@@ -1,0 +1,7 @@
+coverage
+dist
+lib
+node_modules
+test_output
+*~
+.DS_Store
