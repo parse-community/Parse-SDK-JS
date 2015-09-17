@@ -208,6 +208,9 @@ export default class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
+   *
+   * @return {Parse.Promise} A promise that is resolved with the result when
+   * the query completes.
    */
   get(objectId: string, options?: FullOptions) {
     this.equalTo('objectId', objectId);
