@@ -200,7 +200,7 @@ export function commitServerChanges(className: string, id: string, changes: Attr
     var val = changes[attr];
     state.serverData[attr] = val;
     if (val &&
-      typeof val == 'object' &&
+      typeof val === 'object' &&
       !(val instanceof ParseObject) &&
       !(val instanceof ParseFile) &&
       !(val instanceof ParseRelation)

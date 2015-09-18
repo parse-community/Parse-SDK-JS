@@ -1136,7 +1136,7 @@ export default class ParseObject {
    *       // If this is an aggregate error, then we can inspect each error
    *       // object individually to determine the reason why a particular
    *       // object was not deleted.
-   *       if (error.code == Parse.Error.AGGREGATE_ERROR) {
+   *       if (error.code === Parse.Error.AGGREGATE_ERROR) {
    *         for (var i = 0; i < error.errors.length; i++) {
    *           console.log("Couldn't delete " + error.errors[i].object.id +
    *             "due to " + error.errors[i].message);
