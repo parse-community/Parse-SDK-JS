@@ -25,7 +25,7 @@ var provider = {
     FB.login((response) => {
       if (response.authResponse) {
         if (options.success) {
-          options.success(self, {
+          options.success(this, {
             id: response.authResponse.userID,
             access_token: response.authResponse.accessToken,
             expiration_date: new Date(response.authResponse.expiresIn * 1000 +
