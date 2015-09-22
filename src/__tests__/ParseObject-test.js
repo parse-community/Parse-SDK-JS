@@ -523,6 +523,47 @@ describe('ParseObject', () => {
     expect(o2.get('age')).toBe(22);
   });
 
+  it('does not stack-overflow when encoding recursive pointers', () => {
+    var o = ParseObject.fromJSON({
+      __type: 'Object',
+      className: 'Item',
+      objectId: 'recurParent',
+      child: {
+        __type: 'Pointer',
+        className: 'Item',
+        objectId: 'recurChild'
+      }
+    });
+    expect(o.toJSON()).toEqual({
+      objectId: 'recurParent',
+      child: {
+        __type: 'Pointer',
+        className: 'Item',
+        objectId: 'recurChild'
+      }
+    });
+
+    var child = ParseObject.fromJSON({
+      __type: 'Object',
+      className: 'Item',
+      objectId: 'recurChild',
+      parent: {
+        __type: 'Pointer',
+        className: 'Item',
+        objectId: 'recurParent'
+      }
+    });
+
+    expect(o.toJSON()).toEqual({
+      objectId: 'recurParent',
+      child: {
+        __type: 'Pointer',
+        className: 'Item',
+        objectId: 'recurChild'
+      }
+    });
+  });
+
   it('updates the existed flag when saved', () => {
     var o = new ParseObject('Item');
     expect(o.existed()).toBe(false);

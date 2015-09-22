@@ -373,7 +373,7 @@ export default class ParseObject {
       if ((attr === 'createdAt' || attr === 'updatedAt') && attrs[attr].toJSON) {
         json[attr] = attrs[attr].toJSON();
       } else {
-        json[attr] = encode(attrs[attr], false, false);
+        json[attr] = encode(attrs[attr], false, true);
       }
     }
     var pending = this._getPendingOps();
