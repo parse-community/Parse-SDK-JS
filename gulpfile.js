@@ -15,6 +15,9 @@ var VERSION = require('./package.json').version;
 var DEV_HEADER = (
   '/**\n' +
   ' * Parse JavaScript SDK v' + VERSION + '\n' +
+  ' *\n' +
+  ' * The source tree of this library can be found at\n' +
+  ' *   https://github.com/ParsePlatform/Parse-SDK-JS\n' +
   ' */\n'
 );
 
@@ -25,6 +28,8 @@ var FULL_HEADER = (
   ' * Copyright (c) 2015-present, Parse, LLC.\n' +
   ' * All rights reserved.\n' +
   ' *\n' +
+  ' * The source tree of this library can be found at\n' +
+  ' *   https://github.com/ParsePlatform/Parse-SDK-JS\n' +
   ' * This source code is licensed under the BSD-style license found in the\n' +
   ' * LICENSE file in the root directory of this source tree. An additional grant\n' +
   ' * of patent rights can be found in the PATENTS file in the same directory.\n' +
