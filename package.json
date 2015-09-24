@@ -20,6 +20,7 @@
     "react-native.js",
     "lib/",
     "LICENSE",
+    "PATENTS",
     "README.md"
   ],
   "browser": {
