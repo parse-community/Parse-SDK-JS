@@ -63,4 +63,4 @@ By contributing to the Parse JavaScript SDK, you agree that your contributions w
  [rest-api]: https://www.parse.com/docs/rest/guide
  [parse-api-console]: http://blog.parse.com/announcements/introducing-the-parse-api-console/
  [stacktrace-or-gtfo]: http://i.imgur.com/jacoj.jpg
- [tests-dir]: /Parse/src/test/java/com/parse
+ [tests-dir]: /src/__tests__
