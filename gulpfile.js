@@ -47,9 +47,11 @@ gulp.task('compile', function() {
         'runtime',
         'utility.inlineEnvironmentVariables'
       ],
-      plugins: [require('./vendor/babel-plugin-dead-code-elimination')],
+      plugins: [
+        'inline-package-json',
+        require('./vendor/babel-plugin-dead-code-elimination')
+      ],
     }))
-    .pipe(replace(/require\('\.\.\/package\.json'\)/g, JSON.stringify(packageJSON)))
     .pipe(gulp.dest(path.join('lib', BUILD)));
 });
 
