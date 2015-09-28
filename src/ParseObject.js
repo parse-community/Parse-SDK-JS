@@ -848,8 +848,7 @@ export default class ParseObject {
 
   /**
    * Fetch the model from the server. If the server's representation of the
-   * model differs from its current attributes, they will be overriden,
-   * triggering a <code>"change"</code> event.
+   * model differs from its current attributes, they will be overriden.
    *
    * @method fetch
    * @param {Object} options A Backbone-style callback object.
@@ -982,7 +981,6 @@ export default class ParseObject {
 
   /**
    * Destroy this model on the server if it was already persisted.
-   * Optimistically removes the model from its collection, if it has one.
    * If `wait: true` is passed, waits for the server to respond
    * before removal.
    *
@@ -1107,7 +1105,6 @@ export default class ParseObject {
 
   /**
    * Destroy the given list of models on the server if it was already persisted.
-   * Optimistically removes each model from its collection, if it has one.
    *
    * <p>Unlike saveAll, if an error occurs while deleting an individual model,
    * this method will continue trying to delete the rest of the models if
