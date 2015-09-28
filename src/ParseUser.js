@@ -381,10 +381,6 @@ export default class ParseUser extends ParseObject {
    *     the login is complete.
    */
   logIn(options: FullOptions) {
-    if (!canUseCurrentUser) {
-      throw new Error('It is not possible to log in on a server environment.');
-    }
-
     options = options || {};
 
     var loginOptions = {};
@@ -393,7 +389,7 @@ export default class ParseUser extends ParseObject {
     }
 
     var controller = CoreManager.getUserController();
-    return controller.logIn(this, loginOptions)._thenRunCallbacks(options);
+    return controller.logIn(this, loginOptions)._thenRunCallbacks(options, this);
   }
 
   static readOnlyAttributes() {
@@ -639,7 +635,7 @@ export default class ParseUser extends ParseObject {
   }
 
   /**
-   * Enables the use of logIn, become, and a current user in a server
+   * Enables the use of become or the current user in a server
    * environment. These features are disabled by default, since they depend on
    * global objects that are not memory-safe for most servers.
    * @method enableUnsafeCurrentUser
@@ -647,6 +643,17 @@ export default class ParseUser extends ParseObject {
    */
   static enableUnsafeCurrentUser() {
     canUseCurrentUser = true;
+  }
+
+  /**
+   * Disables the use of become or the current user in any environment.
+   * These features are disabled on servers by default, since they depend on
+   * global objects that are not memory-safe for most servers.
+   * @method disableUnsafeCurrentUser
+   * @static
+   */
+  static disableUnsafeCurrentUser() {
+    canUseCurrentUser = false;
   }
 
   static _registerAuthenticationProvider(provider) {
@@ -818,6 +825,10 @@ var DefaultController = {
       );
       response.password = undefined;
       user._finishFetch(response);
+      if (!canUseCurrentUser) {
+        // We can't set the current user, so just return the one we logged in
+        return ParsePromise.as(user);
+      }
       return DefaultController.setCurrentUser(user);
     });
   },

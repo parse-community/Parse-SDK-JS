@@ -87,9 +87,6 @@ describe('ParseUser', () => {
   });
 
   it('does not allow current user actions on node servers', () => {
-    expect(ParseUser.logIn.bind(null, 'username', 'password')).toThrow(
-      'It is not possible to log in on a server environment.'
-    );
     expect(ParseUser.become.bind(null, 'token')).toThrow(
       'It is not memory-safe to become a user in a server environment'
     );
