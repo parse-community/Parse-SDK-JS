@@ -86,7 +86,8 @@ describe('ParseRelation', () => {
     var r = new ParseRelation(parent, 'shipments');
     var o = new ParseObject('Delivery');
     o.id = 'D1';
-    r.add(o);
+    var p = r.add(o);
+    expect(p).toBeTruthy();
     expect(r.toJSON()).toEqual({
       __type: 'Relation',
       className: 'Delivery'
