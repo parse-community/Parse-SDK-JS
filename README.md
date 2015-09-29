@@ -46,8 +46,8 @@ of patent rights can be found in the PATENTS file in the same directory.
 
  [build-status-svg]: https://travis-ci.org/ParsePlatform/Parse-SDK-JS.svg?branch=master
  [build-status-link]: https://travis-ci.org/ParsePlatform/Parse-SDK-JS
- [coverage-status-svg]: https://coveralls.io/repos/ParsePlatform/Parse-SDK-JS/badge.svg?branch=master&service=github
- [coverage-status-link]: https://coveralls.io/github/ParsePlatform/Parse-SDK-JS?branch=master
+ [coverage-status-svg]: http://codecov.io/github/ParsePlatform/Parse-SDK-JS/coverage.svg?branch=master
+ [coverage-status-link]: http://codecov.io/github/ParsePlatform/Parse-SDK-JS?branch=master
  [npm-svg]: https://badge.fury.io/js/parse.svg
  [npm-link]: https://npmjs.org/parse
  [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
