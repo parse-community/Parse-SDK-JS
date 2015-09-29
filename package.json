@@ -36,7 +36,7 @@
     "babel-plugin-flow-comments": "^1.0.9",
     "babel-plugin-inline-package-json": "~1.0.1",
     "browserify": "^11.0.1",
-    "coveralls": "^2.11.3",
+    "codecov.io": "^0.1.6",
     "gulp": "^3.9.0",
     "gulp-babel": "^5.2.0",
     "gulp-derequire": "^2.1.0",
