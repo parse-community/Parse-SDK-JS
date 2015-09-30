@@ -1289,4 +1289,13 @@ describe('ParseQuery', () => {
       done();
     });
   }));
+
+  it('rewrites User queries when the rewrite is enabled', () => {
+    CoreManager.set('PERFORM_USER_REWRITE', true);
+    var q = new ParseQuery('User');
+    expect(q.className).toBe('_User');
+    CoreManager.set('PERFORM_USER_REWRITE', false);
+    q = new ParseQuery('User');
+    expect(q.className).toBe('User');
+  });
 });

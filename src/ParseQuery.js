@@ -111,7 +111,11 @@ export default class ParseQuery {
 
   constructor(objectClass) {
     if (typeof objectClass === 'string') {
-      this.className = objectClass;
+      if (objectClass === 'User' && CoreManager.get('PERFORM_USER_REWRITE')) {
+        this.className = '_User';
+      } else {
+        this.className = objectClass;
+      }
     } else if (objectClass instanceof ParseObject) {
       this.className = objectClass.className;
     } else if (typeof objectClass === 'function') {
