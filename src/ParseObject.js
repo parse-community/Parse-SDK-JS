@@ -601,6 +601,12 @@ export default class ParseObject {
         newOps[k] = opFromJSON(changes[k]);
       } else if (k === 'objectId' || k === 'id') {
         this.id = changes[k];
+      } else if (
+        k === 'ACL' &&
+        typeof changes[k] === 'object' &&
+        !(changes[k] instanceof ParseACL)
+      ) {
+        newOps[k] = new SetOp(new ParseACL(changes[k]));
       } else {
         newOps[k] = new SetOp(changes[k]);
       }

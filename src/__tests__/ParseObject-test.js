@@ -491,6 +491,7 @@ describe('ParseObject', () => {
   it('validates attributes on set()', () => {
     var o = new ParseObject('Listing');
     expect(o.set('ACL', 'not an acl')).toBe(false);
+    expect(o.set('ACL', { '*': { read: true, write: false } })).toBe(o);
     expect(o.set('$$$', 'o_O')).toBe(false);
 
     o.set('$$$', 'o_O', { error: function(obj, err) {
