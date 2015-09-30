@@ -108,6 +108,8 @@ export default class ParseUser extends ParseObject {
           }
           this._linkWith(provider, opts).then(() => {
             promise.resolve(this);
+          }, (error) => {
+            promise.reject(error);
           });
         },
         error: (provider, error) => {
