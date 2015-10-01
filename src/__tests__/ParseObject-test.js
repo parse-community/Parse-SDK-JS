@@ -610,6 +610,15 @@ describe('ParseObject', () => {
     expect(oldState.tasks).toBe(newState.tasks);
   });
 
+  it('marks inflated objects as existed', () => {
+    var o = ParseObject.fromJSON({
+      className: 'Item',
+      objectId: 'iexist',
+      count: 7
+    });
+    expect(o.existed()).toBe(true);
+  });
+
   it('can save the object', asyncHelper((done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{
