@@ -1263,6 +1263,9 @@ export default class ParseObject {
       }
     }
     o._finishFetch(otherAttributes);
+    if (json.objectId) {
+      o._setExisted(true);
+    }
     return o;
   }
 
