@@ -32,6 +32,7 @@ var ParseObject = require('../ParseObject');
 var ParsePromise = require('../ParsePromise');
 var ParseUser = require('../ParseUser');
 var Storage = require('../Storage');
+var ParseError = require('../ParseError');
 
 var asyncHelper = require('./test_helpers/asyncHelper');
 
@@ -354,6 +355,49 @@ describe('ParseUser', () => {
       expect(u.getUsername()).toBe('bob');
       expect(u.id).toBe('abc');
       expect(u.getSessionToken()).toBe('12345');
+      done();
+    });
+  }));
+
+  it('can get error when recursive _linkWith call fails', asyncHelper((done) => {
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('POST');
+        expect(path).toBe('users');
+        expect(body.authData.test).toEqual({
+          id : 'id',
+          access_token : 'access_token'
+        });
+        var error = new ParseError(
+          ParseError.ACCOUNT_ALREADY_LINKED,
+          'Another user is already linked to this facebook id.'
+        );
+        return ParsePromise.error(error);
+      },
+      ajax() {}
+    });
+    var provider = {
+      authenticate(options) {
+        if (options.success) {
+          options.success(this, {
+            id: 'id',
+            access_token: 'access_token'
+          });
+        }
+      },
+
+      restoreAuthentication(authData) {},
+
+      getAuthType() {
+        return 'test';
+      },
+
+      deauthenticate() {}
+    };
+
+    ParseUser.logInWith(provider, {}).then(null, (error) => {
+      expect(error.code).toBe(ParseError.ACCOUNT_ALREADY_LINKED);
+      expect(error.message).toBe('Another user is already linked to this facebook id.');
       done();
     });
   }));
