@@ -401,4 +401,20 @@ describe('ParseUser', () => {
       done();
     });
   }));
+
+  it('strip anonymity when we set username', () => {
+    var user = new ParseUser();
+    var authData = {
+      anonymous : {
+        id : 'anonymousId'
+      }
+    }
+    user.set('authData', authData);
+    expect(user.get('authData').anonymous.id).toBe('anonymousId');
+
+    // Set username should strip anonymous authData
+    user.setUsername('test');
+    expect(user.getUsername()).toBe('test');
+    expect(user.get('authData').anonymous).toBe(null);
+  });
 });

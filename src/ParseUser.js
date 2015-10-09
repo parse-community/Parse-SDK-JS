@@ -277,6 +277,13 @@ export default class ParseUser extends ParseObject {
    * @return {Boolean}
    */
   setUsername(username: string) {
+    // Strip anonymity, even we do not support anonymous user in js SDK, we may
+    // encounter anonymous user created by android/iOS in cloud code.
+    var authData = this.get('authData');
+    if (authData && authData.hasOwnProperty('anonymous')) {
+      // We need to set anonymous to null instead of deleting it in order to remove it from Parse.
+      authData.anonymous = null;
+    }
     this.set('username', username);
   }
 
