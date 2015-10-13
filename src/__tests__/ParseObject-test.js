@@ -558,9 +558,14 @@ describe('ParseObject', () => {
     expect(o.toJSON()).toEqual({
       objectId: 'recurParent',
       child: {
-        __type: 'Pointer',
+        __type: 'Object',
         className: 'Item',
-        objectId: 'recurChild'
+        objectId: 'recurChild',
+        parent: {
+          __type: 'Pointer',
+          className: 'Item',
+          objectId: 'recurParent'
+        }
       }
     });
   });

@@ -367,13 +367,14 @@ export default class ParseObject {
    * @return {Object}
    */
   toJSON(): AttributeMap {
+    var seenEntry = this.id ? this.className + ':' + this.id : this;
     var json = {};
     var attrs = this.attributes;
     for (var attr in attrs) {
       if ((attr === 'createdAt' || attr === 'updatedAt') && attrs[attr].toJSON) {
         json[attr] = attrs[attr].toJSON();
       } else {
-        json[attr] = encode(attrs[attr], false, true);
+        json[attr] = encode(attrs[attr], false, false, [seenEntry]);
       }
     }
     var pending = this._getPendingOps();

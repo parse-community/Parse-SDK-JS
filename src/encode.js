@@ -23,17 +23,23 @@ function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, 
     if (disallowObjects) {
       throw new Error('Parse Objects not allowed here');
     }
+    var seenEntry = value.id ? value.className + ':' + value.id : value;
     if (forcePointers ||
       !seen ||
-      seen.indexOf(value) > -1 ||
+      seen.indexOf(seenEntry) > -1 ||
       value.dirty() ||
       Object.keys(value._getServerData()).length < 1
     ) {
       return value.toPointer();
     }
-    seen = seen.concat(value);
-    var json = value._toFullJSON(seen);
-    return encode(json, disallowObjects, forcePointers, seen);
+    seen = seen.concat(seenEntry);
+    var json = encode(value.attributes, disallowObjects, forcePointers, seen);
+    json.className = value.className;
+    json.__type = 'Object';
+    if (value.id) {
+      json.objectId = value.id;
+    }
+    return json;
   }
   if (value instanceof Op ||
       value instanceof ParseACL ||
@@ -75,6 +81,6 @@ function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, 
   return value;
 }
 
-export default function(value: mixed, disallowObjects?: boolean, forcePointers?: boolean) {
-  return encode(value, !!disallowObjects, !!forcePointers, []);
+export default function(value: mixed, disallowObjects?: boolean, forcePointers?: boolean, seen?: Array<mixed>) {
+  return encode(value, !!disallowObjects, !!forcePointers, seen || []);
 }
