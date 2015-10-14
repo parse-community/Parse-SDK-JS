@@ -231,8 +231,8 @@ export default class ParseObject {
     return dirty;
   }
 
-  _toFullJSON(): AttributeMap {
-    var json: { [key: string]: mixed } = this.toJSON();
+  _toFullJSON(seen): AttributeMap {
+    var json: { [key: string]: mixed } = this.toJSON(seen);
     json.__type = 'Object';
     json.className = this.className;
     return json;
@@ -366,15 +366,16 @@ export default class ParseObject {
    * @method toJSON
    * @return {Object}
    */
-  toJSON(): AttributeMap {
+  toJSON(seen): AttributeMap {
     var seenEntry = this.id ? this.className + ':' + this.id : this;
+    var seen = seen || [seenEntry];
     var json = {};
     var attrs = this.attributes;
     for (var attr in attrs) {
       if ((attr === 'createdAt' || attr === 'updatedAt') && attrs[attr].toJSON) {
         json[attr] = attrs[attr].toJSON();
       } else {
-        json[attr] = encode(attrs[attr], false, false, [seenEntry]);
+        json[attr] = encode(attrs[attr], false, false, seen);
       }
     }
     var pending = this._getPendingOps();

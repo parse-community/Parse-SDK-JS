@@ -27,13 +27,13 @@ mockObject.prototype = {
   toJSON() {
     return this.attributes;
   },
-  _toFullJSON() {
+  _toFullJSON(seen) {
     var json = {
       __type: 'Object',
       className: this.className
     };
     for (var attr in this.attributes) {
-      json[attr] = this.attributes[attr];
+      json[attr] = encode(this.attributes[attr], false, false, seen.concat(this));
     }
     return json;
   }

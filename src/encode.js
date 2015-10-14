@@ -33,19 +33,7 @@ function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, 
       return value.toPointer();
     }
     seen = seen.concat(seenEntry);
-    var json = encode(value.attributes, disallowObjects, forcePointers, seen);
-    if (json.createdAt) {
-      json.createdAt = json.createdAt.iso;
-    }
-    if (json.updatedAt) {
-      json.updatedAt = json.updatedAt.iso;
-    }
-    json.className = value.className;
-    json.__type = 'Object';
-    if (value.id) {
-      json.objectId = value.id;
-    }
-    return json;
+    return value._toFullJSON(seen);
   }
   if (value instanceof Op ||
       value instanceof ParseACL ||

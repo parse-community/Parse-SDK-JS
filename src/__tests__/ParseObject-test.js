@@ -627,6 +627,55 @@ describe('ParseObject', () => {
     });
   });
 
+  it('encodes multiple layers of nested objects', () => {
+    var grandparent = ParseObject.fromJSON({
+      __type: 'Object',
+      className: 'Item',
+      objectId: 'nestedGrand',
+      child: {
+        __type: 'Pointer',
+        className: 'Item',
+        objectId: 'nestedParent'
+      }
+    });
+
+    var parent = ParseObject.fromJSON({
+      __type: 'Object',
+      className: 'Item',
+      objectId: 'nestedParent',
+      child: {
+        __type: 'Pointer',
+        className: 'Item',
+        objectId: 'nestedChild'
+      }
+    });
+
+    var child = ParseObject.fromJSON({
+      __type: 'Object',
+      className: 'Item',
+      objectId: 'nestedChild',
+      count: 12
+    });
+
+    expect(grandparent.get('child').id).toBe(parent.id);
+    expect(grandparent.get('child').get('child').id).toBe(child.id);
+
+    expect(grandparent.toJSON()).toEqual({
+      objectId: 'nestedGrand',
+      child: {
+        __type: 'Object',
+        className: 'Item',
+        objectId: 'nestedParent',
+        child: {
+          __type: 'Object',
+          className: 'Item',
+          objectId: 'nestedChild',
+          count: 12
+        }
+      }
+    });
+  });
+
   it('updates the existed flag when saved', () => {
     var o = new ParseObject('Item');
     expect(o.existed()).toBe(false);
