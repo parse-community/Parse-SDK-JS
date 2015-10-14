@@ -570,6 +570,63 @@ describe('ParseObject', () => {
     });
   });
 
+  it('properly encodes createdAt/updatedAt dates on nested objects', () => {
+    var o = ParseObject.fromJSON({
+      __type: 'Object',
+      className: 'Item',
+      objectId: 'recurParent',
+      createdAt: '1970-01-01T00:00:00.000Z',
+      updatedAt: '1970-01-01T00:00:00.000Z',
+      aDate: {
+        __type: 'Date',
+        iso: '1970-01-01T00:00:00.000Z'
+      },
+      child: {
+        __type: 'Pointer',
+        className: 'Item',
+        objectId: 'recurChild'
+      }
+    });
+    expect(o.createdAt.getTime()).toBe(new Date(0).getTime());
+    expect(o.updatedAt.getTime()).toBe(new Date(0).getTime());
+    expect(o.get('aDate').getTime()).toBe(new Date(0).getTime());
+
+    var child = ParseObject.fromJSON({
+      __type: 'Object',
+      className: 'Item',
+      objectId: 'recurChild',
+      createdAt: '1970-01-01T00:00:00.000Z',
+      updatedAt: '1970-01-01T00:00:00.000Z',
+      parent: {
+        __type: 'Pointer',
+        className: 'Item',
+        objectId: 'recurParent'
+      }
+    });
+
+    expect(o.toJSON()).toEqual({
+      objectId: 'recurParent',
+      createdAt: '1970-01-01T00:00:00.000Z',
+      updatedAt: '1970-01-01T00:00:00.000Z',
+      aDate: {
+        __type: 'Date',
+        iso: '1970-01-01T00:00:00.000Z'
+      },
+      child: {
+        __type: 'Object',
+        className: 'Item',
+        objectId: 'recurChild',
+        createdAt: '1970-01-01T00:00:00.000Z',
+        updatedAt: '1970-01-01T00:00:00.000Z',
+        parent: {
+          __type: 'Pointer',
+          className: 'Item',
+          objectId: 'recurParent'
+        }
+      }
+    });
+  });
+
   it('updates the existed flag when saved', () => {
     var o = new ParseObject('Item');
     expect(o.existed()).toBe(false);
