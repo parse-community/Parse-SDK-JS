@@ -7,8 +7,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-// We may want to expose this value at a later time, so that Promises/A+ style
-// can be employed instead
 var isPromisesAPlusCompliant = false;
 
 /**
@@ -419,5 +417,13 @@ export default class ParsePromise {
 
   static isPromisesAPlusCompliant() {
     return isPromisesAPlusCompliant;
+  }
+
+  static enableAPlusCompliant() {
+    isPromisesAPlusCompliant = true;
+  }
+
+  static disableAPlusCompliant() {
+    isPromisesAPlusCompliant = false;
   }
 }
