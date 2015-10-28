@@ -100,13 +100,15 @@ var RESTController = {
             promise.reject(e);
           }
           promise.resolve(response, xhr.status, xhr);
-        } else if (xhr.status >= 500) { // retry on 5XX
+        } else if (xhr.status >= 500 || xhr.status === 0) { // retry on 5XX or node-xmlhttprequest error
           if (++attempts < CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
             // Exponentially-growing random delay
             var delay = Math.round(
               Math.random() * 125 * Math.pow(2, attempts)
             );
             setTimeout(dispatch, delay);
+          } else if (xhr.status === 0) {
+            promise.reject('Unable to connect to the Parse API');
           } else {
             // After the retry limit is reached, fail
             promise.reject(xhr);
