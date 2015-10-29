@@ -43,8 +43,30 @@ describe('Cloud', () => {
     Cloud.run('myfunction', {});
 
     expect(CoreManager.getCloudController().run.mock.calls[0])
-      .toEqual(['myfunction', {}, { useMasterKey: undefined }]);
+      .toEqual(['myfunction', {}, {}]);
   });
+
+  it('passes options', () => {
+    Cloud.run('myfunction', {}, { useMasterKey: false });
+
+    expect(CoreManager.getCloudController().run.mock.calls[0])
+      .toEqual(['myfunction', {}, {}]);
+
+    Cloud.run('myfunction', {}, { useMasterKey: true });
+
+    expect(CoreManager.getCloudController().run.mock.calls[1])
+      .toEqual(['myfunction', {}, { useMasterKey: true }]);
+
+    Cloud.run('myfunction', {}, { sessionToken: 'asdf1234' });
+
+    expect(CoreManager.getCloudController().run.mock.calls[2])
+      .toEqual(['myfunction', {}, { sessionToken: 'asdf1234' }]);
+
+    Cloud.run('myfunction', {}, { useMasterKey: true, sessionToken: 'asdf1234' });
+
+    expect(CoreManager.getCloudController().run.mock.calls[3])
+      .toEqual(['myfunction', {}, { useMasterKey: true, sessionToken: 'asdf1234' }]);
+  })
 });
 
 describe('CloudController', () => {
@@ -65,6 +87,22 @@ describe('CloudController', () => {
     expect(CoreManager.getRESTController().request.mock.calls[0])
       .toEqual(['POST', 'functions/myfunction', {
         value: 12, when: { __type: 'Date', iso: '2015-01-01T00:00:00.000Z'}
-      }, { useMasterKey: false }]);
+      }, { }]);
+  });
+
+  it('passes options', () => {
+    Cloud.run('myfunction', { value: 12 }, { useMasterKey: true });
+
+    expect(CoreManager.getRESTController().request.mock.calls[0])
+      .toEqual(['POST', 'functions/myfunction', {
+        value: 12
+      }, { useMasterKey: true }]);
+
+    Cloud.run('myfunction', { value: 12 }, { sessionToken: 'asdf1234' });
+
+    expect(CoreManager.getRESTController().request.mock.calls[1])
+      .toEqual(['POST', 'functions/myfunction', {
+        value: 12
+      }, { sessionToken: 'asdf1234' }]);
   });
 });

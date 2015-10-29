@@ -50,10 +50,16 @@ export function run(
     throw new TypeError('Cloud function name must be a string.');
   }
 
+  var requestOptions = {};
+  if (options.useMasterKey) {
+    requestOptions.useMasterKey = options.useMasterKey;
+  }
+  if (options.sessionToken) {
+    requestOptions.sessionToken = options.sessionToken;
+  }
+
   return (
-    CoreManager.getCloudController().run(name, data, {
-      useMasterKey: options.useMasterKey
-    })._thenRunCallbacks(options)
+    CoreManager.getCloudController().run(name, data, requestOptions)._thenRunCallbacks(options)
   );
 }
 
@@ -63,11 +69,19 @@ var DefaultController = {
 
     var payload = encode(data, true);
 
+    var requestOptions = {};
+    if (options.hasOwnProperty('useMasterKey')) {
+      requestOptions.useMasterKey = options.useMasterKey;
+    }
+    if (options.hasOwnProperty('sessionToken')) {
+      requestOptions.sessionToken = options.sessionToken;
+    }
+
     var request = RESTController.request(
       'POST',
       'functions/' + name,
       payload,
-      { useMasterKey: !!options.useMasterKey }
+      requestOptions
     );
 
     return request.then(function(res) {
