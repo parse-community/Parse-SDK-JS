@@ -85,6 +85,7 @@ var singleInstance = (!CoreManager.get('IS_NODE'));
  * @constructor
  * @param {String} className The class name for the object
  * @param {Object} attributes The initial set of data to store in the object.
+ * @param {Object} options The options for this object instance.
  */
 export default class ParseObject {
   /**
@@ -97,7 +98,7 @@ export default class ParseObject {
   _objCount: number;
   className: string;
 
-  constructor(className: ?string | { className: string, [attr: string]: mixed }, attributes?: { [attr: string]: mixed }) {
+  constructor(className: ?string | { className: string, [attr: string]: mixed }, attributes?: { [attr: string]: mixed }, options?: { ignoreValidation: boolean }) {
     var toSet = null;
     this._objCount = objectCount++;
     if (typeof className === 'string') {
@@ -113,8 +114,11 @@ export default class ParseObject {
           toSet[attr] = className[attr];
         }
       }
+      if (attributes && typeof attributes === 'object') {
+        options = attributes;
+      }
     }
-    if (toSet && !this.set(toSet)) {
+    if (toSet && !this.set(toSet, options)) {
       throw new Error('Can\'t create an invalid Parse Object');
     }
     // Enable legacy initializers
@@ -626,12 +630,14 @@ export default class ParseObject {
     }
 
     // Validate changes
-    var validation = this.validate(newValues);
-    if (validation) {
-      if (typeof options.error === 'function') {
-        options.error(this, validation);
+    if (!options.ignoreValidation) {
+      var validation = this.validate(newValues);
+      if (validation) {
+        if (typeof options.error === 'function') {
+          options.error(this, validation);
+        }
+        return false;
       }
-      return false;
     }
 
     // Consolidate Ops
@@ -1359,11 +1365,11 @@ export default class ParseObject {
     } else if (classMap[adjustedClassName]) {
       parentProto = classMap[adjustedClassName].prototype;
     }
-    var ParseObjectSubclass = function(attributes) {
+    var ParseObjectSubclass = function(attributes, options) {
       this.className = adjustedClassName;
       this._objCount = objectCount++;
       if (attributes && typeof attributes === 'object'){
-        if (!this.set(attributes || {})) {
+        if (!this.set(attributes || {}, options)) {
           throw new Error('Can\'t create an invalid Parse Object');
         }
       }
