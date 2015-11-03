@@ -108,6 +108,25 @@ describe('ParseObject', () => {
     expect(o.attributes).toEqual({ value: 12 });
   });
 
+  it('can ignore validation if ignoreValidation option is provided', () => {
+    class ValidatedObject extends ParseObject {
+      validate(attrs) {
+        if (attrs.hasOwnProperty('badAttr')) {
+          return 'you have the bad attr';
+        }
+      }
+    }
+
+    var o = new ValidatedObject({
+      className: 'Item',
+      value: 12,
+      badAttr: true
+    }, { ignoreValidation: true });
+
+    expect(o.attributes.value).toBe(12);
+    expect(o.attributes.badAttr).toBe(true);
+  });
+
   it('can be inflated from server JSON', () => {
     var json = {
       className: 'Item',
@@ -498,6 +517,11 @@ describe('ParseObject', () => {
       expect(obj).toBe(o);
       expect(err.code).toBe(105);
     }});
+  });
+
+  it('ignores validation if ignoreValidation option is passed to set()', () => {
+    var o = new ParseObject('Listing');
+    expect(o.set('$$$', 'o_O', { ignoreValidation: true })).toBe(o);
   });
 
   it('can test object validity', () => {
