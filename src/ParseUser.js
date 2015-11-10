@@ -862,7 +862,7 @@ var DefaultController = {
       if (currentUser !== null) {
         var currentSession = currentUser.getSessionToken();
         if (currentSession && isRevocableSession(currentSession)) {
-          promise.then(() => {
+          promise = promise.then(() => {
             return RESTController.request(
               'POST', 'logout', {}, { sessionToken: currentSession }
             );
