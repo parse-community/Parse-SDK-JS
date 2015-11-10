@@ -317,8 +317,9 @@ export default class ParsePromise {
   /**
    * Returns a new promise that is fulfilled when all of the input promises
    * are resolved. If any promise in the list fails, then the returned promise
-   * will fail with the last error. If they all succeed, then the returned
-   * promise will succeed, with the results being the results of all the input
+   * will be rejected with an array containing the error from each promise.
+   * If they all succeed, then the returned promise will succeed, with the
+   * results being the results of all the input
    * promises. For example: <pre>
    *   var p1 = Parse.Promise.as(1);
    *   var p2 = Parse.Promise.as(2);
