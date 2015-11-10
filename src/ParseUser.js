@@ -401,6 +401,32 @@ export default class ParseUser extends ParseObject {
     return controller.logIn(this, loginOptions)._thenRunCallbacks(options, this);
   }
 
+  /**
+   * Wrap the default save behavior with functionality to save to local
+   * storage if this is current user.
+   */
+  save(...args) {
+    return super.save.apply(this, args).then(() => {
+      if (this.isCurrent()) {
+        return CoreManager.getUserController().updateUserOnDisk(this);
+      }
+      return this;
+    });
+  }
+
+  /**
+   * Wrap the default fetch behavior with functionality to save to local
+   * storage if this is current user.
+   */
+  fetch(...args) {
+    return super.fetch.apply(this, args).then(() => {
+      if (this.isCurrent()) {
+        return CoreManager.getUserController().updateUserOnDisk(this);
+      }
+      return this;
+    });
+  }
+
   static readOnlyAttributes() {
     return ['sessionToken'];
   }
@@ -692,10 +718,7 @@ export default class ParseUser extends ParseObject {
 ParseObject.registerSubclass('_User', ParseUser);
 
 var DefaultController = {
-  setCurrentUser(user) {
-    currentUserCache = user;
-    user._cleanupAuthData();
-    user._synchronizeAllAuthData();
+  updateUserOnDisk(user) {
     var path = Storage.generatePath(CURRENT_USER_KEY);
     var json = user.toJSON();
     json.className = '_User';
@@ -704,6 +727,13 @@ var DefaultController = {
     ).then(() => {
       return user;
     });
+  },
+
+  setCurrentUser(user) {
+    currentUserCache = user;
+    user._cleanupAuthData();
+    user._synchronizeAllAuthData();
+    return DefaultController.updateUserOnDisk(user);
   },
 
   currentUser(): ?ParseUser {

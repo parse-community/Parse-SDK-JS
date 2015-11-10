@@ -359,6 +359,80 @@ describe('ParseUser', () => {
     });
   }));
 
+  it('updates the current user on disk when saved', asyncHelper((done) => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    CoreManager.setRESTController({
+      request() {
+        return ParsePromise.as({
+          objectId: 'uid5',
+        }, 201);
+      },
+      ajax() {}
+    });
+
+    ParseUser.signUp('updater', 'password').then((u) => {
+      expect(u.isCurrent()).toBe(true);
+      ParseUser._clearCache();
+      CoreManager.setRESTController({
+        request() {
+          return ParsePromise.as({}, 200);
+        },
+        ajax() {}
+      });
+      return u.save({ count: 12 });
+    }).then((u) => {
+      ParseUser._clearCache();
+      ParseObject._clearAllState();
+      expect(u.attributes).toEqual({});
+      expect(u.get('count')).toBe(undefined);
+      return ParseUser.currentAsync();
+    }).then((current) => {
+      expect(current.id).toBe('uid5');
+      expect(current.get('count')).toBe(12);
+      done();
+    });
+  }));
+
+  it('updates the current user on disk when fetched', asyncHelper((done) => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    CoreManager.setRESTController({
+      request() {
+        return ParsePromise.as({
+          objectId: 'uid6'
+        }, 200);
+      },
+      ajax() {}
+    });
+
+    ParseUser.signUp('spot', 'fetch').then((u) => {
+      expect(u.isCurrent()).toBe(true);
+      ParseUser._clearCache();
+      CoreManager.setRESTController({
+        request() {
+          return ParsePromise.as({
+            count: 15
+          }, 200);
+        },
+        ajax() {}
+      });
+      return u.fetch();
+    }).then((u) => {
+      ParseUser._clearCache();
+      ParseObject._clearAllState();
+      expect(u.attributes).toEqual({});
+      expect(u.get('count')).toBe(undefined);
+      return ParseUser.currentAsync();
+    }).then((current) => {
+      expect(current.id).toBe('uid6');
+      expect(current.get('count')).toBe(15);
+      done();
+    });
+  }));
+
   it('can get error when recursive _linkWith call fails', asyncHelper((done) => {
     CoreManager.setRESTController({
       request(method, path, body, options) {
