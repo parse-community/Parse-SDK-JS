@@ -353,10 +353,7 @@ export default class ParseObject {
 
   _handleSaveError() {
     var pending = this._getPendingOps();
-    if (pending.length > 2) {
-      // There are more saves on the queue
-      ObjectState.mergeFirstPendingState(this.className, this._getStateIdentifier());
-    }
+    ObjectState.mergeFirstPendingState(this.className, this._getStateIdentifier());
   }
 
   /** Public methods **/

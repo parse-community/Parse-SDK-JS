@@ -868,7 +868,7 @@ describe('ParseObject', () => {
     p.save().then(null, (err) => {
       expect(err.code).toBe(103);
       expect(err.message).toBe('Invalid class name');
-      expect(p._getPendingOps().length).toBe(2);
+      expect(p._getPendingOps().length).toBe(1);
       expect(p.dirtyKeys()).toEqual(['updates']);
       expect(p.get('updates')).toBe(1);
 
