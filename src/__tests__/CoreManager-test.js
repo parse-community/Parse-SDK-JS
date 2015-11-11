@@ -13,7 +13,7 @@ var CoreManager = require('../CoreManager');
 
 describe('CoreManager', () => {
   it('is initialized with default values', () => {
-    expect(CoreManager.get('SERVER_URL')).toBe('https://api.parse.com');
+    expect(CoreManager.get('SERVER_URL')).toBe('https://api.parse.com/1');
   });
 
   it('pulls the version string from package.json', () => {

@@ -139,7 +139,10 @@ var RESTController = {
   request(method: string, path: string, data: mixed, options?: RequestOptions) {
     options = options || {};
     var url = CoreManager.get('SERVER_URL');
-    url += '/1/' + path;
+    if (url[url.length - 1] !== '/') {
+      url += '/';
+    }
+    url += path;
 
     var payload = {};
     if (data && typeof data === 'object') {
