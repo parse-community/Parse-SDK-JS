@@ -7,6 +7,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+jest.autoMockOff();
+
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../ObjectState');
