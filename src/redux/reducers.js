@@ -30,12 +30,27 @@ var actions = {
 	  return objectState;
 	},
 	REMOVE_STATE: function(objectState, className, id) {
+	  objectState = {...objectState};
 	  objectState[className] = {...objectState[className]};
 	  delete objectState[className][id];
-	  return state;
+	  return objectState;
 	},
 	SET_SERVER_DATA: function(objectState, className, id, attributes) {
-
+		objectState = {...objectState};
+		var classState = {...objectState[className]};
+		var obj = {...objectState[className][id]};
+		var data = {...obj.serverData};
+	  for (var attr in attributes) {
+	    if (typeof attributes[attr] !== 'undefined') {
+	      data[attr] = attributes[attr];
+	    } else {
+	      delete data[attr];
+	    }
+	  }
+	  obj.serverData = data;
+	  classState[id] = obj;
+	  objectState[className] = classState;
+	  return objectState;
 	},
 	SET_PENDING_OP: function(objectState, className, id, op) {
 

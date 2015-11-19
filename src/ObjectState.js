@@ -76,15 +76,9 @@ export function getServerData(className: string, id: string): AttributeMap {
 }
 
 export function setServerData(className: string, id: string, attributes: AttributeMap) {
-	var objectState = Store.getState().parse;
-  var data = initializeState(className, id).serverData;
-  for (var attr in attributes) {
-    if (typeof attributes[attr] !== 'undefined') {
-      data[attr] = attributes[attr];
-    } else {
-      delete data[attr];
-    }
-  }
+  initializeState(className, id).serverData;
+  Store.dispatch(actionCreators.setServerData(...arguments));
+	return getState(...arguments);
 }
 
 export function getPendingOps(className: string, id: string): Array<OpsMap> {
