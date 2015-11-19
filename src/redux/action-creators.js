@@ -52,5 +52,11 @@ export default {
 			type: 'ENQUEUE_TASK',
 			payload: arguments
 		};
+	},
+	_clearAllState: function() {
+		return {
+			type: 'CLEAR_ALL_STATE',
+			payload: arguments
+		}
 	}
 }

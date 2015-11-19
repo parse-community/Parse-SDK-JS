@@ -67,7 +67,6 @@ export function removeState(className: string, id: string): ?State {
 }
 
 export function getServerData(className: string, id: string): AttributeMap {
-	var objectState = Store.getState().parse;
   var state = getState(className, id);
   if (state) {
     return state.serverData;
@@ -82,7 +81,6 @@ export function setServerData(className: string, id: string, attributes: Attribu
 }
 
 export function getPendingOps(className: string, id: string): Array<OpsMap> {
-	var objectState = Store.getState().parse;
   var state = getState(className, id);
   if (state) {
     return state.pendingOps;
@@ -107,7 +105,6 @@ export function popPendingState(className: string, id: string): OpsMap {
 }
 
 export function mergeFirstPendingState(className: string, id: string) {
-	var objectState = Store.getState().parse;
   var first = popPendingState(className, id);
   var pending = getPendingOps(className, id);
   var next = pending[0];
@@ -124,7 +121,6 @@ export function mergeFirstPendingState(className: string, id: string) {
 }
 
 export function getObjectCache(className: string, id: string): ObjectCache {
-	var objectState = Store.getState().parse;
   var state = getState(className, id);
   if (state) {
     return state.objectCache;
@@ -133,7 +129,6 @@ export function getObjectCache(className: string, id: string): ObjectCache {
 }
 
 export function estimateAttribute(className: string, id: string, attr: string): mixed {
-	var objectState = Store.getState().parse;
   var serverData = getServerData(className, id);
   var value = serverData[attr];
   var pending = getPendingOps(className, id);
@@ -154,7 +149,6 @@ export function estimateAttribute(className: string, id: string, attr: string): 
 }
 
 export function estimateAttributes(className: string, id: string): AttributeMap {
-	var objectState = Store.getState().parse;
   var data = {};
   var attr;
   var serverData = getServerData(className, id);
@@ -179,7 +173,6 @@ export function estimateAttributes(className: string, id: string): AttributeMap 
 }
 
 export function commitServerChanges(className: string, id: string, changes: AttributeMap) {
-	var objectState = Store.getState().parse;
   var state = initializeState(className, id);
   for (var attr in changes) {
     var val = changes[attr];
@@ -197,12 +190,10 @@ export function commitServerChanges(className: string, id: string, changes: Attr
 }
 
 export function enqueueTask(className: string, id: string, task: () => ParsePromise) {
-	var objectState = Store.getState().parse;
-  var state = initializeState(className, id);
+  initializeState(className, id);
   return state.tasks.enqueue(task);
 }
 
 export function _clearAllState() {
-	var objectState = Store.getState().parse;
-  objectState = {};
+	Store.dispatch(actionCreators._clearAllState(...arguments));
 }

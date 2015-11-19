@@ -97,6 +97,9 @@ var actions = {
 	},
 	ENQUEUE_TASK: function(objectState, className, id, task) {
 
+	},
+	CLEAR_ALL_STATE: function() {
+		return {};
 	}
 }
 
