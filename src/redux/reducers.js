@@ -37,9 +37,10 @@ var actions = {
 	},
 	SET_SERVER_DATA: function(objectState, className, id, attributes) {
 		objectState = {...objectState};
-		var classState = {...objectState[className]};
-		var obj = {...objectState[className][id]};
-		var data = {...obj.serverData};
+		objectState[className] = {...objectState[className]};
+		objectState[className][id] = {...objectState[className][id]};
+		var data = objectState[className][id].serverData = {...objectState[className][id].serverData};
+
 	  for (var attr in attributes) {
 	    if (typeof attributes[attr] !== 'undefined') {
 	      data[attr] = attributes[attr];
@@ -47,13 +48,24 @@ var actions = {
 	      delete data[attr];
 	    }
 	  }
-	  obj.serverData = data;
-	  classState[id] = obj;
-	  objectState[className] = classState;
+
 	  return objectState;
 	},
-	SET_PENDING_OP: function(objectState, className, id, op) {
+	SET_PENDING_OP: function(objectState, className, id, attr, op) {
+		objectState = {...objectState};
+		objectState[className] = {...objectState[className]};
+		objectState[className][id] = {...objectState[className][id]};
+		var pending = objectState[className][id].pendingOps = [...objectState[className][id].pendingOps];
 
+	 	console.log(pending);
+	  var last = pending.length - 1;
+	  if (op) {
+	    pending[last][attr] = op;
+	  } else {
+	    delete pending[last][attr];
+	  }
+
+	  return objectState;
 	},
 	PUSH_PENDING_STATE: function(objectState, className, id) {
 

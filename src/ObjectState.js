@@ -91,14 +91,8 @@ export function getPendingOps(className: string, id: string): Array<OpsMap> {
 }
 
 export function setPendingOp(className: string, id: string, attr: string, op: ?Op) {
-	var objectState = Store.getState().parse;
-  var pending = initializeState(className, id).pendingOps;
-  var last = pending.length - 1;
-  if (op) {
-    pending[last][attr] = op;
-  } else {
-    delete pending[last][attr];
-  }
+  initializeState(className, id);
+  Store.dispatch(actionCreators.setPendingOp(...arguments));
 }
 
 export function pushPendingState(className: string, id: string) {
