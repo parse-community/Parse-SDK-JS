@@ -47,18 +47,23 @@ export function getState(className: string, id: string): ?State {
 }
 
 export function initializeState(className: string, id: string, initial?: State): State {
-	Store.dispatch(actionCreators.initializeState.apply(null, arguments));
+	var state = getState(className, id);
+  if (state) {
+    return state;
+  }
+
+	Store.dispatch(actionCreators.initializeState(...arguments));
 	return getState(...arguments);
 }
 
 export function removeState(className: string, id: string): ?State {
-	var objectState = Store.getState().parse;
-  var state = getState(className, id);
+	var state = getState(className, id);
   if (state === null) {
     return null;
   }
-  delete objectState[className][id];
-  return state;
+
+	Store.dispatch(actionCreators.removeState(...arguments));
+	return getState(...arguments);
 }
 
 export function getServerData(className: string, id: string): AttributeMap {

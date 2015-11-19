@@ -10,11 +10,6 @@ var getAnObjectState = function(objectState, className, id) {
 
 var actions = {
 	INITIALIZE_STATE: function(objectState, className, id, initial) {
-		var state = getAnObjectState(objectState, className, id);
-	  if (state) {
-	    return objectState;
-	  }
-
 	  objectState = {...objectState};
 	  if (!objectState[className]) {
 	    objectState[className] = {};
@@ -35,7 +30,9 @@ var actions = {
 	  return objectState;
 	},
 	REMOVE_STATE: function(objectState, className, id) {
-
+	  objectState[className] = {...objectState[className]};
+	  delete objectState[className][id];
+	  return state;
 	},
 	SET_SERVER_DATA: function(objectState, className, id, attributes) {
 
