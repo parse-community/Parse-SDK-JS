@@ -57,7 +57,6 @@ var actions = {
 		objectState[className][id] = {...objectState[className][id]};
 		var pending = objectState[className][id].pendingOps = [...objectState[className][id].pendingOps];
 
-	 	console.log(pending);
 	  var last = pending.length - 1;
 	  if (op) {
 	    pending[last][attr] = op;
@@ -68,10 +67,27 @@ var actions = {
 	  return objectState;
 	},
 	PUSH_PENDING_STATE: function(objectState, className, id) {
+		objectState = {...objectState};
+		objectState[className] = {...objectState[className]};
+		objectState[className][id] = {...objectState[className][id]};
+		var pending = objectState[className][id].pendingOps = [...objectState[className][id].pendingOps];
 
+		pending.push({});
+
+		return objectState;
 	},
 	POP_PENDING_STATE: function(objectState, className, id) {
+		objectState = {...objectState};
+		objectState[className] = {...objectState[className]};
+		objectState[className][id] = {...objectState[className][id]};
+		var pending = objectState[className][id].pendingOps = [...objectState[className][id].pendingOps];
 
+	  pending.shift();
+	  if (!pending.length) {
+	    pending[0] = {};
+	  }
+
+	  return objectState;
 	},
 	MERGE_FIRST_PENDING_STATE: function(objectState, className, id) {
 
