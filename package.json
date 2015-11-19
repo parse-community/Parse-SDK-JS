@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "babel-runtime": "^5.8.20",
+    "redux": "3.0.4",
     "xmlhttprequest": "^1.7.0"
   },
   "devDependencies": {

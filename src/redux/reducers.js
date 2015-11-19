@@ -1,17 +1,73 @@
+import TaskQueue from '../TaskQueue';
+
+var getAnObjectState = function(objectState, className, id) {
+  var classData = objectState[className];
+  if (classData) {
+    return classData[id] || null;
+  }
+  return null;
+};
+
 var actions = {
-	INITIALIZE_STATE: 'INITIALIZE_STATE',
-	REMOVE_STATE: 'REMOVE_STATE',
-	SET_SERVER_DATA: 'SET_SERVER_DATA',
-	SET_PENDING_OP: 'SET_PENDING_OP',
-	PUSH_PENDING_STATE: 'PUSH_PENDING_STATE',
-	POP_PENDING_STATE: 'POP_PENDING_STATE',
-	MERGE_FIRST_PENDING_STATE: 'MERGE_FIRST_PENDING_STATE',
-	ESTIMATE_ATTRIBUTE: 'ESTIMATE_ATTRIBUTE',
-	ESTIMATE_ATTRIBUTES: 'ESTIMATE_ATTRIBUTES',
-	COMMIT_SERVER_CHANGES: 'COMMIT_SERVER_CHANGES',
-	ENQUEUE_TASK: 'ENQUEUE_TASK'
+	INITIALIZE_STATE: function(objectState, className, id, initial) {
+		var state = getAnObjectState(objectState, className, id);
+	  if (state) {
+	    return objectState;
+	  }
+
+	  objectState = {...objectState};
+	  if (!objectState[className]) {
+	    objectState[className] = {};
+	  } else {
+	  	objectState[className] = {...objectState[className]};
+	  }
+
+	  if (!initial) {
+	    initial = {
+	      serverData: {},
+	      pendingOps: [{}],
+	      objectCache: {},
+	      tasks: new TaskQueue(),
+	      existed: false
+	    };
+	  }
+	  objectState[className][id] = initial;
+	  return objectState;
+	},
+	REMOVE_STATE: function(objectState, className, id) {
+
+	},
+	SET_SERVER_DATA: function(objectState, className, id, attributes) {
+
+	},
+	SET_PENDING_OP: function(objectState, className, id, op) {
+
+	},
+	PUSH_PENDING_STATE: function(objectState, className, id) {
+
+	},
+	POP_PENDING_STATE: function(objectState, className, id) {
+
+	},
+	MERGE_FIRST_PENDING_STATE: function(objectState, className, id) {
+
+	},
+	ESTIMATE_ATTRIBUTE: function(objectState, className, id, attr) {
+
+	},
+	ESTIMATE_ATTRIBUTES: function(objectState, className, id) {
+
+	},
+	COMMIT_SERVER_CHANGES: function(objectState, className, id, changes) {
+
+	},
+	ENQUEUE_TASK: function(objectState, className, id, task) {
+
+	}
 }
 
 export function parse(state = {}, action) {
+	if (actions[action.type])
+		return actions[action.type](state, ...action.payload);
 	return state;
 }
