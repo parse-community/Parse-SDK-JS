@@ -41,18 +41,6 @@ export default {
 			payload: arguments
 		};
 	},
-	estimateAttribute: function() {
-		return {
-			type: 'ESTIMATE_ATTRIBUTE',
-			payload: arguments
-		};
-	},
-	estimateAttributes: function() {
-		return {
-			type: 'ESTIMATE_ATTRIBUTES',
-			payload: arguments
-		};
-	},
 	commitServerChanges: function() {
 		return {
 			type: 'COMMIT_SERVER_CHANGES',

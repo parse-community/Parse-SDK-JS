@@ -92,12 +92,6 @@ var actions = {
 	MERGE_FIRST_PENDING_STATE: function(objectState, className, id) {
 
 	},
-	ESTIMATE_ATTRIBUTE: function(objectState, className, id, attr) {
-
-	},
-	ESTIMATE_ATTRIBUTES: function(objectState, className, id) {
-
-	},
 	COMMIT_SERVER_CHANGES: function(objectState, className, id, changes) {
 
 	},
