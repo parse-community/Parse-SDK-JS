@@ -1,7 +1,7 @@
 import { createStore, applyMiddleware, combineReducers } from 'redux'
-import * as reducers from './reducers'
+import parse from './reducers'
+import thunk from 'redux-thunk';
 
 export default function(data) {
-  var reducer = combineReducers(reducers);
-  return createStore(reducer, data);
+  return createStore(parse, data);
 }

@@ -1,62 +1,56 @@
 export default {
-	initializeState: function() {
+	initializeState: function(payload) {
 		return {
 			type: 'INITIALIZE_STATE',
-			payload: arguments
+			payload
 		};
 	},
-	removeState: function() {
+	removeState: function(payload) {
 		return {
 			type: 'REMOVE_STATE',
-			payload: arguments
+			payload
 		};
 	},
-	setServerData: function() {
+	setServerData: function(payload) {
 		return {
 			type: 'SET_SERVER_DATA',
-			payload: arguments
+			payload
 		};
 	},
-	setPendingOp: function() {
+	setPendingOp: function(payload) {
 		return {
 			type: 'SET_PENDING_OP',
-			payload: arguments
+			payload
 		};
 	},
-	pushPendingState: function() {
+	pushPendingState: function(payload) {
 		return {
 			type: 'PUSH_PENDING_STATE',
-			payload: arguments
+			payload
 		};
 	},
-	popPendingState: function() {
+	popPendingState: function(payload) {
 		return {
 			type: 'POP_PENDING_STATE',
-			payload: arguments
+			payload
 		};
 	},
-	mergeFirstPendingState: function() {
+	mergeFirstPendingState: function(payload) {
 		return {
 			type: 'MERGE_FIRST_PENDING_STATE',
-			payload: arguments
+			payload
 		};
 	},
-	commitServerChanges: function() {
+	commitServerChanges: function(payload) {
 		return {
 			type: 'COMMIT_SERVER_CHANGES',
-			payload: arguments
+			payload
 		};
 	},
-	enqueueTask: function() {
-		return {
-			type: 'ENQUEUE_TASK',
-			payload: arguments
-		};
-	},
-	_clearAllState: function() {
+	_clearAllState: function(payload) {
 		return {
 			type: 'CLEAR_ALL_STATE',
-			payload: arguments
+			payload
 		}
 	}
 }

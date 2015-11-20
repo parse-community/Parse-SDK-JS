@@ -1,15 +1,10 @@
 import TaskQueue from '../TaskQueue';
 
-var getAnObjectState = function(objectState, className, id) {
-  var classData = objectState[className];
-  if (classData) {
-    return classData[id] || null;
-  }
-  return null;
-};
-
 var actions = {
-	INITIALIZE_STATE: function(objectState, className, id, initial) {
+	INITIALIZE_STATE: function(objectState, payload) {
+		var {className, id, initial} = payload;
+		var initial = payload.initial;
+
 	  objectState = {...objectState};
 	  if (!objectState[className]) {
 	    objectState[className] = {};
@@ -22,20 +17,24 @@ var actions = {
 	      serverData: {},
 	      pendingOps: [{}],
 	      objectCache: {},
-	      tasks: new TaskQueue(),
+	      // tasks: new TaskQueue(),
 	      existed: false
 	    };
 	  }
 	  objectState[className][id] = initial;
 	  return objectState;
 	},
-	REMOVE_STATE: function(objectState, className, id) {
+	REMOVE_STATE: function(objectState, payload) {
+		var {className, id} = payload;
+
 	  objectState = {...objectState};
 	  objectState[className] = {...objectState[className]};
 	  delete objectState[className][id];
 	  return objectState;
 	},
-	SET_SERVER_DATA: function(objectState, className, id, attributes) {
+	SET_SERVER_DATA: function(objectState, payload) {
+		var {className, id, attributes} = payload;
+
 		objectState = {...objectState};
 		objectState[className] = {...objectState[className]};
 		objectState[className][id] = {...objectState[className][id]};
@@ -51,7 +50,9 @@ var actions = {
 
 	  return objectState;
 	},
-	SET_PENDING_OP: function(objectState, className, id, attr, op) {
+	SET_PENDING_OP: function(objectState, payload) {
+		var {className, id, attr, op} = payload;
+
 		objectState = {...objectState};
 		objectState[className] = {...objectState[className]};
 		objectState[className][id] = {...objectState[className][id]};
@@ -66,7 +67,9 @@ var actions = {
 
 	  return objectState;
 	},
-	PUSH_PENDING_STATE: function(objectState, className, id) {
+	PUSH_PENDING_STATE: function(objectState, payload) {
+		var {className, id} = payload;
+
 		objectState = {...objectState};
 		objectState[className] = {...objectState[className]};
 		objectState[className][id] = {...objectState[className][id]};
@@ -76,7 +79,9 @@ var actions = {
 
 		return objectState;
 	},
-	POP_PENDING_STATE: function(objectState, className, id) {
+	POP_PENDING_STATE: function(objectState, payload) {
+		var {className, id} = payload;
+
 		objectState = {...objectState};
 		objectState[className] = {...objectState[className]};
 		objectState[className][id] = {...objectState[className][id]};
@@ -89,22 +94,27 @@ var actions = {
 
 	  return objectState;
 	},
-	MERGE_FIRST_PENDING_STATE: function(objectState, className, id) {
+	MERGE_FIRST_PENDING_STATE: function(objectState, payload) {
+		var {className, id} = payload;
 
+		// TODO
+
+		return objectState;
 	},
-	COMMIT_SERVER_CHANGES: function(objectState, className, id, changes) {
+	COMMIT_SERVER_CHANGES: function(objectState, payload) {
+		var {className, id, changes} = payload;
 
-	},
-	ENQUEUE_TASK: function(objectState, className, id, task) {
+		// TODO
 
+		return objectState;
 	},
 	CLEAR_ALL_STATE: function() {
 		return {};
 	}
 }
 
-export function parse(state = {}, action) {
+export default function parse(state = {}, action) {
 	if (actions[action.type])
-		return actions[action.type](state, ...action.payload);
+		return actions[action.type](state, action.payload);
 	return state;
 }

@@ -49,7 +49,7 @@ describe('ObjectState', () => {
       serverData: { counter: 12 },
       pendingOps: [{}],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
   });
@@ -62,7 +62,7 @@ describe('ObjectState', () => {
       serverData: {},
       pendingOps: [{ counter: op }],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
   });
@@ -73,7 +73,7 @@ describe('ObjectState', () => {
       serverData: { counter: 12 },
       pendingOps: [{}],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
     ObjectState.setServerData('someClass', 'C', { valid: true });
@@ -81,7 +81,7 @@ describe('ObjectState', () => {
       serverData: { counter: 12, valid: true },
       pendingOps: [{}],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
     ObjectState.setServerData('someClass', 'C', { counter: 0 });
@@ -89,7 +89,7 @@ describe('ObjectState', () => {
       serverData: { counter: 0, valid: true },
       pendingOps: [{}],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
   });
@@ -100,7 +100,7 @@ describe('ObjectState', () => {
       serverData: { counter: 12 },
       pendingOps: [{}],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
     ObjectState.setServerData('someClass', 'D', { counter: undefined });
@@ -108,7 +108,7 @@ describe('ObjectState', () => {
       serverData: {},
       pendingOps: [{}],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
   });
@@ -122,7 +122,7 @@ describe('ObjectState', () => {
       serverData: {},
       pendingOps: [{ counter: op, valid: op2 }],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
     var op3 = new ParseOps.UnsetOp();
@@ -131,7 +131,7 @@ describe('ObjectState', () => {
       serverData: {},
       pendingOps: [{ counter: op, valid: op3 }],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
   });
@@ -143,7 +143,7 @@ describe('ObjectState', () => {
       serverData: {},
       pendingOps: [{ counter: op }],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
     ObjectState.setPendingOp('someClass', 'F', 'counter', null);
@@ -151,7 +151,7 @@ describe('ObjectState', () => {
       serverData: {},
       pendingOps: [{}],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
   });
@@ -163,7 +163,7 @@ describe('ObjectState', () => {
       serverData: {},
       pendingOps: [{ counter: op }],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
     ObjectState.pushPendingState('someClass', 'G');
@@ -171,7 +171,7 @@ describe('ObjectState', () => {
       serverData: {},
       pendingOps: [{ counter: op }, {}],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
     var op2 = new ParseOps.SetOp(true);
@@ -180,7 +180,7 @@ describe('ObjectState', () => {
       serverData: {},
       pendingOps: [{ counter: op }, { valid: op2 }],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
   });
@@ -193,7 +193,7 @@ describe('ObjectState', () => {
       serverData: {},
       pendingOps: [{ counter: op }, {}],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
     expect(ObjectState.popPendingState('someClass', 'H')).toEqual({
@@ -203,7 +203,7 @@ describe('ObjectState', () => {
       serverData: {},
       pendingOps: [{}],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
   });
@@ -214,7 +214,7 @@ describe('ObjectState', () => {
       serverData: {},
       pendingOps: [{}, {}],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
     ObjectState.popPendingState('someClass', 'I');
@@ -223,7 +223,7 @@ describe('ObjectState', () => {
       serverData: {},
       pendingOps: [{}],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
   });
@@ -324,7 +324,7 @@ describe('ObjectState', () => {
         valid: new ParseOps.SetOp(true),
       }],
       objectCache: {},
-      tasks: new TaskQueue(),
+      // tasks: new TaskQueue(),
       existed: false
     });
   });
