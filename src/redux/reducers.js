@@ -100,7 +100,24 @@ var actions = {
 	MERGE_FIRST_PENDING_STATE: function(objectState, payload) {
 		var {className, id} = payload;
 
-		// TODO
+		objectState = {...objectState};
+		objectState[className] = {...objectState[className]};
+		objectState[className][id] = {...objectState[className][id]};
+		var pending = objectState[className][id].pendingOps = [...objectState[className][id].pendingOps];
+
+		var first = pending.shift();
+	  var pending;
+	  var next = pending[0] = {...pending[0]};
+	  for (var attr in first) {
+	    if (next[attr] && first[attr]) {
+	      var merged = next[attr].mergeWith(first[attr]);
+	      if (merged) {
+	        next[attr] = merged;
+	      }
+	    } else {
+	      next[attr] = first[attr];
+	    }
+	  }
 
 		return objectState;
 	},

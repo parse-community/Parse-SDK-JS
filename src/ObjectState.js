@@ -101,19 +101,7 @@ export function popPendingState(className: string, id: string): OpsMap {
 }
 
 export function mergeFirstPendingState(className: string, id: string) {
-  var first = popPendingState(className, id);
-  var pending = getPendingOps(className, id);
-  var next = pending[0];
-  for (var attr in first) {
-    if (next[attr] && first[attr]) {
-      var merged = next[attr].mergeWith(first[attr]);
-      if (merged) {
-        next[attr] = merged;
-      }
-    } else {
-      next[attr] = first[attr];
-    }
-  }
+	Store.dispatch(actionCreators.mergeFirstPendingState({className, id}));
 }
 
 export function getObjectCache(className: string, id: string): ObjectCache {
