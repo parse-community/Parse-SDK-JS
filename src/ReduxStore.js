@@ -9,10 +9,7 @@ export function set(_Store) {
 	
 	if (!_Store)
 	{
-		var reducers = {};
-		reducers.Parse = parseReducer;
-		var reducer = combineReducers(reducers);
-		
+		var reducer = combineReducers({Parse: parseReducer});
 		_Store = createStore(reducer);
 	}
 

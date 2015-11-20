@@ -162,7 +162,7 @@ var actions = {
 	}
 }
 
-export default function(state = {}, action) {
+export default function Parse(state = {}, action) {
 	if (actions[action.type])
 		return actions[action.type](state, action.payload);
 	return state;
