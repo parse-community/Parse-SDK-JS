@@ -1,5 +1,5 @@
-import { createStore, combineReducers } from 'redux'
-import parseReducer from './ReduxReducers'
+import { createStore, combineReducers } from 'redux';
+import parseReducer from './ReduxReducers';
 
 var Store = null;
 var name = null;
