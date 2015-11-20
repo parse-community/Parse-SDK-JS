@@ -128,7 +128,7 @@ var actions = {
 		objectState[className] = {...objectState[className]};
 		objectState[className][id] = {...objectState[className][id]};
 		var serverData = objectState[className][id].serverData = {...objectState[className][id].serverData};
-		var objectCache = objectState[className][id].objectCache = {...objectState[className][id].serverData};
+		var objectCache = objectState[className][id].objectCache = {...objectState[className][id].objectCache};
 
 	  for (var attr in changes) {
 	    var val = changes[attr];
