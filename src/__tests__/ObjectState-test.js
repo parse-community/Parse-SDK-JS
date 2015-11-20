@@ -7,8 +7,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-jest.autoMockOff();
-
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../ObjectState');
@@ -17,6 +15,11 @@ jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseOp');
 jest.dontMock('../ParsePromise');
 jest.dontMock('../TaskQueue');
+
+jest.dontMock('redux');
+jest.dontMock('../redux/action-creators');
+jest.dontMock('../redux/create-store');
+jest.dontMock('../redux/reducers');
 
 var mockObject = function() {};
 mockObject.registerSubclass = function() {};

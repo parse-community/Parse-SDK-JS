@@ -14,6 +14,11 @@ jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
 jest.dontMock('../ParseRole');
 
+jest.dontMock('redux');
+jest.dontMock('../redux/action-creators');
+jest.dontMock('../redux/create-store');
+jest.dontMock('../redux/reducers');
+
 var ParseACL = require('../ParseACL');
 var ParseError = require('../ParseError');
 var ParseObject = require('../ParseObject');

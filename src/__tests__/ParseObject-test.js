@@ -30,6 +30,11 @@ jest.dontMock('../unsavedChildren');
 jest.dontMock('./test_helpers/asyncHelper');
 jest.dontMock('./test_helpers/mockXHR');
 
+jest.dontMock('redux');
+jest.dontMock('../redux/action-creators');
+jest.dontMock('../redux/create-store');
+jest.dontMock('../redux/reducers');
+
 var mockRelation = function(parent, key) {
   this.parentClass = parent.className;
   this.parentId = parent.id;
