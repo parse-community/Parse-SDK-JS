@@ -59,7 +59,7 @@ export function removeState(className: string, id: string): ?State {
   }
 
 	Store.dispatch(actionCreators.removeState({className, id}));
-	return getState(...arguments);
+	return {...state};
 }
 
 export function getServerData(className: string, id: string): AttributeMap {
