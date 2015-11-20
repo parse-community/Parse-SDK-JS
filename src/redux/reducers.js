@@ -148,6 +148,17 @@ var actions = {
 	},
 	CLEAR_ALL_STATE: function() {
 		return {};
+	},
+	SET_EXISTED: function(objectState, payload) {
+		var {className, id, existed} = payload;
+
+		objectState = {...objectState};
+		objectState[className] = {...objectState[className]};
+		var myObject = objectState[className][id] = {...objectState[className][id]};
+
+		myObject.existed = existed;
+
+		return objectState;
 	}
 }
 

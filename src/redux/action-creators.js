@@ -52,5 +52,11 @@ export default {
 			type: 'CLEAR_ALL_STATE',
 			payload
 		}
+	},
+	_setExisted: function(payload) {
+		return {
+			type: 'SET_EXISTED',
+			payload
+		}
 	}
 }

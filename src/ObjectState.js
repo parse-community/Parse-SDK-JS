@@ -175,3 +175,7 @@ export function enqueueTask(className: string, id: string, task: () => ParseProm
 export function _clearAllState() {
 	Store.dispatch(actionCreators._clearAllState(...arguments));
 }
+
+export function _setExisted(className: string, id: string, existed: boolean) {
+	Store.dispatch(actionCreators._setExisted(...arguments));
+}
