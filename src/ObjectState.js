@@ -13,8 +13,8 @@ import ParsePromise from './ParsePromise';
 import TaskQueue from './TaskQueue';
 import { RelationOp } from './ParseOp';
 
-import createStore from './redux/create-store';
-import actionCreators from './redux/action-creators';
+import * as _Store from './ReduxStore';
+import actionCreators from './ReduxActionCreators';
 
 import type { Op } from './ParseOp';
 
@@ -31,10 +31,10 @@ type State = {
 };
 
 // Redux
-var Store = createStore();
+var Store = _Store.get();
 
 export function getState(className: string, id: string): ?State {
-	var objectState = Store.getState();
+	var objectState = Store.getState().parse;
   var classData = objectState[className];
   if (classData) {
     return classData[id] || null;

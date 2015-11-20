@@ -28,9 +28,9 @@ jest.dontMock('./test_helpers/asyncHelper');
 jest.dontMock('./test_helpers/mockXHR');
 
 jest.dontMock('redux');
-jest.dontMock('../redux/action-creators');
-jest.dontMock('../redux/create-store');
-jest.dontMock('../redux/reducers');
+jest.dontMock('../ReduxActionCreators');
+jest.dontMock('../ReduxStore');
+jest.dontMock('../ReduxReducers');
 
 var mockUser = function(token) {
   this.token = token;

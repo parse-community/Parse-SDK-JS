@@ -1,19 +1,21 @@
 {
-  "name": "parse",
+  "name": "parse-redux",
   "version": "1.6.9",
   "description": "The Parse JavaScript SDK",
-  "homepage": "https://www.parse.com",
+  "homepage": "https://github.com/chrbala/Parse-Redux",
   "keywords": [
     "cloud",
     "mobile",
-    "api"
+    "api",
+    "redux",
+    "flux"
   ],
   "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ParsePlatform/Parse-SDK-JS"
+    "url": "https://github.com/chrbala/Parse-Redux"
   },
-  "bugs": "https://github.com/ParsePlatform/Parse-SDK-JS/issues",
+  "bugs": "https://github.com/chrbala/Parse-Redux/issues",
   "files": [
     "index.js",
     "node.js",

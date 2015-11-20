@@ -1,7 +1,7 @@
-import encode from '../encode';
-import ParseFile from '../ParseFile';
-import ParseObject from '../ParseObject';
-import ParseRelation from '../ParseRelation';
+import encode from './encode';
+import ParseFile from './ParseFile';
+import ParseObject from './ParseObject';
+import ParseRelation from './ParseRelation';
 
 var actions = {
 	INITIALIZE_STATE: function(objectState, payload) {
