@@ -9,11 +9,7 @@
  * @flow
  */
 
-import encode from './encode';
-import ParseFile from './ParseFile';
-import ParseObject from './ParseObject';
 import ParsePromise from './ParsePromise';
-import ParseRelation from './ParseRelation';
 import TaskQueue from './TaskQueue';
 import { RelationOp } from './ParseOp';
 
@@ -173,20 +169,8 @@ export function estimateAttributes(className: string, id: string): AttributeMap 
 }
 
 export function commitServerChanges(className: string, id: string, changes: AttributeMap) {
-  var state = initializeState(className, id);
-  for (var attr in changes) {
-    var val = changes[attr];
-    state.serverData[attr] = val;
-    if (val &&
-      typeof val === 'object' &&
-      !(val instanceof ParseObject) &&
-      !(val instanceof ParseFile) &&
-      !(val instanceof ParseRelation)
-    ) {
-      var json = encode(val, false, true);
-      state.objectCache[attr] = JSON.stringify(json);
-    }
-  }
+	initializeState(className, id);
+  Store.dispatch(actionCreators.commitServerChanges({className, id, changes}));
 }
 
 var QueueMap = {};

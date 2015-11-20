@@ -1,4 +1,7 @@
-import TaskQueue from '../TaskQueue';
+import encode from '../encode';
+import ParseFile from '../ParseFile';
+import ParseObject from '../ParseObject';
+import ParseRelation from '../ParseRelation';
 
 var actions = {
 	INITIALIZE_STATE: function(objectState, payload) {
@@ -104,7 +107,25 @@ var actions = {
 	COMMIT_SERVER_CHANGES: function(objectState, payload) {
 		var {className, id, changes} = payload;
 
-		// TODO
+		objectState = {...objectState};
+		objectState[className] = {...objectState[className]};
+		objectState[className][id] = {...objectState[className][id]};
+		var serverData = objectState[className][id].serverData = {...objectState[className][id].serverData};
+		var objectCache = objectState[className][id].objectCache = {...objectState[className][id].serverData};
+
+	  for (var attr in changes) {
+	    var val = changes[attr];
+	    serverData[attr] = val;
+	    if (val &&
+	      typeof val === 'object' &&
+	      !(val instanceof ParseObject) &&
+	      !(val instanceof ParseFile) &&
+	      !(val instanceof ParseRelation)
+	    ) {
+	      var json = encode(val, false, true);
+	      objectCache[attr] = JSON.stringify(json);
+	    }
+	  }
 
 		return objectState;
 	},
