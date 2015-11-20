@@ -1,23 +1,32 @@
-import { createStore, applyMiddleware, combineReducers } from 'redux'
-import parse from './ReduxReducers'
+import { createStore, combineReducers } from 'redux'
+import parseReducer from './ReduxReducers'
 
 var Store = null;
+var name = null;
 
-export function init(reducers = {}, middleware = [], data) {
+export function getName() {
+	return name;
+}
+
+export function set(_Store, _name = 'Parse') {
 	if (Store)
 		throw new Error("Store already set! Make sure to initialize the store before it is retrieved.");
+	
+	if (!_Store)
+	{
+		var reducers = {};
+		reducers[_name] = parseReducer;
+		var reducer = combineReducers(reducers);
+		
+		_Store = createStore(reducer);
+	}
 
-	reducers.parse = parse;
-
-	var reducer = combineReducers(reducers);
-	var finalCreateStore = applyMiddleware(...middleware)(createStore);
-  Store = finalCreateStore(reducer, data);
-
-  return Store;
+	Store = _Store
+	name = _name;
 }
 
 export function get() {
 	if (!Store)
-		init();
+		set();
 	return Store;
 }

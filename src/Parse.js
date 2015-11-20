@@ -15,6 +15,7 @@ import * as ParseOp from './ParseOp';
 import RESTController from './RESTController';
 
 import * as Store from './ReduxStore';
+import parseReducer from './ReduxReducers'
 
 /**
  * Contains all Parse API classes and functions.
@@ -22,10 +23,6 @@ import * as Store from './ReduxStore';
  * @static
  */
 var Parse = {
-	createStore() {
-		Store.init(...arguments);
-	},
-
   /**
    * Call this method first to set up your authentication tokens for Parse.
    * You can get your keys from the Data Browser on parse.com.
@@ -135,8 +132,11 @@ Parse._getInstallationId = function() {
 }
 
 // redux
-Parse.getStore = function() {
-	return Store.get();
+Parse.setStore = function() {
+	Store.set(...arguments);
+}
+Parse.getReducer = function() {
+	return parseReducer;
 }
 
 CoreManager.setInstallationController(InstallationController);
