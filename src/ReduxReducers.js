@@ -209,7 +209,7 @@ const FunctionActions = {
 
 		return set(state, payload, value);
 	},
-	APPEND_RESULT(state, payload) {
+	OPERATE_ON_ARRAY(state, payload) {
 		var value = get(state, payload);
 		if (value.pending === false)
 			console.error('Pending already set to false on ' + payload.name + '.');
@@ -219,7 +219,9 @@ const FunctionActions = {
 			console.warn('Attempted to append a non-array value on ' + payload.name + '.');
 
 		var cache = value.cache ? [...value.cache] : [];
-		cache.push(...result);
+		var operation = payload.operation;
+
+		cache[operation](...result);
 
 		value = {
 			cache,

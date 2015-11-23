@@ -85,8 +85,18 @@ export const FunctionActions = {
 		}
 	},
 	appendResult(payload) {
+		payload.operation = 'push';
+
 		return {
-			type: 'APPEND_RESULT',
+			type: 'OPERATE_ON_ARRAY',
+			payload
+		}
+	},
+	prependResult(payload) {
+		payload.operation = 'unshift';
+
+		return {
+			type: 'OPERATE_ON_ARRAY',
 			payload
 		}
 	}

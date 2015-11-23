@@ -142,21 +142,13 @@ run.refresh = function(
 	return done;
 }
 
-run.append = function(
-  name: string,
-  data = {}: mixed,
-  grouping: string,
-  options: { [key: string]: mixed }
-) {
-	var functionState = Store.getState().Parse.Functions;
-	var state = get(functionState, {name, data});
-	if (state.pending)
-		throw new Error('Cannot refresh query while it is pending.');
+function _operateOnArray(params, operation) {
+	var {name, data, grouping, options} = params;
 
 	Store.dispatch(Actions.setPending({name, data, grouping}));
 
-	return run(...arguments).then(function(result) {
-		Store.dispatch(Actions.appendResult({name, data, grouping, result}));
+	return run(name, data, options).then(function(result) {
+		Store.dispatch(Actions[operation]({name, data, grouping, result}));
 
 		return Parse.Promise.as(result);
 	}).fail(function(err) {
@@ -164,6 +156,24 @@ run.append = function(
 
 		return Parse.Promise.error(err);
 	});
+}
+
+run.append = function(
+  name: string,
+  data = {}: mixed,
+  grouping: string,
+  options: { [key: string]: mixed }
+) {
+	return _operateOnArray({name, data, grouping, options}, 'appendResult');
+}
+
+run.prepend = function(
+  name: string,
+  data = {}: mixed,
+  grouping: string,
+  options: { [key: string]: mixed }
+) {
+	return _operateOnArray({name, data, grouping, options}, 'prependResult');
 }
 
 run.isPending = function(
