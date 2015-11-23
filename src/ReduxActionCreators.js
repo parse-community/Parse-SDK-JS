@@ -38,7 +38,7 @@ export const ObjectActions = generateActions([
 	'commitServerChanges',
 	'_clearAllState',
 	'_setExisted',
-], 'Parse/Objects');
+], 'Parse/Object');
 
 export const QueryActions = {
 

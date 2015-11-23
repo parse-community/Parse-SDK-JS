@@ -239,7 +239,7 @@ function createReducers(reducers) {
 }
 
 export default createReducers({
-	Objects,
+	'Object': Objects,
 	Cloud,
 	Queries
 });

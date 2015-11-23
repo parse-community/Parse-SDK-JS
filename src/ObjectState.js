@@ -31,7 +31,7 @@ type State = {
 };
 
 export function getState(className: string, id: string): ?State {
-	var objectState = Store.getState().Parse.Objects;
+	var objectState = Store.getState().Parse.Object;
   var classData = objectState[className];
   if (classData) {
     return classData[id] || null;
