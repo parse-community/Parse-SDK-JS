@@ -16,7 +16,12 @@ function generateActions(actions, namespace = '') {
 				}
 			}
 		}	else
-		 out[m.name] = m.action;
+		 out[m.name] = function(payload) {
+		 	var action = m.action(payload);
+		 	action.type = namespace + '/' + action.type;
+
+		 	return action;
+		}
 	});
 
 	return out;
@@ -55,4 +60,4 @@ export const FunctionActions = generateActions([
 
 		return {type, payload};
 	}}
-], 'Parse/Functions');
+], 'Parse/Cloud');

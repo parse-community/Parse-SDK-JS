@@ -168,7 +168,7 @@ const Queries = {
 
 }
 
-const Functions = {
+const Cloud = {
 	SET_PENDING(state, payload) {
 		var value = get(state, payload);
 		if (value.pending === true)
@@ -240,6 +240,6 @@ function createReducers(reducers) {
 
 export default createReducers({
 	Objects,
-	Functions,
+	Cloud,
 	Queries
 });

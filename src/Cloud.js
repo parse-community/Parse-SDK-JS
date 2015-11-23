@@ -108,7 +108,7 @@ run.cache = function(
   data = {}: mixed,
   options: { [key: string]: mixed }
 ) {
-	var functionState = Store.getState().Parse.Functions;
+	var functionState = Store.getState().Parse.Cloud;
 	var state = get(functionState, {name, data});
 
 	if (state.pending)
@@ -180,7 +180,7 @@ run.isPending = function(
   name: string,
   data = {}: mixed
 ) {
-	var functionState = Store.getState().Parse.Functions;
+	var functionState = Store.getState().Parse.Cloud;
 	var state = get(functionState, {name, data});
 
 	return state.pending;
