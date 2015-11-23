@@ -4,22 +4,20 @@ var lib = {
 	}
 }
 
-function generateActions(actions) {
+function generateActions(actions, namespace = '') {
 	var out = {};
 
-	for (let i in actions) {
-		let action = actions[i];
-
-		if (typeof action == 'string') {
-			out[action] = function(payload) {
+	actions.forEach(function(m) {
+		if (typeof m == 'string') {
+			out[m] = function(payload) {
 				return {
-					type: lib.toUnderscore(action),
+					type: namespace + '/' + lib.toUnderscore(m),
 					payload
 				}
 			}
 		}	else
-		 out[action.name] = action.action;
-	}
+		 out[m.name] = m.action;
+	});
 
 	return out;
 }
@@ -35,7 +33,7 @@ export const ObjectActions = generateActions([
 	'commitServerChanges',
 	'_clearAllState',
 	'_setExisted',
-]);
+], 'Parse/Objects');
 
 export const QueryActions = {
 
@@ -57,4 +55,4 @@ export const FunctionActions = generateActions([
 
 		return {type, payload};
 	}}
-]);
+], 'Parse/Functions');

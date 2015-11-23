@@ -5,7 +5,7 @@ import ParseRelation from './ParseRelation';
 import { combineReducers } from 'redux';
 import { get, set } from './Cloud';
 
-const ObjectActions = {
+const Objects = {
 	INITIALIZE_STATE(objectState, payload) {
 		var {className, id, initial} = payload;
 		var initial = payload.initial;
@@ -164,24 +164,11 @@ const ObjectActions = {
 	}
 }
 
-function Objects(state = {}, action) {
-	console.log(action);
-	if (ObjectActions[action.type])
-		return ObjectActions[action.type](state, action.payload);
-	return state;
-}
-
-const QueryActions = {
+const Queries = {
 
 }
 
-function Queries(state = {}, action) {
-	if (QueryActions[action.type])
-		return QueryActions[action.type](state, action.payload);
-	return state;
-}
-
-const FunctionActions = {
+const Functions = {
 	SET_PENDING(state, payload) {
 		var value = get(state, payload);
 		if (value.pending === true)
@@ -233,14 +220,26 @@ const FunctionActions = {
 	}
 }
 
-function Functions(state = {}, action) {
-	if (FunctionActions[action.type])
-		return FunctionActions[action.type](state, action.payload);
-	return state;
+function createReducers(reducers) {
+	var out = {};
+
+	for (let name in reducers) {
+		let reducer = reducers[name];
+
+		out[name] = function(state = {}, action) {
+			var [namespace, handlerName, type] = action.type.split('/');
+
+			if (namespace == 'Parse' && handlerName == name && reducer[type])
+				return reducer[type](state, action.payload);
+			return state;
+		}
+	}
+
+	return combineReducers(out);
 }
 
-export default combineReducers({
+export default createReducers({
 	Objects,
-	Queries,
-	Functions
+	Functions,
+	Queries
 });
