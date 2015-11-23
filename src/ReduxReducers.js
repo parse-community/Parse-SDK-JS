@@ -216,7 +216,7 @@ const FunctionActions = {
 
 		var result = payload.result;
 		if (!Array.isArray(result))
-			console.warn('Attempted to append a non-array value.');
+			console.warn('Attempted to append a non-array value on ' + payload.name + '.');
 
 		var cache = value.cache ? [...value.cache] : [];
 		cache.push(...result);
