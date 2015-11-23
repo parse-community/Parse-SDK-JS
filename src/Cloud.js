@@ -164,6 +164,16 @@ run.append = function(
 	});
 }
 
+run.isPending = function(
+  name: string,
+  data = {}: mixed
+) {
+	var functionState = Store.getState().Parse.Functions;
+	var state = get(functionState, {name, data});
+
+	return state.pending;
+}
+
 var DefaultController = {
   run(name, data, options) {
     var RESTController = CoreManager.getRESTController();

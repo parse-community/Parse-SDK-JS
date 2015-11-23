@@ -184,7 +184,7 @@ const FunctionActions = {
 	SET_PENDING(state, payload) {
 		var value = get(state, payload);
 		if (value.pending === true)
-			throw new Error('Cloud Code function ' + payload.name + ' is already pending.');
+			console.error('Cloud Code function ' + payload.name + ' is pending.');
 
 		value = {...value};
 		value.pending = true;
@@ -197,14 +197,12 @@ const FunctionActions = {
 			pending: false
 		};
 
-		console.log(value);
-
 		return set(state, payload, value);
 	},
 	UNSET_PENDING(state, payload) {
 		var value = get(state, payload);
 		if (value.pending === false)
-			throw new Error('Pending already set to false on ' + payload.name + '.');
+			console.error('Pending already set to false on ' + payload.name + '.');
 
 		value = {...value};
 		value.pending = false;
