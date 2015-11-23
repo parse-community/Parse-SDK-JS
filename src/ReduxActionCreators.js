@@ -1,59 +1,59 @@
 export const ObjectActions = {
-	initializeState: function(payload) {
+	initializeState(payload) {
 		return {
 			type: 'INITIALIZE_STATE',
 			payload
 		};
 	},
-	removeState: function(payload) {
+	removeState(payload) {
 		return {
 			type: 'REMOVE_STATE',
 			payload
 		};
 	},
-	setServerData: function(payload) {
+	setServerData(payload) {
 		return {
 			type: 'SET_SERVER_DATA',
 			payload
 		};
 	},
-	setPendingOp: function(payload) {
+	setPendingOp(payload) {
 		return {
 			type: 'SET_PENDING_OP',
 			payload
 		};
 	},
-	pushPendingState: function(payload) {
+	pushPendingState(payload) {
 		return {
 			type: 'PUSH_PENDING_STATE',
 			payload
 		};
 	},
-	popPendingState: function(payload) {
+	popPendingState(payload) {
 		return {
 			type: 'POP_PENDING_STATE',
 			payload
 		};
 	},
-	mergeFirstPendingState: function(payload) {
+	mergeFirstPendingState(payload) {
 		return {
 			type: 'MERGE_FIRST_PENDING_STATE',
 			payload
 		};
 	},
-	commitServerChanges: function(payload) {
+	commitServerChanges(payload) {
 		return {
 			type: 'COMMIT_SERVER_CHANGES',
 			payload
 		};
 	},
-	_clearAllState: function(payload) {
+	_clearAllState(payload) {
 		return {
 			type: 'CLEAR_ALL_STATE',
 			payload
 		}
 	},
-	_setExisted: function(payload) {
+	_setExisted(payload) {
 		return {
 			type: 'SET_EXISTED',
 			payload
@@ -66,21 +66,27 @@ export const QueryActions = {
 }
 
 export const FunctionActions = {
-	setPending: function(payload) {
+	setPending(payload) {
 		return {
 			type: 'SET_PENDING',
 			payload
 		}
 	},
-	saveResult: function(payload) {
+	unsetPending(payload) {
+		return {
+			type: 'UNSET_PENDING',
+			payload
+		}
+	},
+	saveResult(payload) {
 		return {
 			type: 'SAVE_RESULT',
 			payload
 		}
 	},
-	unsetPending: function(payload) {
+	appendResult(payload) {
 		return {
-			type: 'UNSET_PENDING',
+			type: 'APPEND_RESULT',
 			payload
 		}
 	}

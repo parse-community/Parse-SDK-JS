@@ -152,14 +152,16 @@ run.append = function(
 	var state = get(functionState, {name, data});
 	if (state.pending)
 		throw new Error('Cannot refresh query while it is pending.');
-	// set 'pending' for name[grouping]
 
-	return run(...arguments).then(function(res) {
-		// append result to name[grouping]
-		// unset 'pending' to name[grouping]
-		return Parse.Promise.as(res);
+	Store.dispatch(Actions.setPending({name, data, grouping}));
+
+	return run(...arguments).then(function(result) {
+		Store.dispatch(Actions.appendResult({name, data, grouping, result}));
+
+		return Parse.Promise.as(result);
 	}).fail(function(err) {
-		// unset 'pending' for for name[JSON.stringify(options)]
+		Store.dispatch(Actions.unsetPending({name, data, grouping}));
+
 		return Parse.Promise.error(err);
 	});
 }

@@ -191,6 +191,16 @@ const FunctionActions = {
 
 		return set(state, payload, value);
 	},
+	UNSET_PENDING(state, payload) {
+		var value = get(state, payload);
+		if (value.pending === false)
+			console.error('Pending already set to false on ' + payload.name + '.');
+
+		value = {...value};
+		value.pending = false;
+
+		return set(state, payload, value);
+	},
 	SAVE_RESULT(state, payload) {
 		var value = {
 			cache: payload.result,
@@ -199,13 +209,22 @@ const FunctionActions = {
 
 		return set(state, payload, value);
 	},
-	UNSET_PENDING(state, payload) {
+	APPEND_RESULT(state, payload) {
 		var value = get(state, payload);
 		if (value.pending === false)
 			console.error('Pending already set to false on ' + payload.name + '.');
 
-		value = {...value};
-		value.pending = false;
+		var result = payload.result;
+		if (!Array.isArray(result))
+			console.warn('Attempted to append a non-array value.');
+
+		var cache = value.cache ? [...value.cache] : [];
+		cache.push(...result);
+
+		value = {
+			cache,
+			pending: false
+		};
 
 		return set(state, payload, value);
 	}
