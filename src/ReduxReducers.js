@@ -148,10 +148,10 @@ const ObjectActions = {
 
 		return objectState;
 	},
-	CLEAR_ALL_STATE() {
+	_CLEAR_ALL_STATE() {
 		return {};
 	},
-	SET_EXISTED(objectState, payload) {
+	_SET_EXISTED(objectState, payload) {
 		var {className, id, existed} = payload;
 
 		objectState = {...objectState};
@@ -165,6 +165,7 @@ const ObjectActions = {
 }
 
 function Objects(state = {}, action) {
+	console.log(action);
 	if (ObjectActions[action.type])
 		return ObjectActions[action.type](state, action.payload);
 	return state;

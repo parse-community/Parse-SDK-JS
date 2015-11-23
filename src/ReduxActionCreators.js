@@ -1,103 +1,60 @@
-export const ObjectActions = {
-	initializeState(payload) {
-		return {
-			type: 'INITIALIZE_STATE',
-			payload
-		};
-	},
-	removeState(payload) {
-		return {
-			type: 'REMOVE_STATE',
-			payload
-		};
-	},
-	setServerData(payload) {
-		return {
-			type: 'SET_SERVER_DATA',
-			payload
-		};
-	},
-	setPendingOp(payload) {
-		return {
-			type: 'SET_PENDING_OP',
-			payload
-		};
-	},
-	pushPendingState(payload) {
-		return {
-			type: 'PUSH_PENDING_STATE',
-			payload
-		};
-	},
-	popPendingState(payload) {
-		return {
-			type: 'POP_PENDING_STATE',
-			payload
-		};
-	},
-	mergeFirstPendingState(payload) {
-		return {
-			type: 'MERGE_FIRST_PENDING_STATE',
-			payload
-		};
-	},
-	commitServerChanges(payload) {
-		return {
-			type: 'COMMIT_SERVER_CHANGES',
-			payload
-		};
-	},
-	_clearAllState(payload) {
-		return {
-			type: 'CLEAR_ALL_STATE',
-			payload
-		}
-	},
-	_setExisted(payload) {
-		return {
-			type: 'SET_EXISTED',
-			payload
-		}
+var lib = {
+	toUnderscore(){
+		return this.replace(/([A-Z])/g, function($1){return "_"+$1}).toUpperCase();
 	}
 }
+
+function generateActions(actions) {
+	var out = {};
+
+	for (let i in actions) {
+		let action = actions[i];
+
+		if (typeof action == 'string') {
+			out[action] = function(payload) {
+				return {
+					type: lib.toUnderscore.call(action),
+					payload
+				}
+			}
+		}	else
+		 out[action.name] = action.action;
+	}
+
+	return out;
+}
+
+export const ObjectActions = generateActions([
+	'initializeState',
+	'removeState',
+	'setServerData',
+	'setPendingOp',
+	'pushPendingState',
+	'popPendingState',
+	'mergeFirstPendingState',
+	'commitServerChanges',
+	'_clearAllState',
+	'_setExisted',
+]);
 
 export const QueryActions = {
 
 }
 
-export const FunctionActions = {
-	setPending(payload) {
-		return {
-			type: 'SET_PENDING',
-			payload
-		}
-	},
-	unsetPending(payload) {
-		return {
-			type: 'UNSET_PENDING',
-			payload
-		}
-	},
-	saveResult(payload) {
-		return {
-			type: 'SAVE_RESULT',
-			payload
-		}
-	},
-	appendResult(payload) {
+export const FunctionActions = generateActions([
+	'setPending',
+	'unsetPending',
+	'saveResult',
+	{name: 'appendResult', action: function(payload) {
+		var type = 'OPERATE_ON_ARRAY';
 		payload.operation = 'push';
 
-		return {
-			type: 'OPERATE_ON_ARRAY',
-			payload
-		}
-	},
-	prependResult(payload) {
+		return {type, payload};
+	}},
+	{name: 'prependResult', action: function(payload) {
+		var type = 'OPERATE_ON_ARRAY';
 		payload.operation = 'unshift';
 
-		return {
-			type: 'OPERATE_ON_ARRAY',
-			payload
-		}
-	}
-}
+		return {type, payload};
+	}}
+]);
