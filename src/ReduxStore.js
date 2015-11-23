@@ -13,11 +13,17 @@ export function set(_Store) {
 		_Store = createStore(reducer);
 	}
 
-	Store = _Store
+	Store = _Store;
 }
 
-export function get() {
+export function getState() {
 	if (!Store)
 		set();
-	return Store;
+	return Store.getState(...arguments);
+}
+
+export function dispatch() {
+	if (!Store)
+		set();
+	return Store.dispatch(...arguments);
 }

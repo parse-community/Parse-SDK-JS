@@ -2,9 +2,11 @@ import encode from './encode';
 import ParseFile from './ParseFile';
 import ParseObject from './ParseObject';
 import ParseRelation from './ParseRelation';
+import { combineReducers } from 'redux';
+import { get, set } from './Cloud';
 
-var actions = {
-	INITIALIZE_STATE: function(objectState, payload) {
+const ObjectActions = {
+	INITIALIZE_STATE(objectState, payload) {
 		var {className, id, initial} = payload;
 		var initial = payload.initial;
 
@@ -27,7 +29,7 @@ var actions = {
 	  objectState[className][id] = initial;
 	  return objectState;
 	},
-	REMOVE_STATE: function(objectState, payload) {
+	REMOVE_STATE(objectState, payload) {
 		var {className, id} = payload;
 
 	  objectState = {...objectState};
@@ -35,7 +37,7 @@ var actions = {
 	  delete objectState[className][id];
 	  return objectState;
 	},
-	SET_SERVER_DATA: function(objectState, payload) {
+	SET_SERVER_DATA(objectState, payload) {
 		var {className, id, attributes} = payload;
 
 		objectState = {...objectState};
@@ -53,7 +55,7 @@ var actions = {
 
 	  return objectState;
 	},
-	SET_PENDING_OP: function(objectState, payload) {
+	SET_PENDING_OP(objectState, payload) {
 		var {className, id, attr, op} = payload;
 
 		objectState = {...objectState};
@@ -70,7 +72,7 @@ var actions = {
 
 	  return objectState;
 	},
-	PUSH_PENDING_STATE: function(objectState, payload) {
+	PUSH_PENDING_STATE(objectState, payload) {
 		var {className, id} = payload;
 
 		objectState = {...objectState};
@@ -82,7 +84,7 @@ var actions = {
 
 		return objectState;
 	},
-	POP_PENDING_STATE: function(objectState, payload) {
+	POP_PENDING_STATE(objectState, payload) {
 		var {className, id} = payload;
 
 		objectState = {...objectState};
@@ -97,7 +99,7 @@ var actions = {
 
 	  return objectState;
 	},
-	MERGE_FIRST_PENDING_STATE: function(objectState, payload) {
+	MERGE_FIRST_PENDING_STATE(objectState, payload) {
 		var {className, id} = payload;
 
 		objectState = {...objectState};
@@ -121,7 +123,7 @@ var actions = {
 
 		return objectState;
 	},
-	COMMIT_SERVER_CHANGES: function(objectState, payload) {
+	COMMIT_SERVER_CHANGES(objectState, payload) {
 		var {className, id, changes} = payload;
 
 		objectState = {...objectState};
@@ -146,10 +148,10 @@ var actions = {
 
 		return objectState;
 	},
-	CLEAR_ALL_STATE: function() {
+	CLEAR_ALL_STATE() {
 		return {};
 	},
-	SET_EXISTED: function(objectState, payload) {
+	SET_EXISTED(objectState, payload) {
 		var {className, id, existed} = payload;
 
 		objectState = {...objectState};
@@ -162,8 +164,63 @@ var actions = {
 	}
 }
 
-export default function Parse(state = {}, action) {
-	if (actions[action.type])
-		return actions[action.type](state, action.payload);
+function Objects(state = {}, action) {
+	if (ObjectActions[action.type])
+		return ObjectActions[action.type](state, action.payload);
 	return state;
 }
+
+const QueryActions = {
+
+}
+
+function Queries(state = {}, action) {
+	if (QueryActions[action.type])
+		return QueryActions[action.type](state, action.payload);
+	return state;
+}
+
+const FunctionActions = {
+	SET_PENDING(state, payload) {
+		var value = get(state, payload);
+		if (value.pending === true)
+			throw new Error('Cloud Code function ' + payload.name + ' is already pending.');
+
+		value = {...value};
+		value.pending = true;
+
+		return set(state, payload, value);
+	},
+	SAVE_RESULT(state, payload) {
+		var value = {
+			cache: payload.result,
+			pending: false
+		};
+
+		console.log(value);
+
+		return set(state, payload, value);
+	},
+	UNSET_PENDING(state, payload) {
+		var value = get(state, payload);
+		if (value.pending === false)
+			throw new Error('Pending already set to false on ' + payload.name + '.');
+
+		value = {...value};
+		value.pending = false;
+
+		return set(state, payload, value);
+	}
+}
+
+function Functions(state = {}, action) {
+	if (FunctionActions[action.type])
+		return FunctionActions[action.type](state, action.payload);
+	return state;
+}
+
+export default combineReducers({
+	Objects,
+	Queries,
+	Functions
+});

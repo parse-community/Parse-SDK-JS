@@ -14,7 +14,7 @@ import TaskQueue from './TaskQueue';
 import { RelationOp } from './ParseOp';
 
 import * as Store from './ReduxStore';
-import actionCreators from './ReduxActionCreators';
+import { ObjectActions as Actions } from './ReduxActionCreators';
 
 import type { Op } from './ParseOp';
 
@@ -31,7 +31,7 @@ type State = {
 };
 
 export function getState(className: string, id: string): ?State {
-	var objectState = Store.get().getState().Parse;
+	var objectState = Store.getState().Parse.Objects;
   var classData = objectState[className];
   if (classData) {
     return classData[id] || null;
@@ -45,7 +45,7 @@ export function initializeState(className: string, id: string, initial?: State):
     return state;
   }
 
-	Store.get().dispatch(actionCreators.initializeState({className, id, initial}));
+	Store.dispatch(Actions.initializeState({className, id, initial}));
 	return getState(...arguments);
 }
 
@@ -55,7 +55,7 @@ export function removeState(className: string, id: string): ?State {
     return null;
   }
 
-	Store.get().dispatch(actionCreators.removeState({className, id}));
+	Store.dispatch(Actions.removeState({className, id}));
 	return state;
 }
 
@@ -69,7 +69,7 @@ export function getServerData(className: string, id: string): AttributeMap {
 
 export function setServerData(className: string, id: string, attributes: AttributeMap) {
   initializeState(className, id).serverData;
-  Store.get().dispatch(actionCreators.setServerData({className, id, attributes}));
+  Store.dispatch(Actions.setServerData({className, id, attributes}));
 	return getState(...arguments);
 }
 
@@ -83,22 +83,22 @@ export function getPendingOps(className: string, id: string): Array<OpsMap> {
 
 export function setPendingOp(className: string, id: string, attr: string, op: ?Op) {
   initializeState(className, id);
-  Store.get().dispatch(actionCreators.setPendingOp({className, id, attr, op}));
+  Store.dispatch(Actions.setPendingOp({className, id, attr, op}));
 }
 
 export function pushPendingState(className: string, id: string) {
 	initializeState(className, id);
-  Store.get().dispatch(actionCreators.pushPendingState({className, id}));
+  Store.dispatch(Actions.pushPendingState({className, id}));
 }
 
 export function popPendingState(className: string, id: string): OpsMap {
   var first = initializeState(className, id).pendingOps[0];
-  Store.get().dispatch(actionCreators.popPendingState({className, id}));
+  Store.dispatch(Actions.popPendingState({className, id}));
   return first;
 }
 
 export function mergeFirstPendingState(className: string, id: string) {
-	Store.get().dispatch(actionCreators.mergeFirstPendingState({className, id}));
+	Store.dispatch(Actions.mergeFirstPendingState({className, id}));
 }
 
 export function getObjectCache(className: string, id: string): ObjectCache {
@@ -155,7 +155,7 @@ export function estimateAttributes(className: string, id: string): AttributeMap 
 
 export function commitServerChanges(className: string, id: string, changes: AttributeMap) {
 	initializeState(className, id);
-  Store.get().dispatch(actionCreators.commitServerChanges({className, id, changes}));
+  Store.dispatch(Actions.commitServerChanges({className, id, changes}));
 }
 
 var QueueMap = {};
@@ -170,9 +170,9 @@ export function enqueueTask(className: string, id: string, task: () => ParseProm
 }
 
 export function _clearAllState() {
-	Store.get().dispatch(actionCreators._clearAllState());
+	Store.dispatch(Actions._clearAllState());
 }
 
 export function _setExisted(className: string, id: string, existed: boolean) {
-	Store.get().dispatch(actionCreators._setExisted({className, id, existed}));
+	Store.dispatch(Actions._setExisted({className, id, existed}));
 }
