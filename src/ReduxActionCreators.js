@@ -1,6 +1,6 @@
 var lib = {
-	toUnderscore(){
-		return this.replace(/([A-Z])/g, function($1){return "_"+$1}).toUpperCase();
+	toUnderscore(str){
+		return str.replace(/([A-Z])/g, function($1){return "_"+$1}).toUpperCase();
 	}
 }
 
@@ -13,7 +13,7 @@ function generateActions(actions) {
 		if (typeof action == 'string') {
 			out[action] = function(payload) {
 				return {
-					type: lib.toUnderscore.call(action),
+					type: lib.toUnderscore(action),
 					payload
 				}
 			}
