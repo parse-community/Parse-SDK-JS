@@ -54,7 +54,8 @@
   "scripts": {
     "build": "./build_releases.sh",
     "release": "./build_releases.sh && npm publish",
-    "test": "PARSE_BUILD=node jest"
+    "test": "PARSE_BUILD=node jest",
+    "browser": "PARSE_BUILD=browser gulp compile"
   },
   "jest": {
     "collectCoverage": true,
