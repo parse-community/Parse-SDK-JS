@@ -156,7 +156,7 @@ export default class ParsePromise {
       fn.call();
     };
     if (isPromisesAPlusCompliant) {
-      if (typeof process !== 'undefined' &&
+      if (process != null &&
           typeof process.nextTick === 'function') {
         runLater = function(fn) {
           process.nextTick(fn);
@@ -283,7 +283,7 @@ export default class ParsePromise {
    */
   static is(promise) {
     return (
-      typeof promise !== 'undefined' &&
+      typeof promise != null &&
       typeof promise.then === 'function'
     );
   }
