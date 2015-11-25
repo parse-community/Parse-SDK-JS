@@ -18,7 +18,7 @@ export default function(options) {
 			return Parse.Promise.error(err);
 		});
 
-		Executed = set(Executed, {name, data}, done);
+		Executed = setItemState(Executed, {name, data}, done);
 
 		return done;
 	}

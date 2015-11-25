@@ -62,12 +62,12 @@ const Objects = {
 		objectState[className] = {...objectState[className]};
 		objectState[className][id] = {...objectState[className][id]};
 		var pending = objectState[className][id].pendingOps = [...objectState[className][id].pendingOps];
+	  var last = pending[pending.length - 1] = {...pending[pending.length - 1]};
 
-	  var last = pending.length - 1;
 	  if (op) {
-	    pending[last][attr] = op;
+	    last[attr] = op;
 	  } else {
-	    delete pending[last][attr];
+	    delete last[attr];
 	  }
 
 	  return objectState;
