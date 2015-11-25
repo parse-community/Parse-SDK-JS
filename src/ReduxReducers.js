@@ -3,7 +3,7 @@ import ParseFile from './ParseFile';
 import ParseObject from './ParseObject';
 import ParseRelation from './ParseRelation';
 import { combineReducers } from 'redux';
-import { get, set } from './Cloud';
+import { getItemState, setItemState } from './ReduxCacheHelper';
 
 const Objects = {
 	INITIALIZE_STATE(objectState, payload) {
@@ -166,24 +166,24 @@ const Objects = {
 
 const Cloud = {
 	SET_PENDING(state, payload) {
-		var value = get(state, payload);
+		var value = getItemState(state, payload);
 		if (value.pending === true)
 			console.error('Cloud Code function ' + payload.name + ' is pending.');
 
 		value = {...value};
 		value.pending = true;
 
-		return set(state, payload, value);
+		return setItemState(state, payload, value);
 	},
 	UNSET_PENDING(state, payload) {
-		var value = get(state, payload);
+		var value = getItemState(state, payload);
 		if (value.pending === false)
 			console.error('Pending already set to false on ' + payload.name + '.');
 
 		value = {...value};
 		value.pending = false;
 
-		return set(state, payload, value);
+		return setItemState(state, payload, value);
 	},
 	SAVE_RESULT(state, payload) {
 		var value = {
@@ -191,10 +191,10 @@ const Cloud = {
 			pending: false
 		};
 
-		return set(state, payload, value);
+		return setItemState(state, payload, value);
 	},
 	OPERATE_ON_ARRAY(state, payload) {
-		var value = get(state, payload);
+		var value = getItemState(state, payload);
 		if (value.pending === false)
 			console.error('Pending already set to false on ' + payload.name + '.');
 
@@ -212,7 +212,7 @@ const Cloud = {
 			pending: false
 		};
 
-		return set(state, payload, value);
+		return setItemState(state, payload, value);
 	}
 }
 

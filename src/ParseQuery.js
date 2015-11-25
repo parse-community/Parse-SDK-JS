@@ -20,7 +20,10 @@ import type { RequestOptions, FullOptions } from './RESTController';
 
 import * as Store from './ReduxStore';
 import { QueryActions as Actions } from './ReduxActionCreators';
-import { get, set } from './Cloud';
+
+import CacheHelper, { getItemState } from './ReduxCacheHelper';
+var cacheHelper = new CacheHelper({Actions, namespace: "Query"});
+
 export type WhereClause = {
   [attr: string]: mixed;
 };
@@ -292,48 +295,25 @@ export default class ParseQuery {
 	  }).bind(this);
 
 	  _find.refresh = (function() {
-	  	var name = this.className;
-	  	var data = this;
-
-	  	Store.dispatch(Actions.setPending({name, data}));
-
-			var done = _find(...arguments).then(function(result) {
-				Store.dispatch(Actions.saveResult({name, data, result}));
-				
-				return Parse.Promise.as(result);
-			}).fail(function(err) {
-				Store.dispatch(Actions.unsetPending({name, data}));
-
-				return Parse.Promise.error(err);
-			});
-
-			ExecutedQueries = set(ExecutedQueries, {name, data}, done);
-
-			return done;
+	  	return cacheHelper.refresh(_find, this.className, this);
 	  }).bind(this);
 
 	  _find.cache = (function() {
+	  	return cacheHelper.cache(_find, this.className, this);
+	  }).bind(this);
+
+	  _find.append = (function(grouping, options) {
 	  	var name = this.className;
 	  	var data = this;
 
-	  	var functionState = Store.getState().Parse.Query;
-			var state = get(functionState, {name, data});
-
-			if (state.pending)
-				return get(ExecutedQueries, {name, data});
-
-			if (state.cache)
-				return Parse.Promise.as(state.cache);
-
-			return _find.refresh(...arguments);
+	  	return cacheHelper.append(_find, {name, data, grouping, options});
 	  }).bind(this);
 
-	  _find.append = (function() {
+	  _find.prepend = (function(grouping, options) {
+	  	var name = this.className;
+	  	var data = this;
 
-	  }).bind(this);
-
-	  _find.prepend = (function() {
-
+	  	return cacheHelper.prepend(_find, {name, data, grouping, options});
 	  }).bind(this);
 
 	  return _find;

@@ -18,6 +18,9 @@ import ParsePromise from './ParsePromise';
 import * as Store from './ReduxStore';
 import { FunctionActions as Actions } from './ReduxActionCreators';
 
+import CacheHelper from './ReduxCacheHelper';
+var cacheHelper = new CacheHelper({Actions, namespace: "Cloud"});
+
 /**
  * Contains functions for calling and declaring
  * <a href="/docs/cloud_code_guide#functions">cloud functions</a>.
@@ -66,96 +69,12 @@ export var run = function(
   );
 }
 
-var ExecutedFunctions = {};
-
-export function get(object, options) {
-	var next = object[options.name];
-  if (!next)
-  	return {};
-
-  if (options.grouping)
-  	next = next[options.grouping];
-  else
-  	next = next[JSON.stringify(options.data)];
-
-  return next || {};
+run.cache = function() {
+	return cacheHelper.cache(run, ...arguments);
 }
 
-export function set(object, options, value) {
-	var object = {...object};
-	var next = object[options.name];
-
-	if (next)
-		next = {...next};
-  else
-  	next = {};
-
-  object[options.name] = next;
-
-  var key;
-  if (options.grouping)
-  	key = options.grouping;
-  else
-  	key = JSON.stringify(options.data);
-  	
-	next[key] = value;
-
-  return object;
-}
-
-run.cache = function(
-  name: string,
-  data = {}: mixed,
-  options: { [key: string]: mixed }
-) {
-	var functionState = Store.getState().Parse.Cloud;
-	var state = get(functionState, {name, data});
-
-	if (state.pending)
-		return get(ExecutedFunctions, {name, data});
-
-	if (state.cache)
-		return Parse.Promise.as(state.cache);
-
-	return run.refresh(...arguments);
-}
-
-run.refresh = function(
-  name: string,
-  data = {}: mixed,
-  options: { [key: string]: mixed }
-) {
-	Store.dispatch(Actions.setPending({name, data}));
-
-	var done = run(...arguments).then(function(result) {
-		Store.dispatch(Actions.saveResult({name, data, result}));
-		
-		return Parse.Promise.as(result);
-	}).fail(function(err) {
-		Store.dispatch(Actions.unsetPending({name, data}));
-
-		return Parse.Promise.error(err);
-	});
-
-	ExecutedFunctions = set(ExecutedFunctions, {name, data}, done);
-
-	return done;
-}
-
-function _operateOnArray(params, operation) {
-	var {name, data, grouping, options} = params;
-
-	Store.dispatch(Actions.setPending({name, data, grouping}));
-
-	return run(name, data, options).then(function(result) {
-		Store.dispatch(Actions[operation]({name, data, grouping, result}));
-
-		return Parse.Promise.as(result);
-	}).fail(function(err) {
-		Store.dispatch(Actions.unsetPending({name, data, grouping}));
-
-		return Parse.Promise.error(err);
-	});
+run.refresh = function() {
+	return cacheHelper.refresh(run, ...arguments);
 }
 
 run.append = function(
@@ -164,7 +83,7 @@ run.append = function(
   grouping: string,
   options: { [key: string]: mixed }
 ) {
-	return _operateOnArray({name, data, grouping, options}, 'appendResult');
+	return cacheHelper.append(run, {name, data, grouping, options});
 }
 
 run.prepend = function(
@@ -173,17 +92,11 @@ run.prepend = function(
   grouping: string,
   options: { [key: string]: mixed }
 ) {
-	return _operateOnArray({name, data, grouping, options}, 'prependResult');
+	return cacheHelper.prepend(run, {name, data, grouping, options});
 }
 
-run.isPending = function(
-  name: string,
-  data = {}: mixed
-) {
-	var functionState = Store.getState().Parse.Cloud;
-	var state = get(functionState, {name, data});
-
-	return state.pending;
+run.isPending = function() {
+	return cacheHelper.isPending(run, ...arguments);
 }
 
 var DefaultController = {
