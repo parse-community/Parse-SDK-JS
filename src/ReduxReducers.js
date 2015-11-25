@@ -164,10 +164,6 @@ const Objects = {
 	}
 }
 
-const Queries = {
-
-}
-
 const Cloud = {
 	SET_PENDING(state, payload) {
 		var value = get(state, payload);
@@ -238,8 +234,10 @@ function createReducers(reducers) {
 	return combineReducers(out);
 }
 
+const Query = Cloud;
+
 export default createReducers({
 	'Object': Objects,
 	Cloud,
-	Queries
+	Query
 });

@@ -40,11 +40,7 @@ export const ObjectActions = generateActions([
 	'_setExisted',
 ], 'Parse/Object');
 
-export const QueryActions = {
-
-}
-
-export const FunctionActions = generateActions([
+var _functionActions = [
 	'setPending',
 	'unsetPending',
 	'saveResult',
@@ -60,4 +56,8 @@ export const FunctionActions = generateActions([
 
 		return {type, payload};
 	}}
-], 'Parse/Cloud');
+];
+
+export const FunctionActions = generateActions(_functionActions, 'Parse/Cloud');
+export const QueryActions = generateActions(_functionActions, 'Parse/Query');
+

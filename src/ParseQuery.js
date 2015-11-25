@@ -18,6 +18,9 @@ import ParsePromise from './ParsePromise';
 
 import type { RequestOptions, FullOptions } from './RESTController';
 
+import * as Store from './ReduxStore';
+import { QueryActions as Actions } from './ReduxActionCreators';
+import { get, set } from './Cloud';
 export type WhereClause = {
   [attr: string]: mixed;
 };
@@ -41,6 +44,8 @@ export type QueryJSON = {
 function quote(s: string) {
   return '\\Q' + s.replace('\\E', '\\E\\\\E\\Q') + '\\E';
 }
+
+var ExecutedQueries = {};
 
 /**
  * Creates a new parse Parse.Query for the given Parse.Object subclass.
@@ -259,30 +264,81 @@ export default class ParseQuery {
    * @return {Parse.Promise} A promise that is resolved with the results when
    * the query completes.
    */
-  find(options?: FullOptions): ParsePromise {
-    options = options || {};
 
-    var findOptions = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      findOptions.useMasterKey = options.useMasterKey;
-    }
-    if (options.hasOwnProperty('sessionToken')) {
-      findOptions.sessionToken = options.sessionToken;
-    }
+  get find() {
+  	var _find = (function(options?: FullOptions): ParsePromise {
+	    options = options || {};
 
-    var controller = CoreManager.getQueryController();
+	    var findOptions = {};
+	    if (options.hasOwnProperty('useMasterKey')) {
+	      findOptions.useMasterKey = options.useMasterKey;
+	    }
+	    if (options.hasOwnProperty('sessionToken')) {
+	      findOptions.sessionToken = options.sessionToken;
+	    }
 
-    return controller.find(
-      this.className,
-      this.toJSON(),
-      findOptions
-    ).then((response) => {
-      return response.results.map((data) => {
-        data.className = this.className;
-        return ParseObject.fromJSON(data);
-      });
-    })._thenRunCallbacks(options);
+	    var controller = CoreManager.getQueryController();
+
+	    return controller.find(
+	      this.className,
+	      this.toJSON(),
+	      findOptions
+	    ).then((response) => {
+	      return response.results.map((data) => {
+	        data.className = this.className;
+	        return ParseObject.fromJSON(data);
+	      });
+	    })._thenRunCallbacks(options);
+	  }).bind(this);
+
+	  _find.refresh = (function() {
+	  	var name = this.className;
+	  	var data = this;
+
+	  	Store.dispatch(Actions.setPending({name, data}));
+
+			var done = _find(...arguments).then(function(result) {
+				Store.dispatch(Actions.saveResult({name, data, result}));
+				
+				return Parse.Promise.as(result);
+			}).fail(function(err) {
+				Store.dispatch(Actions.unsetPending({name, data}));
+
+				return Parse.Promise.error(err);
+			});
+
+			ExecutedQueries = set(ExecutedQueries, {name, data}, done);
+
+			return done;
+	  }).bind(this);
+
+	  _find.cache = (function() {
+	  	var name = this.className;
+	  	var data = this;
+
+	  	var functionState = Store.getState().Parse.Query;
+			var state = get(functionState, {name, data});
+
+			if (state.pending)
+				return get(ExecutedQueries, {name, data});
+
+			if (state.cache)
+				return Parse.Promise.as(state.cache);
+
+			return _find.refresh(...arguments);
+	  }).bind(this);
+
+	  _find.append = (function() {
+
+	  }).bind(this);
+
+	  _find.prepend = (function() {
+
+	  }).bind(this);
+
+	  return _find;
   }
+  
 
   /**
    * Counts the number of objects that match this query.
