@@ -20,6 +20,7 @@ jest.dontMock('redux');
 jest.dontMock('../ReduxActionCreators');
 jest.dontMock('../ReduxStore');
 jest.dontMock('../ReduxReducers');
+jest.dontMock('../ReduxCacheHelper');
 
 var mockObject = function() {};
 mockObject.registerSubclass = function() {};

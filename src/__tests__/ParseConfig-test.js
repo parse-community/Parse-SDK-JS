@@ -20,6 +20,8 @@ jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
 jest.dontMock('./test_helpers/asyncHelper');
 
+jest.dontMock('../ReduxCacheHelper');
+
 var CoreManager = require('../CoreManager');
 var ParseConfig = require('../ParseConfig');
 var ParseGeoPoint = require('../ParseGeoPoint');

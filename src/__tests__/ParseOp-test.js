@@ -12,6 +12,8 @@ jest.dontMock('../encode');
 jest.dontMock('../ParseOp');
 jest.dontMock('../unique');
 
+jest.dontMock('../ReduxCacheHelper');
+
 var localCount = 0;
 var mockObject = function(className, id) {
   this.className = className;

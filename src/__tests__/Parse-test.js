@@ -10,6 +10,8 @@
 jest.dontMock('../CoreManager');
 jest.dontMock('../Parse');
 
+jest.dontMock('../ReduxCacheHelper');
+
 var CoreManager = require('../CoreManager');
 var Parse = require('../Parse');
 

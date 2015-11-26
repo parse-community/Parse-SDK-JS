@@ -18,6 +18,7 @@ jest.dontMock('redux');
 jest.dontMock('../ReduxActionCreators');
 jest.dontMock('../ReduxStore');
 jest.dontMock('../ReduxReducers');
+jest.dontMock('../ReduxCacheHelper');
 
 var ParseACL = require('../ParseACL');
 var ParseError = require('../ParseError');

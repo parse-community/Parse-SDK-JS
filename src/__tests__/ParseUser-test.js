@@ -31,6 +31,7 @@ jest.dontMock('redux');
 jest.dontMock('../ReduxActionCreators');
 jest.dontMock('../ReduxStore');
 jest.dontMock('../ReduxReducers');
+jest.dontMock('../ReduxCacheHelper');
 
 var CoreManager = require('../CoreManager');
 var ParseObject = require('../ParseObject');

@@ -11,6 +11,8 @@ jest.dontMock('../decode');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 
+jest.dontMock('../ReduxCacheHelper');
+
 var decode = require('../decode');
 
 var ParseFile = require('../ParseFile');

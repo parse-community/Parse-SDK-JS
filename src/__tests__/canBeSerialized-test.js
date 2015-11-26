@@ -9,6 +9,8 @@
 
 jest.dontMock('../canBeSerialized');
 
+jest.dontMock('../ReduxCacheHelper');
+
 function mockObject(id, attributes) {
   this.id = id;
   this.attributes = attributes;
