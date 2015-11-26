@@ -14,6 +14,9 @@ import InstallationController from './InstallationController';
 import * as ParseOp from './ParseOp';
 import RESTController from './RESTController';
 
+import * as Store from './ReduxStore';
+import parseReducer from './ReduxReducers'
+
 /**
  * Contains all Parse API classes and functions.
  * @class Parse
@@ -126,6 +129,14 @@ Parse._encode = function(value, _, disallowObjects) {
 }
 Parse._getInstallationId = function() {
   return CoreManager.getInstallationController().currentInstallationId();
+}
+
+// redux
+Parse.setStore = function() {
+	Store.set(...arguments);
+}
+Parse.getReducer = function() {
+	return parseReducer;
 }
 
 CoreManager.setInstallationController(InstallationController);

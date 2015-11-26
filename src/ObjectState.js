@@ -9,13 +9,12 @@
  * @flow
  */
 
-import encode from './encode';
-import ParseFile from './ParseFile';
-import ParseObject from './ParseObject';
 import ParsePromise from './ParsePromise';
-import ParseRelation from './ParseRelation';
 import TaskQueue from './TaskQueue';
 import { RelationOp } from './ParseOp';
+
+import * as Store from './ReduxStore';
+import { ObjectActions as Actions } from './ReduxActionCreators';
 
 import type { Op } from './ParseOp';
 
@@ -27,17 +26,12 @@ type State = {
   serverData: AttributeMap;
   pendingOps: Array<OpsMap>;
   objectCache: ObjectCache;
-  tasks: TaskQueue;
+  // tasks: TaskQueue;
   existed: boolean
 };
 
-var objectState: {
-  [className: string]: {
-    [id: string]: State
-  }
-} = {};
-
 export function getState(className: string, id: string): ?State {
+	var objectState = Store.getState().Parse.Object;
   var classData = objectState[className];
   if (classData) {
     return classData[id] || null;
@@ -46,33 +40,23 @@ export function getState(className: string, id: string): ?State {
 }
 
 export function initializeState(className: string, id: string, initial?: State): State {
-  var state = getState(className, id);
+	var state = getState(className, id);
   if (state) {
     return state;
   }
-  if (!objectState[className]) {
-    objectState[className] = {};
-  }
-  if (!initial) {
-    initial = {
-      serverData: {},
-      pendingOps: [{}],
-      objectCache: {},
-      tasks: new TaskQueue(),
-      existed: false
-    };
-  }
-  state = objectState[className][id] = initial;
-  return state;
+
+	Store.dispatch(Actions.initializeState({className, id, initial}));
+	return getState(...arguments);
 }
 
 export function removeState(className: string, id: string): ?State {
-  var state = getState(className, id);
+	var state = getState(className, id);
   if (state === null) {
     return null;
   }
-  delete objectState[className][id];
-  return state;
+
+	Store.dispatch(Actions.removeState({className, id}));
+	return state;
 }
 
 export function getServerData(className: string, id: string): AttributeMap {
@@ -84,14 +68,9 @@ export function getServerData(className: string, id: string): AttributeMap {
 }
 
 export function setServerData(className: string, id: string, attributes: AttributeMap) {
-  var data = initializeState(className, id).serverData;
-  for (var attr in attributes) {
-    if (typeof attributes[attr] !== 'undefined') {
-      data[attr] = attributes[attr];
-    } else {
-      delete data[attr];
-    }
-  }
+  initializeState(className, id).serverData;
+  Store.dispatch(Actions.setServerData({className, id, attributes}));
+	return getState(...arguments);
 }
 
 export function getPendingOps(className: string, id: string): Array<OpsMap> {
@@ -103,43 +82,23 @@ export function getPendingOps(className: string, id: string): Array<OpsMap> {
 }
 
 export function setPendingOp(className: string, id: string, attr: string, op: ?Op) {
-  var pending = initializeState(className, id).pendingOps;
-  var last = pending.length - 1;
-  if (op) {
-    pending[last][attr] = op;
-  } else {
-    delete pending[last][attr];
-  }
+  initializeState(className, id);
+  Store.dispatch(Actions.setPendingOp({className, id, attr, op}));
 }
 
 export function pushPendingState(className: string, id: string) {
-  var pending = initializeState(className, id).pendingOps;
-  pending.push({});
+	initializeState(className, id);
+  Store.dispatch(Actions.pushPendingState({className, id}));
 }
 
 export function popPendingState(className: string, id: string): OpsMap {
-  var pending = initializeState(className, id).pendingOps;
-  var first = pending.shift();
-  if (!pending.length) {
-    pending[0] = {};
-  }
+  var first = initializeState(className, id).pendingOps[0];
+  Store.dispatch(Actions.popPendingState({className, id}));
   return first;
 }
 
 export function mergeFirstPendingState(className: string, id: string) {
-  var first = popPendingState(className, id);
-  var pending = getPendingOps(className, id);
-  var next = pending[0];
-  for (var attr in first) {
-    if (next[attr] && first[attr]) {
-      var merged = next[attr].mergeWith(first[attr]);
-      if (merged) {
-        next[attr] = merged;
-      }
-    } else {
-      next[attr] = first[attr];
-    }
-  }
+	Store.dispatch(Actions.mergeFirstPendingState({className, id}));
 }
 
 export function getObjectCache(className: string, id: string): ObjectCache {
@@ -195,27 +154,25 @@ export function estimateAttributes(className: string, id: string): AttributeMap 
 }
 
 export function commitServerChanges(className: string, id: string, changes: AttributeMap) {
-  var state = initializeState(className, id);
-  for (var attr in changes) {
-    var val = changes[attr];
-    state.serverData[attr] = val;
-    if (val &&
-      typeof val === 'object' &&
-      !(val instanceof ParseObject) &&
-      !(val instanceof ParseFile) &&
-      !(val instanceof ParseRelation)
-    ) {
-      var json = encode(val, false, true);
-      state.objectCache[attr] = JSON.stringify(json);
-    }
-  }
+	initializeState(className, id);
+  Store.dispatch(Actions.commitServerChanges({className, id, changes}));
 }
 
+var QueueMap = {};
 export function enqueueTask(className: string, id: string, task: () => ParsePromise) {
-  var state = initializeState(className, id);
-  return state.tasks.enqueue(task);
+  initializeState(className, id);
+  if (!QueueMap[className])
+		QueueMap[className] = {};
+	if (!QueueMap[className][id])
+		QueueMap[className][id] = new TaskQueue();
+
+  return QueueMap[className][id].enqueue(task);
 }
 
 export function _clearAllState() {
-  objectState = {};
+	Store.dispatch(Actions._clearAllState());
+}
+
+export function _setExisted(className: string, id: string, existed: boolean) {
+	Store.dispatch(Actions._setExisted({className, id, existed}));
 }

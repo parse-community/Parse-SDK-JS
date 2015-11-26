@@ -9,6 +9,8 @@
 
 jest.dontMock('../ParseACL');
 
+jest.dontMock('../ReduxCacheHelper');
+
 var mockRole = function(name) {
   this.name = name;
 };

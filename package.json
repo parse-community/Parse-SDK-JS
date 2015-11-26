@@ -1,19 +1,21 @@
 {
-  "name": "parse",
-  "version": "1.6.9",
+  "name": "parse-redux",
+  "version": "0.0.4",
   "description": "The Parse JavaScript SDK",
-  "homepage": "https://www.parse.com",
+  "homepage": "https://github.com/chrbala/Parse-Redux",
   "keywords": [
     "cloud",
     "mobile",
-    "api"
+    "api",
+    "redux",
+    "flux"
   ],
   "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ParsePlatform/Parse-SDK-JS"
+    "url": "https://github.com/chrbala/Parse-Redux"
   },
-  "bugs": "https://github.com/ParsePlatform/Parse-SDK-JS/issues",
+  "bugs": "https://github.com/chrbala/Parse-Redux/issues",
   "files": [
     "index.js",
     "node.js",
@@ -29,6 +31,7 @@
   },
   "dependencies": {
     "babel-runtime": "^5.8.20",
+    "redux": "3.0.4",
     "xmlhttprequest": "^1.7.0"
   },
   "devDependencies": {
@@ -51,7 +54,8 @@
   "scripts": {
     "build": "./build_releases.sh",
     "release": "./build_releases.sh && npm publish",
-    "test": "PARSE_BUILD=node jest"
+    "test": "PARSE_BUILD=node jest",
+    "browser": "PARSE_BUILD=browser gulp compile"
   },
   "jest": {
     "collectCoverage": true,

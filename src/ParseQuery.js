@@ -18,6 +18,12 @@ import ParsePromise from './ParsePromise';
 
 import type { RequestOptions, FullOptions } from './RESTController';
 
+import * as Store from './ReduxStore';
+import { QueryActions as Actions } from './ReduxActionCreators';
+
+import CacheHelper, { getItemState } from './ReduxCacheHelper';
+var cacheHelper = new CacheHelper({Actions, namespace: "Query"});
+
 export type WhereClause = {
   [attr: string]: mixed;
 };
@@ -41,6 +47,8 @@ export type QueryJSON = {
 function quote(s: string) {
   return '\\Q' + s.replace('\\E', '\\E\\\\E\\Q') + '\\E';
 }
+
+var ExecutedQueries = {};
 
 /**
  * Creates a new parse Parse.Query for the given Parse.Object subclass.
@@ -259,30 +267,58 @@ export default class ParseQuery {
    * @return {Parse.Promise} A promise that is resolved with the results when
    * the query completes.
    */
-  find(options?: FullOptions): ParsePromise {
-    options = options || {};
 
-    var findOptions = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      findOptions.useMasterKey = options.useMasterKey;
-    }
-    if (options.hasOwnProperty('sessionToken')) {
-      findOptions.sessionToken = options.sessionToken;
-    }
+  get find() {
+  	var _find = (function(options?: FullOptions): ParsePromise {
+	    options = options || {};
 
-    var controller = CoreManager.getQueryController();
+	    var findOptions = {};
+	    if (options.hasOwnProperty('useMasterKey')) {
+	      findOptions.useMasterKey = options.useMasterKey;
+	    }
+	    if (options.hasOwnProperty('sessionToken')) {
+	      findOptions.sessionToken = options.sessionToken;
+	    }
 
-    return controller.find(
-      this.className,
-      this.toJSON(),
-      findOptions
-    ).then((response) => {
-      return response.results.map((data) => {
-        data.className = this.className;
-        return ParseObject.fromJSON(data);
-      });
-    })._thenRunCallbacks(options);
+	    var controller = CoreManager.getQueryController();
+
+	    return controller.find(
+	      this.className,
+	      this.toJSON(),
+	      findOptions
+	    ).then((response) => {
+	      return response.results.map((data) => {
+	        data.className = this.className;
+	        return ParseObject.fromJSON(data);
+	      });
+	    })._thenRunCallbacks(options);
+	  }).bind(this);
+
+	  _find.refresh = (function() {
+	  	return cacheHelper.refresh(_find, this.className, this);
+	  }).bind(this);
+
+	  _find.cache = (function() {
+	  	return cacheHelper.cache(_find, this.className, this);
+	  }).bind(this);
+
+	  _find.append = (function(grouping, options) {
+	  	var name = this.className;
+	  	var data = this;
+
+	  	return cacheHelper.append(_find, {name, data, grouping, options});
+	  }).bind(this);
+
+	  _find.prepend = (function(grouping, options) {
+	  	var name = this.className;
+	  	var data = this;
+
+	  	return cacheHelper.prepend(_find, {name, data, grouping, options});
+	  }).bind(this);
+
+	  return _find;
   }
+  
 
   /**
    * Counts the number of objects that match this query.

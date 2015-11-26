@@ -15,6 +15,12 @@ import encode from './encode';
 import ParseError from './ParseError';
 import ParsePromise from './ParsePromise';
 
+import * as Store from './ReduxStore';
+import { FunctionActions as Actions } from './ReduxActionCreators';
+
+import CacheHelper from './ReduxCacheHelper';
+var cacheHelper = new CacheHelper({Actions, namespace: "Cloud"});
+
 /**
  * Contains functions for calling and declaring
  * <a href="/docs/cloud_code_guide#functions">cloud functions</a>.
@@ -39,7 +45,7 @@ import ParsePromise from './ParsePromise';
   * @return {Parse.Promise} A promise that will be resolved with the result
   * of the function.
   */
-export function run(
+export var run = function(
   name: string,
   data: mixed,
   options: { [key: string]: mixed }
@@ -61,6 +67,36 @@ export function run(
   return (
     CoreManager.getCloudController().run(name, data, requestOptions)._thenRunCallbacks(options)
   );
+}
+
+run.cache = function() {
+	return cacheHelper.cache(run, ...arguments);
+}
+
+run.refresh = function() {
+	return cacheHelper.refresh(run, ...arguments);
+}
+
+run.append = function(
+  name: string,
+  data = {}: mixed,
+  grouping: string,
+  options: { [key: string]: mixed }
+) {
+	return cacheHelper.append(run, {name, data, grouping, options});
+}
+
+run.prepend = function(
+  name: string,
+  data = {}: mixed,
+  grouping: string,
+  options: { [key: string]: mixed }
+) {
+	return cacheHelper.prepend(run, {name, data, grouping, options});
+}
+
+run.isPending = function() {
+	return cacheHelper.isPending(run, ...arguments);
 }
 
 var DefaultController = {

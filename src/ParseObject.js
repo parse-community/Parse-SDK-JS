@@ -301,10 +301,7 @@ export default class ParseObject {
   }
 
   _setExisted(existed: boolean) {
-    var state = ObjectState.getState(this.className, this._getStateIdentifier());
-    if (state) {
-      state.existed = existed;
-    }
+    ObjectState._setExisted(this.className, this._getStateIdentifier(), existed);
   }
 
   _migrateId(serverId: string) {
