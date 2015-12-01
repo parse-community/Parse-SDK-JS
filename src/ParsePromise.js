@@ -283,7 +283,7 @@ export default class ParsePromise {
    */
   static is(promise) {
     return (
-      typeof promise !== 'undefined' &&
+      promise != null &&
       typeof promise.then === 'function'
     );
   }
