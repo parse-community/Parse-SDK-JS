@@ -142,7 +142,7 @@ describe('RESTController', () => {
       _method: 'GET',
       _ApplicationId: 'A',
       _JavaScriptKey: 'B',
-      _ClientVersion: 'jsV',
+      _ClientVersion: 'V',
       _InstallationId: 'iid',
       _SessionToken: '1234',
     });

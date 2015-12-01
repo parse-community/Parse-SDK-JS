@@ -158,7 +158,7 @@ var RESTController = {
 
     payload._ApplicationId = CoreManager.get('APPLICATION_ID');
     payload._JavaScriptKey = CoreManager.get('JAVASCRIPT_KEY');
-    payload._ClientVersion = 'js' + CoreManager.get('VERSION');
+    payload._ClientVersion = CoreManager.get('VERSION');
 
     var useMasterKey = options.useMasterKey;
     if (typeof useMasterKey === 'undefined') {
