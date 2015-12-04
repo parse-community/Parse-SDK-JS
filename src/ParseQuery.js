@@ -46,8 +46,7 @@ function quote(s: string) {
  * Creates a new parse Parse.Query for the given Parse.Object subclass.
  * @class Parse.Query
  * @constructor
- * @param objectClass -
- *   An instance of a subclass of Parse.Object, or a Parse className string.
+ * @param {} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
  *
  * <p>Parse.Query defines a query that is used to fetch Parse.Objects. The
  * most common use case is finding all objects that match a query through the
