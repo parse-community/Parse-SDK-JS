@@ -139,7 +139,10 @@ var RESTController = {
   request(method: string, path: string, data: mixed, options?: RequestOptions) {
     options = options || {};
     var url = CoreManager.get('SERVER_URL');
-    url += '/1/' + path;
+    if (url[url.length - 1] !== '/') {
+      url += '/';
+    }
+    url += path;
 
     var payload = {};
     if (data && typeof data === 'object') {
@@ -155,7 +158,7 @@ var RESTController = {
 
     payload._ApplicationId = CoreManager.get('APPLICATION_ID');
     payload._JavaScriptKey = CoreManager.get('JAVASCRIPT_KEY');
-    payload._ClientVersion = 'js' + CoreManager.get('VERSION');
+    payload._ClientVersion = CoreManager.get('VERSION');
 
     var useMasterKey = options.useMasterKey;
     if (typeof useMasterKey === 'undefined') {

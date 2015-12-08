@@ -694,10 +694,11 @@ export default class ParseUser extends ParseObject {
   static _registerAuthenticationProvider(provider) {
     authProviders[provider.getAuthType()] = provider;
     // Synchronize the current user with the auth provider.
-    var current = ParseUser.current();
-    if (current) {
-      current._synchronizeAuthData(provider.getAuthType());
-    }
+    ParseUser.currentAsync().then((current) => {
+      if (current) {
+        current._synchronizeAuthData(provider.getAuthType());
+      }
+    });
   }
 
   static _logInWith(provider, options) {

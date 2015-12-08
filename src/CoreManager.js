@@ -92,8 +92,8 @@ var config: { [key: string]: mixed } = {
             !!process.versions &&
             !!process.versions.node),
   REQUEST_ATTEMPT_LIMIT: 5,
-  SERVER_URL: 'https://api.parse.com',
-  VERSION: require('../package.json').version,
+  SERVER_URL: 'https://api.parse.com/1',
+  VERSION: 'js' + require('../package.json').version,
   APPLICATION_ID: null,
   JAVASCRIPT_KEY: null,
   MASTER_KEY: null,

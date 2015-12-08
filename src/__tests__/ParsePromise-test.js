@@ -422,4 +422,13 @@ describe('Promise', () => {
       expect(error).toBe('hello');
     });
   });
+
+  it('can check if an object is a thenable promise', () => {
+    expect(ParsePromise.is(null)).toBe(false);
+    expect(ParsePromise.is(void(0))).toBe(false);
+    expect(ParsePromise.is('a string')).toBe(false);
+    expect(ParsePromise.is({})).toBe(false);
+    expect(ParsePromise.is(ParsePromise.as())).toBe(true);
+    expect(ParsePromise.is(ParsePromise.error())).toBe(true);
+  })
 });
