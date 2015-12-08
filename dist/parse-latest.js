@@ -1,5 +1,5 @@
 /**
- * Parse JavaScript SDK v1.6.8
+ * Parse JavaScript SDK v1.6.9
  *
  * The source tree of this library can be found at
  *   https://github.com/ParsePlatform/Parse-SDK-JS
@@ -221,7 +221,7 @@ var config = {
   IS_NODE: typeof process !== 'undefined' && !!process.versions && !!process.versions.node,
   REQUEST_ATTEMPT_LIMIT: 5,
   SERVER_URL: 'https://api.parse.com',
-  VERSION: '1.6.8',
+  VERSION: '1.6.9',
   APPLICATION_ID: null,
   JAVASCRIPT_KEY: null,
   MASTER_KEY: null,
@@ -2907,10 +2907,11 @@ var singleInstance = !_CoreManager2['default'].get('IS_NODE');
  * @constructor
  * @param {String} className The class name for the object
  * @param {Object} attributes The initial set of data to store in the object.
+ * @param {Object} options The options for this object instance.
  */
 
 var ParseObject = (function () {
-  function ParseObject(className, attributes) {
+  function ParseObject(className, attributes, options) {
     _classCallCheck(this, ParseObject);
 
     var toSet = null;
@@ -2928,8 +2929,11 @@ var ParseObject = (function () {
           toSet[attr] = className[attr];
         }
       }
+      if (attributes && typeof attributes === 'object') {
+        options = attributes;
+      }
     }
-    if (toSet && !this.set(toSet)) {
+    if (toSet && !this.set(toSet, options)) {
       throw new Error('Can\'t create an invalid Parse Object');
     }
     // Enable legacy initializers
@@ -3152,10 +3156,7 @@ var ParseObject = (function () {
     key: '_handleSaveError',
     value: function _handleSaveError() {
       var pending = this._getPendingOps();
-      if (pending.length > 2) {
-        // There are more saves on the queue
-        ObjectState.mergeFirstPendingState(this.className, this._getStateIdentifier());
-      }
+      ObjectState.mergeFirstPendingState(this.className, this._getStateIdentifier());
     }
 
     /** Public methods **/
@@ -3439,12 +3440,14 @@ var ParseObject = (function () {
       }
 
       // Validate changes
-      var validation = this.validate(newValues);
-      if (validation) {
-        if (typeof options.error === 'function') {
-          options.error(this, validation);
+      if (!options.ignoreValidation) {
+        var validation = this.validate(newValues);
+        if (validation) {
+          if (typeof options.error === 'function') {
+            options.error(this, validation);
+          }
+          return false;
         }
-        return false;
       }
 
       // Consolidate Ops
@@ -4224,11 +4227,11 @@ var ParseObject = (function () {
       } else if (classMap[adjustedClassName]) {
         parentProto = classMap[adjustedClassName].prototype;
       }
-      var ParseObjectSubclass = function ParseObjectSubclass(attributes) {
+      var ParseObjectSubclass = function ParseObjectSubclass(attributes, options) {
         this.className = adjustedClassName;
         this._objCount = objectCount++;
         if (attributes && typeof attributes === 'object') {
-          if (!this.set(attributes || {})) {
+          if (!this.set(attributes || {}, options)) {
             throw new Error('Can\'t create an invalid Parse Object');
           }
         }
@@ -5521,8 +5524,9 @@ var ParsePromise = (function () {
     /**
      * Returns a new promise that is fulfilled when all of the input promises
      * are resolved. If any promise in the list fails, then the returned promise
-     * will fail with the last error. If they all succeed, then the returned
-     * promise will succeed, with the results being the results of all the input
+     * will be rejected with an array containing the error from each promise.
+     * If they all succeed, then the returned promise will succeed, with the
+     * results being the results of all the input
      * promises. For example: <pre>
      *   var p1 = Parse.Promise.as(1);
      *   var p2 = Parse.Promise.as(2);
@@ -7759,6 +7763,48 @@ var ParseUser = (function (_ParseObject) {
       var controller = _CoreManager2['default'].getUserController();
       return controller.logIn(this, loginOptions)._thenRunCallbacks(options, this);
     }
+
+    /**
+     * Wrap the default save behavior with functionality to save to local
+     * storage if this is current user.
+     */
+  }, {
+    key: 'save',
+    value: function save() {
+      var _this3 = this;
+
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return _get(Object.getPrototypeOf(ParseUser.prototype), 'save', this).apply(this, args).then(function () {
+        if (_this3.isCurrent()) {
+          return _CoreManager2['default'].getUserController().updateUserOnDisk(_this3);
+        }
+        return _this3;
+      });
+    }
+
+    /**
+     * Wrap the default fetch behavior with functionality to save to local
+     * storage if this is current user.
+     */
+  }, {
+    key: 'fetch',
+    value: function fetch() {
+      var _this4 = this;
+
+      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+
+      return _get(Object.getPrototypeOf(ParseUser.prototype), 'fetch', this).apply(this, args).then(function () {
+        if (_this4.isCurrent()) {
+          return _CoreManager2['default'].getUserController().updateUserOnDisk(_this4);
+        }
+        return _this4;
+      });
+    }
   }], [{
     key: 'readOnlyAttributes',
     value: function readOnlyAttributes() {
@@ -8080,16 +8126,20 @@ exports['default'] = ParseUser;
 _ParseObject3['default'].registerSubclass('_User', ParseUser);
 
 var DefaultController = {
-  setCurrentUser: function setCurrentUser(user) {
-    currentUserCache = user;
-    user._cleanupAuthData();
-    user._synchronizeAllAuthData();
+  updateUserOnDisk: function updateUserOnDisk(user) {
     var path = _Storage2['default'].generatePath(CURRENT_USER_KEY);
     var json = user.toJSON();
     json.className = '_User';
     return _Storage2['default'].setItemAsync(path, JSON.stringify(json)).then(function () {
       return user;
     });
+  },
+
+  setCurrentUser: function setCurrentUser(user) {
+    currentUserCache = user;
+    user._cleanupAuthData();
+    user._synchronizeAllAuthData();
+    return DefaultController.updateUserOnDisk(user);
   },
 
   currentUser: function currentUser() {
@@ -8225,7 +8275,7 @@ var DefaultController = {
       if (currentUser !== null) {
         var currentSession = currentUser.getSessionToken();
         if (currentSession && (0, _isRevocableSession2['default'])(currentSession)) {
-          promise.then(function () {
+          promise = promise.then(function () {
             return RESTController.request('POST', 'logout', {}, { sessionToken: currentSession });
           });
         }
