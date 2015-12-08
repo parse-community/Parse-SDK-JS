@@ -1,5 +1,5 @@
 /**
- * Parse JavaScript SDK v1.6.6
+ * Parse JavaScript SDK v1.6.8
  *
  * The source tree of this library can be found at
  *   https://github.com/ParsePlatform/Parse-SDK-JS
@@ -165,9 +165,15 @@ function run(name, data, options) {
     throw new TypeError('Cloud function name must be a string.');
   }
 
-  return _CoreManager2['default'].getCloudController().run(name, data, {
-    useMasterKey: options.useMasterKey
-  })._thenRunCallbacks(options);
+  var requestOptions = {};
+  if (options.useMasterKey) {
+    requestOptions.useMasterKey = options.useMasterKey;
+  }
+  if (options.sessionToken) {
+    requestOptions.sessionToken = options.sessionToken;
+  }
+
+  return _CoreManager2['default'].getCloudController().run(name, data, requestOptions)._thenRunCallbacks(options);
 }
 
 _CoreManager2['default'].setCloudController({
@@ -176,7 +182,15 @@ _CoreManager2['default'].setCloudController({
 
     var payload = (0, _encode2['default'])(data, true);
 
-    var request = RESTController.request('POST', 'functions/' + name, payload, { useMasterKey: !!options.useMasterKey });
+    var requestOptions = {};
+    if (options.hasOwnProperty('useMasterKey')) {
+      requestOptions.useMasterKey = options.useMasterKey;
+    }
+    if (options.hasOwnProperty('sessionToken')) {
+      requestOptions.sessionToken = options.sessionToken;
+    }
+
+    var request = RESTController.request('POST', 'functions/' + name, payload, requestOptions);
 
     return request.then(function (res) {
       var decoded = (0, _decode2['default'])(res);
@@ -207,7 +221,7 @@ var config = {
   IS_NODE: typeof process !== 'undefined' && !!process.versions && !!process.versions.node,
   REQUEST_ATTEMPT_LIMIT: 5,
   SERVER_URL: 'https://api.parse.com',
-  VERSION: '1.6.6',
+  VERSION: '1.6.8',
   APPLICATION_ID: null,
   JAVASCRIPT_KEY: null,
   MASTER_KEY: null,
@@ -696,7 +710,7 @@ var iidCache = null;
 
 function hexOctet() {
   return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-};
+}
 
 function generateId() {
   return hexOctet() + hexOctet() + '-' + hexOctet() + '-' + hexOctet() + '-' + hexOctet() + '-' + hexOctet() + hexOctet() + hexOctet();
@@ -3014,8 +3028,8 @@ var ParseObject = (function () {
     }
   }, {
     key: '_toFullJSON',
-    value: function _toFullJSON() {
-      var json = this.toJSON();
+    value: function _toFullJSON(seen) {
+      var json = this.toJSON(seen);
       json.__type = 'Object';
       json.className = this.className;
       return json;
@@ -3159,15 +3173,16 @@ var ParseObject = (function () {
 
   }, {
     key: 'toJSON',
-    value: function toJSON() {
+    value: function toJSON(seen) {
       var seenEntry = this.id ? this.className + ':' + this.id : this;
+      var seen = seen || [seenEntry];
       var json = {};
       var attrs = this.attributes;
       for (var attr in attrs) {
         if ((attr === 'createdAt' || attr === 'updatedAt') && attrs[attr].toJSON) {
           json[attr] = attrs[attr].toJSON();
         } else {
-          json[attr] = (0, _encode2['default'])(attrs[attr], false, false, [seenEntry]);
+          json[attr] = (0, _encode2['default'])(attrs[attr], false, false, seen);
         }
       }
       var pending = this._getPendingOps();
@@ -5136,6 +5151,7 @@ var RelationOp = (function (_Op7) {
 
 exports.RelationOp = RelationOp;
 },{"./ParseObject":14,"./ParseRelation":18,"./arrayContainsObject":27,"./decode":29,"./encode":30,"./unique":35,"babel-runtime/helpers/class-call-check":43,"babel-runtime/helpers/create-class":44,"babel-runtime/helpers/get":45,"babel-runtime/helpers/inherits":46,"babel-runtime/helpers/interop-require-default":47}],16:[function(_dereq_,module,exports){
+(function (process){
 /**
  * Copyright (c) 2015-present, Parse, LLC.
  * All rights reserved.
@@ -5145,8 +5161,6 @@ exports.RelationOp = RelationOp;
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-// We may want to expose this value at a later time, so that Promises/A+ style
-// can be employed instead
 'use strict';
 
 var _createClass = _dereq_('babel-runtime/helpers/create-class')['default'];
@@ -5265,7 +5279,15 @@ var ParsePromise = (function () {
         }
 
         if (typeof resolvedCallback === 'function') {
-          results = [resolvedCallback.apply(this, results)];
+          if (_isPromisesAPlusCompliant) {
+            try {
+              results = [resolvedCallback.apply(this, results)];
+            } catch (e) {
+              results = [ParsePromise.error(e)];
+            }
+          } else {
+            results = [resolvedCallback.apply(this, results)];
+          }
         }
         if (results.length === 1 && ParsePromise.is(results[0])) {
           results[0].then(function () {
@@ -5281,8 +5303,15 @@ var ParsePromise = (function () {
       var wrappedRejectedCallback = function wrappedRejectedCallback(error) {
         var result = [];
         if (typeof rejectedCallback === 'function') {
-          result = [rejectedCallback(error)];
-
+          if (_isPromisesAPlusCompliant) {
+            try {
+              result = [rejectedCallback(error)];
+            } catch (e) {
+              result = [ParsePromise.error(e)];
+            }
+          } else {
+            result = [rejectedCallback(error)];
+          }
           if (result.length === 1 && ParsePromise.is(result[0])) {
             result[0].then(function () {
               promise.resolve.apply(promise, arguments);
@@ -5290,7 +5319,11 @@ var ParsePromise = (function () {
               promise.reject(error);
             });
           } else {
-            promise.reject(result[0]);
+            if (_isPromisesAPlusCompliant) {
+              promise.resolve.apply(promise, result);
+            } else {
+              promise.reject(result[0]);
+            }
           }
         } else {
           promise.reject(error);
@@ -5300,6 +5333,17 @@ var ParsePromise = (function () {
       var runLater = function runLater(fn) {
         fn.call();
       };
+      if (_isPromisesAPlusCompliant) {
+        if (typeof process !== 'undefined' && typeof process.nextTick === 'function') {
+          runLater = function (fn) {
+            process.nextTick(fn);
+          };
+        } else if (typeof setTimeout === 'function') {
+          runLater = function (fn) {
+            setTimeout(fn, 0);
+          };
+        }
+      }
 
       if (this._resolved) {
         runLater(function () {
@@ -5583,6 +5627,16 @@ var ParsePromise = (function () {
     value: function isPromisesAPlusCompliant() {
       return _isPromisesAPlusCompliant;
     }
+  }, {
+    key: 'enableAPlusCompliant',
+    value: function enableAPlusCompliant() {
+      _isPromisesAPlusCompliant = true;
+    }
+  }, {
+    key: 'disableAPlusCompliant',
+    value: function disableAPlusCompliant() {
+      _isPromisesAPlusCompliant = false;
+    }
   }]);
 
   return ParsePromise;
@@ -5590,7 +5644,8 @@ var ParsePromise = (function () {
 
 exports['default'] = ParsePromise;
 module.exports = exports['default'];
-},{"babel-runtime/helpers/class-call-check":43,"babel-runtime/helpers/create-class":44}],17:[function(_dereq_,module,exports){
+}).call(this,_dereq_('_process'))
+},{"_process":49,"babel-runtime/helpers/class-call-check":43,"babel-runtime/helpers/create-class":44}],17:[function(_dereq_,module,exports){
 /**
  * Copyright (c) 2015-present, Parse, LLC.
  * All rights reserved.
@@ -7575,6 +7630,13 @@ var ParseUser = (function (_ParseObject) {
   }, {
     key: 'setUsername',
     value: function setUsername(username) {
+      // Strip anonymity, even we do not support anonymous user in js SDK, we may
+      // encounter anonymous user created by android/iOS in cloud code.
+      var authData = this.get('authData');
+      if (authData && authData.hasOwnProperty('anonymous')) {
+        // We need to set anonymous to null instead of deleting it in order to remove it from Parse.
+        authData.anonymous = null;
+      }
       this.set('username', username);
     }
 
@@ -8410,12 +8472,14 @@ var RESTController = {
             promise.reject(e);
           }
           promise.resolve(response, xhr.status, xhr);
-        } else if (xhr.status >= 500) {
-          // retry on 5XX
+        } else if (xhr.status >= 500 || xhr.status === 0) {
+          // retry on 5XX or node-xmlhttprequest error
           if (++attempts < _CoreManager2['default'].get('REQUEST_ATTEMPT_LIMIT')) {
             // Exponentially-growing random delay
             var delay = Math.round(Math.random() * 125 * Math.pow(2, attempts));
             setTimeout(dispatch, delay);
+          } else if (xhr.status === 0) {
+            promise.reject('Unable to connect to the Parse API');
           } else {
             // After the retry limit is reached, fail
             promise.reject(xhr);
@@ -9005,13 +9069,7 @@ function encode(value, disallowObjects, forcePointers, seen) {
       return value.toPointer();
     }
     seen = seen.concat(seenEntry);
-    var json = encode(value.attributes, disallowObjects, forcePointers, seen);
-    json.className = value.className;
-    json.__type = 'Object';
-    if (value.id) {
-      json.objectId = value.id;
-    }
-    return json;
+    return value._toFullJSON(seen);
   }
   if (value instanceof _ParseOp.Op || value instanceof _ParseACL2['default'] || value instanceof _ParseGeoPoint2['default'] || value instanceof _ParseRelation2['default']) {
     return value.toJSON();
