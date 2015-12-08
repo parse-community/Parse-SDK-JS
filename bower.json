@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "description": "The Parse JavaScript SDK",
   "license": "BSD-3-Clause",
   "main": [
@@ -31,4 +31,3 @@
     "build_releases.sh"
   ]
 }
-
