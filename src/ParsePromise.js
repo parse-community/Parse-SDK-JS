@@ -333,10 +333,8 @@ export default class ParsePromise {
    *
    * The input promises can also be specified as an array: <pre>
    *   var promises = [p1, p2, p3];
-   *   Parse.Promise.when(promises).then(function(r1, r2, r3) {
-   *     console.log(r1);  // prints 1
-   *     console.log(r2);  // prints 2
-   *     console.log(r3);  // prints 3
+   *   Parse.Promise.when(promises).then(function(results) {
+   *     console.log(results);  // prints [1,2,3]
    *   });
    * </pre>
    * @method when
