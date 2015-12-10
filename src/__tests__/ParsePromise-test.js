@@ -249,10 +249,10 @@ describe('Promise', () => {
       generate(i);
     }
 
-    ParsePromise.when(promises).then(function() {
+    ParsePromise.when(promises).then(function(results) {
       expect(called).toBe(COUNT);
-      expect(COUNT).toBe(arguments.length);
-      var actual = arguments;
+      expect(COUNT).toBe(results.length);
+      var actual = results;
       for (var i = 0; i < actual.length; i++) {
         expect(actual[i]).toBe(5 * i);
       }
