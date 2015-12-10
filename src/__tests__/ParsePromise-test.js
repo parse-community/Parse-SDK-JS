@@ -227,7 +227,7 @@ describe('Promise', () => {
     jest.runAllTimers();
   }));
 
-  it('can handle promises in parallel', asyncHelper(function(done) {
+  it('can handle promises in parallel with array', asyncHelper(function(done) {
     var COUNT = 5;
 
     var delay = function(ms) {
@@ -253,6 +253,41 @@ describe('Promise', () => {
       expect(called).toBe(COUNT);
       expect(COUNT).toBe(results.length);
       var actual = results;
+      for (var i = 0; i < actual.length; i++) {
+        expect(actual[i]).toBe(5 * i);
+      }
+      done();
+    });
+
+    jest.runAllTimers();
+  }));
+
+  it('can handle promises in parallel with arguments', asyncHelper(function(done) {
+    var COUNT = 5;
+
+    var delay = function(ms) {
+      var promise = new ParsePromise();
+      setTimeout(() => { promise.resolve(); }, ms);
+      return promise;
+    };
+
+    var called = 0;
+    var promises = [];
+    function generate(i) {
+      promises[i] = delay((i % 2) ? (i * 10) : (COUNT * 10) - (i * 10)).then(
+        function() {
+          called++;
+          return 5 * i;
+        });
+    }
+    for (var i = 0; i < COUNT; i++) {
+      generate(i);
+    }
+
+    ParsePromise.when.apply(null, promises).then(function() {
+      expect(called).toBe(COUNT);
+      expect(COUNT).toBe(arguments.length);
+      var actual = arguments;
       for (var i = 0; i < actual.length; i++) {
         expect(actual[i]).toBe(5 * i);
       }
