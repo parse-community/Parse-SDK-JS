@@ -20,43 +20,38 @@ var _ParsePromise2 = _interopRequireDefault(_ParsePromise);
 module.exports = {
   async: 1,
 
-  getItemAsync: function getItemAsync(path) {
+  getItemAsync(path) {
     var p = new _ParsePromise2['default']();
-    asyncLocalStorage.getItem(path, function (err, value) {
-      if (err) {
-        p.reject(err);
-      } else {
-        p.resolve(value);
-      }
-    });
+    asyncLocalStorage.getItem(
+      path,
+      function(value) {p.resolve(value);},
+      function(error) {p.reject(error);}
+    );
     return p;
   },
 
-  setItemAsync: function setItemAsync(path, value) {
+  setItemAsync(path, value) {
     var p = new _ParsePromise2['default']();
-    asyncLocalStorage.setItem(path, value, function (err) {
-      if (err) {
-        p.reject(err);
-      } else {
-        p.resolve(value);
-      }
-    });
+    asyncLocalStorage.setItem(
+      path,
+      value,
+      function()      {p.resolve(value);},
+      function(error) {p.reject(error);}
+    );
     return p;
   },
 
-  removeItemAsync: function removeItemAsync(path) {
+  removeItemAsync(path) {
     var p = new _ParsePromise2['default']();
-    asyncLocalStorage.removeItem(path, function (err) {
-      if (err) {
-        p.reject(err);
-      } else {
-        p.resolve();
-      }
-    });
+    asyncLocalStorage.removeItem(
+      path,
+      function()      {p.resolve();},
+      function(error) {p.reject(error);}
+    );
     return p;
   },
 
-  clear: function clear() {
+  clear() {
     asyncLocalStorage.clear();
   }
 };
