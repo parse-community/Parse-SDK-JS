@@ -6,6 +6,17 @@
 
 A library that gives you access to the powerful Parse cloud platform from your JavaScript app. For more information on Parse and its features, see [the website](https://parse.com) or [the JavaScript guide](https://parse.com/docs/js/guide).
 
+## THIS FORK: Webworkers support
+
+This fork was created to add support for Webworkers. The only problem is webworkers can't access the localStorage object, which Parse requires.
+
+How to use:
+
+- define self.asyncLocalStorage BEFORE requiring parse.js
+- asyncLocalStorage should support: `getItem, setItem, removeItem and clear`
+- asyncLocalStorage should take exactly the same inputs as localStorage
+- asyncLocalStorage should return promises (ES6 or Parse compatible) for all four functions which resolve to the same results localStorage would return.
+
 ## Getting Started
 
 The SDK is available for download [on our website](https://parse.com/downloads) or [on our CDN](http://www.parsecdn.com/js/parse-latest.js). However, the easiest way to integrate it into your JavaScript project is through the [npm module](https://npmjs.org/parse).
@@ -40,7 +51,7 @@ Copyright (c) 2015-present, Parse, LLC.
 All rights reserved.
 
 This source code is licensed under the BSD-style license found in the
-LICENSE file in the root directory of this source tree. An additional grant 
+LICENSE file in the root directory of this source tree. An additional grant
 of patent rights can be found in the PATENTS file in the same directory.
 ```
 
