@@ -346,8 +346,7 @@ export default class ParsePromise {
    */
   static when(promises) {
     var objects;
-    var arrayArgument = Array.isArray(promises);
-    if (arrayArgument) {
+    if (Array.isArray(promises)) {
       objects = promises;
     } else {
       objects = arguments;
@@ -356,13 +355,12 @@ export default class ParsePromise {
     var total = objects.length;
     var hadError = false;
     var results = [];
-    var returnValue = arrayArgument ? [results] : results;
     var errors = [];
     results.length = objects.length;
     errors.length = objects.length;
 
     if (total === 0) {
-      return ParsePromise.as.apply(this, returnValue);
+      return ParsePromise.as.apply(this, results);
     }
 
     var promise = new ParsePromise();
@@ -373,7 +371,7 @@ export default class ParsePromise {
         if (hadError) {
           promise.reject(errors);
         } else {
-          promise.resolve.apply(promise, returnValue);
+          promise.resolve.apply(promise, results);
         }
       }
     };
