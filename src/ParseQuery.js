@@ -277,7 +277,9 @@ export default class ParseQuery {
       findOptions
     ).then((response) => {
       return response.results.map((data) => {
-        data.className = this.className;
+        if (!data.className) {
+          data.className = this.className;
+        }
         return ParseObject.fromJSON(data);
       });
     })._thenRunCallbacks(options);
@@ -373,7 +375,9 @@ export default class ParseQuery {
       if (!objects[0]) {
         return undefined;
       }
-      objects[0].className = this.className;
+      if (!objects[0].className) {
+        objects[0].className = this.className;
+      }
       return ParseObject.fromJSON(objects[0]);
     })._thenRunCallbacks(options);
   }
