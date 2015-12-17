@@ -334,6 +334,8 @@ export default class ParseObject {
       if ((attr === 'createdAt' || attr === 'updatedAt') &&
           typeof response[attr] === 'string') {
         changes[attr] = parseDate(response[attr]);
+      } else if (attr === 'ACL') {
+        changes[attr] = new ParseACL(response[attr]);
       } else if (attr !== 'objectId') {
         changes[attr] = decode(response[attr]);
       }
