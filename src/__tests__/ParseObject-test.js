@@ -26,6 +26,7 @@ jest.dontMock('../RESTController');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
 jest.dontMock('../unsavedChildren');
+jest.dontMock('../ParseACL');
 
 jest.dontMock('./test_helpers/asyncHelper');
 jest.dontMock('./test_helpers/mockXHR');
@@ -726,6 +727,18 @@ describe('ParseObject', () => {
       age: 24
     });
     expect(p.op('age')).toBe(undefined);
+  });
+
+  it('handles ACL when saved', () => {
+    var p = new ParseObject('Person');
+
+    p._handleSaveResponse({
+      ACL: {}
+    }, 201);
+
+    var acl = p.getACL();
+    expect(acl).not.toEqual(null);
+    expect(acl instanceof ParseACL).toBe(true);
   });
 
   it('replaces a local id with a real one when saved', () => {
