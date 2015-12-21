@@ -99,6 +99,11 @@ export default class ParseObject {
   className: string;
 
   constructor(className: ?string | { className: string, [attr: string]: mixed }, attributes?: { [attr: string]: mixed }, options?: { ignoreValidation: boolean }) {
+    // Enable legacy initializers
+    if (typeof this.initialize === 'function') {
+      this.initialize.apply(this, arguments);
+    }
+
     var toSet = null;
     this._objCount = objectCount++;
     if (typeof className === 'string') {
@@ -120,10 +125,6 @@ export default class ParseObject {
     }
     if (toSet && !this.set(toSet, options)) {
       throw new Error('Can\'t create an invalid Parse Object');
-    }
-    // Enable legacy initializers
-    if (typeof this.initialize === 'function') {
-      this.initialize.apply(this, arguments);
     }
   }
 
@@ -1371,16 +1372,17 @@ export default class ParseObject {
       parentProto = classMap[adjustedClassName].prototype;
     }
     var ParseObjectSubclass = function(attributes, options) {
+      // Enable legacy initializers
+      if (typeof this.initialize === 'function') {
+        this.initialize.apply(this, arguments);
+      }
+
       this.className = adjustedClassName;
       this._objCount = objectCount++;
       if (attributes && typeof attributes === 'object'){
         if (!this.set(attributes || {}, options)) {
           throw new Error('Can\'t create an invalid Parse Object');
         }
-      }
-      // Enable legacy initializers
-      if (typeof this.initialize === 'function') {
-        this.initialize.apply(this, arguments);
       }
     };
     ParseObjectSubclass.className = adjustedClassName;
