@@ -469,7 +469,10 @@ describe('ParseUser', () => {
       deauthenticate() {}
     };
 
-    ParseUser.logInWith(provider, {}).then(null, (error) => {
+    ParseUser.logInWith(provider, {}).then((r) => {
+      console.log('arrrrr');
+      console.log(r);
+    }, (error) => {
       expect(error.code).toBe(ParseError.ACCOUNT_ALREADY_LINKED);
       expect(error.message).toBe('Another user is already linked to this facebook id.');
       done();

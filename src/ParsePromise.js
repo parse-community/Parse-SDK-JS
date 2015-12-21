@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-var isPromisesAPlusCompliant = false;
+var isPromisesAPlusCompliant = true;
 
 /**
  * A Promise is returned by async methods as a hook to provide callbacks to be

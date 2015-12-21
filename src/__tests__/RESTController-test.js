@@ -135,6 +135,7 @@ describe('RESTController', () => {
     };
     RESTController._setXHR(function() { return xhr; });
     RESTController.request('GET', 'classes/MyObject', {}, { sessionToken: '1234' });
+    jest.runAllTicks();
     expect(xhr.open.mock.calls[0]).toEqual(
       ['POST', 'https://api.parse.com/1/classes/MyObject', true]
     );

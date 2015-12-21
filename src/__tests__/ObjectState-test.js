@@ -294,10 +294,12 @@ describe('ObjectState', () => {
     });
     expect(called).toEqual([false, false, false]);
     p1.resolve();
+    jest.runAllTicks();
     expect(t1._resolved).toBe(true);
     expect(t2._resolved).toBe(false);
     expect(called).toEqual([true, false, false]);
     p2.resolve();
+    jest.runAllTicks();
     expect(t2._resolved).toBe(true);
     expect(t3._resolved).toBe(true);
     expect(called).toEqual([true, true, true]);

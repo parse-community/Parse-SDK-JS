@@ -1746,7 +1746,7 @@ var DefaultController = {
       return ObjectState.enqueueTask(target.className, target._getStateIdentifier(), task).then(() => {
         return target;
       }, (error) => {
-        return error;
+        return ParsePromise.error(error);
       });
     }
     return ParsePromise.as();

@@ -841,6 +841,7 @@ describe('ParseObject', () => {
       expect(p.get('age')).toBe(39);
       done();
     });
+    jest.runAllTicks();
     expect(p._getPendingOps().length).toBe(2);
     p.increment('age');
     expect(p.get('age')).toBe(39);
@@ -867,10 +868,12 @@ describe('ParseObject', () => {
     expect(xhrs.length).toBe(0);
     p.increment('updates');
     p.save();
+    jest.runAllTicks();
     expect(p._getPendingOps().length).toBe(2);
     expect(xhrs.length).toBe(1);
     p.increment('updates');
     p.save();
+    jest.runAllTicks();
     expect(p._getPendingOps().length).toBe(3);
     expect(xhrs.length).toBe(1);
 
@@ -878,6 +881,7 @@ describe('ParseObject', () => {
     xhrs[0].responseText = JSON.stringify({ objectId: 'P15', updates: 1 });
     xhrs[0].readyState = 4;
     xhrs[0].onreadystatechange();
+    jest.runAllTicks();
 
     expect(p._getServerData()).toEqual({ updates: 1 });
     expect(p.get('updates')).toBe(2);
@@ -904,6 +908,7 @@ describe('ParseObject', () => {
 
       done();
     });
+    jest.runAllTicks();
 
     xhr.status = 404;
     xhr.responseText = JSON.stringify({ code: 103, error: 'Invalid class name' });
@@ -926,15 +931,18 @@ describe('ParseObject', () => {
     expect(p._getPendingOps().length).toBe(1);
     p.increment('updates');
     p.save();
+    jest.runAllTicks();
     expect(p._getPendingOps().length).toBe(2);
     p.set('updates', 12);
     p.save();
+    jest.runAllTicks();
     expect(p._getPendingOps().length).toBe(3);
 
     xhrs[0].status = 404;
     xhrs[0].responseText = JSON.stringify({ code: 103, error: 'Invalid class name' });
     xhrs[0].readyState = 4;
     xhrs[0].onreadystatechange();
+    jest.runAllTicks();
 
     expect(p._getPendingOps().length).toBe(2);
     expect(p._getPendingOps()[0]).toEqual({
@@ -965,6 +973,7 @@ describe('ParseObject', () => {
       expect(parent.id).toBe('parent');
       done();
     });
+    jest.runAllTicks();
 
     expect(xhrs.length).toBe(1);
     expect(xhrs[0].open.mock.calls[0]).toEqual(
@@ -972,10 +981,12 @@ describe('ParseObject', () => {
     );
     xhrs[0].responseText = JSON.stringify([ { success: { objectId: 'child' } } ]);
     xhrs[0].onreadystatechange();
+    jest.runAllTicks();
 
     expect(xhrs.length).toBe(2);
     xhrs[1].responseText = JSON.stringify({ objectId: 'parent' });
     xhrs[1].onreadystatechange();
+    jest.runAllTicks();
   }));
 
   it('will fail for a circular dependency of non-existing objects', () => {
@@ -1052,6 +1063,7 @@ describe('ParseObject', () => {
       expect(parent.id).toBe('parent');
       done();
     });
+    jest.runAllTicks();
 
     expect(xhrs.length).toBe(1);
     expect(xhrs[0].open.mock.calls[0]).toEqual(
@@ -1072,12 +1084,14 @@ describe('ParseObject', () => {
     );
     xhrs[0].responseText = JSON.stringify([ { success: { objectId: 'parent' } } ]);
     xhrs[0].onreadystatechange();
+    jest.runAllTicks();
 
     expect(parent.id).toBe('parent');
 
     expect(xhrs.length).toBe(2);
     xhrs[1].responseText = JSON.stringify([ { success: {} } ]);
     xhrs[1].onreadystatechange();
+    jest.runAllTicks();
   }));
 
   it('can save a chain of unsaved objects', asyncHelper((done) => {
@@ -1107,6 +1121,7 @@ describe('ParseObject', () => {
       expect(grandchild.id).toBe('grandchild');
       done();
     });
+    jest.runAllTicks();
 
     expect(xhrs.length).toBe(1);
     expect(xhrs[0].open.mock.calls[0]).toEqual(
@@ -1121,6 +1136,7 @@ describe('ParseObject', () => {
     );
     xhrs[0].responseText = JSON.stringify([ { success: { objectId: 'grandchild' } } ]);
     xhrs[0].onreadystatechange();
+    jest.runAllTicks();
 
     expect(xhrs.length).toBe(2);
     expect(xhrs[1].open.mock.calls[0]).toEqual(
@@ -1141,6 +1157,7 @@ describe('ParseObject', () => {
     );
     xhrs[1].responseText = JSON.stringify([ { success: { objectId: 'child' } } ]);
     xhrs[1].onreadystatechange();
+    jest.runAllTicks();
 
     expect(xhrs.length).toBe(3);
     expect(xhrs[2].open.mock.calls[0]).toEqual(
@@ -1161,6 +1178,7 @@ describe('ParseObject', () => {
     );
     xhrs[2].responseText = JSON.stringify([ { success: { objectId: 'parent' } } ]);
     xhrs[2].onreadystatechange();
+    jest.runAllTicks();
   }));
 
   it('can update fields via a fetch() call', asyncHelper((done) => {
@@ -1206,11 +1224,13 @@ describe('ParseObject', () => {
       expect(JSON.parse(xhr.send.mock.calls[0])._method).toBe('DELETE');
       done();
     });
+    jest.runAllTicks();
 
     xhr.status = 200;
     xhr.responseText = JSON.stringify({});
     xhr.readyState = 4;
     xhr.onreadystatechange();
+    jest.runAllTicks();
   }));
 
   it('can save an array of objects', asyncHelper((done) => {
@@ -1235,6 +1255,7 @@ describe('ParseObject', () => {
       });
       done();
     });
+    jest.runAllTicks();
 
     xhr.status = 200;
     xhr.responseText = JSON.stringify([
@@ -1246,6 +1267,7 @@ describe('ParseObject', () => {
     ]);
     xhr.readyState = 4;
     xhr.onreadystatechange();
+    jest.runAllTicks();
   }));
 
   it('returns the first error when saving an array of objects', asyncHelper((done) => {
@@ -1274,6 +1296,7 @@ describe('ParseObject', () => {
       expect(error.message).toBe('first error');
       done();
     });
+    jest.runAllTicks();
 
     xhrs[0].responseText = JSON.stringify([
       { success: { objectId: 'pid0' } },
@@ -1298,15 +1321,8 @@ describe('ParseObject', () => {
       { success: { objectId: 'pid19' } },
     ]);
     xhrs[0].onreadystatechange();
+    jest.runAllTicks();
   }));
-
-  it('can fetch an array of objects', () => {
-
-  });
-
-  it('can destroy an array of objects', () => {
-
-  });
 });
 
 describe('ObjectController', () => {
@@ -1328,11 +1344,13 @@ describe('ObjectController', () => {
       expect(body._method).toBe('GET');
       done();
     });
+    jest.runAllTicks();
 
     xhr.status = 200;
     xhr.responseText = JSON.stringify({});
     xhr.readyState = 4;
     xhr.onreadystatechange();
+    jest.runAllTicks();
   }));
 
   it('can fetch an array of objects', asyncHelper((done) => {
@@ -1371,7 +1389,9 @@ describe('ObjectController', () => {
       var destroy = objectController.destroy(p2, {
         useMasterKey: true
       });
+      jest.runAllTicks();
       xhr.onreadystatechange();
+      jest.runAllTicks();
       return destroy;
     }).then(() => {
       expect(xhr.open.mock.calls[1]).toEqual(
@@ -1382,11 +1402,13 @@ describe('ObjectController', () => {
       expect(body._MasterKey).toBe('C');
       done();
     });
+    jest.runAllTicks();
 
     xhr.status = 200;
     xhr.responseText = JSON.stringify({});
     xhr.readyState = 4;
     xhr.onreadystatechange();
+    jest.runAllTicks();
   }));
 
   it('can destroy an array of objects', asyncHelper((done) => {
@@ -1443,17 +1465,22 @@ describe('ObjectController', () => {
         objects[i].id = 'pid' + i;
       }
       var destroy = objectController.destroy(objects, {});
+      jest.runAllTicks();
       xhrs[1].onreadystatechange();
+      jest.runAllTicks();
       expect(xhrs[1].open.mock.calls.length).toBe(1);
       xhrs[2].onreadystatechange();
+      jest.runAllTicks();
       return destroy;
     }).then(() => {
       expect(JSON.parse(xhrs[1].send.mock.calls[0]).requests.length).toBe(20);
       expect(JSON.parse(xhrs[2].send.mock.calls[0]).requests.length).toBe(2);
       done();
     });
+    jest.runAllTicks();
 
     xhrs[0].onreadystatechange();
+    jest.runAllTicks();
   }));
 
   it('can save an object', asyncHelper((done) => {
@@ -1475,11 +1502,13 @@ describe('ObjectController', () => {
       expect(body.key).toBe('value');
       done();
     });
+    jest.runAllTicks();
 
     xhr.status = 200;
     xhr.responseText = JSON.stringify({});
     xhr.readyState = 4;
     xhr.onreadystatechange();
+    jest.runAllTicks();
   }));
 
   it('can save an array of files', asyncHelper((done) => {
@@ -1513,6 +1542,7 @@ describe('ObjectController', () => {
       );
       done();
     });
+    jest.runAllTicks();
 
     var names = ['parse.txt', 'parse2.txt', 'parse3.txt'];
     for (var i = 0; i < 3; i++) {
@@ -1521,6 +1551,7 @@ describe('ObjectController', () => {
         url: 'http://files.parsetfss.com/a/' + names[i]
       });
       xhrs[i].onreadystatechange();
+      jest.runAllTicks();
     }
   }));
 
@@ -1557,6 +1588,7 @@ describe('ObjectController', () => {
         });
       }
       var save = objectController.save(objects, {});
+      jest.runAllTicks();
       xhrs[1].responseText = JSON.stringify(response.slice(0, 20));
       xhrs[2].responseText = JSON.stringify(response.slice(20));
 
@@ -1568,12 +1600,14 @@ describe('ObjectController', () => {
       objects[20].set('index', 0);
 
       xhrs[1].onreadystatechange();
+      jest.runAllTicks();
       expect(objects[0].dirty()).toBe(false);
       expect(objects[0].id).toBe('pid0');
       expect(objects[20].dirty()).toBe(true);
       expect(objects[20].id).toBe(undefined);
 
       xhrs[2].onreadystatechange();
+      jest.runAllTicks();
       expect(objects[20].dirty()).toBe(false);
       expect(objects[20].get('index')).toBe(0);
       expect(objects[20].id).toBe('pid20');
@@ -1582,6 +1616,7 @@ describe('ObjectController', () => {
       expect(results.length).toBe(22);
       done();
     });
+    jest.runAllTicks();
 
     xhrs[0].responseText = JSON.stringify([
       { success: { objectId: 'pid0', index: 0 } },
@@ -1591,6 +1626,7 @@ describe('ObjectController', () => {
       { success: { objectId: 'pid4', index: 4 } },
     ]);
     xhrs[0].onreadystatechange();
+    jest.runAllTicks();
   }));
 
   it('does not fail when checking if arrays of pointers are dirty', () => {
@@ -1619,6 +1655,7 @@ describe('ObjectController', () => {
     items.push(new ParseObject('Item'));
     brand.set('items', items);
     expect(function() { brand.save(); }).not.toThrow();
+    jest.runAllTicks();
 
     xhrs[0].onreadystatechange();
   });
