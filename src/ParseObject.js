@@ -225,9 +225,15 @@ export default class ParseObject {
       ) {
         // Due to the way browsers construct maps, the key order will not change
         // unless the object is changed
-        var json = encode(val, false, true);
-        var stringified = JSON.stringify(json);
-        if (objectCache[attr] !== stringified) {
+        try {
+          var json = encode(val, false, true);
+          var stringified = JSON.stringify(json);
+          if (objectCache[attr] !== stringified) {
+            dirty[attr] = val;
+          }
+        } catch (e) {
+          // Error occurred, possibly by a nested unsaved pointer in a mutable container
+          // No matter how it happened, it indicates a change in the attribute
           dirty[attr] = val;
         }
       }

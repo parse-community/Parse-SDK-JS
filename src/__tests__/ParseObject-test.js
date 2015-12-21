@@ -1565,6 +1565,36 @@ describe('ObjectController', () => {
     ]);
     xhrs[0].onreadystatechange();
   }));
+
+  it('does not fail when checking if arrays of pointers are dirty', () => {
+    var objectController = CoreManager.getObjectController();
+    var xhrs = [];
+    for (var i = 0; i < 2; i++) {
+      xhrs[i] = {
+        setRequestHeader: jest.genMockFn(),
+        open: jest.genMockFn(),
+        send: jest.genMockFn(),
+        status: 200,
+        readyState: 4
+      };
+    }
+    var current = 0;
+    RESTController._setXHR(function() { return xhrs[current++]; });
+    xhrs[0].responseText = JSON.stringify([{ success: { objectId: 'i333' } }]);
+    xhrs[1].responseText = JSON.stringify({});
+    var brand = ParseObject.fromJSON({
+      className: 'Brand',
+      objectId: 'b123',
+      items: [{ __type: 'Pointer', objectId: 'i222', className: 'Item' }]
+    });
+    expect(brand._getSaveJSON()).toEqual({});
+    var items = brand.get('items');
+    items.push(new ParseObject('Item'));
+    brand.set('items', items);
+    expect(function() { brand.save(); }).not.toThrow();
+
+    xhrs[0].onreadystatechange();
+  });
 });
 
 class MyObject extends ParseObject {
