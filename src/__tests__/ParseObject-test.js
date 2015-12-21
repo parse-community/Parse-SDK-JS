@@ -1565,10 +1565,6 @@ describe('ObjectController', () => {
     ]);
     xhrs[0].onreadystatechange();
   }));
-
-  it('can save a mixed array of files and objects', asyncHelper((done) => {
-    done();
-  }));
 });
 
 class MyObject extends ParseObject {
