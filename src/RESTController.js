@@ -97,9 +97,11 @@ var RESTController = {
           try {
             response = JSON.parse(xhr.responseText);
           } catch (e) {
-            promise.reject(e);
+            promise.reject(e.toString());
           }
-          promise.resolve(response, xhr.status, xhr);
+          if (response) {
+            promise.resolve(response, xhr.status, xhr);
+          }
         } else if (xhr.status >= 500 || xhr.status === 0) { // retry on 5XX or node-xmlhttprequest error
           if (++attempts < CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
             // Exponentially-growing random delay
