@@ -983,6 +983,16 @@ describe('ParseObject', () => {
     );
   });
 
+  it('does not mark shallow objects as dirty', () => {
+    var post = new ParseObject('Post');
+    post.id = '141414';
+    expect(post.dirty()).toBe(false);
+
+    var comment = new ParseObject('Comment');
+    comment.set('parent', post);
+    expect(unsavedChildren(comment)).toEqual([]);
+  });
+
   it('can fetch an object given an id', asyncHelper((done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{
