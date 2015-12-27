@@ -749,11 +749,11 @@ export default class ParseObject {
    */
   clone(): any {
     var clone = new this.constructor();
-    if (clone.set) {
-      clone.set(this.attributes);
-    }
     if (!clone.className) {
       clone.className = this.className;
+    }
+    if (clone.set) {
+      clone.set(this.attributes);
     }
     return clone;
   }
