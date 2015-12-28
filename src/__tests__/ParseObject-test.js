@@ -767,6 +767,23 @@ describe('ParseObject', () => {
     expect(o.existed()).toBe(true);
   });
 
+  it('can revert unsaved ops', () => {
+    var o = ParseObject.fromJSON({
+      className: 'Item',
+      objectId: 'canrevert',
+      count: 5
+    });
+    o.set({ cool: true });
+    o.increment('count');
+    expect(o.get('cool')).toBe(true);
+    expect(o.get('count')).toBe(6);
+    o.revert();
+    expect(o.get('cool')).toBe(undefined);
+    expect(o.op('cool')).toBe(undefined);
+    expect(o.get('count')).toBe(5);
+    expect(o.op('count')).toBe(undefined);
+  });
+
   it('can save the object', asyncHelper((done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{

@@ -848,6 +848,14 @@ export default class ParseObject {
   }
 
   /**
+   * Clears any changes to this object made since the last call to save()
+   * @method revert
+   */
+  revert(): void {
+    this._clearPendingOps();
+  }
+
+  /**
    * Clears all attributes on a model
    * @method clear
    */
