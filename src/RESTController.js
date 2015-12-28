@@ -50,7 +50,9 @@ function ajaxIE9(method: string, url: string, data: any) {
     } catch (e) {
       promise.reject(e);
     }
-    promise.resolve(response);
+    if (response) {
+      promise.resolve(response);
+    }
   };
   xdr.onerror = xdr.ontimeout = function() {
     // Let's fake a real error message.
