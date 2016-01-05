@@ -430,5 +430,37 @@ describe('Promise', () => {
     expect(ParsePromise.is({})).toBe(false);
     expect(ParsePromise.is(ParsePromise.as())).toBe(true);
     expect(ParsePromise.is(ParsePromise.error())).toBe(true);
-  })
+  });
+
+  it('can be constructed in ES6 style and resolved', asyncHelper((done) => {
+    new ParsePromise((resolve, reject) => {
+      resolve('abc');
+    }).then((result) => {
+      expect(result).toBe('abc');
+      
+      return new ParsePromise((resolve, reject) => {
+        resolve('def');
+      });
+    }).then((result) => {
+      expect(result).toBe('def');
+      done();
+    });
+  }));
+
+  it('can be constructed in ES6 style and rejected', asyncHelper((done) => {
+    new ParsePromise((resolve, reject) => {
+      reject('err');
+    }).then(() => {
+      // Should not be reached
+    }, (error) => {
+      expect(error).toBe('err');
+      
+      return new ParsePromise((resolve, reject) => {
+        reject('err2');
+      });
+    }).then(null, (error) => {
+      expect(error).toBe('err2');
+      done();
+    });
+  }));
 });

@@ -26,11 +26,15 @@ var isPromisesAPlusCompliant = true;
  * @constructor
  */
 export default class ParsePromise {
-  constructor() {
+  constructor(closure) {
     this._resolved = false;
     this._rejected = false;
     this._resolvedCallbacks = [];
     this._rejectedCallbacks = [];
+
+    if (typeof closure === 'function') {
+      closure(this.resolve.bind(this), this.reject.bind(this));
+    }
   }
 
   /**
