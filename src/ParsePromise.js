@@ -26,11 +26,15 @@ var isPromisesAPlusCompliant = true;
  * @constructor
  */
 export default class ParsePromise {
-  constructor() {
+  constructor(executor) {
     this._resolved = false;
     this._rejected = false;
     this._resolvedCallbacks = [];
     this._rejectedCallbacks = [];
+
+    if (typeof executor === 'function') {
+      executor(this.resolve.bind(this), this.reject.bind(this));
+    }
   }
 
   /**
@@ -302,6 +306,26 @@ export default class ParsePromise {
   }
 
   /**
+   * Returns a new promise that is resolved with a given value.
+   * If that value is a thenable Promise (has a .then() prototype
+   * method), the new promise will be chained to the end of the
+   * value.
+   * @method resolve
+   * @param value The value to resolve the promise with
+   * @static
+   * @return {Parse.Promise} the new promise.
+   */
+  static resolve(value) {
+    return new ParsePromise((resolve, reject) => {
+      if (ParsePromise.is(value)) {
+        value.then(resolve, reject);
+      } else {
+        resolve(value);
+      }
+    });
+  }
+
+  /**
    * Returns a new promise that is rejected with a given error.
    * @method error
    * @param error The error to reject the promise with
@@ -312,6 +336,19 @@ export default class ParsePromise {
     var promise = new ParsePromise();
     promise.reject.apply(promise, errors);
     return promise;
+  }
+
+  /**
+   * Returns a new promise that is rejected with a given error.
+   * This is an alias for Parse.Promise.error, for compliance with
+   * the ES6 implementation.
+   * @method reject
+   * @param error The error to reject the promise with
+   * @static
+   * @return {Parse.Promise} the new promise.
+   */
+  static reject(...errors) {
+    return ParsePromise.error.apply(null, errors);
   }
 
   /**
