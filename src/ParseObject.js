@@ -65,6 +65,15 @@ var objectCount = 0;
 // behavior in a server scenario
 var singleInstance = (!CoreManager.get('IS_NODE'));
 
+function getServerUrlPath() {
+  var serverUrl = CoreManager.get('SERVER_URL');
+  if (serverUrl[serverUrl.length - 1] !== '/') {
+    serverUrl += '/';
+  }
+  var url = serverUrl.replace(/https?:\/\//, '');
+  return url.substr(url.indexOf('/'));
+}
+
 /**
  * Creates a new model with defined attributes.
  *
@@ -1576,7 +1585,7 @@ var DefaultController = {
             requests: batch.map((obj) => {
               return {
                 method: 'DELETE',
-                path: '/1/classes/' + obj.className + '/' + obj._getId(),
+                path: getServerUrlPath() + 'classes/' + obj.className + '/' + obj._getId(),
                 body: {}
               };
             })
@@ -1700,7 +1709,7 @@ var DefaultController = {
             return RESTController.request('POST', 'batch', {
               requests: batch.map((obj) => {
                 var params = obj._getSaveParams();
-                params.path = '/1/' + params.path;
+                params.path = getServerUrlPath() + params.path;
                 return params;
               })
             }, options);
