@@ -40,6 +40,8 @@ import unsavedChildren from './unsavedChildren';
 import type { AttributeMap, OpsMap } from './ObjectState';
 import type { RequestOptions, FullOptions } from './RESTController';
 
+import url from 'url';
+
 export type Pointer = {
   __type: string;
   className: string;
@@ -1570,13 +1572,21 @@ var DefaultController = {
       }
       var deleteCompleted = ParsePromise.as();
       var errors = [];
+      
+      var serverUrl = CoreManager.get('SERVER_URL');
+      if (serverUrl[serverUrl.length - 1] !== '/') {
+        serverUrl += '/';
+      }
+
+      var serverUrlPath = url.parse(serverUrl, true, true).path;
+
       batches.forEach((batch) => {
         deleteCompleted = deleteCompleted.then(() => {
           return RESTController.request('POST', 'batch', {
             requests: batch.map((obj) => {
               return {
                 method: 'DELETE',
-                path: '/1/classes/' + obj.className + '/' + obj._getId(),
+                path: serverUrlPath + 'classes/' + obj.className + '/' + obj._getId(),
                 body: {}
               };
             })
@@ -1695,12 +1705,19 @@ var DefaultController = {
             batchTasks.push(ObjectState.enqueueTask(obj.className, obj._getStateIdentifier(), task));
           });
 
+          var serverUrl = CoreManager.get('SERVER_URL');
+          if (serverUrl[serverUrl.length - 1] !== '/') {
+            serverUrl += '/';
+          }
+
+          var serverUrlPath = url.parse(serverUrl, true, true).path;
+
           ParsePromise.when(batchReady).then(() => {
             // Kick off the batch request
             return RESTController.request('POST', 'batch', {
               requests: batch.map((obj) => {
                 var params = obj._getSaveParams();
-                params.path = '/1/' + params.path;
+                params.path = serverUrlPath + params.path;
                 return params;
               })
             }, options);
