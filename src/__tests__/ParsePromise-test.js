@@ -433,6 +433,8 @@ describe('Promise', () => {
   });
 
   it('can be constructed in ES6 style and resolved', asyncHelper((done) => {
+    expect(ParsePromise.length).toBe(1); // constructor arguments
+
     new ParsePromise((resolve, reject) => {
       resolve('abc');
     }).then((result) => {
@@ -460,6 +462,24 @@ describe('Promise', () => {
       });
     }).then(null, (error) => {
       expect(error).toBe('err2');
+      done();
+    });
+  }));
+
+  it('can be initially resolved, ES6 style', asyncHelper((done) => {
+    ParsePromise.resolve('abc').then((result) => {
+      expect(result).toBe('abc');
+      
+      return ParsePromise.resolve(ParsePromise.as('def'));
+    }).then((result) => {
+      expect(result).toBe('def');
+      done();
+    });
+  }));
+
+  it('can be initially rejected, ES6 style', asyncHelper((done) => {
+    ParsePromise.reject('err').then(null, (error) => {
+      expect(error).toBe('err');
       done();
     });
   }));
