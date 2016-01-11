@@ -35,6 +35,7 @@ import ParseQuery from './ParseQuery';
 import ParseRelation from './ParseRelation';
 import * as SingleInstanceState from './SingleInstanceState';
 import unique from './unique';
+import * as UniqueInstanceState from './UniqueInstanceState';
 import unsavedChildren from './unsavedChildren';
 
 import type { AttributeMap, OpsMap } from './ObjectState';
@@ -133,8 +134,7 @@ export default class ParseObject {
   get attributes(): AttributeMap {
     let attributes = singleInstance ?
       SingleInstanceState.estimateAttributes(this.className, this._getStateIdentifier()) :
-      null;
-    // TODO: implement uniqueInstanceState
+      UniqueInstanceState.estimateAttributes(this);
     return Object.freeze(attributes);
   }
 
@@ -192,7 +192,7 @@ export default class ParseObject {
     if (singleInstance) {
       return SingleInstanceState.getServerData(this.className, this._getStateIdentifier());
     } else {
-      // TODO: implement uniqueInstanceState
+      return UniqueInstanceState.getServerData(this);
     }
   }
 
@@ -205,7 +205,7 @@ export default class ParseObject {
     if (singleInstance) {
       SingleInstanceState.setServerData(this.className, this._getStateIdentifier(), unset);
     } else {
-      // TODO: implement uniqueInstanceState
+      UniqueInstanceState.setServerData(this, unset);
     }
   }
 
@@ -213,7 +213,7 @@ export default class ParseObject {
     if (singleInstance) {
       return SingleInstanceState.getPendingOps(this.className, this._getStateIdentifier());
     } else {
-      // TODO: implement uniqueInstanceState
+      return UniqueInstanceState.getPendingOps(this);
     }
   }
 
@@ -230,8 +230,7 @@ export default class ParseObject {
     var attributes = this.attributes;
     var objectCache = singleInstance ?
       SingleInstanceState.getObjectCache(this.className, this._getStateIdentifier()) :
-      {};
-    // TODO: implement uniqueInstanceState
+      UniqueInstanceState.getObjectCache(this);
     var dirty = {};
     for (var attr in attributes) {
       var val = attributes[attr];
@@ -303,7 +302,7 @@ export default class ParseObject {
     if (singleInstance) {
       SingleInstanceState.initializeState(this.className, this._getStateIdentifier());
     } else {
-      // TODO: implement uniqueInstanceState
+      UniqueInstanceState.initializeState(this);
     }
     var decoded = {};
     for (var attr in serverData) {
@@ -328,15 +327,14 @@ export default class ParseObject {
     if (singleInstance) {
       SingleInstanceState.commitServerChanges(this.className, this._getStateIdentifier(), decoded);
     } else {
-      // TODO: implement uniqueInstanceState
+      UniqueInstanceState.commitServerChanges(this, decoded);
     }
   }
 
   _setExisted(existed: boolean) {
     let state = singleInstance ?
       SingleInstanceState.getState(this.className, this._getStateIdentifier()) :
-      null;
-    // TODO: implement uniqueInstanceState
+      UniqueInstanceState.getState(this);
     if (state) {
       state.existed = existed;
     }
@@ -344,11 +342,16 @@ export default class ParseObject {
 
   _migrateId(serverId: string) {
     if (this._localId && serverId) {
-      var oldState = SingleInstanceState.removeState(this.className, this._getStateIdentifier());
-      this.id = serverId;
-      delete this._localId;
-      if (oldState) {
-        SingleInstanceState.initializeState(this.className, this._getStateIdentifier(), oldState);
+      if (singleInstance) {
+        var oldState = SingleInstanceState.removeState(this.className, this._getStateIdentifier());
+        this.id = serverId;
+        delete this._localId;
+        if (oldState) {
+          SingleInstanceState.initializeState(this.className, this._getStateIdentifier(), oldState);
+        }
+      } else {
+        this.id = serverId;
+        delete this._localId;
       }
     }
   }
@@ -358,8 +361,7 @@ export default class ParseObject {
     var attr;
     var pending = singleInstance ?
       SingleInstanceState.popPendingState(this.className, this._getStateIdentifier()) :
-      null;
-    // TODO: implement uniqueInstanceState
+      UniqueInstanceState.popPendingState(this);
     for (attr in pending) {
       if (pending[attr] instanceof RelationOp) {
         changes[attr] = pending[attr].applyTo(undefined, this, attr);
@@ -391,7 +393,7 @@ export default class ParseObject {
     if (singleInstance) {
       SingleInstanceState.commitServerChanges(this.className, this._getStateIdentifier(), changes);
     } else {
-      // TODO: implement uniqueInstanceState
+      UniqueInstanceState.commitServerChanges(this, changes);
     }
   }
 
@@ -400,7 +402,7 @@ export default class ParseObject {
     if (singleInstance) {
       SingleInstanceState.mergeFirstPendingState(this.className, this._getStateIdentifier());
     } else {
-      // TODO: implement uniqueInstanceState
+      UniqueInstanceState.mergeFirstPendingState(this);
     }
   }
 
@@ -693,7 +695,7 @@ export default class ParseObject {
       if (singleInstance) {
         SingleInstanceState.setPendingOp(this.className, this._getStateIdentifier(), attr, nextOp);
       } else {
-        // TODO: implement uniqueInstanceState
+        UniqueInstanceState.setPendingOp(this, attr, nextOp);
       }
     }
 
@@ -823,8 +825,7 @@ export default class ParseObject {
     }
     var state = singleInstance ?
       SingleInstanceState.getState(this.className, this._getStateIdentifier()) :
-      null;
-    // TODO: implement uniqueInstanceState
+      UniqueInstanceState.getState(this);
     if (state) {
       return state.existed;
     }
@@ -1095,7 +1096,7 @@ export default class ParseObject {
     if (singleInstance) {
       SingleInstanceState._clearAllState();
     } else {
-      // TODO: implement uniqueInstanceState
+      UniqueInstanceState._clearAllState();
     }
   }
 
@@ -1514,6 +1515,15 @@ export default class ParseObject {
   static disableSingleInstance() {
     singleInstance = false;
   }
+
+  /**
+   * Returns a boolean marking whether single instance mode is enabled or not.
+   * @method isSingleInstance
+   * @return {Boolean} A boolean flag that is true if single instance is enabled.
+   */
+  static isSingleInstance(): boolean {
+    return singleInstance;
+  }
 }
 
 var DefaultController = {
@@ -1753,7 +1763,8 @@ var DefaultController = {
               SingleInstanceState.pushPendingState(obj.className, obj._getStateIdentifier());
               batchTasks.push(SingleInstanceState.enqueueTask(obj.className, obj._getStateIdentifier(), task));
             } else {
-              // TODO: implement uniqueInstanceState
+              UniqueInstanceState.pushPendingState(obj);
+              batchTasks.push(UniqueInstanceState.enqueueTask(obj, task));
             }
           });
 
@@ -1801,7 +1812,8 @@ var DefaultController = {
         SingleInstanceState.pushPendingState(target.className, target._getStateIdentifier());
         enqueueTask = SingleInstanceState.enqueueTask(target.className, target._getStateIdentifier(), task);
       } else {
-        // TODO: implement uniqueInstanceState
+        UniqueInstanceState.pushPendingState(target);
+        enqueueTask = UniqueInstanceState.enqueueTask(target, task);
       }
 
       return enqueueTask.then(() => {

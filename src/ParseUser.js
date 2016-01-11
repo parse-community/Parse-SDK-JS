@@ -11,12 +11,13 @@
 
 import CoreManager from './CoreManager';
 import isRevocableSession from './isRevocableSession';
-import * as ObjectState from './ObjectState';
 import ParseError from './ParseError';
 import ParseObject from './ParseObject';
 import ParsePromise from './ParsePromise';
 import ParseSession from './ParseSession';
+import * as SingleInstanceState from './SingleInstanceState';
 import Storage from './Storage';
+import * as UniqueInstanceState from './UniqueInstanceState';
 
 import type { AttributeMap } from './ObjectState';
 import type { RequestOptions, FullOptions } from './RESTController';
@@ -857,12 +858,21 @@ var DefaultController = {
     ).then((response, status) => {
       user._migrateId(response.objectId);
       user._setExisted(true);
-      ObjectState.setPendingOp(
-        user.className, user._getId(), 'username', undefined
-      );
-      ObjectState.setPendingOp(
-        user.className, user._getId(), 'password', undefined
-      );
+      if (ParseObject.isSingleInstance()) {
+        SingleInstanceState.setPendingOp(
+          user.className, user._getId(), 'username', undefined
+        );
+        SingleInstanceState.setPendingOp(
+          user.className, user._getId(), 'password', undefined
+        );
+      } else {
+        UniqueInstanceState.setPendingOp(
+          user, 'username', undefined
+        );
+        UniqueInstanceState.setPendingOp(
+          user, 'password', undefined
+        );
+      }
       response.password = undefined;
       user._finishFetch(response);
       if (!canUseCurrentUser) {

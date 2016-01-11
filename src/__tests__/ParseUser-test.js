@@ -19,6 +19,7 @@ jest.dontMock('../ParseOp');
 jest.dontMock('../ParsePromise');
 jest.dontMock('../ParseUser');
 jest.dontMock('../RESTController');
+jest.dontMock('../SingleInstanceState');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
 jest.dontMock('../TaskQueue');
@@ -38,9 +39,12 @@ var asyncHelper = require('./test_helpers/asyncHelper');
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
-ParseObject.enableSingleInstance();
 
 describe('ParseUser', () => {
+  beforeEach(() => {
+    ParseObject.enableSingleInstance();
+  });
+
   it('can be constructed with initial attributes', () => {
     var u = new ParseUser();
     expect(u.isCurrent()).toBe(false);
@@ -469,9 +473,8 @@ describe('ParseUser', () => {
       deauthenticate() {}
     };
 
-    ParseUser.logInWith(provider, {}).then((r) => {
-      console.log('arrrrr');
-      console.log(r);
+    ParseUser.logInWith(provider, {}).then(() => {
+      // Should not run
     }, (error) => {
       expect(error.code).toBe(ParseError.ACCOUNT_ALREADY_LINKED);
       expect(error.message).toBe('Another user is already linked to this facebook id.');

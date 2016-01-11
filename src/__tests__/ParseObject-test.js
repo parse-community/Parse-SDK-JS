@@ -14,7 +14,7 @@ jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../equals');
 jest.dontMock('../escape');
-jest.dontMock('../ObjectState')
+jest.dontMock('../ObjectState');
 jest.dontMock('../parseDate');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseFile');
@@ -23,8 +23,10 @@ jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
 jest.dontMock('../ParsePromise');
 jest.dontMock('../RESTController');
+jest.dontMock('../SingleInstanceState');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
+jest.dontMock('../UniqueInstanceState');
 jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 
@@ -59,20 +61,21 @@ mockQuery.prototype.find = function() {
 };
 jest.setMock('../ParseQuery', mockQuery);
 
-var CoreManager = require('../CoreManager');
-var ObjectState = require('../ObjectState');
-var ParseACL = require('../ParseACL');
-var ParseError = require('../ParseError');
-var ParseFile = require('../ParseFile');
-var ParseGeoPoint = require('../ParseGeoPoint');
-var ParseObject = require('../ParseObject');
-var ParseOp = require('../ParseOp');
-var ParsePromise = require('../ParsePromise');
-var RESTController = require('../RESTController');
-var unsavedChildren = require('../unsavedChildren');
+const CoreManager = require('../CoreManager');
+const ObjectState = require('../ObjectState');
+const ParseACL = require('../ParseACL');
+const ParseError = require('../ParseError');
+const ParseFile = require('../ParseFile');
+const ParseGeoPoint = require('../ParseGeoPoint');
+const ParseObject = require('../ParseObject');
+const ParseOp = require('../ParseOp');
+const ParsePromise = require('../ParsePromise');
+const RESTController = require('../RESTController');
+const SingleInstanceState = require('../SingleInstanceState');
+const unsavedChildren = require('../unsavedChildren');
 
-var asyncHelper = require('./test_helpers/asyncHelper');
-var mockXHR = require('./test_helpers/mockXHR');
+const asyncHelper = require('./test_helpers/asyncHelper');
+const mockXHR = require('./test_helpers/mockXHR');
 
 CoreManager.setRESTController(RESTController);
 CoreManager.setInstallationController({
@@ -84,15 +87,18 @@ CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 CoreManager.set('MASTER_KEY', 'C');
 CoreManager.set('VERSION', 'V');
-ParseObject.enableSingleInstance();
 
-var {
+const {
   SetOp,
   UnsetOp,
   IncrementOp
 } = require('../ParseOp');
 
 describe('ParseObject', () => {
+  beforeEach(() => {
+    ParseObject.enableSingleInstance();
+  });
+
   it('is initially created with no Id', () => {
     var o = new ParseObject('Item');
     expect(o.id).toBe(undefined);
@@ -746,13 +752,13 @@ describe('ParseObject', () => {
     p.set('age', 34);
     expect(p._localId).toBeTruthy();
     expect(p.id).toBe(undefined);
-    var oldState = ObjectState.getState('Person', p._localId);
+    var oldState = SingleInstanceState.getState('Person', p._localId);
     p._handleSaveResponse({
       objectId: 'P4'
     });
     expect(p._localId).toBe(undefined);
     expect(p.id).toBe('P4');
-    var newState = ObjectState.getState('Person', 'P4');
+    var newState = SingleInstanceState.getState('Person', 'P4');
     expect(oldState.serverData).toBe(newState.serverData);
     expect(oldState.pendingOps).toBe(newState.pendingOps);
     expect(oldState.tasks).toBe(newState.tasks);
@@ -1595,7 +1601,7 @@ describe('ObjectController', () => {
       // Objects in the second batch will not be prepared for save yet
       // This means they can also be modified before the first batch returns
       expect(
-        ObjectState.getState('Person', objects[20]._getId()).pendingOps.length
+        SingleInstanceState.getState('Person', objects[20]._getId()).pendingOps.length
       ).toBe(1);
       objects[20].set('index', 0);
 
