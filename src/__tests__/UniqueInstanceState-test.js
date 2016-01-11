@@ -410,4 +410,14 @@ describe('UniqueInstanceState', () => {
     });
     expect(UniqueInstanceState.getState(obj)).toBe(null);
   });
+
+  it('can allocate many objects without running out of memory', () => {
+    let closure = function() {
+      let obj = new ParseObject();
+      UniqueInstanceState.setServerData(obj, { spacious: true });
+    };
+    for (var i = 0; i < 1e5; i++) {
+      closure();
+    }
+  });
 });

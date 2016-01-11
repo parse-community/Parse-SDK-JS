@@ -1517,6 +1517,14 @@ describe('ObjectController', () => {
     jest.runAllTicks();
   }));
 
+  it('returns an empty promise from an empty save', asyncHelper((done) => {
+    var objectController = CoreManager.getObjectController();
+    objectController.save().then(() => {
+      done();
+    });
+    jest.runAllTicks();
+  }));
+
   it('can save an array of files', asyncHelper((done) => {
     var objectController = CoreManager.getObjectController();
     var xhrs = [];
@@ -1667,6 +1675,188 @@ describe('ObjectController', () => {
   });
 });
 
+describe('ParseObject (unique instance mode)', () => {
+  beforeEach(() => {
+    ParseObject.disableSingleInstance();
+  });
+
+  it('can be created with initial attributes', () => {
+    var o = new ParseObject({
+      className: 'Item',
+      value: 12
+    });
+    expect(o.className).toBe('Item');
+    expect(o.attributes).toEqual({ value: 12 });
+  });
+
+  it('can be inflated from server JSON', () => {
+    var json = {
+      className: 'Item',
+      createdAt: '2013-12-14T04:51:19Z',
+      objectId: 'I1',
+      size: 'medium'
+    };
+    var o = ParseObject.fromJSON(json);
+    expect(o.className).toBe('Item');
+    expect(o.id).toBe('I1');
+    expect(o.attributes).toEqual({
+      size: 'medium',
+      createdAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
+      updatedAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19))
+    });
+    expect(o.dirty()).toBe(false);
+  });
+
+  it('can be rendered to JSON', () => {
+    var o = new ParseObject('Item');
+    o.set({
+      size: 'large',
+      inStock: 18
+    });
+    expect(o.toJSON()).toEqual({
+      size: 'large',
+      inStock: 18
+    });
+    o = new ParseObject('Item');
+    o._finishFetch({
+      objectId: 'O2',
+      size: 'medium',
+      inStock: 12
+    });
+    expect(o.id).toBe('O2');
+    expect(o.toJSON()).toEqual({
+      objectId: 'O2',
+      size: 'medium',
+      inStock: 12
+    });
+  });
+
+  it('can add, update, and remove attributes', () => {
+    var o = new ParseObject({
+      className: 'Item',
+      objectId: 'anObjectId',
+      value: 12,
+      valid: true
+    });
+    o.set({ value: 14 });
+    expect(o.get('value')).toBe(14);
+    o.unset('valid');
+    expect(o.get('valid')).toBe(undefined);
+    expect(o.dirtyKeys()).toEqual(['value', 'valid']);
+    o.increment('value');
+    expect(o.get('value'), 15);
+
+    o.clear();
+    expect(o.get('value')).toBe(undefined);
+
+    var o2 = ParseObject.fromJSON({
+      className: 'Item',
+      tags: ['#tbt']
+    });
+
+    o2.add('tags', '#nofilter');
+    expect(o2.get('tags')).toEqual(['#tbt', '#nofilter']);
+    
+    o2.revert();
+    o2.addUnique('tags', '#tbt');
+    expect(o2.get('tags')).toEqual(['#tbt']);
+
+    o2.revert();
+    o2.remove('tags', '#tbt');
+    expect(o2.get('tags')).toEqual([]);
+  });
+
+  it('can save the object', asyncHelper((done) => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: {
+          objectId: 'P1',
+          count: 1
+        }
+      }])
+    );
+    var p = new ParseObject('Person');
+    p.set('age', 38);
+    p.increment('count');
+    p.save().then((obj) => {
+      expect(obj).toBe(p);
+      expect(obj.get('age')).toBe(38);
+      expect(obj.get('count')).toBe(1);
+      expect(obj.op('age')).toBe(undefined);
+      expect(obj.dirty()).toBe(false);
+      done();
+    });
+  }));
+
+  it('can save an array of objects', asyncHelper((done) => {
+    var xhr = {
+      setRequestHeader: jest.genMockFn(),
+      open: jest.genMockFn(),
+      send: jest.genMockFn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    var objects = [];
+    for (var i = 0; i < 5; i++) {
+      objects[i] = new ParseObject('Person');
+    }
+    ParseObject.saveAll(objects).then(() => {
+      expect(xhr.open.mock.calls[0]).toEqual(
+        ['POST', 'https://api.parse.com/1/batch', true]
+      );
+      expect(JSON.parse(xhr.send.mock.calls[0]).requests[0]).toEqual({
+        method: 'POST',
+        path: '/1/classes/Person',
+        body: {}
+      });
+      done();
+    });
+    jest.runAllTicks();
+
+    xhr.status = 200;
+    xhr.responseText = JSON.stringify([
+      { success: { objectId: 'pid0' } },
+      { success: { objectId: 'pid1' } },
+      { success: { objectId: 'pid2' } },
+      { success: { objectId: 'pid3' } },
+      { success: { objectId: 'pid4' } },
+    ]);
+    xhr.readyState = 4;
+    xhr.onreadystatechange();
+    jest.runAllTicks();
+  }));
+
+  it('preserves changes when changing the id', () => {
+    var o = new ParseObject({
+      className: 'Item',
+      objectId: 'anObjectId',
+      value: 12
+    });
+    o.id = 'otherId';
+    expect(o.get('value')).toBe(12);
+  });
+
+  it('can maintain differences between two instances of an object', () => {
+    var o = new ParseObject({
+      className: 'Item',
+      objectId: 'anObjectId',
+      value: 12
+    });
+    var o2 = new ParseObject({
+      className: 'Item',
+      objectId: 'anObjectId',
+      value: 12
+    });
+    o.set({ value: 100 });
+    expect(o.get('value')).toBe(100);
+    expect(o2.get('value')).toBe(12);
+
+    o2.set({ name: 'foo' });
+    expect(o.has('name')).toBe(false);
+    expect(o2.has('name')).toBe(true);
+  });
+});
+
 class MyObject extends ParseObject {
   constructor() {
     super('MyObject');
@@ -1684,6 +1874,10 @@ class MyObject extends ParseObject {
 ParseObject.registerSubclass('MyObject', MyObject);
 
 describe('ParseObject Subclasses', () => {
+  beforeEach(() => {
+    ParseObject.enableSingleInstance();
+  });
+
   it('can be extended with ES6 classes', () => {
     var o = new MyObject();
     expect(o.className).toBe('MyObject');
@@ -1753,6 +1947,10 @@ describe('ParseObject Subclasses', () => {
 });
 
 describe('ParseObject extensions', () => {
+  beforeEach(() => {
+    ParseObject.enableSingleInstance();
+  });
+
   it('can generate ParseObjects with a default className', () => {
     var YourObject = ParseObject.extend('YourObject');
     var yo = new YourObject();
@@ -1801,4 +1999,4 @@ describe('ParseObject extensions', () => {
     f = new FeatureObject();
     expect(f.foo() + f.bar()).toBe('FB');
   });
-})
+});
