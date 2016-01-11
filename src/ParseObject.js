@@ -15,7 +15,6 @@ import decode from './decode';
 import encode from './encode';
 import equals from './equals';
 import escape from './escape';
-import * as ObjectState from './ObjectState';
 import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
@@ -34,6 +33,7 @@ import {
 import ParsePromise from './ParsePromise';
 import ParseQuery from './ParseQuery';
 import ParseRelation from './ParseRelation';
+import * as SingleInstanceState from './SingleInstanceState';
 import unique from './unique';
 import unsavedChildren from './unsavedChildren';
 
@@ -131,9 +131,11 @@ export default class ParseObject {
   /** Prototype getters / setters **/
 
   get attributes(): AttributeMap {
-    return Object.freeze(
-      ObjectState.estimateAttributes(this.className, this._getStateIdentifier())
-    );
+    let attributes = singleInstance ?
+      SingleInstanceState.estimateAttributes(this.className, this._getStateIdentifier()) :
+      null;
+    // TODO: implement uniqueInstanceState
+    return Object.freeze(attributes);
   }
 
   /**
@@ -187,7 +189,11 @@ export default class ParseObject {
   }
 
   _getServerData(): AttributeMap {
-    return ObjectState.getServerData(this.className, this._getStateIdentifier());
+    if (singleInstance) {
+      return SingleInstanceState.getServerData(this.className, this._getStateIdentifier());
+    } else {
+      // TODO: implement uniqueInstanceState
+    }
   }
 
   _clearServerData() {
@@ -196,11 +202,19 @@ export default class ParseObject {
     for (var attr in serverData) {
       unset[attr] = undefined;
     }
-    ObjectState.setServerData(this.className, this._getStateIdentifier(), unset);
+    if (singleInstance) {
+      SingleInstanceState.setServerData(this.className, this._getStateIdentifier(), unset);
+    } else {
+      // TODO: implement uniqueInstanceState
+    }
   }
 
   _getPendingOps(): Array<OpsMap> {
-    return ObjectState.getPendingOps(this.className, this._getStateIdentifier());
+    if (singleInstance) {
+      return SingleInstanceState.getPendingOps(this.className, this._getStateIdentifier());
+    } else {
+      // TODO: implement uniqueInstanceState
+    }
   }
 
   _clearPendingOps() {
@@ -214,7 +228,10 @@ export default class ParseObject {
 
   _getDirtyObjectAttributes(): AttributeMap {
     var attributes = this.attributes;
-    var objectCache = ObjectState.getObjectCache(this.className, this._getStateIdentifier());
+    var objectCache = singleInstance ?
+      SingleInstanceState.getObjectCache(this.className, this._getStateIdentifier()) :
+      {};
+    // TODO: implement uniqueInstanceState
     var dirty = {};
     for (var attr in attributes) {
       var val = attributes[attr];
@@ -283,7 +300,11 @@ export default class ParseObject {
     if (!this.id && serverData.objectId) {
       this.id = serverData.objectId;
     }
-    ObjectState.initializeState(this.className, this._getStateIdentifier());
+    if (singleInstance) {
+      SingleInstanceState.initializeState(this.className, this._getStateIdentifier());
+    } else {
+      // TODO: implement uniqueInstanceState
+    }
     var decoded = {};
     for (var attr in serverData) {
       if (attr === 'ACL') {
@@ -304,11 +325,18 @@ export default class ParseObject {
     if (!decoded.updatedAt && decoded.createdAt) {
       decoded.updatedAt = decoded.createdAt;
     }
-    ObjectState.commitServerChanges(this.className, this._getStateIdentifier(), decoded);
+    if (singleInstance) {
+      SingleInstanceState.commitServerChanges(this.className, this._getStateIdentifier(), decoded);
+    } else {
+      // TODO: implement uniqueInstanceState
+    }
   }
 
   _setExisted(existed: boolean) {
-    var state = ObjectState.getState(this.className, this._getStateIdentifier());
+    let state = singleInstance ?
+      SingleInstanceState.getState(this.className, this._getStateIdentifier()) :
+      null;
+    // TODO: implement uniqueInstanceState
     if (state) {
       state.existed = existed;
     }
@@ -316,11 +344,11 @@ export default class ParseObject {
 
   _migrateId(serverId: string) {
     if (this._localId && serverId) {
-      var oldState = ObjectState.removeState(this.className, this._getStateIdentifier());
+      var oldState = SingleInstanceState.removeState(this.className, this._getStateIdentifier());
       this.id = serverId;
       delete this._localId;
       if (oldState) {
-        ObjectState.initializeState(this.className, this._getStateIdentifier(), oldState);
+        SingleInstanceState.initializeState(this.className, this._getStateIdentifier(), oldState);
       }
     }
   }
@@ -328,7 +356,10 @@ export default class ParseObject {
   _handleSaveResponse(response, status: number) {
     var changes = {};
     var attr;
-    var pending = ObjectState.popPendingState(this.className, this._getStateIdentifier());
+    var pending = singleInstance ?
+      SingleInstanceState.popPendingState(this.className, this._getStateIdentifier()) :
+      null;
+    // TODO: implement uniqueInstanceState
     for (attr in pending) {
       if (pending[attr] instanceof RelationOp) {
         changes[attr] = pending[attr].applyTo(undefined, this, attr);
@@ -357,12 +388,20 @@ export default class ParseObject {
       this._setExisted(true);
     }
 
-    ObjectState.commitServerChanges(this.className, this._getStateIdentifier(), changes);
+    if (singleInstance) {
+      SingleInstanceState.commitServerChanges(this.className, this._getStateIdentifier(), changes);
+    } else {
+      // TODO: implement uniqueInstanceState
+    }
   }
 
   _handleSaveError() {
     var pending = this._getPendingOps();
-    ObjectState.mergeFirstPendingState(this.className, this._getStateIdentifier());
+    if (singleInstance) {
+      SingleInstanceState.mergeFirstPendingState(this.className, this._getStateIdentifier());
+    } else {
+      // TODO: implement uniqueInstanceState
+    }
   }
 
   /** Public methods **/
@@ -651,7 +690,11 @@ export default class ParseObject {
     var last = pendingOps.length - 1;
     for (var attr in newOps) {
       var nextOp = newOps[attr].mergeWith(pendingOps[last][attr]);
-      ObjectState.setPendingOp(this.className, this._getStateIdentifier(), attr, nextOp);
+      if (singleInstance) {
+        SingleInstanceState.setPendingOp(this.className, this._getStateIdentifier(), attr, nextOp);
+      } else {
+        // TODO: implement uniqueInstanceState
+      }
     }
 
     return this;
@@ -778,7 +821,10 @@ export default class ParseObject {
     if (!this.id) {
       return false;
     }
-    var state = ObjectState.getState(this.className, this._getStateIdentifier());
+    var state = singleInstance ?
+      SingleInstanceState.getState(this.className, this._getStateIdentifier()) :
+      null;
+    // TODO: implement uniqueInstanceState
     if (state) {
       return state.existed;
     }
@@ -1046,7 +1092,11 @@ export default class ParseObject {
   /** Static methods **/
 
   static _clearAllState() {
-    ObjectState._clearAllState();
+    if (singleInstance) {
+      SingleInstanceState._clearAllState();
+    } else {
+      // TODO: implement uniqueInstanceState
+    }
   }
 
   /**
@@ -1699,8 +1749,12 @@ var DefaultController = {
                 }
               });
             };
-            ObjectState.pushPendingState(obj.className, obj._getStateIdentifier());
-            batchTasks.push(ObjectState.enqueueTask(obj.className, obj._getStateIdentifier(), task));
+            if (singleInstance) {
+              SingleInstanceState.pushPendingState(obj.className, obj._getStateIdentifier());
+              batchTasks.push(SingleInstanceState.enqueueTask(obj.className, obj._getStateIdentifier(), task));
+            } else {
+              // TODO: implement uniqueInstanceState
+            }
           });
 
           ParsePromise.when(batchReady).then(() => {
@@ -1742,8 +1796,15 @@ var DefaultController = {
           return ParsePromise.error(error);
         });
       }
-      ObjectState.pushPendingState(target.className, target._getStateIdentifier());
-      return ObjectState.enqueueTask(target.className, target._getStateIdentifier(), task).then(() => {
+      let enqueueTask;
+      if (singleInstance) {
+        SingleInstanceState.pushPendingState(target.className, target._getStateIdentifier());
+        enqueueTask = SingleInstanceState.enqueueTask(target.className, target._getStateIdentifier(), task);
+      } else {
+        // TODO: implement uniqueInstanceState
+      }
+
+      return enqueueTask.then(() => {
         return target;
       }, (error) => {
         return ParsePromise.error(error);
