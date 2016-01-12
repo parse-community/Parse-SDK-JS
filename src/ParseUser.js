@@ -56,7 +56,7 @@ export default class ParseUser extends ParseObject {
    * @return {Parse.Promise} A promise that is resolved when the replacement
    *   token has been fetched.
    */
-  _upgradeToRevocableSession(options: RequestOptions) {
+  _upgradeToRevocableSession(options: RequestOptions): ParsePromise {
     options = options || {};
 
     var upgradeOptions = {};
@@ -358,7 +358,7 @@ export default class ParseUser extends ParseObject {
    * @return {Parse.Promise} A promise that is fulfilled when the signup
    *     finishes.
    */
-  signUp(attrs: AttributeMap, options: FullOptions) {
+  signUp(attrs: AttributeMap, options: FullOptions): ParsePromise {
     options = options || {};
 
     var signupOptions = {};
@@ -388,7 +388,7 @@ export default class ParseUser extends ParseObject {
    * @return {Parse.Promise} A promise that is fulfilled with the user when
    *     the login is complete.
    */
-  logIn(options: FullOptions) {
+  logIn(options: FullOptions): ParsePromise {
     options = options || {};
 
     var loginOptions = {};
@@ -404,7 +404,7 @@ export default class ParseUser extends ParseObject {
    * Wrap the default save behavior with functionality to save to local
    * storage if this is current user.
    */
-  save(...args) {
+  save(...args: Array<any>): ParsePromise {
     return super.save.apply(this, args).then(() => {
       if (this.isCurrent()) {
         return CoreManager.getUserController().updateUserOnDisk(this);
@@ -417,7 +417,7 @@ export default class ParseUser extends ParseObject {
    * Wrap the default fetch behavior with functionality to save to local
    * storage if this is current user.
    */
-  fetch(...args) {
+  fetch(...args: Array<any>): ParsePromise {
     return super.fetch.apply(this, args).then(() => {
       if (this.isCurrent()) {
         return CoreManager.getUserController().updateUserOnDisk(this);

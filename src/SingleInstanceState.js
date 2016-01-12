@@ -11,6 +11,10 @@
 
 import * as ObjectStateMutations from './ObjectStateMutations';
 
+import type { Op } from './ParseOp';
+import type ParsePromise from './ParsePromise';
+import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
+
 type ObjectIdentifier = {
   className: string;
   id: string
@@ -120,7 +124,7 @@ export function commitServerChanges(obj: ObjectIdentifier, changes: AttributeMap
   ObjectStateMutations.commitServerChanges(state.serverData, state.objectCache, changes);
 }
 
-export function enqueueTask(obj: ObjectIdentifier, task: () => ParsePromise) {
+export function enqueueTask(obj: ObjectIdentifier, task: () => ParsePromise): ParsePromise {
   let state = initializeState(obj);
   return state.tasks.enqueue(task);
 }

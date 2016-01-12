@@ -18,7 +18,7 @@ import ParseRelation from './ParseRelation';
 
 var toString = Object.prototype.toString;
 
-function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, seen: Array<mixed>) {
+function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, seen: Array<mixed>): any {
   if (value instanceof ParseObject) {
     if (disallowObjects) {
       throw new Error('Parse Objects not allowed here');
@@ -75,6 +75,6 @@ function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, 
   return value;
 }
 
-export default function(value: mixed, disallowObjects?: boolean, forcePointers?: boolean, seen?: Array<mixed>) {
+export default function(value: mixed, disallowObjects?: boolean, forcePointers?: boolean, seen?: Array<mixed>): any {
   return encode(value, !!disallowObjects, !!forcePointers, seen || []);
 }

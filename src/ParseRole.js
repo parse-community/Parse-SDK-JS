@@ -104,7 +104,7 @@ export default class ParseRole extends ParseObject {
     return this.relation('roles');
   }
 
-  validate(attrs: AttributeMap, options?: mixed) {
+  validate(attrs: AttributeMap, options?: mixed): ParseError | boolean {
     var isInvalid = super.validate(attrs, options);
     if (isInvalid) {
       return isInvalid;

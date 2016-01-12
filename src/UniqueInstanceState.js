@@ -12,7 +12,10 @@
 import * as ObjectStateMutations from './ObjectStateMutations';
 import TaskQueue from './TaskQueue';
 
+import type { Op } from './ParseOp';
 import type ParseObject from './ParseObject';
+import type ParsePromise from './ParsePromise';
+import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
 
 let objectState = new WeakMap();
 
@@ -115,7 +118,7 @@ export function commitServerChanges(obj: ParseObject, changes: AttributeMap) {
   ObjectStateMutations.commitServerChanges(state.serverData, state.objectCache, changes);
 }
 
-export function enqueueTask(obj: ParseObject, task: () => ParsePromise) {
+export function enqueueTask(obj: ParseObject, task: () => ParsePromise): ParsePromise {
   let state = initializeState(obj);
   return state.tasks.enqueue(task);
 }

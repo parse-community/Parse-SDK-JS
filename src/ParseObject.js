@@ -179,7 +179,7 @@ export default class ParseObject {
   /**
    * Returns a unique identifier used to pull data from the State Controller.
    */
-  _getStateIdentifier(): string {
+  _getStateIdentifier(): mixed {
     if (singleInstance) {
       let id = this.id;
       if (!id) {
@@ -254,7 +254,7 @@ export default class ParseObject {
     return dirty;
   }
 
-  _toFullJSON(seen): AttributeMap {
+  _toFullJSON(seen: Array<any>): AttributeMap {
     var json: { [key: string]: mixed } = this.toJSON(seen);
     json.__type = 'Object';
     json.className = this.className;
@@ -398,7 +398,7 @@ export default class ParseObject {
    * @method toJSON
    * @return {Object}
    */
-  toJSON(seen): AttributeMap {
+  toJSON(seen: Array<any>): AttributeMap {
     var seenEntry = this.id ? this.className + ':' + this.id : this;
     var seen = seen || [seenEntry];
     var json = {};
@@ -829,7 +829,7 @@ export default class ParseObject {
    * @return {} False if the data is valid.  An error object otherwise.
    * @see Parse.Object#set
    */
-  validate(attrs: AttributeMap) {
+  validate(attrs: AttributeMap): ParseError | boolean {
     if (attrs.hasOwnProperty('ACL') && !(attrs.ACL instanceof ParseACL)) {
       return new ParseError(
         ParseError.OTHER_CAUSE,
@@ -915,7 +915,7 @@ export default class ParseObject {
    * @return {Parse.Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetch(options: RequestOptions) {
+  fetch(options: RequestOptions): ParsePromise {
     options = options || {};
     var fetchOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
@@ -979,12 +979,16 @@ export default class ParseObject {
     arg1: ?string | { [attr: string]: mixed },
     arg2: FullOptions | mixed,
     arg3?: FullOptions
-  ) {
+  ): ParsePromise {
     var attrs;
     var options;
     if (typeof arg1 === 'object' || typeof arg1 === 'undefined') {
       attrs = arg1;
-      options = arg2;
+      if (typeof arg2 === 'object') {
+        options = arg2;
+      } else {
+        options = {};
+      }
     } else {
       attrs = {};
       attrs[arg1] = arg2;
@@ -1049,7 +1053,7 @@ export default class ParseObject {
    * @return {Parse.Promise} A promise that is fulfilled when the destroy
    *     completes.
    */
-  destroy(options: RequestOptions) {
+  destroy(options: RequestOptions): ParsePromise {
     options = options || {};
     var destroyOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
@@ -1772,8 +1776,7 @@ var DefaultController = {
       }
 
       stateController.pushPendingState(target._getStateIdentifier());
-      let enqueueTask = stateController.enqueueTask(target._getStateIdentifier(), task);
-      return enqueueTask.then(() => {
+      return stateController.enqueueTask(target._getStateIdentifier(), task).then(() => {
         return target;
       }, (error) => {
         return ParsePromise.error(error);

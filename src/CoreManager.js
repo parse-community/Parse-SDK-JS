@@ -9,8 +9,9 @@
  * @flow
  */
 
-import type { AttributeMap } from './ObjectStateMutations';
+import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
 import type { FileSource } from './ParseFile';
+import type { Op } from './ParseOp';
 import type ParseObject from './ParseObject';
 import type ParsePromise from './ParsePromise';
 import type { QueryJSON } from './ParseQuery';
@@ -44,21 +45,21 @@ type ObjectController = {
   destroy: (object: ParseObject, options: RequestOptions) => ParsePromise;
 };
 type ObjectStateController = {
-  getState: (obj: ParseObject) => ?State;
-  initializeState: (obj: ParseObject, initial?: State) => State;
-  removeState: (obj: ParseObject) => ?State;
-  getServerData: (obj: ParseObject) => AttributeMap;
-  setServerData: (obj: ParseObject, attributes: AttributeMap) => void;
-  getPendingOps: (obj: ParseObject) => Array<OpsMap>;
-  setPendingOp: (obj: ParseObject, attr: string, op: ?Op) => void;
-  pushPendingState: (obj: ParseObject) => void;
-  popPendingState: (obj: ParseObject) => OpsMap;
-  mergeFirstPendingState: (obj: ParseObject) => void;
-  getObjectCache: (obj: ParseObject) => ObjectCache;
-  estimateAttribute: (obj: ParseObject, attr: string) => mixed;
-  estimateAttributes: (obj: ParseObject) => AttributeMap;
-  commitServerChanges: (obj: ParseObject, changes: AttributeMap) => void;
-  enqueueTask: (obj: ParseObject, task: () => ParsePromise) => void;
+  getState: (obj: any) => ?State;
+  initializeState: (obj: any, initial?: State) => State;
+  removeState: (obj: any) => ?State;
+  getServerData: (obj: any) => AttributeMap;
+  setServerData: (obj: any, attributes: AttributeMap) => void;
+  getPendingOps: (obj: any) => Array<OpsMap>;
+  setPendingOp: (obj: any, attr: string, op: ?Op) => void;
+  pushPendingState: (obj: any) => void;
+  popPendingState: (obj: any) => OpsMap;
+  mergeFirstPendingState: (obj: any) => void;
+  getObjectCache: (obj: any) => ObjectCache;
+  estimateAttribute: (obj: any, attr: string) => mixed;
+  estimateAttributes: (obj: any) => AttributeMap;
+  commitServerChanges: (obj: any, changes: AttributeMap) => void;
+  enqueueTask: (obj: any, task: () => ParsePromise) => ParsePromise;
   clearAllState: () => void;
 };
 type PushController = {
@@ -82,6 +83,7 @@ type StorageController = {
   getItemAsync?: (path: string) => ParsePromise;
   setItemAsync?: (path: string, value: string) => ParsePromise;
   removeItemAsync?: (path: string) => ParsePromise;
+  clear: () => void;
 } | {
   async: 1;
   getItem?: (path: string) => ?string;
@@ -90,6 +92,7 @@ type StorageController = {
   getItemAsync: (path: string) => ParsePromise;
   setItemAsync: (path: string, value: string) => ParsePromise;
   removeItemAsync: (path: string) => ParsePromise;
+  clear: () => void;
 };
 type UserController = {
   setCurrentUser: (user: ParseUser) => ParsePromise;
@@ -100,6 +103,7 @@ type UserController = {
   become: (options: RequestOptions) => ParsePromise;
   logOut: () => ParsePromise;
   requestPasswordReset: (email: string, options: RequestOptions) => ParsePromise;
+  updateUserOnDisk: (user: ParseUser) => ParsePromise;
   upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => ParsePromise;
   linkWith: (user: ParseUser, authData: AuthData) => ParsePromise;
 };
