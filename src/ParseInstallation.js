@@ -11,7 +11,7 @@
 
 import ParseObject from './ParseObject';
 
-import type { AttributeMap } from './ObjectState';
+import type { AttributeMap } from './ObjectStateMutations';
 
 export default class Installation extends ParseObject {
   constructor(attributes: ?AttributeMap) {

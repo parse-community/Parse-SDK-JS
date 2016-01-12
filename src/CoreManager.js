@@ -9,7 +9,7 @@
  * @flow
  */
 
-import type { AttributeMap } from './ObjectState';
+import type { AttributeMap } from './ObjectStateMutations';
 import type { FileSource } from './ParseFile';
 import type ParseObject from './ParseObject';
 import type ParsePromise from './ParsePromise';

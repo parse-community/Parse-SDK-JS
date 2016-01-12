@@ -13,7 +13,7 @@ import ParseACL from './ParseACL';
 import ParseError from './ParseError';
 import ParseObject from './ParseObject';
 
-import type { AttributeMap } from './ObjectState';
+import type { AttributeMap } from './ObjectStateMutations';
 import type ParseRelation from './ParseRelation';
 
 /**

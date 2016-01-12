@@ -11,7 +11,7 @@ jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../isRevocableSession');
-jest.dontMock('../ObjectState')
+jest.dontMock('../ObjectStateMutations')
 jest.dontMock('../parseDate');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');

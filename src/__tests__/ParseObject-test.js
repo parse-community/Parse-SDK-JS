@@ -14,7 +14,7 @@ jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../equals');
 jest.dontMock('../escape');
-jest.dontMock('../ObjectState');
+jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../parseDate');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseFile');
@@ -62,7 +62,7 @@ mockQuery.prototype.find = function() {
 jest.setMock('../ParseQuery', mockQuery);
 
 const CoreManager = require('../CoreManager');
-const ObjectState = require('../ObjectState');
+const ObjectStateMutations = require('../ObjectStateMutations');
 const ParseACL = require('../ParseACL');
 const ParseError = require('../ParseError');
 const ParseFile = require('../ParseFile');

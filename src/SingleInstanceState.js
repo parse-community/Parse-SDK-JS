@@ -9,7 +9,7 @@
  * @flow
  */
 
-import * as ObjectState from './ObjectState';
+import * as ObjectStateMutations from './ObjectStateMutations';
 
 type ObjectIdentifier = {
   className: string;
@@ -39,7 +39,7 @@ export function initializeState(obj: ObjectIdentifier, initial?: State): State {
     objectState[obj.className] = {};
   }
   if (!initial) {
-    initial = ObjectState.defaultState();
+    initial = ObjectStateMutations.defaultState();
   }
   state = objectState[obj.className][obj.id] = initial;
   return state;
@@ -64,7 +64,7 @@ export function getServerData(obj: ObjectIdentifier): AttributeMap {
 
 export function setServerData(obj: ObjectIdentifier, attributes: AttributeMap) {
   let serverData = initializeState(obj).serverData;
-  ObjectState.setServerData(serverData, attributes);
+  ObjectStateMutations.setServerData(serverData, attributes);
 }
 
 export function getPendingOps(obj: ObjectIdentifier): Array<OpsMap> {
@@ -77,22 +77,22 @@ export function getPendingOps(obj: ObjectIdentifier): Array<OpsMap> {
 
 export function setPendingOp(obj: ObjectIdentifier, attr: string, op: ?Op) {
   let pendingOps = initializeState(obj).pendingOps;
-  ObjectState.setPendingOp(pendingOps, attr, op);
+  ObjectStateMutations.setPendingOp(pendingOps, attr, op);
 }
 
 export function pushPendingState(obj: ObjectIdentifier) {
   let pendingOps = initializeState(obj).pendingOps;
-  ObjectState.pushPendingState(pendingOps);
+  ObjectStateMutations.pushPendingState(pendingOps);
 }
 
 export function popPendingState(obj: ObjectIdentifier): OpsMap {
   let pendingOps = initializeState(obj).pendingOps;
-  return ObjectState.popPendingState(pendingOps);
+  return ObjectStateMutations.popPendingState(pendingOps);
 }
 
 export function mergeFirstPendingState(obj: ObjectIdentifier) {
   let pendingOps = getPendingOps(obj);
-  ObjectState.mergeFirstPendingState(pendingOps);
+  ObjectStateMutations.mergeFirstPendingState(pendingOps);
 }
 
 export function getObjectCache(obj: ObjectIdentifier): ObjectCache {
@@ -106,18 +106,18 @@ export function getObjectCache(obj: ObjectIdentifier): ObjectCache {
 export function estimateAttribute(obj: ObjectIdentifier, attr: string): mixed {
   let serverData = getServerData(obj);
   let pendingOps = getPendingOps(obj);
-  return ObjectState.estimateAttribute(serverData, pendingOps, obj.className, obj.id, attr);
+  return ObjectStateMutations.estimateAttribute(serverData, pendingOps, obj.className, obj.id, attr);
 }
 
 export function estimateAttributes(obj: ObjectIdentifier): AttributeMap {
   let serverData = getServerData(obj);
   let pendingOps = getPendingOps(obj);
-  return ObjectState.estimateAttributes(serverData, pendingOps, obj.className, obj.id);
+  return ObjectStateMutations.estimateAttributes(serverData, pendingOps, obj.className, obj.id);
 }
 
 export function commitServerChanges(obj: ObjectIdentifier, changes: AttributeMap) {
   let state = initializeState(obj);
-  ObjectState.commitServerChanges(state.serverData, state.objectCache, changes);
+  ObjectStateMutations.commitServerChanges(state.serverData, state.objectCache, changes);
 }
 
 export function enqueueTask(obj: ObjectIdentifier, task: () => ParsePromise) {

@@ -9,7 +9,7 @@
 
 jest.dontMock('../decode');
 jest.dontMock('../encode');
-jest.dontMock('../ObjectState');
+jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseOp');

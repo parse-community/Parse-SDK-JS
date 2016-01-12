@@ -38,7 +38,7 @@ import unique from './unique';
 import * as UniqueInstanceState from './UniqueInstanceState';
 import unsavedChildren from './unsavedChildren';
 
-import type { AttributeMap, OpsMap } from './ObjectState';
+import type { AttributeMap, OpsMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
 
 export type Pointer = {

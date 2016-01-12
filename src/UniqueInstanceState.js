@@ -9,7 +9,7 @@
  * @flow
  */
 
-import * as ObjectState from './ObjectState';
+import * as ObjectStateMutations from './ObjectStateMutations';
 import TaskQueue from './TaskQueue';
 
 import type ParseObject from './ParseObject';
@@ -59,7 +59,7 @@ export function getServerData(obj: ParseObject): AttributeMap {
 
 export function setServerData(obj: ParseObject, attributes: AttributeMap) {
   let serverData = initializeState(obj).serverData;
-  ObjectState.setServerData(serverData, attributes);
+  ObjectStateMutations.setServerData(serverData, attributes);
 }
 
 export function getPendingOps(obj: ParseObject): Array<OpsMap> {
@@ -72,22 +72,22 @@ export function getPendingOps(obj: ParseObject): Array<OpsMap> {
 
 export function setPendingOp(obj: ParseObject, attr: string, op: ?Op) {
   let pendingOps = initializeState(obj).pendingOps;
-  ObjectState.setPendingOp(pendingOps, attr, op);
+  ObjectStateMutations.setPendingOp(pendingOps, attr, op);
 }
 
 export function pushPendingState(obj: ParseObject) {
   let pendingOps = initializeState(obj).pendingOps;
-  ObjectState.pushPendingState(pendingOps);
+  ObjectStateMutations.pushPendingState(pendingOps);
 }
 
 export function popPendingState(obj: ParseObject): OpsMap {
   let pendingOps = initializeState(obj).pendingOps;
-  return ObjectState.popPendingState(pendingOps);
+  return ObjectStateMutations.popPendingState(pendingOps);
 }
 
 export function mergeFirstPendingState(obj: ParseObject) {
   let pendingOps = getPendingOps(obj);
-  ObjectState.mergeFirstPendingState(pendingOps);
+  ObjectStateMutations.mergeFirstPendingState(pendingOps);
 }
 
 export function getObjectCache(obj: ParseObject): ObjectCache {
@@ -101,18 +101,18 @@ export function getObjectCache(obj: ParseObject): ObjectCache {
 export function estimateAttribute(obj: ParseObject, attr: string): mixed {
   let serverData = getServerData(obj);
   let pendingOps = getPendingOps(obj);
-  return ObjectState.estimateAttribute(serverData, pendingOps, obj.className, obj.id, attr);
+  return ObjectStateMutations.estimateAttribute(serverData, pendingOps, obj.className, obj.id, attr);
 }
 
 export function estimateAttributes(obj: ParseObject): AttributeMap {
   let serverData = getServerData(obj);
   let pendingOps = getPendingOps(obj);
-  return ObjectState.estimateAttributes(serverData, pendingOps, obj.className, obj.id);
+  return ObjectStateMutations.estimateAttributes(serverData, pendingOps, obj.className, obj.id);
 }
 
 export function commitServerChanges(obj: ParseObject, changes: AttributeMap) {
   let state = initializeState(obj);
-  ObjectState.commitServerChanges(state.serverData, state.objectCache, changes);
+  ObjectStateMutations.commitServerChanges(state.serverData, state.objectCache, changes);
 }
 
 export function enqueueTask(obj: ParseObject, task: () => ParsePromise) {
