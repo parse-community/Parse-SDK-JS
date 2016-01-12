@@ -7,12 +7,14 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../ObjectState');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
 jest.dontMock('../ParseRole');
+jest.dontMock('../SingleInstanceState');
 jest.dontMock('../UniqueInstanceState');
 
 const ParseACL = require('../ParseACL');

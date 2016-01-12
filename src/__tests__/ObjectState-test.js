@@ -127,4 +127,14 @@ describe('ObjectState', () => {
     expect(serverData).toEqual({ name: 'foo', data: { count: 5 } });
     expect(objectCache).toEqual({ data: '{"count":5}' });
   });
+
+  it('can generate a default state for implementations', () => {
+    expect(ObjectState.defaultState()).toEqual({
+      serverData: {},
+      pendingOps: [{}],
+      objectCache: {},
+      tasks: new TaskQueue(),
+      existed: false
+    });
+  });
 });

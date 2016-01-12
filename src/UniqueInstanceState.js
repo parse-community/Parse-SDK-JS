@@ -120,6 +120,6 @@ export function enqueueTask(obj: ParseObject, task: () => ParsePromise) {
   return state.tasks.enqueue(task);
 }
 
-export function _clearAllState() {
+export function clearAllState() {
   objectState = new WeakMap();
 }

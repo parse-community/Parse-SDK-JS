@@ -43,6 +43,24 @@ type ObjectController = {
   save: (object: ParseObject, options: RequestOptions) => ParsePromise;
   destroy: (object: ParseObject, options: RequestOptions) => ParsePromise;
 };
+type ObjectStateController = {
+  getState: (obj: ParseObject) => ?State;
+  initializeState: (obj: ParseObject, initial?: State) => State;
+  removeState: (obj: ParseObject) => ?State;
+  getServerData: (obj: ParseObject) => AttributeMap;
+  setServerData: (obj: ParseObject, attributes: AttributeMap) => void;
+  getPendingOps: (obj: ParseObject) => Array<OpsMap>;
+  setPendingOp: (obj: ParseObject, attr: string, op: ?Op) => void;
+  pushPendingState: (obj: ParseObject) => void;
+  popPendingState: (obj: ParseObject) => OpsMap;
+  mergeFirstPendingState: (obj: ParseObject) => void;
+  getObjectCache: (obj: ParseObject) => ObjectCache;
+  estimateAttribute: (obj: ParseObject, attr: string) => mixed;
+  estimateAttributes: (obj: ParseObject) => AttributeMap;
+  commitServerChanges: (obj: ParseObject, changes: AttributeMap) => void;
+  enqueueTask: (obj: ParseObject, task: () => ParsePromise) => void;
+  clearAllState: () => void;
+};
 type PushController = {
   send: (data: PushData, options: RequestOptions) => ParsePromise;
 };
@@ -179,17 +197,6 @@ module.exports = {
     return config['InstallationController'];
   },
 
-  setPushController(controller: PushController) {
-    if (typeof controller.send !== 'function') {
-      throw new Error('PushController must implement send()');
-    }
-    config['PushController'] = controller;
-  },
-
-  getPushController(): PushController {
-    return config['PushController'];
-  },
-
   setObjectController(controller: ObjectController) {
     if (typeof controller.save !== 'function') {
       throw new Error('ObjectController must implement save()');
@@ -205,6 +212,107 @@ module.exports = {
 
   getObjectController(): ObjectController {
     return config['ObjectController'];
+  },
+
+  setObjectStateController(controller: ObjectStateController) {
+    if (typeof controller.getState !== 'function') {
+      console.log(controller);
+      throw new Error(
+        'ObjectStateController must implement getState()'
+      );
+    }
+    if (typeof controller.initializeState !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement initializeState()'
+      );
+    }
+    if (typeof controller.removeState !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement removeState()'
+      );
+    }
+    if (typeof controller.getServerData !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement getServerData()'
+      );
+    }
+    if (typeof controller.setServerData !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement setServerData()'
+      );
+    }
+    if (typeof controller.getPendingOps !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement getPendingOps()'
+      );
+    }
+    if (typeof controller.setPendingOp !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement setPendingOp()'
+      );
+    }
+    if (typeof controller.pushPendingState !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement pushPendingState()'
+      );
+    }
+    if (typeof controller.popPendingState !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement popPendingState()'
+      );
+    }
+    if (typeof controller.mergeFirstPendingState !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement mergeFirstPendingState()'
+      );
+    }
+    if (typeof controller.getObjectCache !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement getObjectCache()'
+      );
+    }
+    if (typeof controller.estimateAttribute !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement estimateAttribute()'
+      );
+    }
+    if (typeof controller.estimateAttributes !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement estimateAttributes()'
+      );
+    }
+    if (typeof controller.commitServerChanges !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement commitServerChanges()'
+      );
+    }
+    if (typeof controller.enqueueTask !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement enqueueTask()'
+      );
+    }
+    if (typeof controller.clearAllState !== 'function') {
+      throw new Error(
+        'ObjectStateController must implement clearAllState()'
+      );
+    }
+
+    config['ObjectStateController'] = controller;
+  },
+
+  getObjectStateController(): ObjectStateController {
+    return config['ObjectStateController'];
+  },
+
+  setPushController(controller: PushController) {
+    if (typeof controller.send !== 'function') {
+      throw new Error('PushController must implement send()');
+    }
+    config['PushController'] = controller;
+  },
+
+  getPushController(): PushController {
+    return config['PushController'];
   },
 
   setQueryController(controller: QueryController) {

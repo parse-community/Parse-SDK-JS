@@ -31,6 +31,16 @@ export type State = {
   existed: boolean
 };
 
+export function defaultState(): State {
+  return {
+    serverData: {},
+    pendingOps: [{}],
+    objectCache: {},
+    tasks: new TaskQueue(),
+    existed: false
+  };
+}
+
 export function setServerData(serverData: AttributeMap, attributes: AttributeMap) {
   for (let attr in attributes) {
     if (typeof attributes[attr] !== 'undefined') {

@@ -10,7 +10,11 @@
  */
 
 import * as ObjectState from './ObjectState';
-import TaskQueue from './TaskQueue';
+
+type ObjectIdentifier = {
+  className: string;
+  id: string
+};
 
 let objectState: {
   [className: string]: {
@@ -18,115 +22,109 @@ let objectState: {
   }
 } = {};
 
-export function getState(className: string, id: string): ?State {
-  let classData = objectState[className];
+export function getState(obj: ObjectIdentifier): ?State {
+  let classData = objectState[obj.className];
   if (classData) {
-    return classData[id] || null;
+    return classData[obj.id] || null;
   }
   return null;
 }
 
-export function initializeState(className: string, id: string, initial?: State): State {
-  let state = getState(className, id);
+export function initializeState(obj: ObjectIdentifier, initial?: State): State {
+  let state = getState(obj);
   if (state) {
     return state;
   }
-  if (!objectState[className]) {
-    objectState[className] = {};
+  if (!objectState[obj.className]) {
+    objectState[obj.className] = {};
   }
   if (!initial) {
-    initial = {
-      serverData: {},
-      pendingOps: [{}],
-      objectCache: {},
-      tasks: new TaskQueue(),
-      existed: false
-    };
+    initial = ObjectState.defaultState();
   }
-  state = objectState[className][id] = initial;
+  state = objectState[obj.className][obj.id] = initial;
   return state;
 }
 
-export function removeState(className: string, id: string): ?State {
-  let state = getState(className, id);
+export function removeState(obj: ObjectIdentifier): ?State {
+  let state = getState(obj);
   if (state === null) {
     return null;
   }
-  delete objectState[className][id];
+  delete objectState[obj.className][obj.id];
   return state;
 }
 
-export function getServerData(className: string, id: string): AttributeMap {
-  let state = getState(className, id);
+export function getServerData(obj: ObjectIdentifier): AttributeMap {
+  let state = getState(obj);
   if (state) {
     return state.serverData;
   }
   return {};
 }
 
-export function setServerData(className: string, id: string, attributes: AttributeMap) {
-  let serverData = initializeState(className, id).serverData;
+export function setServerData(obj: ObjectIdentifier, attributes: AttributeMap) {
+  let serverData = initializeState(obj).serverData;
   ObjectState.setServerData(serverData, attributes);
 }
 
-export function getPendingOps(className: string, id: string): Array<OpsMap> {
-  let state = getState(className, id);
+export function getPendingOps(obj: ObjectIdentifier): Array<OpsMap> {
+  let state = getState(obj);
   if (state) {
     return state.pendingOps;
   }
   return [{}];
 }
 
-export function setPendingOp(className: string, id: string, attr: string, op: ?Op) {
-  let pendingOps = initializeState(className, id).pendingOps;
+export function setPendingOp(obj: ObjectIdentifier, attr: string, op: ?Op) {
+  let pendingOps = initializeState(obj).pendingOps;
   ObjectState.setPendingOp(pendingOps, attr, op);
 }
 
-export function pushPendingState(className: string, id: string) {
-  let pendingOps = initializeState(className, id).pendingOps;
+export function pushPendingState(obj: ObjectIdentifier) {
+  let pendingOps = initializeState(obj).pendingOps;
   ObjectState.pushPendingState(pendingOps);
 }
 
-export function popPendingState(className: string, id: string): OpsMap {
-  let pendingOps = initializeState(className, id).pendingOps;
+export function popPendingState(obj: ObjectIdentifier): OpsMap {
+  let pendingOps = initializeState(obj).pendingOps;
   return ObjectState.popPendingState(pendingOps);
 }
 
-export function mergeFirstPendingState(className: string, id: string) {
-  let pendingOps = getPendingOps(className, id);
+export function mergeFirstPendingState(obj: ObjectIdentifier) {
+  let pendingOps = getPendingOps(obj);
   ObjectState.mergeFirstPendingState(pendingOps);
 }
 
-export function getObjectCache(className: string, id: string): ObjectCache {
-  let state = getState(className, id);
+export function getObjectCache(obj: ObjectIdentifier): ObjectCache {
+  let state = getState(obj);
   if (state) {
     return state.objectCache;
   }
   return {};
 }
 
-export function estimateAttribute(className: string, id: string, attr: string): mixed {
-  let serverData = getServerData(className, id);
-  let pendingOps = getPendingOps(className, id);
-  return ObjectState.estimateAttribute(serverData, pendingOps, className, id, attr);
+export function estimateAttribute(obj: ObjectIdentifier, attr: string): mixed {
+  let serverData = getServerData(obj);
+  let pendingOps = getPendingOps(obj);
+  return ObjectState.estimateAttribute(serverData, pendingOps, obj.className, obj.id, attr);
 }
 
-export function estimateAttributes(className: string, id: string): AttributeMap {
-  let serverData = getServerData(className, id);
-  let pendingOps = getPendingOps(className, id);
-  return ObjectState.estimateAttributes(serverData, pendingOps, className, id);
+export function estimateAttributes(obj: ObjectIdentifier): AttributeMap {
+  let serverData = getServerData(obj);
+  let pendingOps = getPendingOps(obj);
+  return ObjectState.estimateAttributes(serverData, pendingOps, obj.className, obj.id);
 }
 
-export function commitServerChanges(className: string, id: string, changes: AttributeMap) {
-  let state = initializeState(className, id);
+export function commitServerChanges(obj: ObjectIdentifier, changes: AttributeMap) {
+  let state = initializeState(obj);
   ObjectState.commitServerChanges(state.serverData, state.objectCache, changes);
 }
 
-export function enqueueTask(className: string, id: string, task: () => ParsePromise) {
-  let state = initializeState(className, id);
+export function enqueueTask(obj: ObjectIdentifier, task: () => ParsePromise) {
+  let state = initializeState(obj);
   return state.tasks.enqueue(task);
 }
 
-export function _clearAllState() {
+export function clearAllState() {
   objectState = {};
 }

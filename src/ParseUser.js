@@ -15,9 +15,7 @@ import ParseError from './ParseError';
 import ParseObject from './ParseObject';
 import ParsePromise from './ParsePromise';
 import ParseSession from './ParseSession';
-import * as SingleInstanceState from './SingleInstanceState';
 import Storage from './Storage';
-import * as UniqueInstanceState from './UniqueInstanceState';
 
 import type { AttributeMap } from './ObjectState';
 import type { RequestOptions, FullOptions } from './RESTController';
@@ -849,6 +847,7 @@ var DefaultController = {
 
   logIn(user: ParseUser, options: RequestOptions): ParsePromise {
     var RESTController = CoreManager.getRESTController();
+    var stateController = CoreManager.getObjectStateController();
     var auth = {
       username: user.get('username'),
       password: user.get('password')
@@ -858,21 +857,12 @@ var DefaultController = {
     ).then((response, status) => {
       user._migrateId(response.objectId);
       user._setExisted(true);
-      if (ParseObject.isSingleInstance()) {
-        SingleInstanceState.setPendingOp(
-          user.className, user._getId(), 'username', undefined
-        );
-        SingleInstanceState.setPendingOp(
-          user.className, user._getId(), 'password', undefined
-        );
-      } else {
-        UniqueInstanceState.setPendingOp(
-          user, 'username', undefined
-        );
-        UniqueInstanceState.setPendingOp(
-          user, 'password', undefined
-        );
-      }
+      stateController.setPendingOp(
+        user._getStateIdentifier(), 'username', undefined
+      );
+      stateController.setPendingOp(
+        user._getStateIdentifier(), 'password', undefined
+      );
       response.password = undefined;
       user._finishFetch(response);
       if (!canUseCurrentUser) {

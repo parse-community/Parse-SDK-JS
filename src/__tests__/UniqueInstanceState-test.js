@@ -70,7 +70,7 @@ describe('UniqueInstanceState', () => {
       tasks: new TaskQueue(),
       existed: false
     });
-    UniqueInstanceState._clearAllState();
+    UniqueInstanceState.clearAllState();
     expect(UniqueInstanceState.getState(obj)).toEqual(null);
   });
 
