@@ -23,7 +23,7 @@ jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
-jest.dontMock('../UniqueInstanceState');
+jest.dontMock('../UniqueInstanceStateController');
 
 jest.dontMock('./test_helpers/asyncHelper');
 jest.dontMock('./test_helpers/mockXHR');

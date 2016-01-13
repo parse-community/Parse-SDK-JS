@@ -23,10 +23,10 @@ jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
 jest.dontMock('../ParsePromise');
 jest.dontMock('../RESTController');
-jest.dontMock('../SingleInstanceState');
+jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
-jest.dontMock('../UniqueInstanceState');
+jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 
@@ -71,7 +71,7 @@ const ParseObject = require('../ParseObject');
 const ParseOp = require('../ParseOp');
 const ParsePromise = require('../ParsePromise');
 const RESTController = require('../RESTController');
-const SingleInstanceState = require('../SingleInstanceState');
+const SingleInstanceStateController = require('../SingleInstanceStateController');
 const unsavedChildren = require('../unsavedChildren');
 
 const asyncHelper = require('./test_helpers/asyncHelper');
@@ -752,13 +752,13 @@ describe('ParseObject', () => {
     p.set('age', 34);
     expect(p._localId).toBeTruthy();
     expect(p.id).toBe(undefined);
-    var oldState = SingleInstanceState.getState({ className: 'Person', id: p._localId });
+    var oldState = SingleInstanceStateController.getState({ className: 'Person', id: p._localId });
     p._handleSaveResponse({
       objectId: 'P4'
     });
     expect(p._localId).toBe(undefined);
     expect(p.id).toBe('P4');
-    var newState = SingleInstanceState.getState({ className: 'Person', id: 'P4' });
+    var newState = SingleInstanceStateController.getState({ className: 'Person', id: 'P4' });
     expect(oldState.serverData).toBe(newState.serverData);
     expect(oldState.pendingOps).toBe(newState.pendingOps);
     expect(oldState.tasks).toBe(newState.tasks);
@@ -1609,7 +1609,7 @@ describe('ObjectController', () => {
       // Objects in the second batch will not be prepared for save yet
       // This means they can also be modified before the first batch returns
       expect(
-        SingleInstanceState.getState({ className: 'Person', id: objects[20]._getId() }).pendingOps.length
+        SingleInstanceStateController.getState({ className: 'Person', id: objects[20]._getId() }).pendingOps.length
       ).toBe(1);
       objects[20].set('index', 0);
 

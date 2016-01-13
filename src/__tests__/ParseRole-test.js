@@ -14,8 +14,8 @@ jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
 jest.dontMock('../ParseRole');
-jest.dontMock('../SingleInstanceState');
-jest.dontMock('../UniqueInstanceState');
+jest.dontMock('../SingleInstanceStateController');
+jest.dontMock('../UniqueInstanceStateController');
 
 const ParseACL = require('../ParseACL');
 const ParseError = require('../ParseError');

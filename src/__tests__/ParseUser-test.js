@@ -19,12 +19,12 @@ jest.dontMock('../ParseOp');
 jest.dontMock('../ParsePromise');
 jest.dontMock('../ParseUser');
 jest.dontMock('../RESTController');
-jest.dontMock('../SingleInstanceState');
+jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
-jest.dontMock('../UniqueInstanceState');
+jest.dontMock('../UniqueInstanceStateController');
 
 jest.dontMock('./test_helpers/asyncHelper');
 jest.dontMock('./test_helpers/mockXHR');

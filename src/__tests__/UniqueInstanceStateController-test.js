@@ -14,7 +14,7 @@ jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseOp');
 jest.dontMock('../ParsePromise');
-jest.dontMock('../UniqueInstanceState');
+jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../TaskQueue');
 
 const mockObject = function(className) {
@@ -28,30 +28,30 @@ const ParseGeoPoint = require('../ParseGeoPoint');
 const ParseObject = require('../ParseObject'); 
 const ParseOps = require('../ParseOp');
 const ParsePromise = require('../ParsePromise');
-const UniqueInstanceState = require('../UniqueInstanceState');
+const UniqueInstanceStateController = require('../UniqueInstanceStateController');
 const TaskQueue = require('../TaskQueue');
 
-describe('UniqueInstanceState', () => {
+describe('UniqueInstanceStateController', () => {
   it('returns null state for an unknown object', () => {
     let obj = new ParseObject();
-    expect(UniqueInstanceState.getState(obj)).toBe(null);
+    expect(UniqueInstanceStateController.getState(obj)).toBe(null);
   });
 
   it('returns empty data for an unknown object', () => {
     let obj = new ParseObject();
-    expect(UniqueInstanceState.getServerData(obj)).toEqual({});
+    expect(UniqueInstanceStateController.getServerData(obj)).toEqual({});
   });
 
   it('returns an empty op queue for an unknown object', () => {
     let obj = new ParseObject();
-    expect(UniqueInstanceState.getPendingOps(obj)).toEqual([{}]);
+    expect(UniqueInstanceStateController.getPendingOps(obj)).toEqual([{}]);
   });
 
   it('initializes server data when setting state', () => {
     let obj = new ParseObject();
-    expect(UniqueInstanceState.getState(obj)).toBe(null);
-    UniqueInstanceState.setServerData(obj, { counter: 12 });
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    expect(UniqueInstanceStateController.getState(obj)).toBe(null);
+    UniqueInstanceStateController.setServerData(obj, { counter: 12 });
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: { counter: 12 },
       pendingOps: [{}],
       objectCache: {},
@@ -62,24 +62,24 @@ describe('UniqueInstanceState', () => {
 
   it('can clear all data', () => {
     let obj = new ParseObject();
-    UniqueInstanceState.setServerData(obj, { counter: 12 });
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setServerData(obj, { counter: 12 });
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: { counter: 12 },
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
       existed: false
     });
-    UniqueInstanceState.clearAllState();
-    expect(UniqueInstanceState.getState(obj)).toEqual(null);
+    UniqueInstanceStateController.clearAllState();
+    expect(UniqueInstanceStateController.getState(obj)).toEqual(null);
   });
 
   it('initializes server data when setting pending ops', () => {
     let obj = new ParseObject();
-    expect(UniqueInstanceState.getState(obj)).toBe(null);
+    expect(UniqueInstanceStateController.getState(obj)).toBe(null);
     let op = new ParseOps.IncrementOp(1);
-    UniqueInstanceState.setPendingOp(obj, 'counter', op);
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setPendingOp(obj, 'counter', op);
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{ counter: op }],
       objectCache: {},
@@ -90,24 +90,24 @@ describe('UniqueInstanceState', () => {
 
   it('can set server data on an existing state', () => {
     let obj = new ParseObject();
-    UniqueInstanceState.setServerData(obj, { counter: 12 });
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setServerData(obj, { counter: 12 });
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: { counter: 12 },
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
       existed: false
     });
-    UniqueInstanceState.setServerData(obj, { valid: true });
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setServerData(obj, { valid: true });
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: { counter: 12, valid: true },
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
       existed: false
     });
-    UniqueInstanceState.setServerData(obj, { counter: 0 });
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setServerData(obj, { counter: 0 });
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: { counter: 0, valid: true },
       pendingOps: [{}],
       objectCache: {},
@@ -118,16 +118,16 @@ describe('UniqueInstanceState', () => {
 
   it('can remove server data from a state', () => {
     let obj = new ParseObject();
-    UniqueInstanceState.setServerData(obj, { counter: 12 });
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setServerData(obj, { counter: 12 });
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: { counter: 12 },
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
       existed: false
     });
-    UniqueInstanceState.setServerData(obj, { counter: undefined });
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setServerData(obj, { counter: undefined });
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{}],
       objectCache: {},
@@ -140,9 +140,9 @@ describe('UniqueInstanceState', () => {
     let obj = new ParseObject();
     let op = new ParseOps.IncrementOp(1);
     let op2 = new ParseOps.SetOp(true);
-    UniqueInstanceState.setPendingOp(obj, 'counter', op);
-    UniqueInstanceState.setPendingOp(obj, 'valid', op2);
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setPendingOp(obj, 'counter', op);
+    UniqueInstanceStateController.setPendingOp(obj, 'valid', op2);
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{ counter: op, valid: op2 }],
       objectCache: {},
@@ -150,8 +150,8 @@ describe('UniqueInstanceState', () => {
       existed: false
     });
     let op3 = new ParseOps.UnsetOp();
-    UniqueInstanceState.setPendingOp(obj, 'valid', op3);
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setPendingOp(obj, 'valid', op3);
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{ counter: op, valid: op3 }],
       objectCache: {},
@@ -163,16 +163,16 @@ describe('UniqueInstanceState', () => {
   it('can unset pending Ops', () => {
     let obj = new ParseObject();
     let op = new ParseOps.IncrementOp(1);
-    UniqueInstanceState.setPendingOp(obj, 'counter', op);
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setPendingOp(obj, 'counter', op);
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{ counter: op }],
       objectCache: {},
       tasks: new TaskQueue(),
       existed: false
     });
-    UniqueInstanceState.setPendingOp(obj, 'counter', null);
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setPendingOp(obj, 'counter', null);
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{}],
       objectCache: {},
@@ -184,16 +184,16 @@ describe('UniqueInstanceState', () => {
   it('can push a new pending state frame', () => {
     let obj = new ParseObject();
     let op = new ParseOps.IncrementOp(1);
-    UniqueInstanceState.setPendingOp(obj, 'counter', op);
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setPendingOp(obj, 'counter', op);
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{ counter: op }],
       objectCache: {},
       tasks: new TaskQueue(),
       existed: false
     });
-    UniqueInstanceState.pushPendingState(obj);
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.pushPendingState(obj);
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{ counter: op }, {}],
       objectCache: {},
@@ -201,8 +201,8 @@ describe('UniqueInstanceState', () => {
       existed: false
     });
     let op2 = new ParseOps.SetOp(true);
-    UniqueInstanceState.setPendingOp(obj, 'valid', op2);
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setPendingOp(obj, 'valid', op2);
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{ counter: op }, { valid: op2 }],
       objectCache: {},
@@ -214,19 +214,19 @@ describe('UniqueInstanceState', () => {
   it('can pop a pending state frame', () => {
     let obj = new ParseObject();
     let op = new ParseOps.IncrementOp(1);
-    UniqueInstanceState.setPendingOp(obj, 'counter', op);
-    UniqueInstanceState.pushPendingState(obj);
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setPendingOp(obj, 'counter', op);
+    UniqueInstanceStateController.pushPendingState(obj);
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{ counter: op }, {}],
       objectCache: {},
       tasks: new TaskQueue(),
       existed: false
     });
-    expect(UniqueInstanceState.popPendingState(obj)).toEqual({
+    expect(UniqueInstanceStateController.popPendingState(obj)).toEqual({
       counter: op
     });
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{}],
       objectCache: {},
@@ -237,17 +237,17 @@ describe('UniqueInstanceState', () => {
 
   it('will never leave the pending Op queue empty', () => {
     let obj = new ParseObject();
-    UniqueInstanceState.pushPendingState(obj);
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.pushPendingState(obj);
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{}, {}],
       objectCache: {},
       tasks: new TaskQueue(),
       existed: false
     });
-    UniqueInstanceState.popPendingState(obj);
-    UniqueInstanceState.popPendingState(obj);
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.popPendingState(obj);
+    UniqueInstanceStateController.popPendingState(obj);
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{}],
       objectCache: {},
@@ -258,50 +258,50 @@ describe('UniqueInstanceState', () => {
 
   it('can estimate a single attribute', () => {
     let obj = new ParseObject();
-    expect(UniqueInstanceState.estimateAttribute(obj, 'unset'))
+    expect(UniqueInstanceStateController.estimateAttribute(obj, 'unset'))
       .toBe(undefined);
-    UniqueInstanceState.setServerData(obj, { counter: 11 });
-    expect(UniqueInstanceState.estimateAttribute(obj, 'counter')).toBe(11);
+    UniqueInstanceStateController.setServerData(obj, { counter: 11 });
+    expect(UniqueInstanceStateController.estimateAttribute(obj, 'counter')).toBe(11);
     let op = new ParseOps.IncrementOp(1);
-    UniqueInstanceState.setPendingOp(obj, 'counter', op);
-    expect(UniqueInstanceState.estimateAttribute(obj, 'counter')).toBe(12);
-    UniqueInstanceState.pushPendingState(obj);
+    UniqueInstanceStateController.setPendingOp(obj, 'counter', op);
+    expect(UniqueInstanceStateController.estimateAttribute(obj, 'counter')).toBe(12);
+    UniqueInstanceStateController.pushPendingState(obj);
     let op2 = new ParseOps.IncrementOp(10);
-    UniqueInstanceState.setPendingOp(obj, 'counter', op2);
-    expect(UniqueInstanceState.estimateAttribute(obj, 'counter')).toBe(22);
+    UniqueInstanceStateController.setPendingOp(obj, 'counter', op2);
+    expect(UniqueInstanceStateController.estimateAttribute(obj, 'counter')).toBe(22);
   });
 
   it('can estimate all attributes', () => {
     let obj = new ParseObject();
-    expect(UniqueInstanceState.estimateAttributes(obj)).toEqual({});
-    UniqueInstanceState.setServerData(obj, { counter: 11 });
+    expect(UniqueInstanceStateController.estimateAttributes(obj)).toEqual({});
+    UniqueInstanceStateController.setServerData(obj, { counter: 11 });
     let op = new ParseOps.IncrementOp(1);
     let op2 = new ParseOps.SetOp(false);
-    UniqueInstanceState.setPendingOp(obj, 'counter', op);
-    UniqueInstanceState.setPendingOp(obj, 'valid', op2);
-    expect(UniqueInstanceState.estimateAttributes(obj)).toEqual({
+    UniqueInstanceStateController.setPendingOp(obj, 'counter', op);
+    UniqueInstanceStateController.setPendingOp(obj, 'valid', op2);
+    expect(UniqueInstanceStateController.estimateAttributes(obj)).toEqual({
       counter: 12,
       valid: false
     });
-    UniqueInstanceState.pushPendingState(obj);
+    UniqueInstanceStateController.pushPendingState(obj);
     let op3 = new ParseOps.UnsetOp();
-    UniqueInstanceState.setPendingOp(obj, 'valid', op3);
-    expect(UniqueInstanceState.estimateAttributes(obj)).toEqual({
+    UniqueInstanceStateController.setPendingOp(obj, 'valid', op3);
+    expect(UniqueInstanceStateController.estimateAttributes(obj)).toEqual({
       counter: 12
     });
   });
 
   it('can update server data with changes', () => {
     let obj = new ParseObject();
-    UniqueInstanceState.setServerData(obj, { counter: 11 });
-    expect(UniqueInstanceState.estimateAttributes(obj)).toEqual({
+    UniqueInstanceStateController.setServerData(obj, { counter: 11 });
+    expect(UniqueInstanceStateController.estimateAttributes(obj)).toEqual({
       counter: 11
     });
-    UniqueInstanceState.commitServerChanges(obj, {
+    UniqueInstanceStateController.commitServerChanges(obj, {
       counter: 12,
       valid: true
     });
-    expect(UniqueInstanceState.estimateAttributes(obj)).toEqual({
+    expect(UniqueInstanceStateController.estimateAttributes(obj)).toEqual({
       counter: 12,
       valid: true
     });
@@ -312,17 +312,17 @@ describe('UniqueInstanceState', () => {
     let p1 = new ParsePromise();
     let p2 = new ParsePromise();
     let called = [false, false, false];
-    let t1 = UniqueInstanceState.enqueueTask(obj, () => {
+    let t1 = UniqueInstanceStateController.enqueueTask(obj, () => {
       return p1.then(() => {
         called[0] = true;
       });
     });
-    let t2 = UniqueInstanceState.enqueueTask(obj, () => {
+    let t2 = UniqueInstanceStateController.enqueueTask(obj, () => {
       return p2.then(() => {
         called[1] = true;
       });
     });
-    let t3 = UniqueInstanceState.enqueueTask(obj, () => {
+    let t3 = UniqueInstanceStateController.enqueueTask(obj, () => {
       called[2] = true;
       return ParsePromise.as();
     });
@@ -343,15 +343,15 @@ describe('UniqueInstanceState', () => {
     let obj = new ParseObject();
     let incCount = new ParseOps.IncrementOp(1);
     let setName = new ParseOps.SetOp('demo');
-    UniqueInstanceState.setPendingOp(obj, 'counter', incCount);
-    UniqueInstanceState.setPendingOp(obj, 'name', setName);
-    UniqueInstanceState.pushPendingState(obj);
+    UniqueInstanceStateController.setPendingOp(obj, 'counter', incCount);
+    UniqueInstanceStateController.setPendingOp(obj, 'name', setName);
+    UniqueInstanceStateController.pushPendingState(obj);
     let setCount = new ParseOps.SetOp(44);
     let setValid = new ParseOps.SetOp(true);
-    UniqueInstanceState.setPendingOp(obj, 'counter', setCount);
-    UniqueInstanceState.setPendingOp(obj, 'valid', setValid);
-    UniqueInstanceState.mergeFirstPendingState(obj);
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    UniqueInstanceStateController.setPendingOp(obj, 'counter', setCount);
+    UniqueInstanceStateController.setPendingOp(obj, 'valid', setValid);
+    UniqueInstanceStateController.mergeFirstPendingState(obj);
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{
         counter: new ParseOps.SetOp(44),
@@ -366,9 +366,9 @@ describe('UniqueInstanceState', () => {
 
   it('stores cached versions of object attributes', () => {
     let obj = new ParseObject();
-    let cache = UniqueInstanceState.getObjectCache(obj);
+    let cache = UniqueInstanceStateController.getObjectCache(obj);
     expect(cache).toEqual({});
-    UniqueInstanceState.commitServerChanges(obj, {
+    UniqueInstanceStateController.commitServerChanges(obj, {
       name: 'MyObject',
       obj: { a: 12, b: 21 },
       location: new ParseGeoPoint(20, 20),
@@ -378,7 +378,7 @@ describe('UniqueInstanceState', () => {
         url: 'http://files.parsetfss.com/a/parse.txt'
       })
     });
-    cache = UniqueInstanceState.getObjectCache(obj);
+    cache = UniqueInstanceStateController.getObjectCache(obj);
     expect(cache.name).toBe(undefined);
     expect(cache.file).toBe(undefined);
     expect(JSON.parse(cache.obj)).toEqual({ a: 12, b: 21 });
@@ -391,16 +391,16 @@ describe('UniqueInstanceState', () => {
 
   it('can remove state for an object', () => {
     let obj = new ParseObject();
-    expect(UniqueInstanceState.removeState(obj)).toBe(null);
-    UniqueInstanceState.setServerData(obj, { counter: 12 });
-    expect(UniqueInstanceState.getState(obj)).toEqual({
+    expect(UniqueInstanceStateController.removeState(obj)).toBe(null);
+    UniqueInstanceStateController.setServerData(obj, { counter: 12 });
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: { counter: 12 },
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
       existed: false
     });
-    let state = UniqueInstanceState.removeState(obj);
+    let state = UniqueInstanceStateController.removeState(obj);
     expect(state).toEqual({
       serverData: { counter: 12 },
       pendingOps: [{}],
@@ -408,13 +408,13 @@ describe('UniqueInstanceState', () => {
       tasks: new TaskQueue(),
       existed: false
     });
-    expect(UniqueInstanceState.getState(obj)).toBe(null);
+    expect(UniqueInstanceStateController.getState(obj)).toBe(null);
   });
 
   it('can allocate many objects without running out of memory', () => {
     let closure = function() {
       let obj = new ParseObject();
-      UniqueInstanceState.setServerData(obj, { spacious: true });
+      UniqueInstanceStateController.setServerData(obj, { spacious: true });
     };
     for (var i = 0; i < 1e5; i++) {
       closure();

@@ -33,9 +33,9 @@ import {
 import ParsePromise from './ParsePromise';
 import ParseQuery from './ParseQuery';
 import ParseRelation from './ParseRelation';
-import * as SingleInstanceState from './SingleInstanceState';
+import * as SingleInstanceStateController from './SingleInstanceStateController';
 import unique from './unique';
-import * as UniqueInstanceState from './UniqueInstanceState';
+import * as UniqueInstanceStateController from './UniqueInstanceStateController';
 import unsavedChildren from './unsavedChildren';
 
 import type { AttributeMap, OpsMap } from './ObjectStateMutations';
@@ -66,9 +66,9 @@ var objectCount = 0;
 // behavior in a server scenario
 var singleInstance = (!CoreManager.get('IS_NODE'));
 if (singleInstance) {
-  CoreManager.setObjectStateController(SingleInstanceState);
+  CoreManager.setObjectStateController(SingleInstanceStateController);
 } else {
-  CoreManager.setObjectStateController(UniqueInstanceState);
+  CoreManager.setObjectStateController(UniqueInstanceStateController);
 }
 
 /**
@@ -1481,7 +1481,7 @@ export default class ParseObject {
    */
   static enableSingleInstance() {
     singleInstance = true;
-    CoreManager.setObjectStateController(SingleInstanceState);
+    CoreManager.setObjectStateController(SingleInstanceStateController);
   }
 
   /**
@@ -1493,7 +1493,7 @@ export default class ParseObject {
    */
   static disableSingleInstance() {
     singleInstance = false;
-    CoreManager.setObjectStateController(UniqueInstanceState);
+    CoreManager.setObjectStateController(UniqueInstanceStateController);
   }
 }
 
