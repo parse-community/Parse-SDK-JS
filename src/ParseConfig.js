@@ -48,7 +48,7 @@ export default class ParseConfig {
    * @method escape
    * @param {String} attr The name of an attribute.
    */
-  escape(attr: string) {
+  escape(attr: string): string {
     var html = this._escapedAttributes[attr];
     if (html) {
       return html;

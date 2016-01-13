@@ -186,6 +186,30 @@ describe('CoreManager', () => {
     expect(CoreManager.getObjectController()).toBe(controller);
   });
 
+  it('can set and get ObjectStateController', () => {
+    var controller = {
+      getState: function() {},
+      initializeState: function() {},
+      removeState: function() {},
+      getServerData: function() {},
+      setServerData: function() {},
+      getPendingOps: function() {},
+      setPendingOp: function() {},
+      pushPendingState: function() {},
+      popPendingState: function() {},
+      mergeFirstPendingState: function() {},
+      getObjectCache: function() {},
+      estimateAttribute: function() {},
+      estimateAttributes: function() {},
+      commitServerChanges: function() {},
+      enqueueTask: function() {},
+      clearAllState: function() {},
+    };
+
+    CoreManager.setObjectStateController(controller);
+    expect(CoreManager.getObjectStateController()).toBe(controller);
+  });
+
   it('requires QueryController to implement certain functionality', () => {
     expect(CoreManager.setQueryController.bind(null, {})).toThrow(
       'QueryController must implement find()'

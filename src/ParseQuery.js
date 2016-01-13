@@ -108,7 +108,7 @@ export default class ParseQuery {
   _order: Array<string>;
   _extraOptions: { [key: string]: mixed };
 
-  constructor(objectClass) {
+  constructor(objectClass: string | ParseObject) {
     if (typeof objectClass === 'string') {
       if (objectClass === 'User' && CoreManager.get('PERFORM_USER_REWRITE')) {
         this.className = '_User';
@@ -215,7 +215,7 @@ export default class ParseQuery {
    * @return {Parse.Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  get(objectId: string, options?: FullOptions) {
+  get(objectId: string, options?: FullOptions): ParsePromise {
     this.equalTo('objectId', objectId);
 
     var firstOptions = {};
@@ -398,7 +398,7 @@ export default class ParseQuery {
    * @return {Parse.Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
-  each(callback: (obj: ParseObject) => any, options?: FullOptions) {
+  each(callback: (obj: ParseObject) => any, options?: FullOptions): ParsePromise {
     options = options || {};
 
     if (this._order || this._skip || (this._limit >= 0)) {

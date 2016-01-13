@@ -227,7 +227,7 @@ describe('Promise', () => {
     jest.runAllTimers();
   }));
 
-  it('can handle promises in parallel', asyncHelper(function(done) {
+  it('can handle promises in parallel with array', asyncHelper(function(done) {
     var COUNT = 5;
 
     var delay = function(ms) {
@@ -249,7 +249,42 @@ describe('Promise', () => {
       generate(i);
     }
 
-    ParsePromise.when(promises).then(function() {
+    ParsePromise.when(promises).then(function(results) {
+      expect(called).toBe(COUNT);
+      expect(COUNT).toBe(results.length);
+      var actual = results;
+      for (var i = 0; i < actual.length; i++) {
+        expect(actual[i]).toBe(5 * i);
+      }
+      done();
+    });
+
+    jest.runAllTimers();
+  }));
+
+  it('can handle promises in parallel with arguments', asyncHelper(function(done) {
+    var COUNT = 5;
+
+    var delay = function(ms) {
+      var promise = new ParsePromise();
+      setTimeout(() => { promise.resolve(); }, ms);
+      return promise;
+    };
+
+    var called = 0;
+    var promises = [];
+    function generate(i) {
+      promises[i] = delay((i % 2) ? (i * 10) : (COUNT * 10) - (i * 10)).then(
+        function() {
+          called++;
+          return 5 * i;
+        });
+    }
+    for (var i = 0; i < COUNT; i++) {
+      generate(i);
+    }
+
+    ParsePromise.when.apply(null, promises).then(function() {
       expect(called).toBe(COUNT);
       expect(COUNT).toBe(arguments.length);
       var actual = arguments;
@@ -430,5 +465,57 @@ describe('Promise', () => {
     expect(ParsePromise.is({})).toBe(false);
     expect(ParsePromise.is(ParsePromise.as())).toBe(true);
     expect(ParsePromise.is(ParsePromise.error())).toBe(true);
-  })
+  });
+
+  it('can be constructed in ES6 style and resolved', asyncHelper((done) => {
+    expect(ParsePromise.length).toBe(1); // constructor arguments
+
+    new ParsePromise((resolve, reject) => {
+      resolve('abc');
+    }).then((result) => {
+      expect(result).toBe('abc');
+      
+      return new ParsePromise((resolve, reject) => {
+        resolve('def');
+      });
+    }).then((result) => {
+      expect(result).toBe('def');
+      done();
+    });
+  }));
+
+  it('can be constructed in ES6 style and rejected', asyncHelper((done) => {
+    new ParsePromise((resolve, reject) => {
+      reject('err');
+    }).then(() => {
+      // Should not be reached
+    }, (error) => {
+      expect(error).toBe('err');
+      
+      return new ParsePromise((resolve, reject) => {
+        reject('err2');
+      });
+    }).then(null, (error) => {
+      expect(error).toBe('err2');
+      done();
+    });
+  }));
+
+  it('can be initially resolved, ES6 style', asyncHelper((done) => {
+    ParsePromise.resolve('abc').then((result) => {
+      expect(result).toBe('abc');
+      
+      return ParsePromise.resolve(ParsePromise.as('def'));
+    }).then((result) => {
+      expect(result).toBe('def');
+      done();
+    });
+  }));
+
+  it('can be initially rejected, ES6 style', asyncHelper((done) => {
+    ParsePromise.reject('err').then(null, (error) => {
+      expect(error).toBe('err');
+      done();
+    });
+  }));
 });
