@@ -220,7 +220,6 @@ module.exports = {
 
   setObjectStateController(controller: ObjectStateController) {
     if (typeof controller.getState !== 'function') {
-      console.log(controller);
       throw new Error(
         'ObjectStateController must implement getState()'
       );
