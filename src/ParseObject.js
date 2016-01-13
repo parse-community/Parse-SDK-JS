@@ -995,8 +995,6 @@ export default class ParseObject {
       attrs = arg1;
       if (typeof arg2 === 'object') {
         options = arg2;
-      } else {
-        options = {};
       }
     } else {
       attrs = {};
