@@ -24,7 +24,7 @@ export type FullOptions = {
   error?: any;
   useMasterKey?: boolean;
   sessionToken?: string;
-}
+};
 
 var XHR = null;
 if (typeof XMLHttpRequest !== 'undefined') {
@@ -70,7 +70,7 @@ function ajaxIE9(method: string, url: string, data: any) {
   return promise;
 }
 
-var RESTController = {
+const RESTController = {
   ajax(method: string, url: string, data: any, headers?: any) {
     if (useXDomainRequest) {
       return ajaxIE9(method, url, data, headers);

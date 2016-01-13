@@ -16,7 +16,7 @@ import ParseObject from './ParseObject';
 import { opFromJSON } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
-export default function decode(value: any) {
+export default function decode(value: any): any {
   if (value === null || typeof value !== 'object') {
     return value;
   }

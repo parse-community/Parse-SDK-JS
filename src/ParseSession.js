@@ -15,7 +15,7 @@ import ParseObject from './ParseObject';
 import ParsePromise from './ParsePromise';
 import ParseUser from './ParseUser';
 
-import type { AttributeMap } from './ObjectState';
+import type { AttributeMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
 
 /**

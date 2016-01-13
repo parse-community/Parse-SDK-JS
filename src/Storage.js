@@ -36,7 +36,7 @@ var Storage = {
     return ParsePromise.as(controller.getItem(path));
   },
 
-  setItem(path: string, value: string) {
+  setItem(path: string, value: string): void {
     var controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       throw new Error(
@@ -54,7 +54,7 @@ var Storage = {
     return ParsePromise.as(controller.setItem(path, value));
   },
 
-  removeItem(path: string) {
+  removeItem(path: string): void {
     var controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       throw new Error(

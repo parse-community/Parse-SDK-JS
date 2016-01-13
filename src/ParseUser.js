@@ -11,14 +11,13 @@
 
 import CoreManager from './CoreManager';
 import isRevocableSession from './isRevocableSession';
-import * as ObjectState from './ObjectState';
 import ParseError from './ParseError';
 import ParseObject from './ParseObject';
 import ParsePromise from './ParsePromise';
 import ParseSession from './ParseSession';
 import Storage from './Storage';
 
-import type { AttributeMap } from './ObjectState';
+import type { AttributeMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
 
 export type AuthData = ?{ [key: string]: mixed };
@@ -57,7 +56,7 @@ export default class ParseUser extends ParseObject {
    * @return {Parse.Promise} A promise that is resolved when the replacement
    *   token has been fetched.
    */
-  _upgradeToRevocableSession(options: RequestOptions) {
+  _upgradeToRevocableSession(options: RequestOptions): ParsePromise {
     options = options || {};
 
     var upgradeOptions = {};
@@ -359,7 +358,7 @@ export default class ParseUser extends ParseObject {
    * @return {Parse.Promise} A promise that is fulfilled when the signup
    *     finishes.
    */
-  signUp(attrs: AttributeMap, options: FullOptions) {
+  signUp(attrs: AttributeMap, options: FullOptions): ParsePromise {
     options = options || {};
 
     var signupOptions = {};
@@ -389,7 +388,7 @@ export default class ParseUser extends ParseObject {
    * @return {Parse.Promise} A promise that is fulfilled with the user when
    *     the login is complete.
    */
-  logIn(options: FullOptions) {
+  logIn(options: FullOptions): ParsePromise {
     options = options || {};
 
     var loginOptions = {};
@@ -405,7 +404,7 @@ export default class ParseUser extends ParseObject {
    * Wrap the default save behavior with functionality to save to local
    * storage if this is current user.
    */
-  save(...args) {
+  save(...args: Array<any>): ParsePromise {
     return super.save.apply(this, args).then(() => {
       if (this.isCurrent()) {
         return CoreManager.getUserController().updateUserOnDisk(this);
@@ -418,7 +417,7 @@ export default class ParseUser extends ParseObject {
    * Wrap the default fetch behavior with functionality to save to local
    * storage if this is current user.
    */
-  fetch(...args) {
+  fetch(...args: Array<any>): ParsePromise {
     return super.fetch.apply(this, args).then(() => {
       if (this.isCurrent()) {
         return CoreManager.getUserController().updateUserOnDisk(this);
@@ -848,6 +847,7 @@ var DefaultController = {
 
   logIn(user: ParseUser, options: RequestOptions): ParsePromise {
     var RESTController = CoreManager.getRESTController();
+    var stateController = CoreManager.getObjectStateController();
     var auth = {
       username: user.get('username'),
       password: user.get('password')
@@ -857,11 +857,11 @@ var DefaultController = {
     ).then((response, status) => {
       user._migrateId(response.objectId);
       user._setExisted(true);
-      ObjectState.setPendingOp(
-        user.className, user._getId(), 'username', undefined
+      stateController.setPendingOp(
+        user._getStateIdentifier(), 'username', undefined
       );
-      ObjectState.setPendingOp(
-        user.className, user._getId(), 'password', undefined
+      stateController.setPendingOp(
+        user._getStateIdentifier(), 'password', undefined
       );
       response.password = undefined;
       user._finishFetch(response);

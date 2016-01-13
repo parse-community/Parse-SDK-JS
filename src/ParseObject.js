@@ -15,7 +15,6 @@ import decode from './decode';
 import encode from './encode';
 import equals from './equals';
 import escape from './escape';
-import * as ObjectState from './ObjectState';
 import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
@@ -34,10 +33,12 @@ import {
 import ParsePromise from './ParsePromise';
 import ParseQuery from './ParseQuery';
 import ParseRelation from './ParseRelation';
+import * as SingleInstanceStateController from './SingleInstanceStateController';
 import unique from './unique';
+import * as UniqueInstanceStateController from './UniqueInstanceStateController';
 import unsavedChildren from './unsavedChildren';
 
-import type { AttributeMap, OpsMap } from './ObjectState';
+import type { AttributeMap, OpsMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
 
 export type Pointer = {
@@ -64,6 +65,11 @@ var objectCount = 0;
 // will have the same attributes. However, this may be dangerous default
 // behavior in a server scenario
 var singleInstance = (!CoreManager.get('IS_NODE'));
+if (singleInstance) {
+  CoreManager.setObjectStateController(SingleInstanceStateController);
+} else {
+  CoreManager.setObjectStateController(UniqueInstanceStateController);
+}
 
 /**
  * Creates a new model with defined attributes.
@@ -131,9 +137,8 @@ export default class ParseObject {
   /** Prototype getters / setters **/
 
   get attributes(): AttributeMap {
-    return Object.freeze(
-      ObjectState.estimateAttributes(this.className, this._getStateIdentifier())
-    );
+    let stateController = CoreManager.getObjectStateController();
+    return Object.freeze(stateController.estimateAttributes(this._getStateIdentifier()));
   }
 
   /**
@@ -172,22 +177,26 @@ export default class ParseObject {
   }
 
   /**
-   * Returns a local or server Id used to pull data from the Object State store
-   * If single instance objects are disabled, it will use the object's unique
-   * count to separate its data from other objects with the same server Id.
+   * Returns a unique identifier used to pull data from the State Controller.
    */
-  _getStateIdentifier(): string {
-    if (typeof this.id === 'string') {
-      if (singleInstance) {
-        return this.id;
+  _getStateIdentifier(): mixed {
+    if (singleInstance) {
+      let id = this.id;
+      if (!id) {
+        id = this._getId();
       }
-      return this.id + '_' + String(this._objCount);
+      return {
+        id: id,
+        className: this.className
+      };
+    } else {
+      return this;
     }
-    return this._getId();
   }
 
   _getServerData(): AttributeMap {
-    return ObjectState.getServerData(this.className, this._getStateIdentifier());
+    let stateController = CoreManager.getObjectStateController();
+    return stateController.getServerData(this._getStateIdentifier());
   }
 
   _clearServerData() {
@@ -196,11 +205,13 @@ export default class ParseObject {
     for (var attr in serverData) {
       unset[attr] = undefined;
     }
-    ObjectState.setServerData(this.className, this._getStateIdentifier(), unset);
+    let stateController = CoreManager.getObjectStateController();
+    stateController.setServerData(this._getStateIdentifier(), unset);
   }
 
   _getPendingOps(): Array<OpsMap> {
-    return ObjectState.getPendingOps(this.className, this._getStateIdentifier());
+    let stateController = CoreManager.getObjectStateController();
+    return stateController.getPendingOps(this._getStateIdentifier());
   }
 
   _clearPendingOps() {
@@ -214,7 +225,8 @@ export default class ParseObject {
 
   _getDirtyObjectAttributes(): AttributeMap {
     var attributes = this.attributes;
-    var objectCache = ObjectState.getObjectCache(this.className, this._getStateIdentifier());
+    var stateController = CoreManager.getObjectStateController();
+    var objectCache = stateController.getObjectCache(this._getStateIdentifier());
     var dirty = {};
     for (var attr in attributes) {
       var val = attributes[attr];
@@ -242,7 +254,7 @@ export default class ParseObject {
     return dirty;
   }
 
-  _toFullJSON(seen): AttributeMap {
+  _toFullJSON(seen: Array<any>): AttributeMap {
     var json: { [key: string]: mixed } = this.toJSON(seen);
     json.__type = 'Object';
     json.className = this.className;
@@ -283,7 +295,8 @@ export default class ParseObject {
     if (!this.id && serverData.objectId) {
       this.id = serverData.objectId;
     }
-    ObjectState.initializeState(this.className, this._getStateIdentifier());
+    let stateController = CoreManager.getObjectStateController();
+    stateController.initializeState(this._getStateIdentifier());
     var decoded = {};
     for (var attr in serverData) {
       if (attr === 'ACL') {
@@ -304,11 +317,12 @@ export default class ParseObject {
     if (!decoded.updatedAt && decoded.createdAt) {
       decoded.updatedAt = decoded.createdAt;
     }
-    ObjectState.commitServerChanges(this.className, this._getStateIdentifier(), decoded);
+    stateController.commitServerChanges(this._getStateIdentifier(), decoded);
   }
 
   _setExisted(existed: boolean) {
-    var state = ObjectState.getState(this.className, this._getStateIdentifier());
+    let stateController = CoreManager.getObjectStateController();
+    let state = stateController.getState(this._getStateIdentifier());
     if (state) {
       state.existed = existed;
     }
@@ -316,11 +330,17 @@ export default class ParseObject {
 
   _migrateId(serverId: string) {
     if (this._localId && serverId) {
-      var oldState = ObjectState.removeState(this.className, this._getStateIdentifier());
-      this.id = serverId;
-      delete this._localId;
-      if (oldState) {
-        ObjectState.initializeState(this.className, this._getStateIdentifier(), oldState);
+      if (singleInstance) {
+        let stateController = CoreManager.getObjectStateController();
+        let oldState = stateController.removeState(this._getStateIdentifier());
+        this.id = serverId;
+        delete this._localId;
+        if (oldState) {
+          stateController.initializeState(this._getStateIdentifier(), oldState);
+        }
+      } else {
+        this.id = serverId;
+        delete this._localId;
       }
     }
   }
@@ -328,7 +348,8 @@ export default class ParseObject {
   _handleSaveResponse(response, status: number) {
     var changes = {};
     var attr;
-    var pending = ObjectState.popPendingState(this.className, this._getStateIdentifier());
+    var stateController = CoreManager.getObjectStateController();
+    var pending = stateController.popPendingState(this._getStateIdentifier());
     for (attr in pending) {
       if (pending[attr] instanceof RelationOp) {
         changes[attr] = pending[attr].applyTo(undefined, this, attr);
@@ -357,12 +378,13 @@ export default class ParseObject {
       this._setExisted(true);
     }
 
-    ObjectState.commitServerChanges(this.className, this._getStateIdentifier(), changes);
+    stateController.commitServerChanges(this._getStateIdentifier(), changes);
   }
 
   _handleSaveError() {
     var pending = this._getPendingOps();
-    ObjectState.mergeFirstPendingState(this.className, this._getStateIdentifier());
+    let stateController = CoreManager.getObjectStateController();
+    stateController.mergeFirstPendingState(this._getStateIdentifier());
   }
 
   /** Public methods **/
@@ -376,7 +398,7 @@ export default class ParseObject {
    * @method toJSON
    * @return {Object}
    */
-  toJSON(seen): AttributeMap {
+  toJSON(seen: Array<any>): AttributeMap {
     var seenEntry = this.id ? this.className + ':' + this.id : this;
     var seen = seen || [seenEntry];
     var json = {};
@@ -649,9 +671,10 @@ export default class ParseObject {
     // Consolidate Ops
     var pendingOps = this._getPendingOps();
     var last = pendingOps.length - 1;
+    var stateController = CoreManager.getObjectStateController();
     for (var attr in newOps) {
       var nextOp = newOps[attr].mergeWith(pendingOps[last][attr]);
-      ObjectState.setPendingOp(this.className, this._getStateIdentifier(), attr, nextOp);
+      stateController.setPendingOp(this._getStateIdentifier(), attr, nextOp);
     }
 
     return this;
@@ -778,7 +801,8 @@ export default class ParseObject {
     if (!this.id) {
       return false;
     }
-    var state = ObjectState.getState(this.className, this._getStateIdentifier());
+    let stateController = CoreManager.getObjectStateController();
+    let state = stateController.getState(this._getStateIdentifier());
     if (state) {
       return state.existed;
     }
@@ -805,7 +829,7 @@ export default class ParseObject {
    * @return {} False if the data is valid.  An error object otherwise.
    * @see Parse.Object#set
    */
-  validate(attrs: AttributeMap) {
+  validate(attrs: AttributeMap): ParseError | boolean {
     if (attrs.hasOwnProperty('ACL') && !(attrs.ACL instanceof ParseACL)) {
       return new ParseError(
         ParseError.OTHER_CAUSE,
@@ -891,7 +915,7 @@ export default class ParseObject {
    * @return {Parse.Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetch(options: RequestOptions) {
+  fetch(options: RequestOptions): ParsePromise {
     options = options || {};
     var fetchOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
@@ -955,12 +979,16 @@ export default class ParseObject {
     arg1: ?string | { [attr: string]: mixed },
     arg2: FullOptions | mixed,
     arg3?: FullOptions
-  ) {
+  ): ParsePromise {
     var attrs;
     var options;
     if (typeof arg1 === 'object' || typeof arg1 === 'undefined') {
       attrs = arg1;
-      options = arg2;
+      if (typeof arg2 === 'object') {
+        options = arg2;
+      } else {
+        options = {};
+      }
     } else {
       attrs = {};
       attrs[arg1] = arg2;
@@ -1025,7 +1053,7 @@ export default class ParseObject {
    * @return {Parse.Promise} A promise that is fulfilled when the destroy
    *     completes.
    */
-  destroy(options: RequestOptions) {
+  destroy(options: RequestOptions): ParsePromise {
     options = options || {};
     var destroyOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
@@ -1046,7 +1074,8 @@ export default class ParseObject {
   /** Static methods **/
 
   static _clearAllState() {
-    ObjectState._clearAllState();
+    let stateController = CoreManager.getObjectStateController();
+    stateController.clearAllState();
   }
 
   /**
@@ -1452,6 +1481,7 @@ export default class ParseObject {
    */
   static enableSingleInstance() {
     singleInstance = true;
+    CoreManager.setObjectStateController(SingleInstanceStateController);
   }
 
   /**
@@ -1463,6 +1493,7 @@ export default class ParseObject {
    */
   static disableSingleInstance() {
     singleInstance = false;
+    CoreManager.setObjectStateController(UniqueInstanceStateController);
   }
 }
 
@@ -1626,6 +1657,7 @@ var DefaultController = {
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
     var RESTController = CoreManager.getRESTController();
+    var stateController = CoreManager.getObjectStateController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
         return ParsePromise.as([]);
@@ -1699,8 +1731,8 @@ var DefaultController = {
                 }
               });
             };
-            ObjectState.pushPendingState(obj.className, obj._getStateIdentifier());
-            batchTasks.push(ObjectState.enqueueTask(obj.className, obj._getStateIdentifier(), task));
+            stateController.pushPendingState(obj._getStateIdentifier());
+            batchTasks.push(stateController.enqueueTask(obj._getStateIdentifier(), task));
           });
 
           ParsePromise.when(batchReady).then(() => {
@@ -1742,8 +1774,9 @@ var DefaultController = {
           return ParsePromise.error(error);
         });
       }
-      ObjectState.pushPendingState(target.className, target._getStateIdentifier());
-      return ObjectState.enqueueTask(target.className, target._getStateIdentifier(), task).then(() => {
+
+      stateController.pushPendingState(target._getStateIdentifier());
+      return stateController.enqueueTask(target._getStateIdentifier(), task).then(() => {
         return target;
       }, (error) => {
         return ParsePromise.error(error);
