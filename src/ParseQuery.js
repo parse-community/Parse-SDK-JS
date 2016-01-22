@@ -261,7 +261,7 @@ export default class ParseQuery {
   find(options?: FullOptions): ParsePromise {
     options = options || {};
 
-    var findOptions = {};
+    let findOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       findOptions.useMasterKey = options.useMasterKey;
     }
@@ -269,7 +269,7 @@ export default class ParseQuery {
       findOptions.sessionToken = options.sessionToken;
     }
 
-    var controller = CoreManager.getQueryController();
+    let controller = CoreManager.getQueryController();
 
     return controller.find(
       this.className,
@@ -277,8 +277,11 @@ export default class ParseQuery {
       findOptions
     ).then((response) => {
       return response.results.map((data) => {
+        // In cases of relations, the server may send back a className
+        // on the top level of the payload
+        let override = response.className || this.className;
         if (!data.className) {
-          data.className = this.className;
+          data.className = override;
         }
         return ParseObject.fromJSON(data);
       });
