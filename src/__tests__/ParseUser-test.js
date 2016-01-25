@@ -179,6 +179,22 @@ describe('ParseUser', () => {
     });
   }));
 
+  it('fail login when invalid username or password is used', asyncHelper((done) => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    ParseUser.logIn({}, 'password').then(null, (err) => {
+      expect(err.code).toBe(ParseError.OTHER_CAUSE);
+      expect(err.message).toBe('Username must be a string.');
+      
+      return ParseUser.logIn('username', {});
+    }).then(null, (err) => {
+      expect(err.code).toBe(ParseError.OTHER_CAUSE);
+      expect(err.message).toBe('Password must be a string.');
+      
+      done();
+    });
+  }));
+
   it('preserves changes when logging in', asyncHelper((done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();

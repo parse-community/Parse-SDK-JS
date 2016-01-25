@@ -539,6 +539,21 @@ export default class ParseUser extends ParseObject {
    *     the login completes.
    */
   static logIn(username, password, options) {
+    if (typeof username !== 'string') {
+      return ParsePromise.error(
+        new ParseError(
+          ParseError.OTHER_CAUSE,
+          'Username must be a string.'
+        )
+      );
+    } else if (typeof password !== 'string') {
+      return ParsePromise.error(
+        new ParseError(
+          ParseError.OTHER_CAUSE,
+          'Password must be a string.'
+        )
+      );
+    }
     var user = new ParseUser();
     user._finishFetch({ username: username, password: password });
     return user.logIn(options);
