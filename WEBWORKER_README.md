@@ -1,6 +1,6 @@
-## THIS FORK: Webworkers support
+## Webworkers support
 
-This fork was created to add support for Webworkers. The only problem is webworkers can't access the localStorage object, which Parse requires.
+To make Parse work in a webworker, it needs access to the localStorage object on the main/browser thread. This small patch to Parse allows clients to provide a custom asyncLocalStorage implementation.
 
 How to use:
 
