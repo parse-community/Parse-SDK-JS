@@ -43,7 +43,7 @@ export function run(
   name: string,
   data: mixed,
   options: { [key: string]: mixed }
-) {
+): ParsePromise {
   options = options || {};
 
   if (typeof name !== 'string' || name.length === 0) {

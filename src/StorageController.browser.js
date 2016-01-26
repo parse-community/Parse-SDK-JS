@@ -19,7 +19,11 @@ var StorageController = {
   },
 
   setItem(path: string, value: string) {
-    localStorage.setItem(path, value);
+    try {
+      localStorage.setItem(path, value);
+    } catch (e) {
+      // Quota exceeded, possibly due to Safari Private Browsing mode
+    }
   },
 
   removeItem(path: string) {

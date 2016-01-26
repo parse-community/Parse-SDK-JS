@@ -11,7 +11,7 @@ jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../isRevocableSession');
-jest.dontMock('../ObjectState')
+jest.dontMock('../ObjectStateMutations')
 jest.dontMock('../parseDate');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
@@ -19,10 +19,12 @@ jest.dontMock('../ParseOp');
 jest.dontMock('../ParsePromise');
 jest.dontMock('../ParseUser');
 jest.dontMock('../RESTController');
+jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
+jest.dontMock('../UniqueInstanceStateController');
 
 jest.dontMock('./test_helpers/asyncHelper');
 jest.dontMock('./test_helpers/mockXHR');
@@ -38,9 +40,12 @@ var asyncHelper = require('./test_helpers/asyncHelper');
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
-ParseObject.enableSingleInstance();
 
 describe('ParseUser', () => {
+  beforeEach(() => {
+    ParseObject.enableSingleInstance();
+  });
+
   it('can be constructed with initial attributes', () => {
     var u = new ParseUser();
     expect(u.isCurrent()).toBe(false);
@@ -170,6 +175,22 @@ describe('ParseUser', () => {
       expect(current instanceof ParseUser).toBe(true);
       expect(current.id).toBe('uid2');
       expect(current.authenticated()).toBe(true);
+      done();
+    });
+  }));
+
+  it('fail login when invalid username or password is used', asyncHelper((done) => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    ParseUser.logIn({}, 'password').then(null, (err) => {
+      expect(err.code).toBe(ParseError.OTHER_CAUSE);
+      expect(err.message).toBe('Username must be a string.');
+      
+      return ParseUser.logIn('username', {});
+    }).then(null, (err) => {
+      expect(err.code).toBe(ParseError.OTHER_CAUSE);
+      expect(err.message).toBe('Password must be a string.');
+      
       done();
     });
   }));
@@ -469,7 +490,9 @@ describe('ParseUser', () => {
       deauthenticate() {}
     };
 
-    ParseUser.logInWith(provider, {}).then(null, (error) => {
+    ParseUser.logInWith(provider, {}).then(() => {
+      // Should not run
+    }, (error) => {
       expect(error.code).toBe(ParseError.ACCOUNT_ALREADY_LINKED);
       expect(error.message).toBe('Another user is already linked to this facebook id.');
       done();

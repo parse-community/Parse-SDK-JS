@@ -13,7 +13,7 @@ import ParseACL from './ParseACL';
 import ParseError from './ParseError';
 import ParseObject from './ParseObject';
 
-import type { AttributeMap } from './ObjectState';
+import type { AttributeMap } from './ObjectStateMutations';
 import type ParseRelation from './ParseRelation';
 
 /**
@@ -104,7 +104,7 @@ export default class ParseRole extends ParseObject {
     return this.relation('roles');
   }
 
-  validate(attrs: AttributeMap, options?: mixed) {
+  validate(attrs: AttributeMap, options?: mixed): ParseError | boolean {
     var isInvalid = super.validate(attrs, options);
     if (isInvalid) {
       return isInvalid;

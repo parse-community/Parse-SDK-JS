@@ -13,7 +13,7 @@ var CoreManager = require('../CoreManager');
 
 describe('CoreManager', () => {
   it('is initialized with default values', () => {
-    expect(CoreManager.get('SERVER_URL')).toBe('https://api.parse.com');
+    expect(CoreManager.get('SERVER_URL')).toBe('https://api.parse.com/1');
   });
 
   it('pulls the version string from package.json', () => {
@@ -184,6 +184,30 @@ describe('CoreManager', () => {
 
     CoreManager.setObjectController(controller);
     expect(CoreManager.getObjectController()).toBe(controller);
+  });
+
+  it('can set and get ObjectStateController', () => {
+    var controller = {
+      getState: function() {},
+      initializeState: function() {},
+      removeState: function() {},
+      getServerData: function() {},
+      setServerData: function() {},
+      getPendingOps: function() {},
+      setPendingOp: function() {},
+      pushPendingState: function() {},
+      popPendingState: function() {},
+      mergeFirstPendingState: function() {},
+      getObjectCache: function() {},
+      estimateAttribute: function() {},
+      estimateAttributes: function() {},
+      commitServerChanges: function() {},
+      enqueueTask: function() {},
+      clearAllState: function() {},
+    };
+
+    CoreManager.setObjectStateController(controller);
+    expect(CoreManager.getObjectStateController()).toBe(controller);
   });
 
   it('requires QueryController to implement certain functionality', () => {

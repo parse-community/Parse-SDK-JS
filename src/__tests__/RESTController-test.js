@@ -135,6 +135,7 @@ describe('RESTController', () => {
     };
     RESTController._setXHR(function() { return xhr; });
     RESTController.request('GET', 'classes/MyObject', {}, { sessionToken: '1234' });
+    jest.runAllTicks();
     expect(xhr.open.mock.calls[0]).toEqual(
       ['POST', 'https://api.parse.com/1/classes/MyObject', true]
     );
@@ -142,7 +143,7 @@ describe('RESTController', () => {
       _method: 'GET',
       _ApplicationId: 'A',
       _JavaScriptKey: 'B',
-      _ClientVersion: 'jsV',
+      _ClientVersion: 'V',
       _InstallationId: 'iid',
       _SessionToken: '1234',
     });
@@ -162,4 +163,170 @@ describe('RESTController', () => {
         done();
       });
   }));
+
+  it('handles invalid responses', asyncHelper((done) => {
+    var XHR = function() { };
+    XHR.prototype = {
+      open: function() { },
+      setRequestHeader: function() { },
+      send: function() {
+        this.status = 200;
+        this.responseText = '{';
+        this.readyState = 4;
+        this.onreadystatechange();
+      }
+    };
+    RESTController._setXHR(XHR);
+    RESTController.request('GET', 'classes/MyObject', {}, {})
+      .then(null, (error) => {
+        expect(error.code).toBe(100);
+        expect(error.message).toBe('XMLHttpRequest failed: "SyntaxError: Unexpected end of input"');
+        done();
+      });
+  }));
+
+  it('handles invalid errors', asyncHelper((done) => {
+    var XHR = function() { };
+    XHR.prototype = {
+      open: function() { },
+      setRequestHeader: function() { },
+      send: function() {
+        this.status = 400;
+        this.responseText = '{';
+        this.readyState = 4;
+        this.onreadystatechange();
+      }
+    };
+    RESTController._setXHR(XHR);
+    RESTController.request('GET', 'classes/MyObject', {}, {})
+      .then(null, (error) => {
+        expect(error.code).toBe(107);
+        expect(error.message).toBe('Received an error with invalid JSON from Parse: {');
+        done();
+      });
+  }));
+
+  it('attaches the session token of the current user', () => {
+    CoreManager.setUserController({
+      currentUserAsync() {
+        return ParsePromise.as({ getSessionToken: () => '5678' });
+      },
+      setCurrentUser() {},
+      currentUser() {},
+      signUp() {},
+      logIn() {},
+      become() {},
+      logOut() {},
+      requestPasswordReset() {},
+      upgradeToRevocableSession() {},
+      linkWith() {},
+    });
+
+    var xhr = {
+      setRequestHeader: jest.genMockFn(),
+      open: jest.genMockFn(),
+      send: jest.genMockFn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    RESTController.request('GET', 'classes/MyObject', {}, {});
+    jest.runAllTicks();
+    expect(JSON.parse(xhr.send.mock.calls[0][0])).toEqual({
+      _method: 'GET',
+      _ApplicationId: 'A',
+      _JavaScriptKey: 'B',
+      _ClientVersion: 'V',
+      _InstallationId: 'iid',
+      _SessionToken: '5678',
+    });
+    CoreManager.set('UserController', undefined); // Clean up
+  });
+
+  it('attaches no session token when there is no current user', () => {
+    CoreManager.setUserController({
+      currentUserAsync() {
+        return ParsePromise.as(null);
+      },
+      setCurrentUser() {},
+      currentUser() {},
+      signUp() {},
+      logIn() {},
+      become() {},
+      logOut() {},
+      requestPasswordReset() {},
+      upgradeToRevocableSession() {},
+      linkWith() {},
+    });
+
+    var xhr = {
+      setRequestHeader: jest.genMockFn(),
+      open: jest.genMockFn(),
+      send: jest.genMockFn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    RESTController.request('GET', 'classes/MyObject', {}, {});
+    jest.runAllTicks();
+    expect(JSON.parse(xhr.send.mock.calls[0][0])).toEqual({
+      _method: 'GET',
+      _ApplicationId: 'A',
+      _JavaScriptKey: 'B',
+      _ClientVersion: 'V',
+      _InstallationId: 'iid',
+    });
+    CoreManager.set('UserController', undefined); // Clean up
+  });
+
+  it('sends the revocable session upgrade header when the config flag is set', () => {
+    CoreManager.set('FORCE_REVOCABLE_SESSION', true);
+    var xhr = {
+      setRequestHeader: jest.genMockFn(),
+      open: jest.genMockFn(),
+      send: jest.genMockFn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    RESTController.request('GET', 'classes/MyObject', {}, {});
+    jest.runAllTicks();
+    expect(JSON.parse(xhr.send.mock.calls[0][0])).toEqual({
+      _method: 'GET',
+      _ApplicationId: 'A',
+      _JavaScriptKey: 'B',
+      _ClientVersion: 'V',
+      _InstallationId: 'iid',
+      _RevocableSession: '1'
+    });
+    CoreManager.set('FORCE_REVOCABLE_SESSION', false); // Clean up
+  });
+
+  it('sends the master key when requested', () => {
+    CoreManager.set('MASTER_KEY', 'M');
+    var xhr = {
+      setRequestHeader: jest.genMockFn(),
+      open: jest.genMockFn(),
+      send: jest.genMockFn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    RESTController.request('GET', 'classes/MyObject', {}, { useMasterKey: true });
+    jest.runAllTicks();
+    expect(JSON.parse(xhr.send.mock.calls[0][0])).toEqual({
+      _method: 'GET',
+      _ApplicationId: 'A',
+      _MasterKey: 'M',
+      _ClientVersion: 'V',
+      _InstallationId: 'iid',
+    });
+  });
+
+  it('throws when attempted to use an unprovided master key', () => {
+    CoreManager.set('MASTER_KEY', undefined);
+    var xhr = {
+      setRequestHeader: jest.genMockFn(),
+      open: jest.genMockFn(),
+      send: jest.genMockFn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    expect(function() {
+      RESTController.request('GET', 'classes/MyObject', {}, { useMasterKey: true });
+    }).toThrow(
+      'Cannot use the Master Key, it has not been provided.'
+    );
+  });
 });

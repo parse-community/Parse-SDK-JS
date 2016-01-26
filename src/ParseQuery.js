@@ -46,8 +46,7 @@ function quote(s: string) {
  * Creates a new parse Parse.Query for the given Parse.Object subclass.
  * @class Parse.Query
  * @constructor
- * @param objectClass -
- *   An instance of a subclass of Parse.Object, or a Parse className string.
+ * @param {} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
  *
  * <p>Parse.Query defines a query that is used to fetch Parse.Objects. The
  * most common use case is finding all objects that match a query through the
@@ -109,7 +108,7 @@ export default class ParseQuery {
   _order: Array<string>;
   _extraOptions: { [key: string]: mixed };
 
-  constructor(objectClass) {
+  constructor(objectClass: string | ParseObject) {
     if (typeof objectClass === 'string') {
       if (objectClass === 'User' && CoreManager.get('PERFORM_USER_REWRITE')) {
         this.className = '_User';
@@ -216,7 +215,7 @@ export default class ParseQuery {
    * @return {Parse.Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  get(objectId: string, options?: FullOptions) {
+  get(objectId: string, options?: FullOptions): ParsePromise {
     this.equalTo('objectId', objectId);
 
     var firstOptions = {};
@@ -262,7 +261,7 @@ export default class ParseQuery {
   find(options?: FullOptions): ParsePromise {
     options = options || {};
 
-    var findOptions = {};
+    let findOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       findOptions.useMasterKey = options.useMasterKey;
     }
@@ -270,7 +269,7 @@ export default class ParseQuery {
       findOptions.sessionToken = options.sessionToken;
     }
 
-    var controller = CoreManager.getQueryController();
+    let controller = CoreManager.getQueryController();
 
     return controller.find(
       this.className,
@@ -278,7 +277,12 @@ export default class ParseQuery {
       findOptions
     ).then((response) => {
       return response.results.map((data) => {
-        data.className = this.className;
+        // In cases of relations, the server may send back a className
+        // on the top level of the payload
+        let override = response.className || this.className;
+        if (!data.className) {
+          data.className = override;
+        }
         return ParseObject.fromJSON(data);
       });
     })._thenRunCallbacks(options);
@@ -374,7 +378,9 @@ export default class ParseQuery {
       if (!objects[0]) {
         return undefined;
       }
-      objects[0].className = this.className;
+      if (!objects[0].className) {
+        objects[0].className = this.className;
+      }
       return ParseObject.fromJSON(objects[0]);
     })._thenRunCallbacks(options);
   }
@@ -395,7 +401,7 @@ export default class ParseQuery {
    * @return {Parse.Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
-  each(callback: (obj: ParseObject) => any, options?: FullOptions) {
+  each(callback: (obj: ParseObject) => any, options?: FullOptions): ParsePromise {
     options = options || {};
 
     if (this._order || this._skip || (this._limit >= 0)) {

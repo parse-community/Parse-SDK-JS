@@ -233,7 +233,10 @@ var DefaultController = {
       'X-Parse-JavaScript-Key': CoreManager.get('JAVASCRIPT_KEY')
     };
     var url = CoreManager.get('SERVER_URL');
-    url += '/1/files/' + name;
+    if (url[url.length - 1] !== '/') {
+      url += '/';
+    }
+    url += 'files/' + name;
     return CoreManager.getRESTController().ajax('POST', url, source.file, headers);
   },
 

@@ -7,19 +7,26 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
-jest.dontMock('../ObjectState');
+jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
 jest.dontMock('../ParseRole');
+jest.dontMock('../SingleInstanceStateController');
+jest.dontMock('../UniqueInstanceStateController');
 
-var ParseACL = require('../ParseACL');
-var ParseError = require('../ParseError');
-var ParseObject = require('../ParseObject');
-var ParseRole = require('../ParseRole');
+const ParseACL = require('../ParseACL');
+const ParseError = require('../ParseError');
+const ParseObject = require('../ParseObject');
+const ParseRole = require('../ParseRole');
 
 describe('ParseRole', () => {
+  beforeEach(() => {
+    ParseObject.disableSingleInstance();
+  });
+
   it('can create Roles', () => {
     var role = new ParseRole();
     expect(role.getName()).toBe(undefined);

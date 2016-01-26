@@ -24,7 +24,7 @@ export type FullOptions = {
   error?: any;
   useMasterKey?: boolean;
   sessionToken?: string;
-}
+};
 
 var XHR = null;
 if (typeof XMLHttpRequest !== 'undefined') {
@@ -50,7 +50,9 @@ function ajaxIE9(method: string, url: string, data: any) {
     } catch (e) {
       promise.reject(e);
     }
-    promise.resolve(response);
+    if (response) {
+      promise.resolve(response);
+    }
   };
   xdr.onerror = xdr.ontimeout = function() {
     // Let's fake a real error message.
@@ -68,7 +70,7 @@ function ajaxIE9(method: string, url: string, data: any) {
   return promise;
 }
 
-var RESTController = {
+const RESTController = {
   ajax(method: string, url: string, data: any, headers?: any) {
     if (useXDomainRequest) {
       return ajaxIE9(method, url, data, headers);
@@ -97,9 +99,11 @@ var RESTController = {
           try {
             response = JSON.parse(xhr.responseText);
           } catch (e) {
-            promise.reject(e);
+            promise.reject(e.toString());
           }
-          promise.resolve(response, xhr.status, xhr);
+          if (response) {
+            promise.resolve(response, xhr.status, xhr);
+          }
         } else if (xhr.status >= 500 || xhr.status === 0) { // retry on 5XX or node-xmlhttprequest error
           if (++attempts < CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
             // Exponentially-growing random delay
@@ -139,7 +143,10 @@ var RESTController = {
   request(method: string, path: string, data: mixed, options?: RequestOptions) {
     options = options || {};
     var url = CoreManager.get('SERVER_URL');
-    url += '/1/' + path;
+    if (url[url.length - 1] !== '/') {
+      url += '/';
+    }
+    url += path;
 
     var payload = {};
     if (data && typeof data === 'object') {
@@ -155,7 +162,7 @@ var RESTController = {
 
     payload._ApplicationId = CoreManager.get('APPLICATION_ID');
     payload._JavaScriptKey = CoreManager.get('JAVASCRIPT_KEY');
-    payload._ClientVersion = 'js' + CoreManager.get('VERSION');
+    payload._ClientVersion = CoreManager.get('VERSION');
 
     var useMasterKey = options.useMasterKey;
     if (typeof useMasterKey === 'undefined') {

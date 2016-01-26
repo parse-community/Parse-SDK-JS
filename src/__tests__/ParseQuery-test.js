@@ -1298,4 +1298,41 @@ describe('ParseQuery', () => {
     q = new ParseQuery('User');
     expect(q.className).toBe('User');
   });
+
+  it('does not override the className if it comes from the server', asyncHelper((done) => {
+    CoreManager.setQueryController({
+      find(className, params, options) {
+        return ParsePromise.as({
+          results: [
+            { className: 'Product', objectId: 'P40', name: 'Product 40' },
+          ]
+        });
+      }
+    });
+
+    var q = new ParseQuery('Item');
+    q.find().then((results) => {
+      expect(results[0].className).toBe('Product');
+      done();
+    });
+  }));
+
+  it('can override the className with a name from the server', asyncHelper((done) => {
+    CoreManager.setQueryController({
+      find(className, params, options) {
+        return ParsePromise.as({
+          results: [
+            { objectId: 'P41', name: 'Product 41' },
+          ],
+          className: 'Product'
+        });
+      }
+    });
+
+    var q = new ParseQuery('Item');
+    q.find().then((results) => {
+      expect(results[0].className).toBe('Product');
+      done();
+    });
+  }));
 });
