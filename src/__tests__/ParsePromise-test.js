@@ -14,6 +14,18 @@ var ParsePromise = require('../ParsePromise');
 var asyncHelper = require('./test_helpers/asyncHelper');
 
 describe('Promise', () => {
+  it('can disable A+ compliance', () => {
+    ParsePromise.disableAPlusCompliant();
+    expect(ParsePromise.isPromisesAPlusCompliant()).toBe(false);
+  });
+
+  it('can enable A+ compliance', () => {
+    ParsePromise.enableAPlusCompliant();
+    expect(ParsePromise.isPromisesAPlusCompliant()).toBe(true);
+  });
+});
+
+function promiseTests() {
   it('can be initially resolved', () => {
     var promise = ParsePromise.as('foo');
     promise.then((result) => {
@@ -428,6 +440,40 @@ describe('Promise', () => {
     });
   });
 
+  it('runs catch callbacks on error', () => {
+    var promise = ParsePromise.error('foo');
+    promise.fail((error) => {
+      expect(error).toBe('foo');
+    }).then((result) => {
+      if (ParsePromise.isPromisesAPlusCompliant()) {
+        expect(result).toBe(undefined);
+      } else {
+        // This should not be reached
+        expect(true).toBe(false);
+      }
+    }, (error) => {
+      if (ParsePromise.isPromisesAPlusCompliant()) {
+        // This should not be reached
+        expect(true).toBe(false);
+      } else {
+        expect(error).toBe(undefined);
+      }
+    });
+  });
+
+  it('does not run catch callbacks on success', () => {
+    var promise = ParsePromise.as('foo');
+    promise.catch((error) => {
+      // This should not be reached
+      expect(true).toBe(false);
+    }).then((result) => {
+      expect(result).toBe('foo');
+    }, (error) => {
+      // This should not be reached
+      expect(true).toBe(false);
+    });
+  });
+
   it('operates asynchonously', () => {
     var triggered = false;
     ParsePromise.as().then(() => {
@@ -518,4 +564,116 @@ describe('Promise', () => {
       done();
     });
   }));
+
+  it('resolves Promise.all with the set of resolved results', asyncHelper((done) => {
+    let firstSet = [
+      new ParsePromise(),
+      new ParsePromise(),
+      new ParsePromise(),
+      new ParsePromise()
+    ];
+
+    let secondSet = [5,6,7];
+
+    ParsePromise.all([]).then((results) => {
+      expect(results).toEqual([]);
+
+      return ParsePromise.all(firstSet);
+    }).then((results) => {
+      expect(results).toEqual([1,2,3,4]);
+      return ParsePromise.all(secondSet);
+    }).then((results) => {
+      expect(results).toEqual([5,6,7]);
+      done();
+    });
+    firstSet[0].resolve(1);
+    firstSet[1].resolve(2);
+    firstSet[2].resolve(3);
+    firstSet[3].resolve(4);
+  }));
+
+  it('rejects Promise.all with the first rejected promise', asyncHelper((done) => {
+    let promises = [
+      new ParsePromise(),
+      new ParsePromise(),
+      new ParsePromise()
+    ];
+
+    ParsePromise.all(promises).then(() => {
+      // this should not be reached
+    }, (error) => {
+      expect(error).toBe('an error');
+      done();
+    });
+    promises[0].resolve(1);
+    promises[1].reject('an error');
+    promises[2].resolve(3);
+  }));
+
+  it('resolves Promise.race with the first resolved result', asyncHelper((done) => {
+    let firstSet = [
+      new ParsePromise(),
+      new ParsePromise(),
+      new ParsePromise()
+    ];
+
+    let secondSet = [4, 5, ParsePromise.error()];
+
+    ParsePromise.race(firstSet).then((result) => {
+      expect(result).toBe(2);
+
+      return ParsePromise.race(secondSet);
+    }).then((result) => {
+      expect(result).toBe(4);
+      done();
+    });
+    firstSet[1].resolve(2);
+    firstSet[0].resolve(1);
+  }));
+
+  it('rejects Promise.race with the first rejected reason', asyncHelper((done) => {
+    let promises = [
+      new ParsePromise(),
+      new ParsePromise(),
+      new ParsePromise()
+    ];
+
+    ParsePromise.race(promises).fail((error) => {
+      expect(error).toBe('error 2');
+      done();
+    });
+    promises[1].reject('error 2');
+    promises[0].resolve('error 1');
+  }));
+
+  it('can implement continuations', asyncHelper((done) => {
+    let count = 0;
+    let loop = () => {
+      count++;
+      return ParsePromise.as();
+    }
+    ParsePromise._continueWhile(
+      () => { return count < 5 },
+      loop
+    ).then(() => {
+      expect(count).toBe(5);
+      done();
+    });
+  }));
+}
+
+describe('Promise (A Compliant)', () => {
+  beforeEach(() => {
+    ParsePromise.disableAPlusCompliant();
+  });
+
+  promiseTests();
+});
+
+describe('Promise (A+ Compliant)', () => {
+  beforeEach(() => {
+    ParsePromise.enableAPlusCompliant();
+  });
+
+  promiseTests();
 });

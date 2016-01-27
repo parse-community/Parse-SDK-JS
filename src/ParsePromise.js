@@ -207,9 +207,18 @@ export default class ParsePromise {
 
   /**
    * Add handlers to be called when the Promise object is rejected
+   * Alias for catch().
    * @method fail
    */
   fail(callback) {
+    return this.then(null, callback);
+  }
+
+  /**
+   * Add handlers to be called when the Promise object is rejected
+   * @method catch
+   */
+  catch(callback) {
     return this.then(null, callback);
   }
 
@@ -430,6 +439,115 @@ export default class ParsePromise {
     };
     for (var i = 0; i < objects.length; i++) {
       chain(objects[i], i);
+    }
+
+    return promise;
+  }
+
+  /**
+   * Returns a new promise that is fulfilled when all of the promises in the
+   * iterable argument are resolved. If any promise in the list fails, then
+   * the returned promise will be immediately rejected with the reason that
+   * single promise rejected. If they all succeed, then the returned promise
+   * will succeed, with the results being the results of all the input
+   * promises. If the iterable provided is empty, the returned promise will
+   * be immediately resolved.
+   * 
+   * For example: <pre>
+   *   var p1 = Parse.Promise.as(1);
+   *   var p2 = Parse.Promise.as(2);
+   *   var p3 = Parse.Promise.as(3);
+   *
+   *   Parse.Promise.all([p1, p2, p3]).then(function([r1, r2, r3]) {
+   *     console.log(r1);  // prints 1
+   *     console.log(r2);  // prints 2
+   *     console.log(r3);  // prints 3
+   *   });</pre>
+   *
+   * @method all
+   * @param {Iterable} promises an iterable of promises to wait for.
+   * @static
+   * @return {Parse.Promise} the new promise.
+   */
+  static all(promises) {
+    let total = 0;
+    let objects = [];
+
+    for (let p of promises) {
+      objects[total++] = p;
+    }
+
+    if (total === 0) {
+      return ParsePromise.as([]);
+    }
+
+    let hadError = false;
+    let promise = new ParsePromise();
+    let resolved = 0;
+    let results = [];
+    objects.forEach((object, i) => {
+      if (ParsePromise.is(object)) {
+        object.then((result) => {
+          if (hadError) {
+            return false;
+          }
+          results[i] = result;
+          resolved++;
+          if (resolved >= total) {
+            promise.resolve(results);
+          }
+        }, (error) => {
+          // Reject immediately
+          promise.reject(error);
+          hadError = true;
+        });
+      } else {
+        results[i] = object;
+        resolved++;
+        if (!hadError && resolved >= total) {
+          promise.resolve(results);
+        }
+      }
+    });
+
+    return promise;
+  }
+
+  /**
+   * Returns a new promise that is immediately fulfilled when any of the
+   * promises in the iterable argument are resolved or rejected. If the
+   * first promise to complete is resolved, the returned promise will be
+   * resolved with the same value. Likewise, if the first promise to
+   * complete is rejected, the returned promise will be rejected with the
+   * same reason.
+   *
+   * @method race
+   * @param {Iterable} promises an iterable of promises to wait for.
+   * @static
+   * @return {Parse.Promise} the new promise.
+   */
+  static race(promises) {
+    let completed = false;
+    let promise = new ParsePromise();
+    for (let p of promises) {
+      if (ParsePromise.is(p)) {
+        p.then((result) => {
+          if (completed) {
+            return;
+          }
+          completed = true;
+          promise.resolve(result);
+        }, (error) => {
+          if (completed) {
+            return;
+          }
+          completed = true;
+          promise.reject(error);
+        });
+      } else if (!completed) {
+        completed = true;
+        promise.resolve(p);
+      }
     }
 
     return promise;
