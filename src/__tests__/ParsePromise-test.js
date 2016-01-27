@@ -309,6 +309,27 @@ function promiseTests() {
     jest.runAllTimers();
   }));
 
+  it('immediately resolves when processing an empty array in parallel', asyncHelper((done) => {
+    ParsePromise.when([]).then((result) => {
+      expect(result).toEqual([]);
+      done();
+    });
+  }));
+
+  it('can handle rejected promises in parallel', asyncHelper((done) => {
+    ParsePromise.when([ParsePromise.as(1), ParsePromise.error('an error')]).then(null, (errors) => {
+      expect(errors).toEqual([undefined, 'an error']);
+      done();
+    });
+  }));
+
+  it('can automatically resolve non-promises in parallel', asyncHelper((done) => {
+    ParsePromise.when([1,2,3]).then((results) => {
+      expect(results).toEqual([1,2,3]);
+      done();
+    });
+  }));
+
   it('passes on errors', () => {
     ParsePromise.error('foo').then(() => {
       // This should not be reached
@@ -658,6 +679,20 @@ function promiseTests() {
     ).then(() => {
       expect(count).toBe(5);
       done();
+    });
+  }));
+
+  it('can attach a universal callback to a promise', asyncHelper((done) => {
+    ParsePromise.as(15)._continueWith((result, err) => {
+      expect(result).toEqual([15]);
+      expect(err).toBe(null);
+
+      ParsePromise.error('an error')._continueWith((result, err) => {
+        expect(result).toBe(null);
+        expect(err).toBe('an error');
+
+        done();
+      });
     });
   }));
 }
