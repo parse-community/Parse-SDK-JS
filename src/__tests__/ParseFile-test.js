@@ -78,6 +78,15 @@ describe('ParseFile', () => {
     }).toThrow('Cannot create a Parse.File with that data.');
   });
 
+  it('returns secure url when specified', () => {
+    var file = new ParseFile('parse.txt', { base64: 'ParseA==' });
+    file.save().then(function(result) {
+      expect(result).toBe(file);
+      expect(result.url({ secure: true }))
+        .toBe('https://files.parsetfss.com/a/parse.txt');
+    });
+  });
+
   it('updates fields when saved', () => {
     var file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     expect(file.name()).toBe('parse.txt');
