@@ -82,9 +82,14 @@ describe('ParseFile', () => {
     var file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     file.save().then(function(result) {
       expect(result).toBe(file);
-      expect(result.url({ secure: true }))
+      expect(result.url({ forceSecure: true }))
         .toBe('https://files.parsetfss.com/a/parse.txt');
     });
+  });
+
+  it('returns undefined when there is no url', () => {
+    var file = new ParseFile('parse.txt', { base64: 'ParseA==' });
+    expect(file.url({ forceSecure: true })).toBeUndefined();
   });
 
   it('updates fields when saved', () => {

@@ -137,9 +137,12 @@ export default class ParseFile {
    * @param {Object} options An object to specify url options
    * @return {String}
    */
-  url(options?: { secure?: boolean }): ?string {
+  url(options?: { forceSecure?: boolean }): ?string {
     options = options || {};
-    if (options.secure) {
+    if (!this._url) {
+      return;
+    }
+    if (options.forceSecure) {
       return this._url.replace(/^http:\/\//i, 'https://');
     } else {
       return this._url;
