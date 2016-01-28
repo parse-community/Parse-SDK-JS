@@ -134,10 +134,19 @@ export default class ParseFile {
    * Gets the url of the file. It is only available after you save the file or
    * after you get the file from a Parse.Object.
    * @method url
+   * @param {Object} options An object to specify url options
    * @return {String}
    */
-  url(): ?string {
-    return this._url;
+  url(options?: { forceSecure?: boolean }): ?string {
+    options = options || {};
+    if (!this._url) {
+      return;
+    }
+    if (options.forceSecure) {
+      return this._url.replace(/^http:\/\//i, 'https://');
+    } else {
+      return this._url;
+    }
   }
 
   /**
