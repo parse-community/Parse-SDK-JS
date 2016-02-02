@@ -21,6 +21,7 @@ import type { PushData } from './Push';
 type RequestOptions = {
   useMasterKey?: boolean;
   sessionToken?: string;
+  installationId?: string;
 };
 type AnalyticsController = {
   track: (name: string, dimensions: { [key: string]: string }) => ParsePromise;
