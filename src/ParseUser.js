@@ -365,6 +365,9 @@ export default class ParseUser extends ParseObject {
     if (options.hasOwnProperty('useMasterKey')) {
       signupOptions.useMasterKey = options.useMasterKey;
     }
+    if (options.hasOwnProperty('installationId')) {
+      signupOptions.installationId = options.installationId;
+    }
 
     var controller = CoreManager.getUserController();
     return controller.signUp(
@@ -394,6 +397,9 @@ export default class ParseUser extends ParseObject {
     var loginOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       loginOptions.useMasterKey = options.useMasterKey;
+    }
+    if (options.hasOwnProperty('installationId')) {
+      loginOptions.installationId = options.installationId;
     }
 
     var controller = CoreManager.getUserController();
