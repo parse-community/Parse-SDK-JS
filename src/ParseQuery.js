@@ -283,7 +283,7 @@ export default class ParseQuery {
         if (!data.className) {
           data.className = override;
         }
-        return ParseObject.fromJSON(data);
+        return ParseObject.fromJSON(data, true);
       });
     })._thenRunCallbacks(options);
   }
@@ -381,7 +381,7 @@ export default class ParseQuery {
       if (!objects[0].className) {
         objects[0].className = this.className;
       }
-      return ParseObject.fromJSON(objects[0]);
+      return ParseObject.fromJSON(objects[0], true);
     })._thenRunCallbacks(options);
   }
 
