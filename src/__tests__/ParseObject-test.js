@@ -152,6 +152,27 @@ describe('ParseObject', () => {
     expect(o.dirty()).toBe(false);
   });
 
+  it('can override old data when inflating from the server', () => {
+    var o = ParseObject.fromJSON({
+      className: 'Item',
+      objectId: 'I01',
+      size: 'small'
+    });
+    expect(o.get('size')).toBe('small');
+    var o2 = ParseObject.fromJSON({
+      className: 'Item',
+      objectId: 'I01',
+      disabled: true
+    }, true);
+    expect(o.get('disabled')).toBe(true);
+    expect(o.get('size')).toBe(undefined);
+    expect(o.has('size')).toBe(false);
+
+    expect(o2.get('disabled')).toBe(true);
+    expect(o2.get('size')).toBe(undefined);
+    expect(o2.has('size')).toBe(false);
+  });
+
   it('is given a local Id once dirtied', () => {
     var o = new ParseObject('Item');
     o.set('size', 'small');
@@ -1210,6 +1231,32 @@ describe('ParseObject', () => {
     }).then(() => {
       expect(p.get('count')).toBe(20);
       expect(p.dirty()).toBe(false);
+      done();
+    });
+  }));
+
+  it('replaces old data when fetch() is called', asyncHelper((done) => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: {
+          count: 10
+        }
+      }])
+    );
+
+    var p = ParseObject.fromJSON({
+      className: 'Person',
+      objectId: 'P200',
+      name: 'Fred',
+      count: 0
+    });
+    expect(p.get('name')).toBe('Fred');
+    expect(p.get('count')).toBe(0);
+    p.fetch().then(() => {
+      expect(p.get('count')).toBe(10);
+      expect(p.get('name')).toBe(undefined);
+      expect(p.has('name')).toBe(false);
       done();
     });
   }));
