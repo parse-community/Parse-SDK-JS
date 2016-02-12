@@ -780,12 +780,25 @@ export default class ParseObject {
    * @return {Parse.Object}
    */
   clone(): any {
-    var clone = new this.constructor();
+    let clone = new this.constructor();
     if (!clone.className) {
       clone.className = this.className;
     }
+    let attributes = this.attributes;
+    if (typeof this.constructor.readOnlyAttributes === 'function') {
+      let readonly = this.constructor.readOnlyAttributes() || [];
+      // Attributes are frozen, so we have to rebuild an object,
+      // rather than delete readonly keys
+      let copy = {};
+      for (let a in attributes) {
+        if (readonly.indexOf(a) < 0) {
+          copy[a] = attributes[a];
+        }
+      }
+      attributes = copy;
+    }
     if (clone.set) {
-      clone.set(this.attributes);
+      clone.set(attributes);
     }
     return clone;
   }

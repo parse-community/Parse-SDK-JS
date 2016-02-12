@@ -127,4 +127,17 @@ describe('ParseSession', () => {
       done();
     });
   }));
+
+  it('can be cloned', () => {
+    var s = ParseObject.fromJSON({
+      className: '_Session',
+      sessionToken: '123abc',
+      foo: 12
+    });
+
+    var clone = s.clone();
+    expect(clone.className).toBe('_Session');
+    expect(clone.get('foo')).toBe(12);
+    expect(clone.get('sessionToken')).toBe(undefined);
+  });
 });

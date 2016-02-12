@@ -85,6 +85,21 @@ describe('ParseUser', () => {
     expect(u2.getEmail()).toBe('bono@u2.com');
   });
 
+  it('can clone User objects', () => {
+    var u = ParseObject.fromJSON({
+      className: '_User',
+      username: 'user12',
+      email: 'user12@parse.com',
+      sessionToken: '123abc'
+    });
+
+    var clone = u.clone();
+    expect(clone.className).toBe('_User');
+    expect(clone.get('username')).toBe('user12');
+    expect(clone.get('email')).toBe('user12@parse.com');
+    expect(clone.get('sessionToken')).toBe(undefined);
+  });
+
   it('makes session tokens readonly', () => {
     var u = new ParseUser();
     expect(u.set.bind(u, 'sessionToken', 'token')).toThrow(
