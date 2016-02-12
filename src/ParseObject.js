@@ -1305,10 +1305,12 @@ export default class ParseObject {
    * Creates a new instance of a Parse Object from a JSON representation.
    * @method fromJSON
    * @param {Object} json The JSON map of the Object's data
+   * @param {boolean} override In single instance mode, all old server data
+   *   is overwritten if this is set to true
    * @static
    * @return {Parse.Object} A Parse.Object reference
    */
-  static fromJSON(json) {
+  static fromJSON(json, override) {
     if (!json.className) {
       throw new Error('Cannot create an object without a className');
     }
@@ -1319,6 +1321,13 @@ export default class ParseObject {
       if (attr !== 'className' && attr !== '__type') {
         otherAttributes[attr] = json[attr];
       }
+    }
+    if (override) {
+      // id needs to be set before clearServerData can work
+      if (otherAttributes.objectId) {
+        o.id = otherAttributes.objectId;
+      }
+      o._clearServerData();
     }
     o._finishFetch(otherAttributes);
     if (json.objectId) {
@@ -1587,6 +1596,7 @@ var DefaultController = {
       ).then((response, status, xhr) => {
         if (target instanceof ParseObject) {
           target._clearPendingOps();
+          target._clearServerData();
           target._finishFetch(response);
         }
         return target;
