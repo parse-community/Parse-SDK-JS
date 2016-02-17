@@ -123,6 +123,23 @@ export function enqueueTask(obj: ParseObject, task: () => ParsePromise): ParsePr
   return state.tasks.enqueue(task);
 }
 
+export function duplicateState(source: ParseObject, dest: ParseObject): void {
+  let oldState = initializeState(source);
+  let newState = initializeState(dest);
+  for (let key in oldState.serverData) {
+    newState.serverData[key] = oldState.serverData[key];
+  }
+  for (let index = 0; index < oldState.pendingOps.length; index++) {
+    for (let key in oldState.pendingOps[index]) {
+      newState.pendingOps[index][key] = oldState.pendingOps[index][key];
+    }
+  }
+  for (let key in oldState.objectCache) {
+    newState.objectCache[key] = oldState.objectCache[key];
+  }
+  newState.existed = oldState.existed;
+}
+
 export function clearAllState() {
   objectState = new WeakMap();
 }
