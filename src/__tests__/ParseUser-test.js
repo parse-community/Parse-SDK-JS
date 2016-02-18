@@ -431,6 +431,37 @@ describe('ParseUser', () => {
     });
   }));
 
+  it('removes the current user from disk when destroyed', asyncHelper((done) => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    CoreManager.setRESTController({
+      request() {
+        return ParsePromise.as({
+          objectId: 'uid9',
+        }, 201);
+      },
+      ajax() {}
+    });
+
+    ParseUser.signUp('destroyed', 'password').then((u) => {
+      expect(u.isCurrent()).toBe(true);
+      CoreManager.setRESTController({
+        request() {
+          return ParsePromise.as({}, 200);
+        },
+        ajax() {}
+      });
+      return u.destroy();
+    }).then((u) => {
+      expect(ParseUser.current()).toBe(null);
+      return ParseUser.currentAsync();
+    }).then((current) => {
+      expect(current).toBe(null);
+      done();
+    });
+  }));
+
   it('updates the current user on disk when fetched', asyncHelper((done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();

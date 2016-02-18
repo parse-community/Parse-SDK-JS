@@ -420,6 +420,19 @@ export default class ParseUser extends ParseObject {
   }
 
   /**
+   * Wrap the default destroy behavior with functionality that logs out
+   * the current user when it is destroyed
+   */
+  destroy(...args: Array<any>): ParsePromise {
+    return super.destroy.apply(this, args).then(() => {
+      if (this.isCurrent()) {
+        return CoreManager.getUserController().removeUserFromDisk();
+      }
+      return this;
+    });
+  }
+
+  /**
    * Wrap the default fetch behavior with functionality to save to local
    * storage if this is current user.
    */
@@ -748,6 +761,13 @@ var DefaultController = {
     ).then(() => {
       return user;
     });
+  },
+
+  removeUserFromDisk() {
+    let path = Storage.generatePath(CURRENT_USER_KEY);
+    currentUserCacheMatchesDisk = true;
+    currentUserCache = null;
+    return Storage.removeItemAsync(path);
   },
 
   setCurrentUser(user) {
