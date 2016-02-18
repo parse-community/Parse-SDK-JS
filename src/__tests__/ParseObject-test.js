@@ -1720,6 +1720,20 @@ describe('ObjectController', () => {
 
     xhrs[0].onreadystatechange();
   });
+
+  it('can create a new instance of an object', () => {
+    let o = ParseObject.fromJSON({
+      className: 'Clone',
+      objectId: 'C12',
+    });
+    let o2 = o.newInstance();
+    expect(o.id).toBe(o2.id);
+    expect(o.className).toBe(o2.className);
+    o.set({ valid: true });
+    expect(o2.get('valid')).toBe(true);
+
+    expect(o).not.toBe(o2);
+  });
 });
 
 describe('ParseObject (unique instance mode)', () => {
@@ -1901,6 +1915,21 @@ describe('ParseObject (unique instance mode)', () => {
     o2.set({ name: 'foo' });
     expect(o.has('name')).toBe(false);
     expect(o2.has('name')).toBe(true);
+  });
+
+  it('can create a new instance of an object', () => {
+    let o = ParseObject.fromJSON({
+      className: 'Clone',
+      objectId: 'C14',
+    });
+    let o2 = o.newInstance();
+    expect(o.id).toBe(o2.id);
+    expect(o.className).toBe(o2.className);
+    expect(o).not.toBe(o2);
+    o.set({ valid: true });
+    expect(o2.get('valid')).toBe(undefined);
+    o2 = o.newInstance();
+    expect(o2.get('valid')).toBe(true);
   });
 });
 
