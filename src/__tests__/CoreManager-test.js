@@ -20,6 +20,10 @@ describe('CoreManager', () => {
     expect(CoreManager.get('VERSION').length).toBeGreaterThan(0);
   });
 
+  it('detects when running in node', () => {
+    expect(CoreManager.get('IS_NODE')).toBe(true);
+  });
+
   it('can set and retrieve arbitrary values', () => {
     expect(CoreManager.get.bind(null, 'something')).toThrow(
       'Configuration key not found: something'
