@@ -100,6 +100,28 @@ describe('ParseUser', () => {
     expect(clone.get('sessionToken')).toBe(undefined);
   });
 
+  it('can create a new instance of a User', () => {
+    ParseObject.disableSingleInstance();
+    let o = ParseObject.fromJSON({
+      className: '_User',
+      objectId: 'U111',
+      username: 'u111',
+      email: 'u111@parse.com',
+      sesionToken: '1313'
+    });
+    let o2 = o.newInstance();
+    expect(o.id).toBe(o2.id);
+    expect(o.className).toBe(o2.className);
+    expect(o.get('username')).toBe(o2.get('username'));
+    expect(o.get('sessionToken')).toBe(o2.get('sessionToken'));
+    expect(o).not.toBe(o2);
+    o.set({ admin: true });
+    expect(o2.get('admin')).toBe(undefined);
+    o2 = o.newInstance();
+    expect(o2.get('admin')).toBe(true);
+    ParseObject.enableSingleInstance();
+  });
+
   it('makes session tokens readonly', () => {
     var u = new ParseUser();
     expect(u.set.bind(u, 'sessionToken', 'token')).toThrow(
