@@ -522,6 +522,39 @@ describe('ParseUser', () => {
     });
   }));
 
+  it('clears the current user on disk when logged out', asyncHelper((done) => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    CoreManager.setRESTController({
+      request() {
+        return ParsePromise.as({
+          objectId: 'uid5',
+        }, 201);
+      },
+      ajax() {}
+    });
+
+    var path = Storage.generatePath('currentUser');
+    ParseUser.signUp('temporary', 'password').then((u) => {
+      expect(u.isCurrent()).toBe(true);
+      expect(Storage.getItem(path)).not.toBe(null);
+      ParseUser._clearCache();
+      CoreManager.setRESTController({
+        request() {
+          return ParsePromise.as({}, 200);
+        },
+        ajax() {}
+      });
+      return ParseUser.logOut();
+    }).then(() => {
+      ParseUser._clearCache();
+      expect(ParseUser.current()).toBe(null);
+      expect(Storage.getItem(path)).toBe(null);
+      done();
+    });
+  }));
+
   it('can get error when recursive _linkWith call fails', asyncHelper((done) => {
     CoreManager.setRESTController({
       request(method, path, body, options) {
