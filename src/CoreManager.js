@@ -117,6 +117,7 @@ var config: { [key: string]: mixed } = {
             !process.version.electron),
   REQUEST_ATTEMPT_LIMIT: 5,
   SERVER_URL: 'https://api.parse.com/1',
+  LIVEQUERY_SERVER_URL: null,
   VERSION: 'js' + require('../package.json').version,
   APPLICATION_ID: null,
   JAVASCRIPT_KEY: null,
@@ -455,5 +456,25 @@ module.exports = {
 
   getUserController(): UserController {
     return config['UserController'];
+  },
+
+  setLiveQueryController(controller: any) {
+    if (typeof controller.subscribe !== 'function') {
+      throw new Error('LiveQueryController must implement subscribe()');
+    }
+    if (typeof controller.unsubscribe !== 'function') {
+      throw new Error('LiveQueryController must implement unsubscribe()');
+    }
+    if (typeof controller.open !== 'function') {
+      throw new Error('LiveQueryController must implement open()');
+    }
+    if (typeof controller.close !== 'function') {
+      throw new Error('LiveQueryController must implement close()');
+    }
+    config['LiveQueryController'] = controller;
+  },
+
+  getLiveQueryController(): any {
+    return config['LiveQueryController'];
   }
 }
