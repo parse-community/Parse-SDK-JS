@@ -149,6 +149,7 @@ export default class LiveQueryClient extends events.EventEmitter {
       throw new Error('You need to set a proper Parse LiveQuery server url before using LiveQueryClient');
     }
 
+    this.reconnectHandle = null;
     this.attempts = 1;;
     this.id = 0;
     this.requestId = 1;
@@ -427,13 +428,25 @@ export default class LiveQueryClient extends events.EventEmitter {
 
   _handleReconnect() {
     // if closed or currently reconnecting we stop attempting to reconnect
-    if (this.state === CLIENT_STATE.DISCONNECTED || this.state === CLIENT_STATE.RECONNECTING) {
+    if (this.state === CLIENT_STATE.DISCONNECTED) {
       return;
     }
+
     this.state = CLIENT_STATE.RECONNECTING;
     let time = generateInterval(this.attempts);
-    console.info('attempting to reconnect after ' + time + 'ms');
-    setTimeout((() => {
+
+    // handle case when both close/error occur at frequent rates we ensure we do not reconnect unnecessarily.
+    // we're unable to distinguish different between close/error when we're unable to reconnect therefore
+    // we try to reonnect in both cases
+    // server side ws and browser WebSocket behave differently in when close/error get triggered
+     
+    if (this.reconnectHandle) {
+      clearTimeout(this.reconnectHandle);
+    } else {
+      console.info('attempting to reconnect');
+    }
+
+    this.reconnectHandle = setTimeout((() => {
       this.attempts++;
       this.connectPromise = new ParsePromise();
       this.open();
