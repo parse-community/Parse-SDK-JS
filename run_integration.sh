@@ -6,6 +6,6 @@ npm install
 node server.js &
 PID=$!
 npm test
-C=$!
+C=$?
 kill -9 $PID
 exit $C
