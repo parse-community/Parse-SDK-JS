@@ -1,6 +1,7 @@
 #!/bin/sh
 
 cd integration
+npm install
 node server.js &
 PID=$!
 npm test
