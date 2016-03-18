@@ -17,6 +17,7 @@ import Storage from './Storage';
 export type RequestOptions = {
   useMasterKey?: boolean;
   sessionToken?: string;
+  installationId?: string;
 };
 
 export type FullOptions = {
@@ -24,6 +25,7 @@ export type FullOptions = {
   error?: any;
   useMasterKey?: boolean;
   sessionToken?: string;
+  installationId?: string;
 };
 
 var XHR = null;
@@ -184,9 +186,16 @@ const RESTController = {
       payload._RevocableSession = '1';
     }
 
-    var installationController = CoreManager.getInstallationController();
+    var installationId = options.installationId;
+    var installationIdPromise;
+    if (installationId && typeof installationId === 'string') {
+      installationIdPromise = ParsePromise.as(installationId);
+    } else {
+      var installationController = CoreManager.getInstallationController();
+      installationIdPromise = installationController.currentInstallationId();
+    }
 
-    return installationController.currentInstallationId().then((iid) => {
+    return installationIdPromise.then((iid) => {
       payload._InstallationId = iid;
       var userController = CoreManager.getUserController();
       if (options && typeof options.sessionToken === 'string') {

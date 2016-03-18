@@ -365,6 +365,9 @@ export default class ParseUser extends ParseObject {
     if (options.hasOwnProperty('useMasterKey')) {
       signupOptions.useMasterKey = options.useMasterKey;
     }
+    if (options.hasOwnProperty('installationId')) {
+      signupOptions.installationId = options.installationId;
+    }
 
     var controller = CoreManager.getUserController();
     return controller.signUp(
@@ -395,6 +398,9 @@ export default class ParseUser extends ParseObject {
     if (options.hasOwnProperty('useMasterKey')) {
       loginOptions.useMasterKey = options.useMasterKey;
     }
+    if (options.hasOwnProperty('installationId')) {
+      loginOptions.installationId = options.installationId;
+    }
 
     var controller = CoreManager.getUserController();
     return controller.logIn(this, loginOptions)._thenRunCallbacks(options, this);
@@ -408,6 +414,19 @@ export default class ParseUser extends ParseObject {
     return super.save.apply(this, args).then(() => {
       if (this.isCurrent()) {
         return CoreManager.getUserController().updateUserOnDisk(this);
+      }
+      return this;
+    });
+  }
+
+  /**
+   * Wrap the default destroy behavior with functionality that logs out
+   * the current user when it is destroyed
+   */
+  destroy(...args: Array<any>): ParsePromise {
+    return super.destroy.apply(this, args).then(() => {
+      if (this.isCurrent()) {
+        return CoreManager.getUserController().removeUserFromDisk();
       }
       return this;
     });
@@ -742,6 +761,13 @@ var DefaultController = {
     ).then(() => {
       return user;
     });
+  },
+
+  removeUserFromDisk() {
+    let path = Storage.generatePath(CURRENT_USER_KEY);
+    currentUserCacheMatchesDisk = true;
+    currentUserCache = null;
+    return Storage.removeItemAsync(path);
   },
 
   setCurrentUser(user) {

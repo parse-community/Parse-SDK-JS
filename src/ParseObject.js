@@ -775,7 +775,7 @@ export default class ParseObject {
   }
 
   /**
-   * Creates a new model with identical attributes to this one.
+   * Creates a new model with identical attributes to this one, similar to Backbone.Model's clone()
    * @method clone
    * @return {Parse.Object}
    */
@@ -800,6 +800,27 @@ export default class ParseObject {
     if (clone.set) {
       clone.set(attributes);
     }
+    return clone;
+  }
+
+  /**
+   * Creates a new instance of this object. Not to be confused with clone()
+   * @method newInstance
+   * @return {Parse.Object}
+   */
+  newInstance(): any {
+    let clone = new this.constructor();
+    if (!clone.className) {
+      clone.className = this.className;
+    }
+    clone.id = this.id;
+    if (singleInstance) {
+      // Just return an object with the right id
+      return clone;
+    }
+
+    let stateController = CoreManager.getObjectStateController();
+    stateController.duplicateState(this._getStateIdentifier(), clone._getStateIdentifier());
     return clone;
   }
 

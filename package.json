@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "1.7.1",
+  "version": "1.8.0-rc1",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://www.parse.com",
   "keywords": [
@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "babel-runtime": "^5.8.20",
+    "ws": "^1.0.1",
     "xmlhttprequest": "^1.7.0"
   },
   "devDependencies": {

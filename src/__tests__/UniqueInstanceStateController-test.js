@@ -420,4 +420,65 @@ describe('UniqueInstanceStateController', () => {
       closure();
     }
   });
+
+  it('can duplicate the state of an object', () => {
+    let obj = new ParseObject();
+    UniqueInstanceStateController.setServerData(obj, { counter: 12, name: 'original' });
+    let setCount = new ParseOps.SetOp(44);
+    let setValid = new ParseOps.SetOp(true);
+    UniqueInstanceStateController.setPendingOp(obj, 'counter', setCount);
+    UniqueInstanceStateController.setPendingOp(obj, 'valid', setValid);
+    
+    let duplicate = new ParseObject();
+    UniqueInstanceStateController.duplicateState(obj, duplicate);
+    expect(UniqueInstanceStateController.getState(duplicate)).toEqual({
+      serverData: { counter: 12, name: 'original' },
+      pendingOps: [{ counter: setCount, valid: setValid }],
+      objectCache: {},
+      tasks: new TaskQueue(),
+      existed: false
+    });
+
+    UniqueInstanceStateController.setServerData(duplicate, { name: 'duplicate' });
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
+      serverData: { counter: 12, name: 'original' },
+      pendingOps: [{ counter: setCount, valid: setValid }],
+      objectCache: {},
+      tasks: new TaskQueue(),
+      existed: false
+    });
+    expect(UniqueInstanceStateController.getState(duplicate)).toEqual({
+      serverData: { counter: 12, name: 'duplicate' },
+      pendingOps: [{ counter: setCount, valid: setValid }],
+      objectCache: {},
+      tasks: new TaskQueue(),
+      existed: false
+    });
+
+    UniqueInstanceStateController.commitServerChanges(obj, { o: { a: 12 } });
+    expect(UniqueInstanceStateController.getState(obj)).toEqual({
+      serverData: { counter: 12, name: 'original', o: { a: 12 } },
+      pendingOps: [{ counter: setCount, valid: setValid }],
+      objectCache: { o: '{"a":12}' },
+      tasks: new TaskQueue(),
+      existed: false
+    });
+    expect(UniqueInstanceStateController.getState(duplicate)).toEqual({
+      serverData: { counter: 12, name: 'duplicate' },
+      pendingOps: [{ counter: setCount, valid: setValid }],
+      objectCache: {},
+      tasks: new TaskQueue(),
+      existed: false
+    });
+
+    let otherDup = new ParseObject();
+    UniqueInstanceStateController.duplicateState(obj, otherDup);
+    expect(UniqueInstanceStateController.getState(otherDup)).toEqual({
+      serverData: { counter: 12, name: 'original', o: { a: 12 } },
+      pendingOps: [{ counter: setCount, valid: setValid }],
+      objectCache: { o: '{"a":12}' },
+      tasks: new TaskQueue(),
+      existed: false
+    });
+  });
 });
