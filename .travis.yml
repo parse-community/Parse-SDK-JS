@@ -8,6 +8,12 @@ branches:
     - master
 
 services: mongodb
+addons:
+  apt:
+    sources:
+    - mongodb-3.0-precise
+    packages:
+    - mongodb-org-server
 
 script: npm test && ./run_integration.sh
 after_script: cat ./coverage/coverage-final.json | ./node_modules/codecov.io/bin/codecov.io.js && rm -rf ./coverage
