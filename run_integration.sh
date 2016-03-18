@@ -1,5 +1,6 @@
 #!/bin/sh
 
+npm run build
 cd integration
 npm install
 node server.js &
