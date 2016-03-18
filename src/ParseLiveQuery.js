@@ -1,5 +1,4 @@
 import events from 'events';
-import url from 'url';
 import LiveQueryClient from './LiveQueryClient';
 import CoreManager from './CoreManager';
 
@@ -100,7 +99,7 @@ let DefaultLiveQueryController = {
 
     // If we can not find Parse.liveQueryServerURL, we try to extract it from Parse.serverURL
     if (!liveQueryServerURL) {
-      let host = url.parse(CoreManager.get('SERVER_URL')).host;
+      let host = CoreManager.get('SERVER_URL').replace(/^https?:\/\//, '');
       liveQueryServerURL = 'ws://' + host;
       CoreManager.set('LIVEQUERY_SERVER_URL', liveQueryServerURL);
     }
