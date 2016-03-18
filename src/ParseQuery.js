@@ -988,6 +988,17 @@ export default class ParseQuery {
   }
 
   /**
+   * Subscribe this query to get liveQuery updates
+   * @method subscribe
+   * @return {LiveQuerySubscription} Returns the liveQuerySubscription, it's an event emitter
+   * which can be used to get liveQuery updates.
+   */
+  subscribe(): any {
+    let controller = CoreManager.getLiveQueryController();
+    return controller.subscribe(this);
+  }
+
+  /**
    * Constructs a Parse.Query that is the OR of the passed in queries.  For
    * example:
    * <pre>var compoundQuery = Parse.Query.or(query1, query2, query3);</pre>
