@@ -7,4 +7,7 @@ branches:
   only:
     - master
 
+services: mongodb
+
+script: npm test && ./run_integration.sh
 after_script: cat ./coverage/coverage-final.json | ./node_modules/codecov.io/bin/codecov.io.js && rm -rf ./coverage
