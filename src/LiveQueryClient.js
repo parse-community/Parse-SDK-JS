@@ -321,15 +321,13 @@ export default class LiveQueryClient extends events.EventEmitter {
   }
 
   _getWebSocketImplementation(): any {
-    let WebSocketImplementation;
     if (process.env.PARSE_BUILD === 'node') {
-      WebSocketImplementation = require('ws');
+      return require('ws');
     } else if (process.env.PARSE_BUILD === 'browser') {
-      if (window.WebSocket) {
-        WebSocketImplementation = WebSocket;
-      }
+      return typeof WebSocket === 'function' ? WebSocket : null;
+    } else if (process.env.PARSE_BUILD === 'react-native') {
+      return WebSocket;
     }
-    return WebSocketImplementation;
   }
 
   // ensure we start with valid state if connect is called again after close
