@@ -990,7 +990,7 @@ export default class ParseQuery {
   /**
    * Subscribe this query to get liveQuery updates
    * @method subscribe
-   * @return {LiveQuerySubscription} Returns the liveQuerySubscription, it's an event emitter
+   * @return {Parse.Promise} A promise that is resolved with a liveQuerySubscription
    * which can be used to get liveQuery updates.
    */
   subscribe(): any {
