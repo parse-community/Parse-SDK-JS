@@ -8,7 +8,7 @@
  *
  */
 
-import events from 'events';
+import EventEmitter from './EventEmitter';
 import ParsePromise from './ParsePromise';
 import ParseObject from './ParseObject';
 import LiveQuerySubscription from './LiveQuerySubscription';
@@ -122,7 +122,7 @@ let generateInterval = (k) => {
  * 
  * 
  */
-export default class LiveQueryClient extends events.EventEmitter {
+export default class LiveQueryClient extends EventEmitter {
   attempts: number;
   id: number;
   requestId: number;

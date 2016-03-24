@@ -1,4 +1,4 @@
-import events from 'events';
+import EventEmitter from './EventEmitter';
 import LiveQueryClient from './LiveQueryClient';
 import CoreManager from './CoreManager';
 
@@ -41,7 +41,7 @@ function close() {
  * @static
  * 
  */
-let LiveQuery = new events.EventEmitter();
+let LiveQuery = new EventEmitter();
 
 /**
  * After open is called, the LiveQuery will try to send a connect request

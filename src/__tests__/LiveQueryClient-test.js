@@ -15,6 +15,7 @@ jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../equals');
 jest.dontMock('../escape');
+jest.dontMock('../EventEmitter');
 jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../parseDate');
 jest.dontMock('../ParseError');

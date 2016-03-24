@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "babel-runtime": "^5.8.20",
-    "events": "^1.1.0",
     "ws": "^1.0.1",
     "xmlhttprequest": "^1.7.0"
   },

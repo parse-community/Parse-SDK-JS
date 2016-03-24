@@ -8,7 +8,7 @@
  *
  */
 
-import events from 'events';
+import EventEmitter from './EventEmitter';
 import CoreManager from './CoreManager';
 
 /**
@@ -90,7 +90,7 @@ import CoreManager from './CoreManager';
  *
  * 
  */
-export default class Subscription extends events.EventEmitter {
+export default class Subscription extends EventEmitter {
   constructor(id, query, sessionToken) {
     super();
     this.id = id;
