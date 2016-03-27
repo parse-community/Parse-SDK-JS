@@ -615,4 +615,38 @@ describe('ParseUser', () => {
     expect(user.getUsername()).toBe('test');
     expect(user.get('authData').anonymous).toBe(null);
   });
+
+  it('maintains the session token when refetched', asyncHelper((done) => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    CoreManager.setRESTController({
+      request() {
+        return ParsePromise.as({
+          objectId: 'uidfetch',
+          username: 'temporary',
+          number: 123,
+          sessionToken: 'abc141',
+        }, 201);
+      },
+      ajax() {}
+    });
+
+    ParseUser.signUp('temporary', 'password').then((u) => {
+      expect(u.getSessionToken()).toBe('abc141');
+      expect(u.get('number')).toBe(123);
+      ParseUser._clearCache();
+
+      let u2 = ParseObject.fromJSON({
+        objectId: 'uidfetch',
+        className: '_User',
+        username: 'temporary',
+      }, true);
+      expect(u.getSessionToken()).toBe('abc141');
+      expect(u2.getSessionToken()).toBe('abc141');
+      expect(u.get('number')).toBe(undefined);
+      expect(u2.get('number')).toBe(undefined);
+      done();
+    });
+  }));
 });

@@ -250,6 +250,16 @@ export default class ParseUser extends ParseObject {
   }
 
   /**
+   * Class instance method used to maintain specific keys when a fetch occurs.
+   * Used to ensure that the session token is not lost.
+   */
+  _preserveFieldsOnFetch(): AttributeMap {
+    return {
+      sessionToken: this.get('sessionToken'),
+    };
+  }
+
+  /**
    * Returns true if <code>current</code> would return this user.
    * @method isCurrent
    * @return {Boolean}
