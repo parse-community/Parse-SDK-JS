@@ -108,6 +108,13 @@ type UserController = {
   upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => ParsePromise;
   linkWith: (user: ParseUser, authData: AuthData) => ParsePromise;
 };
+type HooksController = {
+  get: (type: string, functionName?: string, triggerName?: string) => ParsePromise;
+  create: (hook: mixed) => ParsePromise;
+  delete: (hook: mixed) => ParsePromise;
+  update: (hook: mixed) => ParsePromise;
+  send: (method: string, path: string, body?: mixed) => ParsePromise;
+}
 
 var config: { [key: string]: mixed } = {
   // Defaults
@@ -476,5 +483,20 @@ module.exports = {
 
   getLiveQueryController(): any {
     return config['LiveQueryController'];
+  },
+
+  setHooksController(controller: HooksController) {
+    ['create', 'get', 'update', 'remove'].forEach((func) => {
+      if (typeof controller[func] !== 'function') {
+        throw new Error(
+          `A HooksController must implement ${func}()`
+        );
+      }
+    })
+    config['HooksController'] = controller;
+  },
+
+  getHooksController(): HooksController {
+    return config['HooksController'];
   }
 }
