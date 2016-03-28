@@ -289,6 +289,24 @@ describe('Parse User', () => {
     });
   });
 
+  it('preserves the session token when querying the current user', (done) => {
+    let user = new Parse.User();
+    user.set('password', 'asdf');
+    user.set('email', 'asdf@example.com');
+    user.set('username', 'zxcv');
+    user.signUp().then(() => {
+      assert(user.has('sessionToken'));
+      let query = new Parse.Query(Parse.User);
+      return query.get(user.id);
+    }).then((u) => {
+      // Old object maintains token
+      assert(user.has('sessionToken'));
+      // New object doesn't have token
+      assert(!u.has('sessionToken'));
+      done();
+    });
+  });
+
   it('does not log in a user when saving', (done) => {
     Parse.User.enableUnsafeCurrentUser();
     let user = new Parse.User();

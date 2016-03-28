@@ -57,7 +57,7 @@ gulp.task('compile', function() {
 
 gulp.task('browserify', function() {
   var stream = browserify({
-    builtins: { _process: true },
+    builtins: ['_process', 'events'],
     entries: 'lib/browser/Parse.js',
     standalone: 'Parse'
   })

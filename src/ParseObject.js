@@ -1361,7 +1361,14 @@ export default class ParseObject {
       if (otherAttributes.objectId) {
         o.id = otherAttributes.objectId;
       }
+      let preserved = null;
+      if (typeof o._preserveFieldsOnFetch === 'function') {
+        preserved = o._preserveFieldsOnFetch();
+      }
       o._clearServerData();
+      if (preserved) {
+        o._finishFetch(preserved);
+      }
     }
     o._finishFetch(otherAttributes);
     if (json.objectId) {
