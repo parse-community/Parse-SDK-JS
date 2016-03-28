@@ -145,7 +145,7 @@ let DefaultLiveQueryController = {
     });
   },
   subscribe(query: any): EventEmitter {
-    let subscriptionWrap = new events.EventEmitter();
+    let subscriptionWrap = new EventEmitter();
 
     getLiveQueryClient().then((liveQueryClient) => {
       if (liveQueryClient.shouldOpen()) {
