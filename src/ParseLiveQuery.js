@@ -123,11 +123,9 @@ let DefaultLiveQueryController = {
       // Register a default onError callback to make sure we do not crash on error
       defaultLiveQueryClient.on('error', (error) => {
         LiveQuery.emit('error', error);
-      });
-      defaultLiveQueryClient.on('open', () => {
+      }).on('open', () => {
         LiveQuery.emit('open');
-      });
-      defaultLiveQueryClient.on('close', () => {
+      }).on('close', () => {
         LiveQuery.emit('close');
       });
 
