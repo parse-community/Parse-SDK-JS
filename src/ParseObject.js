@@ -223,12 +223,14 @@ export default class ParseObject {
     return stateController.getPendingOps(this._getStateIdentifier());
   }
 
-  _clearPendingOps() {
+  _clearPendingOps(keysToRevert) {
     var pending = this._getPendingOps();
     var latest = pending[pending.length - 1];
     var keys = Object.keys(latest);
     keys.forEach((key) => {
-      delete latest[key];
+        if(!keysToRevert || (keysToRevert && keysToRevert.indexOf(key) !== -1)) {
+            delete latest[key];
+        }
     });
   }
 
@@ -917,9 +919,16 @@ export default class ParseObject {
   /**
    * Clears any changes to this object made since the last call to save()
    * @method revert
+   * @param [keysToRevert] {String|Array<String>}
    */
-  revert(): void {
-    this._clearPendingOps();
+  revert(keysToRevert): void {
+    if (keysToRevert 
+          && typeof keysToRevert !== "string" 
+          && (keysToRevert instanceof Array !== true 
+               || (keysToRevert.length && typeof keysToRevert[0] !== "string"))) {
+        throw "Keys to revert must be a string or an array of strings.";
+      }
+    this._clearPendingOps(keysToRevert);
   }
 
   /**
