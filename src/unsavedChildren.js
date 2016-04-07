@@ -84,7 +84,9 @@ function traverse(
   }
   if (Array.isArray(obj)) {
     obj.forEach((el) => {
-      traverse(el, encountered, shouldThrow, allowDeepUnsaved);
+      if (typeof el === 'object') {
+        traverse(el, encountered, shouldThrow, allowDeepUnsaved);
+      }
     });
   }
   for (var k in obj) {
