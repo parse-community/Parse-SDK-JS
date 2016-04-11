@@ -1,6 +1,7 @@
 import EventEmitter from './EventEmitter';
 import LiveQueryClient from './LiveQueryClient';
 import CoreManager from './CoreManager';
+import ParsePromise from './ParsePromise';
 
 function open() {
   var LiveQueryController = CoreManager.getLiveQueryController();
@@ -69,16 +70,18 @@ LiveQuery.on('error', () => {
 export default LiveQuery;
 
 let getSessionToken = () => {
-  let currentUser = CoreManager.getUserController().currentUser();
-  let sessionToken;
-  if (currentUser) {
-    sessionToken = currentUser.getSessionToken();
-  }
-  return sessionToken;
+  let promiseUser = CoreManager.getUserController().currentUserAsync();
+  return promiseUser.then((currentUser) => {
+    return ParsePromise.as(currentUser ? currentUser.sessionToken : undefined);
+  }).then((sessionToken) => {
+    return ParsePromise.as(sessionToken);
+  });
 };
 
 let getLiveQueryClient = () => {
-  return CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
+  return CoreManager.getLiveQueryController().getDefaultLiveQueryClient().then((defaultLiveQueryClient) => {
+    return ParsePromise.as(defaultLiveQueryClient);
+  });
 };
 
 let defaultLiveQueryClient;
@@ -86,65 +89,101 @@ let DefaultLiveQueryController = {
   setDefaultLiveQueryClient(liveQueryClient: any) {
     defaultLiveQueryClient = liveQueryClient;
   },
-  getDefaultLiveQueryClient(): any {
+  getDefaultLiveQueryClient(): ParsePromise {
     if (defaultLiveQueryClient) {
-      return defaultLiveQueryClient;
+      return ParsePromise.as(defaultLiveQueryClient);
     }
 
-    let liveQueryServerURL = CoreManager.get('LIVEQUERY_SERVER_URL');
-    
-    if (liveQueryServerURL && liveQueryServerURL.indexOf('ws') !== 0) {
-      throw new Error('You need to set a proper Parse LiveQuery server url before using LiveQueryClient');
-    }
+    let sessionTokenPromise = getSessionToken();
+    return sessionTokenPromise.then((sessionToken) => {
+      let liveQueryServerURL = CoreManager.get('LIVEQUERY_SERVER_URL');
+      
+      if (liveQueryServerURL && liveQueryServerURL.indexOf('ws') !== 0) {
+        throw new Error('You need to set a proper Parse LiveQuery server url before using LiveQueryClient');
+      }
 
-    // If we can not find Parse.liveQueryServerURL, we try to extract it from Parse.serverURL
-    if (!liveQueryServerURL) {
-      let host = CoreManager.get('SERVER_URL').replace(/^https?:\/\//, '');
-      liveQueryServerURL = 'ws://' + host;
-      CoreManager.set('LIVEQUERY_SERVER_URL', liveQueryServerURL);
-    }
+      // If we can not find Parse.liveQueryServerURL, we try to extract it from Parse.serverURL
+      if (!liveQueryServerURL) {
+        let host = CoreManager.get('SERVER_URL').replace(/^https?:\/\//, '');
+        liveQueryServerURL = 'ws://' + host;
+        CoreManager.set('LIVEQUERY_SERVER_URL', liveQueryServerURL);
+      }
 
-    let applicationId = CoreManager.get('APPLICATION_ID');
-    let javascriptKey = CoreManager.get('JAVASCRIPT_KEY');
-    let masterKey = CoreManager.get('MASTER_KEY');
-    // Get currentUser sessionToken if possible
-    defaultLiveQueryClient = new LiveQueryClient({
-      applicationId,
-      serverURL: liveQueryServerURL,
-      javascriptKey,
-      masterKey,
-      sessionToken: getSessionToken(),
+      let applicationId = CoreManager.get('APPLICATION_ID');
+      let javascriptKey = CoreManager.get('JAVASCRIPT_KEY');
+      let masterKey = CoreManager.get('MASTER_KEY');
+      // Get currentUser sessionToken if possible
+      defaultLiveQueryClient = new LiveQueryClient({
+        applicationId,
+        serverURL: liveQueryServerURL,
+        javascriptKey,
+        masterKey,
+        sessionToken,
+      });
+      // Register a default onError callback to make sure we do not crash on error
+      defaultLiveQueryClient.on('error', (error) => {
+        LiveQuery.emit('error', error);
+      }).on('open', () => {
+        LiveQuery.emit('open');
+      }).on('close', () => {
+        LiveQuery.emit('close');
+      });
+
+      return ParsePromise.as(defaultLiveQueryClient);
     });
-    // Register a default onError callback to make sure we do not crash on error
-    defaultLiveQueryClient.on('error', (error) => {
-      LiveQuery.emit('error', error);
-    });
-    defaultLiveQueryClient.on('open', () => {
-      LiveQuery.emit('open');
-    });
-    defaultLiveQueryClient.on('close', () => {
-      LiveQuery.emit('close');
-    });
-    return defaultLiveQueryClient;
   },
   open() {
-    let liveQueryClient = getLiveQueryClient();
-    liveQueryClient.open();
+    getLiveQueryClient().then((liveQueryClient) => {
+      this.resolve(liveQueryClient.open());
+    });
   },
   close() {
-    let liveQueryClient = getLiveQueryClient();
-    liveQueryClient.close();
+    getLiveQueryClient().then((liveQueryClient) => {
+      this.resolve(liveQueryClient.close());
+    });
   },
-  subscribe(query: any): any {
-    let liveQueryClient = getLiveQueryClient();
-    if (liveQueryClient.shouldOpen()) {
-      liveQueryClient.open();
-    }
-    return liveQueryClient.subscribe(query, getSessionToken());
+  subscribe(query: any): EventEmitter {
+    let subscriptionWrap = new EventEmitter();
+
+    getLiveQueryClient().then((liveQueryClient) => {
+      if (liveQueryClient.shouldOpen()) {
+        liveQueryClient.open();
+      }
+      let promiseSessionToken = getSessionToken();
+      // new event emitter
+      return promiseSessionToken.then((sessionToken) => {
+
+        let subscription = liveQueryClient.subscribe(query, sessionToken);
+        // enter, leave create, etc
+        
+        subscriptionWrap.id = subscription.id;
+        subscriptionWrap.query = subscription.query;
+        subscriptionWrap.sessionToken = subscription.sessionToken;
+        subscriptionWrap.unsubscribe = subscription.unsubscribe;
+
+        subscription.on('open', () => {
+          subscriptionWrap.emit('open');
+        }).on('create', (object) => {
+          subscriptionWrap.emit('create', object);
+        }).on('update', (object) => {
+          subscriptionWrap.emit('update', object);
+        }).on('enter', (object) => {
+          subscriptionWrap.emit('enter', object);
+        }).on('leave', (object) => {
+          subscriptionWrap.emit('leave', object);
+        }).on('delete', (object) => {
+          subscriptionWrap.emit('delete', object);
+        });
+
+        this.resolve();
+      });
+    });
+    return subscriptionWrap;
   },
   unsubscribe(subscription: any) {
-    let liveQueryClient = getLiveQueryClient();
-    return liveQueryClient.unsubscribe(subscription);
+    getLiveQueryClient().then((liveQueryClient) => {
+      this.resolve(liveQueryClient.unsubscribe(subscription));
+    });
   }
 };
 
