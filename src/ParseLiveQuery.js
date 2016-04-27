@@ -121,11 +121,14 @@ let DefaultLiveQueryController = {
         sessionToken,
       });
       // Register a default onError callback to make sure we do not crash on error
+      // Cannot create these events on a nested way because of EventEmiiter from React Native
       defaultLiveQueryClient.on('error', (error) => {
         LiveQuery.emit('error', error);
-      }).on('open', () => {
+      });
+      defaultLiveQueryClient.on('open', () => {
         LiveQuery.emit('open');
-      }).on('close', () => {
+      });
+      defaultLiveQueryClient.on('close', () => {
         LiveQuery.emit('close');
       });
 
@@ -160,18 +163,23 @@ let DefaultLiveQueryController = {
         subscriptionWrap.query = subscription.query;
         subscriptionWrap.sessionToken = subscription.sessionToken;
         subscriptionWrap.unsubscribe = subscription.unsubscribe;
-
+        // Cannot create these events on a nested way because of EventEmiiter from React Native
         subscription.on('open', () => {
           subscriptionWrap.emit('open');
-        }).on('create', (object) => {
+        });
+        subscription.on('create', (object) => {
           subscriptionWrap.emit('create', object);
-        }).on('update', (object) => {
+        });
+        subscription.on('update', (object) => {
           subscriptionWrap.emit('update', object);
-        }).on('enter', (object) => {
+        });
+        subscription.on('enter', (object) => {
           subscriptionWrap.emit('enter', object);
-        }).on('leave', (object) => {
+        });
+        subscription.on('leave', (object) => {
           subscriptionWrap.emit('leave', object);
-        }).on('delete', (object) => {
+        });
+        subscription.on('delete', (object) => {
           subscriptionWrap.emit('delete', object);
         });
 
