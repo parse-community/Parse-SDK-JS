@@ -104,13 +104,13 @@ let DefaultLiveQueryController = {
       
       // If we can not find Parse.liveQueryServerURL, we try to extract it from Parse.serverURL
       if (!liveQueryServerURL) {
-        var tempServerURL = CoreManager.get('SERVER_URL');
-        var protocol = 'ws://';
+        const tempServerURL = CoreManager.get('SERVER_URL');
+        let protocol = 'ws://';
         // If Parse is being served over SSL/HTTPS, ensure LiveQuery Server uses 'wss://' prefix
         if (tempServerURL.indexOf('https') === 0) {
           protocol = 'wss://'
         }
-        var host = tempServerURL.replace(/^https?:\/\//, '');
+        const host = tempServerURL.replace(/^https?:\/\//, '');
         liveQueryServerURL = protocol + host;
         CoreManager.set('LIVEQUERY_SERVER_URL', liveQueryServerURL);
       }
