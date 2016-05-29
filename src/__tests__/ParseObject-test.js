@@ -864,10 +864,6 @@ describe('ParseObject', () => {
     o.save({ key: 'value', deletedKey: 'keyToDelete' }).then(() => {
       expect(o.get('key')).toBe('value');
       expect(o.get('deletedKey')).toBeUndefined();
-      o = new ParseObject('Item');
-      return o.save({ ACL: 'not an acl' });
-    }).then(null, (error) => {
-      expect(error.code).toBe(-1);
       done();
     });
   }));
