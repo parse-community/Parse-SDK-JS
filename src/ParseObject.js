@@ -375,6 +375,9 @@ export default class ParseObject {
         changes[attr] = new ParseACL(response[attr]);
       } else if (attr !== 'objectId') {
         changes[attr] = decode(response[attr]);
+        if (changes[attr] instanceof UnsetOp) {
+          changes[attr] = undefined;
+        }
       }
     }
     if (changes.createdAt && !changes.updatedAt) {
