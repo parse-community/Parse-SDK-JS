@@ -852,6 +852,21 @@ describe('ParseObject', () => {
       done();
     });
   }));
+  
+  it('interpolates delete operations', asyncHelper((done) => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: { objectId: 'newattributes', deletedKey: {__op: 'Delete'} }
+      }])
+    );
+    var o = new ParseObject('Item');
+    o.save({ key: 'value', deletedKey: 'keyToDelete' }).then(() => {
+      expect(o.get('key')).toBe('value');
+      expect(o.get('deletedKey')).toBeUndefined();
+      done();
+    });
+  }));
 
   it('can make changes while in the process of a save', asyncHelper((done) => {
     var xhr = {
