@@ -102,13 +102,12 @@ export default class ParseFile {
   		var commaIndex = data.base64.indexOf(',');
   		try {
   		    window.atob(commaIndex === -1?data.base64:data.base64.slice(commaIndex + 1));
-  		    return true;
   		} catch(e) {
   		    throw new TypeError('Cannot create a Parse.File with that data.');
   		}
   
       if (commaIndex !== -1) {
-        var matches = dataUriRegexp.slice(100).exec(data.base64);
+        var matches = dataUriRegexp.exec(data.base64.slice(0, 100));
         // if data URI with type and charset, there will be 4 matches.
         this._source = {
           format: 'base64',
