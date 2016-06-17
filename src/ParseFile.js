@@ -24,7 +24,7 @@ export type FileSource = {
 };
 
 var dataUriRegexp =
-  /^data:([a-zA-Z]*\/[a-zA-Z+.-]*);(charset=[a-zA-Z0-9\-\/\s]*,)?base64,(\S+)/;
+  /^data:([a-zA-Z]*\/[a-zA-Z+.-]*);(charset=[a-zA-Z0-9\-\/\s]*,)?base64,/;
 
 function b64Digit(number: number): string {
   if (number < 26) {
@@ -99,15 +99,10 @@ export default class ParseFile {
         type: specifiedType
       };
     } else if (data && data.hasOwnProperty('base64')) {
-  		var commaIndex = data.base64.indexOf(',');
-  		try {
-  		    window.atob(commaIndex === -1?data.base64:data.base64.slice(commaIndex + 1));
-  		} catch(e) {
-  		    throw new TypeError('Cannot create a Parse.File with that data.');
-  		}
+      var commaIndex = data.base64.indexOf(',');
   
       if (commaIndex !== -1) {
-        var matches = dataUriRegexp.exec(data.base64.slice(0, 100));
+        var matches = dataUriRegexp.exec(data.base64.slice(0, commaIndex + 1));
         // if data URI with type and charset, there will be 4 matches.
         this._source = {
           format: 'base64',
