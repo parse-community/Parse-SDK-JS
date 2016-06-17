@@ -67,7 +67,7 @@ export default class ParsePromise {
   reject(error) {
     if (this._resolved || this._rejected) {
       throw new Error(
-        'A promise was resolved even though it had already been ' +
+        'A promise was rejected even though it had already been ' +
         (this._resolved ? 'resolved' : 'rejected') + '.'
       );
     }
