@@ -147,6 +147,7 @@ if (process.env.PARSE_BUILD === 'node') {
   Parse.Cloud.useMasterKey = function() {
     CoreManager.set('USE_MASTER_KEY', true);
   }
+  Parse.Hooks = require('./ParseHooks');
 }
 
 // For legacy requires, of the form `var Parse = require('parse').Parse`
