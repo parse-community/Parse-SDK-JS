@@ -134,6 +134,14 @@ var config: { [key: string]: mixed } = {
   FORCE_REVOCABLE_SESSION: false
 };
 
+function requireMethods(name: string, methods: Array<string>, controller: any) {
+  methods.forEach((func) => {
+    if (typeof controller[func] !== 'function') {
+      throw new Error(`${name} must implement ${func}()`);
+    }
+  });
+}
+
 module.exports = {
   get: function(key: string): any {
     if (config.hasOwnProperty(key)) {
@@ -149,9 +157,7 @@ module.exports = {
   /* Specialized Controller Setters/Getters */
 
   setAnalyticsController(controller: AnalyticsController) {
-    if (typeof controller.track !== 'function') {
-      throw new Error('AnalyticsController must implement track()');
-    }
+    requireMethods('AnalyticsController', ['track'], controller);
     config['AnalyticsController'] = controller;
   },
 
@@ -160,9 +166,7 @@ module.exports = {
   },
 
   setCloudController(controller: CloudController) {
-    if (typeof controller.run !== 'function') {
-      throw new Error('CloudController must implement run()');
-    }
+    requireMethods('CloudController', ['run'], controller);
     config['CloudController'] = controller;
   },
 
@@ -171,12 +175,7 @@ module.exports = {
   },
 
   setConfigController(controller: ConfigController) {
-    if (typeof controller.current !== 'function') {
-      throw new Error('ConfigController must implement current()');
-    }
-    if (typeof controller.get !== 'function') {
-      throw new Error('ConfigController must implement get()');
-    }
+    requireMethods('ConfigController', ['current', 'get'], controller);
     config['ConfigController'] = controller;
   },
 
@@ -185,12 +184,7 @@ module.exports = {
   },
 
   setFileController(controller: FileController) {
-    if (typeof controller.saveFile !== 'function') {
-      throw new Error('FileController must implement saveFile()');
-    }
-    if (typeof controller.saveBase64 !== 'function') {
-      throw new Error('FileController must implement saveBase64()');
-    }
+    requireMethods('FileController', ['saveFile', 'saveBase64'], controller);
     config['FileController'] = controller;
   },
 
@@ -199,11 +193,7 @@ module.exports = {
   },
 
   setInstallationController(controller: InstallationController) {
-    if (typeof controller.currentInstallationId !== 'function') {
-      throw new Error(
-        'InstallationController must implement currentInstallationId()'
-      );
-    }
+    requireMethods('InstallationController', ['currentInstallationId'], controller);
     config['InstallationController'] = controller;
   },
 
@@ -212,15 +202,7 @@ module.exports = {
   },
 
   setObjectController(controller: ObjectController) {
-    if (typeof controller.save !== 'function') {
-      throw new Error('ObjectController must implement save()');
-    }
-    if (typeof controller.fetch !== 'function') {
-      throw new Error('ObjectController must implement fetch()');
-    }
-    if (typeof controller.destroy !== 'function') {
-      throw new Error('ObjectController must implement destroy()');
-    }
+    requireMethods('ObjectController', ['save', 'fetch', 'destroy'], controller);
     config['ObjectController'] = controller;
   },
 
@@ -229,86 +211,24 @@ module.exports = {
   },
 
   setObjectStateController(controller: ObjectStateController) {
-    if (typeof controller.getState !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement getState()'
-      );
-    }
-    if (typeof controller.initializeState !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement initializeState()'
-      );
-    }
-    if (typeof controller.removeState !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement removeState()'
-      );
-    }
-    if (typeof controller.getServerData !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement getServerData()'
-      );
-    }
-    if (typeof controller.setServerData !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement setServerData()'
-      );
-    }
-    if (typeof controller.getPendingOps !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement getPendingOps()'
-      );
-    }
-    if (typeof controller.setPendingOp !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement setPendingOp()'
-      );
-    }
-    if (typeof controller.pushPendingState !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement pushPendingState()'
-      );
-    }
-    if (typeof controller.popPendingState !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement popPendingState()'
-      );
-    }
-    if (typeof controller.mergeFirstPendingState !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement mergeFirstPendingState()'
-      );
-    }
-    if (typeof controller.getObjectCache !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement getObjectCache()'
-      );
-    }
-    if (typeof controller.estimateAttribute !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement estimateAttribute()'
-      );
-    }
-    if (typeof controller.estimateAttributes !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement estimateAttributes()'
-      );
-    }
-    if (typeof controller.commitServerChanges !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement commitServerChanges()'
-      );
-    }
-    if (typeof controller.enqueueTask !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement enqueueTask()'
-      );
-    }
-    if (typeof controller.clearAllState !== 'function') {
-      throw new Error(
-        'ObjectStateController must implement clearAllState()'
-      );
-    }
+    requireMethods('ObjectStateController', [
+      'getState',
+      'initializeState',
+      'removeState',
+      'getServerData',
+      'setServerData',
+      'getPendingOps',
+      'setPendingOp',
+      'pushPendingState',
+      'popPendingState',
+      'mergeFirstPendingState',
+      'getObjectCache',
+      'estimateAttribute',
+      'estimateAttributes',
+      'commitServerChanges',
+      'enqueueTask',
+      'clearAllState',
+    ], controller);
 
     config['ObjectStateController'] = controller;
   },
@@ -318,9 +238,7 @@ module.exports = {
   },
 
   setPushController(controller: PushController) {
-    if (typeof controller.send !== 'function') {
-      throw new Error('PushController must implement send()');
-    }
+    requireMethods('PushController', ['send'], controller);
     config['PushController'] = controller;
   },
 
@@ -329,9 +247,7 @@ module.exports = {
   },
 
   setQueryController(controller: QueryController) {
-    if (typeof controller.find !== 'function') {
-      throw new Error('QueryController must implement find()');
-    }
+    requireMethods('QueryController', ['find'], controller);
     config['QueryController'] = controller;
   },
 
@@ -340,12 +256,7 @@ module.exports = {
   },
 
   setRESTController(controller: RESTController) {
-    if (typeof controller.request !== 'function') {
-      throw new Error('RESTController must implement request()');
-    }
-    if (typeof controller.ajax !== 'function') {
-      throw new Error('RESTController must implement ajax()');
-    }
+    requireMethods('RESTController', ['request', 'ajax'], controller);
     config['RESTController'] = controller;
   },
 
@@ -354,11 +265,7 @@ module.exports = {
   },
 
   setSessionController(controller: SessionController) {
-    if (typeof controller.getSession !== 'function') {
-      throw new Error(
-        'A SessionController must implement getSession()'
-      );
-    }
+    requireMethods('SessionController', ['getSession'], controller);
     config['SessionController'] = controller;
   },
 
@@ -368,37 +275,17 @@ module.exports = {
 
   setStorageController(controller: StorageController) {
     if (controller.async) {
-      if (typeof controller.getItemAsync !== 'function') {
-        throw new Error(
-          'An async StorageController must implement getItemAsync()'
-        );
-      }
-      if (typeof controller.setItemAsync !== 'function') {
-        throw new Error(
-          'An async StorageController must implement setItemAsync()'
-        );
-      }
-      if (typeof controller.removeItemAsync !== 'function') {
-        throw new Error(
-          'An async StorageController must implement removeItemAsync()'
-        );
-      }
+      requireMethods('An async StorageController', [
+        'getItemAsync',
+        'setItemAsync',
+        'removeItemAsync',
+      ], controller);
     } else {
-      if (typeof controller.getItem !== 'function') {
-        throw new Error(
-          'A synchronous StorageController must implement getItem()'
-        );
-      }
-      if (typeof controller.setItem !== 'function') {
-        throw new Error(
-          'A synchronous StorageController must implement setItem()'
-        );
-      }
-      if (typeof controller.removeItem !== 'function') {
-        throw new Error(
-          'A synchonous StorageController must implement removeItem()'
-        );
-      }
+      requireMethods('A synchronous StorageController', [
+        'getItem',
+        'setItem',
+        'removeItem',
+      ], controller);
     }
     config['StorageController'] = controller;
   },
@@ -408,56 +295,18 @@ module.exports = {
   },
 
   setUserController(controller: UserController) {
-    if (typeof controller.setCurrentUser !== 'function') {
-      throw new Error(
-        'A UserController must implement setCurrentUser()'
-      );
-    }
-    if (typeof controller.currentUser !== 'function') {
-      throw new Error(
-        'A UserController must implement currentUser()'
-      );
-    }
-    if (typeof controller.currentUserAsync !== 'function') {
-      throw new Error(
-        'A UserController must implement currentUserAsync()'
-      );
-    }
-    if (typeof controller.signUp !== 'function') {
-      throw new Error(
-        'A UserController must implement signUp()'
-      );
-    }
-    if (typeof controller.logIn !== 'function') {
-      throw new Error(
-        'A UserController must implement logIn()'
-      );
-    }
-    if (typeof controller.become !== 'function') {
-      throw new Error(
-        'A UserController must implement become()'
-      );
-    }
-    if (typeof controller.logOut !== 'function') {
-      throw new Error(
-        'A UserController must implement logOut()'
-      );
-    }
-    if (typeof controller.requestPasswordReset !== 'function') {
-      throw new Error(
-        'A UserController must implement requestPasswordReset()'
-      );
-    }
-    if (typeof controller.upgradeToRevocableSession !== 'function') {
-      throw new Error(
-        'A UserController must implement upgradeToRevocableSession()'
-      );
-    }
-    if (typeof controller.linkWith !== 'function') {
-      throw new Error(
-        'A UserController must implement linkWith()'
-      );
-    }
+    requireMethods('UserController', [
+      'setCurrentUser',
+      'currentUser',
+      'currentUserAsync',
+      'signUp',
+      'logIn',
+      'become',
+      'logOut',
+      'requestPasswordReset',
+      'upgradeToRevocableSession',
+      'linkWith',
+    ], controller);
     config['UserController'] = controller;
   },
 
@@ -466,18 +315,12 @@ module.exports = {
   },
 
   setLiveQueryController(controller: any) {
-    if (typeof controller.subscribe !== 'function') {
-      throw new Error('LiveQueryController must implement subscribe()');
-    }
-    if (typeof controller.unsubscribe !== 'function') {
-      throw new Error('LiveQueryController must implement unsubscribe()');
-    }
-    if (typeof controller.open !== 'function') {
-      throw new Error('LiveQueryController must implement open()');
-    }
-    if (typeof controller.close !== 'function') {
-      throw new Error('LiveQueryController must implement close()');
-    }
+    requireMethods('LiveQueryController', [
+      'subscribe',
+      'unsubscribe',
+      'open',
+      'close',
+    ], controller);
     config['LiveQueryController'] = controller;
   },
 
@@ -486,13 +329,12 @@ module.exports = {
   },
 
   setHooksController(controller: HooksController) {
-    ['create', 'get', 'update', 'remove'].forEach((func) => {
-      if (typeof controller[func] !== 'function') {
-        throw new Error(
-          `A HooksController must implement ${func}()`
-        );
-      }
-    })
+    requireMethods('HooksController', [
+      'create',
+      'get',
+      'update',
+      'remove',
+    ], controller);
     config['HooksController'] = controller;
   },
 
