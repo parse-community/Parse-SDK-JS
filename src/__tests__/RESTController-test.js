@@ -180,7 +180,7 @@ describe('RESTController', () => {
     RESTController.request('GET', 'classes/MyObject', {}, {})
       .then(null, (error) => {
         expect(error.code).toBe(100);
-        expect(error.message).toBe('XMLHttpRequest failed: "SyntaxError: Unexpected end of input"');
+        expect(error.message.indexOf('XMLHttpRequest failed')).toBe(0);
         done();
       });
   }));

@@ -65,14 +65,14 @@ gulp.task('browserify', function() {
   .ignore('_process')
   .bundle();
 
-  return stream.pipe(source('parse-latest.js'))
+  return stream.pipe(source('parse.js'))
     .pipe(derequire())
     .pipe(insert.prepend(DEV_HEADER))
     .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('minify', function() {
-  return gulp.src('dist/parse-latest.js')
+  return gulp.src('dist/parse.js')
     .pipe(uglify())
     .pipe(insert.prepend(FULL_HEADER))
     .pipe(rename({ extname: '.min.js' }))
