@@ -121,7 +121,7 @@ var config: { [key: string]: mixed } = {
   IS_NODE: (typeof process !== 'undefined' &&
             !!process.versions &&
             !!process.versions.node &&
-            !process.version.electron),
+            !process.versions.electron),
   REQUEST_ATTEMPT_LIMIT: 5,
   SERVER_URL: 'https://api.parse.com/1',
   LIVEQUERY_SERVER_URL: null,
