@@ -245,7 +245,8 @@ var DefaultController = {
     // To directly upload a File, we use a REST-style AJAX request
     var headers = {
       'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
-      'X-Parse-JavaScript-Key': CoreManager.get('JAVASCRIPT_KEY')
+      'X-Parse-JavaScript-Key': CoreManager.get('JAVASCRIPT_KEY'),
+      'Content-Type': source.type || (source.file? source.file.type : null)
     };
     var url = CoreManager.get('SERVER_URL');
     if (url[url.length - 1] !== '/') {
