@@ -311,7 +311,10 @@ export class RelationOp extends Op {
   relationsToAdd: Array<string>;
   relationsToRemove: Array<string>;
 
-  constructor(adds: Array<ParseObject>, removes: Array<ParseObject>) {
+  constructor(
+    adds: Array<ParseObject | string>,
+    removes: Array<ParseObject | string>
+  ) {
     super();
     this._targetClassName = null;
 
@@ -345,8 +348,11 @@ export class RelationOp extends Op {
     return obj.id;
   }
 
-  applyTo(value: mixed, object: { className: string, id: string }, key: string): ?ParseRelation {
+  applyTo(value: mixed, object?: { className: string, id: ?string }, key?: string): ?ParseRelation {
     if (!value) {
+      if (!object || !key) {
+        throw new Error('Cannot apply a RelationOp without either a previous value, or an object and a key');
+      }
       var parent = new ParseObject(object.className);
       if (object.id && object.id.indexOf('local') === 0) {
         parent._localId = object.id;

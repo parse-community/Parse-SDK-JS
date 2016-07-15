@@ -14,7 +14,7 @@ import ParseObject from './ParseObject';
 import ParseRelation from './ParseRelation';
 
 type EncounterMap = {
-  objects: { [identifier: string]: ParseObject; };
+  objects: { [identifier: string]: ParseObject | boolean; };
   files: Array<ParseFile>;
 };
 

@@ -51,7 +51,7 @@ function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, 
     if (isNaN(value)) {
       throw new Error('Tried to encode an invalid date.');
     }
-    return { __type: 'Date', iso: value.toJSON() };
+    return { __type: 'Date', iso: (value: any).toJSON() };
   }
   if (toString.call(value) === '[object RegExp]' &&
       typeof value.source === 'string') {

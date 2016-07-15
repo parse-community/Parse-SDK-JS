@@ -29,11 +29,11 @@ import ParseQuery from './ParseQuery';
  * </p>
  */
 export default class ParseRelation {
-  parent: ParseObject;
+  parent: ?ParseObject;
   key: ?string;
   targetClassName: ?string;
 
-  constructor(parent: ParseObject, key: ?string) {
+  constructor(parent: ?ParseObject, key: ?string) {
     this.parent = parent;
     this.key = key;
     this.targetClassName = null;
@@ -74,15 +74,19 @@ export default class ParseRelation {
    * @method add
    * @param {} objects The item or items to add.
    */
-  add(objects: ParseObject | Array<ParseObject>): ParseObject {
+  add(objects: ParseObject | Array<ParseObject | string>): ParseObject {
     if (!Array.isArray(objects)) {
       objects = [objects];
     }
 
     var change = new RelationOp(objects, []);
-    this.parent.set(this.key, change);
+    var parent = this.parent;
+    if (!parent) {
+      throw new Error('Cannot add to a Relation without a parent');
+    }
+    parent.set(this.key, change);
     this.targetClassName = change._targetClassName;
-    return this.parent;
+    return parent;
   }
 
   /**
@@ -90,12 +94,15 @@ export default class ParseRelation {
    * @method remove
    * @param {} objects The item or items to remove.
    */
-  remove(objects: ParseObject | Array<ParseObject>) {
+  remove(objects: ParseObject | Array<ParseObject | string>) {
     if (!Array.isArray(objects)) {
       objects = [objects];
     }
 
     var change = new RelationOp([], objects);
+    if (!this.parent) {
+      throw new Error('Cannot remove from a Relation without a parent');
+    }
     this.parent.set(this.key, change);
     this.targetClassName = change._targetClassName;
   }
@@ -120,16 +127,20 @@ export default class ParseRelation {
    */
   query(): ParseQuery {
     var query;
+    var parent = this.parent;
+    if (!parent) {
+      throw new Error('Cannot construct a query for a Relation without a parent');
+    }
     if (!this.targetClassName) {
-      query = new ParseQuery(this.parent.className);
+      query = new ParseQuery(parent.className);
       query._extraOptions.redirectClassNameForKey = this.key;
     } else {
       query = new ParseQuery(this.targetClassName)
     }
     query._addCondition('$relatedTo', 'object', {
       __type: 'Pointer',
-      className: this.parent.className,
-      objectId: this.parent.id
+      className: parent.className,
+      objectId: parent.id
     });
     query._addCondition('$relatedTo', 'key', this.key);
 
