@@ -118,7 +118,11 @@ export default class ParseACL {
     if (userId instanceof ParseUser) {
       userId = userId.id;
     } else if (userId instanceof ParseRole) {
-      userId = 'role:' + userId.getName();
+      const name = userId.getName();
+      if (!name) {
+        throw new TypeError('Role must have a name');
+      }
+      userId = 'role:' + name;
     }
     if (typeof userId !== 'string') {
       throw new TypeError('userId must be a string.');
@@ -157,7 +161,11 @@ export default class ParseACL {
         throw new Error('Cannot get access for a ParseUser without an ID');
       }
     } else if (userId instanceof ParseRole) {
-      userId = 'role:' + userId.getName();
+      const name = userId.getName();
+      if (!name) {
+        throw new TypeError('Role must have a name');
+      }
+      userId = 'role:' + name;
     }
     var permissions = this.permissionsById[userId];
     if (!permissions) {
