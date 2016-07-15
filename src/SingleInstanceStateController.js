@@ -132,3 +132,7 @@ export function enqueueTask(obj: ObjectIdentifier, task: () => ParsePromise): Pa
 export function clearAllState() {
   objectState = {};
 }
+
+export function duplicateState(source: {id: string}, dest: {id: string}) {
+  dest.id = source.id;
+}

@@ -47,8 +47,12 @@ export default class ParseRole extends ParseObject {
    * @method getName
    * @return {String} the name of the role.
    */
-  getName(): string {
-    return this.get('name');
+  getName(): ?string {
+    const name = this.get('name');
+    if (name == null || typeof name === 'string') {
+      return name;
+    }
+    return '';
   }
 
   /**

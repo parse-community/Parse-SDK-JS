@@ -10,12 +10,14 @@
  */
 
 import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
+import type ParseFile from './ParseFile';
 import type { FileSource } from './ParseFile';
 import type { Op } from './ParseOp';
 import type ParseObject from './ParseObject';
 import type ParsePromise from './ParsePromise';
 import type { QueryJSON } from './ParseQuery';
-import type { ParseUser, AuthData } from './ParseUser';
+import type ParseUser from './ParseUser';
+import type { AuthData } from './ParseUser';
 import type { PushData } from './Push';
 
 type RequestOptions = {
@@ -41,9 +43,9 @@ type InstallationController = {
   currentInstallationId: () => ParsePromise;
 };
 type ObjectController = {
-  fetch: (object: ParseObject, forceFetch: boolean, options: RequestOptions) => ParsePromise;
-  save: (object: ParseObject, options: RequestOptions) => ParsePromise;
-  destroy: (object: ParseObject, options: RequestOptions) => ParsePromise;
+  fetch: (object: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions) => ParsePromise;
+  save: (object: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) => ParsePromise;
+  destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => ParsePromise;
 };
 type ObjectStateController = {
   getState: (obj: any) => ?State;
@@ -62,6 +64,7 @@ type ObjectStateController = {
   commitServerChanges: (obj: any, changes: AttributeMap) => void;
   enqueueTask: (obj: any, task: () => ParsePromise) => ParsePromise;
   clearAllState: () => void;
+  duplicateState: (source: any, dest: any) => void;
 };
 type PushController = {
   send: (data: PushData, options: RequestOptions) => ParsePromise;
@@ -107,6 +110,7 @@ type UserController = {
   updateUserOnDisk: (user: ParseUser) => ParsePromise;
   upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => ParsePromise;
   linkWith: (user: ParseUser, authData: AuthData) => ParsePromise;
+  removeUserFromDisk: () => ParsePromise;
 };
 type HooksController = {
   get: (type: string, functionName?: string, triggerName?: string) => ParsePromise;
@@ -114,9 +118,26 @@ type HooksController = {
   delete: (hook: mixed) => ParsePromise;
   update: (hook: mixed) => ParsePromise;
   send: (method: string, path: string, body?: mixed) => ParsePromise;
-}
+};
 
-var config: { [key: string]: mixed } = {
+type Config = {
+  AnalyticsController?: AnalyticsController,
+  CloudController?: CloudController,
+  ConfigController?: ConfigController,
+  FileController?: FileController,
+  InstallationController?: InstallationController,
+  ObjectController?: ObjectController,
+  ObjectStateController?: ObjectStateController,
+  PushController?: PushController,
+  QueryController?: QueryController,
+  RESTController?: RESTController,
+  SessionController?: SessionController,
+  StorageController?: StorageController,
+  UserController?: UserController,
+  HooksController?: HooksController,
+};
+
+var config: Config & { [key: string]: mixed } = {
   // Defaults
   IS_NODE: (typeof process !== 'undefined' &&
             !!process.versions &&

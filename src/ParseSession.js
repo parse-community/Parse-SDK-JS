@@ -42,7 +42,11 @@ export default class ParseSession extends ParseObject {
    * @return {String}
    */
   getSessionToken(): string {
-    return this.get('sessionToken');
+    const token = this.get('sessionToken');
+    if (typeof token === 'string') {
+      return token;
+    }
+    return '';
   }
 
   static readOnlyAttributes() {

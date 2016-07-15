@@ -76,7 +76,7 @@ export default class ParseUser extends ParseObject {
    * call linkWith on the user (even if it doesn't exist yet on the server).
    * @method _linkWith
    */
-  _linkWith(provider, options: { authData?: AuthData }): ParsePromise {
+  _linkWith(provider: any, options: { authData?: AuthData }): ParsePromise {
     var authType;
     if (typeof provider === 'string') {
       authType = provider;
@@ -86,6 +86,9 @@ export default class ParseUser extends ParseObject {
     }
     if (options && options.hasOwnProperty('authData')) {
       var authData = this.get('authData') || {};
+      if (typeof authData !== 'object') {
+        throw new Error('Invalid type: authData field should be an object');
+      }
       authData[authType] = options.authData;
 
       var controller = CoreManager.getUserController();
@@ -139,7 +142,7 @@ export default class ParseUser extends ParseObject {
       authType = provider.getAuthType();
     }
     var authData = this.get('authData');
-    if (!provider || typeof authData !== 'object') {
+    if (!provider || !authData || typeof authData !== 'object') {
       return;
     }
     var success = provider.restoreAuthentication(authData[authType]);
@@ -188,7 +191,7 @@ export default class ParseUser extends ParseObject {
    * Unlinks a user from a service.
    * @method _unlinkFrom
    */
-  _unlinkFrom(provider, options?: FullOptions) {
+  _unlinkFrom(provider: any, options?: FullOptions) {
     var authType;
     if (typeof provider === 'string') {
       authType = provider;
@@ -206,7 +209,7 @@ export default class ParseUser extends ParseObject {
    * Checks whether a user is linked to a service.
    * @method _isLinked
    */
-  _isLinked(provider): boolean {
+  _isLinked(provider: any): boolean {
     var authType;
     if (typeof provider === 'string') {
       authType = provider;
@@ -214,6 +217,9 @@ export default class ParseUser extends ParseObject {
       authType = provider.getAuthType();
     }
     var authData = this.get('authData') || {};
+    if (typeof authData !== 'object') {
+      return false;
+    }
     return !!authData[authType];
   }
 
@@ -237,7 +243,7 @@ export default class ParseUser extends ParseObject {
    * Facebook SDK).
    * @method _logOutWith
    */
-  _logOutWith(provider) {
+  _logOutWith(provider: any) {
     if (!this.isCurrent()) {
       return;
     }
@@ -275,7 +281,11 @@ export default class ParseUser extends ParseObject {
    * @return {String}
    */
   getUsername(): ?string {
-    return this.get('username');
+    const username = this.get('username');
+    if (username == null || typeof username === 'string') {
+      return username;
+    }
+    return '';
   }
 
   /**
@@ -289,7 +299,7 @@ export default class ParseUser extends ParseObject {
     // Strip anonymity, even we do not support anonymous user in js SDK, we may
     // encounter anonymous user created by android/iOS in cloud code.
     var authData = this.get('authData');
-    if (authData && authData.hasOwnProperty('anonymous')) {
+    if (authData && typeof authData === 'object' && authData.hasOwnProperty('anonymous')) {
       // We need to set anonymous to null instead of deleting it in order to remove it from Parse.
       authData.anonymous = null;
     }
@@ -313,7 +323,11 @@ export default class ParseUser extends ParseObject {
    * @return {String}
    */
   getEmail(): ?string {
-    return this.get('email');
+    const email = this.get('email');
+    if (email == null || typeof email === 'string') {
+      return email;
+    }
+    return '';
   }
 
   /**
@@ -335,7 +349,11 @@ export default class ParseUser extends ParseObject {
    * @return {String} the session token, or undefined
    */
   getSessionToken(): ?string {
-    return this.get('sessionToken');
+    const token = this.get('sessionToken');
+    if (token == null || typeof token === 'string') {
+      return token;
+    }
+    return '';
   }
 
   /**
@@ -467,7 +485,7 @@ export default class ParseUser extends ParseObject {
    * @static
    * @return {Class} The newly extended Parse.User class
    */
-  static extend(protoProps, classProps) {
+  static extend(protoProps: {[prop: string]: any}, classProps: {[prop: string]: any}) {
     if (protoProps) {
       for (var prop in protoProps) {
         if (prop !== 'className') {
