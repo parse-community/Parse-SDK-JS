@@ -1,0 +1,40 @@
+YUI.add("yuidoc-meta", function(Y) {
+   Y.YUIDoc = { meta: {
+    "classes": [
+        "Parse",
+        "Parse.ACL",
+        "Parse.Analytics",
+        "Parse.Cloud",
+        "Parse.Cloud.AfterDeleteRequest",
+        "Parse.Cloud.AfterSaveRequest",
+        "Parse.Cloud.BeforeDeleteRequest",
+        "Parse.Cloud.BeforeDeleteResponse",
+        "Parse.Cloud.BeforeSaveRequest",
+        "Parse.Cloud.BeforeSaveResponse",
+        "Parse.Cloud.Cookie",
+        "Parse.Cloud.CookieOptions",
+        "Parse.Cloud.FunctionRequest",
+        "Parse.Cloud.FunctionResponse",
+        "Parse.Cloud.HTTPOptions",
+        "Parse.Cloud.HTTPResponse",
+        "Parse.Cloud.JobRequest",
+        "Parse.Cloud.JobStatus",
+        "Parse.Config",
+        "Parse.Error",
+        "Parse.FacebookUtils",
+        "Parse.File",
+        "Parse.GeoPoint",
+        "Parse.Object",
+        "Parse.Promise",
+        "Parse.Push",
+        "Parse.Query",
+        "Parse.Relation",
+        "Parse.Role",
+        "Parse.Session",
+        "Parse.User"
+    ],
+    "modules": [],
+    "allModules": [],
+    "elements": []
+} };
+});
