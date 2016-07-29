@@ -2090,4 +2090,15 @@ describe('ParseObject extensions', () => {
     f = new FeatureObject();
     expect(f.foo() + f.bar()).toBe('FB');
   });
+
+  it('can specify a custom initializer', () => {
+    var InitObject = ParseObject.extend('InitObject', {
+      initialize: function(attrs, options) {
+        this.set('field', 12);
+      }
+    });
+
+    var i = new InitObject()
+    expect(i.get('field')).toBe(12);
+  });
 });

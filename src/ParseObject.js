@@ -1473,13 +1473,13 @@ export default class ParseObject {
       parentProto = classMap[adjustedClassName].prototype;
     }
     var ParseObjectSubclass = function(attributes, options) {
+      this.className = adjustedClassName;
+      this._objCount = objectCount++;
       // Enable legacy initializers
       if (typeof this.initialize === 'function') {
         this.initialize.apply(this, arguments);
       }
 
-      this.className = adjustedClassName;
-      this._objCount = objectCount++;
       if (attributes && typeof attributes === 'object'){
         if (!this.set(attributes || {}, options)) {
           throw new Error('Can\'t create an invalid Parse Object');
