@@ -168,6 +168,10 @@ export default class ParseObject {
     return this._getServerData().updatedAt;
   }
 
+  get isFetched(): boolean {
+    return !!this.createdAt;
+  }
+
   /** Private methods **/
 
   /**
