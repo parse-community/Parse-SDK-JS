@@ -168,6 +168,11 @@ export default class ParseObject {
     return this._getServerData().updatedAt;
   }
 
+  /**
+   * Returns true if the object was fetched previously.
+   * @property isFetched
+   * @type boolean
+   */
   get isFetched(): boolean {
     return !!this.createdAt;
   }
