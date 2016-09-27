@@ -13,13 +13,9 @@ jest.dontMock('../ParsePromise');
 jest.dontMock('../LiveQueryClient');
 jest.dontMock('../ParseObject');
 
-jest.dontMock('./test_helpers/asyncHelper');
-
 const ParseLiveQuery = require('../ParseLiveQuery');
 const CoreManager = require('../CoreManager');
-const ParsePromise = require('../ParsePromise');
-
-const asyncHelper = require('./test_helpers/asyncHelper');
+const ParsePromise = require('../ParsePromise').default;
 
 describe('ParseLiveQuery', () => {
   beforeEach(() => {
@@ -27,7 +23,7 @@ describe('ParseLiveQuery', () => {
     controller._clearCachedDefaultClient();
   });
 
-  it('fails with an invalid livequery server url', asyncHelper((done) => {
+  it('fails with an invalid livequery server url', (done) => {
     CoreManager.set('UserController', {
       currentUserAsync() {
         return ParsePromise.as(undefined);
@@ -41,9 +37,9 @@ describe('ParseLiveQuery', () => {
       );
       done();
     });
-  }));
+  });
 
-  it('initializes the client', asyncHelper((done) => {
+  it('initializes the client', (done) => {
     CoreManager.set('UserController', {
       currentUserAsync() {
         return ParsePromise.as(undefined);
@@ -60,9 +56,9 @@ describe('ParseLiveQuery', () => {
       expect(client.sessionToken).toBe(undefined);
       done();
     });
-  }));
+  });
 
-  it('automatically generates a websocket url', asyncHelper((done) => {
+  it('automatically generates a websocket url', (done) => {
     CoreManager.set('UserController', {
       currentUserAsync() {
         return ParsePromise.as(undefined);
@@ -79,9 +75,9 @@ describe('ParseLiveQuery', () => {
       expect(client.sessionToken).toBe(undefined);
       done();
     });
-  }));
+  });
 
-  it('populates the session token', asyncHelper((done) => {
+  it('populates the session token', (done) => {
     CoreManager.set('UserController', {
       currentUserAsync() {
         return ParsePromise.as({
@@ -102,5 +98,5 @@ describe('ParseLiveQuery', () => {
       expect(client.sessionToken).toBe('token');
       done();
     });
-  }));
+  });
 });

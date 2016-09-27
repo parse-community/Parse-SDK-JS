@@ -115,7 +115,7 @@ export default class ParseUser extends ParseObject {
           });
         },
         error: (provider, error) => {
-          if (options.error) {
+          if (typeof options.error === 'function') {
             options.error(this, error);
           }
           promise.reject(error);

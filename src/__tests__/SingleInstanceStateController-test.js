@@ -20,11 +20,12 @@ jest.dontMock('../TaskQueue');
 var mockObject = function() {};
 mockObject.registerSubclass = function() {};
 jest.setMock('../ParseObject', mockObject);
+jest.useFakeTimers();
 
-var ParseFile = require('../ParseFile');
-var ParseGeoPoint = require('../ParseGeoPoint');
+var ParseFile = require('../ParseFile').default;
+var ParseGeoPoint = require('../ParseGeoPoint').default;
 var ParseOps = require('../ParseOp');
-var ParsePromise = require('../ParsePromise');
+var ParsePromise = require('../ParsePromise').default;
 var SingleInstanceStateController = require('../SingleInstanceStateController');
 var TaskQueue = require('../TaskQueue');
 

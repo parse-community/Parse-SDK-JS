@@ -17,10 +17,10 @@ jest.dontMock('../ParseRole');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../UniqueInstanceStateController');
 
-const ParseACL = require('../ParseACL');
-const ParseError = require('../ParseError');
-const ParseObject = require('../ParseObject');
-const ParseRole = require('../ParseRole');
+const ParseACL = require('../ParseACL').default;
+const ParseError = require('../ParseError').default;
+const ParseObject = require('../ParseObject').default;
+const ParseRole = require('../ParseRole').default;
 
 describe('ParseRole', () => {
   beforeEach(() => {

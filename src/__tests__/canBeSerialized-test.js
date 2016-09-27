@@ -24,7 +24,7 @@ mockFile.prototype.url = function() {
 };
 jest.setMock('../ParseFile', mockFile);
 
-var canBeSerialized = require('../canBeSerialized');
+var canBeSerialized = require('../canBeSerialized').default;
 var ParseFile = require('../ParseFile');
 var ParseObject = require('../ParseObject');
 

@@ -8,7 +8,7 @@
  */
 
 // We need this until Jest finishes upgrading to Jasmine 2.0
-export default function asyncHelper(fn) {
+module.exports = function asyncHelper(fn) {
   var finished = false;
   var done = function() {
     finished = true;

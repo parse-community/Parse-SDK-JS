@@ -26,17 +26,14 @@ jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
 jest.dontMock('../UniqueInstanceStateController');
 
-jest.dontMock('./test_helpers/asyncHelper');
 jest.dontMock('./test_helpers/mockXHR');
 
 var CoreManager = require('../CoreManager');
-var ParseObject = require('../ParseObject');
-var ParsePromise = require('../ParsePromise');
-var ParseUser = require('../ParseUser');
+var ParseObject = require('../ParseObject').default;
+var ParsePromise = require('../ParsePromise').default;
+var ParseUser = require('../ParseUser').default;
 var Storage = require('../Storage');
-var ParseError = require('../ParseError');
-
-var asyncHelper = require('./test_helpers/asyncHelper');
+var ParseError = require('../ParseError').default;
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
@@ -138,7 +135,7 @@ describe('ParseUser', () => {
     );
   });
 
-  it('can sign up a new user', asyncHelper((done) => {
+  it('can sign up a new user', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
@@ -181,9 +178,9 @@ describe('ParseUser', () => {
       expect(current.get('password')).toBe(undefined);
       done();
     });
-  }));
+  });
 
-  it('can log in as a user', asyncHelper((done) => {
+  it('can log in as a user', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
@@ -214,9 +211,9 @@ describe('ParseUser', () => {
       expect(current.authenticated()).toBe(true);
       done();
     });
-  }));
+  });
 
-  it('fail login when invalid username or password is used', asyncHelper((done) => {
+  it('fail login when invalid username or password is used', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     ParseUser.logIn({}, 'password').then(null, (err) => {
@@ -230,9 +227,9 @@ describe('ParseUser', () => {
       
       done();
     });
-  }));
+  });
 
-  it('preserves changes when logging in', asyncHelper((done) => {
+  it('preserves changes when logging in', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
@@ -261,9 +258,9 @@ describe('ParseUser', () => {
       expect(u.get('count')).toBe(5);
       done();
     });
-  }));
+  });
 
-  it('can become a user with a session token', asyncHelper((done) => {
+  it('can become a user with a session token', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
@@ -287,7 +284,7 @@ describe('ParseUser', () => {
       expect(u.existed()).toBe(true);
       done();
     });
-  }));
+  });
 
   it('can send a password reset request', () => {
     CoreManager.setRESTController({
@@ -304,7 +301,7 @@ describe('ParseUser', () => {
     ParseUser.requestPasswordReset('me@parse.com');
   });
 
-  it('can log out a user', asyncHelper((done) => {
+  it('can log out a user', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
@@ -332,9 +329,9 @@ describe('ParseUser', () => {
       expect(ParseUser.current()).toBe(null);
       done();
     });
-  }));
+  });
 
-  it('can revoke a session on logout', asyncHelper((done) => {
+  it('can revoke a session on logout', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
@@ -365,9 +362,9 @@ describe('ParseUser', () => {
       expect(ParseUser.current()).toBe(null);
       done();
     });
-  }));
+  });
 
-  it('can get the current user asynchronously', asyncHelper((done) => {
+  it('can get the current user asynchronously', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     Storage._clear();
@@ -394,9 +391,9 @@ describe('ParseUser', () => {
       expect(u.id).toBe('uid6');
       done();
     });
-  }));
+  });
 
-  it('can inflate users stored from previous SDK versions', asyncHelper((done) => {
+  it('can inflate users stored from previous SDK versions', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     Storage._clear();
@@ -415,9 +412,9 @@ describe('ParseUser', () => {
       expect(u.getSessionToken()).toBe('12345');
       done();
     });
-  }));
+  });
 
-  it('updates the current user on disk when saved', asyncHelper((done) => {
+  it('updates the current user on disk when saved', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     Storage._clear();
@@ -451,9 +448,9 @@ describe('ParseUser', () => {
       expect(current.get('count')).toBe(12);
       done();
     });
-  }));
+  });
 
-  it('removes the current user from disk when destroyed', asyncHelper((done) => {
+  it('removes the current user from disk when destroyed', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     Storage._clear();
@@ -482,9 +479,9 @@ describe('ParseUser', () => {
       expect(current).toBe(null);
       done();
     });
-  }));
+  });
 
-  it('updates the current user on disk when fetched', asyncHelper((done) => {
+  it('updates the current user on disk when fetched', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     Storage._clear();
@@ -520,9 +517,9 @@ describe('ParseUser', () => {
       expect(current.get('count')).toBe(15);
       done();
     });
-  }));
+  });
 
-  it('clears the current user on disk when logged out', asyncHelper((done) => {
+  it('clears the current user on disk when logged out', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     Storage._clear();
@@ -553,9 +550,9 @@ describe('ParseUser', () => {
       expect(Storage.getItem(path)).toBe(null);
       done();
     });
-  }));
+  });
 
-  it('can get error when recursive _linkWith call fails', asyncHelper((done) => {
+  it('can get error when recursive _linkWith call fails', (done) => {
     CoreManager.setRESTController({
       request(method, path, body, options) {
         expect(method).toBe('POST');
@@ -598,7 +595,7 @@ describe('ParseUser', () => {
       expect(error.message).toBe('Another user is already linked to this facebook id.');
       done();
     });
-  }));
+  });
 
   it('strip anonymity when we set username', () => {
     var user = new ParseUser();
@@ -616,7 +613,7 @@ describe('ParseUser', () => {
     expect(user.get('authData').anonymous).toBe(null);
   });
 
-  it('maintains the session token when refetched', asyncHelper((done) => {
+  it('maintains the session token when refetched', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     Storage._clear();
@@ -648,5 +645,5 @@ describe('ParseUser', () => {
       expect(u2.get('number')).toBe(undefined);
       done();
     });
-  }));
+  });
 });

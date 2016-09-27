@@ -25,11 +25,9 @@ mockQuery.prototype = {
 jest.setMock('../ParseQuery', mockQuery);
 
 var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise');
+var ParsePromise = require('../ParsePromise').default;
 var ParseQuery = require('../ParseQuery');
 var Push = require('../Push');
-
-var asyncHelper = require('./test_helpers/asyncHelper');
 
 var defaultController = CoreManager.getPushController();
 
@@ -43,7 +41,7 @@ describe('Push', () => {
     });
   });
 
-  it('can be sent with a where clause', asyncHelper((done) => {
+  it('can be sent with a where clause', (done) => {
     var q = new ParseQuery();
     q.where = {
       installationId: '123'
@@ -57,18 +55,18 @@ describe('Push', () => {
       });
       done();
     });
-  }));
+  });
 
-  it('can specify a push time with a Date', asyncHelper((done) => {
+  it('can specify a push time with a Date', (done) => {
     Push.send({
       push_time: new Date(Date.UTC(2015, 1, 1))
     }).then((data) => {
       expect(data.push_time).toBe('2015-02-01T00:00:00.000Z');
       done();
     });
-  }));
+  });
 
-  it('can specify a push time with a string', asyncHelper((done) => {
+  it('can specify a push time with a string', (done) => {
     Push.send({
       // Local timezone push
       push_time: '2015-02-01T00:00:00.000'
@@ -76,16 +74,16 @@ describe('Push', () => {
       expect(data.push_time).toBe('2015-02-01T00:00:00.000');
       done();
     });
-  }));
+  });
 
-  it('can specify an expiration time', asyncHelper((done) => {
+  it('can specify an expiration time', (done) => {
     Push.send({
       expiration_time: new Date(Date.UTC(2015, 1, 1))
     }).then((data) => {
       expect(data.expiration_time).toBe('2015-02-01T00:00:00.000Z');
       done();
     });
-  }));
+  });
 
   it('cannot specify both an expiration time and an expiration interval', () => {
     expect(Push.send.bind(null, {

@@ -8,10 +8,9 @@
  */
 
 jest.autoMockOff();
+jest.useFakeTimers();
 
-var ParsePromise = require('../ParsePromise');
-
-var asyncHelper = require('./test_helpers/asyncHelper');
+var ParsePromise = require('../ParsePromise').default;
 
 describe('Promise', () => {
   it('can disable A+ compliance', () => {
@@ -58,7 +57,7 @@ function promiseTests() {
     });
   });
 
-  it('can be resolved later', asyncHelper(function(done) {
+  it('can be resolved later', function(done) {
     var promise = new ParsePromise();
     promise.then((result) => {
       expect(result).toBe('bar');
@@ -71,9 +70,9 @@ function promiseTests() {
 
     setTimeout(() => { promise.resolve('bar'); }, 10);
     jest.runAllTimers();
-  }));
+  });
 
-  it('can be resolved with multiple values later', asyncHelper(function(done) {
+  it('can be resolved with multiple values later', function(done) {
     var promise = new ParsePromise();
     promise.then((result1, result2) => {
       expect(result1).toBe('bar');
@@ -87,9 +86,9 @@ function promiseTests() {
 
     setTimeout(() => { promise.resolve('bar', 'baz'); }, 10);
     jest.runAllTimers();
-  }));
+  });
 
-  it('can be rejected later', asyncHelper(function(done) {
+  it('can be rejected later', function(done) {
     var promise = new ParsePromise();
     promise.then((result) => {
       // This should not be reached
@@ -102,9 +101,9 @@ function promiseTests() {
 
     setTimeout(() => { promise.reject('bar'); }, 10);
     jest.runAllTimers();
-  }));
+  });
 
-  it('can resolve with a constant and then resolve', asyncHelper(function(done) {
+  it('can resolve with a constant and then resolve', function(done) {
     var promise = new ParsePromise();
     promise.then((result) => {
       expect(result).toBe('foo');
@@ -123,9 +122,9 @@ function promiseTests() {
 
     setTimeout(() => { promise.resolve('foo'); }, 10);
     jest.runAllTimers();
-  }));
+  });
 
-  it('can reject with a constant and then resolve', asyncHelper(function(done) {
+  it('can reject with a constant and then resolve', function(done) {
     var promise = new ParsePromise();
     promise.then((result) => {
       // This should not be reached
@@ -153,9 +152,9 @@ function promiseTests() {
 
     setTimeout(() => { promise.reject('foo'); }, 10);
     jest.runAllTimers();
-  }));
+  });
 
-  it('can resolve with a promise and then resolve', asyncHelper(function(done) {
+  it('can resolve with a promise and then resolve', function(done) {
     var promise = new ParsePromise();
     promise.then((result) => {
       expect(result).toBe('foo');
@@ -174,9 +173,9 @@ function promiseTests() {
 
     setTimeout(() => { promise.resolve('foo'); }, 10);
     jest.runAllTimers();
-  }));
+  });
 
-  it('can reject with a promise and then resolve', asyncHelper(function(done) {
+  it('can reject with a promise and then resolve', function(done) {
     var promise = new ParsePromise();
     promise.then((result) => {
       // This should not be reached
@@ -195,9 +194,9 @@ function promiseTests() {
 
     setTimeout(() => { promise.reject('foo'); }, 10);
     jest.runAllTimers();
-  }));
+  });
 
-  it('can resolve with a promise and then reject', asyncHelper(function(done) {
+  it('can resolve with a promise and then reject', function(done) {
     var promise = new ParsePromise();
     promise.then((result) => {
       expect(result).toBe('foo');
@@ -216,9 +215,9 @@ function promiseTests() {
 
     setTimeout(() => { promise.resolve('foo'); }, 10);
     jest.runAllTimers();
-  }));
+  });
 
-  it('can reject with a promise and then reject', asyncHelper(function(done) {
+  it('can reject with a promise and then reject', function(done) {
     var promise = new ParsePromise();
     promise.then((result) => {
       // This should not be reached
@@ -237,9 +236,9 @@ function promiseTests() {
 
     setTimeout(() => { promise.reject('foo'); }, 10);
     jest.runAllTimers();
-  }));
+  });
 
-  it('can handle promises in parallel with array', asyncHelper(function(done) {
+  it('can handle promises in parallel with array', function(done) {
     var COUNT = 5;
 
     var delay = function(ms) {
@@ -272,9 +271,9 @@ function promiseTests() {
     });
 
     jest.runAllTimers();
-  }));
+  });
 
-  it('can handle promises in parallel with arguments', asyncHelper(function(done) {
+  it('can handle promises in parallel with arguments', function(done) {
     var COUNT = 5;
 
     var delay = function(ms) {
@@ -307,28 +306,28 @@ function promiseTests() {
     });
 
     jest.runAllTimers();
-  }));
+  });
 
-  it('immediately resolves when processing an empty array in parallel', asyncHelper((done) => {
+  it('immediately resolves when processing an empty array in parallel', (done) => {
     ParsePromise.when([]).then((result) => {
       expect(result).toEqual([]);
       done();
     });
-  }));
+  });
 
-  it('can handle rejected promises in parallel', asyncHelper((done) => {
+  it('can handle rejected promises in parallel', (done) => {
     ParsePromise.when([ParsePromise.as(1), ParsePromise.error('an error')]).then(null, (errors) => {
       expect(errors).toEqual([undefined, 'an error']);
       done();
     });
-  }));
+  });
 
-  it('can automatically resolve non-promises in parallel', asyncHelper((done) => {
+  it('can automatically resolve non-promises in parallel', (done) => {
     ParsePromise.when([1,2,3]).then((results) => {
       expect(results).toEqual([1,2,3]);
       done();
     });
-  }));
+  });
 
   it('passes on errors', () => {
     ParsePromise.error('foo').then(() => {
@@ -534,7 +533,7 @@ function promiseTests() {
     expect(ParsePromise.is(ParsePromise.error())).toBe(true);
   });
 
-  it('can be constructed in ES6 style and resolved', asyncHelper((done) => {
+  it('can be constructed in ES6 style and resolved', (done) => {
     expect(ParsePromise.length).toBe(1); // constructor arguments
 
     new ParsePromise((resolve, reject) => {
@@ -549,9 +548,9 @@ function promiseTests() {
       expect(result).toBe('def');
       done();
     });
-  }));
+  });
 
-  it('can be constructed in ES6 style and rejected', asyncHelper((done) => {
+  it('can be constructed in ES6 style and rejected', (done) => {
     new ParsePromise((resolve, reject) => {
       reject('err');
     }).then(() => {
@@ -566,9 +565,9 @@ function promiseTests() {
       expect(error).toBe('err2');
       done();
     });
-  }));
+  });
 
-  it('can be initially resolved, ES6 style', asyncHelper((done) => {
+  it('can be initially resolved, ES6 style', (done) => {
     ParsePromise.resolve('abc').then((result) => {
       expect(result).toBe('abc');
       
@@ -577,16 +576,16 @@ function promiseTests() {
       expect(result).toBe('def');
       done();
     });
-  }));
+  });
 
-  it('can be initially rejected, ES6 style', asyncHelper((done) => {
+  it('can be initially rejected, ES6 style', (done) => {
     ParsePromise.reject('err').then(null, (error) => {
       expect(error).toBe('err');
       done();
     });
-  }));
+  });
 
-  it('resolves Promise.all with the set of resolved results', asyncHelper((done) => {
+  it('resolves Promise.all with the set of resolved results', (done) => {
     let firstSet = [
       new ParsePromise(),
       new ParsePromise(),
@@ -611,9 +610,9 @@ function promiseTests() {
     firstSet[1].resolve(2);
     firstSet[2].resolve(3);
     firstSet[3].resolve(4);
-  }));
+  });
 
-  it('rejects Promise.all with the first rejected promise', asyncHelper((done) => {
+  it('rejects Promise.all with the first rejected promise', (done) => {
     let promises = [
       new ParsePromise(),
       new ParsePromise(),
@@ -629,9 +628,9 @@ function promiseTests() {
     promises[0].resolve(1);
     promises[1].reject('an error');
     promises[2].resolve(3);
-  }));
+  });
 
-  it('resolves Promise.race with the first resolved result', asyncHelper((done) => {
+  it('resolves Promise.race with the first resolved result', (done) => {
     let firstSet = [
       new ParsePromise(),
       new ParsePromise(),
@@ -650,9 +649,9 @@ function promiseTests() {
     });
     firstSet[1].resolve(2);
     firstSet[0].resolve(1);
-  }));
+  });
 
-  it('rejects Promise.race with the first rejected reason', asyncHelper((done) => {
+  it('rejects Promise.race with the first rejected reason', (done) => {
     let promises = [
       new ParsePromise(),
       new ParsePromise(),
@@ -665,9 +664,9 @@ function promiseTests() {
     });
     promises[1].reject('error 2');
     promises[0].resolve('error 1');
-  }));
+  });
 
-  it('can implement continuations', asyncHelper((done) => {
+  it('can implement continuations', (done) => {
     let count = 0;
     let loop = () => {
       count++;
@@ -680,9 +679,9 @@ function promiseTests() {
       expect(count).toBe(5);
       done();
     });
-  }));
+  });
 
-  it('can attach a universal callback to a promise', asyncHelper((done) => {
+  it('can attach a universal callback to a promise', (done) => {
     ParsePromise.as(15)._continueWith((result, err) => {
       expect(result).toEqual([15]);
       expect(err).toBe(null);
@@ -694,7 +693,7 @@ function promiseTests() {
         done();
       });
     });
-  }));
+  });
 }
 
 describe('Promise (A Compliant)', () => {

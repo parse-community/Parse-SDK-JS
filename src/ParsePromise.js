@@ -280,8 +280,8 @@ export default class ParsePromise {
    * @param {Function} continuation the callback.
    */
   _continueWith(continuation) {
-    return this.then(function() {
-      return continuation(arguments, null);
+    return this.then(function(...args) {
+      return continuation(args, null);
     }, function(error) {
       return continuation(null, error);
     });
