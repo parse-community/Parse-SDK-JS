@@ -9,7 +9,7 @@
 
 jest.autoMockOff();
 
-var ParseGeoPoint = require('../ParseGeoPoint');
+var ParseGeoPoint = require('../ParseGeoPoint').default;
 
 describe('GeoPoint', () => {
   it('can be constructed from various inputs', () => {

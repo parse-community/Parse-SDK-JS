@@ -13,7 +13,6 @@ jest.dontMock('../ParseError');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParsePromise');
 jest.dontMock('../ParseQuery');
-jest.dontMock('./test_helpers/asyncHelper');
 
 var mockObject = function(className) {
   this.className = className;
@@ -33,13 +32,11 @@ mockObject.fromJSON = function(json) {
 jest.setMock('../ParseObject', mockObject);
 
 var CoreManager = require('../CoreManager');
-var ParseError = require('../ParseError');
-var ParseGeoPoint = require('../ParseGeoPoint');
+var ParseError = require('../ParseError').default;
+var ParseGeoPoint = require('../ParseGeoPoint').default;
 var ParseObject = require('../ParseObject');
-var ParsePromise = require('../ParsePromise');
-var ParseQuery = require('../ParseQuery');
-
-var asyncHelper = require('./test_helpers/asyncHelper');
+var ParsePromise = require('../ParsePromise').default;
+var ParseQuery = require('../ParseQuery').default;
 
 describe('ParseQuery', () => {
   it('can be constructed from a class name', () => {
@@ -882,7 +879,7 @@ describe('ParseQuery', () => {
     });
   });
 
-  it('can get the first object of a query', asyncHelper((done) => {
+  it('can get the first object of a query', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
         expect(className).toBe('Item');
@@ -912,9 +909,9 @@ describe('ParseQuery', () => {
       });
       done();
     });
-  }));
+  });
 
-  it('can pass options to a first() query', asyncHelper((done) => {
+  it('can pass options to a first() query', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
         expect(className).toBe('Item');
@@ -942,9 +939,9 @@ describe('ParseQuery', () => {
       expect(obj).toBe(undefined);
       done();
     });
-  }));
+  });
 
-  it('can get a single object by id', asyncHelper((done) => {
+  it('can get a single object by id', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
         expect(className).toBe('Item');
@@ -974,9 +971,9 @@ describe('ParseQuery', () => {
       });
       done();
     });
-  }));
+  });
 
-  it('will error when getting a nonexistent object', asyncHelper((done) => {
+  it('will error when getting a nonexistent object', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
         expect(className).toBe('Item');
@@ -1003,9 +1000,9 @@ describe('ParseQuery', () => {
       expect(err.message).toBe('Object not found.');
       done();
     });
-  }));
+  });
 
-  it('can pass options to a get() query', asyncHelper((done) => {
+  it('can pass options to a get() query', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
         expect(className).toBe('Item');
@@ -1034,9 +1031,9 @@ describe('ParseQuery', () => {
     }).then((obj) => {
       done();
     });
-  }));
+  });
 
-  it('can issue a count query', asyncHelper((done) => {
+  it('can issue a count query', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
         expect(className).toBe('Item');
@@ -1060,9 +1057,9 @@ describe('ParseQuery', () => {
       expect(count).toBe(145);
       done();
     });
-  }));
+  });
 
-  it('can pass options to a count query', asyncHelper((done) => {
+  it('can pass options to a count query', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
         expect(className).toBe('Item');
@@ -1092,9 +1089,9 @@ describe('ParseQuery', () => {
       expect(count).toBe(145);
       done();
     });
-  }));
+  });
 
-  it('can issue a query to the controller', asyncHelper((done) => {
+  it('can issue a query to the controller', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
         expect(className).toBe('Item');
@@ -1140,9 +1137,9 @@ describe('ParseQuery', () => {
         });
         done();
       });
-  }));
+  });
 
-  it('can pass options to find()', asyncHelper((done) => {
+  it('can pass options to find()', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
         expect(className).toBe('Item');
@@ -1173,9 +1170,9 @@ describe('ParseQuery', () => {
         expect(objs).toEqual([]);
         done();
       });
-  }));
+  });
 
-  it('can iterate over results with each()', asyncHelper((done) => {
+  it('can iterate over results with each()', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
         expect(className).toBe('Item');
@@ -1229,9 +1226,9 @@ describe('ParseQuery', () => {
       expect(calls).toBe(3);
       done();
     });
-  }));
+  });
 
-  it('can pass options to each()', asyncHelper((done) => {
+  it('can pass options to each()', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
         expect(className).toBe('Item');
@@ -1275,9 +1272,9 @@ describe('ParseQuery', () => {
       expect(calls).toBe(3);
       done();
     });
-  }));
+  });
 
-  it('returns an error when iterating over an invalid query', asyncHelper((done) => {
+  it('returns an error when iterating over an invalid query', (done) => {
     var q = new ParseQuery('Item');
     q.limit(10);
     q.each(() => {}).then(() => {
@@ -1288,7 +1285,7 @@ describe('ParseQuery', () => {
       expect(err).toBe('Cannot iterate on a query with sort, skip, or limit.');
       done();
     });
-  }));
+  });
 
   it('rewrites User queries when the rewrite is enabled', () => {
     CoreManager.set('PERFORM_USER_REWRITE', true);
@@ -1299,7 +1296,7 @@ describe('ParseQuery', () => {
     expect(q.className).toBe('User');
   });
 
-  it('does not override the className if it comes from the server', asyncHelper((done) => {
+  it('does not override the className if it comes from the server', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
         return ParsePromise.as({
@@ -1315,9 +1312,9 @@ describe('ParseQuery', () => {
       expect(results[0].className).toBe('Product');
       done();
     });
-  }));
+  });
 
-  it('can override the className with a name from the server', asyncHelper((done) => {
+  it('can override the className with a name from the server', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
         return ParsePromise.as({
@@ -1334,5 +1331,5 @@ describe('ParseQuery', () => {
       expect(results[0].className).toBe('Product');
       done();
     });
-  }));
+  });
 });

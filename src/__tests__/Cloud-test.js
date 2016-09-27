@@ -15,7 +15,7 @@ jest.dontMock('../ParsePromise');
 
 var Cloud = require('../Cloud');
 var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise');
+var ParsePromise = require('../ParsePromise').default;
 
 var defaultController = CoreManager.getCloudController();
 

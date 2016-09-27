@@ -15,7 +15,7 @@ jest.dontMock('../ParsePromise');
 
 var Hooks = require('../ParseHooks');
 var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise');
+var ParsePromise = require('../ParsePromise').default;
 
 var defaultController = CoreManager.getHooksController();
 

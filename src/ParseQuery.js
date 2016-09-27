@@ -18,6 +18,8 @@ import ParsePromise from './ParsePromise';
 
 import type { RequestOptions, FullOptions } from './RESTController';
 
+type BatchOptions = FullOptions & { batchSize?: number };
+
 export type WhereClause = {
   [attr: string]: mixed;
 };
@@ -407,7 +409,7 @@ export default class ParseQuery {
    * @return {Parse.Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
-  each(callback: (obj: ParseObject) => any, options?: FullOptions): ParsePromise {
+  each(callback: (obj: ParseObject) => any, options?: BatchOptions): ParsePromise {
     options = options || {};
 
     if (this._order || this._skip || (this._limit >= 0)) {

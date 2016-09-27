@@ -100,7 +100,7 @@ export default class ParseFile {
           file: data,
           type: specifiedType
         };
-      } else if (data && typeof data.base64 !== 'undefined') {
+      } else if (data && typeof data.base64 === 'string') {
         const base64 = data.base64;
         var commaIndex = base64.indexOf(',');
 

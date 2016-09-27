@@ -270,7 +270,6 @@ export default class LiveQueryClient extends EventEmitter {
     };
 
     this.socket.onerror = (error) => {
-      console.log("error on socket");
       this._handleWebSocketError(error);
     };
   }
@@ -440,8 +439,6 @@ export default class LiveQueryClient extends EventEmitter {
      
     if (this.reconnectHandle) {
       clearTimeout(this.reconnectHandle);
-    } else {
-      console.info('attempting to reconnect');
     }
 
     this.reconnectHandle = setTimeout((() => {

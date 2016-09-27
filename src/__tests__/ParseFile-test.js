@@ -9,8 +9,8 @@
 
 jest.autoMockOff();
 
-var ParseFile = require('../ParseFile');
-var ParsePromise = require('../ParsePromise');
+var ParseFile = require('../ParseFile').default;
+var ParsePromise = require('../ParsePromise').default;
 var CoreManager = require('../CoreManager');
 
 function generateSaveMock(prefix) {
