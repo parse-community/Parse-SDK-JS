@@ -80,6 +80,14 @@ Object.defineProperty(Parse, 'serverURL', {
     CoreManager.set('SERVER_URL', value);
   }
 });
+Object.defineProperty(Parse, 'credentials', {
+  get() {
+    return CoreManager.get('CREDENTIALS');
+  },
+  set(value) {
+    CoreManager.set('CREDENTIALS', value);
+  }
+});
 Object.defineProperty(Parse, 'liveQueryServerURL', {
   get() {
     return CoreManager.get('LIVEQUERY_SERVER_URL');

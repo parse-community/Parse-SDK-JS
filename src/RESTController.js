@@ -132,7 +132,9 @@ const RESTController = {
         headers['User-Agent'] = 'Parse/' + CoreManager.get('VERSION') +
           ' (NodeJS ' + process.versions.node + ')';
       }
-
+      if (CoreManager.get('CREDENTIALS')) {
+        headers['Authorization'] = 'Bearer ' + CoreManager.get('CREDENTIALS');
+      }
       xhr.open(method, url, true);
       for (var h in headers) {
         xhr.setRequestHeader(h, headers[h]);

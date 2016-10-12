@@ -329,4 +329,24 @@ describe('RESTController', () => {
       'Cannot use the Master Key, it has not been provided.'
     );
   });
+
+  it('sends credentials header when the config flag is set', () => {
+    CoreManager.set('CREDENTIALS', 'some_random_token');
+    var credentialsHeader = function(header){ return "Authorization" === header[0] }
+    var xhr = {
+      setRequestHeader: jest.genMockFn(),
+      open: jest.genMockFn(),
+      send: jest.genMockFn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    RESTController.request('GET', 'classes/MyObject', {}, {});
+    jest.runAllTicks();
+    expect(xhr.setRequestHeader.mock.calls.filter(credentialsHeader)).toEqual(
+        [["Authorization", "Bearer some_random_token"]]
+    );
+    console.log()
+    CoreManager.set('CREDENTIALS', null); // Clean up
+  });
+
+
 });
