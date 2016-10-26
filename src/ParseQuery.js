@@ -45,6 +45,24 @@ function quote(s: string) {
 }
 
 /**
+ * Extracts the class name from queries. If not all queries have the same
+ * class name an error will be thrown.
+ */
+function _getClassNameFromQueries(queries: Array<ParseQuery>): string {
+  var className = null;
+  queries.forEach((q) => {
+    if (!className) {
+      className = q.className;
+    }
+
+    if (className !== q.className) {
+      throw new Error('All queries must be for the same class.');
+    }
+  });
+  return className;
+}
+
+/**
  * Creates a new parse Parse.Query for the given Parse.Object subclass.
  * @class Parse.Query
  * @constructor
@@ -151,6 +169,21 @@ export default class ParseQuery {
     });
 
     this._where.$or = queryJSON;
+    return this;
+  }
+
+  /**
+   * Adds constraint that all of the passed in queries match.
+   * @method _andQuery
+   * @param {Array} queries
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  _andQuery(queries: Array<ParseQuery>): ParseQuery {
+    var queryJSON = queries.map((q) => {
+      return q.toJSON().where;
+    });
+
+    this._where.$and = queryJSON;
     return this;
   }
 
@@ -1019,19 +1052,28 @@ export default class ParseQuery {
    * @return {Parse.Query} The query that is the OR of the passed in queries.
    */
   static or(...queries: Array<ParseQuery>): ParseQuery {
-    var className = null;
-    queries.forEach((q) => {
-      if (!className) {
-        className = q.className;
-      }
-
-      if (className !== q.className) {
-        throw new Error('All queries must be for the same class.');
-      }
-    });
-
+    var className = _getClassNameFromQueries(queries);
     var query = new ParseQuery(className);
     query._orQuery(queries);
+    return query;
+  }
+
+  /**
+   * Constructs a Parse.Query that is the AND of the passed in queries.  For
+   * example:
+   * <pre>var compoundQuery = Parse.Query.and(query1, query2, query3);</pre>
+   *
+   * will create a compoundQuery that is an and of the query1, query2, and
+   * query3.
+   * @method and
+   * @param {...Parse.Query} var_args The list of queries to AND.
+   * @static
+   * @return {Parse.Query} The query that is the AND of the passed in queries.
+   */
+  static and(...queries: Array<ParseQuery>): ParseQuery {
+    var className = _getClassNameFromQueries(queries);
+    var query = new ParseQuery(className);
+    query._andQuery(queries);
     return query;
   }
 }
