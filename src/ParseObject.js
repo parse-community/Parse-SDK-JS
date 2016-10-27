@@ -880,7 +880,7 @@ export default class ParseObject {
    * @see Parse.Object#set
    */
   validate(attrs: AttributeMap): ParseError | boolean {
-    if (attrs.hasOwnProperty('ACL') && !(attrs.ACL instanceof ParseACL)) {
+    if (Object.prototype.hasOwnProperty.call(attrs, 'ACL') && !(attrs.ACL instanceof ParseACL)) {
       return new ParseError(
         ParseError.OTHER_CAUSE,
         'ACL must be a Parse ACL.'
