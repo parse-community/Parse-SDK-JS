@@ -879,6 +879,40 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can combine queries with an AND clause', () => {
+    var q = new ParseQuery('Item');
+    var q2 = new ParseQuery('Purchase');
+    expect(ParseQuery.and.bind(null, q, q2)).toThrow(
+      'All queries must be for the same class.'
+    );
+
+    q2 = new ParseQuery('Item');
+    q.equalTo('size', 'medium');
+    q2.equalTo('size', 'large');
+
+    var mediumOrLarge = ParseQuery.and(q, q2);
+    expect(mediumOrLarge.toJSON()).toEqual({
+      where: {
+        $and: [
+          { size: 'medium' },
+          { size: 'large' }
+        ]
+      }
+    });
+
+    // It removes limits, skips, etc
+    q.limit(10);
+    mediumOrLarge = ParseQuery.and(q, q2);
+    expect(mediumOrLarge.toJSON()).toEqual({
+      where: {
+        $and: [
+          { size: 'medium' },
+          { size: 'large' }
+        ]
+      }
+    });
+  });
+
   it('can get the first object of a query', (done) => {
     CoreManager.setQueryController({
       find(className, params, options) {
