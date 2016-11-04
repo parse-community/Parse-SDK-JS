@@ -330,8 +330,9 @@ describe('RESTController', () => {
     );
   });
 
-  it('sends credentials header when the config flag is set', () => {
-    CoreManager.set('CREDENTIALS', 'some_random_token');
+  it('sends auth header when the auth type and token flags are set', () => {
+    CoreManager.set('SERVER_AUTH_TYPE', 'Bearer');
+    CoreManager.set('SERVER_AUTH_TOKEN', 'some_random_token');
     var credentialsHeader = function(header){ return "Authorization" === header[0] }
     var xhr = {
       setRequestHeader: jest.genMockFn(),
@@ -344,8 +345,9 @@ describe('RESTController', () => {
     expect(xhr.setRequestHeader.mock.calls.filter(credentialsHeader)).toEqual(
         [["Authorization", "Bearer some_random_token"]]
     );
-    console.log()
-    CoreManager.set('CREDENTIALS', null); // Clean up
+
+    CoreManager.set('SERVER_AUTH_TYPE', null); // Clean up
+    CoreManager.set('SERVER_AUTH_TOKEN', null);
   });
 
 

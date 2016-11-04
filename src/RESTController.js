@@ -132,8 +132,8 @@ const RESTController = {
         headers['User-Agent'] = 'Parse/' + CoreManager.get('VERSION') +
           ' (NodeJS ' + process.versions.node + ')';
       }
-      if (CoreManager.get('CREDENTIALS')) {
-        headers['Authorization'] = 'Bearer ' + CoreManager.get('CREDENTIALS');
+      if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
+        headers['Authorization'] = CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
       }
       xhr.open(method, url, true);
       for (var h in headers) {

@@ -80,12 +80,20 @@ Object.defineProperty(Parse, 'serverURL', {
     CoreManager.set('SERVER_URL', value);
   }
 });
-Object.defineProperty(Parse, 'credentials', {
+Object.defineProperty(Parse, 'serverAuthToken', {
   get() {
-    return CoreManager.get('CREDENTIALS');
+    return CoreManager.get('SERVER_AUTH_TOKEN');
   },
   set(value) {
-    CoreManager.set('CREDENTIALS', value);
+    CoreManager.set('SERVER_AUTH_TOKEN', value);
+  }
+});
+Object.defineProperty(Parse, 'serverAuthType', {
+  get() {
+    return CoreManager.get('SERVER_AUTH_TYPE');
+  },
+  set(value) {
+    CoreManager.set('SERVER_AUTH_TYPE', value);
   }
 });
 Object.defineProperty(Parse, 'liveQueryServerURL', {
