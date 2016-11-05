@@ -73,7 +73,7 @@ function ajaxIE9(method: string, url: string, data: any) {
 }
 
 const RESTController = {
-  ajax(method: string, url: string, data: any, headers?: any) {
+  ajax(method: string, url: string, data: any, headers?: any, progress?: any) {
     if (useXDomainRequest) {
       return ajaxIE9(method, url, data, headers);
     }
@@ -134,6 +134,16 @@ const RESTController = {
       }
 
       xhr.open(method, url, true);
+
+      // Report progress to a callback when one is provided
+      if(typeof progress === "function" && xhr.upload) {
+        xhr.upload.addEventListener("progress", function(oEvent) {
+          if (oEvent.lengthComputable) {
+            progress(oEvent.loaded / oEvent.total);
+          }
+        });
+      }
+
       for (var h in headers) {
         xhr.setRequestHeader(h, headers[h]);
       }

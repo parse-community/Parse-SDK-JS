@@ -161,18 +161,18 @@ export default class ParseFile {
    * @param {Object} options A Backbone-style options object.
    * @return {Parse.Promise} Promise that is resolved when the save finishes.
    */
-  save(options?: { success?: any, error?: any }) {
+  save(options?: { success?: any, error?: any, progress?: any }) {
     options = options || {};
     var controller = CoreManager.getFileController();
     if (!this._previousSave) {
       if (this._source.format === 'file') {
-        this._previousSave = controller.saveFile(this._name, this._source).then((res) => {
+        this._previousSave = controller.saveFile(this._name, this._source, options.progress).then((res) => {
           this._name = res.name;
           this._url = res.url;
           return this;
         });
       } else {
-        this._previousSave = controller.saveBase64(this._name, this._source).then((res) => {
+        this._previousSave = controller.saveBase64(this._name, this._source, options.progress).then((res) => {
           this._name = res.name;
           this._url = res.url;
           return this;
@@ -238,7 +238,7 @@ export default class ParseFile {
 }
 
 var DefaultController = {
-  saveFile: function(name: string, source: FileSource) {
+  saveFile: function(name: string, source: FileSource, progress?: any) {
     if (source.format !== 'file') {
       throw new Error('saveFile can only be used with File-type sources.');
     }
@@ -253,7 +253,7 @@ var DefaultController = {
       url += '/';
     }
     url += 'files/' + name;
-    return CoreManager.getRESTController().ajax('POST', url, source.file, headers);
+    return CoreManager.getRESTController().ajax('POST', url, source.file, headers, progress);
   },
 
   saveBase64: function(name: string, source: FileSource) {

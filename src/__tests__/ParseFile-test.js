@@ -14,7 +14,11 @@ var ParsePromise = require('../ParsePromise').default;
 var CoreManager = require('../CoreManager');
 
 function generateSaveMock(prefix) {
-  return function(name, payload) {
+  return function(name, payload, progress) {
+    // When save is called with a progress callback, call it with 0.5
+    if (typeof progress === "function") {
+      progress(0.5);
+    }
     return ParsePromise.as({
       name: name,
       url: prefix + name
@@ -159,6 +163,22 @@ describe('ParseFile', () => {
 
     expect(a.equals(b)).toBe(false);
     expect(b.equals(a)).toBe(false);
+  });
+
+  it('reports progress during save when source is a File', () => {
+    var file = new ParseFile('progress.txt', new File(["Parse"], "progress.txt"));
+
+    var options = {
+      progress: function(){}
+    };
+    spyOn(options, 'progress');
+
+    return file.save(options).then(function(f) {
+      expect(options.progress).toHaveBeenCalledWith(0.5);
+      expect(f).toBe(file);
+      expect(f.name()).toBe('progress.txt');
+      expect(f.url()).toBe('http://files.parsetfss.com/a/progress.txt');
+    });
   });
 });
 
