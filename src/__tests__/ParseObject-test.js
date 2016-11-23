@@ -465,22 +465,22 @@ describe('ParseObject', () => {
   });
 
   it('can be cloned with relation (#381)', () => {
-    var relationJSON = {__type: "Relation", className: "Foo"};
+    var relationJSON = {__type: 'Relation', className: 'Bar'};
     var o = ParseObject.fromJSON({
       objectId: '7777777777',
       className: 'Foo',
       aRelation: relationJSON,
     });
-    o.relation('aRelation').add(o);
     var o2 = o.clone();
     expect(o2._getSaveJSON()).toEqual({
-      aRelation: {
-        __type: 'Relation',
-        className: 'Foo',
-      },
+      aRelation: relationJSON,
     });
     var newRel = o2.relation('aRelation');
-    newRel.add(o);
+    var bar = ParseObject.fromJSON({
+      objectId: '8888888888',
+      className: 'Bar',
+    });
+    newRel.add(bar);
     expect(newRel.toJSON()).toEqual(relationJSON);
     expect(o2._getSaveJSON()).toEqual({
       aRelation: {
@@ -488,8 +488,8 @@ describe('ParseObject', () => {
         objects: [
           {
             __type: 'Pointer',
-            className: 'Foo',
-            objectId: '7777777777'
+            className: 'Bar',
+            objectId: '8888888888'
           },
         ],
       },
