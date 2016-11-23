@@ -473,6 +473,12 @@ describe('ParseObject', () => {
     });
     o.relation('aRelation').add(o);
     var o2 = o.clone();
+    expect(o2._getSaveJSON()).toEqual({
+      aRelation: {
+        __type: 'Relation',
+        className: 'Foo',
+      },
+    });
     var newRel = o2.relation('aRelation');
     newRel.add(o);
     expect(newRel.toJSON()).toEqual(relationJSON);
@@ -486,7 +492,7 @@ describe('ParseObject', () => {
             objectId: '7777777777'
           },
         ],
-      }
+      },
     });
   });
 
