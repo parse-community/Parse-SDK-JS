@@ -389,6 +389,8 @@ export class RelationOp extends Op {
       return this;
     } else if (previous instanceof UnsetOp) {
       throw new Error('You cannot modify a relation after deleting it.');
+    } else if (previous instanceof SetOp && previous._value instanceof ParseRelation) {
+      return this;
     } else if (previous instanceof RelationOp) {
       if (previous._targetClassName &&
         previous._targetClassName !== this._targetClassName) {

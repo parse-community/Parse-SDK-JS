@@ -655,6 +655,8 @@ export default class ParseObject {
         !(changes[k] instanceof ParseACL)
       ) {
         newOps[k] = new SetOp(new ParseACL(changes[k]));
+      } else if (changes[k] instanceof ParseRelation) {
+        newOps[k] = new SetOp(new ParseRelation(this, k));
       } else {
         newOps[k] = new SetOp(changes[k]);
       }

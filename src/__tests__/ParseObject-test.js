@@ -464,6 +464,32 @@ describe('ParseObject', () => {
     expect(rel.targetClassName).toBe('Person');
   });
 
+  it('can be cloned with relation (#381)', () => {
+    var relationJSON = {__type: "Relation", className: "Foo"};
+    var o = ParseObject.fromJSON({
+      objectId: '7777777777',
+      className: 'Foo',
+      aRelation: relationJSON,
+    });
+    o.relation('aRelation').add(o);
+    var o2 = o.clone();
+    var newRel = o2.relation('aRelation');
+    newRel.add(o);
+    expect(newRel.toJSON()).toEqual(relationJSON);
+    expect(o2._getSaveJSON()).toEqual({
+      aRelation: {
+        __op: 'AddRelation',
+        objects: [
+          {
+            __type: 'Pointer',
+            className: 'Foo',
+            objectId: '7777777777'
+          },
+        ],
+      }
+    });
+  });
+
   it('can detect dirty object children', () => {
     var o = new ParseObject('Person');
     o._finishFetch({
