@@ -22,6 +22,7 @@ jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
 jest.dontMock('../ParsePromise');
+jest.dontMock('../ParseRelation');
 jest.dontMock('../RESTController');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../TaskQueue');
@@ -33,16 +34,6 @@ jest.dontMock('../ParseACL');
 jest.dontMock('./test_helpers/mockXHR');
 
 jest.useFakeTimers();
-
-var mockRelation = function(parent, key) {
-  this.parentClass = parent.className;
-  this.parentId = parent.id;
-  this.key = key;
-};
-mockRelation.prototype.add = function(obj) {
-  this.targetClassName = obj.className;
-};
-jest.setMock('../ParseRelation', mockRelation);
 
 var queryResults = [];
 var mockQuery = function(className) {
@@ -465,8 +456,7 @@ describe('ParseObject', () => {
       'Called relation() on non-relation field age'
     );
     var rel = o.relation('friends');
-    expect(rel.parentClass).toBe('Person');
-    expect(rel.parentId).toBe('AA');
+    expect(rel.parent).toBe(o);
     expect(rel.key).toBe('friends');
     var friend = new ParseObject('Person');
     friend.id = 'BB';
