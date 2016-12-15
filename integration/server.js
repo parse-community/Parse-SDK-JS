@@ -14,14 +14,10 @@ var api = new ParseServer({
 // Serve the Parse API on the /parse URL prefix
 app.use('/parse', api);
 
-const DatabaseAdapter = require('parse-server/lib/DatabaseAdapter');
+const TestUtils = require('parse-server').TestUtils;
 
 app.get('/clear', (req, res) => {
-  var promises = [];
-  for (var conn in DatabaseAdapter.dbConnections) {
-    promises.push(DatabaseAdapter.dbConnections[conn].deleteEverything());
-  }
-  Promise.all(promises).then(() => {
+  TestUtils.destroyAllDataPermanently().then(() => {
     res.send('{}');
   });
 });

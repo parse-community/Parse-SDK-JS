@@ -8,11 +8,33 @@
  */
 
 jest.autoMockOff();
+var mockRNStorage = {};
+var mockRNStorageInterface = {
+  getItem(path, cb) {
+    cb(undefined, mockRNStorage[path] || null);
+  },
+
+  setItem(path, value, cb) {
+    mockRNStorage[path] = value;
+    cb();
+  },
+
+  removeItem(path, cb) {
+    delete mockRNStorage[path];
+    cb();
+  },
+
+  clear() {
+    mockRNStorage = {};
+  },
+};
+
+jest.mock('react-native/Libraries/react-native/react-native.js', () => {
+  return {AsyncStorage: mockRNStorageInterface};
+}, {virtual: true});
 
 var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise');
-
-var asyncHelper = require('./test_helpers/asyncHelper');
+var ParsePromise = require('../ParsePromise').default;
 
 var mockStorage = {};
 var mockStorageInterface = {
@@ -89,7 +111,7 @@ describe('React Native StorageController', () => {
     expect(typeof RNStorageController.removeItemAsync).toBe('function');
   });
 
-  it('can store and retrieve values', asyncHelper((done) => {
+  it('can store and retrieve values', (done) => {
     RNStorageController.getItemAsync('myKey').then((result) => {
       expect(result).toBe(null);
       return RNStorageController.setItemAsync('myKey', 'myValue');
@@ -99,9 +121,9 @@ describe('React Native StorageController', () => {
       expect(result).toBe('myValue');
       done();
     });
-  }));
+  });
 
-  it('can remove values', asyncHelper((done) => {
+  it('can remove values', (done) => {
     RNStorageController.setItemAsync('myKey', 'myValue').then(() => {
       return RNStorageController.getItemAsync('myKey');
     }).then((result) => {
@@ -113,7 +135,7 @@ describe('React Native StorageController', () => {
       expect(result).toBe(null);
       done();
     });
-  }));
+  });
 });
 
 var DefaultStorageController = require('../StorageController.default');
@@ -164,7 +186,7 @@ describe('Storage (Default StorageController)', () => {
     expect(Storage.getItem('myKey')).toBe(null);
   });
 
-  it('wraps synchronous methods in async wrappers', asyncHelper((done) => {
+  it('wraps synchronous methods in async wrappers', (done) => {
     Storage.getItemAsync('myKey').then((result) => {
       expect(result).toBe(null);
       return Storage.setItemAsync('myKey', 'myValue');
@@ -178,7 +200,7 @@ describe('Storage (Default StorageController)', () => {
     }).then((result) => {
       done();
     });
-  }));
+  });
 
   it('can generate a unique storage path', () => {
     expect(Storage.generatePath.bind(null, 'hello')).toThrow(
@@ -212,7 +234,7 @@ describe('Storage (Async StorageController)', () => {
     );
   });
 
-  it('wraps synchronous methods in async wrappers', asyncHelper((done) => {
+  it('wraps synchronous methods in async wrappers', (done) => {
     Storage.getItemAsync('myKey').then((result) => {
       expect(result).toBe(null);
       return Storage.setItemAsync('myKey', 'myValue');
@@ -226,5 +248,5 @@ describe('Storage (Async StorageController)', () => {
     }).then((result) => {
       done();
     });
-  }));
+  });
 });

@@ -188,7 +188,7 @@ export default class ParseObject {
   /**
    * Returns a unique identifier used to pull data from the State Controller.
    */
-  _getStateIdentifier(): mixed {
+  _getStateIdentifier(): ParseObject | {id: string, className: string} {
     if (singleInstance) {
       let id = this.id;
       if (!id) {
@@ -356,7 +356,7 @@ export default class ParseObject {
     }
   }
 
-  _handleSaveResponse(response, status: number) {
+  _handleSaveResponse(response: AttributeMap, status: number) {
     var changes = {};
     var attr;
     var stateController = CoreManager.getObjectStateController();
@@ -377,6 +377,9 @@ export default class ParseObject {
         changes[attr] = new ParseACL(response[attr]);
       } else if (attr !== 'objectId') {
         changes[attr] = decode(response[attr]);
+        if (changes[attr] instanceof UnsetOp) {
+          changes[attr] = undefined;
+        }
       }
     }
     if (changes.createdAt && !changes.updatedAt) {
@@ -409,7 +412,7 @@ export default class ParseObject {
    * @method toJSON
    * @return {Object}
    */
-  toJSON(seen: Array<any>): AttributeMap {
+  toJSON(seen: Array<any> | void): AttributeMap {
     var seenEntry = this.id ? this.className + ':' + this.id : this;
     var seen = seen || [seenEntry];
     var json = {};
@@ -645,7 +648,9 @@ export default class ParseObject {
       ) {
         newOps[k] = opFromJSON(changes[k]);
       } else if (k === 'objectId' || k === 'id') {
-        this.id = changes[k];
+        if (typeof changes[k] === 'string') {
+          this.id = changes[k];
+        }
       } else if (
         k === 'ACL' &&
         typeof changes[k] === 'object' &&
@@ -822,7 +827,9 @@ export default class ParseObject {
     }
 
     let stateController = CoreManager.getObjectStateController();
-    stateController.duplicateState(this._getStateIdentifier(), clone._getStateIdentifier());
+    if (stateController) {
+      stateController.duplicateState(this._getStateIdentifier(), clone._getStateIdentifier());
+    }
     return clone;
   }
 
@@ -1072,9 +1079,9 @@ export default class ParseObject {
     options = options || {};
     var saveOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
-      saveOptions.useMasterKey = options.useMasterKey;
+      saveOptions.useMasterKey = !!options.useMasterKey;
     }
-    if (options.hasOwnProperty('sessionToken')) {
+    if (options.hasOwnProperty('sessionToken') && typeof options.sessionToken === 'string') {
       saveOptions.sessionToken = options.sessionToken;
     }
 
@@ -1452,7 +1459,7 @@ export default class ParseObject {
    *     this method.
    * @return {Class} A new subclass of Parse.Object.
    */
-  static extend(className: string, protoProps, classProps) {
+  static extend(className: any, protoProps: any, classProps: any) {
     if (typeof className !== 'string') {
       if (className && typeof className.className === 'string') {
         return ParseObject.extend(className.className, className, protoProps);
@@ -1475,13 +1482,13 @@ export default class ParseObject {
       parentProto = classMap[adjustedClassName].prototype;
     }
     var ParseObjectSubclass = function(attributes, options) {
+      this.className = adjustedClassName;
+      this._objCount = objectCount++;
       // Enable legacy initializers
       if (typeof this.initialize === 'function') {
         this.initialize.apply(this, arguments);
       }
 
-      this.className = adjustedClassName;
-      this._objCount = objectCount++;
       if (attributes && typeof attributes === 'object'){
         if (!this.set(attributes || {}, options)) {
           throw new Error('Can\'t create an invalid Parse Object');

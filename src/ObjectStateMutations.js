@@ -87,16 +87,18 @@ export function mergeFirstPendingState(pendingOps: Array<OpsMap>) {
   }
 }
 
-export function estimateAttribute(serverData: AttributeMap, pendingOps: Array<OpsMap>, className: string, id: string, attr: string): mixed {
+export function estimateAttribute(serverData: AttributeMap, pendingOps: Array<OpsMap>, className: string, id: ?string, attr: string): mixed {
   let value = serverData[attr];
   for (let i = 0; i < pendingOps.length; i++) {
     if (pendingOps[i][attr]) {
       if (pendingOps[i][attr] instanceof RelationOp) {
-        value = pendingOps[i][attr].applyTo(
-          value,
-          { className: className, id: id },
-          attr
-        );
+        if (id) {
+          value = pendingOps[i][attr].applyTo(
+            value,
+            { className: className, id: id },
+            attr
+          );
+        }
       } else {
         value = pendingOps[i][attr].applyTo(value);
       }
@@ -105,7 +107,7 @@ export function estimateAttribute(serverData: AttributeMap, pendingOps: Array<Op
   return value;
 }
 
-export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<OpsMap>, className: string, id: string): AttributeMap {
+export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<OpsMap>, className: string, id: ?string): AttributeMap {
   let data = {};
   let attr;
   for (attr in serverData) {
@@ -114,11 +116,13 @@ export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<O
   for (let i = 0; i < pendingOps.length; i++) {
     for (attr in pendingOps[i]) {
       if (pendingOps[i][attr] instanceof RelationOp) {
-        data[attr] = pendingOps[i][attr].applyTo(
-          data[attr],
-          { className: className, id: id },
-          attr
-        );
+        if (id) {
+          data[attr] = pendingOps[i][attr].applyTo(
+            data[attr],
+            { className: className, id: id },
+            attr
+          );
+        }
       } else {
         data[attr] = pendingOps[i][attr].applyTo(data[attr]);
       }

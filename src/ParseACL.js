@@ -12,6 +12,9 @@
 import ParseRole from './ParseRole';
 import ParseUser from './ParseUser';
 
+type PermissionsMap = { [permission: string]: boolean };
+type ByIdMap = { [userId: string]: PermissionsMap };
+
 var PUBLIC_KEY = '*';
 
 /**
@@ -29,9 +32,9 @@ var PUBLIC_KEY = '*';
  * of your application.</p>
  */
 export default class ParseACL {
-  permissionsById: { [userId: string]: { [permission: string]: boolean } };
+  permissionsById: ByIdMap;
 
-  constructor(arg1: mixed) {
+  constructor(arg1: ParseUser | ByIdMap) {
     this.permissionsById = {};
     if (arg1 && typeof arg1 === 'object') {
       if (arg1 instanceof ParseUser) {
@@ -74,7 +77,7 @@ export default class ParseACL {
    * @method toJSON
    * @return {Object}
    */
-  toJSON(): { [key: string]: any } {
+  toJSON(): ByIdMap {
     var permissions = {};
     for (var p in this.permissionsById) {
       permissions[p] = this.permissionsById[p];
@@ -88,7 +91,7 @@ export default class ParseACL {
    * @param other The other object to compare to
    * @return {Boolean}
    */
-  equals(other: mixed): boolean {
+  equals(other: ParseACL): boolean {
     if (!(other instanceof ParseACL)) {
       return false;
     }
@@ -115,7 +118,11 @@ export default class ParseACL {
     if (userId instanceof ParseUser) {
       userId = userId.id;
     } else if (userId instanceof ParseRole) {
-      userId = 'role:' + userId.getName();
+      const name = userId.getName();
+      if (!name) {
+        throw new TypeError('Role must have a name');
+      }
+      userId = 'role:' + name;
     }
     if (typeof userId !== 'string') {
       throw new TypeError('userId must be a string.');
@@ -150,8 +157,15 @@ export default class ParseACL {
   ): boolean {
     if (userId instanceof ParseUser) {
       userId = userId.id;
+      if (!userId) {
+        throw new Error('Cannot get access for a ParseUser without an ID');
+      }
     } else if (userId instanceof ParseRole) {
-      userId = 'role:' + userId.getName();
+      const name = userId.getName();
+      if (!name) {
+        throw new TypeError('Role must have a name');
+      }
+      userId = 'role:' + name;
     }
     var permissions = this.permissionsById[userId];
     if (!permissions) {

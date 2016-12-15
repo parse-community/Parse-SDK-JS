@@ -67,7 +67,7 @@ export default class ParsePromise {
   reject(error) {
     if (this._resolved || this._rejected) {
       throw new Error(
-        'A promise was resolved even though it had already been ' +
+        'A promise was rejected even though it had already been ' +
         (this._resolved ? 'resolved' : 'rejected') + '.'
       );
     }
@@ -280,8 +280,8 @@ export default class ParsePromise {
    * @param {Function} continuation the callback.
    */
   _continueWith(continuation) {
-    return this.then(function() {
-      return continuation(arguments, null);
+    return this.then(function(...args) {
+      return continuation(args, null);
     }, function(error) {
       return continuation(null, error);
     });

@@ -13,7 +13,7 @@ jest.dontMock('../ParsePromise');
 
 var Analytics = require('../Analytics');
 var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise');
+var ParsePromise = require('../ParsePromise').default;
 
 var defaultController = CoreManager.getAnalyticsController();
 

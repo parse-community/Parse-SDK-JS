@@ -12,7 +12,8 @@
 import CoreManager from './CoreManager';
 import ParsePromise from './ParsePromise';
 
-type FileData = Array<number> | { base64: string } | File;
+type Base64 = { base64: string };
+type FileData = Array<number> | Base64 | File;
 export type FileSource = {
   format: 'file';
   file: File;
@@ -24,7 +25,7 @@ export type FileSource = {
 };
 
 var dataUriRegexp =
-  /^data:([a-zA-Z]*\/[a-zA-Z+.-]*);(charset=[a-zA-Z0-9\-\/\s]*,)?base64,(\S+)/;
+  /^data:([a-zA-Z]*\/[a-zA-Z+.-]*);(charset=[a-zA-Z0-9\-\/\s]*,)?base64,/;
 
 function b64Digit(number: number): string {
   if (number < 26) {
@@ -86,36 +87,41 @@ export default class ParseFile {
 
     this._name = name;
 
-    if (Array.isArray(data)) {
-      this._source = {
-        format: 'base64',
-        base64: ParseFile.encodeBase64(data),
-        type: specifiedType
-      };
-    } else if (typeof File !== 'undefined' && data instanceof File) {
-      this._source = {
-        format: 'file',
-        file: data,
-        type: specifiedType
-      };
-    } else if (data && data.hasOwnProperty('base64')) {
-      var matches = dataUriRegexp.exec(data.base64);
-      if (matches && matches.length > 0) {
-        // if data URI with type and charset, there will be 4 matches.
+    if (data !== undefined) {
+      if (Array.isArray(data)) {
         this._source = {
           format: 'base64',
-          base64: matches.length === 4 ? matches[3] : matches[2],
-          type: matches[1]
-        };
-      } else {
-        this._source = {
-          format: 'base64',
-          base64: data.base64,
+          base64: ParseFile.encodeBase64(data),
           type: specifiedType
         };
+      } else if (typeof File !== 'undefined' && data instanceof File) {
+        this._source = {
+          format: 'file',
+          file: data,
+          type: specifiedType
+        };
+      } else if (data && typeof data.base64 === 'string') {
+        const base64 = data.base64;
+        var commaIndex = base64.indexOf(',');
+
+        if (commaIndex !== -1) {
+          var matches = dataUriRegexp.exec(base64.slice(0, commaIndex + 1));
+          // if data URI with type and charset, there will be 4 matches.
+          this._source = {
+            format: 'base64',
+            base64: base64.slice(commaIndex + 1),
+            type: matches[1]
+          };
+        } else {
+          this._source = {
+            format: 'base64',
+            base64: base64,
+            type: specifiedType
+          };
+        }
+      } else {
+        throw new TypeError('Cannot create a Parse.File with that data.');
       }
-    } else if (typeof data !== 'undefined') {
-      throw new TypeError('Cannot create a Parse.File with that data.');
     }
   }
 
@@ -239,7 +245,8 @@ var DefaultController = {
     // To directly upload a File, we use a REST-style AJAX request
     var headers = {
       'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
-      'X-Parse-JavaScript-Key': CoreManager.get('JAVASCRIPT_KEY')
+      'X-Parse-JavaScript-Key': CoreManager.get('JAVASCRIPT_KEY'),
+      'Content-Type': source.type || (source.file? source.file.type : null)
     };
     var url = CoreManager.get('SERVER_URL');
     if (url[url.length - 1] !== '/') {

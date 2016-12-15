@@ -102,8 +102,11 @@ export default class Subscription extends EventEmitter {
    * @method unsubscribe
    */
   unsubscribe() {
-    var liveQueryClient = CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
-    liveQueryClient.unsubscribe(this);
-    this.emit('close');
+    let _this = this;
+    CoreManager.getLiveQueryController().getDefaultLiveQueryClient().then((liveQueryClient) => {
+      liveQueryClient.unsubscribe(_this);
+      _this.emit('close');
+      this.resolve();
+    });
   }
 }

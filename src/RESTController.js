@@ -125,7 +125,9 @@ const RESTController = {
       };
 
       headers = headers || {};
-      headers['Content-Type'] = 'text/plain'; // Avoid pre-flight
+      if (typeof(headers['Content-Type']) !== 'string') {
+        headers['Content-Type'] = 'text/plain'; // Avoid pre-flight
+      }
       if (CoreManager.get('IS_NODE')) {
         headers['User-Agent'] = 'Parse/' + CoreManager.get('VERSION') +
           ' (NodeJS ' + process.versions.node + ')';

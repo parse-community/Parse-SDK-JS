@@ -25,7 +25,6 @@ jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
 jest.dontMock('../UniqueInstanceStateController');
 
-jest.dontMock('./test_helpers/asyncHelper');
 jest.dontMock('./test_helpers/mockXHR');
 
 var mockUser = function(token) {
@@ -40,12 +39,10 @@ mockUser.current = function() {
 jest.setMock('../ParseUser', mockUser);
 
 var CoreManager = require('../CoreManager');
-var ParseObject = require('../ParseObject');
-var ParsePromise = require('../ParsePromise');
-var ParseSession = require('../ParseSession');
+var ParseObject = require('../ParseObject').default;
+var ParsePromise = require('../ParsePromise').default;
+var ParseSession = require('../ParseSession').default;
 var ParseUser = require('../ParseUser');
-
-var asyncHelper = require('./test_helpers/asyncHelper');
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
@@ -101,7 +98,7 @@ describe('ParseSession', () => {
     expect(ParseSession.isCurrentSessionRevocable()).toBe(false);
   });
 
-  it('can fetch the full session for the current token', asyncHelper((done) => {
+  it('can fetch the full session for the current token', (done) => {
     CoreManager.setRESTController({
       request(method, path, body, options) {
         expect(method).toBe('GET');
@@ -126,7 +123,7 @@ describe('ParseSession', () => {
       expect(session.getSessionToken()).toBe('abc123');
       done();
     });
-  }));
+  });
 
   it('can be cloned', () => {
     var s = ParseObject.fromJSON({

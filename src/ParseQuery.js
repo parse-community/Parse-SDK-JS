@@ -18,6 +18,8 @@ import ParsePromise from './ParsePromise';
 
 import type { RequestOptions, FullOptions } from './RESTController';
 
+type BatchOptions = FullOptions & { batchSize?: number };
+
 export type WhereClause = {
   [attr: string]: mixed;
 };
@@ -395,13 +397,19 @@ export default class ParseQuery {
    * @method each
    * @param {Function} callback Callback that will be called with each result
    *     of the query.
-   * @param {Object} options An optional Backbone-like options object with
-   *     success and error callbacks that will be invoked once the iteration
-   *     has finished.
+   * @param {Object} options A Backbone-style options object. Valid options
+   * are:<ul>
+   *   <li>success: Function to call when the iteration completes successfully.
+   *   <li>error: Function to call when the iteration fails.
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
    * @return {Parse.Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
-  each(callback: (obj: ParseObject) => any, options?: FullOptions): ParsePromise {
+  each(callback: (obj: ParseObject) => any, options?: BatchOptions): ParsePromise {
     options = options || {};
 
     if (this._order || this._skip || (this._limit >= 0)) {

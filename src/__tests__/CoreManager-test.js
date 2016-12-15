@@ -272,7 +272,7 @@ describe('CoreManager', () => {
       async: 0,
       getItem: function() {},
       setItem: function() {}
-    })).toThrow('A synchonous StorageController must implement removeItem()');
+    })).toThrow('A synchronous StorageController must implement removeItem()');
 
     expect(CoreManager.setStorageController.bind(null, {
       async: 0,
