@@ -9,7 +9,7 @@
 
 jest.autoMockOff();
 
-var ParsePromise = require('../ParsePromise');
+var ParsePromise = require('../ParsePromise').default;
 var TaskQueue = require('../TaskQueue');
 
 describe('TaskQueue', () => {

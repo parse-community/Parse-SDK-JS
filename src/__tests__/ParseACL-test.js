@@ -17,8 +17,8 @@ mockRole.prototype.getName = function() {
 }
 jest.setMock('../ParseRole', mockRole);
 
-var ParseACL = require('../ParseACL');
-var ParseUser = require('../ParseUser');
+var ParseACL = require('../ParseACL').default;
+var ParseUser = require('../ParseUser').default;
 var ParseRole = require('../ParseRole');
 
 describe('ParseACL', () => {

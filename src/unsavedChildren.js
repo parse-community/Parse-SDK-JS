@@ -14,7 +14,7 @@ import ParseObject from './ParseObject';
 import ParseRelation from './ParseRelation';
 
 type EncounterMap = {
-  objects: { [identifier: string]: ParseObject; };
+  objects: { [identifier: string]: ParseObject | boolean; };
   files: Array<ParseFile>;
 };
 
@@ -84,7 +84,9 @@ function traverse(
   }
   if (Array.isArray(obj)) {
     obj.forEach((el) => {
-      traverse(el, encountered, shouldThrow, allowDeepUnsaved);
+      if (typeof el === 'object') {
+        traverse(el, encountered, shouldThrow, allowDeepUnsaved);
+      }
     });
   }
   for (var k in obj) {

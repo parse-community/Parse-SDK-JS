@@ -1,7 +1,8 @@
 [ignore]
-.*\/node_modules\/
+.*/node_modules/.*
 
 [include]
+../package.json
 
 [libs]
 interfaces/

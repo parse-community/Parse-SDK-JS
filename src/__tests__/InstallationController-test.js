@@ -12,12 +12,10 @@ jest.dontMock('../InstallationController');
 jest.dontMock('../ParsePromise');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
-jest.dontMock('./test_helpers/asyncHelper');
 
 var CoreManager = require('../CoreManager');
 var InstallationController = require('../InstallationController');
 var Storage = require('../Storage');
-var asyncHelper = require('./test_helpers/asyncHelper');
 
 describe('InstallationController', () => {
   beforeEach(() => {
@@ -27,15 +25,15 @@ describe('InstallationController', () => {
     InstallationController._clearCache();
   });
 
-  it('generates a new installation id when there is none', asyncHelper((done) => {
+  it('generates a new installation id when there is none', (done) => {
     InstallationController.currentInstallationId().then((iid) => {
       expect(typeof iid).toBe('string');
       expect(iid.length).toBeGreaterThan(0);
       done();
     });
-  }));
+  });
 
-  it('caches the installation id', asyncHelper((done) => {
+  it('caches the installation id', (done) => {
     var iid = null;
     InstallationController.currentInstallationId().then((i) => {
       iid = i;
@@ -45,9 +43,9 @@ describe('InstallationController', () => {
       expect(i).toBe(iid);
       done();
     });
-  }));
+  });
 
-  it('permanently stores the installation id', asyncHelper((done) => {
+  it('permanently stores the installation id', (done) => {
     var iid = null;
     InstallationController.currentInstallationId().then((i) => {
       iid = i;
@@ -57,5 +55,5 @@ describe('InstallationController', () => {
       expect(i).toBe(iid);
       done();
     });
-  }));
+  });
 });

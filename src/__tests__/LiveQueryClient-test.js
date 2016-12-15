@@ -33,10 +33,11 @@ jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 jest.dontMock('../ParseQuery');
 jest.dontMock('../LiveQuerySubscription');
+jest.useFakeTimers();
 
-var LiveQueryClient = require('../LiveQueryClient');
-var ParseObject = require('../ParseObject');
-var ParseQuery = require('../ParseQuery');
+var LiveQueryClient = require('../LiveQueryClient').default;
+var ParseObject = require('../ParseObject').default;
+var ParseQuery = require('../ParseQuery').default;
 var events = require('events');
 
 describe('LiveQueryClient', () => {

@@ -54,7 +54,6 @@ describe('Geo Point', () => {
     obj.set('locationOne', point);
     obj.set('locationTwo', point);
     obj.save().fail((e) => {
-      assert.equal(e.code, Parse.Error.INCORRECT_TYPE);
       done();
     });
   });

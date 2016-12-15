@@ -8,11 +8,11 @@
  */
 
 jest.autoMockOff();
+jest.useFakeTimers();
 
 var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise');
+var ParsePromise = require('../ParsePromise').default;
 var RESTController = require('../RESTController');
-var asyncHelper = require('./test_helpers/asyncHelper');
 var mockXHR = require('./test_helpers/mockXHR');
 
 CoreManager.setInstallationController({
@@ -48,16 +48,16 @@ describe('RESTController', () => {
     expect(xhr.send.mock.calls[0][0]).toEqual({});
   });
 
-  it('resolves with the result of the AJAX request', asyncHelper((done) => {
+  it('resolves with the result of the AJAX request', (done) => {
     RESTController._setXHR(mockXHR([{ status: 200, response: { success: true }}]));
     RESTController.ajax('POST', 'users', {}).then((response, status, xhr) => {
       expect(response).toEqual({ success: true });
       expect(status).toBe(200);
       done();
     });
-  }));
+  });
 
-  it('retries on 5XX errors', asyncHelper((done) => {
+  it('retries on 5XX errors', (done) => {
     RESTController._setXHR(mockXHR([
       { status: 500 },
       { status: 500 },
@@ -69,9 +69,9 @@ describe('RESTController', () => {
       done();
     });
     jest.runAllTimers();
-  }));
+  });
 
-  it('retries on connection failure', asyncHelper((done) => {
+  it('retries on connection failure', (done) => {
     RESTController._setXHR(mockXHR([
       { status: 0 },
       { status: 0 },
@@ -84,9 +84,9 @@ describe('RESTController', () => {
       done();
     });
     jest.runAllTimers();
-  }));
+  });
 
-  it('returns a connection error on network failure', asyncHelper((done) => {
+  it('returns a connection error on network failure', (done) => {
     RESTController._setXHR(mockXHR([
       { status: 0 },
       { status: 0 },
@@ -100,9 +100,9 @@ describe('RESTController', () => {
       done();
     });
     jest.runAllTimers();
-  }));
+  });
 
-  it('aborts after too many failures', asyncHelper((done) => {
+  it('aborts after too many failures', (done) => {
     RESTController._setXHR(mockXHR([
       { status: 500 },
       { status: 500 },
@@ -116,16 +116,16 @@ describe('RESTController', () => {
       done();
     });
     jest.runAllTimers();
-  }));
+  });
 
-  it('rejects 1XX status codes', asyncHelper((done) => {
+  it('rejects 1XX status codes', (done) => {
     RESTController._setXHR(mockXHR([{ status: 100 }]));
     RESTController.ajax('POST', 'users', {}).then(null, (xhr) => {
       expect(xhr).not.toBe(undefined);
       done();
     });
     jest.runAllTimers();
-  }));
+  });
 
   it('can make formal JSON requests', () => {
     var xhr = {
@@ -149,7 +149,7 @@ describe('RESTController', () => {
     });
   });
 
-  it('handles request errors', asyncHelper((done) => {
+  it('handles request errors', (done) => {
     RESTController._setXHR(mockXHR([{
       status: 400, response: {
         code: -1,
@@ -162,9 +162,9 @@ describe('RESTController', () => {
         expect(error.message).toBe('Something bad');
         done();
       });
-  }));
+  });
 
-  it('handles invalid responses', asyncHelper((done) => {
+  it('handles invalid responses', (done) => {
     var XHR = function() { };
     XHR.prototype = {
       open: function() { },
@@ -180,12 +180,12 @@ describe('RESTController', () => {
     RESTController.request('GET', 'classes/MyObject', {}, {})
       .then(null, (error) => {
         expect(error.code).toBe(100);
-        expect(error.message).toBe('XMLHttpRequest failed: "SyntaxError: Unexpected end of input"');
+        expect(error.message.indexOf('XMLHttpRequest failed')).toBe(0);
         done();
       });
-  }));
+  });
 
-  it('handles invalid errors', asyncHelper((done) => {
+  it('handles invalid errors', (done) => {
     var XHR = function() { };
     XHR.prototype = {
       open: function() { },
@@ -204,7 +204,7 @@ describe('RESTController', () => {
         expect(error.message).toBe('Received an error with invalid JSON from Parse: {');
         done();
       });
-  }));
+  });
 
   it('attaches the session token of the current user', () => {
     CoreManager.setUserController({

@@ -90,17 +90,17 @@ Object.defineProperty(Parse, 'liveQueryServerURL', {
 });
 /** End setters **/
 
-Parse.ACL = require('./ParseACL');
+Parse.ACL = require('./ParseACL').default;
 Parse.Analytics = require('./Analytics');
 Parse.Cloud = require('./Cloud');
 Parse.CoreManager = require('./CoreManager');
-Parse.Config = require('./ParseConfig');
-Parse.Error = require('./ParseError');
-Parse.FacebookUtils = require('./FacebookUtils');
-Parse.File = require('./ParseFile');
-Parse.GeoPoint = require('./ParseGeoPoint');
-Parse.Installation = require('./ParseInstallation');
-Parse.Object = require('./ParseObject');
+Parse.Config = require('./ParseConfig').default;
+Parse.Error = require('./ParseError').default;
+Parse.FacebookUtils = require('./FacebookUtils').default;
+Parse.File = require('./ParseFile').default;
+Parse.GeoPoint = require('./ParseGeoPoint').default;
+Parse.Installation = require('./ParseInstallation').default;
+Parse.Object = require('./ParseObject').default;
 Parse.Op = {
   Set: ParseOp.SetOp,
   Unset: ParseOp.UnsetOp,
@@ -110,16 +110,16 @@ Parse.Op = {
   AddUnique: ParseOp.AddUniqueOp,
   Relation: ParseOp.RelationOp
 };
-Parse.Promise = require('./ParsePromise');
+Parse.Promise = require('./ParsePromise').default;
 Parse.Push = require('./Push');
-Parse.Query = require('./ParseQuery');
-Parse.Relation = require('./ParseRelation');
-Parse.Role = require('./ParseRole');
-Parse.Session = require('./ParseSession');
+Parse.Query = require('./ParseQuery').default;
+Parse.Relation = require('./ParseRelation').default;
+Parse.Role = require('./ParseRole').default;
+Parse.Session = require('./ParseSession').default;
 Parse.Storage = require('./Storage');
-Parse.User = require('./ParseUser');
-Parse.LiveQuery = require('./ParseLiveQuery');
-Parse.LiveQueryClient = require('./LiveQueryClient');
+Parse.User = require('./ParseUser').default;
+Parse.LiveQuery = require('./ParseLiveQuery').default;
+Parse.LiveQueryClient = require('./LiveQueryClient').default;
 
 Parse._request = function(...args) {
   return CoreManager.getRESTController().request.apply(null, args);
@@ -147,6 +147,7 @@ if (process.env.PARSE_BUILD === 'node') {
   Parse.Cloud.useMasterKey = function() {
     CoreManager.set('USE_MASTER_KEY', true);
   }
+  Parse.Hooks = require('./ParseHooks');
 }
 
 // For legacy requires, of the form `var Parse = require('parse').Parse`

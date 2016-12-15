@@ -22,7 +22,7 @@ mockObject.prototype._getId = function() {
 }
 jest.setMock('../ParseObject', mockObject);
 
-var arrayContainsObject = require('../arrayContainsObject');
+var arrayContainsObject = require('../arrayContainsObject').default;
 var ParseObject = require('../ParseObject');
 
 describe('arrayContainsObject', () => {

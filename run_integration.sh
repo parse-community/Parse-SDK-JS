@@ -3,7 +3,7 @@
 npm run build
 cd integration
 npm install
-node server.js &
+TESTING=1 node server.js &
 PID=$!
 npm test
 C=$?

@@ -11,11 +11,11 @@ jest.dontMock('../decode');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 
-var decode = require('../decode');
+var decode = require('../decode').default;
 
-var ParseFile = require('../ParseFile');
-var ParseGeoPoint = require('../ParseGeoPoint');
-var ParseObject = require('../ParseObject');
+var ParseFile = require('../ParseFile').default;
+var ParseGeoPoint = require('../ParseGeoPoint').default;
+var ParseObject = require('../ParseObject').default;
 
 describe('decode', () => {
   it('ignores primitives', () => {

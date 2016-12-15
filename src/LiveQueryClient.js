@@ -270,7 +270,6 @@ export default class LiveQueryClient extends EventEmitter {
     };
 
     this.socket.onerror = (error) => {
-      console.log("error on socket");
       this._handleWebSocketError(error);
     };
   }
@@ -324,7 +323,7 @@ export default class LiveQueryClient extends EventEmitter {
     if (process.env.PARSE_BUILD === 'node') {
       return require('ws');
     } else if (process.env.PARSE_BUILD === 'browser') {
-      return typeof WebSocket === 'function' ? WebSocket : null;
+      return typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null;
     } else if (process.env.PARSE_BUILD === 'react-native') {
       return WebSocket;
     }
@@ -440,8 +439,6 @@ export default class LiveQueryClient extends EventEmitter {
      
     if (this.reconnectHandle) {
       clearTimeout(this.reconnectHandle);
-    } else {
-      console.info('attempting to reconnect');
     }
 
     this.reconnectHandle = setTimeout((() => {

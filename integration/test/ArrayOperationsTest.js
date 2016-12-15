@@ -15,6 +15,22 @@ describe('Array Operations', () => {
     });
   });
 
+  it('initializes a field', (done) => {
+    let object = new Parse.Object('TestObject');
+    object.set('strings', ['foo', 'bar', 'baz']);
+    object.save().then(() => {
+      let query = new Parse.Query('TestObject');
+      return query.get(object.id);
+    }).then((o) => {
+      let strings = o.get('strings');
+      assert.equal(strings.length, 3);
+      assert.equal(strings[0], 'foo');
+      assert.equal(strings[1], 'bar');
+      assert.equal(strings[2], 'baz');
+      done();
+    });
+  });
+
   it('adds values', (done) => {
     let object = new Parse.Object('TestObject');
     object.set('strings', ['foo']);

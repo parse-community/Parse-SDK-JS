@@ -30,8 +30,9 @@ jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 
-jest.dontMock('./test_helpers/asyncHelper');
 jest.dontMock('./test_helpers/mockXHR');
+
+jest.useFakeTimers();
 
 var mockRelation = function(parent, key) {
   this.parentClass = parent.className;
@@ -63,18 +64,17 @@ jest.setMock('../ParseQuery', mockQuery);
 
 const CoreManager = require('../CoreManager');
 const ObjectStateMutations = require('../ObjectStateMutations');
-const ParseACL = require('../ParseACL');
-const ParseError = require('../ParseError');
-const ParseFile = require('../ParseFile');
-const ParseGeoPoint = require('../ParseGeoPoint');
-const ParseObject = require('../ParseObject');
+const ParseACL = require('../ParseACL').default;
+const ParseError = require('../ParseError').default;
+const ParseFile = require('../ParseFile').default;
+const ParseGeoPoint = require('../ParseGeoPoint').default;
+const ParseObject = require('../ParseObject').default;
 const ParseOp = require('../ParseOp');
-const ParsePromise = require('../ParsePromise');
+const ParsePromise = require('../ParsePromise').default;
 const RESTController = require('../RESTController');
 const SingleInstanceStateController = require('../SingleInstanceStateController');
-const unsavedChildren = require('../unsavedChildren');
+const unsavedChildren = require('../unsavedChildren').default;
 
-const asyncHelper = require('./test_helpers/asyncHelper');
 const mockXHR = require('./test_helpers/mockXHR');
 
 CoreManager.setRESTController(RESTController);
@@ -244,7 +244,7 @@ describe('ParseObject', () => {
 
   it('can convert to a pointer', () => {
     var o = new ParseObject('Item');
-    expect(o.toPointer).toThrow(
+    expect(function() {o.toPointer();}).toThrow(
       'Cannot create a pointer to an unsaved ParseObject'
     );
     o.id = 'anObjectId';
@@ -811,7 +811,7 @@ describe('ParseObject', () => {
     expect(o.op('count')).toBe(undefined);
   });
 
-  it('can save the object', asyncHelper((done) => {
+  it('can save the object', (done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{
         status: 200,
@@ -832,9 +832,9 @@ describe('ParseObject', () => {
       expect(obj.dirty()).toBe(false);
       done();
     });
-  }));
+  });
 
-  it('accepts attribute changes on save', asyncHelper((done) => {
+  it('accepts attribute changes on save', (done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{
         status: 200,
@@ -851,9 +851,24 @@ describe('ParseObject', () => {
       expect(error.code).toBe(-1);
       done();
     });
-  }));
+  });
+  
+  it('interpolates delete operations', (done) => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: { objectId: 'newattributes', deletedKey: {__op: 'Delete'} }
+      }])
+    );
+    var o = new ParseObject('Item');
+    o.save({ key: 'value', deletedKey: 'keyToDelete' }).then(() => {
+      expect(o.get('key')).toBe('value');
+      expect(o.get('deletedKey')).toBeUndefined();
+      done();
+    });
+  });
 
-  it('can make changes while in the process of a save', asyncHelper((done) => {
+  it('can make changes while in the process of a save', (done) => {
     var xhr = {
       setRequestHeader: jest.genMockFn(),
       open: jest.genMockFn(),
@@ -877,7 +892,7 @@ describe('ParseObject', () => {
     xhr.responseText = JSON.stringify({ objectId: 'P12' });
     xhr.readyState = 4;
     xhr.onreadystatechange();
-  }));
+  });
 
   it('will queue save operations', () => {
     var xhrs = [];
@@ -916,7 +931,7 @@ describe('ParseObject', () => {
     expect(xhrs.length).toBe(2);
   });
 
-  it('will leave the pending ops queue untouched when a lone save fails', asyncHelper((done) => {
+  it('will leave the pending ops queue untouched when a lone save fails', (done) => {
     var xhr = {
       setRequestHeader: jest.genMockFn(),
       open: jest.genMockFn(),
@@ -941,7 +956,7 @@ describe('ParseObject', () => {
     xhr.responseText = JSON.stringify({ code: 103, error: 'Invalid class name' });
     xhr.readyState = 4;
     xhr.onreadystatechange();
-  }));
+  });
 
   it('will merge pending Ops when a save fails and others are pending', () => {
     var xhrs = [];
@@ -977,7 +992,7 @@ describe('ParseObject', () => {
     });
   });
 
-  it('will deep-save the children of an object', asyncHelper((done) => {
+  it('will deep-save the children of an object', (done) => {
     var xhrs = [];
     RESTController._setXHR(function() {
       var xhr = {
@@ -1014,7 +1029,7 @@ describe('ParseObject', () => {
     xhrs[1].responseText = JSON.stringify({ objectId: 'parent' });
     xhrs[1].onreadystatechange();
     jest.runAllTicks();
-  }));
+  });
 
   it('will fail for a circular dependency of non-existing objects', () => {
     var parent = new ParseObject('Item');
@@ -1048,7 +1063,7 @@ describe('ParseObject', () => {
     expect(unsavedChildren(comment)).toEqual([]);
   });
 
-  it('can fetch an object given an id', asyncHelper((done) => {
+  it('can fetch an object given an id', (done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{
         status: 200,
@@ -1064,9 +1079,9 @@ describe('ParseObject', () => {
       expect(p.attributes).toEqual({ count: 10 });
       done();
     });
-  }));
+  });
 
-  it('can save a ring of objects, given one exists', asyncHelper((done) => {
+  it('can save a ring of objects, given one exists', (done) => {
     var xhrs = [];
     RESTController._setXHR(function() {
       var xhr = {
@@ -1119,9 +1134,9 @@ describe('ParseObject', () => {
     xhrs[1].responseText = JSON.stringify([ { success: {} } ]);
     xhrs[1].onreadystatechange();
     jest.runAllTicks();
-  }));
+  });
 
-  it('can save a chain of unsaved objects', asyncHelper((done) => {
+  it('can save a chain of unsaved objects', (done) => {
     var xhrs = [];
     RESTController._setXHR(function() {
       var xhr = {
@@ -1206,9 +1221,9 @@ describe('ParseObject', () => {
     xhrs[2].responseText = JSON.stringify([ { success: { objectId: 'parent' } } ]);
     xhrs[2].onreadystatechange();
     jest.runAllTicks();
-  }));
+  });
 
-  it('can update fields via a fetch() call', asyncHelper((done) => {
+  it('can update fields via a fetch() call', (done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{
         status: 200,
@@ -1233,9 +1248,9 @@ describe('ParseObject', () => {
       expect(p.dirty()).toBe(false);
       done();
     });
-  }));
+  });
 
-  it('replaces old data when fetch() is called', asyncHelper((done) => {
+  it('replaces old data when fetch() is called', (done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{
         status: 200,
@@ -1259,9 +1274,9 @@ describe('ParseObject', () => {
       expect(p.has('name')).toBe(false);
       done();
     });
-  }));
+  });
 
-  it('can destroy an object', asyncHelper((done) => {
+  it('can destroy an object', (done) => {
     var xhr = {
       setRequestHeader: jest.genMockFn(),
       open: jest.genMockFn(),
@@ -1284,9 +1299,9 @@ describe('ParseObject', () => {
     xhr.readyState = 4;
     xhr.onreadystatechange();
     jest.runAllTicks();
-  }));
+  });
 
-  it('can save an array of objects', asyncHelper((done) => {
+  it('can save an array of objects', (done) => {
     var xhr = {
       setRequestHeader: jest.genMockFn(),
       open: jest.genMockFn(),
@@ -1321,9 +1336,9 @@ describe('ParseObject', () => {
     xhr.readyState = 4;
     xhr.onreadystatechange();
     jest.runAllTicks();
-  }));
+  });
 
-  it('returns the first error when saving an array of objects', asyncHelper((done) => {
+  it('returns the first error when saving an array of objects', (done) => {
     var xhrs = [];
     for (var i = 0; i < 2; i++) {
       xhrs[i] = {
@@ -1375,11 +1390,11 @@ describe('ParseObject', () => {
     ]);
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
-  }));
+  });
 });
 
 describe('ObjectController', () => {
-  it('can fetch a single object', asyncHelper((done) => {
+  it('can fetch a single object', (done) => {
     var objectController = CoreManager.getObjectController();
     var xhr = {
       setRequestHeader: jest.genMockFn(),
@@ -1404,9 +1419,9 @@ describe('ObjectController', () => {
     xhr.readyState = 4;
     xhr.onreadystatechange();
     jest.runAllTicks();
-  }));
+  });
 
-  it('can fetch an array of objects', asyncHelper((done) => {
+  it('can fetch an array of objects', (done) => {
     var objectController = CoreManager.getObjectController();
     var objects = [];
     for (var i = 0; i < 5; i++) {
@@ -1420,9 +1435,9 @@ describe('ObjectController', () => {
       expect(results[0].className).toBe('Person');
       done();
     });
-  }));
+  });
 
-  it('can destroy an object', asyncHelper((done) => {
+  it('can destroy an object', (done) => {
     var objectController = CoreManager.getObjectController();
     var xhr = {
       setRequestHeader: jest.genMockFn(),
@@ -1462,9 +1477,9 @@ describe('ObjectController', () => {
     xhr.readyState = 4;
     xhr.onreadystatechange();
     jest.runAllTicks();
-  }));
+  });
 
-  it('can destroy an array of objects', asyncHelper((done) => {
+  it('can destroy an array of objects', (done) => {
     var objectController = CoreManager.getObjectController();
     var xhrs = [];
     for (var i = 0; i < 3; i++) {
@@ -1534,9 +1549,9 @@ describe('ObjectController', () => {
 
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
-  }));
+  });
 
-  it('can save an object', asyncHelper((done) => {
+  it('can save an object', (done) => {
     var objectController = CoreManager.getObjectController();
     var xhr = {
       setRequestHeader: jest.genMockFn(),
@@ -1562,17 +1577,17 @@ describe('ObjectController', () => {
     xhr.readyState = 4;
     xhr.onreadystatechange();
     jest.runAllTicks();
-  }));
+  });
 
-  it('returns an empty promise from an empty save', asyncHelper((done) => {
+  it('returns an empty promise from an empty save', (done) => {
     var objectController = CoreManager.getObjectController();
     objectController.save().then(() => {
       done();
     });
     jest.runAllTicks();
-  }));
+  });
 
-  it('can save an array of files', asyncHelper((done) => {
+  it('can save an array of files', (done) => {
     var objectController = CoreManager.getObjectController();
     var xhrs = [];
     for (var i = 0; i < 4; i++) {
@@ -1614,9 +1629,9 @@ describe('ObjectController', () => {
       xhrs[i].onreadystatechange();
       jest.runAllTicks();
     }
-  }));
+  });
 
-  it('can save an array of objects', asyncHelper((done) => {
+  it('can save an array of objects', (done) => {
     var objectController = CoreManager.getObjectController();
     var xhrs = [];
     for (var i = 0; i < 3; i++) {
@@ -1688,7 +1703,7 @@ describe('ObjectController', () => {
     ]);
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
-  }));
+  });
 
   it('does not fail when checking if arrays of pointers are dirty', () => {
     var objectController = CoreManager.getObjectController();
@@ -1827,7 +1842,7 @@ describe('ParseObject (unique instance mode)', () => {
     expect(o2.get('tags')).toEqual([]);
   });
 
-  it('can save the object', asyncHelper((done) => {
+  it('can save the object', (done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{
         status: 200,
@@ -1848,9 +1863,9 @@ describe('ParseObject (unique instance mode)', () => {
       expect(obj.dirty()).toBe(false);
       done();
     });
-  }));
+  });
 
-  it('can save an array of objects', asyncHelper((done) => {
+  it('can save an array of objects', (done) => {
     var xhr = {
       setRequestHeader: jest.genMockFn(),
       open: jest.genMockFn(),
@@ -1885,7 +1900,7 @@ describe('ParseObject (unique instance mode)', () => {
     xhr.readyState = 4;
     xhr.onreadystatechange();
     jest.runAllTicks();
-  }));
+  });
 
   it('preserves changes when changing the id', () => {
     var o = new ParseObject({
@@ -2074,5 +2089,16 @@ describe('ParseObject extensions', () => {
     });
     f = new FeatureObject();
     expect(f.foo() + f.bar()).toBe('FB');
+  });
+
+  it('can specify a custom initializer', () => {
+    var InitObject = ParseObject.extend('InitObject', {
+      initialize: function(attrs, options) {
+        this.set('field', 12);
+      }
+    });
+
+    var i = new InitObject()
+    expect(i.get('field')).toBe(12);
   });
 });

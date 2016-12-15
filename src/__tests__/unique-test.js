@@ -23,7 +23,7 @@ mockObject.prototype._getId = function() {
 }
 jest.setMock('../ParseObject', mockObject);
 
-var unique = require('../unique');
+var unique = require('../unique').default;
 var ParseObject = require('../ParseObject');
 
 describe('unique', () => {
