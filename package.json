@@ -24,11 +24,16 @@
     "PATENTS",
     "README.md"
   ],
+  "types": "./index.d.ts",
   "browser": {
     "react-native": false
   },
   "dependencies": {
+    "@types/jquery": "^2.0.34",
+    "@types/node": "^6.0.52",
+    "@types/underscore": "^1.7.36",
     "babel-runtime": "^6.11.6",
+    "typescript": "^2.1.4",
     "ws": "^1.0.1",
     "xmlhttprequest": "^1.7.0"
   },
@@ -53,11 +58,13 @@
     "gulp-uglify": "^1.4.0",
     "jasmine-reporters": "~1.0.0",
     "jest-cli": "^15.1.1",
+    "typescript": "^2.1.4",
     "vinyl-source-stream": "^1.1.0"
   },
   "scripts": {
     "build": "./build_releases.sh",
     "release": "./build_releases.sh && npm publish",
+    "pretest": "tsc integration/types/index.ts --noEmit",
     "test": "PARSE_BUILD=node jest"
   },
   "jest": {
