@@ -45,6 +45,70 @@ function quote(s: string) {
 }
 
 /**
+ * Handles pre-populating the result data of a query with select fields,
+ * making sure that the data object contains keys for all objects that have
+ * been requested with a select, so that our cached state updates correctly.
+ */
+function handleSelectResult(data: any, select: Array<string>){
+  var serverDataMask = {};
+
+  select.forEach((field) => {
+    let hasSubObjectSelect = field.indexOf(".") !== -1;
+    if (!hasSubObjectSelect && !data.hasOwnProperty(field)){
+      // this field was selected, but is missing from the retrieved data
+      data[field] = undefined
+    } else if(hasSubObjectSelect){
+      // this field references a sub-object,
+      // so we need to walk down the path components 
+      let pathComponents = field.split(".");
+      var obj = data;
+      var serverMask = serverDataMask;
+
+      pathComponents.forEach((component, index, arr) => {
+        // add keys if the expected data is missing
+        if(!obj[component]){
+          obj[component] = (index == arr.length-1) ? undefined : {};
+        }
+        obj = obj[component];
+
+        //add this path component to the server mask so we can fill it in later if needed
+        if(index < arr.length-1){
+          if(!serverMask[component]){
+            serverMask[component] = {};
+          }
+        }
+      });
+    }
+  });
+
+  if(Object.keys(serverDataMask).length > 0){
+    // When selecting from sub-objects, we don't want to blow away the missing
+    // information that we may have retrieved before. We've already added any
+    // missing selected keys to sub-objects, but we still need to add in the
+    // data for any previously retrieved sub-objects that were not selected.
+
+    let serverData = CoreManager.getObjectStateController().getServerData({id:data.objectId, className:data.className});
+
+    function copyMissingDataWithMask(src, dest, mask, copyThisLevel){
+      //copy missing elements at this level
+      if(copyThisLevel){
+        for (var key in src){
+          if(src.hasOwnProperty(key) && !dest.hasOwnProperty(key)){
+            dest[key] = src[key]
+          }
+        }
+      }
+      for (var key in mask){
+        //traverse into objects as needed
+        copyMissingDataWithMask(src[key], dest[key], mask[key], true);
+      }
+    }
+
+    copyMissingDataWithMask(serverData, data, serverDataMask, false);
+  }
+}
+
+/**
  * Creates a new parse Parse.Query for the given Parse.Object subclass.
  * @class Parse.Query
  * @constructor
@@ -273,6 +337,8 @@ export default class ParseQuery {
 
     let controller = CoreManager.getQueryController();
 
+    let select = this._select;
+
     return controller.find(
       this.className,
       this.toJSON(),
@@ -285,7 +351,15 @@ export default class ParseQuery {
         if (!data.className) {
           data.className = override;
         }
-        return ParseObject.fromJSON(data, true);
+
+        // Make sure the data object contains keys for all objects that
+        // have been requested with a select, so that our cached state
+        // updates correctly.
+        if(select){
+          handleSelectResult(data, select);
+        }
+        
+        return ParseObject.fromJSON(data, !select);
       });
     })._thenRunCallbacks(options);
   }
@@ -371,6 +445,8 @@ export default class ParseQuery {
     var params = this.toJSON();
     params.limit = 1;
 
+    var select = this._select;
+
     return controller.find(
       this.className,
       params,
@@ -383,7 +459,15 @@ export default class ParseQuery {
       if (!objects[0].className) {
         objects[0].className = this.className;
       }
-      return ParseObject.fromJSON(objects[0], true);
+
+      // Make sure the data object contains keys for all objects that
+      // have been requested with a select, so that our cached state
+      // updates correctly.
+      if(select){
+        handleSelectResult(objects[0], select);
+      }
+
+      return ParseObject.fromJSON(objects[0], !select);
     })._thenRunCallbacks(options);
   }
 

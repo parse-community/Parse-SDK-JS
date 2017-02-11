@@ -9,10 +9,14 @@
 
 jest.dontMock('../CoreManager');
 jest.dontMock('../encode');
+jest.dontMock('../decode');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParsePromise');
 jest.dontMock('../ParseQuery');
+jest.dontMock('../SingleInstanceStateController');
+jest.dontMock('../UniqueInstanceStateController');
+jest.dontMock('../ObjectStateMutations');
 
 var mockObject = function(className) {
   this.className = className;
@@ -1330,6 +1334,225 @@ describe('ParseQuery', () => {
     q.find().then((results) => {
       expect(results[0].className).toBe('Product');
       done();
+    });
+  });
+
+
+  
+  it('overrides cached object with query results', (done) => {
+    jest.dontMock("../ParseObject");
+    jest.resetModules();
+    ParseObject = require('../ParseObject').default;
+    CoreManager = require('../CoreManager');
+    ParseQuery = require('../ParseQuery').default;
+
+    ParseObject.enableSingleInstance();
+    
+    var objectToReturn = { 
+      objectId: 'T01', 
+      name: 'Name', 
+      other: 'other', 
+      className:"Thing", 
+      createdAt: '2017-01-10T10:00:00Z'
+    };
+
+    CoreManager.setQueryController({
+      find(className, params, options) {
+        return ParsePromise.as({
+          results: [objectToReturn]
+        });
+      }
+    });
+
+    var q = new ParseQuery("Thing");
+    var testObject;
+    q.find().then((results) => {
+      testObject = results[0];
+      
+      expect(testObject.get("name")).toBe("Name");
+      expect(testObject.get("other")).toBe("other");
+      
+      objectToReturn = { objectId: 'T01', name: 'Name2'};
+      var q2 = new ParseQuery("Thing");
+      return q2.find();
+    }).then((results) => {
+      expect(results[0].get("name")).toBe("Name2");
+      expect(results[0].has("other")).toBe(false);
+    }).then(() => {
+      expect(testObject.get("name")).toBe("Name2");
+      expect(testObject.has("other")).toBe(false);
+      done();
+     });
+  });
+
+  it('does not override unselected fields with select query results', (done) => {
+    jest.dontMock("../ParseObject");
+    jest.resetModules();
+    ParseObject = require('../ParseObject').default;
+    CoreManager = require('../CoreManager');
+    ParseQuery = require('../ParseQuery').default;
+
+    ParseObject.enableSingleInstance();
+    
+    var objectToReturn = { 
+      objectId: 'T01', 
+      name: 'Name', 
+      other: 'other', 
+      tbd: 'exists', 
+      className:"Thing", 
+      createdAt: '2017-01-10T10:00:00Z',
+      subObject: {key1:"value", key2:"value2", key3:"thisWillGoAway"}
+    };
+
+    CoreManager.setQueryController({
+      find(className, params, options) {
+        return ParsePromise.as({
+          results: [objectToReturn]
+        });
+      }
+    });
+
+    var q = new ParseQuery("Thing");
+    var testObject;
+    return q.find().then((results) => {
+      testObject = results[0];
+      
+      expect(testObject.get("name")).toBe("Name");
+      expect(testObject.get("other")).toBe("other");
+      expect(testObject.has("tbd")).toBe(true);
+      expect(testObject.get("subObject").key1).toBe("value");
+      expect(testObject.get("subObject").key2).toBe("value2");
+      expect(testObject.get("subObject").key3).toBe("thisWillGoAway");
+      
+      var q2 = new ParseQuery("Thing");
+      q2.select("other", "tbd", "subObject.key1", "subObject.key3");
+      objectToReturn = { objectId: 'T01', other: 'other2', subObject:{key1:"updatedValue"}};
+      return q2.find();
+    }).then((results) => {
+      expect(results[0].get("name")).toBe("Name");    //query didn't select this
+      expect(results[0].get("other")).toBe("other2"); //query selected and updated this
+      expect(results[0].has("tbd")).toBe(false);      //query selected this and it wasn't returned
+      //sub-objects should work similarly
+      expect(results[0].get("subObject").key1).toBe("updatedValue");
+      expect(results[0].get("subObject").key2).toBe("value2");
+      expect(results[0].get("subObject").key3).toBeUndefined();
+    }).then(() => {
+      expect(testObject.get("name")).toBe("Name");
+      expect(testObject.get("other")).toBe("other2");
+      expect(testObject.has("tbd")).toBe(false);
+      expect(testObject.get("subObject").key1).toBe("updatedValue");
+      expect(testObject.get("subObject").key2).toBe("value2");
+      expect(testObject.get("subObject").key3).toBeUndefined();  
+      done();
+    }, (error) => {
+      done.fail(error);
+    });
+  });
+
+  it('overrides cached object with first() results', (done) => {
+    jest.dontMock("../ParseObject");
+    jest.resetModules();
+    ParseObject = require('../ParseObject').default;
+    CoreManager = require('../CoreManager');
+    ParseQuery = require('../ParseQuery').default;
+
+    ParseObject.enableSingleInstance();
+    
+    var objectToReturn = { 
+      objectId: 'T01', 
+      name: 'Name', 
+      other: 'other', 
+      className:"Thing", 
+      createdAt: '2017-01-10T10:00:00Z'
+    };
+
+    CoreManager.setQueryController({
+      find(className, params, options) {
+        return ParsePromise.as({
+          results: [objectToReturn]
+        });
+      }
+    });
+
+    var q = new ParseQuery("Thing");
+    var testObject;
+    q.first().then((result) => {
+      testObject = result;
+      
+      expect(testObject.get("name")).toBe("Name");
+      expect(testObject.get("other")).toBe("other");
+      
+      objectToReturn = { objectId: 'T01', name: 'Name2'};
+      var q2 = new ParseQuery("Thing");
+      return q2.first();
+    }).then((result) => {
+      expect(result.get("name")).toBe("Name2");
+      expect(result.has("other")).toBe(false);
+    }).then(() => {
+      expect(testObject.get("name")).toBe("Name2");
+      expect(testObject.has("other")).toBe(false);
+      done();
+     });
+  });
+
+  it('does not override unselected fields for first() on select query', (done) => {
+    jest.dontMock("../ParseObject");
+    jest.resetModules();
+    ParseObject = require('../ParseObject').default;
+    CoreManager = require('../CoreManager');
+    ParseQuery = require('../ParseQuery').default;
+
+    ParseObject.enableSingleInstance();
+    
+    var objectToReturn = { 
+      objectId: 'T01', 
+      name: 'Name', 
+      other: 'other', 
+      tbd: 'exists', 
+      className:"Thing", 
+      subObject: {key1:"value", key2:"value2", key3:"thisWillGoAway"},
+      createdAt: '2017-01-10T10:00:00Z',
+    };
+
+    CoreManager.setQueryController({
+      find(className, params, options) {
+        return ParsePromise.as({
+          results: [objectToReturn]
+        });
+      }
+    });
+
+    var q = new ParseQuery("Thing");
+    var testObject;
+    return q.first().then((result) => {
+      testObject = result;
+      
+      expect(testObject.get("name")).toBe("Name");
+      expect(testObject.get("other")).toBe("other");
+      expect(testObject.has("tbd")).toBe(true);
+      
+      var q2 = new ParseQuery("Thing");
+      q2.select("other", "tbd", "subObject.key1", "subObject.key3");
+      objectToReturn = { objectId: 'T01', other: 'other2', subObject:{key1:"updatedValue"}};
+      return q2.first();
+    }).then((result) => {
+      expect(result.get("name")).toBe("Name");    //query didn't select this
+      expect(result.get("other")).toBe("other2"); //query selected and updated this
+      expect(result.has("tbd")).toBe(false);      //query selected this and it wasn't returned
+      //sub-objects should work similarly
+      expect(result.get("subObject").key1).toBe("updatedValue");
+      expect(result.get("subObject").key2).toBe("value2");
+      expect(result.get("subObject").key3).toBeUndefined();
+    }).then(() => {
+      expect(testObject.get("name")).toBe("Name");
+      expect(testObject.get("other")).toBe("other2");
+      expect(testObject.has("tbd")).toBe(false);  
+      expect(testObject.get("subObject").key1).toBe("updatedValue");
+      expect(testObject.get("subObject").key2).toBe("value2");
+      expect(testObject.get("subObject").key3).toBeUndefined(); 
+      done();
+    }, (error) => {
+      done.fail(error);
     });
   });
 });
