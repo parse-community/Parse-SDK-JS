@@ -2,6 +2,7 @@
 [![Build Status][build-status-svg]][build-status-link]
 [![Test Coverage][coverage-status-svg]][coverage-status-link]
 [![Npm Version][npm-svg]][npm-link]
+[![CDNJS version](https://img.shields.io/cdnjs/v/parse.svg)](https://cdnjs.com/libraries/parse)
 [![License][license-svg]][license-link]
 
 A library that gives you access to the powerful Parse cloud platform from your JavaScript app. For more information on Parse and its features, see [the website](https://parse.com) or [the JavaScript guide](https://parseplatform.github.io/docs/js/guide/).
