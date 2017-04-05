@@ -45,6 +45,8 @@ LICENSE file in the root directory of this source tree. An additional grant
 of patent rights can be found in the PATENTS file in the same directory.
 ```
 
+As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code. 
+
  [build-status-svg]: https://travis-ci.org/ParsePlatform/Parse-SDK-JS.svg?branch=master
  [build-status-link]: https://travis-ci.org/ParsePlatform/Parse-SDK-JS
  [coverage-status-svg]: http://codecov.io/github/ParsePlatform/Parse-SDK-JS/coverage.svg?branch=master
