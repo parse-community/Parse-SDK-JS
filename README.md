@@ -47,11 +47,11 @@ of patent rights can be found in the PATENTS file in the same directory.
 
 As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code. 
 
- [build-status-svg]: https://travis-ci.org/ParsePlatform/Parse-SDK-JS.svg?branch=master
- [build-status-link]: https://travis-ci.org/ParsePlatform/Parse-SDK-JS
- [coverage-status-svg]: http://codecov.io/github/ParsePlatform/Parse-SDK-JS/coverage.svg?branch=master
- [coverage-status-link]: http://codecov.io/github/ParsePlatform/Parse-SDK-JS?branch=master
+ [build-status-svg]: https://travis-ci.org/parse-community/Parse-SDK-JS.svg?branch=master
+ [build-status-link]: https://travis-ci.org/parse-community/Parse-SDK-JS
+ [coverage-status-svg]: http://codecov.io/github/parse-community/Parse-SDK-JS/coverage.svg?branch=master
+ [coverage-status-link]: http://codecov.io/github/parse-community/Parse-SDK-JS?branch=master
  [npm-svg]: https://badge.fury.io/js/parse.svg
  [npm-link]: https://npmjs.org/parse
  [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
- [license-link]: https://github.com/ParsePlatform/Parse-SDK-JS/blob/master/LICENSE
+ [license-link]: https://github.com/parse-community/Parse-SDK-JS/blob/master/LICENSE
