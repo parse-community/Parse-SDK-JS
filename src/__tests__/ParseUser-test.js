@@ -219,12 +219,12 @@ describe('ParseUser', () => {
     ParseUser.logIn({}, 'password').then(null, (err) => {
       expect(err.code).toBe(ParseError.OTHER_CAUSE);
       expect(err.message).toBe('Username must be a string.');
-      
+
       return ParseUser.logIn('username', {});
     }).then(null, (err) => {
       expect(err.code).toBe(ParseError.OTHER_CAUSE);
       expect(err.message).toBe('Password must be a string.');
-      
+
       done();
     });
   });
@@ -279,6 +279,36 @@ describe('ParseUser', () => {
     });
 
     ParseUser.become('123abc').then((u) => {
+      expect(u.id).toBe('uid3');
+      expect(u.isCurrent()).toBe(true);
+      expect(u.existed()).toBe(true);
+      done();
+    });
+  });
+
+  it('can hydrate a user with pre-fetched user details', (done) => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('GET');
+        expect(path).toBe('users/me');
+        expect(options.sessionToken).toBe('123abc');
+
+        return ParsePromise.as({
+          objectId: 'uid3',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+
+    ParseUser.hydrate({
+        objectId: 'uid3',
+        username: 'username',
+        sessionToken: '123abc'
+    }).then((u) => {
       expect(u.id).toBe('uid3');
       expect(u.isCurrent()).toBe(true);
       expect(u.existed()).toBe(true);

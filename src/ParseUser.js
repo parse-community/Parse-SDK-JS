@@ -639,6 +639,23 @@ export default class ParseUser extends ParseObject {
     return controller.become(becomeOptions)._thenRunCallbacks(options);
   }
 
+  static hydrate(userDetails, options) {
+    if (!canUseCurrentUser) {
+      throw new Error(
+        'It is not memory-safe to become a user in a server environment'
+      );
+    }
+    options = options || {};
+
+    var becomeOptions = userDetails;
+    if (options.hasOwnProperty('useMasterKey')) {
+      becomeOptions.useMasterKey = options.useMasterKey;
+    }
+
+    var controller = CoreManager.getUserController();
+    return controller.hydrate(becomeOptions)._thenRunCallbacks(options);
+  }
+
   static logInWith(provider, options) {
     return ParseUser._logInWith(provider, options);
   }
@@ -952,6 +969,13 @@ var DefaultController = {
       user._setExisted(true);
       return DefaultController.setCurrentUser(user);
     });
+  },
+
+  hydrate(userDetails) {
+    var user = new ParseUser();
+    user._finishFetch(userDetails);
+    user._setExisted(true);
+    return DefaultController.setCurrentUser(user);
   },
 
   logOut(): ParsePromise {
