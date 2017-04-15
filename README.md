@@ -4,7 +4,7 @@
 [![Npm Version][npm-svg]][npm-link]
 [![License][license-svg]][license-link]
 
-A library that gives you access to the powerful Parse cloud platform from your JavaScript app. For more information on Parse and its features, see [the website](https://parse.com) or [the JavaScript guide](https://parseplatform.github.io/docs/js/guide/).
+A library that gives you access to the powerful Parse cloud platform from your JavaScript app. For more information on Parse and its features, see [the website](http://parseplatform.org) or [the JavaScript guide](https://docs.parseplatform.org/js/guide/).
 
 ## Getting Started
 
