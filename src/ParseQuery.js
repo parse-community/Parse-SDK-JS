@@ -57,7 +57,7 @@ function handleSelectResult(data: any, select: Array<string>){
     if (!hasSubObjectSelect && !data.hasOwnProperty(field)){
       // this field was selected, but is missing from the retrieved data
       data[field] = undefined
-    } else if(hasSubObjectSelect){
+    } else if (hasSubObjectSelect) {
       // this field references a sub-object,
       // so we need to walk down the path components 
       let pathComponents = field.split(".");
@@ -66,14 +66,14 @@ function handleSelectResult(data: any, select: Array<string>){
 
       pathComponents.forEach((component, index, arr) => {
         // add keys if the expected data is missing
-        if(!obj[component]){
+        if (!obj[component]) {
           obj[component] = (index == arr.length-1) ? undefined : {};
         }
         obj = obj[component];
 
         //add this path component to the server mask so we can fill it in later if needed
-        if(index < arr.length-1){
-          if(!serverMask[component]){
+        if (index < arr.length-1) {
+          if (!serverMask[component]) {
             serverMask[component] = {};
           }
         }
@@ -81,7 +81,7 @@ function handleSelectResult(data: any, select: Array<string>){
     }
   });
 
-  if(Object.keys(serverDataMask).length > 0){
+  if (Object.keys(serverDataMask).length > 0) {
     // When selecting from sub-objects, we don't want to blow away the missing
     // information that we may have retrieved before. We've already added any
     // missing selected keys to sub-objects, but we still need to add in the
@@ -91,14 +91,14 @@ function handleSelectResult(data: any, select: Array<string>){
 
     function copyMissingDataWithMask(src, dest, mask, copyThisLevel){
       //copy missing elements at this level
-      if(copyThisLevel){
-        for (var key in src){
-          if(src.hasOwnProperty(key) && !dest.hasOwnProperty(key)){
+      if (copyThisLevel) {
+        for (var key in src) {
+          if (src.hasOwnProperty(key) && !dest.hasOwnProperty(key)) {
             dest[key] = src[key]
           }
         }
       }
-      for (var key in mask){
+      for (var key in mask) {
         //traverse into objects as needed
         copyMissingDataWithMask(src[key], dest[key], mask[key], true);
       }
@@ -355,7 +355,7 @@ export default class ParseQuery {
         // Make sure the data object contains keys for all objects that
         // have been requested with a select, so that our cached state
         // updates correctly.
-        if(select){
+        if (select) {
           handleSelectResult(data, select);
         }
         
@@ -463,7 +463,7 @@ export default class ParseQuery {
       // Make sure the data object contains keys for all objects that
       // have been requested with a select, so that our cached state
       // updates correctly.
-      if(select){
+      if (select) {
         handleSelectResult(objects[0], select);
       }
 
