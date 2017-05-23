@@ -98,7 +98,11 @@ module.exports = Storage;
 if (process.env.PARSE_BUILD === 'react-native') {
   CoreManager.setStorageController(require('./StorageController.react-native'));
 } else if (process.env.PARSE_BUILD === 'browser') {
-  CoreManager.setStorageController(require('./StorageController.browser'));
+  if (!self.localStorage && self.asyncLocalStorage) {
+    CoreManager.setStorageController(require('./StorageController.browser-asyncLocalStorage'));
+  } else {
+    CoreManager.setStorageController(require('./StorageController.browser'));
+  }
 } else {
   CoreManager.setStorageController(require('./StorageController.default'));
 }
