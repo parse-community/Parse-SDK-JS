@@ -243,6 +243,7 @@ describe('Geo Point', () => {
     const point3 = new Parse.GeoPoint(20, 20);
     const obj1 = new Parse.Object('TestObject', {location: point1});
     const obj2 = new Parse.Object('TestObject', {location: point2});
+    const obj3 = new Parse.Object('TestObject', {location: point3});
     Parse.Object.saveAll([obj1, obj2, obj3]).then(() => {
       const points = [
         new Parse.GeoPoint(0, 0),
