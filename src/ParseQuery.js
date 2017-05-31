@@ -59,7 +59,7 @@ function handleSelectResult(data: any, select: Array<string>){
       data[field] = undefined
     } else if (hasSubObjectSelect) {
       // this field references a sub-object,
-      // so we need to walk down the path components 
+      // so we need to walk down the path components
       let pathComponents = field.split(".");
       var obj = data;
       var serverMask = serverDataMask;
@@ -358,7 +358,7 @@ export default class ParseQuery {
         if (select) {
           handleSelectResult(data, select);
         }
-        
+
         return ParseObject.fromJSON(data, !select);
       });
     })._thenRunCallbacks(options);
@@ -926,6 +926,19 @@ export default class ParseQuery {
     }
     this._addCondition(key, '$within', { '$box': [ southwest, northeast ] });
     return this;
+  }
+
+  /**
+   * Adds a constraint to the query that requires a particular key's
+   * coordinates be contained within a given polygon.
+   *
+   * @method withinPolygon
+   * @param {String} key The key to be constrained.
+   * @param {Array} array of geopoints
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  withinPolygon(key: string, points: Array): ParseQuery {
+    return this._addCondition(key, '$geoWithin', { '$polygon': points });
   }
 
   /** Query Orderings **/
