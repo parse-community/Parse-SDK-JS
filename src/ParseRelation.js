@@ -86,7 +86,7 @@ export default class ParseRelation {
     }
     parent.set(this.key, change);
     this.targetClassName = change._targetClassName;
-    return parent;
+    return this.parent;
   }
 
   /**
