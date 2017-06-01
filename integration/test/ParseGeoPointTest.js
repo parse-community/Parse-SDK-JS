@@ -237,13 +237,13 @@ describe('Geo Point', () => {
     });
   });
 
-  it('supports withinPolygon', (done) => {
-    const point1 = new Parse.GeoPoint(1.5, 1.5);
-    const point2 = new Parse.GeoPoint(2, 8);
-    const point3 = new Parse.GeoPoint(20, 20);
-    const obj1 = new Parse.Object('TestObject', {location: point1});
-    const obj2 = new Parse.Object('TestObject', {location: point2});
-    const obj3 = new Parse.Object('TestObject', {location: point3});
+  it('supports withinPolygon open path', (done) => {
+    const inbound = new Parse.GeoPoint(1.5, 1.5);
+    const onbound = new Parse.GeoPoint(10, 10);
+    const outbound = new Parse.GeoPoint(20, 20);
+    const obj1 = new TestObject({location: inbound});
+    const obj2 = new TestObject({location: onbound});
+    const obj3 = new TestObject({location: outbound});
     Parse.Object.saveAll([obj1, obj2, obj3]).then(() => {
       const points = [
         new Parse.GeoPoint(0, 0),
@@ -260,15 +260,65 @@ describe('Geo Point', () => {
     });
   });
 
-  it('invalid input withinPolygon', (done) => {
+  it('supports withinPolygon closed path', (done) => {
+    const inbound = new Parse.GeoPoint(1.5, 1.5);
+    const onbound = new Parse.GeoPoint(10, 10);
+    const outbound = new Parse.GeoPoint(20, 20);
+    const obj1 = new TestObject({location: inbound});
+    const obj2 = new TestObject({location: onbound});
+    const obj3 = new TestObject({location: outbound});
+    Parse.Object.saveAll([obj1, obj2, obj3]).then(() => {
+      const points = [
+        new Parse.GeoPoint(0, 0),
+        new Parse.GeoPoint(0, 10),
+        new Parse.GeoPoint(10, 10),
+        new Parse.GeoPoint(10, 0),
+        new Parse.GeoPoint(0, 0)
+      ];
+      const query = new Parse.Query(TestObject);
+      query.withinPolygon('location', points);
+      return query.find();
+    }).then((results) => {
+      assert.equal(results.length, 2);
+      done();
+    });
+  });
+
+  it('non array withinPolygon', (done) => {
     const point = new Parse.GeoPoint(1.5, 1.5);
-    const obj = new Parse.Object('TestObject', {location: point});
+    const obj = new TestObject({location: point});
     obj.save().then(() => {
       const query = new Parse.Query(TestObject);
       query.withinPolygon('location', 1234);
       return query.find();
-    }).fail((e) => {
-      assert.equal(e.code, Parse.Error.INVALID_JSON);
+    }).fail((err) => {
+      assert.equal(err.code, Parse.Error.INVALID_JSON);
+      done();
+    });
+  });
+
+  it('invalid array withinPolygon', (done) => {
+    const point = new Parse.GeoPoint(1.5, 1.5);
+    const obj = new TestObject({location: point});
+    obj.save().then(() => {
+      const query = new Parse.Query(TestObject);
+      query.withinPolygon('location', [obj]);
+      return query.find();
+    }).fail((err) => {
+      assert.equal(err.code, Parse.Error.INVALID_JSON);
+      done();
+    });
+  });
+
+  it('minimum 3 points withinPolygon', (done) => {
+    const point = new Parse.GeoPoint(1.5, 1.5);
+    const obj = new TestObject({location: point});
+    obj.save().then(() => {
+      const query = new Parse.Query(TestObject);
+      query.withinPolygon('location', []);
+      return query.find();
+    }).fail((err) => {
+      assert.equal(err.code, Parse.Error.INVALID_JSON);
       done();
     });
   });
