@@ -29,7 +29,7 @@ var mockRNStorageInterface = {
   },
 };
 
-jest.mock('react-native/Libraries/react-native/react-native.js', () => {
+jest.mock('react-native/Libraries/react-native/react-native-implementation', () => {
   return {AsyncStorage: mockRNStorageInterface};
 }, {virtual: true});
 
