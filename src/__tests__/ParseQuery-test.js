@@ -264,6 +264,33 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can generate contains-all-starting-with queries', () => {
+    var q = new ParseQuery('Item');
+    q.containsAllStartingWith('tags', ['ho', 'out']);
+    expect(q.toJSON()).toEqual({
+      where: {
+        tags: {
+          $all: [
+            {$regex: '^\\Qho\\E'},
+            {$regex: '^\\Qout\\E'}
+          ]
+        }
+      }
+    });
+
+    q.containsAllStartingWith('tags', ['sal', 'ne']);
+    expect(q.toJSON()).toEqual({
+      where: {
+        tags: {
+          $all: [
+            {$regex: '^\\Qsal\\E'},
+            {$regex: '^\\Qne\\E'}
+          ]
+        }
+      }
+    });
+  });
+
   it('can generate exists queries', () => {
     var q = new ParseQuery('Item');
     q.exists('name');
