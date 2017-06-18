@@ -63,14 +63,14 @@
   "jest": {
     "automock": true,
     "collectCoverage": true,
-    "testPathDirs": [
+    "roots": [
       "src/"
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/test_helpers/"
     ],
-    "scriptPreprocessor": "babel-jest.js",
-    "setupTestFrameworkScriptFile": "setup-jest.js"
+    "transform": {".*": "./babel-jest.js"},
+    "setupTestFrameworkScriptFile": "./setup-jest.js"
   }
 }
