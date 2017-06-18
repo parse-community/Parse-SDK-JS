@@ -34,6 +34,8 @@ For React Native applications, include `'parse/react-native'`:
 var Parse = require('parse/react-native');
 ```
 
+> As of `v1.9.3`, Parse-SDK-JS supports React Native 0.43+. Please use `v1.9.2` for previous versions of React Native.
+
 ## License
 
 ```
@@ -41,11 +43,11 @@ Copyright (c) 2015-present, Parse, LLC.
 All rights reserved.
 
 This source code is licensed under the BSD-style license found in the
-LICENSE file in the root directory of this source tree. An additional grant 
+LICENSE file in the root directory of this source tree. An additional grant
 of patent rights can be found in the PATENTS file in the same directory.
 ```
 
-As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code. 
+As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code.
 
  [build-status-svg]: https://travis-ci.org/parse-community/Parse-SDK-JS.svg?branch=master
  [build-status-link]: https://travis-ci.org/parse-community/Parse-SDK-JS
