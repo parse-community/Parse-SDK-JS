@@ -10,7 +10,7 @@ A library that gives you access to the powerful Parse cloud platform from your J
 ## Getting Started
 
 The easiest way to integrate the Parse SDK into your JavaScript project is through the [npm module](https://npmjs.org/parse).
-However, if you want to use a pre-compiled file, you can fetch it from [npmcdn](https://npmcdn.com). The development version is available at [https://npmcdn.com/parse/dist/parse.js](https://npmcdn.com/parse/dist/parse.js), and the minified production version is at [https://npmcdn.com/parse/dist/parse.min.js](https://npmcdn.com/parse/dist/parse.min.js).
+However, if you want to use a pre-compiled file, you can fetch it from [unpkg](https://unpkg.com). The development version is available at [https://unpkg.com/parse/dist/parse.js](https://unpkg.com/parse/dist/parse.js), and the minified production version is at [https://unpkg.com/parse/dist/parse.min.js](https://unpkg.com/parse/dist/parse.min.js).
 
 ### Using Parse on Different Platforms
 
