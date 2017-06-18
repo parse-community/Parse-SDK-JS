@@ -19,6 +19,10 @@ export default class ParseError {
     this.code = code;
     this.message = message;
   }
+  
+  toString() {
+    return 'ParseError: ' + this.code + ' ' + this.message;
+  }
 }
 
 /**
