@@ -196,6 +196,12 @@ const DefaultLiveQueryController = {
         subscription.on('delete', (object) => {
           subscriptionWrap.emit('delete', object);
         });
+        subscription.on('close', (object) => {
+          subscriptionWrap.emit('close', object);
+        });
+        subscription.on('error', (object) => {
+          subscriptionWrap.emit('error', object);
+        });
 
         this.resolve();
       });
