@@ -655,7 +655,7 @@ export default class ParseUser extends ParseObject {
   static logOut() {
     if (!canUseCurrentUser) {
       throw new Error(
-        'There is no current user user on a node.js server environment.'
+        'There is no current user on a node.js server environment.'
       );
     }
 
