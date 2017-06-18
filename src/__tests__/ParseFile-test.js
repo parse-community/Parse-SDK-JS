@@ -80,7 +80,7 @@ describe('ParseFile', () => {
 
   it('returns secure url when specified', () => {
     var file = new ParseFile('parse.txt', { base64: 'ParseA==' });
-    file.save().then(function(result) {
+    return file.save().then(function(result) {
       expect(result).toBe(file);
       expect(result.url({ forceSecure: true }))
         .toBe('https://files.parsetfss.com/a/parse.txt');
@@ -96,7 +96,7 @@ describe('ParseFile', () => {
     var file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     expect(file.name()).toBe('parse.txt');
     expect(file.url()).toBe(undefined);
-    file.save().then(function(result) {
+    return file.save().then(function(result) {
       expect(result).toBe(file);
       expect(result.name()).toBe('parse.txt');
       expect(result.url()).toBe('http://files.parsetfss.com/a/parse.txt');
@@ -105,7 +105,7 @@ describe('ParseFile', () => {
 
   it('generates a JSON representation', () => {
     var file = new ParseFile('parse.txt', { base64: 'ParseA==' });
-    file.save().then(function(result) {
+    return file.save().then(function(result) {
       expect(result.toJSON()).toEqual({
         __type: 'File',
         name: 'parse.txt',
@@ -184,7 +184,7 @@ describe('FileController', () => {
 
   it('saves files created with bytes', () => {
     var file = new ParseFile('parse.txt', [61, 170, 236, 120]);
-    file.save().then(function(f) {
+    return file.save().then(function(f) {
       expect(f).toBe(file);
       expect(f.name()).toBe('parse.txt');
       expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
