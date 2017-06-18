@@ -1183,8 +1183,8 @@ describe('Parse Object', () => {
     }).then(() => {
       assert.equal(user.createdAt.getTime(), sameUser.createdAt.getTime());
       assert.equal(user.updatedAt.getTime(), sameUser.updatedAt.getTime());
-      done();
-    });
+      return Parse.User.logOut().then(() => { done(); }, () => { done(); });
+    }).catch(done.fail);
   });
 
   it('can fetchAllIfNeeded', (done) => {

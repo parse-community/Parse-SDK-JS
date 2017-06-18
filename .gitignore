@@ -7,3 +7,5 @@ test_output
 *~
 .DS_Store
 .idea/
+integration/test_logs
+

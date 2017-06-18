@@ -11,10 +11,10 @@ describe('Geo Box', () => {
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
   });
-
-  beforeEach((done) => {
+    
+  beforeEach((done) => {  
     clear().then(() => {
-      done();
+      Parse.User.logOut().then(() => { done() }, () => { done() });
     });
   });
 

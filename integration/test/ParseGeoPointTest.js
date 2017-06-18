@@ -9,7 +9,7 @@ const TestObject = Parse.Object.extend('TestObject');
 const TestPoint = Parse.Object.extend('TestPoint');
 
 describe('Geo Point', () => {
-  before(() => {
+  before((done) => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
@@ -28,8 +28,8 @@ describe('Geo Point', () => {
 
       return Parse.Object.saveAll([sacramento, honolulu, sf]);
     }).then(() => {
-      done();
-    });
+      return Parse.User.logOut();
+    }).then(() => { done() }, () => { done() });
   });
 
   it('can save geo points', (done) => {

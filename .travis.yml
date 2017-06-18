@@ -6,6 +6,7 @@ node_js:
 branches:
   only:
     - master
+    - /^greenkeeper/.*$/
 
 env:
   - CXX=g++-4.8

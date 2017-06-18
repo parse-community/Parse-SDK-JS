@@ -30,7 +30,7 @@ var Parse = {
    * @static
    */
   initialize(applicationId: string, javaScriptKey: string) {
-    if (process.env.PARSE_BUILD === 'browser' && CoreManager.get('IS_NODE')) {
+    if (process.env.PARSE_BUILD === 'browser' && CoreManager.get('IS_NODE') && !process.env.SERVER_RENDERING) {
       console.log(
         'It looks like you\'re using the browser version of the SDK in a ' +
         'node.js environment. You should require(\'parse/node\') instead.'
