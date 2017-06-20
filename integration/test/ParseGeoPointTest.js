@@ -236,4 +236,61 @@ describe('Geo Point', () => {
       done();
     });
   });
+
+  it('supports withinPolygon open path', (done) => {
+    const points = [
+      new Parse.GeoPoint(37.85, -122.33),
+      new Parse.GeoPoint(37.85, -122.90),
+      new Parse.GeoPoint(37.68, -122.90),
+      new Parse.GeoPoint(37.68, -122.33)
+    ];
+    const query = new Parse.Query(TestPoint);
+    query.withinPolygon('location', points);
+    return query.find().then((results) => {
+      assert.equal(results.length, 1);
+      done();
+    });
+  });
+
+  it('supports withinPolygon closed path', (done) => {
+     const points = [
+      new Parse.GeoPoint(38.52, -121.50),
+      new Parse.GeoPoint(37.75, -157.93),
+      new Parse.GeoPoint(37.578072, -121.379914),
+      new Parse.GeoPoint(38.52, -121.50)
+    ];
+    const query = new Parse.Query(TestPoint);
+    query.withinPolygon('location', points);
+    return query.find().then((results) => {
+      assert.equal(results.length, 2);
+      done();
+    });
+  });
+
+  it('non array withinPolygon', (done) => {
+    const query = new Parse.Query(TestPoint);
+    query.withinPolygon('location', 1234);
+    return query.find().fail((err) => {
+      assert.equal(err.code, Parse.Error.INVALID_JSON);
+      done();
+    });
+  });
+
+  it('invalid array withinPolygon', (done) => {
+    const query = new Parse.Query(TestPoint);
+    query.withinPolygon('location', [1234]);
+    return query.find().fail((err) => {
+      assert.equal(err.code, Parse.Error.INVALID_JSON);
+      done();
+    });
+  });
+
+  it('minimum 3 points withinPolygon', (done) => {
+    const query = new Parse.Query(TestPoint);
+    query.withinPolygon('location', []);
+    return query.find().fail((err) => {
+      assert.equal(err.code, Parse.Error.INTERNAL_SERVER_ERROR);
+      done();
+    });
+  });
 });
