@@ -1555,4 +1555,33 @@ describe('ParseQuery', () => {
       done.fail(error);
     });
   });
+
+  it('restores queries from json representation', () => {
+    var q = new ParseQuery('Item');
+
+    q.include('manufacturer');
+    q.select('inStock', 'lastPurchase');
+    q.limit(10);
+    q.ascending(['a', 'b', 'c']);
+    q.skip(4);
+    q.equalTo('size', 'medium');
+
+    var json = q.toJSON();
+
+    var newQuery = new ParseQuery('Item');
+
+    newQuery.fromJSON(json);
+
+    expect(newQuery.toJSON()).toEqual({
+      include: 'manufacturer',
+      keys: 'inStock,lastPurchase',
+      limit: 10,
+      order: 'a,b,c',
+      skip: 4,
+      where: {
+        size: 'medium'
+      }
+    });
+
+  });
 });
