@@ -1557,7 +1557,7 @@ describe('ParseQuery', () => {
   });
 
   it('restores queries from json representation', () => {
-    var q = new ParseQuery('Item');
+    const q = new ParseQuery('Item');
 
     q.include('manufacturer');
     q.select('inStock', 'lastPurchase');
@@ -1566,11 +1566,11 @@ describe('ParseQuery', () => {
     q.skip(4);
     q.equalTo('size', 'medium');
 
-    var json = q.toJSON();
+    const json = q.toJSON();
 
-    var newQuery = new ParseQuery('Item');
+    const newQuery = ParseQuery.fromJSON('Item', json);
 
-    newQuery.fromJSON(json);
+    expect(newQuery.className).toBe('Item');
 
     expect(newQuery.toJSON()).toEqual({
       include: 'manufacturer',

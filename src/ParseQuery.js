@@ -269,7 +269,7 @@ export default class ParseQuery {
    * query.equalTo(key: value);
    * query.limit(100);
    * ... (others queries)
-   * Create JSON representaion of Query Object
+   * Create JSON representation of Query Object
    * var jsonFromServer = query.fromJSON();
    *
    * On client side getting query:
@@ -278,13 +278,11 @@ export default class ParseQuery {
    *
    * and continue to query...
    * query.skip(100).find().then(...);
-   * @method fromJSON
-   * @namespace Parse.Query.fromJSON
+   * @method withJSON
    * @param {QueryJSON} json from Parse.Query.toJSON() method
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  fromJSON(json): ParseQuery {
-    var key;
+  withJSON(json: QueryJSON): ParseQuery {
 
     if (json.where) {
       this._where = json.where;
@@ -310,7 +308,7 @@ export default class ParseQuery {
       this._order = json.order.split(",");
     }
 
-    for (key in json) if (json.hasOwnProperty(key))  {
+    for (let key in json) if (json.hasOwnProperty(key))  {
       if (["where", "include", "keys", "limit", "skip", "order"].indexOf(key) === -1) {
         this._extraOptions[key] = json[key];
       }
@@ -318,6 +316,18 @@ export default class ParseQuery {
 
     return this;
 
+  }
+
+    /**
+     * Static method to restore Parse.Query by json representation
+     * Internally calling Parse.Query.withJSON
+     * @param {String} className
+     * @param {QueryJSON} json from Parse.Query.toJSON() method
+     * @returns {Parse.Query} new created query
+     */
+  static fromJSON(className: string, json: QueryJSON): ParseQuery {
+    const query = new ParseQuery(className);
+    return query.withJSON(json);
   }
 
   /**
