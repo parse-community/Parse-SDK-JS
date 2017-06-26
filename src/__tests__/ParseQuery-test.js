@@ -1555,4 +1555,33 @@ describe('ParseQuery', () => {
       done.fail(error);
     });
   });
+
+  it('restores queries from json representation', () => {
+    const q = new ParseQuery('Item');
+
+    q.include('manufacturer');
+    q.select('inStock', 'lastPurchase');
+    q.limit(10);
+    q.ascending(['a', 'b', 'c']);
+    q.skip(4);
+    q.equalTo('size', 'medium');
+
+    const json = q.toJSON();
+
+    const newQuery = ParseQuery.fromJSON('Item', json);
+
+    expect(newQuery.className).toBe('Item');
+
+    expect(newQuery.toJSON()).toEqual({
+      include: 'manufacturer',
+      keys: 'inStock,lastPurchase',
+      limit: 10,
+      order: 'a,b,c',
+      skip: 4,
+      where: {
+        size: 'medium'
+      }
+    });
+
+  });
 });

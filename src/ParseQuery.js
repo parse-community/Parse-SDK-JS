@@ -262,6 +262,75 @@ export default class ParseQuery {
   }
 
   /**
+   * Return a query with conditions from json, can be useful to send query from server side to client
+   * Not static, all query conditions was set before calling this method will be deleted.
+   * For example on the server side we have
+   * var query = new Parse.Query("className");
+   * query.equalTo(key: value);
+   * query.limit(100);
+   * ... (others queries)
+   * Create JSON representation of Query Object
+   * var jsonFromServer = query.fromJSON();
+   *
+   * On client side getting query:
+   * var query = new Parse.Query("className");
+   * query.fromJSON(jsonFromServer);
+   *
+   * and continue to query...
+   * query.skip(100).find().then(...);
+   * @method withJSON
+   * @param {QueryJSON} json from Parse.Query.toJSON() method
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  withJSON(json: QueryJSON): ParseQuery {
+
+    if (json.where) {
+      this._where = json.where;
+    }
+
+    if (json.include) {
+      this._include = json.include.split(",");
+    }
+
+    if (json.keys) {
+      this._select = json.keys.split(",");
+    }
+
+    if (json.limit) {
+      this._limit  = json.limit;
+    }
+
+    if (json.skip) {
+      this._skip = json.skip;
+    }
+
+    if (json.order) {
+      this._order = json.order.split(",");
+    }
+
+    for (let key in json) if (json.hasOwnProperty(key))  {
+      if (["where", "include", "keys", "limit", "skip", "order"].indexOf(key) === -1) {
+        this._extraOptions[key] = json[key];
+      }
+    }
+
+    return this;
+
+  }
+
+    /**
+     * Static method to restore Parse.Query by json representation
+     * Internally calling Parse.Query.withJSON
+     * @param {String} className
+     * @param {QueryJSON} json from Parse.Query.toJSON() method
+     * @returns {Parse.Query} new created query
+     */
+  static fromJSON(className: string, json: QueryJSON): ParseQuery {
+    const query = new ParseQuery(className);
+    return query.withJSON(json);
+  }
+
+  /**
    * Constructs a Parse.Object whose id is already known by fetching data from
    * the server.  Either options.success or options.error is called when the
    * find completes.
