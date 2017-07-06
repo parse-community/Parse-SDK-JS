@@ -12,6 +12,7 @@
 import ParseACL from './ParseACL';
 import ParseFile from './ParseFile';
 import ParseGeoPoint from './ParseGeoPoint';
+import ParsePolygon from './ParsePolygon';
 import ParseObject from './ParseObject';
 import { opFromJSON } from './ParseOp';
 import ParseRelation from './ParseRelation';
@@ -53,6 +54,9 @@ export default function decode(value: any): any {
       latitude: value.latitude,
       longitude: value.longitude
     });
+  }
+  if (value.__type === 'Polygon') {
+    return new ParsePolygon(value.coordinates);
   }
   var copy = {};
   for (var k in value) {

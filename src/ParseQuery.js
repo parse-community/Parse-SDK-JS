@@ -13,6 +13,7 @@ import CoreManager from './CoreManager';
 import encode from './encode';
 import ParseError from './ParseError';
 import ParseGeoPoint from './ParseGeoPoint';
+import ParsePolygon from './ParsePolygon';
 import ParseObject from './ParseObject';
 import ParsePromise from './ParsePromise';
 
@@ -1011,6 +1012,19 @@ export default class ParseQuery {
    */
   withinPolygon(key: string, points: Array): ParseQuery {
     return this._addCondition(key, '$geoWithin', { '$polygon': points });
+  }
+
+  /**
+   * Add a constraint to the query that requires a particular key's
+   * coordinates that contains a ParseGeoPoint
+   *
+   * @method polygonContains
+   * @param {String} key The key to be constrained.
+   * @param {Parse.GeoPoint} GeoPoint
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  polygonContains(key: string, point: ParseGeoPoint): ParseQuery {
+    return this._addCondition(key, '$geoIntersects', { '$point': point });
   }
 
   /** Query Orderings **/
