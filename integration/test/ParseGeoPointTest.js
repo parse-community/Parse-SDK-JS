@@ -12,6 +12,7 @@ describe('Geo Point', () => {
   before((done) => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
+    Parse.CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1);
     Parse.Storage._clear();
     clear().then(() => {
       let sacramento = new TestPoint();
