@@ -289,9 +289,10 @@ describe('Geo Point', () => {
   it('minimum 3 points withinPolygon', (done) => {
     const query = new Parse.Query(TestPoint);
     query.withinPolygon('location', []);
-    return query.find().then(done.fail, (err) => {
+    query.find().then(done.fail, (err) => {
       assert.equal(err.code, Parse.Error.INTERNAL_SERVER_ERROR);
       done();
-    });
+    })
+    .fail(done.fail);
   });
 });
