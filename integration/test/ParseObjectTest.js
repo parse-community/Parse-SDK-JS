@@ -816,12 +816,14 @@ describe('Parse Object', () => {
 
     child.save().then(() => {
       parent.add('children', child);
+      parent.addAll('children', [child, child]);
       return parent.save();
     }).then(() => {
       let query = new Parse.Query('Person');
       return query.get(parent.id);
     }).then((p) => {
       assert.equal(p.get('children')[0].id, child.id);
+      assert.equal(p.get('children').length, 3);
       done();
     });
   });
