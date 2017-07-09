@@ -736,6 +736,17 @@ export default class ParseObject {
   }
 
   /**
+   * Atomically add the objects to the end of the array associated with a given
+   * key.
+   * @method addAll
+   * @param attr {String} The key.
+   * @param items {[]} The items to add.
+   */
+  addAll(attr: string, items: Array<mixed>): ParseObject | boolean {
+    return this.set(attr, new AddOp(items));
+  }
+
+  /**
    * Atomically add an object to the array associated with a given key, only
    * if it is not already present in the array. The position of the insert is
    * not guaranteed.
@@ -749,6 +760,19 @@ export default class ParseObject {
   }
 
   /**
+   * Atomically add the objects to the array associated with a given key, only
+   * if it is not already present in the array. The position of the insert is
+   * not guaranteed.
+   *
+   * @method addAllUnique
+   * @param attr {String} The key.
+   * @param items {[]} The objects to add.
+   */
+  addAllUnique(attr: string, items: Array<mixed>): ParseObject | boolean {
+    return this.set(attr, new AddUniqueOp(items));
+  }
+
+  /**
    * Atomically remove all instances of an object from the array associated
    * with a given key.
    *
@@ -758,6 +782,18 @@ export default class ParseObject {
    */
   remove(attr: string, item: mixed): ParseObject | boolean {
     return this.set(attr, new RemoveOp([item]));
+  }
+
+  /**
+   * Atomically remove all instances of the objects from the array associated
+   * with a given key.
+   *
+   * @method removeAll
+   * @param attr {String} The key.
+   * @param items {[]} The object to remove.
+   */
+  removeAll(attr: string, items: Array<mixed>): ParseObject | boolean {
+    return this.set(attr, new RemoveOp(items));
   }
 
   /**
