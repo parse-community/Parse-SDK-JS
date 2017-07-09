@@ -405,12 +405,13 @@ describe('ParseObject', () => {
   it('can add elements to an array field', () => {
     var o = new ParseObject('Schedule');
     o.add('available', 'Monday');
-    o.add('available', 'Wednesday');
-    expect(o.get('available')).toEqual(['Monday', 'Wednesday']);
+    o.addAll('available', ['Wednesday', 'Friday']);
+    expect(o.get('available')).toEqual(['Monday', 'Wednesday', 'Friday']);
 
-    o.set('colors', ['red', 'green']);
-    o.add('colors', 'blue');
-    expect(o.get('colors')).toEqual(['red', 'green', 'blue']);
+    o.set('colors', ['red']);
+    o.add('colors', 'green');
+    o.addAll('colors', ['blue', 'alpha']);
+    expect(o.get('colors')).toEqual(['red', 'green', 'blue', 'alpha']);
 
     o._handleSaveResponse({
       objectId: 'S1',
@@ -419,7 +420,7 @@ describe('ParseObject', () => {
     });
 
     o.addUnique('available', 'Thursday');
-    o.addUnique('available', 'Monday');
+    o.addAllUnique('available', ['Monday']);
     expect(o.get('available')).toEqual(['Monday', 'Wednesday', 'Thursday']);
   });
 
@@ -446,7 +447,7 @@ describe('ParseObject', () => {
     var o = new ParseObject('Schedule');
     o.set('available', ['Monday', 'Tuesday']);
     o.remove('available', 'Tuesday');
-    o.remove('available', 'Saturday');
+    o.removeAll('available', ['Saturday']);
     expect(o.get('available')).toEqual(['Monday']);
 
     o._handleSaveResponse({
@@ -455,7 +456,7 @@ describe('ParseObject', () => {
     });
 
     o.remove('available', 'Monday');
-    o.remove('available', 'Tuesday');
+    o.removeAll('available', ['Tuesday']);
     expect(o.get('available')).toEqual([]);
   });
 
