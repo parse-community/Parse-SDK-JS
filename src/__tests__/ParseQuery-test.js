@@ -1338,7 +1338,7 @@ describe('ParseQuery', () => {
   });
 
 
-  
+
   it('overrides cached object with query results', (done) => {
     jest.dontMock("../ParseObject");
     jest.resetModules();
@@ -1347,12 +1347,12 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      other: 'other', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      other: 'other',
+      className:"Thing",
       createdAt: '2017-01-10T10:00:00Z'
     };
 
@@ -1368,10 +1368,10 @@ describe('ParseQuery', () => {
     var testObject;
     q.find().then((results) => {
       testObject = results[0];
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other");
-      
+
       objectToReturn = { objectId: 'T01', name: 'Name2'};
       var q2 = new ParseQuery("Thing");
       return q2.find();
@@ -1393,13 +1393,13 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      other: 'other', 
-      tbd: 'exists', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      other: 'other',
+      tbd: 'exists',
+      className:"Thing",
       createdAt: '2017-01-10T10:00:00Z',
       subObject: {key1:"value", key2:"value2", key3:"thisWillGoAway"}
     };
@@ -1416,14 +1416,14 @@ describe('ParseQuery', () => {
     var testObject;
     return q.find().then((results) => {
       testObject = results[0];
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other");
       expect(testObject.has("tbd")).toBe(true);
       expect(testObject.get("subObject").key1).toBe("value");
       expect(testObject.get("subObject").key2).toBe("value2");
       expect(testObject.get("subObject").key3).toBe("thisWillGoAway");
-      
+
       var q2 = new ParseQuery("Thing");
       q2.select("other", "tbd", "subObject.key1", "subObject.key3");
       objectToReturn = { objectId: 'T01', other: 'other2', subObject:{key1:"updatedValue"}};
@@ -1442,7 +1442,7 @@ describe('ParseQuery', () => {
       expect(testObject.has("tbd")).toBe(false);
       expect(testObject.get("subObject").key1).toBe("updatedValue");
       expect(testObject.get("subObject").key2).toBe("value2");
-      expect(testObject.get("subObject").key3).toBeUndefined();  
+      expect(testObject.get("subObject").key3).toBeUndefined();
       done();
     }, (error) => {
       done.fail(error);
@@ -1457,12 +1457,12 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      other: 'other', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      other: 'other',
+      className:"Thing",
       createdAt: '2017-01-10T10:00:00Z'
     };
 
@@ -1478,10 +1478,10 @@ describe('ParseQuery', () => {
     var testObject;
     q.first().then((result) => {
       testObject = result;
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other");
-      
+
       objectToReturn = { objectId: 'T01', name: 'Name2'};
       var q2 = new ParseQuery("Thing");
       return q2.first();
@@ -1503,13 +1503,13 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      other: 'other', 
-      tbd: 'exists', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      other: 'other',
+      tbd: 'exists',
+      className:"Thing",
       subObject: {key1:"value", key2:"value2", key3:"thisWillGoAway"},
       createdAt: '2017-01-10T10:00:00Z',
     };
@@ -1526,11 +1526,11 @@ describe('ParseQuery', () => {
     var testObject;
     return q.first().then((result) => {
       testObject = result;
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other");
       expect(testObject.has("tbd")).toBe(true);
-      
+
       var q2 = new ParseQuery("Thing");
       q2.select("other", "tbd", "subObject.key1", "subObject.key3");
       objectToReturn = { objectId: 'T01', other: 'other2', subObject:{key1:"updatedValue"}};
@@ -1546,10 +1546,10 @@ describe('ParseQuery', () => {
     }).then(() => {
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other2");
-      expect(testObject.has("tbd")).toBe(false);  
+      expect(testObject.has("tbd")).toBe(false);
       expect(testObject.get("subObject").key1).toBe("updatedValue");
       expect(testObject.get("subObject").key2).toBe("value2");
-      expect(testObject.get("subObject").key3).toBeUndefined(); 
+      expect(testObject.get("subObject").key3).toBeUndefined();
       done();
     }, (error) => {
       done.fail(error);
@@ -1593,12 +1593,12 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      tbd: 'exists', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      tbd: 'exists',
+      className:"Thing",
       createdAt: '2017-01-10T10:00:00Z'
     };
 
@@ -1615,7 +1615,7 @@ describe('ParseQuery', () => {
     var testObject;
     return q.find().then((results) => {
       testObject = results[0];
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.has("other")).toBe(false);
       expect(testObject.has("subObject")).toBe(false);
@@ -1635,12 +1635,12 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      tbd: 'exists', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      tbd: 'exists',
+      className:"Thing",
       subObject1: {foo:"bar"},
       subObject2: {foo:"bar"},
       subObject3: {foo:"bar"},
@@ -1660,7 +1660,7 @@ describe('ParseQuery', () => {
     var testObject;
     return q.find().then((results) => {
       testObject = results[0];
-      
+
       expect(testObject.has("subObject1")).toBe(true);
       expect(testObject.has("subObject2")).toBe(true);
       expect(testObject.has("subObject3")).toBe(true);
@@ -1675,7 +1675,7 @@ describe('ParseQuery', () => {
       expect(testObject.has("subObject2")).toBe(false); //selected and not returned
       expect(testObject.has("subObject3")).toBe(true); //not selected, so should still be there
       expect(testObject.has("subObject4")).toBe(true); //selected and just added
-      expect(testObject.has("subObject5")).toBe(true); 
+      expect(testObject.has("subObject5")).toBe(true);
       expect(testObject.get("subObject5").subSubObject).toBeDefined();
       expect(testObject.get("subObject5").subSubObject.bar).toBeDefined(); //not selected but a sibiling was, so should still be there
     }).then(() => {
@@ -1683,6 +1683,69 @@ describe('ParseQuery', () => {
     }, (error) => {
       done.fail(error);
     });
+  });
+
+  it('full text search with one parameter', () => {
+    let query = new ParseQuery('Item');
+
+    query.fullTextSearch('size', 'small');
+
+    expect(query.toJSON()).toEqual({
+      where: {
+        size: {
+          $text: {
+            $search: {
+              $term: "small"
+            }
+          }
+        }
+      }
+    });
+  });
+
+  it('full text search with all parameters', () => {
+    let query = new ParseQuery('Item');
+
+    query.fullTextSearch('size', 'medium', 'en', false, true);
+
+    expect(query.toJSON()).toEqual({
+      where: {
+        size: {
+          $text: {
+            $search: {
+              $term: "medium",
+              $language: "en",
+              $caseSensitive: false,
+              $diacriticSensitive: true
+            }
+          }
+        }
+      }
+    });
+
+  });
+
+  it('add the score for the full text search', () => {
+    let query = new ParseQuery('Item');
+
+    query.fullTextSearch('size', 'medium', 'fr');
+    query.sortByTextScore();
+
+    expect(query.toJSON()).toEqual({
+      where: {
+        size: {
+          $text: {
+            $search: {
+              $term: "medium",
+              $language: "fr"
+            }
+          }
+        }
+      },
+      keys : "$score",
+      order : "$score"
+    });
+
   });
 
 });
