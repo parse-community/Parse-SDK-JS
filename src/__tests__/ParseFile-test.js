@@ -81,7 +81,12 @@ describe('ParseFile', () => {
     expect(file._source.base64).toBe('C++/11A0');
     expect(file._source.type).toBe('');
   });
-
+  
+  it('can create files with file uri(react-native)', () => {
+    var file = new ParseFile('parse.txt', {uri:'react-native://test'});
+    expect(file._source.format).toBe('file');
+  });
+  
   it('can create an empty file', () => {
     var file = new ParseFile('parse.txt');
     expect(file.name()).toBe('parse.txt');

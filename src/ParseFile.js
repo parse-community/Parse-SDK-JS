@@ -95,7 +95,7 @@ class ParseFile {
           base64: ParseFile.encodeBase64(data),
           type: specifiedType
         };
-      } else if (typeof File !== 'undefined' && data instanceof File) {
+      } else if ((typeof File !== 'undefined' && data instanceof File) || (data && data.uri !== undefined)) {
         this._source = {
           format: 'file',
           file: data,
