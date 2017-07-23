@@ -423,6 +423,25 @@ describe('ParseObject', () => {
     expect(o.get('available')).toEqual(['Monday', 'Wednesday', 'Thursday']);
   });
 
+  it('can add elements to an array field in batch mode', () => {
+    var o = new ParseObject('Schedule');
+    o.addAll('available', ['Monday', 'Wednesday']);
+    expect(o.get('available')).toEqual(['Monday', 'Wednesday']);
+
+    o.set('colors', ['red']);
+    o.addAll('colors', ['green', 'blue']);
+    expect(o.get('colors')).toEqual(['red', 'green', 'blue']);
+
+    o._handleSaveResponse({
+      objectId: 'S1',
+      available: ['Monday', 'Wednesday'],
+      colors: ['red', 'green', 'blue']
+    });
+
+    o.addAllUnique('available', ['Thursday', 'Monday']);
+    expect(o.get('available').length).toEqual(3);
+  });
+
   it('can remove elements from an array field', () => {
     var o = new ParseObject('Schedule');
     o.set('available', ['Monday', 'Tuesday']);
@@ -437,6 +456,21 @@ describe('ParseObject', () => {
 
     o.remove('available', 'Monday');
     o.remove('available', 'Tuesday');
+    expect(o.get('available')).toEqual([]);
+  });
+
+  it('can remove elements from an array field in batch mode', () => {
+    var o = new ParseObject('Schedule');
+    o.set('available', ['Monday', 'Tuesday']);
+    o.removeAll('available', ['Tuesday', 'Saturday']);
+    expect(o.get('available')).toEqual(['Monday']);
+
+    o._handleSaveResponse({
+      objectId: 'S2',
+      available: ['Monday']
+    });
+
+    o.removeAll('available', ['Monday', 'Tuesday']);
     expect(o.get('available')).toEqual([]);
   });
 
