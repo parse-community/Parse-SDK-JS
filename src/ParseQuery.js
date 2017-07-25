@@ -1013,6 +1013,52 @@ export default class ParseQuery {
     return this._addCondition(key, '$geoWithin', { '$polygon': points });
   }
 
+  /**
+   * Adds a constraint to the query that requires a particular key's
+   * coordinates be contained within the bounds of a given circle.
+   *
+   * @method withinCenterSphereRadians
+   * @param {String} key The key to be constrained.
+   * @param {ParseGeoPoint} point The reference Parse.GeoPoint that is used.
+   * @param {Number} radius The radius of the circle (in radians)
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  withinCenterSphereRadians(key: string, point: ParseGeoPoint, radius: number): ParseQuery {
+    if (!(point instanceof ParseGeoPoint)) {
+      // Try to cast it as a GeoPoint
+      point = new ParseGeoPoint(point);
+    }
+    return this._addCondition(key, '$geoWithin', { '$centerSphere': [ point, radius ] });
+  }
+
+  /**
+   * Adds a constraint to the query that requires a particular key's
+   * coordinates be contained within the bounds of a given circle.
+   *
+   * @method withinCenterSphereMiles
+   * @param {String} key The key to be constrained.
+   * @param {ParseGeoPoint} point The reference Parse.GeoPoint that is used.
+   * @param {Number} radius The radius of the circle (in miles)
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  withinCenterSphereMiles(key: string, point: ParseGeoPoint, radius: number): ParseQuery {
+    return this.withinCenterSphereRadians(key, point, radius / 3958.8)
+  }
+
+  /**
+   * Adds a constraint to the query that requires a particular key's
+   * coordinates be contained within the bounds of a given circle.
+   *
+   * @method withinCenterSphereKilometers
+   * @param {String} key The key to be constrained.
+   * @param {ParseGeoPoint} point The reference Parse.GeoPoint that is used.
+   * @param {Number} radius The radius of the circle (in kilometers)
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  withinCenterSphereKilometers(key: string, point: ParseGeoPoint, radius: number): ParseQuery {
+    return this.withinCenterSphereRadians(key, point, radius / 6371.0)
+  }
+
   /** Query Orderings **/
 
   /**
