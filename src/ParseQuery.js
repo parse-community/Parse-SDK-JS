@@ -1042,7 +1042,7 @@ export default class ParseQuery {
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   withinCenterSphereMiles(key: string, point: ParseGeoPoint, radius: number): ParseQuery {
-    return this.withinCenterSphereRadians(key, point, radius / 3958.8)
+    return this.withinCenterSphereRadians(key, point, radius / 3958.8);
   }
 
   /**
@@ -1056,7 +1056,7 @@ export default class ParseQuery {
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   withinCenterSphereKilometers(key: string, point: ParseGeoPoint, radius: number): ParseQuery {
-    return this.withinCenterSphereRadians(key, point, radius / 6371.0)
+    return this.withinCenterSphereRadians(key, point, radius / 6371.0);
   }
 
   /** Query Orderings **/
