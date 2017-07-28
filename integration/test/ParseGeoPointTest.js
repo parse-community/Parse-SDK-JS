@@ -296,4 +296,37 @@ describe('Geo Point', () => {
     })
     .fail(done.fail);
   });
+
+  it('works with withinCenterSphereKilometers queries', (done) => {
+    var sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
+    var query = new Parse.Query(TestObject);
+    query.withinCenterSphereKilometers('location', sfo, 2000);
+    query.find().then(results => {
+      assert.equal(results.length, 2);
+      done();
+    })
+    .catch(err => done(err));
+  });
+
+  it('works with withinCenterSphereMiles queries', (done) => {
+    var sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
+    var query = new Parse.Query(TestObject);
+    query.withinCenterSphereMiles('location', sfo, 1243);
+    query.find().then(results => {
+      assert.equal(results.length, 2);
+      done();
+    })
+    .catch(err => done(err));
+  });
+
+  it('works with withinCenterSphereRadians queries', (done) => {
+    var sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
+    var query = new Parse.Query(TestObject);
+    query.withinCenterSphereRadians('location', sfo, 0.313922461);
+    query.find().then(results => {
+      assert.equal(results.length, 2);
+      done();
+    })
+    .catch(err => done(err));
+  });
 });
