@@ -90,6 +90,35 @@ describe('Polygon', () => {
     }
   });
 
+  it('containsPoint', (done) => {
+    const points = [[0,0], [0,1], [1,1], [1,0]];
+    const inside = new Parse.GeoPoint(0.5, 0.5);
+    const outside = new Parse.GeoPoint(10, 10);
+    const polygon = new Parse.Polygon(points);
+
+    assert.equal(polygon.containsPoint(inside), true);
+    assert.equal(polygon.containsPoint(outside), false);
+    done();
+  });
+
+  it('equality', (done) => {
+    const points = [[0,0], [0,1], [1,1], [1,0]];
+    const diff = [[0,0], [0,2], [2,2], [2,0]];
+
+    const polygonA = new Parse.Polygon(points);
+    const polygonB = new Parse.Polygon(points);
+    const polygonC = new Parse.Polygon(diff);
+
+    assert.equal(polygonA.equals(polygonA), true);
+    assert.equal(polygonA.equals(polygonB), true);
+    assert.equal(polygonB.equals(polygonA), true);
+
+    assert.equal(polygonA.equals(true), false);
+    assert.equal(polygonA.equals(polygonC), false);
+
+    done();
+  });
+
   it('supports polygonContains', (done) => {
     const p1 = [[0,0], [0,1], [1,1], [1,0]];
     const p2 = [[0,0], [0,2], [2,2], [2,0]];

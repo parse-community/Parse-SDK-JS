@@ -67,10 +67,55 @@ export default class ParsePolygon {
   }
 
   equals(other: mixed): boolean {
-    return (
-      (other instanceof ParsePolygon) &&
-      this.coordinates === other.coordinates
-    );
+    if (!(other instanceof ParsePolygon) || (this.coordinates.length !== other.coordinates.length)) {
+      return false;
+    }
+    let isEqual = true;
+
+    for (let i = 1; i < this._coordinates.length; i += 1) {
+      if (this._coordinates[i][0] != other.coordinates[i][0] ||
+          this._coordinates[i][1] != other.coordinates[i][1]) {
+        isEqual = false;
+        break;
+      }
+    }
+    return isEqual;
+  }
+
+  containsPoint(point: ParseGeoPoint): boolean {
+    let minX = this._coordinates[0][0];
+    let maxX = this._coordinates[0][0];
+    let minY = this._coordinates[0][1];
+    let maxY = this._coordinates[0][1];
+
+    for (let i = 1; i < this._coordinates.length; i += 1) {
+        const p = this._coordinates[i];
+        minX = Math.min(p[0], minX);
+        maxX = Math.max(p[0], maxX);
+        minY = Math.min(p[1], minY);
+        maxY = Math.max(p[1], maxY);
+    }
+
+    const outside = (point.latitude < minX || point.latitude > maxX || point.longitude < minY || point.longitude > maxY);
+    if (outside) {
+        return false;
+    }
+
+    let inside = false;
+    for (let i = 0, j = this._coordinates.length - 1 ; i < this._coordinates.length; j = i++) {
+      let startX = this._coordinates[i][0];
+      let startY = this._coordinates[i][1];
+      let endX = this._coordinates[j][0];
+      let endY = this._coordinates[j][1];
+
+      const intersect = (( startY > point.longitude ) != ( endY > point.longitude ) &&
+          point.latitude < ( endX - startX ) * ( point.longitude - startY ) / ( endY - startY ) + startX);
+
+      if (intersect) {
+          inside = !inside;
+      }
+    }
+    return inside;
   }
 
   /**
