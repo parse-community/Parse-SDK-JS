@@ -291,7 +291,7 @@ describe('Geo Point', () => {
     const query = new Parse.Query(TestPoint);
     query.withinPolygon('location', []);
     query.find().then(done.fail, (err) => {
-      assert.equal(err.code, Parse.Error.INTERNAL_SERVER_ERROR);
+      assert.equal(err.code, Parse.Error.INVALID_JSON);
       done();
     })
     .fail(done.fail);
