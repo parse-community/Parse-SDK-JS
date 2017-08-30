@@ -289,7 +289,7 @@ describe('Geo Point', () => {
     const query = new Parse.Query(TestPoint);
     query.withinPolygon('location', []);
     return query.find().fail((err) => {
-      assert.equal(err.code, Parse.Error.INTERNAL_SERVER_ERROR);
+      assert.equal(err.code, Parse.Error.INVALID_JSON);
       done();
     });
   });
