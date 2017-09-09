@@ -67,10 +67,12 @@ function handleSelectResult(data: any, select: Array<string>){
 
       pathComponents.forEach((component, index, arr) => {
         // add keys if the expected data is missing
-        if (!obj[component]) {
-          obj[component] = (index == arr.length-1) ? undefined : {};
+        if (obj && !obj.hasOwnProperty(component)){
+          obj[component] = undefined;
         }
-        obj = obj[component];
+        if(obj !== undefined){
+          obj = obj[component];
+        }
 
         //add this path component to the server mask so we can fill it in later if needed
         if (index < arr.length-1) {
@@ -100,8 +102,10 @@ function handleSelectResult(data: any, select: Array<string>){
         }
       }
       for (var key in mask) {
-        //traverse into objects as needed
-        copyMissingDataWithMask(src[key], dest[key], mask[key], true);
+        if (dest[key] !== undefined && dest[key] !== null){
+          //traverse into objects as needed
+          copyMissingDataWithMask(src[key], dest[key], mask[key], true);
+        }
       }
     }
 

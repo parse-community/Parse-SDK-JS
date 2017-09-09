@@ -1584,4 +1584,101 @@ describe('ParseQuery', () => {
     });
 
   });
+
+it('selecting sub-objects does not inject objects when sub-object does not exist', (done) => {
+    jest.dontMock("../ParseObject");
+    jest.resetModules();
+    ParseObject = require('../ParseObject').default;
+    CoreManager = require('../CoreManager');
+    ParseQuery = require('../ParseQuery').default;
+
+    ParseObject.enableSingleInstance();
+    
+    var objectToReturn = { 
+      objectId: 'T01', 
+      name: 'Name', 
+      tbd: 'exists', 
+      className:"Thing", 
+      createdAt: '2017-01-10T10:00:00Z'
+    };
+
+    CoreManager.setQueryController({
+      find(className, params, options) {
+        return ParsePromise.as({
+          results: [objectToReturn]
+        });
+      }
+    });
+
+    var q = new ParseQuery("Thing");
+    q.select("other", "tbd", "subObject.key1")
+    var testObject;
+    return q.find().then((results) => {
+      testObject = results[0];
+      
+      expect(testObject.get("name")).toBe("Name");
+      expect(testObject.has("other")).toBe(false);
+      expect(testObject.has("subObject")).toBe(false);
+
+    }).then(() => {
+      done();
+    }, (error) => {
+      done.fail(error);
+    });
+  });
+
+it('removes missing sub objects from the cached object when they are selected', (done) => {
+    jest.dontMock("../ParseObject");
+    jest.resetModules();
+    ParseObject = require('../ParseObject').default;
+    CoreManager = require('../CoreManager');
+    ParseQuery = require('../ParseQuery').default;
+
+    ParseObject.enableSingleInstance();
+    
+    var objectToReturn = { 
+      objectId: 'T01', 
+      name: 'Name', 
+      tbd: 'exists', 
+      className:"Thing", 
+      subObject1: {foo:"bar"},
+      subObject2: {foo:"bar"},
+      subObject3: {foo:"bar"},
+      createdAt: '2017-01-10T10:00:00Z'
+    };
+
+    CoreManager.setQueryController({
+      find(className, params, options) {
+        return ParsePromise.as({
+          results: [objectToReturn]
+        });
+      }
+    });
+
+    var q = new ParseQuery("Thing");
+    var testObject;
+    return q.find().then((results) => {
+      testObject = results[0];
+      
+      expect(testObject.has("subObject1")).toBe(true);
+      expect(testObject.has("subObject2")).toBe(true);
+      expect(testObject.has("subObject3")).toBe(true);
+      expect(testObject.has("subObject4")).toBe(false);
+
+      var q2 = new ParseQuery("Thing");
+      q.select("name","subObject1", "subObject2.foo", "subObject4.foo");
+      objectToReturn = { objectId: 'T01', name:"Name", subObject4: {foo:"bar"}};
+      return q.find();
+    }).then((results)=>{
+      expect(testObject.has("subObject1")).toBe(false); //selected and not returned
+      expect(testObject.has("subObject2")).toBe(false); //selected and not returned
+      expect(testObject.has("subObject3")).toBe(true); //not selected, so should still be there
+      expect(testObject.has("subObject4")).toBe(true); //selected and just added
+    }).then(() => {
+      done();
+    }, (error) => {
+      done.fail(error);
+    });
+  });
+
 });
