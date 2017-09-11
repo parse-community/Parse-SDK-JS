@@ -1585,7 +1585,7 @@ describe('ParseQuery', () => {
 
   });
 
-it('selecting sub-objects does not inject objects when sub-object does not exist', (done) => {
+  it('selecting sub-objects does not inject objects when sub-object does not exist', (done) => {
     jest.dontMock("../ParseObject");
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
@@ -1627,7 +1627,7 @@ it('selecting sub-objects does not inject objects when sub-object does not exist
     });
   });
 
-it('removes missing sub objects from the cached object when they are selected', (done) => {
+  it('removes missing sub objects from the cached object when they are selected', (done) => {
     jest.dontMock("../ParseObject");
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
@@ -1644,6 +1644,7 @@ it('removes missing sub objects from the cached object when they are selected', 
       subObject1: {foo:"bar"},
       subObject2: {foo:"bar"},
       subObject3: {foo:"bar"},
+      subObject5: {subSubObject:{foo:"foo", bar:"bar"}},
       createdAt: '2017-01-10T10:00:00Z'
     };
 
@@ -1666,14 +1667,17 @@ it('removes missing sub objects from the cached object when they are selected', 
       expect(testObject.has("subObject4")).toBe(false);
 
       var q2 = new ParseQuery("Thing");
-      q.select("name","subObject1", "subObject2.foo", "subObject4.foo");
-      objectToReturn = { objectId: 'T01', name:"Name", subObject4: {foo:"bar"}};
+      q.select("name","subObject1", "subObject2.foo", "subObject4.foo", "subObject5.subSubObject.foo");
+      objectToReturn = { objectId: 'T01', name:"Name", subObject4: {foo:"bar"}, subObject5: {subSubObject:{}}};
       return q.find();
     }).then((results)=>{
       expect(testObject.has("subObject1")).toBe(false); //selected and not returned
       expect(testObject.has("subObject2")).toBe(false); //selected and not returned
       expect(testObject.has("subObject3")).toBe(true); //not selected, so should still be there
       expect(testObject.has("subObject4")).toBe(true); //selected and just added
+      expect(testObject.has("subObject5")).toBe(true); 
+      expect(testObject.get("subObject5").subSubObject).toBeDefined();
+      expect(testObject.get("subObject5").subSubObject.bar).toBeDefined(); //not selected but a sibiling was, so should still be there
     }).then(() => {
       done();
     }, (error) => {

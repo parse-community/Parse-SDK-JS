@@ -79,6 +79,7 @@ function handleSelectResult(data: any, select: Array<string>){
           if (!serverMask[component]) {
             serverMask[component] = {};
           }
+          serverMask = serverMask[component];
         }
       });
     }
