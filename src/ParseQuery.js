@@ -67,10 +67,10 @@ function handleSelectResult(data: any, select: Array<string>){
 
       pathComponents.forEach((component, index, arr) => {
         // add keys if the expected data is missing
-        if (obj && !obj.hasOwnProperty(component)){
+        if (obj && !obj.hasOwnProperty(component)) {
           obj[component] = undefined;
         }
-        if(obj !== undefined){
+        if (obj !== undefined) {
           obj = obj[component];
         }
 
@@ -103,7 +103,7 @@ function handleSelectResult(data: any, select: Array<string>){
         }
       }
       for (var key in mask) {
-        if (dest[key] !== undefined && dest[key] !== null){
+        if (dest[key] !== undefined && dest[key] !== null) {
           //traverse into objects as needed
           copyMissingDataWithMask(src[key], dest[key], mask[key], true);
         }
