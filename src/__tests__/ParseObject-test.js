@@ -402,6 +402,28 @@ describe('ParseObject', () => {
     expect(o2.attributes).toEqual({ age: 41 });
   });
 
+  it('can increment a nested field', () => {
+    var o = new ParseObject('Person');
+    o.increment('children.count');
+    expect(o.attributes).toEqual({ children: { count: 1} });
+    expect(o.op('children.count') instanceof IncrementOp).toBe(true);
+    expect(o.dirtyKeys()).toEqual(['children.count', 'children']);
+    expect(o._getSaveJSON()).toEqual({ ['children.count']: { __op: 'Increment', amount: 1 } });
+
+    o.increment('children.count', 4);
+    expect(o.attributes).toEqual({ children: { count: 5} });
+    expect(o._getSaveJSON()).toEqual({ ['children.count']: { __op: 'Increment', amount: 5 } });
+
+    var o2 = new ParseObject('Person');
+    o2._finishFetch({
+      objectId: 'Pchild',
+      children: { count: 7 }
+    });
+    expect(o2.attributes).toEqual({ children: {count: 7 }});
+    o2.increment('children.count');
+    expect(o2.attributes).toEqual({ children: {count: 8 }});
+  });
+
   it('can add elements to an array field', () => {
     var o = new ParseObject('Schedule');
     o.add('available', 'Monday');

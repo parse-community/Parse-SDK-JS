@@ -107,6 +107,19 @@ export function estimateAttribute(serverData: AttributeMap, pendingOps: Array<Op
   return value;
 }
 
+function applyOpOnKeyPath(data, attr, op) {
+  if (attr.indexOf('.') < 0) {
+    data[attr] = op.applyTo(data[attr]);
+    return data;
+  }
+  const path = attr.split('.');
+  const firstKey = path[0];
+  const nextPath = path.slice(1).join('.');
+  data[firstKey] = applyOpOnKeyPath(data[firstKey] || {}, nextPath, op);
+  delete data[attr];
+  return data;
+}
+
 export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<OpsMap>, className: string, id: ?string): AttributeMap {
   let data = {};
   let attr;
@@ -124,7 +137,7 @@ export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<O
           );
         }
       } else {
-        data[attr] = pendingOps[i][attr].applyTo(data[attr]);
+        applyOpOnKeyPath(data, attr, pendingOps[i][attr]);
       }
     }
   }
