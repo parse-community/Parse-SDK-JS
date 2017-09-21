@@ -38,12 +38,20 @@ describe('ParseFile', () => {
     expect(file._source.type).toBe('');
   });
 
-  it('can extact data type from base64', () => {
+  it('can extract data type from base64', () => {
     var file = new ParseFile('parse.txt', {
       base64: 'data:image/png;base64,ParseA=='
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('image/png');
+  });
+
+  it('can extract data type from base64 with data type containing a number', () => {
+    var file = new ParseFile('parse.m4a', {
+      base64: 'data:audio/m4a;base64,ParseA=='
+    });
+    expect(file._source.base64).toBe('ParseA==');
+    expect(file._source.type).toBe('audio/m4a');
   });
 
   it('can create files with byte arrays', () => {

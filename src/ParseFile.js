@@ -25,7 +25,7 @@ export type FileSource = {
 };
 
 var dataUriRegexp =
-  /^data:([a-zA-Z]*\/[a-zA-Z+.-]*);(charset=[a-zA-Z0-9\-\/\s]*,)?base64,/;
+  /^data:([\w\/\+]+);(charset=[a-zA-Z0-9\-\/\s]*,)?base64,/;
 
 function b64Digit(number: number): string {
   if (number < 26) {
