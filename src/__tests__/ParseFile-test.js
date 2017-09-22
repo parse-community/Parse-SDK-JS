@@ -54,6 +54,22 @@ describe('ParseFile', () => {
     expect(file._source.type).toBe('audio/m4a');
   });
 
+  it('can extract data type from base64 with a complex mime type', () => {
+    var file = new ParseFile('parse.kml', {
+        base64: 'data:application/vnd.google-earth.kml+xml;base64,ParseA=='
+    });
+    expect(file._source.base64).toBe('ParseA==');
+    expect(file._source.type).toBe('application/vnd.google-earth.kml+xml');
+  });
+
+  it('can extract data type from base64 with a charset param', () => {
+    var file = new ParseFile('parse.kml', {
+        base64: 'data:application/vnd.3gpp.pic-bw-var;charset=utf-8;base64,ParseA=='
+    });
+    expect(file._source.base64).toBe('ParseA==');
+    expect(file._source.type).toBe('application/vnd.3gpp.pic-bw-var');
+  });
+
   it('can create files with byte arrays', () => {
     var file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     expect(file._source.base64).toBe('ParseA==');
