@@ -71,6 +71,7 @@ type PushController = {
 };
 type QueryController = {
   find: (className: string, params: QueryJSON, options: RequestOptions) => ParsePromise;
+  aggregate: (className: string, params: any, options: RequestOptions) => ParsePromise;
 };
 type RESTController = {
   request: (method: string, path: string, data: mixed) => ParsePromise;
