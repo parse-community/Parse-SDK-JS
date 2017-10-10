@@ -116,6 +116,7 @@ Parse.Push = require('./Push');
 Parse.Query = require('./ParseQuery').default;
 Parse.Relation = require('./ParseRelation').default;
 Parse.Role = require('./ParseRole').default;
+Parse.Schema = require('./ParseSchema').default;
 Parse.Session = require('./ParseSession').default;
 Parse.Storage = require('./Storage');
 Parse.User = require('./ParseUser').default;

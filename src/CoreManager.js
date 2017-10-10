@@ -76,6 +76,13 @@ type RESTController = {
   request: (method: string, path: string, data: mixed) => ParsePromise;
   ajax: (method: string, url: string, data: any, headers?: any) => ParsePromise;
 };
+type SchemaController = {
+  get: (className: string, options: RequestOptions) => ParsePromise;
+  delete: (className: string, options: RequestOptions) => ParsePromise;
+  create: (className: string, params: any, options: RequestOptions) => ParsePromise;
+  update: (className: string, params: any, options: RequestOptions) => ParsePromise;
+  send(className: string, method: string, params: any, options: RequestOptions): ParsePromise;
+};
 type SessionController = {
   getSession: (token: RequestOptions) => ParsePromise;
 };
@@ -131,6 +138,7 @@ type Config = {
   PushController?: PushController,
   QueryController?: QueryController,
   RESTController?: RESTController,
+  SchemaController?: SchemaController,
   SessionController?: SessionController,
   StorageController?: StorageController,
   UserController?: UserController,
@@ -283,6 +291,15 @@ module.exports = {
 
   getRESTController(): RESTController {
     return config['RESTController'];
+  },
+
+  setSchemaController(controller: SchemaController) {
+    requireMethods('SchemaController', ['get', 'create', 'update', 'delete', 'send'], controller);
+    config['SchemaController'] = controller;
+  },
+
+  getSchemaController(): SchemaController {
+    return config['SchemaController'];
   },
 
   setSessionController(controller: SessionController) {
