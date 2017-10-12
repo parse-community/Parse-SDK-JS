@@ -98,6 +98,21 @@ describe('Schema', () => {
     });
   });
 
+  it('multiple update', (done) => {
+    const testSchema = new Parse.Schema('SchemaTest');
+    testSchema.save().then(() => {
+      testSchema.addString('name');
+      return testSchema.update();
+    }).then(() => {
+      return testSchema.update();
+    }).then(() => {
+      return testSchema.get();
+    }).then((result) => {
+      assert.equal(Object.keys(result.fields).length, 5);
+      done();
+    });
+  });
+
   it('delete', (done) => {
     const testSchema1 = new Parse.Schema('SchemaTest1');
     const testSchema2 = new Parse.Schema('SchemaTest2');

@@ -98,6 +98,9 @@ export default class ParseSchema {
       indexes: this._indexes,
     };
 
+    this._fields = {};
+    this._indexes = {};
+
     return controller.update(this.className, params, options)
       .then((response) => {
         return response;
@@ -219,7 +222,6 @@ export default class ParseSchema {
   }
 
   deleteIndex(name: string) {
-    this._fields = {};
     this._indexes[name] = { __op: 'Delete'};
   }
 }
