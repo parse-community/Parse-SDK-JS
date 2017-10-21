@@ -36,8 +36,6 @@ For React Native applications, include `'parse/react-native'`:
 var Parse = require('parse/react-native');
 ```
 
-> As of `v1.10`, Parse-SDK-JS supports React Native 0.43+. Please use `v1.9.2` for previous versions of React Native.
-
 ## License
 
 ```
