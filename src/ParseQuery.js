@@ -103,7 +103,7 @@ function handleSelectResult(data: any, select: Array<string>){
         }
       }
       for (var key in mask) {
-        if (dest[key] !== undefined && dest[key] !== null) {
+        if (dest[key] !== undefined && dest[key] !== null && src !== undefined && src !== null) {
           //traverse into objects as needed
           copyMissingDataWithMask(src[key], dest[key], mask[key], true);
         }
