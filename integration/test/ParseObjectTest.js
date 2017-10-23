@@ -254,6 +254,14 @@ describe('Parse Object', () => {
     });
   });
 
+  it('cannot set an invalid date', (done) => {
+    let obj = new TestObject();
+    obj.set('when', new Date(Date.parse(null)));
+    Parse.Object.saveAll([obj]).fail((e) => {
+      done();
+    });
+  });
+
   it('cannot create invalid class names', (done) => {
     let item = new Parse.Object('Foo^Bar');
     item.save().fail((e) => {
