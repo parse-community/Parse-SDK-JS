@@ -1115,6 +1115,19 @@ describe('ParseObject', () => {
     });
   });
 
+  it('should fail on invalid date', (done) => {
+    var obj = new ParseObject('Item');
+    obj.set('when', new Date(Date.parse(null)));
+    ParseObject.saveAll([obj]).then(() => {
+      done.fail('Expected invalid date to fail');
+    }).fail((error) => {
+      expect(error[0].code).toEqual(ParseError.INCORRECT_TYPE);
+      expect(error[0].message).toEqual('Tried to encode an invalid date.');
+      done();
+    });
+    jest.runAllTicks();
+  });
+
   it('can save a ring of objects, given one exists', (done) => {
     var xhrs = [];
     RESTController._setXHR(function() {
