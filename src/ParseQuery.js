@@ -1032,37 +1032,37 @@ export default class ParseQuery {
     return this._addCondition(key, '$geoIntersects', { '$point': point });
   }
 
-  /**
-   * Method to find by full text.
-   * The key and the search fields are required the others are optionals.
-   * @method fullTextSearch
-   * @param {String} key The key to structure the where query
-   * @param {String} search The string to search
-   * @param {String} language Determine the list of stop words
-   * @param {Boolean} caseSensitive Dis/en-able the case sensitive search
-   * @param {Boolean} diacriticSensitive Dis/en-able diacritic sensitive search
-   * @return {Parse.Query} Returns the query, so you can chain this call.
-   */
-  fullTextSearch(key: string, search: string, language: string, caseSensitive: boolean, diacriticSensitive: boolean): ParseQuery {
-    if (typeof key === 'undefined' || !key) {
-      throw new Error('A key is required.');
-    }
-    if (typeof search === 'undefined' || !search) {
-      throw new Error('You have to add one string to search.');
-    }
-    var options = { '$term': search };
-    if (typeof language !== "undefined" || language !== null) {
-      options['$language'] = language;
-    }
-    if (typeof caseSensitive !== "undefined" || caseSensitive !== null) {
-      options['$caseSensitive'] = caseSensitive;
-    }
-    if (typeof diacriticSensitive !== "undefined" || diacriticSensitive !== null) {
-      options['$diacriticSensitive'] = diacriticSensitive;
-    }
-    return this._addCondition(key, '$text', { '$search': options });
-  }
-  
+ /**
+  * Method to find by full text.
+  * The key and the search fields are required the others are optionals.
+  * @method fullTextSearch
+  * @param {String} key The key to structure the where query
+  * @param {String} search The string to search
+  * @param {String} language Determine the list of stop words
+  * @param {Boolean} caseSensitive Dis/en-able the case sensitive search
+  * @param {Boolean} diacriticSensitive Dis/en-able diacritic sensitive search
+  * @return {Parse.Query} Returns the query, so you can chain this call.
+  */
+ fullTextSearch(key: string, search: string, language: string, caseSensitive: boolean, diacriticSensitive: boolean): ParseQuery {
+   if (!key) {
+     throw new Error('A key is required.');
+   }
+   if (typeof search !== 'string') {
+     throw new Error('The value being searched for must be a string.');
+   }
+   var options = { '$term': search };
+   if (typeof language === 'string') {
+     options['$language'] = language;
+   }
+   if (typeof caseSensitive === "boolean") {
+     options['$caseSensitive'] = caseSensitive;
+   }
+   if (typeof diacriticSensitive === "boolean") {
+     options['$diacriticSensitive'] = diacriticSensitive;
+   }
+   return this._addCondition(key, '$text', { '$search': options });
+ }
+
   /** Query Orderings **/
 
   /**
