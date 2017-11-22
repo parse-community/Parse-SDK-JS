@@ -17,12 +17,7 @@ try {
   // for React Native 0.43+
   AsyncStorage = require('react-native/Libraries/react-native/react-native-implementation').AsyncStorage;
 } catch (error) {
-  try {
-    AsyncStorage = require('react-native/Libraries/react-native/react-native.js').AsyncStorage;
-  } catch(error) {
-    // for React Native 0.50+
-    AsyncStorage = require('react-native/Libraries/Storage/AsyncStorage');
-  }
+  AsyncStorage = require('react-native/Libraries/react-native/react-native.js').AsyncStorage;
 }
 
 var StorageController = {
