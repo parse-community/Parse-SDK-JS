@@ -174,7 +174,7 @@ describe('Schema', () => {
       testSchema.deleteIndex('test_index');
       return testSchema.update();
     }).then((result) => {
-      assert.equal(result.indexes, undefined);
+      assert.equal(result.indexes.test_index, undefined);
       done();
     });
   });
