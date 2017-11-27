@@ -21,11 +21,10 @@ import Storage from './Storage';
  * Parse.Config is a local representation of configuration data that
  * can be set from the Parse dashboard.
  *
- * @class Parse.Config
- * @constructor
+ * @alias Parse.Config
  */
 
-export default class ParseConfig {
+class ParseConfig {
   attributes: { [key: string]: any };
   _escapedAttributes: { [key: string]: any };
 
@@ -36,7 +35,6 @@ export default class ParseConfig {
 
   /**
    * Gets the value of an attribute.
-   * @method get
    * @param {String} attr The name of an attribute.
    */
   get(attr: string): any {
@@ -45,7 +43,6 @@ export default class ParseConfig {
 
   /**
    * Gets the HTML-escaped value of an attribute.
-   * @method escape
    * @param {String} attr The name of an attribute.
    */
   escape(attr: string): string {
@@ -66,7 +63,6 @@ export default class ParseConfig {
    * Retrieves the most recently-fetched configuration object, either from
    * memory or from local storage if necessary.
    *
-   * @method current
    * @static
    * @return {Config} The most recently-fetched Parse.Config if it
    *     exists, else an empty Parse.Config.
@@ -78,7 +74,6 @@ export default class ParseConfig {
 
   /**
    * Gets a new configuration object from the server.
-   * @method get
    * @static
    * @param {Object} options A Backbone-style options object.
    * Valid options are:<ul>
@@ -176,3 +171,5 @@ var DefaultController = {
 };
 
 CoreManager.setConfigController(DefaultController);
+
+export default ParseConfig;

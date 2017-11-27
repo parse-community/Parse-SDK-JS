@@ -17,9 +17,7 @@ import ParseGeoPoint from './ParseGeoPoint';
  *   new Polygon([[0,0],[0,1],[1,1],[1,0]])
  *   new Polygon([GeoPoint, GeoPoint, GeoPoint])
  *   </pre>
- * @class Parse.GeoPoint
- * @constructor
- *
+ * 
  * <p>Represents a coordinates that may be associated
  * with a key in a ParseObject or used as a reference point for geo queries.
  * This allows proximity-based queries on the key.</p>
@@ -29,10 +27,14 @@ import ParseGeoPoint from './ParseGeoPoint';
  *   var object = new Parse.Object("PlaceObject");
  *   object.set("area", polygon);
  *   object.save();</pre></p>
+ * @alias Parse.Polygon
  */
-export default class ParsePolygon {
+class ParsePolygon {
   _coordinates: Array;
 
+  /**
+   * @param {(Number[][]|Parse.GeoPoint[])} coordinates An Array of coordinate pairs
+   */
   constructor(
     arg1: Array,
   ) {
@@ -55,7 +57,7 @@ export default class ParsePolygon {
 
   /**
    * Returns a JSON representation of the GeoPoint, suitable for Parse.
-   * @method toJSON
+
    * @return {Object}
    */
   toJSON(): { __type: string; coordinates: Array;} {
@@ -145,3 +147,5 @@ export default class ParsePolygon {
     return points;
   }
 }
+
+export default ParsePolygon;

@@ -1,0 +1,22 @@
+{
+  "plugins": ["node_modules/jsdoc-babel"],
+  "babel": {
+      "plugins": ["transform-flow-strip-types"]
+  },
+  "source": {
+    "include": ["./package.json", "./README.md", "./src/Analytics.js", "./src/Cloud.js", "./src/Push.js", "./src/FacebookUtils.js", "./src/LiveQueryClient.js", "./src/LiveQuerySubscription.js" ],
+    "exclude": [ /* array of paths to exclude */ ],
+    "includePattern": "src/Parse.+\\.js(doc|x)?$",
+    "excludePattern": "(^|\\/|\\\\)_"
+  },
+  "templates": {
+    "default": {
+      "outputSourceFiles": false
+    },
+    "cleverLinks": false,
+    "monospaceLinks": false
+  },
+  "opts": {
+    "recurse": true
+  }
+}

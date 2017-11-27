@@ -93,6 +93,7 @@ var provider = {
  * Provides a set of utilities for using Parse with Facebook.
  * @class Parse.FacebookUtils
  * @static
+ * @hideconstructor
  */
 var FacebookUtils = {
   /**
@@ -105,6 +106,7 @@ var FacebookUtils = {
    * with these arguments.
    *
    * @method init
+   * @name Parse.FacebookUtils.init
    * @param {Object} options Facebook options argument as described here:
    *   <a href=
    *   "https://developers.facebook.com/docs/reference/javascript/FB.init/">
@@ -141,6 +143,7 @@ var FacebookUtils = {
    * Gets whether the user has their account linked to Facebook.
    *
    * @method isLinked
+   * @name Parse.FacebookUtils.isLinked
    * @param {Parse.User} user User to check for a facebook link.
    *     The user must be logged in on this device.
    * @return {Boolean} <code>true</code> if the user has their account
@@ -156,7 +159,8 @@ var FacebookUtils = {
    * creates, in the case where it is a new user) a Parse.User.
    *
    * @method logIn
-   * @param {String, Object} permissions The permissions required for Facebook
+   * @name Parse.FacebookUtils.logIn
+   * @param {(String|Object)} permissions The permissions required for Facebook
    *    log in.  This is a comma-separated string of permissions.
    *    Alternatively, supply a Facebook authData object as described in our
    *    REST API docs if you want to handle getting facebook auth tokens
@@ -191,9 +195,10 @@ var FacebookUtils = {
    * the account to the Parse.User.
    *
    * @method link
+   * @name Parse.FacebookUtils.link
    * @param {Parse.User} user User to link to Facebook. This must be the
    *     current user.
-   * @param {String, Object} permissions The permissions required for Facebook
+   * @param {(String|Object)} permissions The permissions required for Facebook
    *    log in.  This is a comma-separated string of permissions.
    *    Alternatively, supply a Facebook authData object as described in our
    *    REST API docs if you want to handle getting facebook auth tokens
@@ -226,6 +231,7 @@ var FacebookUtils = {
    * Unlinks the Parse.User from a Facebook account.
    *
    * @method unlink
+   * @name Parse.FacebookUtils.unlink
    * @param {Parse.User} user User to unlink from Facebook. This must be the
    *     current user.
    * @param {Object} options Standard options object with success and error
