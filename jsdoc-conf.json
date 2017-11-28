@@ -5,7 +5,6 @@
   },
   "source": {
     "include": ["./package.json", "./README.md"],
-    "exclude": [ /* array of paths to exclude */ ],
     "excludePattern": "(^|\\/|\\\\)_"
   },
   "templates": {
