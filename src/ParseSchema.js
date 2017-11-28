@@ -17,19 +17,27 @@ import type { RequestOptions, FullOptions } from './RESTController';
 const FIELD_TYPES = ['String', 'Number', 'Boolean', 'Date', 'File', 'GeoPoint', 'Array', 'Object', 'Pointer', 'Relation'];
 
 /**
- * @class Parse.Schema
- * @constructor
- * @param {String} className The class name for the object
+ * A Parse.Schema object is for handling schema data from Parse.
+ * <p>All the schemas methods require MasterKey.
  *
- * <p>A Parse.Schema object is for handling schema data from Parse.
- * All the schemas methods require master key.</p>
+ * <pre>
+ * const schema = new Parse.Schema('MyClass');
+ * schema.addString('field');
+ * schema.addIndex('index_name', {'field', 1});
+ * schema.save();
+ * </pre>
+ * </p>
+ * @alias Parse.Schema
  */
-export default class ParseSchema {
+class ParseSchema {
   className: string;
   _fields: { [key: string]: mixed };
   _indexes: { [key: string]: mixed };
 
-  constructor(className: ?string) {
+  /**
+   * @param {String} className Parse Class string.
+   */
+  constructor(className: string) {
     if (typeof className === 'string') {
       if (className === 'User' && CoreManager.get('PERFORM_USER_REWRITE')) {
         this.className = '_User';
@@ -42,6 +50,21 @@ export default class ParseSchema {
     this._indexes = {};
   }
 
+  /**
+   * Static method to get all schemas
+   * @param {Object} options A Backbone-style options object.
+   * Valid options are:<ul>
+   *   <li>success: A Backbone-style success callback
+   *   <li>error: An Backbone-style error callback.
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   *
+   * @return {Parse.Promise} A promise that is resolved with the result when
+   * the query completes.
+   */
   static all(options: FullOptions) {
     options = options || {};
     const controller = CoreManager.getSchemaController();
@@ -55,6 +78,21 @@ export default class ParseSchema {
       })._thenRunCallbacks(options);
   }
 
+  /**
+   * Get the Schema from Parse
+   * @param {Object} options A Backbone-style options object.
+   * Valid options are:<ul>
+   *   <li>success: A Backbone-style success callback
+   *   <li>error: An Backbone-style error callback.
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   *
+   * @return {Parse.Promise} A promise that is resolved with the result when
+   * the query completes.
+   */
   get(options: FullOptions) {
     this.assertClassName();
 
@@ -70,6 +108,21 @@ export default class ParseSchema {
       })._thenRunCallbacks(options);
   }
 
+  /**
+   * Create a new Schema on Parse
+   * @param {Object} options A Backbone-style options object.
+   * Valid options are:<ul>
+   *   <li>success: A Backbone-style success callback
+   *   <li>error: An Backbone-style error callback.
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   *
+   * @return {Parse.Promise} A promise that is resolved with the result when
+   * the query completes.
+   */
   save(options: FullOptions) {
     this.assertClassName();
 
@@ -87,6 +140,21 @@ export default class ParseSchema {
       })._thenRunCallbacks(options);
   }
 
+  /**
+   * Update a Schema from Parse
+   * @param {Object} options A Backbone-style options object.
+   * Valid options are:<ul>
+   *   <li>success: A Backbone-style success callback
+   *   <li>error: An Backbone-style error callback.
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   *
+   * @return {Parse.Promise} A promise that is resolved with the result when
+   * the query completes.
+   */
   update(options: FullOptions) {
     this.assertClassName();
 
@@ -107,6 +175,21 @@ export default class ParseSchema {
       })._thenRunCallbacks(options);
   }
 
+  /**
+   * Removing a Schema from Parse
+   * @param {Object} options A Backbone-style options object.
+   * Valid options are:<ul>
+   *   <li>success: A Backbone-style success callback
+   *   <li>error: An Backbone-style error callback.
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   *
+   * @return {Parse.Promise} A promise that is resolved with the result when
+   * the query completes.
+   */
   delete(options: FullOptions) {
     this.assertClassName();
 
@@ -119,12 +202,22 @@ export default class ParseSchema {
       })._thenRunCallbacks(options);
   }
 
+  /**
+   * Assert if ClassName has been filled
+   * @private
+   */
   assertClassName() {
     if (!this.className) {
       throw new Error('You must set a Class Name before making any request.');
     }
   }
 
+  /**
+   * Adding a Field to Create / Update a Schema
+   * @param {String} name Name of the field will be created on Parse
+   * @param {String} type TheCan be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   addField(name: string, type: string) {
     type = type || 'String';
 
@@ -140,6 +233,12 @@ export default class ParseSchema {
     return this;
   }
 
+  /**
+   * Adding an Index to Create / Update a Schema
+   * @param {String} name Name of the field will be created on Parse
+   * @param {String} type TheCan be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   addIndex(name: string, index: any) {
     if (!name) {
       throw new Error('index name may not be null.');
@@ -153,38 +252,84 @@ export default class ParseSchema {
     return this;
   }
 
+  /**
+   * Adding String Field
+   * @param {String} name Name of the field will be created on Parse
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   addString(name: string) {
     return this.addField(name, 'String');
   }
 
+  /**
+   * Adding Number Field
+   * @param {String} name Name of the field will be created on Parse
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   addNumber(name: string) {
     return this.addField(name, 'Number');
   }
 
+  /**
+   * Adding Boolean Field
+   * @param {String} name Name of the field will be created on Parse
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   addBoolean(name: string) {
     return this.addField(name, 'Boolean');
   }
 
+  /**
+   * Adding Date Field
+   * @param {String} name Name of the field will be created on Parse
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   addDate(name: string) {
     return this.addField(name, 'Date');
   }
 
+  /**
+   * Adding File Field
+   * @param {String} name Name of the field will be created on Parse
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   addFile(name: string) {
     return this.addField(name, 'File');
   }
 
+  /**
+   * Adding GeoPoint Field
+   * @param {String} name Name of the field will be created on Parse
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   addGeoPoint(name: string) {
     return this.addField(name, 'GeoPoint');
   }
 
+  /**
+   * Adding Array Field
+   * @param {String} name Name of the field will be created on Parse
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   addArray(name: string) {
     return this.addField(name, 'Array');
   }
 
+  /**
+   * Adding Object Field
+   * @param {String} name Name of the field will be created on Parse
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   addObject(name: string) {
     return this.addField(name, 'Object');
   }
 
+  /**
+   * Adding Pointer Field
+   * @param {String} name Name of the field will be created on Parse
+   * @param {String} targetClass Name of the target Pointer Class
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   addPointer(name: string, targetClass: string) {
     if (!name) {
       throw new Error('field name may not be null.');
@@ -201,6 +346,12 @@ export default class ParseSchema {
     return this;
   }
 
+  /**
+   * Adding Relation Field
+   * @param {String} name Name of the field will be created on Parse
+   * @param {String} targetClass Name of the target Pointer Class
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   addRelation(name: string, targetClass: string) {
     if (!name) {
       throw new Error('field name may not be null.');
@@ -217,10 +368,22 @@ export default class ParseSchema {
     return this;
   }
 
+  /**
+   * Deleting a Field to Update on a Schema
+   * @param {String} name Name of the field will be created on Parse
+   * @param {String} targetClass Name of the target Pointer Class
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   deleteField(name: string) {
     this._fields[name] = { __op: 'Delete'};
   }
 
+   /**
+   * Deleting an Index to Update on a Schema
+   * @param {String} name Name of the field will be created on Parse
+   * @param {String} targetClass Name of the target Pointer Class
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
   deleteIndex(name: string) {
     this._indexes[name] = { __op: 'Delete'};
   }
@@ -259,3 +422,5 @@ const DefaultController = {
 };
 
 CoreManager.setSchemaController(DefaultController);
+
+export default ParseSchema;
