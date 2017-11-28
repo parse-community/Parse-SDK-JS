@@ -482,7 +482,6 @@ export default class ParseQuery {
   /**
    * Executes a distinct query and returns unique values
    *
-   * @method distinct
    * @param {String} key A field to find distinct values
    * @param {Object} options A Backbone-style options object. Valid options
    * are:<ul>
@@ -521,7 +520,6 @@ export default class ParseQuery {
    /**
    * Executes an aggregate query and returns aggregate results
    *
-   * @method aggregate
    * @param {Mixed} pipeline Array or Object of stages to process query
    * @param {Object} options A Backbone-style options object. Valid options
    * are:<ul>
