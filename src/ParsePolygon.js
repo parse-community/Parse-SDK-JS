@@ -57,7 +57,6 @@ class ParsePolygon {
 
   /**
    * Returns a JSON representation of the GeoPoint, suitable for Parse.
-
    * @return {Object}
    */
   toJSON(): { __type: string; coordinates: Array;} {
@@ -68,6 +67,11 @@ class ParsePolygon {
     };
   }
 
+  /**
+   * Checks if two polygons are equal
+   * @param {(Parse.Polygon|Object)} other
+   * @returns {Boolean}
+   */
   equals(other: mixed): boolean {
     if (!(other instanceof ParsePolygon) || (this.coordinates.length !== other.coordinates.length)) {
       return false;
@@ -84,6 +88,11 @@ class ParsePolygon {
     return isEqual;
   }
 
+  /**
+   * 
+   * @param {Parse.GeoPoint} point 
+   * @returns {Boolean} wether the points is contained into the polygon
+   */
   containsPoint(point: ParseGeoPoint): boolean {
     let minX = this._coordinates[0][0];
     let maxX = this._coordinates[0][0];
@@ -121,8 +130,9 @@ class ParsePolygon {
   }
 
   /**
-   * Throws an exception if the given lat-long is out of bounds.
-   * @return {Array}
+   * Validates that the list of coordinates can form a valid polygon
+   * @param {Array} coords the list of coordinated to validate as a polygon
+   * @throws {TypeError}
    */
   static _validate(coords: Array) {
     if (!Array.isArray(coords)) {

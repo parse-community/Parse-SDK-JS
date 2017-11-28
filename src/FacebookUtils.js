@@ -167,6 +167,7 @@ var FacebookUtils = {
    *    yourself.
    * @param {Object} options Standard options object with success and error
    *    callbacks.
+   * @returns {Parse.Promise}
    */
   logIn(permissions, options) {
     if (!permissions || typeof permissions === 'string') {
@@ -205,6 +206,7 @@ var FacebookUtils = {
    *    yourself.
    * @param {Object} options Standard options object with success and error
    *    callbacks.
+   * @returns {Parse.Promise}
    */
   link(user, permissions, options) {
     if (!permissions || typeof permissions === 'string') {
@@ -236,6 +238,7 @@ var FacebookUtils = {
    *     current user.
    * @param {Object} options Standard options object with success and error
    *    callbacks.
+   * @returns {Parse.Promise}
    */
   unlink: function(user, options) {
     if (!initialized) {

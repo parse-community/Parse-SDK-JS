@@ -528,7 +528,7 @@ class ParseObject {
   /**
    * Gets a relation on the given class for the attribute.
    * @param String attr The attribute to get the relation for.
-   * @return {ParseRelation}
+   * @return {Parse.Relation}
    */
   relation(attr: string): ParseRelation {
     var value = this.get(attr);

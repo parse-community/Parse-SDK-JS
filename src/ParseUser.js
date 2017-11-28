@@ -76,7 +76,6 @@ class ParseUser extends ParseObject {
   /**
    * Unlike in the Android/iOS SDKs, logInWith is unnecessary, since you can
    * call linkWith on the user (even if it doesn't exist yet on the server).
-
    */
   _linkWith(provider: any, options: { authData?: AuthData }): ParsePromise {
     var authType;
@@ -677,6 +676,7 @@ class ParseUser extends ParseObject {
    *     forgot their password.
    * @param {Object} options A Backbone-style options object.
    * @static
+   * @returns {Parse.Promise}
    */
   static requestPasswordReset(email, options) {
     options = options || {};
