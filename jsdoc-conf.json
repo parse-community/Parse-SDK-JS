@@ -4,9 +4,8 @@
       "plugins": ["transform-flow-strip-types"]
   },
   "source": {
-    "include": ["./package.json", "./README.md", "./src/Analytics.js", "./src/Cloud.js", "./src/Push.js", "./src/FacebookUtils.js", "./src/LiveQueryClient.js", "./src/LiveQuerySubscription.js" ],
+    "include": ["./package.json", "./README.md"],
     "exclude": [ /* array of paths to exclude */ ],
-    "includePattern": "src/Parse.+\\.js(doc|x)?$",
     "excludePattern": "(^|\\/|\\\\)_"
   },
   "templates": {
