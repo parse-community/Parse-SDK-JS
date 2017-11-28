@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: Cloud</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: Cloud</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>
+            <span class="ancestors"><a href="Parse.html">Parse</a>.</span>Cloud</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".run"><span class="type-signature">(static) </span>run<span class="signature">(name, data, options)</span><span class="type-signature"> &rarr; {<a href="Parse.Promise.html">Parse.Promise</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Makes a call to a cloud function.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The function name.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The parameters to send to the cloud function.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A Backbone-style options object
+options.success, if set, should be a function to handle a successful
+call to a cloud function.  options.error should be a function that
+handles an error running the cloud function.  Both functions are
+optional.  Both functions take a single argument.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A promise that will be resolved with the result
+of the function.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Parse.Promise.html">Parse.Promise</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Parse.html">Parse</a></li><li><a href="Parse.ACL.html">ACL</a></li><li><a href="Parse.Analytics.html">Analytics</a></li><li><a href="Parse.Cloud.html">Cloud</a></li><li><a href="Parse.Config.html">Config</a></li><li><a href="Parse.Error.html">Error</a></li><li><a href="Parse.FacebookUtils.html">FacebookUtils</a></li><li><a href="Parse.File.html">File</a></li><li><a href="Parse.GeoPoint.html">GeoPoint</a></li><li><a href="Parse.LiveQuery.html">LiveQuery</a></li><li><a href="Parse.LiveQueryClient.html">LiveQueryClient</a></li><li><a href="Parse.LiveQuerySubscription.html">LiveQuerySubscription</a></li><li><a href="Parse.Object.html">Object</a></li><li><a href="Parse.Polygon.html">Polygon</a></li><li><a href="Parse.Promise.html">Promise</a></li><li><a href="Parse.Push.html">Push</a></li><li><a href="Parse.Query.html">Query</a></li><li><a href="Parse.Relation.html">Relation</a></li><li><a href="Parse.Role.html">Role</a></li><li><a href="Parse.Session.html">Session</a></li><li><a href="Parse.User.html">User</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Nov 27 2017 21:04:38 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
