@@ -1,0 +1,20 @@
+{
+  "plugins": ["node_modules/jsdoc-babel"],
+  "babel": {
+      "plugins": ["transform-flow-strip-types"]
+  },
+  "source": {
+    "include": ["./package.json", "./README.md"],
+    "excludePattern": "(^|\\/|\\\\)_"
+  },
+  "templates": {
+    "default": {
+      "outputSourceFiles": false
+    },
+    "cleverLinks": false,
+    "monospaceLinks": false
+  },
+  "opts": {
+    "recurse": true
+  }
+}

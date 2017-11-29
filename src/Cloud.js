@@ -24,11 +24,13 @@ import ParsePromise from './ParsePromise';
  *
  * @class Parse.Cloud
  * @static
+ * @hideconstructor
  */
 
  /**
   * Makes a call to a cloud function.
   * @method run
+  * @name Parse.Cloud.run
   * @param {String} name The function name.
   * @param {Object} data The parameters to send to the cloud function.
   * @param {Object} options A Backbone-style options object

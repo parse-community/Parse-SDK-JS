@@ -53,12 +53,15 @@
     "gulp-uglify": "^2.1.2",
     "jasmine-reporters": "~2.2.1",
     "jest-cli": "^19.0.2",
+    "jsdoc": "^3.5.5",
+    "jsdoc-babel": "^0.3.0",
     "vinyl-source-stream": "^1.1.0"
   },
   "scripts": {
     "build": "./build_releases.sh",
     "release": "./build_releases.sh && npm publish",
-    "test": "PARSE_BUILD=node jest"
+    "test": "PARSE_BUILD=node jest",
+    "docs": "jsdoc -c ./jsdoc-conf.json ./src"
   },
   "jest": {
     "automock": true,

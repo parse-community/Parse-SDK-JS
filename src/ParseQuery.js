@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015-present, Parse, LLC.
  * All rights reserved.
  *
@@ -40,12 +40,13 @@ export type QueryJSON = {
  * Converts a string into a regex that matches it.
  * Surrounding with \Q .. \E does this, we just need to escape any \E's in
  * the text separately.
+ * @private
  */
 function quote(s: string) {
   return '\\Q' + s.replace('\\E', '\\E\\\\E\\Q') + '\\E';
 }
 
-/**
+/*
  * Handles pre-populating the result data of a query with select fields,
  * making sure that the data object contains keys for all objects that have
  * been requested with a select, so that our cached state updates correctly.
@@ -116,61 +117,63 @@ function handleSelectResult(data: any, select: Array<string>){
 
 /**
  * Creates a new parse Parse.Query for the given Parse.Object subclass.
- * @class Parse.Query
- * @constructor
- * @param {} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
  *
  * <p>Parse.Query defines a query that is used to fetch Parse.Objects. The
  * most common use case is finding all objects that match a query through the
- * <code>find</code> method. For example, this sample code fetches all objects
- * of class <code>MyClass</code>. It calls a different function depending on
+ * <code>find</code> method. for example, this sample code fetches all objects
+ * of class <code>myclass</code>. it calls a different function depending on
  * whether the fetch succeeded or not.
  *
  * <pre>
- * var query = new Parse.Query(MyClass);
+ * var query = new parse.query(myclass);
  * query.find({
  *   success: function(results) {
- *     // results is an array of Parse.Object.
+ *     // results is an array of parse.object.
  *   },
  *
  *   error: function(error) {
- *     // error is an instance of Parse.Error.
+ *     // error is an instance of parse.error.
  *   }
  * });</pre></p>
  *
- * <p>A Parse.Query can also be used to retrieve a single object whose id is
- * known, through the get method. For example, this sample code fetches an
- * object of class <code>MyClass</code> and id <code>myId</code>. It calls a
+ * <p>a parse.query can also be used to retrieve a single object whose id is
+ * known, through the get method. for example, this sample code fetches an
+ * object of class <code>myclass</code> and id <code>myid</code>. it calls a
  * different function depending on whether the fetch succeeded or not.
  *
  * <pre>
- * var query = new Parse.Query(MyClass);
- * query.get(myId, {
+ * var query = new parse.query(myclass);
+ * query.get(myid, {
  *   success: function(object) {
- *     // object is an instance of Parse.Object.
+ *     // object is an instance of parse.object.
  *   },
  *
  *   error: function(object, error) {
- *     // error is an instance of Parse.Error.
+ *     // error is an instance of parse.error.
  *   }
  * });</pre></p>
  *
- * <p>A Parse.Query can also be used to count the number of objects that match
- * the query without retrieving all of those objects. For example, this
- * sample code counts the number of objects of the class <code>MyClass</code>
+ * <p>a parse.query can also be used to count the number of objects that match
+ * the query without retrieving all of those objects. for example, this
+ * sample code counts the number of objects of the class <code>myclass</code>
  * <pre>
- * var query = new Parse.Query(MyClass);
+ * var query = new parse.query(myclass);
  * query.count({
  *   success: function(number) {
- *     // There are number instances of MyClass.
+ *     // there are number instances of myclass.
  *   },
  *
  *   error: function(error) {
  *     // error is an instance of Parse.Error.
  *   }
  * });</pre></p>
+ * @alias Parse.Query
  */
-export default class ParseQuery {
+class ParseQuery {
+  /**
+   * @property className
+   * @type String
+   */
   className: string;
   _where: any;
   _include: Array<string>;
@@ -180,6 +183,9 @@ export default class ParseQuery {
   _order: Array<string>;
   _extraOptions: { [key: string]: mixed };
 
+  /**
+   * @param {(String|Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
+   */
   constructor(objectClass: string | ParseObject) {
     if (typeof objectClass === 'string') {
       if (objectClass === 'User' && CoreManager.get('PERFORM_USER_REWRITE')) {
@@ -211,7 +217,6 @@ export default class ParseQuery {
 
   /**
    * Adds constraint that at least one of the passed in queries matches.
-   * @method _orQuery
    * @param {Array} queries
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -237,7 +242,6 @@ export default class ParseQuery {
 
   /**
    * Returns a JSON representation of this query.
-   * @method toJSON
    * @return {Object} The JSON representation of the query.
    */
   toJSON(): QueryJSON {
@@ -284,7 +288,6 @@ export default class ParseQuery {
    *
    * and continue to query...
    * query.skip(100).find().then(...);
-   * @method withJSON
    * @param {QueryJSON} json from Parse.Query.toJSON() method
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -341,7 +344,6 @@ export default class ParseQuery {
    * the server.  Either options.success or options.error is called when the
    * find completes.
    *
-   * @method get
    * @param {String} objectId The id of the object to be fetched.
    * @param {Object} options A Backbone-style options object.
    * Valid options are:<ul>
@@ -385,7 +387,6 @@ export default class ParseQuery {
    * Either options.success or options.error is called when the find
    * completes.
    *
-   * @method find
    * @param {Object} options A Backbone-style options object. Valid options
    * are:<ul>
    *   <li>success: Function to call when the find completes successfully.
@@ -444,7 +445,6 @@ export default class ParseQuery {
    * Either options.success or options.error is called when the count
    * completes.
    *
-   * @method count
    * @param {Object} options A Backbone-style options object. Valid options
    * are:<ul>
    *   <li>success: Function to call when the count completes successfully.
@@ -490,7 +490,6 @@ export default class ParseQuery {
    * Either options.success or options.error is called when it completes.
    * success is passed the object if there is one. otherwise, undefined.
    *
-   * @method first
    * @param {Object} options A Backbone-style options object. Valid options
    * are:<ul>
    *   <li>success: Function to call when the find completes successfully.
@@ -553,7 +552,6 @@ export default class ParseQuery {
    * promise, then iteration will stop with that error. The items are
    * processed in an unspecified order. The query may not have any sort order,
    * and may not use limit or skip.
-   * @method each
    * @param {Function} callback Callback that will be called with each result
    *     of the query.
    * @param {Object} options A Backbone-style options object. Valid options
@@ -647,7 +645,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be equal to the provided value.
-   * @method equalTo
    * @param {String} key The key to check.
    * @param value The value that the Parse.Object must contain.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -664,7 +661,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be not equal to the provided value.
-   * @method notEqualTo
    * @param {String} key The key to check.
    * @param value The value that must not be equalled.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -676,7 +672,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be less than the provided value.
-   * @method lessThan
    * @param {String} key The key to check.
    * @param value The value that provides an upper bound.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -688,7 +683,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be greater than the provided value.
-   * @method greaterThan
    * @param {String} key The key to check.
    * @param value The value that provides an lower bound.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -700,7 +694,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be less than or equal to the provided value.
-   * @method lessThanOrEqualTo
    * @param {String} key The key to check.
    * @param value The value that provides an upper bound.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -712,7 +705,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be greater than or equal to the provided value.
-   * @method greaterThanOrEqualTo
    * @param {String} key The key to check.
    * @param value The value that provides an lower bound.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -724,7 +716,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be contained in the provided list of values.
-   * @method containedIn
    * @param {String} key The key to check.
    * @param {Array} values The values that will match.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -736,7 +727,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * not be contained in the provided list of values.
-   * @method notContainedIn
    * @param {String} key The key to check.
    * @param {Array} values The values that will not match.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -748,7 +738,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * contain each one of the provided list of values.
-   * @method containsAll
    * @param {String} key The key to check.  This key's value must be an array.
    * @param {Array} values The values that will match.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -759,7 +748,6 @@ export default class ParseQuery {
 
   /**
    * Adds a constraint for finding objects that contain the given key.
-   * @method exists
    * @param {String} key The key that should exist.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -769,7 +757,6 @@ export default class ParseQuery {
 
   /**
    * Adds a constraint for finding objects that do not contain a given key.
-   * @method doesNotExist
    * @param {String} key The key that should not exist
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -781,7 +768,6 @@ export default class ParseQuery {
    * Adds a regular expression constraint for finding string values that match
    * the provided regular expression.
    * This may be slow for large datasets.
-   * @method matches
    * @param {String} key The key that the string to match is stored in.
    * @param {RegExp} regex The regular expression pattern to match.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -806,7 +792,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint that requires that a key's value matches a Parse.Query
    * constraint.
-   * @method matchesQuery
    * @param {String} key The key that the contains the object to match the
    *                     query.
    * @param {Parse.Query} query The query that should match.
@@ -821,7 +806,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint that requires that a key's value not matches a
    * Parse.Query constraint.
-   * @method doesNotMatchQuery
    * @param {String} key The key that the contains the object to match the
    *                     query.
    * @param {Parse.Query} query The query that should not match.
@@ -836,7 +820,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint that requires that a key's value matches a value in
    * an object returned by a different Parse.Query.
-   * @method matchesKeyInQuery
    * @param {String} key The key that contains the value that is being
    *                     matched.
    * @param {String} queryKey The key in the objects returned by the query to
@@ -856,7 +839,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint that requires that a key's value not match a value in
    * an object returned by a different Parse.Query.
-   * @method doesNotMatchKeyInQuery
    * @param {String} key The key that contains the value that is being
    *                     excluded.
    * @param {String} queryKey The key in the objects returned by the query to
@@ -876,7 +858,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint for finding string values that contain a provided
    * string.  This may be slow for large datasets.
-   * @method contains
    * @param {String} key The key that the string to match is stored in.
    * @param {String} substring The substring that the value must contain.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -892,7 +873,6 @@ export default class ParseQuery {
    * Adds a constraint for finding string values that start with a provided
    * string.  This query will use the backend index, so it will be fast even
    * for large datasets.
-   * @method startsWith
    * @param {String} key The key that the string to match is stored in.
    * @param {String} prefix The substring that the value must start with.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -907,7 +887,6 @@ export default class ParseQuery {
   /**
    * Adds a constraint for finding string values that end with a provided
    * string.  This will be slow for large datasets.
-   * @method endsWith
    * @param {String} key The key that the string to match is stored in.
    * @param {String} suffix The substring that the value must end with.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -922,7 +901,6 @@ export default class ParseQuery {
   /**
    * Adds a proximity based constraint for finding objects with key point
    * values near the point given.
-   * @method near
    * @param {String} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -938,7 +916,6 @@ export default class ParseQuery {
   /**
    * Adds a proximity based constraint for finding objects with key point
    * values near the point given and within the maximum distance given.
-   * @method withinRadians
    * @param {String} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
    * @param {Number} maxDistance Maximum distance (in radians) of results to
@@ -954,7 +931,6 @@ export default class ParseQuery {
    * Adds a proximity based constraint for finding objects with key point
    * values near the point given and within the maximum distance given.
    * Radius of earth used is 3958.8 miles.
-   * @method withinMiles
    * @param {String} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
    * @param {Number} maxDistance Maximum distance (in miles) of results to
@@ -969,7 +945,6 @@ export default class ParseQuery {
    * Adds a proximity based constraint for finding objects with key point
    * values near the point given and within the maximum distance given.
    * Radius of earth used is 6371.0 kilometers.
-   * @method withinKilometers
    * @param {String} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
    * @param {Number} maxDistance Maximum distance (in kilometers) of results
@@ -984,7 +959,6 @@ export default class ParseQuery {
    * Adds a constraint to the query that requires a particular key's
    * coordinates be contained within a given rectangular geographic bounding
    * box.
-   * @method withinGeoBox
    * @param {String} key The key to be constrained.
    * @param {Parse.GeoPoint} southwest
    *     The lower-left inclusive corner of the box.
@@ -1010,7 +984,6 @@ export default class ParseQuery {
    *
    * Polygon must have at least 3 points
    *
-   * @method withinPolygon
    * @param {String} key The key to be constrained.
    * @param {Array} array of geopoints
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -1023,7 +996,6 @@ export default class ParseQuery {
    * Add a constraint to the query that requires a particular key's
    * coordinates that contains a ParseGeoPoint
    *
-   * @method polygonContains
    * @param {String} key The key to be constrained.
    * @param {Parse.GeoPoint} GeoPoint
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -1037,8 +1009,7 @@ export default class ParseQuery {
   /**
    * Sorts the results in ascending order by the given key.
    *
-   * @method ascending
-   * @param {(String|String[]|...String} key The key to order by, which is a
+   * @param {(String|String[]|...String)} key The key to order by, which is a
    * string of comma separated values, or an Array of keys, or multiple keys.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1051,8 +1022,7 @@ export default class ParseQuery {
    * Sorts the results in ascending order by the given key,
    * but can also add secondary sort descriptors without overwriting _order.
    *
-   * @method addAscending
-   * @param {(String|String[]|...String} key The key to order by, which is a
+   * @param {(String|String[]|...String)} key The key to order by, which is a
    * string of comma separated values, or an Array of keys, or multiple keys.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1073,8 +1043,7 @@ export default class ParseQuery {
   /**
    * Sorts the results in descending order by the given key.
    *
-   * @method descending
-   * @param {(String|String[]|...String} key The key to order by, which is a
+   * @param {(String|String[]|...String)} key The key to order by, which is a
    * string of comma separated values, or an Array of keys, or multiple keys.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1087,8 +1056,7 @@ export default class ParseQuery {
    * Sorts the results in descending order by the given key,
    * but can also add secondary sort descriptors without overwriting _order.
    *
-   * @method addDescending
-   * @param {(String|String[]|...String} key The key to order by, which is a
+   * @param {(String|String[]|...String)} key The key to order by, which is a
    * string of comma separated values, or an Array of keys, or multiple keys.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1116,7 +1084,6 @@ export default class ParseQuery {
    * Sets the number of results to skip before returning any results.
    * This is useful for pagination.
    * Default is to skip zero results.
-   * @method skip
    * @param {Number} n the number of results to skip.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1131,7 +1098,6 @@ export default class ParseQuery {
   /**
    * Sets the limit of the number of results to return. The default limit is
    * 100, with a maximum of 1000 results being returned at a time.
-   * @method limit
    * @param {Number} n the number of results to limit to.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1146,7 +1112,6 @@ export default class ParseQuery {
   /**
    * Includes nested Parse.Objects for the provided key.  You can use dot
    * notation to specify which fields in the included object are also fetched.
-   * @method include
    * @param {String} key The name of the key to include.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1165,7 +1130,6 @@ export default class ParseQuery {
    * Restricts the fields of the returned Parse.Objects to include only the
    * provided keys.  If this is called multiple times, then all of the keys
    * specified in each of the calls will be included.
-   * @method select
    * @param {Array} keys The names of the keys to include.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1185,7 +1149,6 @@ export default class ParseQuery {
 
   /**
    * Subscribe this query to get liveQuery updates
-   * @method subscribe
    * @return {LiveQuerySubscription} Returns the liveQuerySubscription, it's an event emitter
    * which can be used to get liveQuery updates.
    */
@@ -1201,7 +1164,6 @@ export default class ParseQuery {
    *
    * will create a compoundQuery that is an or of the query1, query2, and
    * query3.
-   * @method or
    * @param {...Parse.Query} var_args The list of queries to OR.
    * @static
    * @return {Parse.Query} The query that is the OR of the passed in queries.
@@ -1238,3 +1200,5 @@ var DefaultController = {
 };
 
 CoreManager.setQueryController(DefaultController);
+
+export default ParseQuery;
