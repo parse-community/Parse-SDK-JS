@@ -1770,16 +1770,17 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      tbd: 'exists', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      tbd: 'exists',
+      className:"Thing",
       createdAt: '2017-01-10T10:00:00Z'
     };
 
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [objectToReturn]
@@ -1792,7 +1793,7 @@ describe('ParseQuery', () => {
     var testObject;
     return q.find().then((results) => {
       testObject = results[0];
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.has("other")).toBe(false);
       expect(testObject.has("subObject")).toBe(false);
@@ -1812,12 +1813,12 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      tbd: 'exists', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      tbd: 'exists',
+      className:"Thing",
       subObject1: {foo:"bar"},
       subObject2: {foo:"bar"},
       subObject3: {foo:"bar"},
@@ -1826,6 +1827,7 @@ describe('ParseQuery', () => {
     };
 
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [objectToReturn]
@@ -1837,7 +1839,7 @@ describe('ParseQuery', () => {
     var testObject;
     return q.find().then((results) => {
       testObject = results[0];
-      
+
       expect(testObject.has("subObject1")).toBe(true);
       expect(testObject.has("subObject2")).toBe(true);
       expect(testObject.has("subObject3")).toBe(true);
@@ -1852,7 +1854,7 @@ describe('ParseQuery', () => {
       expect(testObject.has("subObject2")).toBe(false); //selected and not returned
       expect(testObject.has("subObject3")).toBe(true); //not selected, so should still be there
       expect(testObject.has("subObject4")).toBe(true); //selected and just added
-      expect(testObject.has("subObject5")).toBe(true); 
+      expect(testObject.has("subObject5")).toBe(true);
       expect(testObject.get("subObject5").subSubObject).toBeDefined();
       expect(testObject.get("subObject5").subSubObject.bar).toBeDefined(); //not selected but a sibiling was, so should still be there
     }).then(() => {
