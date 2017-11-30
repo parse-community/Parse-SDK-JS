@@ -1085,6 +1085,7 @@ describe('ParseQuery', () => {
       }
     });
 
+
     var q = new ParseQuery('Item');
     q.equalTo('size', 'small').count({
       useMasterKey: true,
@@ -1338,7 +1339,7 @@ describe('ParseQuery', () => {
   });
 
 
-  
+
   it('overrides cached object with query results', (done) => {
     jest.dontMock("../ParseObject");
     jest.resetModules();
@@ -1347,12 +1348,12 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      other: 'other', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      other: 'other',
+      className:"Thing",
       createdAt: '2017-01-10T10:00:00Z'
     };
 
@@ -1368,10 +1369,10 @@ describe('ParseQuery', () => {
     var testObject;
     q.find().then((results) => {
       testObject = results[0];
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other");
-      
+
       objectToReturn = { objectId: 'T01', name: 'Name2'};
       var q2 = new ParseQuery("Thing");
       return q2.find();
@@ -1393,13 +1394,13 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      other: 'other', 
-      tbd: 'exists', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      other: 'other',
+      tbd: 'exists',
+      className:"Thing",
       createdAt: '2017-01-10T10:00:00Z',
       subObject: {key1:"value", key2:"value2", key3:"thisWillGoAway"}
     };
@@ -1416,14 +1417,14 @@ describe('ParseQuery', () => {
     var testObject;
     return q.find().then((results) => {
       testObject = results[0];
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other");
       expect(testObject.has("tbd")).toBe(true);
       expect(testObject.get("subObject").key1).toBe("value");
       expect(testObject.get("subObject").key2).toBe("value2");
       expect(testObject.get("subObject").key3).toBe("thisWillGoAway");
-      
+
       var q2 = new ParseQuery("Thing");
       q2.select("other", "tbd", "subObject.key1", "subObject.key3");
       objectToReturn = { objectId: 'T01', other: 'other2', subObject:{key1:"updatedValue"}};
@@ -1442,7 +1443,7 @@ describe('ParseQuery', () => {
       expect(testObject.has("tbd")).toBe(false);
       expect(testObject.get("subObject").key1).toBe("updatedValue");
       expect(testObject.get("subObject").key2).toBe("value2");
-      expect(testObject.get("subObject").key3).toBeUndefined();  
+      expect(testObject.get("subObject").key3).toBeUndefined();
       done();
     }, (error) => {
       done.fail(error);
@@ -1457,12 +1458,12 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      other: 'other', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      other: 'other',
+      className:"Thing",
       createdAt: '2017-01-10T10:00:00Z'
     };
 
@@ -1478,10 +1479,10 @@ describe('ParseQuery', () => {
     var testObject;
     q.first().then((result) => {
       testObject = result;
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other");
-      
+
       objectToReturn = { objectId: 'T01', name: 'Name2'};
       var q2 = new ParseQuery("Thing");
       return q2.first();
@@ -1503,13 +1504,13 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      other: 'other', 
-      tbd: 'exists', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      other: 'other',
+      tbd: 'exists',
+      className:"Thing",
       subObject: {key1:"value", key2:"value2", key3:"thisWillGoAway"},
       createdAt: '2017-01-10T10:00:00Z',
     };
@@ -1526,11 +1527,11 @@ describe('ParseQuery', () => {
     var testObject;
     return q.first().then((result) => {
       testObject = result;
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other");
       expect(testObject.has("tbd")).toBe(true);
-      
+
       var q2 = new ParseQuery("Thing");
       q2.select("other", "tbd", "subObject.key1", "subObject.key3");
       objectToReturn = { objectId: 'T01', other: 'other2', subObject:{key1:"updatedValue"}};
@@ -1546,10 +1547,10 @@ describe('ParseQuery', () => {
     }).then(() => {
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other2");
-      expect(testObject.has("tbd")).toBe(false);  
+      expect(testObject.has("tbd")).toBe(false);
       expect(testObject.get("subObject").key1).toBe("updatedValue");
       expect(testObject.get("subObject").key2).toBe("value2");
-      expect(testObject.get("subObject").key3).toBeUndefined(); 
+      expect(testObject.get("subObject").key3).toBeUndefined();
       done();
     }, (error) => {
       done.fail(error);
@@ -1582,6 +1583,165 @@ describe('ParseQuery', () => {
         size: 'medium'
       }
     });
+  });
 
+  it('can issue a distinct query', (done) => {
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          distinct: 'size',
+          where: {
+            size: 'small'
+          }
+        });
+        expect(options).toEqual({ useMasterKey: true });
+        return ParsePromise.as({
+          results: ['L'],
+        });
+      }
+    });
+
+    var q = new ParseQuery('Item');
+    q.equalTo('size', 'small').distinct('size').then((results) => {
+      expect(results[0]).toBe('L');
+      done();
+    });
+  });
+
+  it('can pass options to a distinct query', (done) => {
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          distinct: 'size',
+          where: {
+            size: 'small'
+          }
+        });
+        expect(options).toEqual({
+          useMasterKey: true,
+          sessionToken: '1234'
+        });
+        return ParsePromise.as({
+          results: ['L']
+        });
+      }
+    });
+
+
+    var q = new ParseQuery('Item');
+    q.equalTo('size', 'small').distinct('size', {
+      sessionToken: '1234'
+    }).then((results) => {
+      expect(results[0]).toBe('L');
+      done();
+    });
+  });
+
+  it('can issue an aggregate query with array pipeline', (done) => {
+    const pipeline = [
+      { group: { objectId: '$name' } }
+    ];
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          group: { objectId: '$name' }
+        });
+        expect(options).toEqual({ useMasterKey: true });
+        return ParsePromise.as({
+          results: [],
+        });
+      }
+    });
+
+    var q = new ParseQuery('Item');
+    q.aggregate(pipeline).then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
+  });
+
+  it('can issue an aggregate query with object pipeline', (done) => {
+    const pipeline = {
+      group: { objectId: '$name' }
+    };
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          group: { objectId: '$name' }
+        });
+        expect(options).toEqual({ useMasterKey: true });
+        return ParsePromise.as({
+          results: [],
+        });
+      }
+    });
+
+    var q = new ParseQuery('Item');
+    q.aggregate(pipeline).then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
+  });
+
+  it('cannot issue an aggregate query with invalid pipeline', (done) => {
+    const pipeline = 1234;
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          group: { objectId: '$name' }
+        });
+        expect(options).toEqual({ useMasterKey: true });
+        return ParsePromise.as({
+          results: [],
+        });
+      }
+    });
+
+    try {
+      var q = new ParseQuery('Item');
+      q.aggregate(pipeline).then(() => {});
+    } catch (e) {
+      done();
+    }
+  });
+
+  it('can pass options to an aggregate query', (done) => {
+    const pipeline = [
+      { group: { objectId: '$name' } }
+    ];
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          group: { objectId: '$name' }
+        });
+        expect(options).toEqual({
+          useMasterKey: true,
+          sessionToken: '1234'
+        });
+        return ParsePromise.as({
+          results: []
+        });
+      }
+    });
+
+    var q = new ParseQuery('Item');
+    q.aggregate(pipeline, {
+      sessionToken: '1234'
+    }).then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
   });
 });
