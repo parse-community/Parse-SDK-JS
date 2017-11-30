@@ -70,7 +70,7 @@ class ParseSchema {
     options = options || {};
     const controller = CoreManager.getSchemaController();
 
-    return controller.get('', {}, options)
+    return controller.get('', options)
       .then((response) => {
         if (response.results.length === 0) {
           throw new Error('Schema not found.');
