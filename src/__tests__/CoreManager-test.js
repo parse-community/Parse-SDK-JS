@@ -220,13 +220,15 @@ describe('CoreManager', () => {
     );
 
     expect(CoreManager.setQueryController.bind(null, {
-      find: function() {}
+      find: function() {},
+      aggregate: function() {}
     })).not.toThrow();
   });
 
   it('can set and get QueryController', () => {
     var controller = {
-      find: function() {}
+      find: function() {},
+      aggregate: function() {}
     };
 
     CoreManager.setQueryController(controller);
