@@ -269,7 +269,7 @@ module.exports = {
   },
 
   setQueryController(controller: QueryController) {
-    requireMethods('QueryController', ['find'], controller);
+    requireMethods('QueryController', ['find', 'aggregate'], controller);
     config['QueryController'] = controller;
   },
 

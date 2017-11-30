@@ -885,6 +885,7 @@ describe('ParseQuery', () => {
 
   it('can get the first object of a query', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -917,6 +918,7 @@ describe('ParseQuery', () => {
 
   it('can pass options to a first() query', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -947,6 +949,7 @@ describe('ParseQuery', () => {
 
   it('can get a single object by id', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -979,6 +982,7 @@ describe('ParseQuery', () => {
 
   it('will error when getting a nonexistent object', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1008,6 +1012,7 @@ describe('ParseQuery', () => {
 
   it('can pass options to a get() query', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1039,6 +1044,7 @@ describe('ParseQuery', () => {
 
   it('can issue a count query', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1065,6 +1071,7 @@ describe('ParseQuery', () => {
 
   it('can pass options to a count query', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1098,6 +1105,7 @@ describe('ParseQuery', () => {
 
   it('can issue a query to the controller', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1146,6 +1154,7 @@ describe('ParseQuery', () => {
 
   it('can pass options to find()', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1179,6 +1188,7 @@ describe('ParseQuery', () => {
 
   it('can iterate over results with each()', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1235,6 +1245,7 @@ describe('ParseQuery', () => {
 
   it('can pass options to each()', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1303,6 +1314,7 @@ describe('ParseQuery', () => {
 
   it('does not override the className if it comes from the server', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [
@@ -1321,6 +1333,7 @@ describe('ParseQuery', () => {
 
   it('can override the className with a name from the server', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [
@@ -1358,6 +1371,7 @@ describe('ParseQuery', () => {
     };
 
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [objectToReturn]
@@ -1406,6 +1420,7 @@ describe('ParseQuery', () => {
     };
 
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [objectToReturn]
@@ -1468,6 +1483,7 @@ describe('ParseQuery', () => {
     };
 
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [objectToReturn]
@@ -1516,6 +1532,7 @@ describe('ParseQuery', () => {
     };
 
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [objectToReturn]
