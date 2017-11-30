@@ -52,6 +52,7 @@ class ParseSchema {
 
   /**
    * Static method to get all schemas
+   *
    * @param {Object} options A Backbone-style options object.
    * Valid options are:<ul>
    *   <li>success: A Backbone-style success callback
@@ -80,6 +81,7 @@ class ParseSchema {
 
   /**
    * Get the Schema from Parse
+   *
    * @param {Object} options A Backbone-style options object.
    * Valid options are:<ul>
    *   <li>success: A Backbone-style success callback
@@ -110,6 +112,7 @@ class ParseSchema {
 
   /**
    * Create a new Schema on Parse
+   *
    * @param {Object} options A Backbone-style options object.
    * Valid options are:<ul>
    *   <li>success: A Backbone-style success callback
@@ -141,7 +144,8 @@ class ParseSchema {
   }
 
   /**
-   * Update a Schema from Parse
+   * Update a Schema on Parse
+   *
    * @param {Object} options A Backbone-style options object.
    * Valid options are:<ul>
    *   <li>success: A Backbone-style success callback
@@ -177,6 +181,7 @@ class ParseSchema {
 
   /**
    * Removing a Schema from Parse
+   *
    * @param {Object} options A Backbone-style options object.
    * Valid options are:<ul>
    *   <li>success: A Backbone-style success callback
@@ -214,7 +219,8 @@ class ParseSchema {
 
   /**
    * Adding a Field to Create / Update a Schema
-   * @param {String} name Name of the field will be created on Parse
+   *
+   * @param {String} name Name of the field that will be created on Parse
    * @param {String} type TheCan be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
@@ -235,8 +241,9 @@ class ParseSchema {
 
   /**
    * Adding an Index to Create / Update a Schema
-   * @param {String} name Name of the field will be created on Parse
-   * @param {String} type TheCan be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)
+   *
+   * @param {String} name Name of the field that will be created on Parse
+   * @param {String} type Can be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addIndex(name: string, index: any) {
@@ -254,7 +261,8 @@ class ParseSchema {
 
   /**
    * Adding String Field
-   * @param {String} name Name of the field will be created on Parse
+   *
+   * @param {String} name Name of the field that will be created on Parse
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addString(name: string) {
@@ -263,7 +271,8 @@ class ParseSchema {
 
   /**
    * Adding Number Field
-   * @param {String} name Name of the field will be created on Parse
+   *
+   * @param {String} name Name of the field that will be created on Parse
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addNumber(name: string) {
@@ -272,7 +281,8 @@ class ParseSchema {
 
   /**
    * Adding Boolean Field
-   * @param {String} name Name of the field will be created on Parse
+   *
+   * @param {String} name Name of the field that will be created on Parse
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addBoolean(name: string) {
@@ -281,7 +291,8 @@ class ParseSchema {
 
   /**
    * Adding Date Field
-   * @param {String} name Name of the field will be created on Parse
+   *
+   * @param {String} name Name of the field that will be created on Parse
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addDate(name: string) {
@@ -290,7 +301,8 @@ class ParseSchema {
 
   /**
    * Adding File Field
-   * @param {String} name Name of the field will be created on Parse
+   *
+   * @param {String} name Name of the field that will be created on Parse
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addFile(name: string) {
@@ -299,7 +311,8 @@ class ParseSchema {
 
   /**
    * Adding GeoPoint Field
-   * @param {String} name Name of the field will be created on Parse
+   *
+   * @param {String} name Name of the field that will be created on Parse
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addGeoPoint(name: string) {
@@ -308,7 +321,8 @@ class ParseSchema {
 
   /**
    * Adding Array Field
-   * @param {String} name Name of the field will be created on Parse
+   *
+   * @param {String} name Name of the field that will be created on Parse
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addArray(name: string) {
@@ -317,7 +331,8 @@ class ParseSchema {
 
   /**
    * Adding Object Field
-   * @param {String} name Name of the field will be created on Parse
+   *
+   * @param {String} name Name of the field that will be created on Parse
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addObject(name: string) {
@@ -326,7 +341,8 @@ class ParseSchema {
 
   /**
    * Adding Pointer Field
-   * @param {String} name Name of the field will be created on Parse
+   *
+   * @param {String} name Name of the field that will be created on Parse
    * @param {String} targetClass Name of the target Pointer Class
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
@@ -348,7 +364,8 @@ class ParseSchema {
 
   /**
    * Adding Relation Field
-   * @param {String} name Name of the field will be created on Parse
+   *
+   * @param {String} name Name of the field that will be created on Parse
    * @param {String} targetClass Name of the target Pointer Class
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
@@ -370,7 +387,8 @@ class ParseSchema {
 
   /**
    * Deleting a Field to Update on a Schema
-   * @param {String} name Name of the field will be created on Parse
+   *
+   * @param {String} name Name of the field that will be created on Parse
    * @param {String} targetClass Name of the target Pointer Class
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
@@ -380,7 +398,8 @@ class ParseSchema {
 
    /**
    * Deleting an Index to Update on a Schema
-   * @param {String} name Name of the field will be created on Parse
+   *
+   * @param {String} name Name of the field that will be created on Parse
    * @param {String} targetClass Name of the target Pointer Class
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
