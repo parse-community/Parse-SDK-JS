@@ -485,6 +485,91 @@ class ParseQuery {
   }
 
   /**
+   * Executes a distinct query and returns unique values
+   *
+   * @param {String} key A field to find distinct values
+   * @param {Object} options A Backbone-style options object. Valid options
+   * are:<ul>
+   *   <li>success: Function to call when the count completes successfully.
+   *   <li>error: Function to call when the find fails.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   *
+   * @return {Parse.Promise} A promise that is resolved with the query completes.
+   */
+  distinct(key: string, options?: FullOptions): ParsePromise {
+    options = options || {};
+
+    const distinctOptions = {
+      useMasterKey: true
+    };
+    if (options.hasOwnProperty('sessionToken')) {
+      distinctOptions.sessionToken = options.sessionToken;
+    }
+    const controller = CoreManager.getQueryController();
+    const params = {
+      distinct: key,
+      where: this._where
+    };
+
+    return controller.aggregate(
+      this.className,
+      params,
+      distinctOptions
+    ).then((results) => {
+      return results.results;
+    })._thenRunCallbacks(options);
+  }
+
+   /**
+   * Executes an aggregate query and returns aggregate results
+   *
+   * @param {Mixed} pipeline Array or Object of stages to process query
+   * @param {Object} options A Backbone-style options object. Valid options
+   * are:<ul>
+   *   <li>success: Function to call when the count completes successfully.
+   *   <li>error: Function to call when the find fails.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   *
+   * @return {Parse.Promise} A promise that is resolved with the query completes.
+   */
+  aggregate(pipeline: mixed, options?: FullOptions): ParsePromise {
+    options = options || {};
+
+    const aggregateOptions = {
+      useMasterKey: true
+    };
+    if (options.hasOwnProperty('sessionToken')) {
+      aggregateOptions.sessionToken = options.sessionToken;
+    }
+    const controller = CoreManager.getQueryController();
+    let stages = {};
+
+    if (Array.isArray(pipeline)) {
+      pipeline.forEach((stage) => {
+        for (let op in stage) {
+          stages[op] = stage[op];
+        }
+      });
+    } else if (pipeline && typeof pipeline === 'object') {
+      stages = pipeline;
+    } else {
+      throw new Error('Invalid pipeline must be Array or Object');
+    }
+
+    return controller.aggregate(
+      this.className,
+      stages,
+      aggregateOptions
+    ).then((results) => {
+      return results.results;
+    })._thenRunCallbacks(options);
+  }
+
+  /**
    * Retrieves at most one Parse.Object that satisfies this query.
    *
    * Either options.success or options.error is called when it completes.
@@ -1193,6 +1278,17 @@ var DefaultController = {
     return RESTController.request(
       'GET',
       'classes/' + className,
+      params,
+      options
+    );
+  },
+
+  aggregate(className: string, params: any, options: RequestOptions): ParsePromise {
+    const RESTController = CoreManager.getRESTController();
+
+    return RESTController.request(
+      'GET',
+      'aggregate/' + className,
       params,
       options
     );

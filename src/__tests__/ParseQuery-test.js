@@ -885,6 +885,7 @@ describe('ParseQuery', () => {
 
   it('can get the first object of a query', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -917,6 +918,7 @@ describe('ParseQuery', () => {
 
   it('can pass options to a first() query', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -947,6 +949,7 @@ describe('ParseQuery', () => {
 
   it('can get a single object by id', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -979,6 +982,7 @@ describe('ParseQuery', () => {
 
   it('will error when getting a nonexistent object', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1008,6 +1012,7 @@ describe('ParseQuery', () => {
 
   it('can pass options to a get() query', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1039,6 +1044,7 @@ describe('ParseQuery', () => {
 
   it('can issue a count query', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1065,6 +1071,7 @@ describe('ParseQuery', () => {
 
   it('can pass options to a count query', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1085,6 +1092,7 @@ describe('ParseQuery', () => {
       }
     });
 
+
     var q = new ParseQuery('Item');
     q.equalTo('size', 'small').count({
       useMasterKey: true,
@@ -1097,6 +1105,7 @@ describe('ParseQuery', () => {
 
   it('can issue a query to the controller', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1145,6 +1154,7 @@ describe('ParseQuery', () => {
 
   it('can pass options to find()', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1178,6 +1188,7 @@ describe('ParseQuery', () => {
 
   it('can iterate over results with each()', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1234,6 +1245,7 @@ describe('ParseQuery', () => {
 
   it('can pass options to each()', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
@@ -1302,6 +1314,7 @@ describe('ParseQuery', () => {
 
   it('does not override the className if it comes from the server', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [
@@ -1320,6 +1333,7 @@ describe('ParseQuery', () => {
 
   it('can override the className with a name from the server', (done) => {
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [
@@ -1338,7 +1352,7 @@ describe('ParseQuery', () => {
   });
 
 
-  
+
   it('overrides cached object with query results', (done) => {
     jest.dontMock("../ParseObject");
     jest.resetModules();
@@ -1347,16 +1361,17 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      other: 'other', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      other: 'other',
+      className:"Thing",
       createdAt: '2017-01-10T10:00:00Z'
     };
 
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [objectToReturn]
@@ -1368,10 +1383,10 @@ describe('ParseQuery', () => {
     var testObject;
     q.find().then((results) => {
       testObject = results[0];
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other");
-      
+
       objectToReturn = { objectId: 'T01', name: 'Name2'};
       var q2 = new ParseQuery("Thing");
       return q2.find();
@@ -1393,18 +1408,19 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      other: 'other', 
-      tbd: 'exists', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      other: 'other',
+      tbd: 'exists',
+      className:"Thing",
       createdAt: '2017-01-10T10:00:00Z',
       subObject: {key1:"value", key2:"value2", key3:"thisWillGoAway"}
     };
 
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [objectToReturn]
@@ -1416,14 +1432,14 @@ describe('ParseQuery', () => {
     var testObject;
     return q.find().then((results) => {
       testObject = results[0];
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other");
       expect(testObject.has("tbd")).toBe(true);
       expect(testObject.get("subObject").key1).toBe("value");
       expect(testObject.get("subObject").key2).toBe("value2");
       expect(testObject.get("subObject").key3).toBe("thisWillGoAway");
-      
+
       var q2 = new ParseQuery("Thing");
       q2.select("other", "tbd", "subObject.key1", "subObject.key3");
       objectToReturn = { objectId: 'T01', other: 'other2', subObject:{key1:"updatedValue"}};
@@ -1442,7 +1458,7 @@ describe('ParseQuery', () => {
       expect(testObject.has("tbd")).toBe(false);
       expect(testObject.get("subObject").key1).toBe("updatedValue");
       expect(testObject.get("subObject").key2).toBe("value2");
-      expect(testObject.get("subObject").key3).toBeUndefined();  
+      expect(testObject.get("subObject").key3).toBeUndefined();
       done();
     }, (error) => {
       done.fail(error);
@@ -1457,16 +1473,17 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      other: 'other', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      other: 'other',
+      className:"Thing",
       createdAt: '2017-01-10T10:00:00Z'
     };
 
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [objectToReturn]
@@ -1478,10 +1495,10 @@ describe('ParseQuery', () => {
     var testObject;
     q.first().then((result) => {
       testObject = result;
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other");
-      
+
       objectToReturn = { objectId: 'T01', name: 'Name2'};
       var q2 = new ParseQuery("Thing");
       return q2.first();
@@ -1503,18 +1520,19 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      other: 'other', 
-      tbd: 'exists', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      other: 'other',
+      tbd: 'exists',
+      className:"Thing",
       subObject: {key1:"value", key2:"value2", key3:"thisWillGoAway"},
       createdAt: '2017-01-10T10:00:00Z',
     };
 
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [objectToReturn]
@@ -1526,11 +1544,11 @@ describe('ParseQuery', () => {
     var testObject;
     return q.first().then((result) => {
       testObject = result;
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other");
       expect(testObject.has("tbd")).toBe(true);
-      
+
       var q2 = new ParseQuery("Thing");
       q2.select("other", "tbd", "subObject.key1", "subObject.key3");
       objectToReturn = { objectId: 'T01', other: 'other2', subObject:{key1:"updatedValue"}};
@@ -1546,10 +1564,10 @@ describe('ParseQuery', () => {
     }).then(() => {
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.get("other")).toBe("other2");
-      expect(testObject.has("tbd")).toBe(false);  
+      expect(testObject.has("tbd")).toBe(false);
       expect(testObject.get("subObject").key1).toBe("updatedValue");
       expect(testObject.get("subObject").key2).toBe("value2");
-      expect(testObject.get("subObject").key3).toBeUndefined(); 
+      expect(testObject.get("subObject").key3).toBeUndefined();
       done();
     }, (error) => {
       done.fail(error);
@@ -1582,7 +1600,166 @@ describe('ParseQuery', () => {
         size: 'medium'
       }
     });
+  });
 
+  it('can issue a distinct query', (done) => {
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          distinct: 'size',
+          where: {
+            size: 'small'
+          }
+        });
+        expect(options).toEqual({ useMasterKey: true });
+        return ParsePromise.as({
+          results: ['L'],
+        });
+      }
+    });
+
+    var q = new ParseQuery('Item');
+    q.equalTo('size', 'small').distinct('size').then((results) => {
+      expect(results[0]).toBe('L');
+      done();
+    });
+  });
+
+  it('can pass options to a distinct query', (done) => {
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          distinct: 'size',
+          where: {
+            size: 'small'
+          }
+        });
+        expect(options).toEqual({
+          useMasterKey: true,
+          sessionToken: '1234'
+        });
+        return ParsePromise.as({
+          results: ['L']
+        });
+      }
+    });
+
+
+    var q = new ParseQuery('Item');
+    q.equalTo('size', 'small').distinct('size', {
+      sessionToken: '1234'
+    }).then((results) => {
+      expect(results[0]).toBe('L');
+      done();
+    });
+  });
+
+  it('can issue an aggregate query with array pipeline', (done) => {
+    const pipeline = [
+      { group: { objectId: '$name' } }
+    ];
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          group: { objectId: '$name' }
+        });
+        expect(options).toEqual({ useMasterKey: true });
+        return ParsePromise.as({
+          results: [],
+        });
+      }
+    });
+
+    var q = new ParseQuery('Item');
+    q.aggregate(pipeline).then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
+  });
+
+  it('can issue an aggregate query with object pipeline', (done) => {
+    const pipeline = {
+      group: { objectId: '$name' }
+    };
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          group: { objectId: '$name' }
+        });
+        expect(options).toEqual({ useMasterKey: true });
+        return ParsePromise.as({
+          results: [],
+        });
+      }
+    });
+
+    var q = new ParseQuery('Item');
+    q.aggregate(pipeline).then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
+  });
+
+  it('cannot issue an aggregate query with invalid pipeline', (done) => {
+    const pipeline = 1234;
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          group: { objectId: '$name' }
+        });
+        expect(options).toEqual({ useMasterKey: true });
+        return ParsePromise.as({
+          results: [],
+        });
+      }
+    });
+
+    try {
+      var q = new ParseQuery('Item');
+      q.aggregate(pipeline).then(() => {});
+    } catch (e) {
+      done();
+    }
+  });
+
+  it('can pass options to an aggregate query', (done) => {
+    const pipeline = [
+      { group: { objectId: '$name' } }
+    ];
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          group: { objectId: '$name' }
+        });
+        expect(options).toEqual({
+          useMasterKey: true,
+          sessionToken: '1234'
+        });
+        return ParsePromise.as({
+          results: []
+        });
+      }
+    });
+
+    var q = new ParseQuery('Item');
+    q.aggregate(pipeline, {
+      sessionToken: '1234'
+    }).then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
   });
 
   it('selecting sub-objects does not inject objects when sub-object does not exist', (done) => {
@@ -1593,16 +1770,17 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      tbd: 'exists', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      tbd: 'exists',
+      className:"Thing",
       createdAt: '2017-01-10T10:00:00Z'
     };
 
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [objectToReturn]
@@ -1615,7 +1793,7 @@ describe('ParseQuery', () => {
     var testObject;
     return q.find().then((results) => {
       testObject = results[0];
-      
+
       expect(testObject.get("name")).toBe("Name");
       expect(testObject.has("other")).toBe(false);
       expect(testObject.has("subObject")).toBe(false);
@@ -1635,12 +1813,12 @@ describe('ParseQuery', () => {
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
-    
-    var objectToReturn = { 
-      objectId: 'T01', 
-      name: 'Name', 
-      tbd: 'exists', 
-      className:"Thing", 
+
+    var objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      tbd: 'exists',
+      className:"Thing",
       subObject1: {foo:"bar"},
       subObject2: {foo:"bar"},
       subObject3: {foo:"bar"},
@@ -1649,6 +1827,7 @@ describe('ParseQuery', () => {
     };
 
     CoreManager.setQueryController({
+      aggregate() {},
       find(className, params, options) {
         return ParsePromise.as({
           results: [objectToReturn]
@@ -1660,7 +1839,7 @@ describe('ParseQuery', () => {
     var testObject;
     return q.find().then((results) => {
       testObject = results[0];
-      
+
       expect(testObject.has("subObject1")).toBe(true);
       expect(testObject.has("subObject2")).toBe(true);
       expect(testObject.has("subObject3")).toBe(true);
@@ -1675,7 +1854,7 @@ describe('ParseQuery', () => {
       expect(testObject.has("subObject2")).toBe(false); //selected and not returned
       expect(testObject.has("subObject3")).toBe(true); //not selected, so should still be there
       expect(testObject.has("subObject4")).toBe(true); //selected and just added
-      expect(testObject.has("subObject5")).toBe(true); 
+      expect(testObject.has("subObject5")).toBe(true);
       expect(testObject.get("subObject5").subSubObject).toBeDefined();
       expect(testObject.get("subObject5").subSubObject.bar).toBeDefined(); //not selected but a sibiling was, so should still be there
     }).then(() => {
