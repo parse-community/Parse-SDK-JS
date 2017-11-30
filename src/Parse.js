@@ -16,14 +16,15 @@ import RESTController from './RESTController';
 
 /**
  * Contains all Parse API classes and functions.
- * @class Parse
  * @static
+ * @global
+ * @class
+ * @hideconstructor
  */
 var Parse = {
   /**
    * Call this method first to set up your authentication tokens for Parse.
    * You can get your keys from the Data Browser on parse.com.
-   * @method initialize
    * @param {String} applicationId Your Parse Application ID.
    * @param {String} javaScriptKey (optional) Your Parse JavaScript Key (Not needed for parse-server)
    * @param {String} masterKey (optional) Your Parse Master Key. (Node.js only!)
@@ -48,6 +49,11 @@ var Parse = {
 };
 
 /** These legacy setters may eventually be deprecated **/
+/** 
+ * @member Parse.applicationId
+ * @type string
+ * @static
+ */
 Object.defineProperty(Parse, 'applicationId', {
   get() {
     return CoreManager.get('APPLICATION_ID');
@@ -56,6 +62,12 @@ Object.defineProperty(Parse, 'applicationId', {
     CoreManager.set('APPLICATION_ID', value);
   }
 });
+
+/** 
+ * @member Parse.javaScriptKey
+ * @type string
+ * @static
+ */
 Object.defineProperty(Parse, 'javaScriptKey', {
   get() {
     return CoreManager.get('JAVASCRIPT_KEY');
@@ -64,6 +76,12 @@ Object.defineProperty(Parse, 'javaScriptKey', {
     CoreManager.set('JAVASCRIPT_KEY', value);
   }
 });
+
+/** 
+ * @member Parse.masterKey
+ * @type string
+ * @static
+ */
 Object.defineProperty(Parse, 'masterKey', {
   get() {
     return CoreManager.get('MASTER_KEY');
@@ -72,6 +90,12 @@ Object.defineProperty(Parse, 'masterKey', {
     CoreManager.set('MASTER_KEY', value);
   }
 });
+
+/** 
+ * @member Parse.serverURL
+ * @type string
+ * @static
+ */
 Object.defineProperty(Parse, 'serverURL', {
   get() {
     return CoreManager.get('SERVER_URL');
@@ -80,6 +104,11 @@ Object.defineProperty(Parse, 'serverURL', {
     CoreManager.set('SERVER_URL', value);
   }
 });
+/** 
+ * @member Parse.liveQueryServerURL
+ * @type string
+ * @static
+ */
 Object.defineProperty(Parse, 'liveQueryServerURL', {
   get() {
     return CoreManager.get('LIVEQUERY_SERVER_URL');
@@ -88,7 +117,7 @@ Object.defineProperty(Parse, 'liveQueryServerURL', {
     CoreManager.set('LIVEQUERY_SERVER_URL', value);
   }
 });
-/** End setters **/
+/* End setters */
 
 Parse.ACL = require('./ParseACL').default;
 Parse.Analytics = require('./Analytics');

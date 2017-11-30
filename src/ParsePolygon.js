@@ -17,9 +17,7 @@ import ParseGeoPoint from './ParseGeoPoint';
  *   new Polygon([[0,0],[0,1],[1,1],[1,0]])
  *   new Polygon([GeoPoint, GeoPoint, GeoPoint])
  *   </pre>
- * @class Parse.GeoPoint
- * @constructor
- *
+ * 
  * <p>Represents a coordinates that may be associated
  * with a key in a ParseObject or used as a reference point for geo queries.
  * This allows proximity-based queries on the key.</p>
@@ -29,10 +27,14 @@ import ParseGeoPoint from './ParseGeoPoint';
  *   var object = new Parse.Object("PlaceObject");
  *   object.set("area", polygon);
  *   object.save();</pre></p>
+ * @alias Parse.Polygon
  */
-export default class ParsePolygon {
+class ParsePolygon {
   _coordinates: Array;
 
+  /**
+   * @param {(Number[][]|Parse.GeoPoint[])} coordinates An Array of coordinate pairs
+   */
   constructor(
     arg1: Array,
   ) {
@@ -55,7 +57,6 @@ export default class ParsePolygon {
 
   /**
    * Returns a JSON representation of the GeoPoint, suitable for Parse.
-   * @method toJSON
    * @return {Object}
    */
   toJSON(): { __type: string; coordinates: Array;} {
@@ -66,6 +67,11 @@ export default class ParsePolygon {
     };
   }
 
+  /**
+   * Checks if two polygons are equal
+   * @param {(Parse.Polygon|Object)} other
+   * @returns {Boolean}
+   */
   equals(other: mixed): boolean {
     if (!(other instanceof ParsePolygon) || (this.coordinates.length !== other.coordinates.length)) {
       return false;
@@ -82,6 +88,11 @@ export default class ParsePolygon {
     return isEqual;
   }
 
+  /**
+   * 
+   * @param {Parse.GeoPoint} point 
+   * @returns {Boolean} wether the points is contained into the polygon
+   */
   containsPoint(point: ParseGeoPoint): boolean {
     let minX = this._coordinates[0][0];
     let maxX = this._coordinates[0][0];
@@ -119,8 +130,9 @@ export default class ParsePolygon {
   }
 
   /**
-   * Throws an exception if the given lat-long is out of bounds.
-   * @return {Array}
+   * Validates that the list of coordinates can form a valid polygon
+   * @param {Array} coords the list of coordinated to validate as a polygon
+   * @throws {TypeError}
    */
   static _validate(coords: Array) {
     if (!Array.isArray(coords)) {
@@ -145,3 +157,5 @@ export default class ParsePolygon {
     return points;
   }
 }
+
+export default ParsePolygon;

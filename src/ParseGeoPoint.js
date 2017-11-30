@@ -20,9 +20,6 @@ import ParsePromise from './ParsePromise';
  *   new GeoPoint({latitude: 30, longitude: 30})
  *   new GeoPoint()  // defaults to (0, 0)
  *   </pre>
- * @class Parse.GeoPoint
- * @constructor
- *
  * <p>Represents a latitude / longitude point that may be associated
  * with a key in a ParseObject or used as a reference point for geo queries.
  * This allows proximity-based queries on the key.</p>
@@ -34,11 +31,16 @@ import ParsePromise from './ParsePromise';
  *   var object = new Parse.Object("PlaceObject");
  *   object.set("location", point);
  *   object.save();</pre></p>
+ * @alias Parse.GeoPoint
  */
-export default class ParseGeoPoint {
+class ParseGeoPoint {
   _latitude: number;
   _longitude: number;
 
+  /**
+   * @param {(Number[]|Object|Number)} options Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point. 
+   * @param {Number} longitude The longitude of the GeoPoint
+   */
   constructor(
     arg1: Array<number> |
     { latitude: number; longitude: number } |
@@ -94,7 +96,7 @@ export default class ParseGeoPoint {
 
   /**
    * Returns a JSON representation of the GeoPoint, suitable for Parse.
-   * @method toJSON
+
    * @return {Object}
    */
   toJSON(): { __type: string; latitude: number; longitude: number } {
@@ -116,7 +118,7 @@ export default class ParseGeoPoint {
 
   /**
    * Returns the distance from this GeoPoint to another in radians.
-   * @method radiansTo
+
    * @param {Parse.GeoPoint} point the other Parse.GeoPoint.
    * @return {Number}
    */
@@ -140,7 +142,7 @@ export default class ParseGeoPoint {
 
   /**
    * Returns the distance from this GeoPoint to another in kilometers.
-   * @method kilometersTo
+
    * @param {Parse.GeoPoint} point the other Parse.GeoPoint.
    * @return {Number}
    */
@@ -150,7 +152,7 @@ export default class ParseGeoPoint {
 
   /**
    * Returns the distance from this GeoPoint to another in miles.
-   * @method milesTo
+
    * @param {Parse.GeoPoint} point the other Parse.GeoPoint.
    * @return {Number}
    */
@@ -158,7 +160,7 @@ export default class ParseGeoPoint {
     return this.radiansTo(point) * 3958.8;
   }
 
-  /**
+  /*
    * Throws an exception if the given lat-long is out of bounds.
    */
   static _validate(latitude: number, longitude: number) {
@@ -192,7 +194,7 @@ export default class ParseGeoPoint {
   /**
    * Creates a GeoPoint with the user's current location, if available.
    * Calls options.success with a new GeoPoint instance or calls options.error.
-   * @method current
+
    * @param {Object} options An object with success and error callbacks.
    * @static
    */
@@ -209,3 +211,5 @@ export default class ParseGeoPoint {
     return promise._thenRunCallbacks(options);
   }
 }
+
+export default ParseGeoPoint;

@@ -19,6 +19,7 @@ import type ParsePromise from './ParsePromise';
  *
  * @class Parse.Analytics
  * @static
+ * @hideconstructor
  */
 
  /**
@@ -44,6 +45,7 @@ import type ParsePromise from './ParsePromise';
   * There is a default limit of 8 dimensions per event tracked.
   *
   * @method track
+  * @name Parse.Analytics.track
   * @param {String} name The name of the custom event to report to Parse as
   * having happened.
   * @param {Object} dimensions The dictionary of information by which to
