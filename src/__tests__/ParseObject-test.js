@@ -2135,4 +2135,29 @@ describe('ParseObject extensions', () => {
     var i = new InitObject()
     expect(i.get('field')).toBe(12);
   });
+
+  it('returns correct isFetched state', asyncHelper((done) => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: {
+          objectId: 'P5'
+        }
+      }, {
+        status: 200,
+        response: {
+          createdAt: '2013-12-14T04:51:19Z'
+        }
+      }])
+    );
+
+    return new ParseObject('Test').save().then((obj) => {
+      var p = ParseObject.createWithoutData(obj.id);
+      expect(p.isFetched).toBe(false);
+      return p.fetch();
+    }).then((o) => {
+      expect(o.isFetched).toBe(true);
+      done();
+    });
+  }));
 });
