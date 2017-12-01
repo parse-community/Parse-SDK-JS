@@ -186,14 +186,17 @@ export default class LiveQueryClient extends EventEmitter {
     if (!query) {
       return;
     }
-    let where = query.toJSON().where;
     let className = query.className;
+    let queryJSON = query.toJSON();
+    let where = queryJSON.where;
+    let fields = queryJSON.keys ? queryJSON.keys.split(',') : undefined;
     let subscribeRequest = {
       op: OP_TYPES.SUBSCRIBE,
       requestId: this.requestId,
       query: {
         className,
-        where
+        where,
+        fields
       }
     };
 
@@ -277,7 +280,9 @@ export default class LiveQueryClient extends EventEmitter {
   resubscribe() {
     this.subscriptions.forEach((subscription, requestId) => {
       let query = subscription.query;
-      let where = query.toJSON().where;
+      let queryJSON = query.toJSON();
+      let where = queryJSON.where;
+      let fields = queryJSON.keys ? queryJSON.keys.split(',') : undefined;
       let className = query.className;
       let sessionToken = subscription.sessionToken;
       let subscribeRequest = {
@@ -285,7 +290,8 @@ export default class LiveQueryClient extends EventEmitter {
         requestId,
         query: {
           className,
-          where
+          where,
+          fields
         }
       };
 
