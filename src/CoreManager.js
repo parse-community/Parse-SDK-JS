@@ -333,6 +333,14 @@ module.exports = {
     return config['StorageController'];
   },
 
+  setAsyncStorage(storage: any) {
+    config['AsyncStorage'] = storage;
+  },
+
+  getAsyncStorage() {
+    return config['AsyncStorage'];
+  },
+
   setUserController(controller: UserController) {
     requireMethods('UserController', [
       'setCurrentUser',
