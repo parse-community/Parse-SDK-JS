@@ -63,7 +63,7 @@ describe('Parse Aggregate Query', () => {
       assert.equal(results[0], 10);
       assert.equal(results[1], 20);
       done();
-    });
+    }).catch(done.fail);
   });
 
   it('distinct equalTo query', (done) => {

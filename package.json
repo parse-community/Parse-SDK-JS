@@ -62,7 +62,8 @@
     "build": "./build_releases.sh",
     "release": "./build_releases.sh && npm publish",
     "test": "PARSE_BUILD=node jest",
-    "docs": "jsdoc -c ./jsdoc-conf.json ./src"
+    "docs": "jsdoc -c ./jsdoc-conf.json ./src",
+    "release_docs": "./release_docs.sh"
   },
   "jest": {
     "automock": true,

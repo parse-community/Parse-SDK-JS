@@ -4,7 +4,7 @@
       "plugins": ["transform-flow-strip-types"]
   },
   "source": {
-    "include": ["./package.json", "./README.md"],
+    "include":  ["./README.md"],
     "excludePattern": "(^|\\/|\\\\)_"
   },
   "templates": {
