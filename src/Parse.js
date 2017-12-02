@@ -45,6 +45,17 @@ var Parse = {
     CoreManager.set('JAVASCRIPT_KEY', javaScriptKey);
     CoreManager.set('MASTER_KEY', masterKey);
     CoreManager.set('USE_MASTER_KEY', false);
+  },
+
+  /**
+   * Call this method to set your AsyncStorage engine
+   * Starting Parse@1.11, the ParseSDK do not provide a React AsyncStorage as the ReactNative module
+   * is not provided at a stable path and changes over versions.
+   * @param {AsyncStorage} storage a react native async storage.
+   * @static
+   */
+  setAsyncStorage(storage: any) {
+    CoreManager.setAsyncStorage(storage);
   }
 };
 
