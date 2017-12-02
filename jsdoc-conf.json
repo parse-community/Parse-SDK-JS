@@ -15,6 +15,8 @@
     "monospaceLinks": false
   },
   "opts": {
-    "recurse": true
+    "recurse": true,
+    "template": "node_modules/minami",
+    "showInheritedInNav": true
   }
 }

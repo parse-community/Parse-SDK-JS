@@ -55,6 +55,7 @@
     "jest-cli": "^19.0.2",
     "jsdoc": "^3.5.5",
     "jsdoc-babel": "^0.3.0",
+    "minami": "^1.2.3",
     "vinyl-source-stream": "^1.1.0"
   },
   "scripts": {
