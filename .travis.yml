@@ -22,5 +22,5 @@ addons:
       - mongodb-org-server
       - g++-4.8
 
-script: npm test && ./run_integration.sh
+script: npm test -- --maxWorkers=4 && ./run_integration.sh
 after_script: cat ./coverage/coverage-final.json | ./node_modules/codecov.io/bin/codecov.io.js && rm -rf ./coverage
