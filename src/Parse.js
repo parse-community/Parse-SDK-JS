@@ -52,6 +52,7 @@ var Parse = {
    * Starting Parse@1.11, the ParseSDK do not provide a React AsyncStorage as the ReactNative module
    * is not provided at a stable path and changes over versions.
    * @param {AsyncStorage} storage a react native async storage.
+   * @static
    */
   setAsyncStorage(storage: any) {
     CoreManager.setAsyncStorage(storage);
