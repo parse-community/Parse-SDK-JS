@@ -10,4 +10,5 @@ integration/test_logs
 .idea/
 integration/test_logs
 out/
+docs/
 

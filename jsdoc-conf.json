@@ -1,10 +1,10 @@
 {
-  "plugins": ["node_modules/jsdoc-babel"],
+  "plugins": ["node_modules/jsdoc-babel", "plugins/markdown"],
   "babel": {
       "plugins": ["transform-flow-strip-types"]
   },
   "source": {
-    "include": ["./package.json", "./README.md"],
+    "include":  ["./README.md"],
     "excludePattern": "(^|\\/|\\\\)_"
   },
   "templates": {
@@ -15,6 +15,9 @@
     "monospaceLinks": false
   },
   "opts": {
-    "recurse": true
+    "recurse": true,
+    "template": "node_modules/minami",
+    "showInheritedInNav": true,
+    "useLongnameInNav": true
   }
 }
