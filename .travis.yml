@@ -29,7 +29,9 @@ jobs:
       env: 
       before_script: skip
       after_script: skip
-      script: npm run release_docs
+      script: 
+      - npm run release_docs
+      - npm run build
       deploy:
         - provider: pages
           skip_cleanup: true
