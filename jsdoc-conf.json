@@ -17,6 +17,7 @@
   "opts": {
     "recurse": true,
     "template": "node_modules/minami",
-    "showInheritedInNav": true
+    "showInheritedInNav": true,
+    "useLongnameInNav": true
   }
 }
