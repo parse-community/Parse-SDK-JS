@@ -145,6 +145,11 @@
  * @property {Boolean} master If true, means the master key was used.
  * @property {Parse.User} user If set, the user that made the request.
  * @property {Parse.Object} object The object triggering the hook.
+ * @property {String} ip The IP address of the client making the request.
+ * @property {Object} headers The original HTTP headers for the request.
+ * @property {String} triggerName The name of the trigger (`beforeSave`, `afterSave`, ...)
+ * @property {Object} log The current logger inside Parse Server.
+ * @property {Parse.Object} original If set, the object, as currently stored.
  */
 
 /**
