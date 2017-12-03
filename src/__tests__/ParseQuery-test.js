@@ -1864,4 +1864,67 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('full text search with one parameter', () => {
+    let query = new ParseQuery('Item');
+
+    query.fullTextSearch('size', 'small');
+
+    expect(query.toJSON()).toEqual({
+      where: {
+        size: {
+          $text: {
+            $search: {
+              $term: "small"
+            }
+          }
+        }
+      }
+    });
+  });
+
+  it('full text search with all parameters', () => {
+    let query = new ParseQuery('Item');
+
+    query.fullTextSearch('size', 'medium', 'en', false, true);
+
+    expect(query.toJSON()).toEqual({
+      where: {
+        size: {
+          $text: {
+            $search: {
+              $term: "medium",
+              $language: "en",
+              $caseSensitive: false,
+              $diacriticSensitive: true
+            }
+          }
+        }
+      }
+    });
+
+  });
+
+  it('add the score for the full text search', () => {
+    let query = new ParseQuery('Item');
+
+    query.fullTextSearch('size', 'medium', 'fr');
+    query.sortByTextScore();
+
+    expect(query.toJSON()).toEqual({
+      where: {
+        size: {
+          $text: {
+            $search: {
+              $term: "medium",
+              $language: "fr"
+            }
+          }
+        }
+      },
+      keys : "$score",
+      order : "$score"
+    });
+
+  });
+
 });
