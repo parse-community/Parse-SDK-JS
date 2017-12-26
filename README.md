@@ -34,6 +34,10 @@ For React Native applications, include `'parse/react-native'`:
 ```js
 // In a React Native application
 var Parse = require('parse/react-native');
+
+// On React Native >= 0.50 and Parse >= 1.11.0, set the Async
+var AsyncStorage = require('react-native').AsyncStorage;
+Parse.setAsyncStorage(AsyncStorage);
 ```
 
 ## License
