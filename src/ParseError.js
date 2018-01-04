@@ -9,15 +9,20 @@
 
  /**
   * Constructs a new Parse.Error object with the given code and message.
-  * @class Parse.Error
-  * @constructor
-  * @param {Number} code An error code constant from <code>Parse.Error</code>.
-  * @param {String} message A detailed description of the error.
+  * @alias Parse.Error
   */
-export default class ParseError {
+class ParseError {
+  /**
+   * @param {Number} code An error code constant from <code>Parse.Error</code>.
+   * @param {String} message A detailed description of the error.
+   */
   constructor(code, message) {
     this.code = code;
     this.message = message;
+  }
+  
+  toString() {
+    return 'ParseError: ' + this.code + ' ' + this.message;
   }
 }
 
@@ -489,3 +494,5 @@ ParseError.FILE_READ_ERROR = 601;
  * @final
  */
 ParseError.X_DOMAIN_REQUEST = 602;
+
+export default ParseError;

@@ -826,6 +826,24 @@ describe('Parse Object', () => {
     });
   });
 
+  it('can add objects to an array in batch mode', (done) => {
+    let child1 = new Parse.Object('Person');
+    let child2 = new Parse.Object('Person');
+    let parent = new Parse.Object('Person');
+
+    Promise.all([child1.save(), child2.save()]).then((children) => {
+      parent.addAll('children', children);
+      return parent.save();
+    }).then(() => {
+      let query = new Parse.Query('Person');
+      return query.get(parent.id);
+    }).then((p) => {
+      assert.equal(p.get('children')[0].id, child1.id);
+      assert.equal(p.get('children')[1].id, child2.id);
+      done();
+    });
+  });
+
   it('can convert saved objects to json', (done) => {
     let object = new TestObject();
     object.save({ foo: 'bar' }).then(() => {
@@ -860,6 +878,29 @@ describe('Parse Object', () => {
       let o = new TestObject();
       o.id = object.id;
       container.remove('array', o);
+      assert.equal(container.get('array').length, 0);
+      done();
+    });
+  });
+
+  it('can remove objects from array fields in batch mode', (done) => {
+    let obj1 = new TestObject();
+    let obj2 = new TestObject();
+
+    Promise.all([obj1.save(), obj2.save()]).then((objects) => {
+      let container = new TestObject();
+      container.addAll('array', objects);
+      assert.equal(container.get('array').length, 2);
+      return container.save();
+    }).then((container) => {
+      let o1 = new TestObject();
+      o1.id = obj1.id;
+      let o2 = new TestObject();
+      o2.id = obj2.id;
+      let o3 = new TestObject();
+      o3.id = 'there_is_no_such_object'
+
+      container.removeAll('array', [o1, o2, o3]);
       assert.equal(container.get('array').length, 0);
       done();
     });
@@ -1183,8 +1224,8 @@ describe('Parse Object', () => {
     }).then(() => {
       assert.equal(user.createdAt.getTime(), sameUser.createdAt.getTime());
       assert.equal(user.updatedAt.getTime(), sameUser.updatedAt.getTime());
-      done();
-    });
+      return Parse.User.logOut().then(() => { done(); }, () => { done(); });
+    }).catch(done.fail);
   });
 
   it('can fetchAllIfNeeded', (done) => {

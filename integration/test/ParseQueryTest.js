@@ -19,8 +19,9 @@ describe('Parse Query', () => {
       }
       return Parse.Object.saveAll(numbers);
     }).then(() => {
-      done();
-    });
+      return Parse.User.logOut();
+    })
+    .then(() => { done() }, () => { done() });
   });
 
   it('can do basic queries', (done) => {
@@ -1182,6 +1183,10 @@ describe('Parse Query', () => {
         assert(o.get('x') <= 15);
       });
       done();
+    })
+    .catch(err => {
+      console.dir(err);
+      done.fail();
     });
   });
 
