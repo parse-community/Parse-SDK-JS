@@ -1477,9 +1477,9 @@ describe('Parse Query', () => {
       return q.find();
     }).then((results) => {
       assert.equal(results.length, 3);
-      assert.equal(results[0].get('score', 1));
-      assert.equal(results[1].get('score', 0.75));
-      assert.equal(results[2].get('score', 0.75));
+      assert.equal(results[0].get('score'), 1);
+      assert.equal(results[1].get('score'), 0.75);
+      assert.equal(results[2].get('score'), 0.75);
       done();
     });
   });
