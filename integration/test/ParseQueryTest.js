@@ -578,7 +578,7 @@ describe('Parse Query', () => {
       assert.equal(results[2].get('string'), 'd');
       assert.equal(results[3].get('number'), 1);
       assert.equal(results[3].get('string'), 'b');
-      
+
       let query = new Parse.Query(TestObject);
       query.equalTo('doubleDescending', true);
       query.descending('number, string');
@@ -608,7 +608,7 @@ describe('Parse Query', () => {
       assert.equal(results[2].get('string'), 'd');
       assert.equal(results[3].get('number'), 1);
       assert.equal(results[3].get('string'), 'b');
-      
+
       let query = new Parse.Query(TestObject);
       query.equalTo('doubleDescending', true);
       query.descending('number', 'string');
@@ -623,7 +623,7 @@ describe('Parse Query', () => {
       assert.equal(results[2].get('string'), 'd');
       assert.equal(results[3].get('number'), 1);
       assert.equal(results[3].get('string'), 'b');
-      
+
       done();
     });
   });
@@ -760,7 +760,7 @@ describe('Parse Query', () => {
       assert.equal(results.length, 2);
       assert.equal(results[0].id, objects[0].id);
       assert.equal(results[1].id, objects[1].id);
-      
+
       let query = new Parse.Query('TestObject');
       query.equalTo('timed2', true);
       query.greaterThan('createdAt', objects[2].createdAt);
@@ -1210,7 +1210,7 @@ describe('Parse Query', () => {
     }).then((results) => {
       assert.equal(results.length, 1);
       assert.equal(results[0].get('name'), 'Bob');
-      
+
       let query = new Parse.Query(Restaurant);
       query.greaterThan('rating', 4);
       let mainQuery = new Parse.Query(Person);
@@ -1423,6 +1423,63 @@ describe('Parse Query', () => {
         assert.equal(o.get('bar'), undefined);
       });
     }).then(() => {
+      done();
+    });
+  });
+
+  it('full text search', (done) => {
+    const subjects = [
+      'coffee',
+      'Coffee Shopping',
+      'Baking a cake',
+      'baking',
+      'Café Con Leche',
+      'Сырники',
+      'coffee and cream',
+      'Cafe con Leche',
+    ];
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestObject({ subject: subjects[i] });
+      objects.push(obj);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestObject);
+      q.fullText('subject', 'coffee');
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 3);
+      done();
+    });
+  });
+
+  it('full text search sort', (done) => {
+    const subjects = [
+      'coffee',
+      'Coffee Shopping',
+      'Baking a cake',
+      'baking',
+      'Café Con Leche',
+      'Сырники',
+      'coffee and cream',
+      'Cafe con Leche',
+    ];
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestObject({ comment: subjects[i] });
+      objects.push(obj);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestObject);
+      q.fullText('comment', 'coffee');
+      q.ascending('$score');
+      q.select('$score');
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 3);
+      assert.equal(results[0].get('score', 1));
+      assert.equal(results[1].get('score', 0.75));
+      assert.equal(results[2].get('score', 0.75));
       done();
     });
   });
