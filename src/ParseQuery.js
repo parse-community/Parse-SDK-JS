@@ -954,6 +954,40 @@ class ParseQuery {
     return this._addCondition(key, '$regex', quote(value));
   }
 
+   /**
+  * Adds a constraint for finding string values that contain a provided
+  * string. This may be slow for large datasets. Requires Parse-Server > 2.5.0
+  *
+  * In order to sort you must use select and ascending ($score is required)
+  *  <pre>
+  *   query.fullText('term');
+  *   query.ascending('$score');
+  *   query.select('$score');
+  *  </pre>
+  *
+  * To retrieve the weight / rank
+  *  <pre>
+  *   object->get('score');
+  *  </pre>
+  *
+  * @param {String} key The key that the string to match is stored in.
+  * @param {String} value The string to search
+  * @return {Parse.Query} Returns the query, so you can chain this call.
+  */
+ fullText(key: string, value: string): ParseQuery {
+   if (!key) {
+     throw new Error('A key is required.');
+   }
+   if (!value) {
+     throw new Error('A search term is required');
+   }
+   if (typeof value !== 'string') {
+     throw new Error('The value being searched for must be a string.');
+   }
+
+   return this._addCondition(key, '$text', { $search: { $term: value } });
+ }
+
   /**
    * Adds a constraint for finding string values that start with a provided
    * string.  This query will use the backend index, so it will be fast even

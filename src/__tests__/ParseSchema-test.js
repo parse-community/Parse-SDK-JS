@@ -13,15 +13,6 @@ var ParseSchema = require('../ParseSchema').default;
 var ParsePromise = require('../ParsePromise').default;
 var CoreManager = require('../CoreManager');
 
-function generateSaveMock(prefix) {
-  return function(name, payload) {
-    return ParsePromise.as({
-      name: name,
-      url: prefix + name
-    });
-  };
-}
-
 var defaultController = CoreManager.getSchemaController();
 
 describe('ParseSchema', () => {
@@ -388,11 +379,9 @@ describe('SchemaController', () => {
   beforeEach(() => {
     CoreManager.setSchemaController(defaultController);
     var request = function(method, path, data, options) {
-      var name = path.substr(path.indexOf('/') + 1);
       return ParsePromise.as([]);
     };
     var ajax = function(method, path, data, headers) {
-      var name = path.substr(path.indexOf('/') + 1);
       return ParsePromise.as([]);
     };
     CoreManager.setRESTController({ request: request, ajax: ajax });

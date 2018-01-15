@@ -1864,4 +1864,59 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('full text search', () => {
+    const query = new ParseQuery('Item');
+    query.fullText('size', 'small');
+
+    expect(query.toJSON()).toEqual({
+      where: {
+        size: {
+          $text: {
+            $search: {
+              $term: "small"
+            }
+          }
+        }
+      }
+    });
+  });
+
+  it('full text search sort', () => {
+    const query = new ParseQuery('Item');
+    query.fullText('size', 'medium');
+    query.ascending('$score');
+    query.select('$score');
+
+    expect(query.toJSON()).toEqual({
+      where: {
+        size: {
+          $text: {
+            $search: {
+              $term: "medium",
+            }
+          }
+        }
+      },
+      keys : "$score",
+      order : "$score"
+    });
+  });
+
+  it('full text search key required', (done) => {
+    const query = new ParseQuery('Item');
+    expect(() => query.fullText()).toThrow('A key is required.');
+    done();
+  });
+
+  it('full text search value required', (done) => {
+      const query = new ParseQuery('Item');
+      expect(() => query.fullText('key')).toThrow('A search term is required');
+      done();
+  });
+
+  it('full text search value must be string', (done) => {
+    const query = new ParseQuery('Item');
+    expect(() => query.fullText('key', [])).toThrow('The value being searched for must be a string.');
+    done();
+  });
 });
