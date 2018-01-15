@@ -1903,29 +1903,20 @@ describe('ParseQuery', () => {
   });
 
   it('full text search key required', (done) => {
-    try {
-      const query = new ParseQuery('Item');
-      query.fullText();
-    } catch (e) {
-      done();
-    }
+    const query = new ParseQuery('Item');
+    expect(() => query.fullText()).toThrow('A key is required.');
+    done();
   });
 
   it('full text search value required', (done) => {
-    try {
       const query = new ParseQuery('Item');
-      query.fullText('key');
-    } catch (e) {
+      expect(() => query.fullText('key')).toThrow('A search term is required');
       done();
-    }
   });
 
   it('full text search value must be string', (done) => {
-    try {
-      const query = new ParseQuery('Item');
-      query.fullText('key', []);
-    } catch (e) {
-      done();
-    }
+    const query = new ParseQuery('Item');
+    expect(() => query.fullText('key', [])).toThrow('The value being searched for must be a string.');
+    done();
   });
 });
