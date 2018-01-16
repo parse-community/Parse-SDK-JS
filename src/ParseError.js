@@ -468,7 +468,7 @@ ParseError.UNSUPPORTED_SERVICE = 252;
 
 /**
  * Error code indicating an invalid operation occured on schema
- * @property SCHEMA_ERROR
+ * @property INVALID_SCHEMA_OPERATION
  * @static
  * @final
  */
