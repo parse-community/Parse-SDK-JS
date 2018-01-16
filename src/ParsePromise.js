@@ -7,6 +7,9 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+ /**
+  * @private
+  */
 var isPromisesAPlusCompliant = true;
 
 /**
@@ -22,10 +25,9 @@ var isPromisesAPlusCompliant = true;
  *    });
  * </pre></p>
  *
- * @class Parse.Promise
- * @constructor
+ * @alias Parse.Promise
  */
-export default class ParsePromise {
+class ParsePromise {
   constructor(executor) {
     this._resolved = false;
     this._rejected = false;
@@ -39,7 +41,7 @@ export default class ParsePromise {
 
   /**
    * Marks this promise as fulfilled, firing any callbacks waiting on it.
-   * @method resolve
+
    * @param {Object} result the result to pass to the callbacks.
    */
   resolve(...results) {
@@ -61,7 +63,7 @@ export default class ParsePromise {
 
   /**
    * Marks this promise as fulfilled, firing any callbacks waiting on it.
-   * @method reject
+
    * @param {Object} error the error to pass to the callbacks.
    */
   reject(error) {
@@ -86,7 +88,7 @@ export default class ParsePromise {
    * chaining. If the callback itself returns a Promise, then the one returned
    * by "then" will not be fulfilled until that one returned by the callback
    * is fulfilled.
-   * @method then
+
    * @param {Function} resolvedCallback Function that is called when this
    * Promise is resolved. Once the callback is complete, then the Promise
    * returned by "then" will also be fulfilled.
@@ -191,7 +193,7 @@ export default class ParsePromise {
   /**
    * Add handlers to be called when the promise
    * is either resolved or rejected
-   * @method always
+
    */
   always(callback) {
     return this.then(callback, callback);
@@ -199,7 +201,7 @@ export default class ParsePromise {
 
   /**
    * Add handlers to be called when the Promise object is resolved
-   * @method done
+
    */
   done(callback) {
     return this.then(callback);
@@ -208,7 +210,7 @@ export default class ParsePromise {
   /**
    * Add handlers to be called when the Promise object is rejected
    * Alias for catch().
-   * @method fail
+
    */
   fail(callback) {
     return this.then(null, callback);
@@ -216,7 +218,7 @@ export default class ParsePromise {
 
   /**
    * Add handlers to be called when the Promise object is rejected
-   * @method catch
+
    */
   catch(callback) {
     return this.then(null, callback);
@@ -224,7 +226,7 @@ export default class ParsePromise {
 
   /**
    * Run the given callbacks after this promise is fulfilled.
-   * @method _thenRunCallbacks
+
    * @param optionsOrCallback {} A Backbone-style options callback, or a
    * callback function. If this is an options object and contains a "model"
    * attributes, that will be passed to error callbacks as the first argument.
@@ -276,7 +278,7 @@ export default class ParsePromise {
    * array of results for its first argument, or the error as its second,
    * depending on whether this Promise was rejected or resolved. Returns a
    * new Promise, like "then" would.
-   * @method _continueWith
+
    * @param {Function} continuation the callback.
    */
   _continueWith(continuation) {
@@ -289,7 +291,7 @@ export default class ParsePromise {
 
   /**
    * Returns true iff the given object fulfils the Promise interface.
-   * @method is
+
    * @param {Object} promise The object to test
    * @static
    * @return {Boolean}
@@ -303,7 +305,7 @@ export default class ParsePromise {
 
   /**
    * Returns a new promise that is resolved with a given value.
-   * @method as
+
    * @param value The value to resolve the promise with
    * @static
    * @return {Parse.Promise} the new promise.
@@ -319,7 +321,7 @@ export default class ParsePromise {
    * If that value is a thenable Promise (has a .then() prototype
    * method), the new promise will be chained to the end of the
    * value.
-   * @method resolve
+
    * @param value The value to resolve the promise with
    * @static
    * @return {Parse.Promise} the new promise.
@@ -336,7 +338,7 @@ export default class ParsePromise {
 
   /**
    * Returns a new promise that is rejected with a given error.
-   * @method error
+
    * @param error The error to reject the promise with
    * @static
    * @return {Parse.Promise} the new promise.
@@ -351,7 +353,7 @@ export default class ParsePromise {
    * Returns a new promise that is rejected with a given error.
    * This is an alias for Parse.Promise.error, for compliance with
    * the ES6 implementation.
-   * @method reject
+
    * @param error The error to reject the promise with
    * @static
    * @return {Parse.Promise} the new promise.
@@ -383,7 +385,7 @@ export default class ParsePromise {
    *     console.log(results);  // prints [1,2,3]
    *   });
    * </pre>
-   * @method when
+
    * @param {Array} promises a list of promises to wait for.
    * @static
    * @return {Parse.Promise} the new promise.
@@ -464,7 +466,7 @@ export default class ParsePromise {
    *     console.log(r3);  // prints 3
    *   });</pre>
    *
-   * @method all
+
    * @param {Iterable} promises an iterable of promises to wait for.
    * @static
    * @return {Parse.Promise} the new promise.
@@ -521,7 +523,7 @@ export default class ParsePromise {
    * complete is rejected, the returned promise will be rejected with the
    * same reason.
    *
-   * @method race
+
    * @param {Iterable} promises an iterable of promises to wait for.
    * @static
    * @return {Parse.Promise} the new promise.
@@ -557,7 +559,7 @@ export default class ParsePromise {
    * Runs the given asyncFunction repeatedly, as long as the predicate
    * function returns a truthy value. Stops repeating if asyncFunction returns
    * a rejected promise.
-   * @method _continueWhile
+
    * @param {Function} predicate should return false when ready to stop.
    * @param {Function} asyncFunction should return a Promise.
    * @static
@@ -583,3 +585,5 @@ export default class ParsePromise {
     isPromisesAPlusCompliant = false;
   }
 }
+
+export default ParsePromise;

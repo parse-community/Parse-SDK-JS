@@ -1480,4 +1480,61 @@ describe('Parse Query', () => {
       done();
     });
   });
+
+  it('full text search', (done) => {
+    const subjects = [
+      'coffee',
+      'Coffee Shopping',
+      'Baking a cake',
+      'baking',
+      'Café Con Leche',
+      'Сырники',
+      'coffee and cream',
+      'Cafe con Leche',
+    ];
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestObject({ subject: subjects[i] });
+      objects.push(obj);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestObject);
+      q.fullText('subject', 'coffee');
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 3);
+      done();
+    });
+  });
+
+  it('full text search sort', (done) => {
+    const subjects = [
+      'coffee',
+      'Coffee Shopping',
+      'Baking a cake',
+      'baking',
+      'Café Con Leche',
+      'Сырники',
+      'coffee and cream',
+      'Cafe con Leche',
+    ];
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestObject({ comment: subjects[i] });
+      objects.push(obj);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestObject);
+      q.fullText('comment', 'coffee');
+      q.ascending('$score');
+      q.select('$score');
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 3);
+      assert.equal(results[0].get('score'), 1);
+      assert.equal(results[1].get('score'), 0.75);
+      assert.equal(results[2].get('score'), 0.75);
+      done();
+    });
+  });
 });

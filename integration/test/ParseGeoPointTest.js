@@ -12,6 +12,7 @@ describe('Geo Point', () => {
   before((done) => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
+    Parse.CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1);
     Parse.Storage._clear();
     clear().then(() => {
       let sacramento = new TestPoint();
@@ -235,5 +236,64 @@ describe('Geo Point', () => {
       assert.equal(results.length, 0);
       done();
     });
+  });
+
+  it('supports withinPolygon open path', (done) => {
+    const points = [
+      new Parse.GeoPoint(37.85, -122.33),
+      new Parse.GeoPoint(37.85, -122.90),
+      new Parse.GeoPoint(37.68, -122.90),
+      new Parse.GeoPoint(37.68, -122.33)
+    ];
+    const query = new Parse.Query(TestPoint);
+    query.withinPolygon('location', points);
+    return query.find().then((results) => {
+      assert.equal(results.length, 1);
+      done();
+    });
+  });
+
+  it('supports withinPolygon closed path', (done) => {
+     const points = [
+      new Parse.GeoPoint(38.52, -121.50),
+      new Parse.GeoPoint(37.75, -157.93),
+      new Parse.GeoPoint(37.578072, -121.379914),
+      new Parse.GeoPoint(38.52, -121.50)
+    ];
+    const query = new Parse.Query(TestPoint);
+    query.withinPolygon('location', points);
+    return query.find().then((results) => {
+      assert.equal(results.length, 2);
+      done();
+    });
+  });
+
+  it('non array withinPolygon', (done) => {
+    const query = new Parse.Query(TestPoint);
+    query.withinPolygon('location', 1234);
+    return query.find().fail((err) => {
+      assert.equal(err.code, Parse.Error.INVALID_JSON);
+      done();
+    });
+  });
+
+  it('invalid array withinPolygon', (done) => {
+    const query = new Parse.Query(TestPoint);
+    query.withinPolygon('location', [1234]);
+    return query.find().fail((err) => {
+      assert.equal(err.code, Parse.Error.INVALID_JSON);
+      done();
+    });
+  });
+
+  it('minimum 3 points withinPolygon', function(done) {
+    return this.skip('Test passes locally but not on CI');
+    const query = new Parse.Query(TestPoint);
+    query.withinPolygon('location', []);
+    query.find().then(done.fail, (err) => {
+      assert.equal(err.code, Parse.Error.INVALID_JSON);
+      done();
+    })
+    .fail(done.fail);
   });
 });

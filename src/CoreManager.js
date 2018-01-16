@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015-present, Parse, LLC.
  * All rights reserved.
  *
@@ -71,10 +71,18 @@ type PushController = {
 };
 type QueryController = {
   find: (className: string, params: QueryJSON, options: RequestOptions) => ParsePromise;
+  aggregate: (className: string, params: any, options: RequestOptions) => ParsePromise;
 };
 type RESTController = {
   request: (method: string, path: string, data: mixed) => ParsePromise;
   ajax: (method: string, url: string, data: any, headers?: any) => ParsePromise;
+};
+type SchemaController = {
+  get: (className: string, options: RequestOptions) => ParsePromise;
+  delete: (className: string, options: RequestOptions) => ParsePromise;
+  create: (className: string, params: any, options: RequestOptions) => ParsePromise;
+  update: (className: string, params: any, options: RequestOptions) => ParsePromise;
+  send(className: string, method: string, params: any, options: RequestOptions): ParsePromise;
 };
 type SessionController = {
   getSession: (token: RequestOptions) => ParsePromise;
@@ -131,6 +139,7 @@ type Config = {
   PushController?: PushController,
   QueryController?: QueryController,
   RESTController?: RESTController,
+  SchemaController?: SchemaController,
   SessionController?: SessionController,
   StorageController?: StorageController,
   UserController?: UserController,
@@ -268,7 +277,7 @@ module.exports = {
   },
 
   setQueryController(controller: QueryController) {
-    requireMethods('QueryController', ['find'], controller);
+    requireMethods('QueryController', ['find', 'aggregate'], controller);
     config['QueryController'] = controller;
   },
 
@@ -283,6 +292,15 @@ module.exports = {
 
   getRESTController(): RESTController {
     return config['RESTController'];
+  },
+
+  setSchemaController(controller: SchemaController) {
+    requireMethods('SchemaController', ['get', 'create', 'update', 'delete', 'send'], controller);
+    config['SchemaController'] = controller;
+  },
+
+  getSchemaController(): SchemaController {
+    return config['SchemaController'];
   },
 
   setSessionController(controller: SessionController) {
@@ -313,6 +331,14 @@ module.exports = {
 
   getStorageController(): StorageController {
     return config['StorageController'];
+  },
+
+  setAsyncStorage(storage: any) {
+    config['AsyncStorage'] = storage;
+  },
+
+  getAsyncStorage() {
+    return config['AsyncStorage'];
   },
 
   setUserController(controller: UserController) {

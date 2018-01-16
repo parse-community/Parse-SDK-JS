@@ -220,13 +220,15 @@ describe('CoreManager', () => {
     );
 
     expect(CoreManager.setQueryController.bind(null, {
-      find: function() {}
+      find: function() {},
+      aggregate: function() {}
     })).not.toThrow();
   });
 
   it('can set and get QueryController', () => {
     var controller = {
-      find: function() {}
+      find: function() {},
+      aggregate: function() {}
     };
 
     CoreManager.setQueryController(controller);
@@ -314,5 +316,32 @@ describe('CoreManager', () => {
 
     CoreManager.setStorageController(controller);
     expect(CoreManager.getStorageController()).toBe(controller);
+  });
+
+  it('requires SchemaController to implement certain functionality', () => {
+    expect(CoreManager.setSchemaController.bind(null, {})).toThrow(
+      'SchemaController must implement get()'
+    );
+
+    expect(CoreManager.setSchemaController.bind(null, {
+      send: function() {},
+      get: function() {},
+      create: function() {},
+      update: function() {},
+      delete: function() {}
+    })).not.toThrow();
+  });
+
+  it('can set and get SchemaController', () => {
+    var controller = {
+      send: function() {},
+      get: function() {},
+      create: function() {},
+      update: function() {},
+      delete: function() {}
+    };
+
+    CoreManager.setSchemaController(controller);
+    expect(CoreManager.getSchemaController()).toBe(controller);
   });
 });
