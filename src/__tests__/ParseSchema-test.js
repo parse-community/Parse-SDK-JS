@@ -47,7 +47,6 @@ describe('ParseSchema', () => {
       .addDate('dateField')
       .addFile('fileField')
       .addGeoPoint('geoPointField')
-      .addPolygon('polygonField')
       .addArray('arrayField')
       .addObject('objectField')
       .addPointer('pointerField', '_User')
@@ -60,7 +59,6 @@ describe('ParseSchema', () => {
     expect(schema._fields.dateField.type, 'Date');
     expect(schema._fields.fileField.type, 'File');
     expect(schema._fields.geoPointField.type, 'GeoPoint');
-    expect(schema._fields.polygonField.type, 'Polygon');
     expect(schema._fields.arrayField.type, 'Array');
     expect(schema._fields.objectField.type, 'Object');
     expect(schema._fields.pointerField.type, 'Pointer');
@@ -164,13 +162,19 @@ describe('ParseSchema', () => {
     done();
   });
 
+  // CoreManager.setSchemaController({
+  //   send() {},
+  //   get() {},
+  //   create() {},
+  //   update() {},
+  //   delete() {},
+  // });
   it('can save schema', (done) => {
     CoreManager.setSchemaController({
       send() {},
       get() {},
       update() {},
       delete() {},
-      purge() {},
       create(className, params, options) {
         expect(className).toBe('SchemaTest');
         expect(params).toEqual({
@@ -198,7 +202,6 @@ describe('ParseSchema', () => {
       get() {},
       create() {},
       delete() {},
-      purge() {},
       update(className, params, options) {
         expect(className).toBe('SchemaTest');
         expect(params).toEqual({
@@ -226,7 +229,6 @@ describe('ParseSchema', () => {
       create() {},
       update() {},
       get() {},
-      purge() {},
       delete(className, options) {
         expect(className).toBe('SchemaTest');
         expect(options).toEqual({});
@@ -241,33 +243,12 @@ describe('ParseSchema', () => {
     });
   });
 
-  it('can purge schema', (done) => {
-    CoreManager.setSchemaController({
-      send() {},
-      create() {},
-      update() {},
-      get() {},
-      delete() {},
-      purge(className) {
-        expect(className).toBe('SchemaTest');
-        return ParsePromise.as([]);
-      },
-    });
-
-    var schema = new ParseSchema('SchemaTest');
-    schema.purge().then((results) => {
-      expect(results).toEqual([]);
-      done();
-    });
-  });
-
   it('can get schema', (done) => {
     CoreManager.setSchemaController({
       send() {},
       create() {},
       update() {},
       delete() {},
-      purge() {},
       get(className, options) {
         expect(className).toBe('SchemaTest');
         expect(options).toEqual({});
@@ -288,7 +269,6 @@ describe('ParseSchema', () => {
       create() {},
       update() {},
       delete() {},
-      purge() {},
       get(className, options) {
         expect(className).toBe('SchemaTest');
         expect(options).toEqual({ sessionToken: 1234 });
@@ -309,7 +289,6 @@ describe('ParseSchema', () => {
       create() {},
       update() {},
       delete() {},
-      purge() {},
       get(className, options) {
         expect(className).toBe('SchemaTest');
         expect(options).toEqual({});
@@ -334,7 +313,6 @@ describe('ParseSchema', () => {
       create() {},
       update() {},
       delete() {},
-      purge() {},
       get(className, options) {
         expect(className).toBe('');
         expect(options).toEqual({});
@@ -356,7 +334,6 @@ describe('ParseSchema', () => {
       create() {},
       update() {},
       delete() {},
-      purge() {},
       get(className, options) {
         expect(className).toBe('');
         expect(options).toEqual({ sessionToken: 1234 });
@@ -378,7 +355,6 @@ describe('ParseSchema', () => {
       create() {},
       update() {},
       delete() {},
-      purge() {},
       get(className, options) {
         expect(className).toBe('');
         expect(options).toEqual({});
@@ -438,14 +414,6 @@ describe('SchemaController', () => {
   it('delete schema', (done) => {
     var schema = new ParseSchema('SchemaTest');
     schema.delete().then((results) => {
-      expect(results).toEqual([]);
-      done();
-    });
-  });
-
-  it('purge schema', (done) => {
-    var schema = new ParseSchema('SchemaTest');
-    schema.purge().then((results) => {
       expect(results).toEqual([]);
       done();
     });
