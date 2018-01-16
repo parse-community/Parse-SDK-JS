@@ -78,6 +78,7 @@ type RESTController = {
   ajax: (method: string, url: string, data: any, headers?: any) => ParsePromise;
 };
 type SchemaController = {
+  purge: (className: string) => ParsePromise;
   get: (className: string, options: RequestOptions) => ParsePromise;
   delete: (className: string, options: RequestOptions) => ParsePromise;
   create: (className: string, params: any, options: RequestOptions) => ParsePromise;
@@ -295,7 +296,7 @@ module.exports = {
   },
 
   setSchemaController(controller: SchemaController) {
-    requireMethods('SchemaController', ['get', 'create', 'update', 'delete', 'send'], controller);
+    requireMethods('SchemaController', ['get', 'create', 'update', 'delete', 'send', 'purge'], controller);
     config['SchemaController'] = controller;
   },
 
