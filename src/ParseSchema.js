@@ -14,7 +14,7 @@ import ParsePromise from './ParsePromise';
 
 import type { RequestOptions, FullOptions } from './RESTController';
 
-const FIELD_TYPES = ['String', 'Number', 'Boolean', 'Date', 'File', 'GeoPoint', 'Array', 'Object', 'Pointer', 'Relation'];
+const FIELD_TYPES = ['String', 'Number', 'Boolean', 'Date', 'File', 'GeoPoint', 'Polygon', 'Array', 'Object', 'Pointer', 'Relation'];
 
 /**
  * A Parse.Schema object is for handling schema data from Parse.
@@ -181,6 +181,7 @@ class ParseSchema {
 
   /**
    * Removing a Schema from Parse
+   * Can only be used on Schema without objects
    *
    * @param {Object} options A Backbone-style options object.
    * Valid options are:<ul>
@@ -202,6 +203,34 @@ class ParseSchema {
     const controller = CoreManager.getSchemaController();
 
     return controller.delete(this.className, options)
+      .then((response) => {
+        return response;
+      })._thenRunCallbacks(options);
+  }
+
+  /**
+   * Removes all objects from a Schema (class) in Parse.
+   * EXERCISE CAUTION, running this will delete all objects for this schema and cannot be reversed
+   *
+   * @param {Object} options A Backbone-style options object.
+   * Valid options are:<ul>
+   *   <li>success: A Backbone-style success callback
+   *   <li>error: An Backbone-style error callback.
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   *
+   * @return {Parse.Promise} A promise that is resolved with the result when
+   * the query completes.
+   */
+  purge(options: FullOptions) {
+    this.assertClassName();
+
+    const controller = CoreManager.getSchemaController();
+
+    return controller.purge(this.className)
       .then((response) => {
         return response;
       })._thenRunCallbacks(options);
@@ -317,6 +346,16 @@ class ParseSchema {
    */
   addGeoPoint(name: string) {
     return this.addField(name, 'GeoPoint');
+  }
+
+  /**
+   * Adding Polygon Field
+   *
+   * @param {String} name Name of the field that will be created on Parse
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
+  addPolygon(name: string) {
+    return this.addField(name, 'Polygon');
   }
 
   /**
@@ -437,6 +476,16 @@ const DefaultController = {
 
   delete(className: string, options: RequestOptions): ParsePromise {
     return this.send(className, 'DELETE', {}, options);
+  },
+
+  purge(className: string): ParsePromise {
+    const RESTController = CoreManager.getRESTController();
+    return RESTController.request(
+      'DELETE',
+      `purge/${className}`,
+      {},
+      { useMasterKey: true }
+    );
   }
 };
 
