@@ -328,7 +328,8 @@ describe('CoreManager', () => {
       get: function() {},
       create: function() {},
       update: function() {},
-      delete: function() {}
+      delete: function() {},
+      purge: function() {},
     })).not.toThrow();
   });
 
@@ -338,7 +339,8 @@ describe('CoreManager', () => {
       get: function() {},
       create: function() {},
       update: function() {},
-      delete: function() {}
+      delete: function() {},
+      purge: function() {},
     };
 
     CoreManager.setSchemaController(controller);

@@ -47,6 +47,7 @@ describe('Schema', () => {
       .addDate('dateField')
       .addFile('fileField')
       .addGeoPoint('geoPointField')
+      .addPolygon('polygonField')
       .addArray('arrayField')
       .addObject('objectField')
       .addPointer('pointerField', '_User')
@@ -62,6 +63,7 @@ describe('Schema', () => {
       assert.equal(result.fields.dateField.type, 'Date');
       assert.equal(result.fields.fileField.type, 'File');
       assert.equal(result.fields.geoPointField.type, 'GeoPoint');
+      assert.equal(result.fields.polygonField.type, 'Polygon');
       assert.equal(result.fields.arrayField.type, 'Array');
       assert.equal(result.fields.objectField.type, 'Object');
       assert.equal(result.fields.pointerField.type, 'Pointer');
@@ -128,6 +130,32 @@ describe('Schema', () => {
     }).then((results) => {
       assert.equal(results.length, 1);
       assert.equal(results[0].className, 'SchemaTest2');
+      done();
+    });
+  });
+
+  it('purge', (done) => {
+    const testSchema = new Parse.Schema('SchemaTest');
+    const obj = new Parse.Object('SchemaTest');
+    obj.save().then(() => {
+        return testSchema.delete().then(() => {
+          // Should never reach here
+          assert.equal(true, false);
+        }).catch((error) => {
+          assert.equal(error.code, Parse.Error.INVALID_SCHEMA_OPERATION);
+          assert.equal(error.message, 'Class SchemaTest is not empty, contains 1 objects, cannot drop schema.');
+          return Parse.Promise.as();
+        });
+    }).then(() => {
+      return testSchema.purge();
+    }).then(() => {
+      const query = new Parse.Query('SchemaTest');
+      return query.count();
+    }).then((count) => {
+      assert.equal(count, 0);
+      // Delete only works on empty schema, extra check
+      return testSchema.delete();
+    }).then(() => {
       done();
     });
   });
