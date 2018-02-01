@@ -1310,6 +1310,60 @@ describe('Parse Query', () => {
     });
   });
 
+  it('can build AND queries', (done) => {
+    let objects = [];
+    for (let i = 0; i < 10; i++) {
+      let obj = new Parse.Object('BoxedNumber');
+      obj.set({ x: i, and: true });
+      objects.push(obj);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      let q1 = new Parse.Query('BoxedNumber');
+      q1.equalTo('and', true);
+      q1.greaterThan('x', 2);
+      let q2 = new Parse.Query('BoxedNumber');
+      q2.equalTo('and', true);
+      q2.lessThan('x', 5);
+      let andQuery = Parse.Query.and(q1, q2);
+      return andQuery.find();
+    }).then((results) => {
+      assert.equal(results.length, 2);
+      results.forEach((number) => {
+        assert(number.get('x') > 2 && number.get('x') < 5);
+      });
+      done();
+    }).fail(e => console.log(e));
+  });
+
+  it('can build complex AND queries', (done) => {
+    let objects = [];
+    for (let i = 0; i < 10; i++) {
+      let child = new Parse.Object('Child');
+      child.set('x', i);
+      child.set('and', true);
+      let parent = new Parse.Object('Parent');
+      parent.set('child', child);
+      parent.set('and', true);
+      parent.set('y', i);
+      objects.push(parent);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      let subQuery = new Parse.Query('Child');
+      subQuery.equalTo('x', 4);
+      subQuery.equalTo('and', true);
+      let q1 = new Parse.Query('Parent');
+      q1.matchesQuery('child', subQuery);
+      let q2 = new Parse.Query('Parent');
+      q2.equalTo('and', true);
+      q2.equalTo('y', 4);
+      let andQuery = new Parse.Query.and(q1, q2);
+      return andQuery.find();
+    }).then((results) => {
+      assert.equal(results.length, 1);
+      done();
+    }).fail(e => console.log(e));
+  });
+
   it('can iterate over results with each', (done) => {
     let items = [];
     for (let i = 0; i < 50; i++) {
