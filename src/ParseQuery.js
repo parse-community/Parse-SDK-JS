@@ -993,7 +993,7 @@ class ParseQuery {
   *
   * In order to sort you must use select and ascending ($score is required)
   *  <pre>
-  *   query.fullText('term');
+  *   query.fullText('field', 'term', { $language: "spanish" });
   *   query.ascending('$score');
   *   query.select('$score');
   *  </pre>
@@ -1005,9 +1005,13 @@ class ParseQuery {
   *
   * @param {String} key The key that the string to match is stored in.
   * @param {String} value The string to search
+  * @param {Object} options (Optional) See https://docs.mongodb.com/manual/reference/operator/query/text/#text-query-operator-behavior
+  * @param {String} options.$language
+  * @param {String} options.$caseSensitive
+  * @param {String} options.$diacriticSensitive
   * @return {Parse.Query} Returns the query, so you can chain this call.
   */
- fullText(key: string, value: string): ParseQuery {
+ fullText(key: string, value: string, options: ?Object): ParseQuery {
    if (!key) {
      throw new Error('A key is required.');
    }
@@ -1018,7 +1022,11 @@ class ParseQuery {
      throw new Error('The value being searched for must be a string.');
    }
 
-   return this._addCondition(key, '$text', { $search: { $term: value } });
+   if (typeof options !== 'object') {
+     throw new Error('The options must be an Object.');
+   }
+
+   return this._addCondition(key, '$text', { $search: Object.assign({ $term: value }, options) });
  }
 
   /**
