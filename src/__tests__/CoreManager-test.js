@@ -57,13 +57,19 @@ describe('CoreManager', () => {
     );
 
     expect(CoreManager.setCloudController.bind(null, {
-      run: function() {}
+      run: function() {},
+      getJobsData: function() {},
+      startJob: function() {},
+      getJobStatus: function() {}
     })).not.toThrow();
   });
 
   it('can set and get CloudController', () => {
     var controller = {
-      run: function() {}
+      run: function() {},
+      getJobsData: function() {},
+      startJob: function() {},
+      getJobStatus: function() {}
     };
 
     CoreManager.setCloudController(controller);

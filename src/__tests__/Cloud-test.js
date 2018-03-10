@@ -22,13 +22,21 @@ var defaultController = CoreManager.getCloudController();
 describe('Cloud', () => {
   beforeEach(() => {
     var run = jest.genMockFunction();
+    var getJobsData = jest.genMockFunction();
+    var startJob = jest.genMockFunction();
     run.mockReturnValue(ParsePromise.as({
       result: {}
     }));
-    CoreManager.setCloudController({ run: run });
+    getJobsData.mockReturnValue(ParsePromise.as({
+      result: {}
+    }));
+    startJob.mockReturnValue(ParsePromise.as({
+      result: {}
+    }));
+    CoreManager.setCloudController({ run, getJobsData, startJob });
   });
 
-  it('throws with an invalid function name', () => {
+  it('run throws with an invalid function name', () => {
     expect(Cloud.run)
       .toThrow('Cloud function name must be a string.');
 
@@ -39,14 +47,14 @@ describe('Cloud', () => {
       .toThrow('Cloud function name must be a string.');
   });
 
-  it('passes function name and data along', () => {
+  it('run passes function name and data along', () => {
     Cloud.run('myfunction', {});
 
     expect(CoreManager.getCloudController().run.mock.calls[0])
       .toEqual(['myfunction', {}, {}]);
   });
 
-  it('passes options', () => {
+  it('run passes options', () => {
     Cloud.run('myfunction', {}, { useMasterKey: false });
 
     expect(CoreManager.getCloudController().run.mock.calls[0])
@@ -66,7 +74,44 @@ describe('Cloud', () => {
 
     expect(CoreManager.getCloudController().run.mock.calls[3])
       .toEqual(['myfunction', {}, { useMasterKey: true, sessionToken: 'asdf1234' }]);
-  })
+  });
+
+  it('startJob throws with an invalid job name', () => {
+    expect(Cloud.startJob)
+      .toThrow('Cloud job name must be a string.');
+
+    expect(Cloud.startJob.bind(null, ''))
+      .toThrow('Cloud job name must be a string.');
+
+    expect(Cloud.startJob.bind(null, {}))
+      .toThrow('Cloud job name must be a string.');
+  });
+
+  it('startJob passes function name and data along', () => {
+    Cloud.startJob('myJob', {});
+
+    expect(CoreManager.getCloudController().startJob.mock.calls[0])
+      .toEqual(['myJob', {}, { useMasterKey: true }]);
+  });
+
+  it('startJob passes options', () => {
+    Cloud.startJob('myJob', {}, { useMasterKey: true });
+
+    expect(CoreManager.getCloudController().startJob.mock.calls[0])
+      .toEqual(['myJob', {}, { useMasterKey: true }]);
+  });
+
+  it('getJobsData passes options', () => {
+    Cloud.getJobsData();
+
+    expect(CoreManager.getCloudController().getJobsData.mock.calls[0])
+      .toEqual([{ useMasterKey: true }]);
+
+    Cloud.getJobsData({ useMasterKey: true });
+
+    expect(CoreManager.getCloudController().getJobsData.mock.calls[0])
+      .toEqual([{ useMasterKey: true }]);
+  });
 });
 
 describe('CloudController', () => {
