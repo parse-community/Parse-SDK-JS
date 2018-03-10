@@ -99,13 +99,13 @@ const RESTController = {
         if (xhr.status >= 200 && xhr.status < 300) {
           var response;
           try {
+            response = JSON.parse(xhr.responseText);
+
             if (typeof xhr.getResponseHeader === 'function') {
               var jobStatusId = xhr.getResponseHeader('x-parse-job-status-id');
               if (jobStatusId) {
                 response = jobStatusId;
               }
-            } else {
-              response = JSON.parse(xhr.responseText);
             }
           } catch (e) {
             promise.reject(e.toString());
