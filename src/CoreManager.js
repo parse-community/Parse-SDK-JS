@@ -30,6 +30,8 @@ type AnalyticsController = {
 };
 type CloudController = {
   run: (name: string, data: mixed, options: { [key: string]: mixed }) => ParsePromise;
+  getJobsData: (options: { [key: string]: mixed }) => ParsePromise;
+  startJob: (name: string, data: mixed, options: { [key: string]: mixed }) => ParsePromise;
 };
 type ConfigController = {
   current: () => ParsePromise;
@@ -197,7 +199,7 @@ module.exports = {
   },
 
   setCloudController(controller: CloudController) {
-    requireMethods('CloudController', ['run'], controller);
+    requireMethods('CloudController', ['run', 'getJobsData', 'startJob'], controller);
     config['CloudController'] = controller;
   },
 
