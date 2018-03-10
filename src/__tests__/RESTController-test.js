@@ -206,6 +206,48 @@ describe('RESTController', () => {
       });
   });
 
+  it('handles x-parse-job-status-id header', (done) => {
+    var XHR = function() { };
+    XHR.prototype = {
+      open: function() { },
+      setRequestHeader: function() { },
+      getResponseHeader: function(name) { return 1234; },
+      send: function() {
+        this.status = 200;
+        this.responseText = '{}';
+        this.readyState = 4;
+        this.onreadystatechange();
+      }
+    };
+    RESTController._setXHR(XHR);
+    RESTController.request('GET', 'classes/MyObject', {}, {})
+      .then((response) => {
+        expect(response).toBe(1234);
+        done();
+      });
+  });
+
+  it('handles invalid header', (done) => {
+    var XHR = function() { };
+    XHR.prototype = {
+      open: function() { },
+      setRequestHeader: function() { },
+      getResponseHeader: function(name) { return null; },
+      send: function() {
+        this.status = 200;
+        this.responseText = '{"result":"hello"}';
+        this.readyState = 4;
+        this.onreadystatechange();
+      }
+    };
+    RESTController._setXHR(XHR);
+    RESTController.request('GET', 'classes/MyObject', {}, {})
+      .then((response) => {
+        expect(response.result).toBe('hello');
+        done();
+      });
+  });
+
   it('attaches the session token of the current user', () => {
     CoreManager.setUserController({
       currentUserAsync() {
