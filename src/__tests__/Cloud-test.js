@@ -126,7 +126,7 @@ describe('CloudController', () => {
     CoreManager.setRESTController({ request: request, ajax: ajax });
   });
 
-  it('passes encoded requests', () => {
+  it('run passes encoded requests', () => {
     Cloud.run('myfunction', { value: 12, when: new Date(Date.UTC(2015,0,1)) });
 
     expect(CoreManager.getRESTController().request.mock.calls[0])
@@ -135,7 +135,7 @@ describe('CloudController', () => {
       }, { }]);
   });
 
-  it('passes options', () => {
+  it('run passes options', () => {
     Cloud.run('myfunction', { value: 12 }, { useMasterKey: true });
 
     expect(CoreManager.getRESTController().request.mock.calls[0])
@@ -149,5 +149,50 @@ describe('CloudController', () => {
       .toEqual(['POST', 'functions/myfunction', {
         value: 12
       }, { sessionToken: 'asdf1234' }]);
+  });
+
+  it('run invalid response', () => {
+    var request = jest.genMockFunction();
+    request.mockReturnValue(ParsePromise.as({
+      success: false
+    }));
+    var ajax = jest.genMockFunction();
+    CoreManager.setRESTController({ request: request, ajax: ajax });
+
+    Cloud.run('myfunction').then(null).catch(() => {
+      done();
+    });
+  });
+
+  it('startJob passes encoded requests', () => {
+    Cloud.startJob('myJob', { value: 12, when: new Date(Date.UTC(2015,0,1)) });
+
+    expect(CoreManager.getRESTController().request.mock.calls[0])
+      .toEqual(['POST', 'jobs/myJob', {
+        value: 12, when: { __type: 'Date', iso: '2015-01-01T00:00:00.000Z'}
+      }, { useMasterKey: true }]);
+  });
+
+  it('startJob passes options', () => {
+    Cloud.startJob('myJob', { value: 12 }, { useMasterKey: true });
+
+    expect(CoreManager.getRESTController().request.mock.calls[0])
+      .toEqual(['POST', 'jobs/myJob', {
+        value: 12
+      }, { useMasterKey: true }]);
+  });
+
+  it('getJobsData passes no options', () => {
+    Cloud.getJobsData();
+
+    expect(CoreManager.getRESTController().request.mock.calls[0])
+      .toEqual(['GET', 'cloud_code/jobs/data', null, { useMasterKey: true }]);
+  });
+
+  it('getJobsData passes options', () => {
+    Cloud.getJobsData({ useMasterKey: true });
+
+    expect(CoreManager.getRESTController().request.mock.calls[0])
+      .toEqual(['GET', 'cloud_code/jobs/data', null, { useMasterKey: true }]);
   });
 });
