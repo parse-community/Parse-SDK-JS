@@ -6,7 +6,7 @@
 [![CDNJS version](https://img.shields.io/cdnjs/v/parse.svg)](https://cdnjs.com/libraries/parse)
 [![License][license-svg]][license-link]
 
-A library that gives you access to the powerful Parse cloud platform from your JavaScript app. For more information on Parse and its features, see [the website](http://parseplatform.org) or [the JavaScript guide](http://docs.parseplatform.org/js/guide/).
+A library that gives you access to the powerful Parse cloud platform from your JavaScript app. For more information on Parse and its features, see [the website](http://parseplatform.org), [the JavaScript guide](http://docs.parseplatform.org/js/guide/) or [API Reference](http://parseplatform.org/Parse-SDK-JS/api/).
 
 ## Getting Started
 
@@ -34,9 +34,11 @@ For React Native applications, include `'parse/react-native'`:
 ```js
 // In a React Native application
 var Parse = require('parse/react-native');
-```
 
-> As of `v1.10`, Parse-SDK-JS supports React Native 0.43+. Please use `v1.9.2` for previous versions of React Native.
+// On React Native >= 0.50 and Parse >= 1.11.0, set the Async
+var AsyncStorage = require('react-native').AsyncStorage;
+Parse.setAsyncStorage(AsyncStorage);
+```
 
 ## License
 

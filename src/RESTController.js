@@ -100,6 +100,13 @@ const RESTController = {
           var response;
           try {
             response = JSON.parse(xhr.responseText);
+
+            if (typeof xhr.getResponseHeader === 'function') {
+              var jobStatusId = xhr.getResponseHeader('x-parse-job-status-id');
+              if (jobStatusId) {
+                response = jobStatusId;
+              }
+            }
           } catch (e) {
             promise.reject(e.toString());
           }

@@ -82,37 +82,28 @@ function getServerUrlPath() {
 
 /**
  * Creates a new model with defined attributes.
- *
- * <p>You won't normally call this method directly.  It is recommended that
- * you use a subclass of <code>Parse.Object</code> instead, created by calling
- * <code>extend</code>.</p>
- *
- * <p>However, if you don't want to use a subclass, or aren't sure which
- * subclass is appropriate, you can use this form:<pre>
- *     var object = new Parse.Object("ClassName");
- * </pre>
- * That is basically equivalent to:<pre>
- *     var MyClass = Parse.Object.extend("ClassName");
- *     var object = new MyClass();
- * </pre></p>
- *
- * @class Parse.Object
- * @constructor
- * @param {String} className The class name for the object
- * @param {Object} attributes The initial set of data to store in the object.
- * @param {Object} options The options for this object instance.
+  *
+  * <p>You won't normally call this method directly.  It is recommended that
+  * you use a subclass of <code>Parse.Object</code> instead, created by calling
+  * <code>extend</code>.</p>
+  *
+  * <p>However, if you don't want to use a subclass, or aren't sure which
+  * subclass is appropriate, you can use this form:<pre>
+  *     var object = new Parse.Object("ClassName");
+  * </pre>
+  * That is basically equivalent to:<pre>
+  *     var MyClass = Parse.Object.extend("ClassName");
+  *     var object = new MyClass();
+  * </pre></p>
+  *
+ * @alias Parse.Object
  */
-export default class ParseObject {
+class ParseObject {
   /**
-   * The ID of this object, unique within its class.
-   * @property id
-   * @type String
+   * @param {String} className The class name for the object
+   * @param {Object} attributes The initial set of data to store in the object.
+   * @param {Object} options The options for this object instance.
    */
-  id: ?string;
-  _localId: ?string;
-  _objCount: number;
-  className: string;
-
   constructor(className: ?string | { className: string, [attr: string]: mixed }, attributes?: { [attr: string]: mixed }, options?: { ignoreValidation: boolean }) {
     // Enable legacy initializers
     if (typeof this.initialize === 'function') {
@@ -142,6 +133,16 @@ export default class ParseObject {
       throw new Error('Can\'t create an invalid Parse Object');
     }
   }
+
+  /**
+   * The ID of this object, unique within its class.
+   * @property id
+   * @type String
+   */
+  id: ?string;
+  _localId: ?string;
+  _objCount: number;
+  className: string;
 
   /** Prototype getters / setters **/
 
@@ -407,7 +408,6 @@ export default class ParseObject {
 
   /**
    * Returns a JSON version of the object suitable for saving to Parse.
-   * @method toJSON
    * @return {Object}
    */
   toJSON(seen: Array<any> | void): AttributeMap {
@@ -435,7 +435,7 @@ export default class ParseObject {
 
   /**
    * Determines whether this ParseObject is equal to another ParseObject
-   * @method equals
+   * @param {Object} other - An other object ot compare
    * @return {Boolean}
    */
   equals(other: mixed): boolean {
@@ -454,7 +454,6 @@ export default class ParseObject {
    * Returns true if this object has been modified since its last
    * save/refresh.  If an attribute is specified, it returns true only if that
    * particular attribute has been modified since the last save/refresh.
-   * @method dirty
    * @param {String} attr An attribute name (optional).
    * @return {Boolean}
    */
@@ -486,8 +485,7 @@ export default class ParseObject {
 
   /**
    * Returns an array of keys that have been modified since last save/refresh
-   * @method dirtyKeys
-   * @return {Array of string}
+   * @return {String[]}
    */
   dirtyKeys(): Array<string> {
     var pendingOps = this._getPendingOps();
@@ -506,8 +504,7 @@ export default class ParseObject {
 
   /**
    * Gets a Pointer referencing this Object.
-   * @method toPointer
-   * @return {Object}
+   * @return {Pointer}
    */
   toPointer(): Pointer {
     if (!this.id) {
@@ -522,7 +519,6 @@ export default class ParseObject {
 
   /**
    * Gets the value of an attribute.
-   * @method get
    * @param {String} attr The string name of an attribute.
    */
   get(attr: string): mixed {
@@ -531,8 +527,8 @@ export default class ParseObject {
 
   /**
    * Gets a relation on the given class for the attribute.
-   * @method relation
    * @param String attr The attribute to get the relation for.
+   * @return {Parse.Relation}
    */
   relation(attr: string): ParseRelation {
     var value = this.get(attr);
@@ -548,7 +544,6 @@ export default class ParseObject {
 
   /**
    * Gets the HTML-escaped value of an attribute.
-   * @method escape
    * @param {String} attr The string name of an attribute.
    */
   escape(attr: string): string {
@@ -569,7 +564,6 @@ export default class ParseObject {
   /**
    * Returns <code>true</code> if the attribute contains a value that is not
    * null or undefined.
-   * @method has
    * @param {String} attr The string name of the attribute.
    * @return {Boolean}
    */
@@ -603,7 +597,6 @@ export default class ParseObject {
    *
    *   game.set("finished", true);</pre></p>
    *
-   * @method set
    * @param {String} key The key to set.
    * @param {} value The value to give it.
    * @param {Object} options A set of options for the set.
@@ -697,7 +690,6 @@ export default class ParseObject {
   /**
    * Remove an attribute from the model. This is a noop if the attribute doesn't
    * exist.
-   * @method unset
    * @param {String} attr The string name of an attribute.
    */
   unset(attr: string, options?: { [opt: string]: mixed }): ParseObject | boolean {
@@ -710,7 +702,6 @@ export default class ParseObject {
    * Atomically increments the value of the given attribute the next time the
    * object is saved. If no amount is specified, 1 is used by default.
    *
-   * @method increment
    * @param attr {String} The key.
    * @param amount {Number} The amount to increment by (optional).
    */
@@ -727,9 +718,9 @@ export default class ParseObject {
   /**
    * Atomically add an object to the end of the array associated with a given
    * key.
-   * @method add
    * @param attr {String} The key.
    * @param item {} The item to add.
+   * @return {(ParseObject|Boolean)}
    */
   add(attr: string, item: mixed): ParseObject | boolean {
     return this.set(attr, new AddOp([item]));
@@ -738,9 +729,8 @@ export default class ParseObject {
   /**
    * Atomically add the objects to the end of the array associated with a given
    * key.
-   * @method addAll
    * @param attr {String} The key.
-   * @param items {[]} The items to add.
+   * @param items {Object[]} The items to add.
    */
   addAll(attr: string, items: Array<mixed>): ParseObject | boolean {
     return this.set(attr, new AddOp(items));
@@ -751,7 +741,6 @@ export default class ParseObject {
    * if it is not already present in the array. The position of the insert is
    * not guaranteed.
    *
-   * @method addUnique
    * @param attr {String} The key.
    * @param item {} The object to add.
    */
@@ -764,9 +753,8 @@ export default class ParseObject {
    * if it is not already present in the array. The position of the insert is
    * not guaranteed.
    *
-   * @method addAllUnique
    * @param attr {String} The key.
-   * @param items {[]} The objects to add.
+   * @param items {Object[]} The objects to add.
    */
   addAllUnique(attr: string, items: Array<mixed>): ParseObject | boolean {
     return this.set(attr, new AddUniqueOp(items));
@@ -776,7 +764,6 @@ export default class ParseObject {
    * Atomically remove all instances of an object from the array associated
    * with a given key.
    *
-   * @method remove
    * @param attr {String} The key.
    * @param item {} The object to remove.
    */
@@ -788,9 +775,8 @@ export default class ParseObject {
    * Atomically remove all instances of the objects from the array associated
    * with a given key.
    *
-   * @method removeAll
    * @param attr {String} The key.
-   * @param items {[]} The object to remove.
+   * @param items {Object[]} The object to remove.
    */
   removeAll(attr: string, items: Array<mixed>): ParseObject | boolean {
     return this.set(attr, new RemoveOp(items));
@@ -802,7 +788,6 @@ export default class ParseObject {
    * saved. For example, after calling object.increment("x"), calling
    * object.op("x") would return an instance of Parse.Op.Increment.
    *
-   * @method op
    * @param attr {String} The key.
    * @returns {Parse.Op} The operation, or undefined if none.
    */
@@ -817,7 +802,6 @@ export default class ParseObject {
 
   /**
    * Creates a new model with identical attributes to this one, similar to Backbone.Model's clone()
-   * @method clone
    * @return {Parse.Object}
    */
   clone(): any {
@@ -846,7 +830,6 @@ export default class ParseObject {
 
   /**
    * Creates a new instance of this object. Not to be confused with clone()
-   * @method newInstance
    * @return {Parse.Object}
    */
   newInstance(): any {
@@ -869,7 +852,6 @@ export default class ParseObject {
 
   /**
    * Returns true if this object has never been saved to Parse.
-   * @method isNew
    * @return {Boolean}
    */
   isNew(): boolean {
@@ -880,7 +862,6 @@ export default class ParseObject {
    * Returns true if this object was created by the Parse server when the
    * object might have already been there (e.g. in the case of a Facebook
    * login)
-   * @method existed
    * @return {Boolean}
    */
   existed(): boolean {
@@ -897,7 +878,6 @@ export default class ParseObject {
 
   /**
    * Checks if the model is currently in a valid state.
-   * @method isValid
    * @return {Boolean}
    */
   isValid(): boolean {
@@ -910,7 +890,6 @@ export default class ParseObject {
    * to provide additional validation on <code>set</code> and
    * <code>save</code>.  Your implementation should return
    *
-   * @method validate
    * @param {Object} attrs The current data to validate.
    * @return {} False if the data is valid.  An error object otherwise.
    * @see Parse.Object#set
@@ -932,7 +911,6 @@ export default class ParseObject {
 
   /**
    * Returns the ACL for this object.
-   * @method getACL
    * @returns {Parse.ACL} An instance of Parse.ACL.
    * @see Parse.Object#get
    */
@@ -946,7 +924,6 @@ export default class ParseObject {
 
   /**
    * Sets the ACL to be used for this object.
-   * @method setACL
    * @param {Parse.ACL} acl An instance of Parse.ACL.
    * @param {Object} options Optional Backbone-like options object to be
    *     passed in to set.
@@ -959,7 +936,6 @@ export default class ParseObject {
 
   /**
    * Clears any changes to this object made since the last call to save()
-   * @method revert
    */
   revert(): void {
     this._clearPendingOps();
@@ -967,7 +943,7 @@ export default class ParseObject {
 
   /**
    * Clears all attributes on a model
-   * @method clear
+   * @return {(ParseObject | boolean)}
    */
   clear(): ParseObject | boolean {
     var attributes = this.attributes;
@@ -988,7 +964,6 @@ export default class ParseObject {
    * Fetch the model from the server. If the server's representation of the
    * model differs from its current attributes, they will be overriden.
    *
-   * @method fetch
    * @param {Object} options A Backbone-style callback object.
    * Valid options are:<ul>
    *   <li>success: A Backbone-style success callback.
@@ -1048,7 +1023,6 @@ export default class ParseObject {
    *     // The save failed.  Error is an instance of Parse.Error.
    *   });</pre>
    *
-   * @method save
    * @param {Object} options A Backbone-style callback object.
    * Valid options are:<ul>
    *   <li>success: A Backbone-style success callback.
@@ -1124,7 +1098,6 @@ export default class ParseObject {
    * If `wait: true` is passed, waits for the server to respond
    * before removal.
    *
-   * @method destroy
    * @param {Object} options A Backbone-style callback object.
    * Valid options are:<ul>
    *   <li>success: A Backbone-style success callback
@@ -1177,7 +1150,6 @@ export default class ParseObject {
    *   });
    * </pre>
    *
-   * @method fetchAll
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {Object} options A Backbone-style callback object.
    * @static
@@ -1218,7 +1190,6 @@ export default class ParseObject {
    *   });
    * </pre>
    *
-   * @method fetchAllIfNeeded
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {Object} options A Backbone-style callback object.
    * @static
@@ -1286,7 +1257,6 @@ export default class ParseObject {
    *   });
    * </pre>
    *
-   * @method destroyAll
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {Object} options A Backbone-style callback object.
    * @static
@@ -1330,7 +1300,6 @@ export default class ParseObject {
    *   });
    * </pre>
    *
-   * @method saveAll
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {Object} options A Backbone-style callback object.
    * @static
@@ -1367,7 +1336,6 @@ export default class ParseObject {
    *  pointerToFoo.id = "myObjectId";
    * </pre>
    *
-   * @method createWithoutData
    * @param {String} id The ID of the object to create a reference to.
    * @static
    * @return {Parse.Object} A Parse.Object reference.
@@ -1380,7 +1348,6 @@ export default class ParseObject {
 
   /**
    * Creates a new instance of a Parse Object from a JSON representation.
-   * @method fromJSON
    * @param {Object} json The JSON map of the Object's data
    * @param {boolean} override In single instance mode, all old server data
    *   is overwritten if this is set to true
@@ -1425,7 +1392,6 @@ export default class ParseObject {
    * When objects of that class are retrieved from a query, they will be
    * instantiated with this subclass.
    * This is only necessary when using ES6 subclassing.
-   * @method registerSubclass
    * @param {String} className The class name of the subclass
    * @param {Class} constructor The subclass
    */
@@ -1478,7 +1444,6 @@ export default class ParseObject {
    *         <i>Class properties</i>
    *     });</pre></p>
    *
-   * @method extend
    * @param {String} className The name of the Parse class backing this model.
    * @param {Object} protoProps Instance properties to add to instances of the
    *     class returned from this method.
@@ -1577,7 +1542,7 @@ export default class ParseObject {
    * share the same attributes, and stay synchronized with each other.
    * This is disabled by default in server environments, since it can lead to
    * security issues.
-   * @method enableSingleInstance
+   * @static
    */
   static enableSingleInstance() {
     singleInstance = true;
@@ -1589,7 +1554,7 @@ export default class ParseObject {
    * share the same attributes, and stay synchronized with each other.
    * When disabled, you can have two instances of the same object in memory
    * without them sharing attributes.
-   * @method disableSingleInstance
+   * @static
    */
   static disableSingleInstance() {
     singleInstance = false;
@@ -1888,3 +1853,5 @@ var DefaultController = {
 }
 
 CoreManager.setObjectController(DefaultController);
+
+export default ParseObject;

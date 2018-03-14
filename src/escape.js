@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015-present, Parse, LLC.
  * All rights reserved.
  *
