@@ -32,13 +32,13 @@ jobs:
       script: 
       - npm run release_docs
       - npm run build
-      #deploy:
-      #  - provider: pages
-      #    skip_cleanup: true
-      #    github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
-      #    local_dir: docs/
-      #    on:
-      #      all_branches: true
+      deploy:
+        - provider: pages
+          skip_cleanup: true
+          github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+          local_dir: docs/
+          on:
+            all_branches: true
       #  - provider: npm
       #    skip_cleanup: true
       #    email:
