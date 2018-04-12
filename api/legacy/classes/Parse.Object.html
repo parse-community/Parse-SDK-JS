@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Parse.Object - Parse JavaScript SDK</title>
+    <link rel="stylesheet" href="https://yui-s.yahooapis.com/3.8.0pr2/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <script src="https://yui-s.yahooapis.com/combo?3.8.0pr2/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            <h1><a href="../index.html">Parse JavaScript SDK: Parse.Object</a></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: </em>
+        </div>
+    </div>
+    <div class="yui3-g">
+
+        <div id="sidebar" class="yui3-u">
+            <div id="classes" class="sidebox">
+                <div class="hd">
+                    <h2 class="no-toc">Classes</h2>
+                </div>
+                <div class="bd">
+                    <ul>
+                            <li><a href="../classes/Parse.html">Parse</a></li>
+                            <li><a href="../classes/Parse.ACL.html">Parse.ACL</a></li>
+                            <li><a href="../classes/Parse.Analytics.html">Parse.Analytics</a></li>
+                            <li><a href="../classes/Parse.Cloud.html">Parse.Cloud</a></li>
+                            <li><a href="../classes/Parse.Cloud.AfterDeleteRequest.html">Parse.Cloud.AfterDeleteRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.AfterSaveRequest.html">Parse.Cloud.AfterSaveRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.BeforeDeleteRequest.html">Parse.Cloud.BeforeDeleteRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.BeforeDeleteResponse.html">Parse.Cloud.BeforeDeleteResponse</a></li>
+                            <li><a href="../classes/Parse.Cloud.BeforeSaveRequest.html">Parse.Cloud.BeforeSaveRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.BeforeSaveResponse.html">Parse.Cloud.BeforeSaveResponse</a></li>
+                            <li><a href="../classes/Parse.Cloud.Cookie.html">Parse.Cloud.Cookie</a></li>
+                            <li><a href="../classes/Parse.Cloud.CookieOptions.html">Parse.Cloud.CookieOptions</a></li>
+                            <li><a href="../classes/Parse.Cloud.FunctionRequest.html">Parse.Cloud.FunctionRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.FunctionResponse.html">Parse.Cloud.FunctionResponse</a></li>
+                            <li><a href="../classes/Parse.Cloud.HTTPOptions.html">Parse.Cloud.HTTPOptions</a></li>
+                            <li><a href="../classes/Parse.Cloud.HTTPResponse.html">Parse.Cloud.HTTPResponse</a></li>
+                            <li><a href="../classes/Parse.Cloud.JobRequest.html">Parse.Cloud.JobRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.JobStatus.html">Parse.Cloud.JobStatus</a></li>
+                            <li><a href="../classes/Parse.Config.html">Parse.Config</a></li>
+                            <li><a href="../classes/Parse.Error.html">Parse.Error</a></li>
+                            <li><a href="../classes/Parse.FacebookUtils.html">Parse.FacebookUtils</a></li>
+                            <li><a href="../classes/Parse.File.html">Parse.File</a></li>
+                            <li><a href="../classes/Parse.GeoPoint.html">Parse.GeoPoint</a></li>
+                            <li><a href="../classes/Parse.Object.html">Parse.Object</a></li>
+                            <li><a href="../classes/Parse.Promise.html">Parse.Promise</a></li>
+                            <li><a href="../classes/Parse.Push.html">Parse.Push</a></li>
+                            <li><a href="../classes/Parse.Query.html">Parse.Query</a></li>
+                            <li><a href="../classes/Parse.Relation.html">Parse.Relation</a></li>
+                            <li><a href="../classes/Parse.Role.html">Parse.Role</a></li>
+                            <li><a href="../classes/Parse.Session.html">Parse.Session</a></li>
+                            <li><a href="../classes/Parse.User.html">Parse.User</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div id="methods-on-page" class="sidebox on-page">
+                <div class="hd">
+                    <h2 class="no-toc">Methods On Page</h2>
+                </div>
+                <div class="bd">
+                    <ul>
+                            <li><a href="#methods_add">add</a></li>
+                            <li><a href="#methods_addUnique">addUnique</a></li>
+                            <li><a href="#methods_clear">clear</a></li>
+                            <li><a href="#methods_clone">clone</a></li>
+                            <li><a href="#methods_createWithoutData">createWithoutData</a></li>
+                            <li><a href="#methods_destroy">destroy</a></li>
+                            <li><a href="#methods_destroyAll">destroyAll</a></li>
+                            <li><a href="#methods_dirty">dirty</a></li>
+                            <li><a href="#methods_dirtyKeys">dirtyKeys</a></li>
+                            <li><a href="#methods_disableSingleInstance">disableSingleInstance</a></li>
+                            <li><a href="#methods_enableSingleInstance">enableSingleInstance</a></li>
+                            <li><a href="#methods_equals">equals</a></li>
+                            <li><a href="#methods_escape">escape</a></li>
+                            <li><a href="#methods_existed">existed</a></li>
+                            <li><a href="#methods_extend">extend</a></li>
+                            <li><a href="#methods_fetch">fetch</a></li>
+                            <li><a href="#methods_fetchAll">fetchAll</a></li>
+                            <li><a href="#methods_fetchAllIfNeeded">fetchAllIfNeeded</a></li>
+                            <li><a href="#methods_fromJSON">fromJSON</a></li>
+                            <li><a href="#methods_get">get</a></li>
+                            <li><a href="#methods_getACL">getACL</a></li>
+                            <li><a href="#methods_has">has</a></li>
+                            <li><a href="#methods_increment">increment</a></li>
+                            <li><a href="#methods_isNew">isNew</a></li>
+                            <li><a href="#methods_isValid">isValid</a></li>
+                            <li><a href="#methods_op">op</a></li>
+                            <li><a href="#methods_registerSubclass">registerSubclass</a></li>
+                            <li><a href="#methods_relation">relation</a></li>
+                            <li><a href="#methods_remove">remove</a></li>
+                            <li><a href="#methods_save">save</a></li>
+                            <li><a href="#methods_saveAll">saveAll</a></li>
+                            <li><a href="#methods_set">set</a></li>
+                            <li><a href="#methods_setACL">setACL</a></li>
+                            <li><a href="#methods_toJSON">toJSON</a></li>
+                            <li><a href="#methods_toPointer">toPointer</a></li>
+                            <li><a href="#methods_unset">unset</a></li>
+                            <li><a href="#methods_validate">validate</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            
+            
+        </div>
+
+        <div id="main" class="yui3-u">
+            <div class="content"><h4>Class Parse.Object</h4>
+<div class="intro"><p>Creates a new model with defined attributes.</p>
+<p>You won't normally call this method directly.  It is recommended that
+you use a subclass of <code>Parse.Object</code> instead, created by calling
+<code>extend</code>.</p>
+<p>However, if you don't want to use a subclass, or aren't sure which
+subclass is appropriate, you can use this form:<pre>
+    var object = new Parse.Object("ClassName");
+</pre>
+That is basically equivalent to:<pre>
+    var MyClass = Parse.Object.extend("ClassName");
+    var object = new MyClass();
+</pre></p></div>
+
+<a name="methods_Parse.Object"></a>
+<div class="method item">
+     <strong class="name"><code>Parse.Object</code></strong>( <code>className, attributes, options </code> ) 
+    <br>
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>className</code> <strong>&lt;String&gt;</strong>
+        <p>The class name for the object</p>
+
+        </li>
+        <li>
+            <code>attributes</code> <strong>&lt;Object&gt;</strong>
+        <p>The initial set of data to store in the object.</p>
+
+        </li>
+        <li>
+            <code>options</code> <strong>&lt;Object&gt;</strong>
+        <p>The options for this object instance.</p>
+
+        </li>
+    </ul>
+</div>
+
+<div id="classdocs">
+    <ul>
+        <li><a href="#methods">Methods</a></li>
+        <li><a href="#props">Properties</a></li>
+    </ul>
+    <div>
+            <div id="methods">
+<a name="methods_add"></a>
+<div class="method item">
+     <strong class="name"><code>add</code></strong>( <code>attr, item </code> ) 
+    <br>
+    <p>Atomically add an object to the end of the array associated with a given
+key.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>attr</code> <strong>&lt;String&gt;</strong>
+        <p>The key.</p>
+
+        </li>
+        <li>
+            <code>item</code> <strong>&lt;Object&gt;</strong>
+        <p>The item to add.</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_addUnique"></a>
+<div class="method item">
+     <strong class="name"><code>addUnique</code></strong>( <code>attr, item </code> ) 
+    <br>
+    <p>Atomically add an object to the array associated with a given key, only
+if it is not already present in the array. The position of the insert is
+not guaranteed.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>attr</code> <strong>&lt;String&gt;</strong>
+        <p>The key.</p>
+
+        </li>
+        <li>
+            <code>item</code> <strong>&lt;Object&gt;</strong>
+        <p>The object to add.</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_clear"></a>
+<div class="method item">
+     <strong class="name"><code>clear</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Clears all attributes on a model</p>
+
+</div>
+<a name="methods_clone"></a>
+<div class="method item">
+    <a href="../classes/Parse.Object.html" class="crosslink">Parse.Object</a> <strong class="name"><code>clone</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Creates a new model with identical attributes to this one.</p>
+
+    <br><div class="returns"><strong>Returns:</strong> &lt;<a href="../classes/Parse.Object.html" class="crosslink">Parse.Object</a>&gt; </div>
+</div>
+<a name="methods_createWithoutData"></a>
+<div class="method item">
+    <a href="../classes/Parse.Object.html" class="crosslink">Parse.Object</a> <strong class="name"><code>createWithoutData</code></strong>( <code>id </code> ) 
+    <br>
+    <p>Creates a reference to a subclass of Parse.Object with the given id. This
+does not exist on Parse.Object, only on subclasses.</p>
+<p>A shortcut for: <pre>
+ var Foo = Parse.Object.extend("Foo");
+ var pointerToFoo = new Foo();
+ pointerToFoo.id = "myObjectId";
+</pre>
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>id</code> <strong>&lt;String&gt;</strong>
+        <p>The ID of the object to create a reference to.</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;<a href="../classes/Parse.Object.html" class="crosslink">Parse.Object</a>&gt; <p>A Parse.Object reference.</p>
+</div>
+</div>
+<a name="methods_destroy"></a>
+<div class="method item">
+    <a href="../classes/Parse.Promise.html" class="crosslink">Parse.Promise</a> <strong class="name"><code>destroy</code></strong>( <code>options </code> ) 
+    <br>
+    <p>Destroy this model on the server if it was already persisted.
+If <code>wait: true</code> is passed, waits for the server to respond
+before removal.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>options</code> <strong>&lt;Object&gt;</strong>
+        <p>A Backbone-style callback object.
+Valid options are:<ul></p>
+  <li>success: A Backbone-style success callback
+  <li>error: An Backbone-style error callback.
+  <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+    be used for this request.
+  <li>sessionToken: A valid session token, used for making a request on
+      behalf of a specific user.
+</ul>
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;<a href="../classes/Parse.Promise.html" class="crosslink">Parse.Promise</a>&gt; <p>A promise that is fulfilled when the destroy
+completes.</p>
+</div>
+</div>
+<a name="methods_destroyAll"></a>
+<div class="method item">
+    <a href="../classes/Parse.Promise.html" class="crosslink">Parse.Promise</a> <strong class="name"><code>destroyAll</code></strong>( <code>list, options </code> ) 
+    <br>
+    <p>Destroy the given list of models on the server if it was already persisted.</p>
+<p>Unlike saveAll, if an error occurs while deleting an individual model,
+this method will continue trying to delete the rest of the models if
+possible, except in the case of a fatal error like a connection error.
+<p>In particular, the Parse.Error object returned in the case of error may
+be one of two types:
+<ul>
+  <li>A Parse.Error.AGGREGATE_ERROR. This object's "errors" property is an
+      array of other Parse.Error objects. Each error object in this array
+      has an "object" property that references the object that could not be
+      deleted (for instance, because that object could not be found).</li>
+  <li>A non-aggregate Parse.Error. This indicates a serious error that
+      caused the delete operation to be aborted partway through (for
+      instance, a connection failure in the middle of the delete).</li>
+</ul>
+<pre>
+  Parse.Object.destroyAll([object1, object2, ...], {
+    success: function() {
+      // All the objects were deleted.
+    },
+    error: function(error) {
+      // An error occurred while deleting one or more of the objects.
+      // If this is an aggregate error, then we can inspect each error
+      // object individually to determine the reason why a particular
+      // object was not deleted.
+      if (error.code === Parse.Error.AGGREGATE_ERROR) {
+        for (var i = 0; i < error.errors.length; i++) {
+          console.log("Couldn't delete " + error.errors[i].object.id +
+            "due to " + error.errors[i].message);
+        }
+      } else {
+        console.log("Delete aborted because of " + error.message);
+      }
+    },
+  });
+</pre>
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>list</code> <strong>&lt;Array&gt;</strong>
+        <p>A list of <code>Parse.Object</code>.</p>
+
+        </li>
+        <li>
+            <code>options</code> <strong>&lt;Object&gt;</strong>
+        <p>A Backbone-style callback object.</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;<a href="../classes/Parse.Promise.html" class="crosslink">Parse.Promise</a>&gt; <p>A promise that is fulfilled when the destroyAll
+completes.</p>
+</div>
+</div>
+<a name="methods_dirty"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>dirty</code></strong>( <code>attr </code> ) 
+    <br>
+    <p>Returns true if this object has been modified since its last
+save/refresh.  If an attribute is specified, it returns true only if that
+particular attribute has been modified since the last save/refresh.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>attr</code> <strong>&lt;String&gt;</strong>
+        <p>An attribute name (optional).</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; </div>
+</div>
+<a name="methods_dirtyKeys"></a>
+<div class="method item">
+    Array of string <strong class="name"><code>dirtyKeys</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Returns an array of keys that have been modified since last save/refresh</p>
+
+    <br><div class="returns"><strong>Returns:</strong> &lt;Array of string&gt; </div>
+</div>
+<a name="methods_disableSingleInstance"></a>
+<div class="method item">
+     <strong class="name"><code>disableSingleInstance</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Disable single instance objects, where any local objects with the same Id
+share the same attributes, and stay synchronized with each other.
+When disabled, you can have two instances of the same object in memory
+without them sharing attributes.</p>
+
+</div>
+<a name="methods_enableSingleInstance"></a>
+<div class="method item">
+     <strong class="name"><code>enableSingleInstance</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Enable single instance objects, where any local objects with the same Id
+share the same attributes, and stay synchronized with each other.
+This is disabled by default in server environments, since it can lead to
+security issues.</p>
+
+</div>
+<a name="methods_equals"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>equals</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Determines whether this ParseObject is equal to another ParseObject</p>
+
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; </div>
+</div>
+<a name="methods_escape"></a>
+<div class="method item">
+     <strong class="name"><code>escape</code></strong>( <code>attr </code> ) 
+    <br>
+    <p>Gets the HTML-escaped value of an attribute.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>attr</code> <strong>&lt;String&gt;</strong>
+        <p>The string name of an attribute.</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_existed"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>existed</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Returns true if this object was created by the Parse server when the
+object might have already been there (e.g. in the case of a Facebook
+login)</p>
+
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; </div>
+</div>
+<a name="methods_extend"></a>
+<div class="method item">
+    Class <strong class="name"><code>extend</code></strong>( <code>className, protoProps, classProps </code> ) 
+    <br>
+    <p>Creates a new subclass of Parse.Object for the given Parse class name.</p>
+<p>Every extension of a Parse class will inherit from the most recent
+previous extension of that class. When a Parse.Object is automatically
+created by parsing JSON, it will use the most recent extension of that
+class.</p>
+<p>You should call either:<pre>
+    var MyClass = Parse.Object.extend("MyClass", {
+        <i>Instance methods</i>,
+        initialize: function(attrs, options) {
+            this.someInstanceProperty = [],
+            <i>Other instance properties</i>
+        }
+    }, {
+        <i>Class properties</i>
+    });</pre>
+or, for Backbone compatibility:<pre>
+    var MyClass = Parse.Object.extend({
+        className: "MyClass",
+        <i>Instance methods</i>,
+        initialize: function(attrs, options) {
+            this.someInstanceProperty = [],
+            <i>Other instance properties</i>
+        }
+    }, {
+        <i>Class properties</i>
+    });</pre></p>
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>className</code> <strong>&lt;String&gt;</strong>
+        <p>The name of the Parse class backing this model.</p>
+
+        </li>
+        <li>
+            <code>protoProps</code> <strong>&lt;Object&gt;</strong>
+        <p>Instance properties to add to instances of the
+class returned from this method.</p>
+
+        </li>
+        <li>
+            <code>classProps</code> <strong>&lt;Object&gt;</strong>
+        <p>Class properties to add the class returned from
+this method.</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;Class&gt; <p>A new subclass of Parse.Object.</p>
+</div>
+</div>
+<a name="methods_fetch"></a>
+<div class="method item">
+    <a href="../classes/Parse.Promise.html" class="crosslink">Parse.Promise</a> <strong class="name"><code>fetch</code></strong>( <code>options </code> ) 
+    <br>
+    <p>Fetch the model from the server. If the server's representation of the
+model differs from its current attributes, they will be overriden.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>options</code> <strong>&lt;Object&gt;</strong>
+        <p>A Backbone-style callback object.
+Valid options are:<ul></p>
+  <li>success: A Backbone-style success callback.
+  <li>error: An Backbone-style error callback.
+  <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+    be used for this request.
+  <li>sessionToken: A valid session token, used for making a request on
+      behalf of a specific user.
+</ul>
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;<a href="../classes/Parse.Promise.html" class="crosslink">Parse.Promise</a>&gt; <p>A promise that is fulfilled when the fetch
+completes.</p>
+</div>
+</div>
+<a name="methods_fetchAll"></a>
+<div class="method item">
+     <strong class="name"><code>fetchAll</code></strong>( <code>list, options </code> ) 
+    <br>
+    <p>Fetches the given list of Parse.Object.
+If any error is encountered, stops and calls the error handler.</p>
+<pre>
+  Parse.Object.fetchAll([object1, object2, ...], {
+    success: function(list) {
+      // All the objects were fetched.
+    },
+    error: function(error) {
+      // An error occurred while fetching one of the objects.
+    },
+  });
+</pre>
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>list</code> <strong>&lt;Array&gt;</strong>
+        <p>A list of <code>Parse.Object</code>.</p>
+
+        </li>
+        <li>
+            <code>options</code> <strong>&lt;Object&gt;</strong>
+        <p>A Backbone-style callback object.</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_fetchAllIfNeeded"></a>
+<div class="method item">
+     <strong class="name"><code>fetchAllIfNeeded</code></strong>( <code>list, options </code> ) 
+    <br>
+    <p>Fetches the given list of Parse.Object if needed.
+If any error is encountered, stops and calls the error handler.</p>
+<pre>
+  Parse.Object.fetchAllIfNeeded([object1, ...], {
+    success: function(list) {
+      // Objects were fetched and updated.
+    },
+    error: function(error) {
+      // An error occurred while fetching one of the objects.
+    },
+  });
+</pre>
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>list</code> <strong>&lt;Array&gt;</strong>
+        <p>A list of <code>Parse.Object</code>.</p>
+
+        </li>
+        <li>
+            <code>options</code> <strong>&lt;Object&gt;</strong>
+        <p>A Backbone-style callback object.</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_fromJSON"></a>
+<div class="method item">
+    <a href="../classes/Parse.Object.html" class="crosslink">Parse.Object</a> <strong class="name"><code>fromJSON</code></strong>( <code>json </code> ) 
+    <br>
+    <p>Creates a new instance of a Parse Object from a JSON representation.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>json</code> <strong>&lt;Object&gt;</strong>
+        <p>The JSON map of the Object's data</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;<a href="../classes/Parse.Object.html" class="crosslink">Parse.Object</a>&gt; <p>A Parse.Object reference</p>
+</div>
+</div>
+<a name="methods_get"></a>
+<div class="method item">
+     <strong class="name"><code>get</code></strong>( <code>attr </code> ) 
+    <br>
+    <p>Gets the value of an attribute.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>attr</code> <strong>&lt;String&gt;</strong>
+        <p>The string name of an attribute.</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_getACL"></a>
+<div class="method item">
+    <a href="../classes/Parse.ACL.html" class="crosslink">Parse.ACL</a> <strong class="name"><code>getACL</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Returns the ACL for this object.</p>
+
+    <br><div class="returns"><strong>Returns:</strong> &lt;<a href="../classes/Parse.ACL.html" class="crosslink">Parse.ACL</a>&gt; <p>An instance of Parse.ACL.</p>
+</div>
+</div>
+<a name="methods_has"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>has</code></strong>( <code>attr </code> ) 
+    <br>
+    <p>Returns <code>true</code> if the attribute contains a value that is not
+null or undefined.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>attr</code> <strong>&lt;String&gt;</strong>
+        <p>The string name of the attribute.</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; </div>
+</div>
+<a name="methods_increment"></a>
+<div class="method item">
+     <strong class="name"><code>increment</code></strong>( <code>attr, amount </code> ) 
+    <br>
+    <p>Atomically increments the value of the given attribute the next time the
+object is saved. If no amount is specified, 1 is used by default.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>attr</code> <strong>&lt;String&gt;</strong>
+        <p>The key.</p>
+
+        </li>
+        <li>
+            <code>amount</code> <strong>&lt;Number&gt;</strong>
+        <p>The amount to increment by (optional).</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_isNew"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>isNew</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Returns true if this object has never been saved to Parse.</p>
+
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; </div>
+</div>
+<a name="methods_isValid"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>isValid</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Checks if the model is currently in a valid state.</p>
+
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; </div>
+</div>
+<a name="methods_op"></a>
+<div class="method item">
+    Parse.Op <strong class="name"><code>op</code></strong>( <code>attr </code> ) 
+    <br>
+    <p>Returns an instance of a subclass of Parse.Op describing what kind of
+modification has been performed on this field since the last time it was
+saved. For example, after calling object.increment(&quot;x&quot;), calling
+object.op(&quot;x&quot;) would return an instance of Parse.Op.Increment.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>attr</code> <strong>&lt;String&gt;</strong>
+        <p>The key.</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;Parse.Op&gt; <p>The operation, or undefined if none.</p>
+</div>
+</div>
+<a name="methods_registerSubclass"></a>
+<div class="method item">
+     <strong class="name"><code>registerSubclass</code></strong>( <code>className, constructor </code> ) 
+    <br>
+    <p>Registers a subclass of Parse.Object with a specific class name.
+When objects of that class are retrieved from a query, they will be
+instantiated with this subclass.
+This is only necessary when using ES6 subclassing.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>className</code> <strong>&lt;String&gt;</strong>
+        <p>The class name of the subclass</p>
+
+        </li>
+        <li>
+            <code>constructor</code> <strong>&lt;Class&gt;</strong>
+        <p>The subclass</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_relation"></a>
+<div class="method item">
+     <strong class="name"><code>relation</code></strong>( <code>String </code> ) 
+    <br>
+    <p>Gets a relation on the given class for the attribute.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>String</code> <strong>&lt;Object&gt;</strong>
+        <p>attr The attribute to get the relation for.</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_remove"></a>
+<div class="method item">
+     <strong class="name"><code>remove</code></strong>( <code>attr, item </code> ) 
+    <br>
+    <p>Atomically remove all instances of an object from the array associated
+with a given key.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>attr</code> <strong>&lt;String&gt;</strong>
+        <p>The key.</p>
+
+        </li>
+        <li>
+            <code>item</code> <strong>&lt;Object&gt;</strong>
+        <p>The object to remove.</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_save"></a>
+<div class="method item">
+    <a href="../classes/Parse.Promise.html" class="crosslink">Parse.Promise</a> <strong class="name"><code>save</code></strong>( <code>options </code> ) 
+    <br>
+    <p>Set a hash of model attributes, and save the model to the server.
+updatedAt will be updated when the request returns.
+You can either call it as:<pre>
+object.save();</pre>
+or<pre>
+object.save(null, options);</pre>
+or<pre>
+object.save(attrs, options);</pre>
+or<pre>
+object.save(key, value, options);</pre></p>
+<p>For example, <pre>
+gameTurn.save({
+player: &quot;Jake Cutter&quot;,
+diceRoll: 2
+}, {
+success: function(gameTurnAgain) {
+// The save was successful.
+},
+error: function(gameTurnAgain, error) {
+// The save failed.  Error is an instance of Parse.Error.
+}
+});</pre>
+or with promises:<pre>
+gameTurn.save({
+player: &quot;Jake Cutter&quot;,
+diceRoll: 2
+}).then(function(gameTurnAgain) {
+// The save was successful.
+}, function(error) {
+// The save failed.  Error is an instance of Parse.Error.
+});</pre></p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>options</code> <strong>&lt;Object&gt;</strong>
+        <p>A Backbone-style callback object.
+Valid options are:<ul></p>
+  <li>success: A Backbone-style success callback.
+  <li>error: An Backbone-style error callback.
+  <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+    be used for this request.
+  <li>sessionToken: A valid session token, used for making a request on
+      behalf of a specific user.
+</ul>
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;<a href="../classes/Parse.Promise.html" class="crosslink">Parse.Promise</a>&gt; <p>A promise that is fulfilled when the save
+completes.</p>
+</div>
+</div>
+<a name="methods_saveAll"></a>
+<div class="method item">
+     <strong class="name"><code>saveAll</code></strong>( <code>list, options </code> ) 
+    <br>
+    <p>Saves the given list of Parse.Object.
+If any error is encountered, stops and calls the error handler.</p>
+<pre>
+  Parse.Object.saveAll([object1, object2, ...], {
+    success: function(list) {
+      // All the objects were saved.
+    },
+    error: function(error) {
+      // An error occurred while saving one of the objects.
+    },
+  });
+</pre>
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>list</code> <strong>&lt;Array&gt;</strong>
+        <p>A list of <code>Parse.Object</code>.</p>
+
+        </li>
+        <li>
+            <code>options</code> <strong>&lt;Object&gt;</strong>
+        <p>A Backbone-style callback object.</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_set"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>set</code></strong>( <code>key, value, options </code> ) 
+    <br>
+    <p>Sets a hash of model attributes on the object.</p>
+<p>You can call it with an object containing keys and values, or with one
+key and value.  For example:<pre>
+  gameTurn.set({
+    player: player1,
+    diceRoll: 2
+  }, {
+    error: function(gameTurnAgain, error) {
+      // The set failed validation.
+    }
+  });
+<p>game.set(&quot;currentPlayer&quot;, player2, {
+error: function(gameTurnAgain, error) {
+// The set failed validation.
+}
+});</p>
+<p>game.set(&quot;finished&quot;, true);</pre></p></p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>key</code> <strong>&lt;String&gt;</strong>
+        <p>The key to set.</p>
+
+        </li>
+        <li>
+            <code>value</code> <strong>&lt;Object&gt;</strong>
+        <p>The value to give it.</p>
+
+        </li>
+        <li>
+            <code>options</code> <strong>&lt;Object&gt;</strong>
+        <p>A set of options for the set.
+The only supported option is <code>error</code>.</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; <p>true if the set succeeded.</p>
+</div>
+</div>
+<a name="methods_setACL"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>setACL</code></strong>( <code>acl, options </code> ) 
+    <br>
+    <p>Sets the ACL to be used for this object.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>acl</code> <strong>&lt;<a href="../classes/Parse.ACL.html" class="crosslink">Parse.ACL</a>&gt;</strong>
+        <p>An instance of Parse.ACL.</p>
+
+        </li>
+        <li>
+            <code>options</code> <strong>&lt;Object&gt;</strong>
+        <p>Optional Backbone-like options object to be
+passed in to set.</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; <p>Whether the set passed validation.</p>
+</div>
+</div>
+<a name="methods_toJSON"></a>
+<div class="method item">
+    Object <strong class="name"><code>toJSON</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Returns a JSON version of the object suitable for saving to Parse.</p>
+
+    <br><div class="returns"><strong>Returns:</strong> &lt;Object&gt; </div>
+</div>
+<a name="methods_toPointer"></a>
+<div class="method item">
+    Object <strong class="name"><code>toPointer</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Gets a Pointer referencing this Object.</p>
+
+    <br><div class="returns"><strong>Returns:</strong> &lt;Object&gt; </div>
+</div>
+<a name="methods_unset"></a>
+<div class="method item">
+     <strong class="name"><code>unset</code></strong>( <code>attr </code> ) 
+    <br>
+    <p>Remove an attribute from the model. This is a noop if the attribute doesn't
+exist.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>attr</code> <strong>&lt;String&gt;</strong>
+        <p>The string name of an attribute.</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_validate"></a>
+<div class="method item">
+    <strong class="name"><code>validate</code></strong>( <code>attrs </code> ) 
+    <br>
+    <p>You should not call this function directly unless you subclass
+<code>Parse.Object</code>, in which case you can override this method
+to provide additional validation on <code>set</code> and
+<code>save</code>.  Your implementation should return</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>attrs</code> <strong>&lt;Object&gt;</strong>
+        <p>The current data to validate.</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> <p>False if the data is valid.  An error object otherwise.</p>
+</div>
+</div>
+            </div>
+            <div id="props">
+<a name="props_createdAt"></a>
+<div class="props item">
+    <code>createdAt</code> &lt;<strong>Date</strong>&gt;<br>
+    <p>The first time this object was saved on the server.</p>
+
+</div>
+<a name="props_id"></a>
+<div class="props item">
+    <code>id</code> &lt;<strong>String</strong>&gt;<br>
+    <p>The ID of this object, unique within its class.</p>
+
+</div>
+<a name="props_updatedAt"></a>
+<div class="props item">
+    <code>updatedAt</code> &lt;<strong>Date</strong>&gt;<br>
+    <p>The last time this object was updated on the server.</p>
+
+</div>
+            </div>
+    </div>
+</div>
+</div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+</body>
+</html>
