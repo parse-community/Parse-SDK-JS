@@ -16,14 +16,14 @@ cache:
 
 jobs:
   include:
-    - stage: test
-      env:
-      - MONGODB_VERSION=3.2.13
-      before_script:
-      - npm install -g mongodb-runner
-      - mongodb-runner start
-      script: npm test -- --maxWorkers=4 && ./run_integration.sh
-      after_script: cat ./coverage/coverage-final.json | ./node_modules/codecov.io/bin/codecov.io.js && rm -rf ./coverage
+    #- stage: test
+    #  env:
+    #  - MONGODB_VERSION=3.2.13
+    #  before_script:
+    #  - npm install -g mongodb-runner
+    #  - mongodb-runner start
+    #  script: npm test -- --maxWorkers=4 && ./run_integration.sh
+    #  after_script: cat ./coverage/coverage-final.json | ./node_modules/codecov.io/bin/codecov.io.js && rm -rf ./coverage
     # release on github latest branch
     - stage: release
       env: 
