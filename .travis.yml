@@ -34,6 +34,8 @@ jobs:
       - npm run build
       deploy:
         - provider: script
+          script: echo "Simple Test"
+        - provider: script
           script: echo "It is calling it!"
           on:
             all_branches: true
