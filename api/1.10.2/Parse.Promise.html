@@ -1,0 +1,2650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: Promise</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: Promise</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>
+            <span class="ancestors"><a href="Parse.html">Parse</a>.</span>Promise<span class="signature">()</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">A Promise is returned by async methods as a hook to provide callbacks to be
+called when the async task is fulfilled.
+
+<p>Typical usage would be like:<pre>
+   query.find().then(function(results) {
+     results[0].set("foo", "bar");
+     return results[0].saveAsync();
+   }).then(function(result) {
+     console.log("Updated " + result.id);
+   });
+</pre></p></div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="Promise"><span class="type-signature"></span>new Promise<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="._continueWhile"><span class="type-signature">(static) </span>_continueWhile<span class="signature">(predicate, asyncFunction)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Runs the given asyncFunction repeatedly, as long as the predicate
+function returns a truthy value. Stops repeating if asyncFunction returns
+a rejected promise.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>predicate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">should return false when ready to stop.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>asyncFunction</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">should return a Promise.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".all"><span class="type-signature">(static) </span>all<span class="signature">(promises)</span><span class="type-signature"> &rarr; {<a href="Parse.Promise.html">Parse.Promise</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns a new promise that is fulfilled when all of the promises in the
+iterable argument are resolved. If any promise in the list fails, then
+the returned promise will be immediately rejected with the reason that
+single promise rejected. If they all succeed, then the returned promise
+will succeed, with the results being the results of all the input
+promises. If the iterable provided is empty, the returned promise will
+be immediately resolved.
+
+For example: <pre>
+  var p1 = Parse.Promise.as(1);
+  var p2 = Parse.Promise.as(2);
+  var p3 = Parse.Promise.as(3);
+
+  Parse.Promise.all([p1, p2, p3]).then(function([r1, r2, r3]) {
+    console.log(r1);  // prints 1
+    console.log(r2);  // prints 2
+    console.log(r3);  // prints 3
+  });</pre>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>promises</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Iterable</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">an iterable of promises to wait for.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    the new promise.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Parse.Promise.html">Parse.Promise</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".as"><span class="type-signature">(static) </span>as<span class="signature">(value)</span><span class="type-signature"> &rarr; {<a href="Parse.Promise.html">Parse.Promise</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns a new promise that is resolved with a given value.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The value to resolve the promise with</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    the new promise.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Parse.Promise.html">Parse.Promise</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".error"><span class="type-signature">(static) </span>error<span class="signature">(error)</span><span class="type-signature"> &rarr; {<a href="Parse.Promise.html">Parse.Promise</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns a new promise that is rejected with a given error.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>error</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The error to reject the promise with</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    the new promise.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Parse.Promise.html">Parse.Promise</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".is"><span class="type-signature">(static) </span>is<span class="signature">(promise)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns true iff the given object fulfils the Promise interface.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>promise</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The object to test</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".race"><span class="type-signature">(static) </span>race<span class="signature">(promises)</span><span class="type-signature"> &rarr; {<a href="Parse.Promise.html">Parse.Promise</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns a new promise that is immediately fulfilled when any of the
+promises in the iterable argument are resolved or rejected. If the
+first promise to complete is resolved, the returned promise will be
+resolved with the same value. Likewise, if the first promise to
+complete is rejected, the returned promise will be rejected with the
+same reason.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>promises</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Iterable</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">an iterable of promises to wait for.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    the new promise.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Parse.Promise.html">Parse.Promise</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".reject"><span class="type-signature">(static) </span>reject<span class="signature">(error)</span><span class="type-signature"> &rarr; {<a href="Parse.Promise.html">Parse.Promise</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns a new promise that is rejected with a given error.
+This is an alias for Parse.Promise.error, for compliance with
+the ES6 implementation.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>error</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The error to reject the promise with</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    the new promise.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Parse.Promise.html">Parse.Promise</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".resolve"><span class="type-signature">(static) </span>resolve<span class="signature">(value)</span><span class="type-signature"> &rarr; {<a href="Parse.Promise.html">Parse.Promise</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns a new promise that is resolved with a given value.
+If that value is a thenable Promise (has a .then() prototype
+method), the new promise will be chained to the end of the
+value.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The value to resolve the promise with</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    the new promise.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Parse.Promise.html">Parse.Promise</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".when"><span class="type-signature">(static) </span>when<span class="signature">(promises)</span><span class="type-signature"> &rarr; {<a href="Parse.Promise.html">Parse.Promise</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns a new promise that is fulfilled when all of the input promises
+are resolved. If any promise in the list fails, then the returned promise
+will be rejected with an array containing the error from each promise.
+If they all succeed, then the returned promise will succeed, with the
+results being the results of all the input
+promises. For example: <pre>
+  var p1 = Parse.Promise.as(1);
+  var p2 = Parse.Promise.as(2);
+  var p3 = Parse.Promise.as(3);
+
+  Parse.Promise.when(p1, p2, p3).then(function(r1, r2, r3) {
+    console.log(r1);  // prints 1
+    console.log(r2);  // prints 2
+    console.log(r3);  // prints 3
+  });</pre>
+
+The input promises can also be specified as an array: <pre>
+  var promises = [p1, p2, p3];
+  Parse.Promise.when(promises).then(function(results) {
+    console.log(results);  // prints [1,2,3]
+  });
+</pre>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>promises</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">a list of promises to wait for.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    the new promise.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Parse.Promise.html">Parse.Promise</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_continueWith"><span class="type-signature"></span>_continueWith<span class="signature">(continuation)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Adds a callback function that should be called regardless of whether
+this promise failed or succeeded. The callback will be given either the
+array of results for its first argument, or the error as its second,
+depending on whether this Promise was rejected or resolved. Returns a
+new Promise, like "then" would.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>continuation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the callback.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_thenRunCallbacks"><span class="type-signature"></span>_thenRunCallbacks<span class="signature">(optionsOrCallback, model)</span><span class="type-signature"> &rarr; {<a href="Parse.Promise.html">Parse.Promise</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Run the given callbacks after this promise is fulfilled.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>optionsOrCallback</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A Backbone-style options callback, or a
+callback function. If this is an options object and contains a "model"
+attributes, that will be passed to error callbacks as the first argument.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>model</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If truthy, this will be passed as the first result of
+error callbacks. This is for Backbone-compatability.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A promise that will be resolved after the
+callbacks are run, with the same result as this.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Parse.Promise.html">Parse.Promise</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="always"><span class="type-signature"></span>always<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Add handlers to be called when the promise
+is either resolved or rejected
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="catch"><span class="type-signature"></span>catch<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Add handlers to be called when the Promise object is rejected
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="done"><span class="type-signature"></span>done<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Add handlers to be called when the Promise object is resolved
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="fail"><span class="type-signature"></span>fail<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Add handlers to be called when the Promise object is rejected
+Alias for catch().
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="reject"><span class="type-signature"></span>reject<span class="signature">(error)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Marks this promise as fulfilled, firing any callbacks waiting on it.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>error</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the error to pass to the callbacks.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="resolve"><span class="type-signature"></span>resolve<span class="signature">(result)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Marks this promise as fulfilled, firing any callbacks waiting on it.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the result to pass to the callbacks.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="then"><span class="type-signature"></span>then<span class="signature">(resolvedCallback, rejectedCallback)</span><span class="type-signature"> &rarr; {<a href="Parse.Promise.html">Parse.Promise</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Adds callbacks to be called when this promise is fulfilled. Returns a new
+Promise that will be fulfilled when the callback is complete. It allows
+chaining. If the callback itself returns a Promise, then the one returned
+by "then" will not be fulfilled until that one returned by the callback
+is fulfilled.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>resolvedCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Function that is called when this
+Promise is resolved. Once the callback is complete, then the Promise
+returned by "then" will also be fulfilled.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rejectedCallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Function that is called when this
+Promise is rejected with an error. Once the callback is complete, then
+the promise returned by "then" with be resolved successfully. If
+rejectedCallback is null, or it returns a rejected Promise, then the
+Promise returned by "then" will be rejected with that error.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A new Promise that will be fulfilled after this
+Promise is fulfilled and either callback has completed. If the callback
+returned a Promise, then this Promise will not be fulfilled until that
+one is.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Parse.Promise.html">Parse.Promise</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Parse.html">Parse</a></li><li><a href="Parse.ACL.html">ACL</a></li><li><a href="Parse.Analytics.html">Analytics</a></li><li><a href="Parse.Cloud.html">Cloud</a></li><li><a href="Parse.Config.html">Config</a></li><li><a href="Parse.Error.html">Error</a></li><li><a href="Parse.FacebookUtils.html">FacebookUtils</a></li><li><a href="Parse.File.html">File</a></li><li><a href="Parse.GeoPoint.html">GeoPoint</a></li><li><a href="Parse.LiveQuery.html">LiveQuery</a></li><li><a href="Parse.LiveQueryClient.html">LiveQueryClient</a></li><li><a href="Parse.LiveQuerySubscription.html">LiveQuerySubscription</a></li><li><a href="Parse.Object.html">Object</a></li><li><a href="Parse.Polygon.html">Polygon</a></li><li><a href="Parse.Promise.html">Promise</a></li><li><a href="Parse.Push.html">Push</a></li><li><a href="Parse.Query.html">Query</a></li><li><a href="Parse.Relation.html">Relation</a></li><li><a href="Parse.Role.html">Role</a></li><li><a href="Parse.Session.html">Session</a></li><li><a href="Parse.User.html">User</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Nov 27 2017 21:04:38 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

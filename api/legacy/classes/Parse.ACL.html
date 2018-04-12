@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Parse.ACL - Parse JavaScript SDK</title>
+    <link rel="stylesheet" href="https://yui-s.yahooapis.com/3.8.0pr2/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <script src="https://yui-s.yahooapis.com/combo?3.8.0pr2/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            <h1><a href="../index.html">Parse JavaScript SDK: Parse.ACL</a></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: </em>
+        </div>
+    </div>
+    <div class="yui3-g">
+
+        <div id="sidebar" class="yui3-u">
+            <div id="classes" class="sidebox">
+                <div class="hd">
+                    <h2 class="no-toc">Classes</h2>
+                </div>
+                <div class="bd">
+                    <ul>
+                            <li><a href="../classes/Parse.html">Parse</a></li>
+                            <li><a href="../classes/Parse.ACL.html">Parse.ACL</a></li>
+                            <li><a href="../classes/Parse.Analytics.html">Parse.Analytics</a></li>
+                            <li><a href="../classes/Parse.Cloud.html">Parse.Cloud</a></li>
+                            <li><a href="../classes/Parse.Cloud.AfterDeleteRequest.html">Parse.Cloud.AfterDeleteRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.AfterSaveRequest.html">Parse.Cloud.AfterSaveRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.BeforeDeleteRequest.html">Parse.Cloud.BeforeDeleteRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.BeforeDeleteResponse.html">Parse.Cloud.BeforeDeleteResponse</a></li>
+                            <li><a href="../classes/Parse.Cloud.BeforeSaveRequest.html">Parse.Cloud.BeforeSaveRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.BeforeSaveResponse.html">Parse.Cloud.BeforeSaveResponse</a></li>
+                            <li><a href="../classes/Parse.Cloud.Cookie.html">Parse.Cloud.Cookie</a></li>
+                            <li><a href="../classes/Parse.Cloud.CookieOptions.html">Parse.Cloud.CookieOptions</a></li>
+                            <li><a href="../classes/Parse.Cloud.FunctionRequest.html">Parse.Cloud.FunctionRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.FunctionResponse.html">Parse.Cloud.FunctionResponse</a></li>
+                            <li><a href="../classes/Parse.Cloud.HTTPOptions.html">Parse.Cloud.HTTPOptions</a></li>
+                            <li><a href="../classes/Parse.Cloud.HTTPResponse.html">Parse.Cloud.HTTPResponse</a></li>
+                            <li><a href="../classes/Parse.Cloud.JobRequest.html">Parse.Cloud.JobRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.JobStatus.html">Parse.Cloud.JobStatus</a></li>
+                            <li><a href="../classes/Parse.Config.html">Parse.Config</a></li>
+                            <li><a href="../classes/Parse.Error.html">Parse.Error</a></li>
+                            <li><a href="../classes/Parse.FacebookUtils.html">Parse.FacebookUtils</a></li>
+                            <li><a href="../classes/Parse.File.html">Parse.File</a></li>
+                            <li><a href="../classes/Parse.GeoPoint.html">Parse.GeoPoint</a></li>
+                            <li><a href="../classes/Parse.Object.html">Parse.Object</a></li>
+                            <li><a href="../classes/Parse.Promise.html">Parse.Promise</a></li>
+                            <li><a href="../classes/Parse.Push.html">Parse.Push</a></li>
+                            <li><a href="../classes/Parse.Query.html">Parse.Query</a></li>
+                            <li><a href="../classes/Parse.Relation.html">Parse.Relation</a></li>
+                            <li><a href="../classes/Parse.Role.html">Parse.Role</a></li>
+                            <li><a href="../classes/Parse.Session.html">Parse.Session</a></li>
+                            <li><a href="../classes/Parse.User.html">Parse.User</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div id="methods-on-page" class="sidebox on-page">
+                <div class="hd">
+                    <h2 class="no-toc">Methods On Page</h2>
+                </div>
+                <div class="bd">
+                    <ul>
+                            <li><a href="#methods_equals">equals</a></li>
+                            <li><a href="#methods_getPublicReadAccess">getPublicReadAccess</a></li>
+                            <li><a href="#methods_getPublicWriteAccess">getPublicWriteAccess</a></li>
+                            <li><a href="#methods_getReadAccess">getReadAccess</a></li>
+                            <li><a href="#methods_getRoleReadAccess">getRoleReadAccess</a></li>
+                            <li><a href="#methods_getRoleWriteAccess">getRoleWriteAccess</a></li>
+                            <li><a href="#methods_getWriteAccess">getWriteAccess</a></li>
+                            <li><a href="#methods_setPublicReadAccess">setPublicReadAccess</a></li>
+                            <li><a href="#methods_setPublicWriteAccess">setPublicWriteAccess</a></li>
+                            <li><a href="#methods_setReadAccess">setReadAccess</a></li>
+                            <li><a href="#methods_setRoleReadAccess">setRoleReadAccess</a></li>
+                            <li><a href="#methods_setRoleWriteAccess">setRoleWriteAccess</a></li>
+                            <li><a href="#methods_setWriteAccess">setWriteAccess</a></li>
+                            <li><a href="#methods_toJSON">toJSON</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            
+            
+        </div>
+
+        <div id="main" class="yui3-u">
+            <div class="content"><h4>Class Parse.ACL</h4>
+<div class="intro"><p>Creates a new ACL.
+If no argument is given, the ACL has no permissions for anyone.
+If the argument is a Parse.User, the ACL will have read and write
+permission for only that user.
+If the argument is any other JSON object, that object will be interpretted
+as a serialized ACL created with toJSON().</p>
+</div>
+
+<a name="methods_Parse.ACL"></a>
+<div class="method item">
+     <strong class="name"><code>Parse.ACL</code></strong>( <code>  </code> ) 
+    <br>
+    
+</div>
+
+<div id="classdocs">
+    <ul>
+        <li><a href="#methods">Methods</a></li>
+    </ul>
+    <div>
+            <div id="methods">
+<a name="methods_equals"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>equals</code></strong>( <code>other </code> ) 
+    <br>
+    <p>Returns whether this ACL is equal to another object</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>other</code> <strong>&lt;Object&gt;</strong>
+        <p>The other object to compare to</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; </div>
+</div>
+<a name="methods_getPublicReadAccess"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>getPublicReadAccess</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Gets whether the public is allowed to read this object.</p>
+
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; </div>
+</div>
+<a name="methods_getPublicWriteAccess"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>getPublicWriteAccess</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Gets whether the public is allowed to write this object.</p>
+
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; </div>
+</div>
+<a name="methods_getReadAccess"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>getReadAccess</code></strong>( <code>userId </code> ) 
+    <br>
+    <p>Get whether the given user id is <em>explicitly</em> allowed to read this object.
+Even if this returns false, the user may still be able to access it if
+getPublicReadAccess returns true or a role that the user belongs to has
+write access.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>userId</code> <strong>&lt;Object&gt;</strong>
+        <p>An instance of Parse.User or its objectId, or a Parse.Role.</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; </div>
+</div>
+<a name="methods_getRoleReadAccess"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>getRoleReadAccess</code></strong>( <code>role </code> ) 
+    <br>
+    <p>Gets whether users belonging to the given role are allowed
+to read this object. Even if this returns false, the role may
+still be able to write it if a parent role has read access.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>role</code> <strong>&lt;Object&gt;</strong>
+        <p>The name of the role, or a Parse.Role object.</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; <p>true if the role has read access. false otherwise.</p>
+</div>
+    <br><div class="throws"><strong>Throws:</strong> &lt;TypeError&gt; <p>If role is neither a Parse.Role nor a String.</p>
+</div>
+</div>
+<a name="methods_getRoleWriteAccess"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>getRoleWriteAccess</code></strong>( <code>role </code> ) 
+    <br>
+    <p>Gets whether users belonging to the given role are allowed
+to write this object. Even if this returns false, the role may
+still be able to write it if a parent role has write access.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>role</code> <strong>&lt;Object&gt;</strong>
+        <p>The name of the role, or a Parse.Role object.</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; <p>true if the role has write access. false otherwise.</p>
+</div>
+    <br><div class="throws"><strong>Throws:</strong> &lt;TypeError&gt; <p>If role is neither a Parse.Role nor a String.</p>
+</div>
+</div>
+<a name="methods_getWriteAccess"></a>
+<div class="method item">
+    Boolean <strong class="name"><code>getWriteAccess</code></strong>( <code>userId </code> ) 
+    <br>
+    <p>Gets whether the given user id is <em>explicitly</em> allowed to write this object.
+Even if this returns false, the user may still be able to write it if
+getPublicWriteAccess returns true or a role that the user belongs to has
+write access.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>userId</code> <strong>&lt;Object&gt;</strong>
+        <p>An instance of Parse.User or its objectId, or a Parse.Role.</p>
+
+        </li>
+    </ul>
+    <br><div class="returns"><strong>Returns:</strong> &lt;Boolean&gt; </div>
+</div>
+<a name="methods_setPublicReadAccess"></a>
+<div class="method item">
+     <strong class="name"><code>setPublicReadAccess</code></strong>( <code>allowed </code> ) 
+    <br>
+    <p>Sets whether the public is allowed to read this object.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>allowed</code> <strong>&lt;Boolean&gt;</strong>
+         
+        </li>
+    </ul>
+</div>
+<a name="methods_setPublicWriteAccess"></a>
+<div class="method item">
+     <strong class="name"><code>setPublicWriteAccess</code></strong>( <code>allowed </code> ) 
+    <br>
+    <p>Sets whether the public is allowed to write this object.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>allowed</code> <strong>&lt;Boolean&gt;</strong>
+         
+        </li>
+    </ul>
+</div>
+<a name="methods_setReadAccess"></a>
+<div class="method item">
+     <strong class="name"><code>setReadAccess</code></strong>( <code>userId, allowed </code> ) 
+    <br>
+    <p>Sets whether the given user is allowed to read this object.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>userId</code> <strong>&lt;Object&gt;</strong>
+        <p>An instance of Parse.User or its objectId.</p>
+
+        </li>
+        <li>
+            <code>allowed</code> <strong>&lt;Boolean&gt;</strong>
+        <p>Whether that user should have read access.</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_setRoleReadAccess"></a>
+<div class="method item">
+     <strong class="name"><code>setRoleReadAccess</code></strong>( <code>role, allowed </code> ) 
+    <br>
+    <p>Sets whether users belonging to the given role are allowed
+to read this object.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>role</code> <strong>&lt;Object&gt;</strong>
+        <p>The name of the role, or a Parse.Role object.</p>
+
+        </li>
+        <li>
+            <code>allowed</code> <strong>&lt;Boolean&gt;</strong>
+        <p>Whether the given role can read this object.</p>
+
+        </li>
+    </ul>
+    <br><div class="throws"><strong>Throws:</strong> &lt;TypeError&gt; <p>If role is neither a Parse.Role nor a String.</p>
+</div>
+</div>
+<a name="methods_setRoleWriteAccess"></a>
+<div class="method item">
+     <strong class="name"><code>setRoleWriteAccess</code></strong>( <code>role, allowed </code> ) 
+    <br>
+    <p>Sets whether users belonging to the given role are allowed
+to write this object.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>role</code> <strong>&lt;Object&gt;</strong>
+        <p>The name of the role, or a Parse.Role object.</p>
+
+        </li>
+        <li>
+            <code>allowed</code> <strong>&lt;Boolean&gt;</strong>
+        <p>Whether the given role can write this object.</p>
+
+        </li>
+    </ul>
+    <br><div class="throws"><strong>Throws:</strong> &lt;TypeError&gt; <p>If role is neither a Parse.Role nor a String.</p>
+</div>
+</div>
+<a name="methods_setWriteAccess"></a>
+<div class="method item">
+     <strong class="name"><code>setWriteAccess</code></strong>( <code>userId, allowed </code> ) 
+    <br>
+    <p>Sets whether the given user id is allowed to write this object.</p>
+
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>userId</code> <strong>&lt;Object&gt;</strong>
+        <p>An instance of Parse.User or its objectId, or a Parse.Role..</p>
+
+        </li>
+        <li>
+            <code>allowed</code> <strong>&lt;Boolean&gt;</strong>
+        <p>Whether that user should have write access.</p>
+
+        </li>
+    </ul>
+</div>
+<a name="methods_toJSON"></a>
+<div class="method item">
+    Object <strong class="name"><code>toJSON</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Returns a JSON-encoded version of the ACL.</p>
+
+    <br><div class="returns"><strong>Returns:</strong> &lt;Object&gt; </div>
+</div>
+            </div>
+    </div>
+</div>
+</div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+</body>
+</html>

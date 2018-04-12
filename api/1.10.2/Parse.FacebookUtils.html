@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: FacebookUtils</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: FacebookUtils</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>
+            <span class="ancestors"><a href="Parse.html">Parse</a>.</span>FacebookUtils</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".init"><span class="type-signature">(static) </span>init<span class="signature">(options)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Initializes Parse Facebook integration.  Call this function after you
+have loaded the Facebook Javascript SDK with the same parameters
+as you would pass to<code>
+<a href=
+"https://developers.facebook.com/docs/reference/javascript/FB.init/">
+FB.init()</a></code>.  Parse.FacebookUtils will invoke FB.init() for you
+with these arguments.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Facebook options argument as described here:
+  <a href=
+  "https://developers.facebook.com/docs/reference/javascript/FB.init/">
+  FB.init()</a>. The status flag will be coerced to 'false' because it
+  interferes with Parse Facebook integration. Call FB.getLoginStatus()
+  explicitly if this behavior is required by your application.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".isLinked"><span class="type-signature">(static) </span>isLinked<span class="signature">(user)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Gets whether the user has their account linked to Facebook.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>user</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Parse.User.html">Parse.User</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">User to check for a facebook link.
+    The user must be logged in on this device.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <code>true</code> if the user has their account
+    linked to Facebook.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".link"><span class="type-signature">(static) </span>link<span class="signature">(user, permissions, options)</span><span class="type-signature"> &rarr; {<a href="Parse.Promise.html">Parse.Promise</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Links Facebook to an existing PFUser. This method delegates to the
+Facebook SDK to authenticate the user, and then automatically links
+the account to the Parse.User.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>user</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Parse.User.html">Parse.User</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">User to link to Facebook. This must be the
+    current user.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>permissions</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+|
+
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The permissions required for Facebook
+   log in.  This is a comma-separated string of permissions.
+   Alternatively, supply a Facebook authData object as described in our
+   REST API docs if you want to handle getting facebook auth tokens
+   yourself.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Standard options object with success and error
+   callbacks.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Parse.Promise.html">Parse.Promise</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".logIn"><span class="type-signature">(static) </span>logIn<span class="signature">(permissions, options)</span><span class="type-signature"> &rarr; {<a href="Parse.Promise.html">Parse.Promise</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Logs in a user using Facebook. This method delegates to the Facebook
+SDK to authenticate the user, and then automatically logs in (or
+creates, in the case where it is a new user) a Parse.User.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>permissions</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+|
+
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The permissions required for Facebook
+   log in.  This is a comma-separated string of permissions.
+   Alternatively, supply a Facebook authData object as described in our
+   REST API docs if you want to handle getting facebook auth tokens
+   yourself.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Standard options object with success and error
+   callbacks.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Parse.Promise.html">Parse.Promise</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".unlink"><span class="type-signature">(static) </span>unlink<span class="signature">(user, options)</span><span class="type-signature"> &rarr; {<a href="Parse.Promise.html">Parse.Promise</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Unlinks the Parse.User from a Facebook account.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>user</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Parse.User.html">Parse.User</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">User to unlink from Facebook. This must be the
+    current user.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Standard options object with success and error
+   callbacks.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Parse.Promise.html">Parse.Promise</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Parse.html">Parse</a></li><li><a href="Parse.ACL.html">ACL</a></li><li><a href="Parse.Analytics.html">Analytics</a></li><li><a href="Parse.Cloud.html">Cloud</a></li><li><a href="Parse.Config.html">Config</a></li><li><a href="Parse.Error.html">Error</a></li><li><a href="Parse.FacebookUtils.html">FacebookUtils</a></li><li><a href="Parse.File.html">File</a></li><li><a href="Parse.GeoPoint.html">GeoPoint</a></li><li><a href="Parse.LiveQuery.html">LiveQuery</a></li><li><a href="Parse.LiveQueryClient.html">LiveQueryClient</a></li><li><a href="Parse.LiveQuerySubscription.html">LiveQuerySubscription</a></li><li><a href="Parse.Object.html">Object</a></li><li><a href="Parse.Polygon.html">Polygon</a></li><li><a href="Parse.Promise.html">Promise</a></li><li><a href="Parse.Push.html">Push</a></li><li><a href="Parse.Query.html">Query</a></li><li><a href="Parse.Relation.html">Relation</a></li><li><a href="Parse.Role.html">Role</a></li><li><a href="Parse.Session.html">Session</a></li><li><a href="Parse.User.html">User</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Nov 27 2017 21:04:38 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
