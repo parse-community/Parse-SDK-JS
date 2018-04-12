@@ -33,6 +33,10 @@ jobs:
       - npm run release_docs
       - npm run build
       deploy:
+        - provider: script
+          script: echo "It is calling it!"
+          on:
+            all_branches: true
         - provider: pages
           skip_cleanup: true
           github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
