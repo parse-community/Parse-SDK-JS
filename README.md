@@ -1,5 +1,5 @@
 # Parse SDK for JavaScript
-1
+12
 [![Build Status][build-status-svg]][build-status-link]
 [![Test Coverage][coverage-status-svg]][coverage-status-link]
 [![Npm Version][npm-svg]][npm-link]
