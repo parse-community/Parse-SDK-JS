@@ -845,6 +845,49 @@ describe('ParseObject', () => {
     expect(o.op('count')).toBe(undefined);
   });
 
+  it('can revert a specific field in unsaved ops', () => {
+    var o = ParseObject.fromJSON({
+      className: 'Item',
+      objectId: 'canrevertspecific',
+      count: 5
+    });
+    o.set({ cool: true });
+    o.increment('count');
+    expect(o.get('cool')).toBe(true);
+    expect(o.get('count')).toBe(6);
+    o.revert('cool');
+    expect(o.get('cool')).toBe(undefined);
+    expect(o.op('cool')).toBe(undefined);
+    expect(o.get('count')).toBe(6);
+    expect(o.op('count')).not.toBe(undefined);
+  });
+
+  it('can revert multiple fields in unsaved ops', () => {
+    var o = ParseObject.fromJSON({
+      className: 'Item',
+      objectId: 'canrevertmultiple',
+      count: 5,
+      age: 18,
+      gender: 'female'
+    });
+    o.set({ cool: true, gender: 'male' });
+    o.increment('count');
+    o.increment('age');
+    expect(o.get('cool')).toBe(true);
+    expect(o.get('count')).toBe(6);
+    expect(o.get('age')).toBe(19);
+    expect(o.get('gender')).toBe('male');
+    o.revert('age', 'count', ['gender']);
+    expect(o.get('cool')).toBe(true);
+    expect(o.op('cool')).not.toBe(undefined);
+    expect(o.get('count')).toBe(5);
+    expect(o.op('count')).toBe(undefined);
+    expect(o.get('age')).toBe(18);
+    expect(o.op('age')).toBe(undefined);
+    expect(o.get('gender')).toBe('female');
+    expect(o.op('gender')).toBe(undefined);
+  });
+
   it('can save the object', (done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{
@@ -886,7 +929,7 @@ describe('ParseObject', () => {
       done();
     });
   });
-  
+
   it('interpolates delete operations', (done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{
@@ -1866,7 +1909,7 @@ describe('ParseObject (unique instance mode)', () => {
 
     o2.add('tags', '#nofilter');
     expect(o2.get('tags')).toEqual(['#tbt', '#nofilter']);
-    
+
     o2.revert();
     o2.addUnique('tags', '#tbt');
     expect(o2.get('tags')).toEqual(['#tbt']);
