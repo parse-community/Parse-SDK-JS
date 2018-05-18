@@ -27,11 +27,13 @@ export type PushData = {
  * Contains functions to deal with Push in Parse.
  * @class Parse.Push
  * @static
+ * @hideconstructor
  */
 
  /**
   * Sends a push notification.
   * @method send
+  * @name Parse.Push.send
   * @param {Object} data -  The data of the push notification.  Valid fields
   * are:
   *   <ol>
