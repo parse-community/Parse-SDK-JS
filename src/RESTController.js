@@ -90,6 +90,13 @@ const RESTController = {
       var handled = false;
       var xhr = new XHR();
 
+      // Enable credentials so we can have access to authorization data,
+      // such as logged user. It is very useful when identifying users from
+      // outer applications, such as parse-dashboard.
+      // Main reason to get this data is to be able to log AJAX access,
+      // and allow our application to be GDPR compliant.
+      xhr.withCredentials = true;
+
       xhr.onreadystatechange = function() {
         if (xhr.readyState !== 4 || handled) {
           return;
