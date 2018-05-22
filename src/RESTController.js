@@ -13,6 +13,7 @@ import CoreManager from './CoreManager';
 import ParseError from './ParseError';
 import ParsePromise from './ParsePromise';
 import Storage from './Storage';
+import settings from './settings';
 
 export type RequestOptions = {
   useMasterKey?: boolean;
@@ -95,7 +96,9 @@ const RESTController = {
       // outer applications, such as parse-dashboard.
       // Main reason to get this data is to be able to log AJAX access,
       // and allow our application to be GDPR compliant.
-      xhr.withCredentials = true;
+      if (url && url.indexOf(settings.PARSE_API_URL) !== -1) {
+        xhr.withCredentials = true;
+      }
 
       xhr.onreadystatechange = function() {
         if (xhr.readyState !== 4 || handled) {
