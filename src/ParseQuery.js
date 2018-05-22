@@ -1012,6 +1012,8 @@ class ParseQuery {
   * @return {Parse.Query} Returns the query, so you can chain this call.
   */
  fullText(key: string, value: string, options: ?Object): ParseQuery {
+   options = options || {};
+   
    if (!key) {
      throw new Error('A key is required.');
    }
