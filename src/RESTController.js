@@ -96,7 +96,7 @@ const RESTController = {
       // outer applications, such as parse-dashboard.
       // Main reason to get this data is to be able to log AJAX access,
       // and allow our application to be GDPR compliant.
-      if (url && url.indexOf(settings.PARSE_API_URL) !== -1) {
+      if (url && url.indexOf(settings.PARSE_API_URL) === -1) {
         xhr.withCredentials = true;
       }
 
