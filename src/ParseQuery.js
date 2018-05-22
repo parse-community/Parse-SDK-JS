@@ -1022,10 +1022,6 @@ class ParseQuery {
      throw new Error('The value being searched for must be a string.');
    }
 
-   if (typeof options !== 'object') {
-     throw new Error('The options must be an Object.');
-   }
-
    return this._addCondition(key, '$text', { $search: Object.assign({ $term: value }, options) });
  }
 
