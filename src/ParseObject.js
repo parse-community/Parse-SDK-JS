@@ -280,6 +280,11 @@ class ParseObject {
       json[attr] = new SetOp(dirtyObjects[attr]).toJSON();
     }
     for (attr in pending[0]) {
+      // the attribut is a nested op, delete the top key
+      // as we'll override anyway
+      if (attr.indexOf('.')) {
+        delete json[attr.split('.')[0]];
+      }
       json[attr] = pending[0][attr].toJSON();
     }
     return json;
@@ -902,7 +907,8 @@ class ParseObject {
       );
     }
     for (var key in attrs) {
-      if (!(/^[A-Za-z][0-9A-Za-z_]*$/).test(key)) {
+      const value = attrs[key];
+      if (!(/^[A-Za-z][0-9A-Za-z_\.]*$/).test(key)) {
         return new ParseError(ParseError.INVALID_KEY_NAME);
       }
     }
