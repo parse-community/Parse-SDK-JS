@@ -14,6 +14,7 @@ import decode from './decode';
 import encode from './encode';
 import ParseError from './ParseError';
 import ParsePromise from './ParsePromise';
+import ParseQuery from './ParseQuery';
 
 /**
  * Contains functions for calling and declaring
@@ -60,9 +61,69 @@ export function run(
     requestOptions.sessionToken = options.sessionToken;
   }
 
-  return (
-    CoreManager.getCloudController().run(name, data, requestOptions)._thenRunCallbacks(options)
-  );
+  return CoreManager.getCloudController().run(name, data, requestOptions)._thenRunCallbacks(options);
+}
+
+ /**
+  * Gets data for the current set of cloud jobs.
+  * @method getJobsData
+  * @name Parse.Cloud.getJobsData
+  * @param {Object} options A Backbone-style options object
+  * options.success, if set, should be a function to handle a successful
+  * call to a cloud function.  options.error should be a function that
+  * handles an error running the cloud function.  Both functions are
+  * optional.  Both functions take a single argument.
+  * @return {Parse.Promise} A promise that will be resolved with the result
+  * of the function.
+  */
+export function getJobsData(options: { [key: string]: mixed }): ParsePromise {
+  options = options || {};
+  const requestOptions = {
+    useMasterKey: true
+  };
+  return CoreManager.getCloudController().getJobsData(requestOptions)._thenRunCallbacks(options);
+}
+
+ /**
+  * Starts a given cloud job, which will process asynchronously.
+  * @method startJob
+  * @name Parse.Cloud.startJob
+  * @param {String} name The function name.
+  * @param {Object} data The parameters to send to the cloud function.
+  * @param {Object} options A Backbone-style options object
+  * options.success, if set, should be a function to handle a successful
+  * call to a cloud function.  options.error should be a function that
+  * handles an error running the cloud function.  Both functions are
+  * optional.  Both functions take a single argument.
+  * @return {Parse.Promise} A promise that will be resolved with the result
+  * of the function.
+  */
+export function startJob(
+  name: string,
+  data: mixed,
+  options: { [key: string]: mixed }
+): ParsePromise {
+  options = options || {};
+
+  if (typeof name !== 'string' || name.length === 0) {
+    throw new TypeError('Cloud job name must be a string.');
+  }
+  const requestOptions = {
+    useMasterKey: true
+  };
+  return CoreManager.getCloudController().startJob(name, data, requestOptions)._thenRunCallbacks(options);
+}
+
+ /**
+  * Gets job status by Id
+  * @method getJobStatus
+  * @name Parse.Cloud.getJobStatus
+  * @param {String} jobStatusId The Id of Job Status.
+  * @return {Parse.Object} Status of Job.
+  */
+export function getJobStatus(jobStatusId: string): ParsePromise {
+  var query = new ParseQuery('_JobStatus');
+  return query.get(jobStatusId, { useMasterKey: true });
 }
 
 var DefaultController = {
@@ -71,19 +132,11 @@ var DefaultController = {
 
     var payload = encode(data, true);
 
-    var requestOptions = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      requestOptions.useMasterKey = options.useMasterKey;
-    }
-    if (options.hasOwnProperty('sessionToken')) {
-      requestOptions.sessionToken = options.sessionToken;
-    }
-
     var request = RESTController.request(
       'POST',
       'functions/' + name,
       payload,
-      requestOptions
+      options
     );
 
     return request.then(function(res) {
@@ -97,7 +150,35 @@ var DefaultController = {
           'The server returned an invalid response.'
         )
       );
-    })._thenRunCallbacks(options);
+    });
+  },
+
+  getJobsData(options) {
+    var RESTController = CoreManager.getRESTController();
+
+    var request = RESTController.request(
+      'GET',
+      'cloud_code/jobs/data',
+      null,
+      options
+    );
+
+    return request;
+  },
+
+  startJob(name, data, options) {
+    var RESTController = CoreManager.getRESTController();
+
+    var payload = encode(data, true);
+
+    var request = RESTController.request(
+      'POST',
+      'jobs/' + name,
+      payload,
+      options,
+    );
+
+    return request;
   }
 };
 
