@@ -1537,4 +1537,31 @@ describe('Parse Query', () => {
       done();
     });
   });
+
+  it('full text search with options', (done) => {
+    const subjects = [
+      'café',
+      'loja de café',
+      'preparando um café',
+      'preparar',
+      'café com leite',
+      'Сырники',
+      'prepare café e creme',
+      'preparação de cafe com leite',
+    ];
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestObject({ comment: subjects[i] });
+      objects.push(obj);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestObject);
+      q.fullText('comment', 'preparar', { $language: "portuguese" });
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 4);
+    }).then(null, () => {
+      done();
+    });
+  });
 });
