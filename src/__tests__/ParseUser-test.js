@@ -131,7 +131,7 @@ describe('ParseUser', () => {
       'It is not memory-safe to become a user in a server environment'
     );
     expect(ParseUser.logOut).toThrow(
-      'There is no current user user on a node.js server environment.'
+      'There is no current user on a node.js server environment.'
     );
   });
 

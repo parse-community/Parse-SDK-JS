@@ -59,7 +59,7 @@ let LiveQuery = new EventEmitter();
  * After open is called, the LiveQuery will try to send a connect request
  * to the LiveQuery server.
  * 
- * @method open
+
  */ 
 LiveQuery.open = open;
 
@@ -70,7 +70,7 @@ LiveQuery.open = open;
  * If you call query.subscribe() after this, we'll create a new WebSocket
  * connection to the LiveQuery server.
  * 
- * @method close
+
  */
 
 LiveQuery.close = close;
@@ -195,6 +195,12 @@ const DefaultLiveQueryController = {
         });
         subscription.on('delete', (object) => {
           subscriptionWrap.emit('delete', object);
+        });
+        subscription.on('close', (object) => {
+          subscriptionWrap.emit('close', object);
+        });
+        subscription.on('error', (object) => {
+          subscriptionWrap.emit('error', object);
         });
 
         this.resolve();

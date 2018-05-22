@@ -25,14 +25,16 @@ import type ParseRelation from './ParseRelation';
  *
  * <p>Roles must have a name (which cannot be changed after creation of the
  * role), and must specify an ACL.</p>
- * @class Parse.Role
- * @constructor
- * @param {String} name The name of the Role to create.
- * @param {Parse.ACL} acl The ACL for this role. Roles must have an ACL.
- * A Parse.Role is a local representation of a role persisted to the Parse
- * cloud.
+ * @alias Parse.Role
+ * @extends Parse.Object
  */
-export default class ParseRole extends ParseObject {
+class ParseRole extends ParseObject {
+  /**
+   * @param {String} name The name of the Role to create.
+   * @param {Parse.ACL} acl The ACL for this role. Roles must have an ACL.
+   * A Parse.Role is a local representation of a role persisted to the Parse
+   * cloud.
+   */
   constructor(name: string, acl: ParseACL) {
     super('_Role');
     if (typeof name === 'string' && (acl instanceof ParseACL)) {
@@ -44,7 +46,7 @@ export default class ParseRole extends ParseObject {
   /**
    * Gets the name of the role.  You can alternatively call role.get("name")
    *
-   * @method getName
+
    * @return {String} the name of the role.
    */
   getName(): ?string {
@@ -67,7 +69,7 @@ export default class ParseRole extends ParseObject {
    *
    * <p>This is equivalent to calling role.set("name", name)</p>
    *
-   * @method setName
+
    * @param {String} name The name of the role.
    * @param {Object} options Standard options object with success and error
    *     callbacks.
@@ -84,7 +86,7 @@ export default class ParseRole extends ParseObject {
    *
    * <p>This is equivalent to calling role.relation("users")</p>
    *
-   * @method getUsers
+
    * @return {Parse.Relation} the relation for the users belonging to this
    *     role.
    */
@@ -100,7 +102,7 @@ export default class ParseRole extends ParseObject {
    *
    * <p>This is equivalent to calling role.relation("roles")</p>
    *
-   * @method getRoles
+
    * @return {Parse.Relation} the relation for the roles belonging to this
    *     role.
    */
@@ -144,3 +146,5 @@ export default class ParseRole extends ParseObject {
 }
 
 ParseObject.registerSubclass('_Role', ParseRole);
+
+export default ParseRole;

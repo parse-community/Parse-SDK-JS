@@ -10,15 +10,18 @@
  */
 
 import ParsePromise from './ParsePromise';
-// RN packager nonsense
-import { AsyncStorage } from 'react-native/Libraries/react-native/react-native.js';
+import CoreManager from './CoreManager';
 
 var StorageController = {
   async: 1,
 
+  getAsyncStorage(): any {
+    return CoreManager.getAsyncStorage();
+  },
+
   getItemAsync(path: string): ParsePromise {
     var p = new ParsePromise();
-    AsyncStorage.getItem(path, function(err, value) {
+    this.getAsyncStorage().getItem(path, function(err, value) {
       if (err) {
         p.reject(err);
       } else {
@@ -30,7 +33,7 @@ var StorageController = {
 
   setItemAsync(path: string, value: string): ParsePromise {
     var p = new ParsePromise();
-    AsyncStorage.setItem(path, value, function(err) {
+    this.getAsyncStorage().setItem(path, value, function(err) {
       if (err) {
         p.reject(err);
       } else {
@@ -42,7 +45,7 @@ var StorageController = {
 
   removeItemAsync(path: string): ParsePromise {
     var p = new ParsePromise();
-    AsyncStorage.removeItem(path, function(err) {
+    this.getAsyncStorage().removeItem(path, function(err) {
       if (err) {
         p.reject(err);
       } else {
@@ -53,7 +56,7 @@ var StorageController = {
   },
 
   clear() {
-    AsyncStorage.clear();
+    this.getAsyncStorage().clear();
   }
 };
 
