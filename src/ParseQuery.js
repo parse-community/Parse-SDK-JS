@@ -274,6 +274,13 @@ class ParseQuery {
   }
 
   /**
+   * Converts string for regular expression at the beginning
+   */
+  _regexStartWith(string: string): String {
+    return '^' + quote(string);
+  }
+
+  /**
    * Returns a JSON representation of this query.
    * @return {Object} The JSON representation of the query.
    */
@@ -865,6 +872,27 @@ class ParseQuery {
   }
 
   /**
+   * Adds a constraint to the query that requires a particular key's value to
+   * contain each one of the provided list of values starting with given strings.
+   * @method containsAllStartingWith
+   * @param {String} key The key to check.  This key's value must be an array.
+   * @param {Array<String>} values The string values that will match as starting string.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  containsAllStartingWith(key: string, values: Array<string>): ParseQuery {
+    var _this = this;
+    if (!Array.isArray(values)) {
+      values = [values];
+    }
+
+    values = values.map(function (value) {
+      return {"$regex": _this._regexStartWith(value)};
+    });
+
+    return this.containsAll(key, values);
+  }
+
+  /**
    * Adds a constraint for finding objects that contain the given key.
    * @param {String} key The key that should exist.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -1033,7 +1061,7 @@ class ParseQuery {
     if (typeof value !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this._addCondition(key, '$regex', '^' + quote(value));
+    return this._addCondition(key, '$regex', this._regexStartWith(value));
   }
 
   /**
