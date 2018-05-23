@@ -1006,26 +1006,59 @@ class ParseQuery {
   * @param {String} key The key that the string to match is stored in.
   * @param {String} value The string to search
   * @param {Object} options (Optional) See https://docs.mongodb.com/manual/reference/operator/query/text/#text-query-operator-behavior
-  * @param {String} options.$language
-  * @param {String} options.$caseSensitive
-  * @param {String} options.$diacriticSensitive
+  * @param {String} options.language
+  * @param {String} options.caseSensitive
+  * @param {String} options.diacriticSensitive
   * @return {Parse.Query} Returns the query, so you can chain this call.
   */
- fullText(key: string, value: string, options: ?Object): ParseQuery {
-   options = options || {};
-   
-   if (!key) {
-     throw new Error('A key is required.');
-   }
-   if (!value) {
-     throw new Error('A search term is required');
-   }
-   if (typeof value !== 'string') {
-     throw new Error('The value being searched for must be a string.');
-   }
+  fullText(key: string, value: string, options: ?Object): ParseQuery {
+    options = options || {};
 
-   return this._addCondition(key, '$text', { $search: Object.assign({ $term: value }, options) });
- }
+    var fullOptions = {};
+    for (var key in options) {
+      switch (key) {
+        case 'language':
+          fullOptions.$language = options[key];
+          break;
+        case 'caseSensitive':
+          fullOptions.$caseSensitive = options[key];
+          break;
+        case 'diacriticSensitive':
+          fullOptions.$diacriticSensitive = options[key];
+          break;
+        default:
+          throw new Error('Unknown option: '+key);
+          break;
+      }
+    }
+
+
+    // if (options && options.hasOwnProperty('$language')) {
+    //   fullOptions.$language = options.$language;
+    // }
+    // if (options && options.hasOwnProperty('$caseSensitive')) {
+    //   fullOptions.$caseSensitive = options.$caseSensitive;
+    // }
+    // if (options && options.hasOwnProperty('$diacriticSensitive')) {
+    //   fullOptions.$diacriticSensitive = options.$diacriticSensitive;
+    // }
+
+    if (options && options.hasOwnProperty('$diacriticSensitive')) {
+      throw new Error('A key is required.');
+    }
+
+    if (!key) {
+      throw new Error('A key is required.');
+    }
+    if (!value) {
+      throw new Error('A search term is required');
+    }
+    if (typeof value !== 'string') {
+      throw new Error('The value being searched for must be a string.');
+    }
+
+    return this._addCondition(key, '$text', { $search: Object.assign({ $term: value }, fullOptions) });
+  }
 
   /**
    * Adds a constraint for finding string values that start with a provided
