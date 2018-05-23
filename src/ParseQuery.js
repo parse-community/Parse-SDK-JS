@@ -1032,17 +1032,6 @@ class ParseQuery {
       }
     }
 
-
-    // if (options && options.hasOwnProperty('$language')) {
-    //   fullOptions.$language = options.$language;
-    // }
-    // if (options && options.hasOwnProperty('$caseSensitive')) {
-    //   fullOptions.$caseSensitive = options.$caseSensitive;
-    // }
-    // if (options && options.hasOwnProperty('$diacriticSensitive')) {
-    //   fullOptions.$diacriticSensitive = options.$diacriticSensitive;
-    // }
-
     if (options && options.hasOwnProperty('$diacriticSensitive')) {
       throw new Error('A key is required.');
     }
