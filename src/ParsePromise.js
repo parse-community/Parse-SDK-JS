@@ -75,6 +75,9 @@ class ParsePromise {
     }
     this._rejected = true;
     this._error = error;
+    if (this._rejectedCallbacks.length === 0) {
+        throw new Error(error);
+    }
     for (var i = 0; i < this._rejectedCallbacks.length; i++) {
       this._rejectedCallbacks[i](error);
     }
