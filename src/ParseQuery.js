@@ -1101,11 +1101,12 @@ class ParseQuery {
    * @param {Number} maxDistance Maximum distance (in radians) of results to
    *   return.
    * @param {Boolean} sorted A Bool value that is true if results should be
-   *   sorted by distance ascending, false is no sorting is required.
+   *   sorted by distance ascending, false is no sorting is required,
+   *   defaults to true.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   withinRadians(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {  
-    if (sorted) {
+    if (sorted || sorted === undefined) {
       this.near(key, point);
       return this._addCondition(key, '$maxDistance', distance);
     } else {
@@ -1122,7 +1123,8 @@ class ParseQuery {
    * @param {Number} maxDistance Maximum distance (in miles) of results to
    *   return.
    * @param {Boolean} sorted A Bool value that is true if results should be
-   *   sorted by distance ascending, false is no sorting is required.
+   *   sorted by distance ascending, false is no sorting is required,
+   *   defaults to true.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   withinMiles(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {
@@ -1138,7 +1140,8 @@ class ParseQuery {
    * @param {Number} maxDistance Maximum distance (in kilometers) of results
    *   to return.
    * @param {Boolean} sorted A Bool value that is true if results should be
-   *   sorted by distance ascending, false is no sorting is required.
+   *   sorted by distance ascending, false is no sorting is required,
+   *   defaults to true.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   withinKilometers(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {
