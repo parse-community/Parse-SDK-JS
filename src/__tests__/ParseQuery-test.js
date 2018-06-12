@@ -573,7 +573,7 @@ describe('ParseQuery', () => {
 
   it('can generate near-geopoint queries with ranges', () => {
     var q = new ParseQuery('Shipment');
-    q.withinRadians('shippedTo', [20, 40], 2);
+    q.withinRadians('shippedTo', [20, 40], 2, true);
     expect(q.toJSON()).toEqual({
       where: {
         shippedTo: {
@@ -587,7 +587,7 @@ describe('ParseQuery', () => {
       }
     });
 
-    q.withinMiles('shippedTo', [20, 30], 3958.8);
+    q.withinMiles('shippedTo', [20, 30], 3958.8, true);
     expect(q.toJSON()).toEqual({
       where: {
         shippedTo: {
@@ -601,7 +601,7 @@ describe('ParseQuery', () => {
       }
     });
 
-    q.withinKilometers('shippedTo', [30, 30], 6371.0);
+    q.withinKilometers('shippedTo', [30, 30], 6371.0, true);
     expect(q.toJSON()).toEqual({
       where: {
         shippedTo: {
@@ -616,19 +616,15 @@ describe('ParseQuery', () => {
     });
   });
 
-  fit('can generate near-geopoint queries without sorting', () => {
+  it('can generate near-geopoint queries without sorting', () => {
     var q = new ParseQuery('Shipment');
-    q.withinRadiansUnsorted('shippedTo', [20, 40], 2);
+    q.withinRadians('shippedTo', new ParseGeoPoint(20, 40), 2, false);
     expect(q.toJSON()).toEqual({
       where: {
         shippedTo: {
           $geoWithin: {
             $centerSphere: [
-              {
-                __type: 'GeoPoint', 
-                latitude: 20,
-                longitude: 40
-              },
+              [40, 20], // This takes [lng, lat] vs. ParseGeoPoint [lat, lng].
               2
             ]
           }
@@ -636,17 +632,13 @@ describe('ParseQuery', () => {
       }
     });
 
-    q.withinMilesUnsorted('shippedTo', [20, 30], 3958.8);
+    q.withinMiles('shippedTo', new ParseGeoPoint(20, 30), 3958.8, false);
     expect(q.toJSON()).toEqual({
       where: {
         shippedTo: {
           $geoWithin: {
             $centerSphere: [
-              {
-                __type: 'GeoPoint', 
-                latitude: 20,
-                longitude: 30
-              },
+              [30, 20], // This takes [lng, lat] vs. ParseGeoPoint [lat, lng].
               1
             ]
           }
@@ -654,17 +646,13 @@ describe('ParseQuery', () => {
       }
     });
 
-    q.withinKilometersUnsorted('shippedTo', [30, 30], 6371.0);
+    q.withinKilometers('shippedTo', new ParseGeoPoint(30, 30), 6371.0, false);
     expect(q.toJSON()).toEqual({
       where: {
         shippedTo: {
           $geoWithin: {
             $centerSphere: [
-              {
-                __type: 'GeoPoint', 
-                latitude: 30,
-                longitude: 30
-              },
+              [30, 30], // This takes [lng, lat] vs. ParseGeoPoint [lat, lng].
               1
             ]
           }
