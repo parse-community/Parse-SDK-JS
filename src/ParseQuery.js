@@ -1136,6 +1136,77 @@ class ParseQuery {
   }
 
   /**
+   * Adds a proximity based constraint for finding objects with key point
+   * values near the point given and within the maximum distance given.
+   * Results are unsorted for better performance compared to `withinRadians'.
+   * @param {String} key The key that the Parse.GeoPoint is stored in.
+   * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
+   * @param {Number} maxDistance Maximum distance (in radians) of results to
+   *   return.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  withinRadiansUnsorted(key: string, point: ParseGeoPoint, distance: number): ParseQuery {
+    
+    if (!(point instanceof ParseGeoPoint)) {
+      // Try to cast it as a GeoPoint
+      point = new ParseGeoPoint(point);
+    }
+    return this._addCondition(key, '$geoWithin', { '$centerSphere': [point, distance] });
+  }
+
+  /**
+   * Adds a proximity based constraint for finding objects with key point
+   * values near the point given and within the maximum distance given.
+   * Radius of earth used is 3958.8 miles.
+   * Results are unsorted for better performance compared to `withinMiles'.
+   * @param {String} key The key that the Parse.GeoPoint is stored in.
+   * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
+   * @param {Number} maxDistance Maximum distance (in miles) of results to
+   *     return.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  withinMilesUnsorted(key: string, point: ParseGeoPoint, distance: number): ParseQuery {
+    return this.withinRadiansUnsorted(key, point, distance / 3958.8);
+  }
+
+  /**
+   * Adds a proximity based constraint for finding objects with key point
+   * values near the point given and within the maximum distance given.
+   * Radius of earth used is 6371.0 kilometers.
+   * Results are unsorted for better performance compared to `withinKilometers'.
+   * @param {String} key The key that the Parse.GeoPoint is stored in.
+   * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
+   * @param {Number} maxDistance Maximum distance (in kilometers) of results
+   *     to return.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  withinKilometersUnsorted(key: string, point: ParseGeoPoint, distance: number): ParseQuery {
+    return this.withinRadiansUnsorted(key, point, distance / 6371.0);
+  }
+
+  /**
+   * Adds a constraint to the query that requires a particular key's
+   * coordinates be contained within a given rectangular geographic bounding
+   * box.
+   * @param {String} key The key to be constrained.
+   * @param {Parse.GeoPoint} southwest
+   *     The lower-left inclusive corner of the box.
+   * @param {Parse.GeoPoint} northeast
+   *     The upper-right inclusive corner of the box.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  withinGeoBox(key: string, southwest: ParseGeoPoint, northeast: ParseGeoPoint): ParseQuery {
+    if (!(southwest instanceof ParseGeoPoint)) {
+      southwest = new ParseGeoPoint(southwest);
+    }
+    if (!(northeast instanceof ParseGeoPoint)) {
+      northeast = new ParseGeoPoint(northeast);
+    }
+    this._addCondition(key, '$within', { '$box': [ southwest, northeast ] });
+    return this;
+  }
+
+  /**
    * Adds a constraint to the query that requires a particular key's
    * coordinates be contained within a given rectangular geographic bounding
    * box.

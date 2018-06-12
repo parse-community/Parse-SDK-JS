@@ -616,6 +616,63 @@ describe('ParseQuery', () => {
     });
   });
 
+  fit('can generate near-geopoint queries without sorting', () => {
+    var q = new ParseQuery('Shipment');
+    q.withinRadiansUnsorted('shippedTo', [20, 40], 2);
+    expect(q.toJSON()).toEqual({
+      where: {
+        shippedTo: {
+          $geoWithin: {
+            $centerSphere: [
+              {
+                __type: 'GeoPoint', 
+                latitude: 20,
+                longitude: 40
+              },
+              2
+            ]
+          }
+        }
+      }
+    });
+
+    q.withinMilesUnsorted('shippedTo', [20, 30], 3958.8);
+    expect(q.toJSON()).toEqual({
+      where: {
+        shippedTo: {
+          $geoWithin: {
+            $centerSphere: [
+              {
+                __type: 'GeoPoint', 
+                latitude: 20,
+                longitude: 30
+              },
+              1
+            ]
+          }
+        }
+      }
+    });
+
+    q.withinKilometersUnsorted('shippedTo', [30, 30], 6371.0);
+    expect(q.toJSON()).toEqual({
+      where: {
+        shippedTo: {
+          $geoWithin: {
+            $centerSphere: [
+              {
+                __type: 'GeoPoint', 
+                latitude: 30,
+                longitude: 30
+              },
+              1
+            ]
+          }
+        }
+      }
+    });
+  });
+
   it('can generate geobox queries', () => {
     var q = new ParseQuery('Shipment');
     q.withinGeoBox('shippedTo', [20, 20], [10, 30]);
