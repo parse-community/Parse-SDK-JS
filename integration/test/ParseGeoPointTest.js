@@ -238,6 +238,161 @@ describe('Geo Point', () => {
     });
   });
 
+  it('can query within large distances unsorted', (done) => {
+    let objects = [];
+    for (let i = 0; i < 3; i++) {
+      let obj = new TestObject();
+      let point = new Parse.GeoPoint(0, i * 45);
+      obj.set('location', point);
+      obj.set('construct', 'large_dist')
+      obj.set('index', i);
+      objects.push(obj);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      let query = new Parse.Query(TestObject);
+      let point = new Parse.GeoPoint(1, -1);
+      query.equalTo('construct', 'large_dist');
+      query.withinRadiansUnsorted('location', point, 3.14);
+      return query.find();
+    }).then((results) => {
+      assert.equal(results.length, 3);
+      done();
+    });
+  });
+
+  it('can query within medium distances unsorted', (done) => {
+    let objects = [];
+    for (let i = 0; i < 3; i++) {
+      let obj = new TestObject();
+      let point = new Parse.GeoPoint(0, i * 45);
+      obj.set('location', point);
+      obj.set('construct', 'medium_dist')
+      obj.set('index', i);
+      objects.push(obj);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      let query = new Parse.Query(TestObject);
+      let point = new Parse.GeoPoint(1, -1);
+      query.equalTo('construct', 'medium_dist');
+      query.withinRadiansUnsorted('location', point, 3.14 * 0.5);
+      return query.find();
+    }).then((results) => {
+      assert.equal(results.length, 2);
+      assert.equal(results[0].get('index'), 0);
+      assert.equal(results[1].get('index'), 1);
+      done();
+    });
+  });
+
+  it('can query within small distances unsorted', (done) => {
+    let objects = [];
+    for (let i = 0; i < 3; i++) {
+      let obj = new TestObject();
+      let point = new Parse.GeoPoint(0, i * 45);
+      obj.set('location', point);
+      obj.set('construct', 'small_dist')
+      obj.set('index', i);
+      objects.push(obj);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      let query = new Parse.Query(TestObject);
+      let point = new Parse.GeoPoint(1, -1);
+      query.equalTo('construct', 'small_dist');
+      query.withinRadiansUnsorted('location', point, 3.14 * 0.25);
+      return query.find();
+    }).then((results) => {
+      assert.equal(results.length, 1);
+      assert.equal(results[0].get('index'), 0);
+      done();
+    });
+  });
+
+  it('can measure distance within km unsorted - everywhere', (done) => {
+    let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
+    let query = new Parse.Query(TestPoint);
+    query.withinKilometersUnsorted('location', sfo, 4000.0);
+    query.find().then((results) => {
+      assert.equal(results.length, 3);
+      done();
+    });
+  });
+
+  it('can measure distance within km unsorted - california', (done) => {
+    let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
+    let query = new Parse.Query(TestPoint);
+    query.withinKilometersUnsorted('location', sfo, 3700.0);
+    query.find().then((results) => {
+      assert.equal(results.length, 2);
+      assert.equal(results[0].get('name'), 'San Francisco');
+      assert.equal(results[1].get('name'), 'Sacramento');
+      done();
+    });
+  });
+
+  it('can measure distance within km unsorted - bay area', (done) => {
+    let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
+    let query = new Parse.Query(TestPoint);
+    query.withinKilometersUnsorted('location', sfo, 100.0);
+    query.find().then((results) => {
+      assert.equal(results.length, 1);
+      assert.equal(results[0].get('name'), 'San Francisco');
+      done();
+    });
+  });
+
+  it('can measure distance within km unsorted - mid peninsula', (done) => {
+    let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
+    let query = new Parse.Query(TestPoint);
+    query.withinKilometersUnsorted('location', sfo, 10.0);
+    query.find().then((results) => {
+      assert.equal(results.length, 0);
+      done();
+    });
+  });
+
+  it('can measure distance within miles unsorted - everywhere', (done) => {
+    let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
+    let query = new Parse.Query(TestPoint);
+    query.withinMilesUnsorted('location', sfo, 2500.0);
+    query.find().then((results) => {
+      assert.equal(results.length, 3);
+      done();
+    });
+  });
+
+  it('can measure distance within miles unsorted - california', (done) => {
+    let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
+    let query = new Parse.Query(TestPoint);
+    query.withinMilesUnsorted('location', sfo, 2200.0);
+    query.find().then((results) => {
+      assert.equal(results.length, 2);
+      assert.equal(results[0].get('name'), 'San Francisco');
+      assert.equal(results[1].get('name'), 'Sacramento');
+      done();
+    });
+  });
+
+  it('can measure distance within miles unsorted - bay area', (done) => {
+    let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
+    let query = new Parse.Query(TestPoint);
+    query.withinMilesUnsorted('location', sfo, 75.0);
+    query.find().then((results) => {
+      assert.equal(results.length, 1);
+      assert.equal(results[0].get('name'), 'San Francisco');
+      done();
+    });
+  });
+
+  it('can measure distance within km unsorted - mid peninsula', (done) => {
+    let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
+    let query = new Parse.Query(TestPoint);
+    query.withinMilesUnsorted('location', sfo, 10.0);
+    query.find().then((results) => {
+      assert.equal(results.length, 0);
+      done();
+    });
+  });
+
   it('supports withinPolygon open path', (done) => {
     const points = [
       new Parse.GeoPoint(37.85, -122.33),
