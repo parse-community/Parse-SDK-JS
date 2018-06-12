@@ -238,7 +238,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('can query within large distances unsorted', (done) => {
+  xit('can query within large distances unsorted', (done) => {
     let objects = [];
     for (let i = 0; i < 3; i++) {
       let obj = new TestObject();
@@ -260,7 +260,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('can query within medium distances unsorted', (done) => {
+  xit('can query within medium distances unsorted', (done) => {
     let objects = [];
     for (let i = 0; i < 3; i++) {
       let obj = new TestObject();
@@ -284,7 +284,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('can query within small distances unsorted', (done) => {
+  xit('can query within small distances unsorted', (done) => {
     let objects = [];
     for (let i = 0; i < 3; i++) {
       let obj = new TestObject();
@@ -307,7 +307,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('can measure distance within km unsorted - everywhere', (done) => {
+  xit('can measure distance within km unsorted - everywhere', (done) => {
     let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
     let query = new Parse.Query(TestPoint);
     query.withinKilometers('location', sfo, 4000.0, false);
@@ -317,7 +317,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('can measure distance within km unsorted - california', (done) => {
+  xit('can measure distance within km unsorted - california', (done) => {
     let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
     let query = new Parse.Query(TestPoint);
     query.withinKilometers('location', sfo, 3700.0, false);
@@ -329,7 +329,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('can measure distance within km unsorted - bay area', (done) => {
+  xit('can measure distance within km unsorted - bay area', (done) => {
     let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
     let query = new Parse.Query(TestPoint);
     query.withinKilometers('location', sfo, 100.0, false);
@@ -340,7 +340,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('can measure distance within km unsorted - mid peninsula', (done) => {
+  xit('can measure distance within km unsorted - mid peninsula', (done) => {
     let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
     let query = new Parse.Query(TestPoint);
     query.withinKilometers('location', sfo, 10.0, false);
@@ -350,7 +350,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('can measure distance within miles unsorted - everywhere', (done) => {
+  xit('can measure distance within miles unsorted - everywhere', (done) => {
     let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
     let query = new Parse.Query(TestPoint);
     query.withinMiles('location', sfo, 2500.0, false);
@@ -360,7 +360,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('can measure distance within miles unsorted - california', (done) => {
+  xit('can measure distance within miles unsorted - california', (done) => {
     let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
     let query = new Parse.Query(TestPoint);
     query.withinMiles('location', sfo, 2200.0, false);
@@ -372,7 +372,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('can measure distance within miles unsorted - bay area', (done) => {
+  xit('can measure distance within miles unsorted - bay area', (done) => {
     let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
     let query = new Parse.Query(TestPoint);
     query.withinMiles('location', sfo, 75.0, false);
@@ -383,7 +383,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('can measure distance within km unsorted - mid peninsula', (done) => {
+  xit('can measure distance within km unsorted - mid peninsula', (done) => {
     let sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
     let query = new Parse.Query(TestPoint);
     query.withinMiles('location', sfo, 10.0, false);
