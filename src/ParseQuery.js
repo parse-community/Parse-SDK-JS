@@ -1172,28 +1172,6 @@ class ParseQuery {
 
   /**
    * Adds a constraint to the query that requires a particular key's
-   * coordinates be contained within a given rectangular geographic bounding
-   * box.
-   * @param {String} key The key to be constrained.
-   * @param {Parse.GeoPoint} southwest
-   *     The lower-left inclusive corner of the box.
-   * @param {Parse.GeoPoint} northeast
-   *     The upper-right inclusive corner of the box.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
-   */
-  withinGeoBox(key: string, southwest: ParseGeoPoint, northeast: ParseGeoPoint): ParseQuery {
-    if (!(southwest instanceof ParseGeoPoint)) {
-      southwest = new ParseGeoPoint(southwest);
-    }
-    if (!(northeast instanceof ParseGeoPoint)) {
-      northeast = new ParseGeoPoint(northeast);
-    }
-    this._addCondition(key, '$within', { '$box': [ southwest, northeast ] });
-    return this;
-  }
-
-  /**
-   * Adds a constraint to the query that requires a particular key's
    * coordinates be contained within and on the bounds of a given polygon.
    * Supports closed and open (last point is connected to first) paths
    *
