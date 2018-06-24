@@ -89,14 +89,14 @@ describe('Geo Point', () => {
       let obj = new TestObject();
       let point = new Parse.GeoPoint(i * 4 - 12, i * 3.2 - 11);
       obj.set('location', point);
-      obj.set('construct', 'line');
+      obj.set('construct', 'line_unsorted');
       obj.set('seq', i);
       line.push(obj);
     }
     Parse.Object.saveAll(line).then(() => {
       let query = new Parse.Query(TestObject);
       let point = new Parse.GeoPoint(24, 19);
-      query.equalTo('construct', 'line');
+      query.equalTo('construct', 'line_unsorted');
       query.withinMiles('location', point, 10000, true);
       return query.find();
     }).then((results) => {
@@ -268,14 +268,14 @@ describe('Geo Point', () => {
       let obj = new TestObject();
       let point = new Parse.GeoPoint(0, i * 45);
       obj.set('location', point);
-      obj.set('construct', 'large_dist')
+      obj.set('construct', 'large_dist_unsorted');
       obj.set('index', i);
       objects.push(obj);
     }
     Parse.Object.saveAll(objects).then(() => {
       let query = new Parse.Query(TestObject);
       let point = new Parse.GeoPoint(1, -1);
-      query.equalTo('construct', 'large_dist');
+      query.equalTo('construct', 'large_dist_unsorted');
       query.withinRadians('location', point, 3.14, false);
       return query.find();
     }).then((results) => {
@@ -290,14 +290,14 @@ describe('Geo Point', () => {
       let obj = new TestObject();
       let point = new Parse.GeoPoint(0, i * 45);
       obj.set('location', point);
-      obj.set('construct', 'medium_dist')
+      obj.set('construct', 'medium_dist_unsorted');
       obj.set('index', i);
       objects.push(obj);
     }
     Parse.Object.saveAll(objects).then(() => {
       let query = new Parse.Query(TestObject);
       let point = new Parse.GeoPoint(1, -1);
-      query.equalTo('construct', 'medium_dist');
+      query.equalTo('construct', 'medium_dist_unsorted');
       query.withinRadians('location', point, 3.14 * 0.5, false);
       return query.find();
     }).then((results) => {
@@ -314,14 +314,14 @@ describe('Geo Point', () => {
       let obj = new TestObject();
       let point = new Parse.GeoPoint(0, i * 45);
       obj.set('location', point);
-      obj.set('construct', 'small_dist')
+      obj.set('construct', 'small_dist_unsorted');
       obj.set('index', i);
       objects.push(obj);
     }
     Parse.Object.saveAll(objects).then(() => {
       let query = new Parse.Query(TestObject);
       let point = new Parse.GeoPoint(1, -1);
-      query.equalTo('construct', 'small_dist');
+      query.equalTo('construct', 'small_dist_unsorted');
       query.withinRadians('location', point, 3.14 * 0.25, false);
       return query.find();
     }).then((results) => {
@@ -426,14 +426,14 @@ describe('Geo Point', () => {
     ];
     const query = new Parse.Query(TestPoint);
     query.withinPolygon('location', points);
-    return query.find().then((results) => {
+    query.find().then((results) => {
       assert.equal(results.length, 1);
       done();
     });
   });
 
   it('supports withinPolygon closed path', (done) => {
-     const points = [
+    const points = [
       new Parse.GeoPoint(38.52, -121.50),
       new Parse.GeoPoint(37.75, -157.93),
       new Parse.GeoPoint(37.578072, -121.379914),
@@ -441,7 +441,7 @@ describe('Geo Point', () => {
     ];
     const query = new Parse.Query(TestPoint);
     query.withinPolygon('location', points);
-    return query.find().then((results) => {
+    query.find().then((results) => {
       assert.equal(results.length, 2);
       done();
     });
@@ -450,7 +450,7 @@ describe('Geo Point', () => {
   it('non array withinPolygon', (done) => {
     const query = new Parse.Query(TestPoint);
     query.withinPolygon('location', 1234);
-    return query.find().fail((err) => {
+    query.find().fail((err) => {
       assert.equal(err.code, Parse.Error.INVALID_JSON);
       done();
     });
@@ -459,7 +459,7 @@ describe('Geo Point', () => {
   it('invalid array withinPolygon', (done) => {
     const query = new Parse.Query(TestPoint);
     query.withinPolygon('location', [1234]);
-    return query.find().fail((err) => {
+    query.find().fail((err) => {
       assert.equal(err.code, Parse.Error.INVALID_JSON);
       done();
     });
