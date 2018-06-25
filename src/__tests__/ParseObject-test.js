@@ -904,9 +904,9 @@ describe('ParseObject', () => {
 
   it('can make changes while in the process of a save', (done) => {
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     var p = new ParseObject('Person');
@@ -932,9 +932,9 @@ describe('ParseObject', () => {
     var xhrs = [];
     RESTController._setXHR(function() {
       var xhr = {
-        setRequestHeader: jest.genMockFn(),
-        open: jest.genMockFn(),
-        send: jest.genMockFn()
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn()
       };
       xhrs.push(xhr);
       return xhr;
@@ -967,9 +967,9 @@ describe('ParseObject', () => {
 
   it('will leave the pending ops queue untouched when a lone save fails', (done) => {
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     var p = new ParseObject('Per$on');
@@ -996,9 +996,9 @@ describe('ParseObject', () => {
     var xhrs = [];
     RESTController._setXHR(function() {
       var xhr = {
-        setRequestHeader: jest.genMockFn(),
-        open: jest.genMockFn(),
-        send: jest.genMockFn()
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn()
       };
       xhrs.push(xhr);
       return xhr;
@@ -1030,9 +1030,9 @@ describe('ParseObject', () => {
     var xhrs = [];
     RESTController._setXHR(function() {
       var xhr = {
-        setRequestHeader: jest.genMockFn(),
-        open: jest.genMockFn(),
-        send: jest.genMockFn(),
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn(),
         status: 200,
         readyState: 4
       };
@@ -1132,9 +1132,9 @@ describe('ParseObject', () => {
     var xhrs = [];
     RESTController._setXHR(function() {
       var xhr = {
-        setRequestHeader: jest.genMockFn(),
-        open: jest.genMockFn(),
-        send: jest.genMockFn(),
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn(),
         status: 200,
         readyState: 4
       };
@@ -1187,9 +1187,9 @@ describe('ParseObject', () => {
     var xhrs = [];
     RESTController._setXHR(function() {
       var xhr = {
-        setRequestHeader: jest.genMockFn(),
-        open: jest.genMockFn(),
-        send: jest.genMockFn(),
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn(),
         status: 200,
         readyState: 4
       };
@@ -1325,9 +1325,9 @@ describe('ParseObject', () => {
 
   it('can destroy an object', (done) => {
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     var p = new ParseObject('Person');
@@ -1350,9 +1350,9 @@ describe('ParseObject', () => {
 
   it('can save an array of objects', (done) => {
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     var objects = [];
@@ -1389,9 +1389,9 @@ describe('ParseObject', () => {
     var xhrs = [];
     for (var i = 0; i < 2; i++) {
       xhrs[i] = {
-        setRequestHeader: jest.genMockFn(),
-        open: jest.genMockFn(),
-        send: jest.genMockFn(),
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn(),
         status: 200,
         readyState: 4
       };
@@ -1444,9 +1444,9 @@ describe('ObjectController', () => {
   it('can fetch a single object', (done) => {
     var objectController = CoreManager.getObjectController();
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     var o = new ParseObject('Person');
@@ -1487,9 +1487,9 @@ describe('ObjectController', () => {
   it('can destroy an object', (done) => {
     var objectController = CoreManager.getObjectController();
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     var p = new ParseObject('Person');
@@ -1531,9 +1531,9 @@ describe('ObjectController', () => {
     var xhrs = [];
     for (var i = 0; i < 3; i++) {
       xhrs[i] = {
-        setRequestHeader: jest.genMockFn(),
-        open: jest.genMockFn(),
-        send: jest.genMockFn()
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn()
       };
       xhrs[i].status = 200;
       xhrs[i].responseText = JSON.stringify({});
@@ -1601,9 +1601,9 @@ describe('ObjectController', () => {
   it('can save an object', (done) => {
     var objectController = CoreManager.getObjectController();
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     var p = new ParseObject('Person');
@@ -1639,9 +1639,9 @@ describe('ObjectController', () => {
     var xhrs = [];
     for (var i = 0; i < 4; i++) {
       xhrs[i] = {
-        setRequestHeader: jest.genMockFn(),
-        open: jest.genMockFn(),
-        send: jest.genMockFn(),
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn(),
         status: 200,
         readyState: 4
       };
@@ -1683,9 +1683,9 @@ describe('ObjectController', () => {
     var xhrs = [];
     for (var i = 0; i < 3; i++) {
       xhrs[i] = {
-        setRequestHeader: jest.genMockFn(),
-        open: jest.genMockFn(),
-        send: jest.genMockFn(),
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn(),
         status: 200,
         readyState: 4
       };
@@ -1757,9 +1757,9 @@ describe('ObjectController', () => {
     var xhrs = [];
     for (var i = 0; i < 2; i++) {
       xhrs[i] = {
-        setRequestHeader: jest.genMockFn(),
-        open: jest.genMockFn(),
-        send: jest.genMockFn(),
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn(),
         status: 200,
         readyState: 4
       };
@@ -1867,7 +1867,7 @@ describe('ParseObject (unique instance mode)', () => {
     expect(o.get('valid')).toBe(undefined);
     expect(o.dirtyKeys()).toEqual(['value', 'valid']);
     o.increment('value');
-    expect(o.get('value'), 15);
+    expect(o.get('value')).toEqual(15);
 
     o.clear();
     expect(o.get('value')).toBe(undefined);
@@ -1914,9 +1914,9 @@ describe('ParseObject (unique instance mode)', () => {
 
   it('can save an array of objects', (done) => {
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     var objects = [];

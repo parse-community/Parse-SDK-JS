@@ -35,9 +35,9 @@ describe('RESTController', () => {
 
   it('opens a XHR with the correct verb and headers', () => {
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     RESTController.ajax('GET', 'users/me', {}, { 'X-Parse-Session-Token': '123' });
@@ -129,9 +129,9 @@ describe('RESTController', () => {
 
   it('can make formal JSON requests', () => {
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     RESTController.request('GET', 'classes/MyObject', {}, { sessionToken: '1234' });
@@ -265,9 +265,9 @@ describe('RESTController', () => {
     });
 
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     RESTController.request('GET', 'classes/MyObject', {}, {});
@@ -300,9 +300,9 @@ describe('RESTController', () => {
     });
 
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     RESTController.request('GET', 'classes/MyObject', {}, {});
@@ -320,9 +320,9 @@ describe('RESTController', () => {
   it('sends the revocable session upgrade header when the config flag is set', () => {
     CoreManager.set('FORCE_REVOCABLE_SESSION', true);
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     RESTController.request('GET', 'classes/MyObject', {}, {});
@@ -341,9 +341,9 @@ describe('RESTController', () => {
   it('sends the master key when requested', () => {
     CoreManager.set('MASTER_KEY', 'M');
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     RESTController.request('GET', 'classes/MyObject', {}, { useMasterKey: true });
@@ -360,9 +360,9 @@ describe('RESTController', () => {
   it('throws when attempted to use an unprovided master key', () => {
     CoreManager.set('MASTER_KEY', undefined);
     var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     expect(function() {

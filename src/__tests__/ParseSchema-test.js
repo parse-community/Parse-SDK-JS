@@ -18,13 +18,13 @@ var defaultController = CoreManager.getSchemaController();
 describe('ParseSchema', () => {
   it('can create schema', (done) => {
     var schema = new ParseSchema('SchemaTest');
-    expect(schema.className, 'SchemaTest');
+    expect(schema.className).toEqual('SchemaTest');
     done();
   });
 
   it('can create schema with User Class', (done) => {
     var schema = new ParseSchema('User');
-    expect(schema.className, '_User');
+    expect(schema.className).toEqual('_User');
     done();
   });
 
@@ -53,20 +53,20 @@ describe('ParseSchema', () => {
       .addPointer('pointerField', '_User')
       .addRelation('relationField', '_User');
 
-    expect(schema._fields.defaultFieldString.type, 'String');
-    expect(schema._fields.stringField.type, 'String');
-    expect(schema._fields.numberField.type, 'Number');
-    expect(schema._fields.booleanField.type, 'Boolean');
-    expect(schema._fields.dateField.type, 'Date');
-    expect(schema._fields.fileField.type, 'File');
-    expect(schema._fields.geoPointField.type, 'GeoPoint');
-    expect(schema._fields.polygonField.type, 'Polygon');
-    expect(schema._fields.arrayField.type, 'Array');
-    expect(schema._fields.objectField.type, 'Object');
-    expect(schema._fields.pointerField.type, 'Pointer');
-    expect(schema._fields.relationField.type, 'Relation');
-    expect(schema._fields.pointerField.targetClass, '_User');
-    expect(schema._fields.relationField.targetClass, '_User');
+    expect(schema._fields.defaultFieldString.type).toEqual('String');
+    expect(schema._fields.stringField.type).toEqual('String');
+    expect(schema._fields.numberField.type).toEqual('Number');
+    expect(schema._fields.booleanField.type).toEqual('Boolean');
+    expect(schema._fields.dateField.type).toEqual('Date');
+    expect(schema._fields.fileField.type).toEqual('File');
+    expect(schema._fields.geoPointField.type).toEqual('GeoPoint');
+    expect(schema._fields.polygonField.type).toEqual('Polygon');
+    expect(schema._fields.arrayField.type).toEqual('Array');
+    expect(schema._fields.objectField.type).toEqual('Object');
+    expect(schema._fields.pointerField.type).toEqual('Pointer');
+    expect(schema._fields.relationField.type).toEqual('Relation');
+    expect(schema._fields.pointerField.targetClass).toEqual('_User');
+    expect(schema._fields.relationField.targetClass).toEqual('_User');
     done();
   });
 
@@ -74,7 +74,7 @@ describe('ParseSchema', () => {
     var schema = new ParseSchema('SchemaTest');
     schema.addIndex('testIndex', { name: 1 });
 
-    expect(schema._indexes.name, 1);
+    expect(schema._indexes.testIndex.name).toBe(1);
     done();
   });
 
@@ -153,14 +153,14 @@ describe('ParseSchema', () => {
   it('can delete schema field', (done) => {
     var schema = new ParseSchema('SchemaTest');
     schema.deleteField('testField');
-    expect(schema._fields.testField._op, 'Delete');
+    expect(schema._fields.testField).toEqual({ __op: 'Delete'});
     done();
   });
 
   it('can delete schema index', (done) => {
     var schema = new ParseSchema('SchemaTest');
     schema.deleteIndex('testIndex');
-    expect(schema._indexes.testIndex._op, 'Delete');
+    expect(schema._indexes.testIndex).toEqual({ __op: 'Delete'});
     done();
   });
 
