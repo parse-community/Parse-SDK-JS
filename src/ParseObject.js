@@ -1812,6 +1812,8 @@ var DefaultController = {
             }, options);
           }).then((response, status, xhr) => {
             batchReturned.resolve(response, status);
+          }, (error) => {
+            batchReturned.reject(new ParseError(ParseError.INCORRECT_TYPE, error.message));
           });
 
           return ParsePromise.when(batchTasks);
