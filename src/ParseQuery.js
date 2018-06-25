@@ -272,6 +272,24 @@ class ParseQuery {
     this._where[key][condition] = encode(value, false, true);
     return this;
   }
+  
+  /**
+   * Helper for removing conditions on the query
+   */
+  _removeCondition(key: string, condition: string): ParseQuery {
+    if (this._where[key] && this._where[key][condition]) {
+      delete this._where[key][condition]
+    }
+    return this;
+  }
+
+  /**
+   * Returns a copy of the current query
+   * @method copy
+   */
+  copy(): ParseQuery {
+    return ParseQuery.fromJSON(this.className, this.toJSON());
+  }
 
   /**
    * Converts string for regular expression at the beginning
@@ -320,7 +338,7 @@ class ParseQuery {
    * query.limit(100);
    * ... (others queries)
    * Create JSON representation of Query Object
-   * var jsonFromServer = query.fromJSON();
+   * var jsonFromServer = query.toJSON();
    *
    * On client side getting query:
    * var query = new Parse.Query("className");
@@ -436,11 +454,12 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
+   * @param  {boolean} count Returns the count of the objects that match the query
    *
    * @return {Parse.Promise} A promise that is resolved with the results when
    * the query completes.
    */
-  find(options?: FullOptions): ParsePromise {
+  find(options?: FullOptions, count?: boolean): ParsePromise {
     options = options || {};
 
     let findOptions = {};
@@ -460,7 +479,7 @@ class ParseQuery {
       this.toJSON(),
       findOptions
     ).then((response) => {
-      return response.results.map((data) => {
+      const results = response.results.map((data) => {
         // In cases of relations, the server may send back a className
         // on the top level of the payload
         let override = response.className || this.className;
@@ -477,6 +496,12 @@ class ParseQuery {
 
         return ParseObject.fromJSON(data, !select);
       });
+      
+      if (count) {
+        return { count, results };
+      }
+      
+      return results;
     })._thenRunCallbacks(options);
   }
 
@@ -933,6 +958,16 @@ class ParseQuery {
       this._addCondition(key, '$options', modifiers);
     }
     return this;
+  }
+  
+  /**
+   * Clears the matching regex for the given key
+   * @method clearMatch
+   * @param {String} key The key that the string to match is stored in.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  clearMatch(key: string): ParseQuery {
+    return this._removeCondition(key, '$regex');
   }
 
   /**
