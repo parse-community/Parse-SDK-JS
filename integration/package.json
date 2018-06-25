@@ -1,8 +1,8 @@
 {
   "private": true,
   "dependencies": {
-    "express": "4.13.4",
-    "mocha": "2.5.3",
+    "express": "4.16.3",
+    "mocha": "5.2.0",
     "parse-server": "github:parseplatform/parse-server#master"
   },
   "engines": {

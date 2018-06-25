@@ -21,9 +21,9 @@ var defaultController = CoreManager.getCloudController();
 
 describe('Cloud', () => {
   beforeEach(() => {
-    var run = jest.genMockFunction();
-    var getJobsData = jest.genMockFunction();
-    var startJob = jest.genMockFunction();
+    var run = jest.fn();
+    var getJobsData = jest.fn();
+    var startJob = jest.fn();
     run.mockReturnValue(ParsePromise.as({
       result: {}
     }));
@@ -117,12 +117,12 @@ describe('Cloud', () => {
 describe('CloudController', () => {
   beforeEach(() => {
     CoreManager.setCloudController(defaultController);
-    var request = jest.genMockFunction();
+    var request = jest.fn();
     request.mockReturnValue(ParsePromise.as({
       success: true,
       result: {}
     }));
-    var ajax = jest.genMockFunction();
+    var ajax = jest.fn();
     CoreManager.setRESTController({ request: request, ajax: ajax });
   });
 
@@ -152,11 +152,11 @@ describe('CloudController', () => {
   });
 
   it('run invalid response', () => {
-    var request = jest.genMockFunction();
+    var request = jest.fn();
     request.mockReturnValue(ParsePromise.as({
       success: false
     }));
-    var ajax = jest.genMockFunction();
+    var ajax = jest.fn();
     CoreManager.setRESTController({ request: request, ajax: ajax });
 
     Cloud.run('myfunction').then(null).catch(() => {

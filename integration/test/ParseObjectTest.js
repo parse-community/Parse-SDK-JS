@@ -1146,7 +1146,7 @@ describe('Parse Object', () => {
     });
   });
 
-  it('fails fetchAll on multiple classes', (done) => {
+  it('fails fetchAll on multiple classes', () => {
     let container = new Container();
     container.set('item', new Item());
     container.set('subcontainer', new Container());
@@ -1160,15 +1160,13 @@ describe('Parse Object', () => {
       return Parse.Object.fetchAll(multiClassArray);
     }).fail((e) => {
       assert.equal(e.code, Parse.Error.INVALID_CLASS_NAME);
-      done();
     });
   });
 
-  it('fails fetchAll on unsaved object', (done) => {
+  it('fails fetchAll on unsaved object', () => {
     let unsavedObjectArray = [new TestObject()];
-    Parse.Object.fetchAll(unsavedObjectArray).fail((e) => {
+    return Parse.Object.fetchAll(unsavedObjectArray).fail((e) => {
       assert.equal(e.code, Parse.Error.MISSING_OBJECT_ID);
-      done();
     });
   });
 
@@ -1274,7 +1272,7 @@ describe('Parse Object', () => {
     });
   });
 
-  it('fails fetchAllIfNeeded on multiple classes', (done) => {
+  it('fails fetchAllIfNeeded on multiple classes', () => {
     let container = new Container();
     container.set('item', new Item());
     container.set('subcontainer', new Container());
@@ -1288,7 +1286,6 @@ describe('Parse Object', () => {
       return Parse.Object.fetchAllIfNeeded(multiClassArray);
     }).fail((e) => {
       assert.equal(e.code, Parse.Error.INVALID_CLASS_NAME);
-      done();
     });
   });
 

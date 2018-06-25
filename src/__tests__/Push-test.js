@@ -96,7 +96,7 @@ describe('Push', () => {
 describe('PushController', () => {
   it('forwards data along', () => {
     CoreManager.setPushController(defaultController);
-    var request = jest.genMockFunction().mockReturnValue({
+    var request = jest.fn().mockReturnValue({
       _thenRunCallbacks() {
         return {
           _thenRunCallbacks() {}
