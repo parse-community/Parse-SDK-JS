@@ -30,16 +30,18 @@ var currentUserCache = null;
 var authProviders = {};
 
 /**
- * @class Parse.User
- * @constructor
- *
  * <p>A Parse.User object is a local representation of a user persisted to the
  * Parse cloud. This class is a subclass of a Parse.Object, and retains the
  * same functionality of a Parse.Object, but also extends it with various
  * user specific methods, like authentication, signing up, and validation of
  * uniqueness.</p>
+ * @alias Parse.User
+ * @extends Parse.Object
  */
-export default class ParseUser extends ParseObject {
+class ParseUser extends ParseObject {
+  /**
+   * @param {Object} attributes The initial set of data to store in the user.
+   */
   constructor(attributes: ?AttributeMap) {
     super('_User');
     if (attributes && typeof attributes === 'object'){
@@ -51,7 +53,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Request a revocable session token to replace the older style of token.
-   * @method _upgradeToRevocableSession
+
    * @param {Object} options A Backbone-style options object.
    * @return {Parse.Promise} A promise that is resolved when the replacement
    *   token has been fetched.
@@ -74,7 +76,6 @@ export default class ParseUser extends ParseObject {
   /**
    * Unlike in the Android/iOS SDKs, logInWith is unnecessary, since you can
    * call linkWith on the user (even if it doesn't exist yet on the server).
-   * @method _linkWith
    */
   _linkWith(provider: any, options: { authData?: AuthData }): ParsePromise {
     var authType;
@@ -128,7 +129,7 @@ export default class ParseUser extends ParseObject {
   /**
    * Synchronizes auth data for a provider (e.g. puts the access token in the
    * right place to be used by the Facebook SDK).
-   * @method _synchronizeAuthData
+
    */
   _synchronizeAuthData(provider: string) {
     if (!this.isCurrent() || !provider) {
@@ -153,7 +154,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Synchronizes authData for all providers.
-   * @method _synchronizeAllAuthData
+
    */
   _synchronizeAllAuthData() {
     var authData = this.get('authData');
@@ -169,7 +170,7 @@ export default class ParseUser extends ParseObject {
   /**
    * Removes null values from authData (which exist temporarily for
    * unlinking)
-   * @method _cleanupAuthData
+
    */
   _cleanupAuthData() {
     if (!this.isCurrent()) {
@@ -189,7 +190,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Unlinks a user from a service.
-   * @method _unlinkFrom
+
    */
   _unlinkFrom(provider: any, options?: FullOptions) {
     var authType;
@@ -207,7 +208,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Checks whether a user is linked to a service.
-   * @method _isLinked
+
    */
   _isLinked(provider: any): boolean {
     var authType;
@@ -225,7 +226,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Deauthenticates all providers.
-   * @method _logOutWithAll
+
    */
   _logOutWithAll() {
     var authData = this.get('authData');
@@ -241,7 +242,7 @@ export default class ParseUser extends ParseObject {
   /**
    * Deauthenticates a single provider (e.g. removing access tokens from the
    * Facebook SDK).
-   * @method _logOutWith
+
    */
   _logOutWith(provider: any) {
     if (!this.isCurrent()) {
@@ -267,7 +268,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Returns true if <code>current</code> would return this user.
-   * @method isCurrent
+
    * @return {Boolean}
    */
   isCurrent(): boolean {
@@ -277,7 +278,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Returns get("username").
-   * @method getUsername
+
    * @return {String}
    */
   getUsername(): ?string {
@@ -290,7 +291,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Calls set("username", username, options) and returns the result.
-   * @method setUsername
+
    * @param {String} username
    * @param {Object} options A Backbone-style options object.
    * @return {Boolean}
@@ -308,7 +309,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Calls set("password", password, options) and returns the result.
-   * @method setPassword
+
    * @param {String} password
    * @param {Object} options A Backbone-style options object.
    * @return {Boolean}
@@ -319,7 +320,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Returns get("email").
-   * @method getEmail
+
    * @return {String}
    */
   getEmail(): ?string {
@@ -332,7 +333,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Calls set("email", email, options) and returns the result.
-   * @method setEmail
+
    * @param {String} email
    * @param {Object} options A Backbone-style options object.
    * @return {Boolean}
@@ -345,7 +346,7 @@ export default class ParseUser extends ParseObject {
    * Returns the session token for this user, if the user has been logged in,
    * or if it is the result of a query with the master key. Otherwise, returns
    * undefined.
-   * @method getSessionToken
+
    * @return {String} the session token, or undefined
    */
   getSessionToken(): ?string {
@@ -358,7 +359,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Checks whether this user is the current user and has been authenticated.
-   * @method authenticated
+
    * @return (Boolean) whether this user is the current user and is logged in.
    */
   authenticated(): boolean {
@@ -380,7 +381,7 @@ export default class ParseUser extends ParseObject {
    *
    * <p>Calls options.success or options.error on completion.</p>
    *
-   * @method signUp
+
    * @param {Object} attrs Extra fields to set on the new user, or null.
    * @param {Object} options A Backbone-style options object.
    * @return {Parse.Promise} A promise that is fulfilled when the signup
@@ -414,7 +415,7 @@ export default class ParseUser extends ParseObject {
    *
    * <p>Calls options.success or options.error on completion.</p>
    *
-   * @method logIn
+
    * @param {Object} options A Backbone-style options object.
    * @return {Parse.Promise} A promise that is fulfilled with the user when
    *     the login is complete.
@@ -479,7 +480,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Adds functionality to the existing Parse.User class
-   * @method extend
+
    * @param {Object} protoProps A set of properties to add to the prototype
    * @param {Object} classProps A set of static properties to add to the class
    * @static
@@ -518,7 +519,7 @@ export default class ParseUser extends ParseObject {
   /**
    * Retrieves the currently logged in ParseUser with a valid session,
    * either from memory or localStorage, if necessary.
-   * @method current
+
    * @static
    * @return {Parse.Object} The currently logged in Parse.User.
    */
@@ -532,7 +533,7 @@ export default class ParseUser extends ParseObject {
 
   /**
    * Retrieves the currently logged in ParseUser from asynchronous Storage.
-   * @method currentAsync
+
    * @static
    * @return {Parse.Promise} A Promise that is resolved with the currently
    *   logged in Parse User
@@ -553,7 +554,7 @@ export default class ParseUser extends ParseObject {
    *
    * <p>Calls options.success or options.error on completion.</p>
    *
-   * @method signUp
+
    * @param {String} username The username (or email) to sign up with.
    * @param {String} password The password to sign up with.
    * @param {Object} attrs Extra fields to set on the new user.
@@ -577,7 +578,7 @@ export default class ParseUser extends ParseObject {
    *
    * <p>Calls options.success or options.error on completion.</p>
    *
-   * @method logIn
+
    * @param {String} username The username (or email) to log in with.
    * @param {String} password The password to log in with.
    * @param {Object} options A Backbone-style options object.
@@ -613,7 +614,7 @@ export default class ParseUser extends ParseObject {
    *
    * <p>Calls options.success or options.error on completion.</p>
    *
-   * @method become
+
    * @param {String} sessionToken The sessionToken to log in with.
    * @param {Object} options A Backbone-style options object.
    * @static
@@ -647,7 +648,7 @@ export default class ParseUser extends ParseObject {
    * Logs out the currently logged in user session. This will remove the
    * session from disk, log out of linked services, and future calls to
    * <code>current</code> will return <code>null</code>.
-   * @method logOut
+
    * @static
    * @return {Parse.Promise} A promise that is resolved when the session is
    *   destroyed on the server.
@@ -670,11 +671,12 @@ export default class ParseUser extends ParseObject {
    *
    * <p>Calls options.success or options.error on completion.</p>
    *
-   * @method requestPasswordReset
+
    * @param {String} email The email address associated with the user that
    *     forgot their password.
    * @param {Object} options A Backbone-style options object.
    * @static
+   * @returns {Parse.Promise}
    */
   static requestPasswordReset(email, options) {
     options = options || {};
@@ -696,7 +698,7 @@ export default class ParseUser extends ParseObject {
    * User to _User for legacy reasons. This allows developers to
    * override that behavior.
    *
-   * @method allowCustomUserClass
+
    * @param {Boolean} isAllowed Whether or not to allow custom User class
    * @static
    */
@@ -711,7 +713,7 @@ export default class ParseUser extends ParseObject {
    * It is not necessary to call this method from cloud code unless you are
    * handling user signup or login from the server side. In a cloud code call,
    * this function will not attempt to upgrade the current token.
-   * @method enableRevocableSession
+
    * @param {Object} options A Backbone-style options object.
    * @static
    * @return {Parse.Promise} A promise that is resolved when the process has
@@ -734,7 +736,7 @@ export default class ParseUser extends ParseObject {
    * Enables the use of become or the current user in a server
    * environment. These features are disabled by default, since they depend on
    * global objects that are not memory-safe for most servers.
-   * @method enableUnsafeCurrentUser
+
    * @static
    */
   static enableUnsafeCurrentUser() {
@@ -745,7 +747,7 @@ export default class ParseUser extends ParseObject {
    * Disables the use of become or the current user in any environment.
    * These features are disabled on servers by default, since they depend on
    * global objects that are not memory-safe for most servers.
-   * @method disableUnsafeCurrentUser
+
    * @static
    */
   static disableUnsafeCurrentUser() {
@@ -1029,3 +1031,5 @@ var DefaultController = {
 };
 
 CoreManager.setUserController(DefaultController);
+
+export default ParseUser;

@@ -9,17 +9,18 @@
 
  /**
   * Constructs a new Parse.Error object with the given code and message.
-  * @class Parse.Error
-  * @constructor
-  * @param {Number} code An error code constant from <code>Parse.Error</code>.
-  * @param {String} message A detailed description of the error.
+  * @alias Parse.Error
   */
-export default class ParseError {
+class ParseError {
+  /**
+   * @param {Number} code An error code constant from <code>Parse.Error</code>.
+   * @param {String} message A detailed description of the error.
+   */
   constructor(code, message) {
     this.code = code;
     this.message = message;
   }
-  
+
   toString() {
     return 'ParseError: ' + this.code + ' ' + this.message;
   }
@@ -466,6 +467,14 @@ ParseError.INVALID_LINKED_SESSION = 251;
 ParseError.UNSUPPORTED_SERVICE = 252;
 
 /**
+ * Error code indicating an invalid operation occured on schema
+ * @property INVALID_SCHEMA_OPERATION
+ * @static
+ * @final
+ */
+ParseError.INVALID_SCHEMA_OPERATION = 255;
+
+/**
  * Error code indicating that there were multiple errors. Aggregate errors
  * have an "errors" property, which is an array of error objects with more
  * detail about each error that occurred.
@@ -493,3 +502,5 @@ ParseError.FILE_READ_ERROR = 601;
  * @final
  */
 ParseError.X_DOMAIN_REQUEST = 602;
+
+export default ParseError;

@@ -51,13 +51,13 @@ describe('LiveQueryClient', () => {
     });
     // Mock _getWebSocketImplementation
     liveQueryClient._getWebSocketImplementation = function() {
-      return jest.genMockFunction();
+      return jest.fn();
     }
     // Mock handlers
-    liveQueryClient._handleWebSocketOpen = jest.genMockFunction();
-    liveQueryClient._handleWebSocketMessage = jest.genMockFunction();
-    liveQueryClient._handleWebSocketClose = jest.genMockFunction();
-    liveQueryClient._handleWebSocketError = jest.genMockFunction();
+    liveQueryClient._handleWebSocketOpen = jest.fn();
+    liveQueryClient._handleWebSocketMessage = jest.fn();
+    liveQueryClient._handleWebSocketClose = jest.fn();
+    liveQueryClient._handleWebSocketError = jest.fn();
 
     liveQueryClient.open();
 
@@ -83,7 +83,7 @@ describe('LiveQueryClient', () => {
       sessionToken: 'sessionToken'
     });
     liveQueryClient.socket = {
-      send: jest.genMockFunction()
+      send: jest.fn()
     };
 
     liveQueryClient._handleWebSocketOpen();
@@ -257,7 +257,7 @@ describe('LiveQueryClient', () => {
       sessionToken: 'sessionToken'
     });
 
-    liveQueryClient.open = jest.genMockFunction();
+    liveQueryClient.open = jest.fn();
 
     let attempts = liveQueryClient.attempts;
     liveQueryClient._handleReconnect();
@@ -298,7 +298,7 @@ describe('LiveQueryClient', () => {
       sessionToken: 'sessionToken'
     });
     liveQueryClient.socket = {
-      send: jest.genMockFunction()
+      send: jest.fn()
     };
     var query = new ParseQuery('Test');
     query.equalTo('key', 'value');
@@ -331,7 +331,7 @@ describe('LiveQueryClient', () => {
       sessionToken: 'sessionToken'
     });
     liveQueryClient.socket = {
-      send: jest.genMockFunction()
+      send: jest.fn()
     };
     var subscription = {
       id: 1
@@ -359,7 +359,7 @@ describe('LiveQueryClient', () => {
       sessionToken: 'sessionToken'
     });
     liveQueryClient.socket = {
-      send: jest.genMockFunction()
+      send: jest.fn()
     };
     var query = new ParseQuery('Test');
     query.equalTo('key', 'value');
@@ -393,7 +393,7 @@ describe('LiveQueryClient', () => {
     });
     liveQueryClient.state = 'connected';
     liveQueryClient.socket = {
-      close: jest.genMockFunction()
+      close: jest.fn()
     }
     var subscription = new events.EventEmitter();
     liveQueryClient.subscriptions.set(1, subscription);
