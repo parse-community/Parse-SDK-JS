@@ -19,7 +19,7 @@ var defaultController = CoreManager.getAnalyticsController();
 
 describe('Analytics', () => {
   beforeEach(() => {
-    var track = jest.genMockFunction();
+    var track = jest.fn();
     track.mockReturnValue(ParsePromise.as());
     CoreManager.setAnalyticsController({ track: track });
   });
@@ -64,12 +64,12 @@ describe('Analytics', () => {
 describe('AnalyticsController', () => {
   beforeEach(() => {
     CoreManager.setAnalyticsController(defaultController);
-    var request = jest.genMockFunction();
+    var request = jest.fn();
     request.mockReturnValue(ParsePromise.as({
       success: true,
       result: {}
     }));
-    var ajax = jest.genMockFunction();
+    var ajax = jest.fn();
     CoreManager.setRESTController({ request: request, ajax: ajax });
   });
 

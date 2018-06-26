@@ -56,13 +56,12 @@ describe('Parse Aggregate Query', () => {
     }
   });
 
-  it('distinct query', (done) => {
+  it('distinct query', () => {
     const query = new Parse.Query(TestObject);
-    query.distinct('score').then((results) => {
+    return query.distinct('score').then((results) => {
       assert.equal(results.length, 2);
       assert.equal(results[0], 10);
       assert.equal(results[1], 20);
-      done();
     });
   });
 
