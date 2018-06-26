@@ -5,6 +5,11 @@
 [![Npm Version][npm-svg]][npm-link]
 [![CDNJS version](https://img.shields.io/cdnjs/v/parse.svg)](https://cdnjs.com/libraries/parse)
 [![License][license-svg]][license-link]
+[![Greenkeeper badge][greenkeeper-svg]][greenkeeper-link]
+
+[![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)](#backers)
+[![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)](#sponsors)
+
 
 A library that gives you access to the powerful Parse cloud platform from your JavaScript app. For more information on Parse and its features, see [the website](http://parseplatform.org), [the JavaScript guide](http://docs.parseplatform.org/js/guide/) or [API Reference](http://parseplatform.org/Parse-SDK-JS/api/).
 
@@ -61,3 +66,5 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  [npm-link]: https://npmjs.org/parse
  [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
  [license-link]: https://github.com/parse-community/Parse-SDK-JS/blob/master/LICENSE
+ [greenkeeper-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
+ [greenkeeper-link]: https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg
