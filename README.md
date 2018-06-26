@@ -64,4 +64,4 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
  [license-link]: https://github.com/parse-community/Parse-SDK-JS/blob/master/LICENSE
  [greenkeeper-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
- [greenkeepr-link]: https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg
+ [greenkeeper-link]: https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg
