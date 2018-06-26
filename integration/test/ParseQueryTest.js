@@ -1538,7 +1538,7 @@ describe('Parse Query', () => {
     });
   });
 
-  it('can perform a full text search with language options', (done) => {
+  it('can perform a full text search with language options', () => {
     const subjects = [
       'café',
       'loja de café',
@@ -1551,21 +1551,19 @@ describe('Parse Query', () => {
     ];
     const objects = [];
     for (const i in subjects) {
-      const obj = new TestObject({ comment: subjects[i] });
+      const obj = new TestObject({ language_comment: subjects[i] });
       objects.push(obj);
     }
-    Parse.Object.saveAll(objects).then(() => {
+    return Parse.Object.saveAll(objects).then(() => {
       const q = new Parse.Query(TestObject);
-      q.fullText('comment', 'preparar', { language: "portuguese" });
+      q.fullText('language_comment', 'preparar', { language: 'pt' });
       return q.find();
     }).then((results) => {
-      assert.equal(results.length, 4);
-    }).then(null, () => {
-      done();
+      assert.equal(results.length, 1);
     });
   });
 
-  it('can perform a full text search with case sensistive options', (done) => {
+  it('can perform a full text search with case sensitive options', () => {
     const subjects = [
       'café',
       'loja de café',
@@ -1578,21 +1576,19 @@ describe('Parse Query', () => {
     ];
     const objects = [];
     for (const i in subjects) {
-      const obj = new TestObject({ comment: subjects[i] });
+      const obj = new TestObject({ casesensitive_comment: subjects[i] });
       objects.push(obj);
     }
-    Parse.Object.saveAll(objects).then(() => {
+    return Parse.Object.saveAll(objects).then(() => {
       const q = new Parse.Query(TestObject);
-      q.fullText('comment', 'Preparar', { language: "portuguese", caseSensistive: true });
+      q.fullText('casesensitive_comment', 'preparar', { caseSensitive: true });
       return q.find();
     }).then((results) => {
       assert.equal(results.length, 1);
-    }).then(null, () => {
-      done();
     });
   });
 
-  it('can perform a full text search with diacritic sensitive options', (done) => {
+  it('can perform a full text search with diacritic sensitive options', () => {
     const subjects = [
       'café',
       'loja de café',
@@ -1605,17 +1601,15 @@ describe('Parse Query', () => {
     ];
     const objects = [];
     for (const i in subjects) {
-      const obj = new TestObject({ comment: subjects[i] });
+      const obj = new TestObject({ diacritic_comment: subjects[i] });
       objects.push(obj);
     }
-    Parse.Object.saveAll(objects).then(() => {
+    return Parse.Object.saveAll(objects).then(() => {
       const q = new Parse.Query(TestObject);
-      q.fullText('comment', 'cafe', { language: "portuguese", diacriticSensitive: true });
+      q.fullText('diacritic_comment', 'cafe', { diacriticSensitive: true });
       return q.find();
     }).then((results) => {
       assert.equal(results.length, 1);
-    }).then(null, () => {
-      done();
     });
   });
 
