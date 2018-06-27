@@ -1078,6 +1078,17 @@ class ParseQuery {
   }
 
   /**
+   * Method to sort the full text search by text score
+   *
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  sortByTextScore() {
+    this.ascending('$score');
+    this.select(['$score']);
+    return this;
+  }
+
+  /**
    * Adds a constraint for finding string values that start with a provided
    * string.  This query will use the backend index, so it will be fast even
    * for large datasets.

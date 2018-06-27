@@ -1481,7 +1481,7 @@ describe('Parse Query', () => {
     });
   });
 
-  it('can perform a full text search', (done) => {
+  it('can perform a full text search', () => {
     const subjects = [
       'coffee',
       'Coffee Shopping',
@@ -1497,17 +1497,16 @@ describe('Parse Query', () => {
       const obj = new TestObject({ subject: subjects[i] });
       objects.push(obj);
     }
-    Parse.Object.saveAll(objects).then(() => {
+    return Parse.Object.saveAll(objects).then(() => {
       const q = new Parse.Query(TestObject);
       q.fullText('subject', 'coffee');
       return q.find();
     }).then((results) => {
       assert.equal(results.length, 3);
-      done();
     });
   });
 
-  it('can perform a full text search sort', (done) => {
+  it('can perform a full text search sort', () => {
     const subjects = [
       'coffee',
       'Coffee Shopping',
@@ -1523,7 +1522,7 @@ describe('Parse Query', () => {
       const obj = new TestObject({ comment: subjects[i] });
       objects.push(obj);
     }
-    Parse.Object.saveAll(objects).then(() => {
+    return Parse.Object.saveAll(objects).then(() => {
       const q = new Parse.Query(TestObject);
       q.fullText('comment', 'coffee');
       q.ascending('$score');
@@ -1534,9 +1533,9 @@ describe('Parse Query', () => {
       assert.equal(results[0].get('score'), 1);
       assert.equal(results[1].get('score'), 0.75);
       assert.equal(results[2].get('score'), 0.75);
-      done();
     });
   });
+
 
   it('can perform a full text search with language options', () => {
     const subjects = [
