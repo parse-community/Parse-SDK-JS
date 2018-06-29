@@ -382,7 +382,7 @@ class ParseQuery {
   /**
    * Constructs a Parse.Object whose id is already known by fetching data from
    * the server.  Either options.success or options.error is called when the
-   * find completes.
+   * find completes. Unlike the <code>first</code> method, it never returns undefined.
    *
    * @param {String} objectId The id of the object to be fetched.
    * @param {Object} options A Backbone-style options object.
