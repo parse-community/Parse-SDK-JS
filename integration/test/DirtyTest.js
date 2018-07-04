@@ -2,7 +2,6 @@
 
 const assert = require('assert');
 const clear = require('./clear');
-const mocha = require('mocha');
 const Parse = require('../../node');
 
 const TestObject = Parse.Object.extend('TestObject');
@@ -10,13 +9,13 @@ const Parent = Parse.Object.extend('Parent');
 const Child = Parse.Object.extend('Child');
 
 describe('Dirty Objects', () => {
-  before((done) => {
+  beforeEach((done) => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
     clear().then(() => {
       done();
-    });
+    }).catch(done.fail);
   });
 
   it('tracks dirty arrays', (done) => {
@@ -34,7 +33,7 @@ describe('Dirty Objects', () => {
     }).then((o) => {
       assert.equal(o.get('scores').length, 2);
       done();
-    });
+    }).catch(done.fail);
   });
 
   it('tracks dirty arrays after fetch', (done) => {

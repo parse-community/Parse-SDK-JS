@@ -2,7 +2,6 @@
 
 const assert = require('assert');
 const clear = require('./clear');
-const mocha = require('mocha');
 const Parse = require('../../node');
 
 const TestObject = Parse.Object.extend('TestObject');
