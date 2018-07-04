@@ -1481,7 +1481,7 @@ describe('Parse Query', () => {
     });
   });
 
-  it('full text search', (done) => {
+  it('can perform a full text search', () => {
     const subjects = [
       'coffee',
       'Coffee Shopping',
@@ -1497,17 +1497,16 @@ describe('Parse Query', () => {
       const obj = new TestObject({ subject: subjects[i] });
       objects.push(obj);
     }
-    Parse.Object.saveAll(objects).then(() => {
+    return Parse.Object.saveAll(objects).then(() => {
       const q = new Parse.Query(TestObject);
       q.fullText('subject', 'coffee');
       return q.find();
     }).then((results) => {
       assert.equal(results.length, 3);
-      done();
     });
   });
 
-  it('full text search sort', (done) => {
+  it('can perform a full text search sort', () => {
     const subjects = [
       'coffee',
       'Coffee Shopping',
@@ -1523,7 +1522,7 @@ describe('Parse Query', () => {
       const obj = new TestObject({ comment: subjects[i] });
       objects.push(obj);
     }
-    Parse.Object.saveAll(objects).then(() => {
+    return Parse.Object.saveAll(objects).then(() => {
       const q = new Parse.Query(TestObject);
       q.fullText('comment', 'coffee');
       q.ascending('$score');
@@ -1534,6 +1533,132 @@ describe('Parse Query', () => {
       assert.equal(results[0].get('score'), 1);
       assert.equal(results[1].get('score'), 0.75);
       assert.equal(results[2].get('score'), 0.75);
+    });
+  });
+
+
+  it('can perform a full text search with language options', () => {
+    const subjects = [
+      'café',
+      'loja de café',
+      'preparando um café',
+      'preparar',
+      'café com leite',
+      'Сырники',
+      'prepare café e creme',
+      'preparação de cafe com leite',
+    ];
+    const TestLanguageOption = Parse.Object.extend('TestLanguageOption');
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestLanguageOption({ language_comment: subjects[i] });
+      objects.push(obj);
+    }
+    return Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestLanguageOption);
+      q.fullText('language_comment', 'preparar', { language: 'portuguese' });
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 1);
+    });
+  });
+
+  it('can perform a full text search with case sensitive options', () => {
+    const subjects = [
+      'café',
+      'loja de café',
+      'Preparando um café',
+      'preparar',
+      'café com leite',
+      'Сырники',
+      'Preparar café e creme',
+      'preparação de cafe com leite',
+    ];
+    const TestCaseOption = Parse.Object.extend('TestCaseOption');
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestCaseOption({ casesensitive_comment: subjects[i] });
+      objects.push(obj);
+    }
+    return Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestCaseOption);
+      q.fullText('casesensitive_comment', 'Preparar', { caseSensitive: true });
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 1);
+    });
+  });
+
+  it('can perform a full text search with diacritic sensitive options', () => {
+    const subjects = [
+      'café',
+      'loja de café',
+      'preparando um café',
+      'Preparar',
+      'café com leite',
+      'Сырники',
+      'preparar café e creme',
+      'preparação de cafe com leite',
+    ];
+    const TestDiacriticOption = Parse.Object.extend('TestDiacriticOption');
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestDiacriticOption({ diacritic_comment: subjects[i] });
+      objects.push(obj);
+    }
+    return Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestDiacriticOption);
+      q.fullText('diacritic_comment', 'cafe', { diacriticSensitive: true });
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 1);
+    });
+  });
+
+  it('can perform a full text search with case and diacritic sensitive options', () => {
+    const subjects = [
+      'Café',
+      'café',
+      'preparar Cafe e creme',
+      'preparação de cafe com leite',
+    ];
+    const TestCaseDiacriticOption = Parse.Object.extend('TestCaseDiacriticOption');
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestCaseDiacriticOption({ diacritic_comment: subjects[i] });
+      objects.push(obj);
+    }
+    return Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestCaseDiacriticOption);
+      q.fullText('diacritic_comment', 'cafe', { caseSensitive: true, diacriticSensitive: true });
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 1);
+      assert.equal(results[0].get('diacritic_comment'), 'preparação de cafe com leite');
+    });
+  });
+
+  it('fails to perform a full text search with unknown options', (done) => {
+    const subjects = [
+      'café',
+      'loja de café',
+      'preparando um café',
+      'preparar',
+      'café com leite',
+      'Сырники',
+      'prepare café e creme',
+      'preparação de cafe com leite',
+    ];
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestObject({ comment: subjects[i] });
+      objects.push(obj);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestObject);
+      q.fullText('comment', 'preparar', { language: "portuguese", notAnOption: true });
+      return q.find();
+    }).catch((e) => {
       done();
     });
   });
