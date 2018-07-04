@@ -3,7 +3,7 @@
 [![Build Status][build-status-svg]][build-status-link]
 [![Test Coverage][coverage-status-svg]][coverage-status-link]
 [![Npm Version][npm-svg]][npm-link]
-[![CDNJS version](https://img.shields.io/cdnjs/v/parse.svg)](https://cdnjs.com/libraries/parse)
+[![CDNJS version](https://img.shields.io/cdnjs/v/parse.svg)](https://cdnjs.com/libraries/parse) [![Greenkeeper badge](https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg)](https://greenkeeper.io/)
 [![License][license-svg]][license-link]
 [![Greenkeeper badge][greenkeeper-svg]][greenkeeper-link]
 

@@ -382,7 +382,7 @@ class ParseQuery {
   /**
    * Constructs a Parse.Object whose id is already known by fetching data from
    * the server.  Either options.success or options.error is called when the
-   * find completes.
+   * find completes. Unlike the <code>first</code> method, it never returns undefined.
    *
    * @param {String} objectId The id of the object to be fetched.
    * @param {Object} options A Backbone-style options object.
@@ -874,7 +874,6 @@ class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * contain each one of the provided list of values starting with given strings.
-   * @method containsAllStartingWith
    * @param {String} key The key to check.  This key's value must be an array.
    * @param {Array<String>} values The string values that will match as starting string.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -1015,13 +1014,13 @@ class ParseQuery {
     return this._addCondition(key, '$regex', quote(value));
   }
 
-   /**
+  /**
   * Adds a constraint for finding string values that contain a provided
   * string. This may be slow for large datasets. Requires Parse-Server > 2.5.0
   *
   * In order to sort you must use select and ascending ($score is required)
   *  <pre>
-  *   query.fullText('term');
+  *   query.fullText('field', 'term');
   *   query.ascending('$score');
   *   query.select('$score');
   *  </pre>
@@ -1031,23 +1030,63 @@ class ParseQuery {
   *   object->get('score');
   *  </pre>
   *
+  * You can define optionals by providing an object as a third parameter
+  *  <pre>
+  *   query.fullText('field', 'term', { language: 'es', diacriticSensitive: true });
+  *  </pre>
+  *
   * @param {String} key The key that the string to match is stored in.
   * @param {String} value The string to search
+  * @param {Object} options (Optional)
+  * @param {String} options.language The language that determines the list of stop words for the search and the rules for the stemmer and tokenizer.
+  * @param {Boolean} options.caseSensitive A boolean flag to enable or disable case sensitive search.
+  * @param {Boolean} options.diacriticSensitive A boolean flag to enable or disable diacritic sensitive search.
   * @return {Parse.Query} Returns the query, so you can chain this call.
   */
- fullText(key: string, value: string): ParseQuery {
-   if (!key) {
-     throw new Error('A key is required.');
-   }
-   if (!value) {
-     throw new Error('A search term is required');
-   }
-   if (typeof value !== 'string') {
-     throw new Error('The value being searched for must be a string.');
-   }
+  fullText(key: string, value: string, options: ?Object): ParseQuery {
+    options = options || {};
 
-   return this._addCondition(key, '$text', { $search: { $term: value } });
- }
+    if (!key) {
+      throw new Error('A key is required.');
+    }
+    if (!value) {
+      throw new Error('A search term is required');
+    }
+    if (typeof value !== 'string') {
+      throw new Error('The value being searched for must be a string.');
+    }
+
+    const fullOptions = { $term: value };
+    for (const option in options) {
+      switch (option) {
+        case 'language':
+          fullOptions.$language = options[option];
+          break;
+        case 'caseSensitive':
+          fullOptions.$caseSensitive = options[option];
+          break;
+        case 'diacriticSensitive':
+          fullOptions.$diacriticSensitive = options[option];
+          break;
+        default:
+          throw new Error(`Unknown option: ${option}`);
+          break;
+      }
+    }
+
+    return this._addCondition(key, '$text', { $search: fullOptions });
+  }
+
+  /**
+   * Method to sort the full text search by text score
+   *
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  sortByTextScore() {
+    this.ascending('$score');
+    this.select(['$score']);
+    return this;
+  }
 
   /**
    * Adds a constraint for finding string values that start with a provided
@@ -1105,7 +1144,7 @@ class ParseQuery {
    *   defaults to true.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  withinRadians(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {  
+  withinRadians(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {
     if (sorted || sorted === undefined) {
       this.near(key, point);
       return this._addCondition(key, '$maxDistance', distance);
@@ -1375,7 +1414,6 @@ class ParseQuery {
    *
    * will create a compoundQuery that is an and of the query1, query2, and
    * query3.
-   * @method and
    * @param {...Parse.Query} var_args The list of queries to AND.
    * @static
    * @return {Parse.Query} The query that is the AND of the passed in queries.
