@@ -11,9 +11,9 @@
   "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ParsePlatform/Parse-SDK-JS"
+    "url": "https://github.com/parse-community/Parse-SDK-JS"
   },
-  "bugs": "https://github.com/ParsePlatform/Parse-SDK-JS/issues",
+  "bugs": "https://github.com/parse-community/Parse-SDK-JS/issues",
   "files": [
     "index.js",
     "node.js",
