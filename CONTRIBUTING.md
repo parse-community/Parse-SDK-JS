@@ -71,7 +71,7 @@ Details are key. The more information you provide us the easier it'll be for us 
 * Anything else you find relevant.
 
 ### Security Bugs
-Facebook has a [bounty program](https://www.facebook.com/whitehat/) for the safe disclosure of security bugs. In those cases, please go through the process outlined on that page and do not file a public issue.
+Parse Community has a [responsible Vulnerability Disclosure Program](https://github.com/parse-community/parse-server/blob/master/SECURITY.md) for the safe disclosure of security bugs. In those cases, please go through the process outlined on that page and do not file a public issue.
 
 ## Coding Style
 * Most importantly, match the existing code style as much as possible.
