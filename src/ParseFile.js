@@ -67,7 +67,8 @@ class ParseFile {
    *     2. an Object like { base64: "..." } with a base64-encoded String.
    *     3. a File object selected with a file upload control. (3) only works
    *        in Firefox 3.6+, Safari 6.0.2+, Chrome 7+, and IE 10+.
-   *        For example:<pre>
+   *        For example:
+   * <pre>
    * var fileUploadControl = $("#profilePhotoFileUpload")[0];
    * if (fileUploadControl.files.length > 0) {
    *   var file = fileUploadControl.files[0];
