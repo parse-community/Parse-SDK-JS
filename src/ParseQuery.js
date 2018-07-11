@@ -1344,10 +1344,10 @@ class ParseQuery {
   /**
    * Includes nested Parse.Objects for the provided key.  You can use dot
    * notation to specify which fields in the included object are also fetched.
-   * @param {String} key The name of the key to include.
+   * @param {...String|Array<String>} key The name(s) of the key(s) to include.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  include(...keys: Array<string>): ParseQuery {
+  include(...keys: Array<string|Array<string>>): ParseQuery {
     keys.forEach((key) => {
       if (Array.isArray(key)) {
         this._include = this._include.concat(key);
@@ -1362,10 +1362,10 @@ class ParseQuery {
    * Restricts the fields of the returned Parse.Objects to include only the
    * provided keys.  If this is called multiple times, then all of the keys
    * specified in each of the calls will be included.
-   * @param {Array} keys The names of the keys to include.
+   * @param {...String|Array<String>} keys The name(s) of the key(s) to include.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  select(...keys: Array<string>): ParseQuery {
+  select(...keys: Array<string|Array<string>>): ParseQuery {
     if (!this._select) {
       this._select = [];
     }
