@@ -1,7 +1,7 @@
 # Contributing to the Parse JavaScript SDK
 We want to make contributing to this project as easy and transparent as possible.
 
-If you're looking to get started, but want to ease yourself into the codebase, look for issues tagged [good first bug](https://github.com/parse-community/Parse-SDK-JS/labels/good%20first%20bug). These are simple yet valuable tasks that should be easy to get started.
+If you're looking to get started, but want to ease yourself into the codebase, look for issues tagged [good first task](https://github.com/parse-community/Parse-SDK-JS/labels/good%20first%20task). These are simple yet valuable tasks that should be easy to get started.
 
 ## `master` is unsafe
 Our goal is to keep `master` stable, but there may be changes that your application may not be compatible with. We'll do our best to publicize any breaking changes, but try to use our specific releases in any production environment.
@@ -11,7 +11,7 @@ Our goal is to keep `master` stable, but there may be changes that your applicat
 ### Recommended setup:
 
 * [vscode](https://code.visualstudio.com), the popular IDE.
-* [Jest Extesnsion](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest) the Jest extension for vscode to run the tests inline and debug quicky.
+* [Jest Extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest) the Jest extension for vscode to run the tests inline and debug quicky.
 * [Jasmine Test Explorer Extension](https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-test-explorer), a very practical test exploration plugin which let you run, debug and see the test results inline.
 * [mongodb-runner](https://github.com/mongodb-js/runner) Easily install and run MongoDB to test your code against it. (install with `npm install -g mongodb-runner`)
 
@@ -61,11 +61,12 @@ We use GitHub issues to track public bugs. We will keep a close eye on this and 
 
 ### Reporting New Issues
 Not all issues are SDK issues. If you're unsure whether your bug is with the SDK or backend, you can test to see if it reproduces with our [REST API][rest-api] and [Parse API Console][parse-api-console]. If it does, you can report backend bugs [here][bug-reports].
+If the issue only reproduces with the JS SDK, you can [open an issue](https://github.com/parse-community/parse-server/issues) on this repository.
 
 Details are key. The more information you provide us the easier it'll be for us to debug and the faster you'll receive a fix. Some examples of useful tidbits:
 
 * A description. What did you expect to happen and what actually happened? Why do you think that was wrong?
-* A simple unit test that fails. Refer [here][tests-dir] for examples of existing unit tests and [here](integration-test-dir) for integration tests examples. See for how to setup your machine and run unit tests in [this]() guide. You can submit a pull request with your failing unit test so that our CI verifies that the test fails.
+* A simple unit test that fails. Refer [here][tests-dir] for examples of existing unit tests and [here][integration-test-dir] for integration tests examples. See for how to setup your machine and run unit tests in [this](#setting-up-the-project-for-debugging-and-contributing) guide. You can submit a pull request with your failing unit test so that our CI verifies that the test fails.
 * What version does this reproduce on? What version did it last work on?
 * [Stacktrace or GTFO][stacktrace-or-gtfo]. In all honesty, full stacktraces with line numbers make a happy developer.
 * Anything else you find relevant.
