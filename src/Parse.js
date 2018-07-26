@@ -56,11 +56,22 @@ var Parse = {
    */
   setAsyncStorage(storage: any) {
     CoreManager.setAsyncStorage(storage);
+  },
+
+  /**
+   * Call this method to set your LocalDatastoreStorage engine
+   * Starting Parse@1.12, the ParseSDK do not provide support for Caching
+   * is not provided at a stable path and changes over versions.
+   * @param {LocalDatastore} store a cache data storage.
+   * @static
+   */
+  setLocalDatastore(store: any) {
+    CoreManager.setLocalDatastore(store);
   }
 };
 
 /** These legacy setters may eventually be deprecated **/
-/** 
+/**
  * @member Parse.applicationId
  * @type string
  * @static
@@ -74,7 +85,7 @@ Object.defineProperty(Parse, 'applicationId', {
   }
 });
 
-/** 
+/**
  * @member Parse.javaScriptKey
  * @type string
  * @static
@@ -88,7 +99,7 @@ Object.defineProperty(Parse, 'javaScriptKey', {
   }
 });
 
-/** 
+/**
  * @member Parse.masterKey
  * @type string
  * @static
@@ -102,7 +113,7 @@ Object.defineProperty(Parse, 'masterKey', {
   }
 });
 
-/** 
+/**
  * @member Parse.serverURL
  * @type string
  * @static
@@ -115,7 +126,7 @@ Object.defineProperty(Parse, 'serverURL', {
     CoreManager.set('SERVER_URL', value);
   }
 });
-/** 
+/**
  * @member Parse.liveQueryServerURL
  * @type string
  * @static
