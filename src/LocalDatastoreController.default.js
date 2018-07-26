@@ -9,33 +9,33 @@
  * @flow
  */
 
-import ParsePromise from '../ParsePromise';
-
+var memMap = {};
 var LocalDatastoreController = {
   fromPinWithName(name: string): ?any {
-    var values = localStorage.getItem(name);
-    if (!values) {
-      return [];
+    if (memMap.hasOwnProperty(name)) {
+      return memMap[name];
     }
-    var objects = JSON.parse(values);
-    return objects;
+    return [];
   },
 
   pinWithName(name: string, objects: any) {
-    try {
-      const values = JSON.stringify(objects);
-      localStorage.setItem(name, values);
-    } catch (e) {
-      // Quota exceeded, possibly due to Safari Private Browsing mode
-    }
+    memMap[name] = objects;
   },
 
   unPinWithName(name: string) {
-    localStorage.removeItem(name);
+    delete memMap[name];
+  },
+
+  getLocalDatastore() {
+    return memMap;
   },
 
   clear() {
-    localStorage.clear();
+    for (var key in memMap) {
+      if (memMap.hasOwnProperty(key)) {
+        delete memMap[key];
+      }
+    }
   }
 };
 
