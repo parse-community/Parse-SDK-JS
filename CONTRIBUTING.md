@@ -91,7 +91,7 @@ By contributing to the Parse JavaScript SDK, you agree that your contributions w
  [stack-overflow]: http://stackoverflow.com/tags/parse-server
  [bug-reports]: https://github.com/parse-community/parse-server/issues
  [rest-api]: https://docs.parseplatform.org/rest/guide
- [parse-api-console]: http://blog.parse.com/announcements/introducing-the-parse-api-console/
+ [parse-api-console]: http://blog.parseplatform.org/announcements/introducing-the-parse-api-console/
  [stacktrace-or-gtfo]: http://i.imgur.com/jacoj.jpg
  [tests-dir]: /src/__tests__
  [integration-test-dir]: /integration/test
