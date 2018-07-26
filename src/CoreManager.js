@@ -109,6 +109,12 @@ type StorageController = {
   removeItemAsync: (path: string) => ParsePromise;
   clear: () => void;
 };
+type LocalDatastoreController = {
+  fromPinWithName: (name: string) => ?any;
+  pinWithName: (name: string, objects: any) => void;
+  unPinWithName: (name: string) => void;
+  clear: () => void;
+};
 type UserController = {
   setCurrentUser: (user: ParseUser) => ParsePromise;
   currentUser: () => ?ParseUser;
@@ -145,6 +151,7 @@ type Config = {
   SchemaController?: SchemaController,
   SessionController?: SessionController,
   StorageController?: StorageController,
+  LocalDatastoreController?: LocalDatastoreController,
   UserController?: UserController,
   HooksController?: HooksController,
 };
@@ -332,6 +339,15 @@ module.exports = {
     config['StorageController'] = controller;
   },
 
+  setLocalDatastoreController(controller: LocalDatastoreController) {
+    requireMethods('LocalDatastoreController', ['pinWithName', 'fromPinWithName', 'unPinWithName', 'clear'], controller);
+    config['LocalDatastoreController'] = controller;
+  },
+
+  getLocalDatastoreController(): LocalDatastoreController {
+    return config['LocalDatastoreController'];
+  },
+
   getStorageController(): StorageController {
     return config['StorageController'];
   },
@@ -342,6 +358,14 @@ module.exports = {
 
   getAsyncStorage() {
     return config['AsyncStorage'];
+  },
+
+  setLocalDatastore(store: any) {
+    config['LocalDatastore'] = store;
+  },
+
+  getLocalDatastore() {
+    return config['LocalDatastore'];
   },
 
   setUserController(controller: UserController) {
