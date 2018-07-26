@@ -19,6 +19,7 @@ import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
 import ParseFile from './ParseFile';
+import LocalDatastore from './LocalDatastore';
 import {
   opFromJSON,
   Op,
@@ -1126,6 +1127,34 @@ class ParseObject {
       this,
       destroyOptions
     )._thenRunCallbacks(options);
+  }
+
+  pin(): void {
+    LocalDatastore.pinWithName(this._getId(), [this]);
+  }
+
+  unPin(): void {
+    LocalDatastore.unPinWithName(this._getId());
+  }
+
+  static pinAll(objects: any): void {
+    for (var obj in objects) {
+      LocalDatastore.pinWithName(obj._getId(), obj);
+    }
+  }
+
+  static pinAllWithName(name: string, objects: any): void {
+    LocalDatastore.pinWithName(name, objects);
+  }
+
+  static unPinAll(objects: any): void {
+    for (var obj in objects) {
+      LocalDatastore.pinWithName(obj._getId(), obj);
+    }
+  }
+
+  static unPinAllWithName(name: string): void {
+    LocalDatastore.unPinWithName(name);
   }
 
   /** Static methods **/

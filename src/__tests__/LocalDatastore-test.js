@@ -33,7 +33,7 @@ var mockStorageInterface = {
 
 global.localStorage = mockStorageInterface;
 
-var LocalStorageController = require('../LocalDatastore/LocalDatastoreController.localStorage');
+var LocalStorageController = require('../LocalDatastoreController.localStorage');
 
 describe('Local DatastoreController', () => {
   beforeEach(() => {
@@ -61,7 +61,7 @@ describe('Local DatastoreController', () => {
   });
 });
 
-var DefaultStorageController = require('../LocalDatastore/LocalDatastoreController.default');
+var DefaultStorageController = require('../LocalDatastoreController.default');
 
 describe('Default DataController', () => {
   beforeEach(() => {
@@ -89,11 +89,11 @@ describe('Default DataController', () => {
   });
 });
 
-var LocalDatastore = require('../LocalDatastore/LocalDatastore');
+var LocalDatastore = require('../LocalDatastore');
 
 describe('LocalDatastore (Default DataStoreController)', () => {
   beforeEach(() => {
-    CoreManager.setLocalDatastoreController(require('../LocalDatastore/LocalDatastoreController.default'));
+    CoreManager.setLocalDatastoreController(require('../LocalDatastoreController.default'));
   });
 
   it('can store and retrieve values', () => {
@@ -112,7 +112,7 @@ describe('LocalDatastore (Default DataStoreController)', () => {
 
 describe('LocalDatastore (LocalStorage DataStoreController)', () => {
   beforeEach(() => {
-    CoreManager.setLocalDatastoreController(require('../LocalDatastore/LocalDatastoreController.localStorage'));
+    CoreManager.setLocalDatastoreController(require('../LocalDatastoreController.localStorage'));
   });
 
   it('can store and retrieve values', () => {

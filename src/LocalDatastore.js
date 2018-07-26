@@ -9,8 +9,7 @@
  * @flow
  */
 
-import CoreManager from '../CoreManager';
-import ParsePromise from '../ParsePromise';
+import CoreManager from './CoreManager';
 
 var LocalDatastore = {
   fromPinWithName(name: string): ?any {
@@ -26,6 +25,11 @@ var LocalDatastore = {
   unPinWithName(name: string): void {
     var controller = CoreManager.getLocalDatastoreController();
     return controller.unPinWithName(name);
+  },
+
+  _getLocalDatastore(): void {
+    var controller = CoreManager.getLocalDatastoreController();
+    controller.getLocalDatastore();
   },
 
   _clear(): void {
