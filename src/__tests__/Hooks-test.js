@@ -21,7 +21,7 @@ var defaultController = CoreManager.getHooksController();
 
 describe('Hooks', () => {
   beforeEach(() => {
-    var run = jest.genMockFunction();
+    var run = jest.fn();
     run.mockReturnValue(ParsePromise.as({
       result: {}
     }));

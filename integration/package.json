@@ -1,9 +1,12 @@
 {
   "private": true,
   "dependencies": {
-    "express": "^4.13.4",
-    "mocha": "^2.4.5",
-    "parse-server": "^2.7.0"
+    "express": "4.16.3",
+    "mocha": "5.2.0",
+    "parse-server": "github:parseplatform/parse-server#master"
+  },
+  "engines": {
+    "node": ">= 8"
   },
   "scripts": {
     "test": "mocha --reporter dot -t 5000"

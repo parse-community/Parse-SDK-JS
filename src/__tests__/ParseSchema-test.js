@@ -13,27 +13,18 @@ var ParseSchema = require('../ParseSchema').default;
 var ParsePromise = require('../ParsePromise').default;
 var CoreManager = require('../CoreManager');
 
-function generateSaveMock(prefix) {
-  return function(name, payload) {
-    return ParsePromise.as({
-      name: name,
-      url: prefix + name
-    });
-  };
-}
-
 var defaultController = CoreManager.getSchemaController();
 
 describe('ParseSchema', () => {
   it('can create schema', (done) => {
     var schema = new ParseSchema('SchemaTest');
-    expect(schema.className, 'SchemaTest');
+    expect(schema.className).toEqual('SchemaTest');
     done();
   });
 
   it('can create schema with User Class', (done) => {
     var schema = new ParseSchema('User');
-    expect(schema.className, '_User');
+    expect(schema.className).toEqual('_User');
     done();
   });
 
@@ -56,24 +47,26 @@ describe('ParseSchema', () => {
       .addDate('dateField')
       .addFile('fileField')
       .addGeoPoint('geoPointField')
+      .addPolygon('polygonField')
       .addArray('arrayField')
       .addObject('objectField')
       .addPointer('pointerField', '_User')
       .addRelation('relationField', '_User');
 
-    expect(schema._fields.defaultFieldString.type, 'String');
-    expect(schema._fields.stringField.type, 'String');
-    expect(schema._fields.numberField.type, 'Number');
-    expect(schema._fields.booleanField.type, 'Boolean');
-    expect(schema._fields.dateField.type, 'Date');
-    expect(schema._fields.fileField.type, 'File');
-    expect(schema._fields.geoPointField.type, 'GeoPoint');
-    expect(schema._fields.arrayField.type, 'Array');
-    expect(schema._fields.objectField.type, 'Object');
-    expect(schema._fields.pointerField.type, 'Pointer');
-    expect(schema._fields.relationField.type, 'Relation');
-    expect(schema._fields.pointerField.targetClass, '_User');
-    expect(schema._fields.relationField.targetClass, '_User');
+    expect(schema._fields.defaultFieldString.type).toEqual('String');
+    expect(schema._fields.stringField.type).toEqual('String');
+    expect(schema._fields.numberField.type).toEqual('Number');
+    expect(schema._fields.booleanField.type).toEqual('Boolean');
+    expect(schema._fields.dateField.type).toEqual('Date');
+    expect(schema._fields.fileField.type).toEqual('File');
+    expect(schema._fields.geoPointField.type).toEqual('GeoPoint');
+    expect(schema._fields.polygonField.type).toEqual('Polygon');
+    expect(schema._fields.arrayField.type).toEqual('Array');
+    expect(schema._fields.objectField.type).toEqual('Object');
+    expect(schema._fields.pointerField.type).toEqual('Pointer');
+    expect(schema._fields.relationField.type).toEqual('Relation');
+    expect(schema._fields.pointerField.targetClass).toEqual('_User');
+    expect(schema._fields.relationField.targetClass).toEqual('_User');
     done();
   });
 
@@ -81,7 +74,7 @@ describe('ParseSchema', () => {
     var schema = new ParseSchema('SchemaTest');
     schema.addIndex('testIndex', { name: 1 });
 
-    expect(schema._indexes.name, 1);
+    expect(schema._indexes.testIndex.name).toBe(1);
     done();
   });
 
@@ -160,30 +153,24 @@ describe('ParseSchema', () => {
   it('can delete schema field', (done) => {
     var schema = new ParseSchema('SchemaTest');
     schema.deleteField('testField');
-    expect(schema._fields.testField._op, 'Delete');
+    expect(schema._fields.testField).toEqual({ __op: 'Delete'});
     done();
   });
 
   it('can delete schema index', (done) => {
     var schema = new ParseSchema('SchemaTest');
     schema.deleteIndex('testIndex');
-    expect(schema._indexes.testIndex._op, 'Delete');
+    expect(schema._indexes.testIndex).toEqual({ __op: 'Delete'});
     done();
   });
 
-  // CoreManager.setSchemaController({
-  //   send() {},
-  //   get() {},
-  //   create() {},
-  //   update() {},
-  //   delete() {},
-  // });
   it('can save schema', (done) => {
     CoreManager.setSchemaController({
       send() {},
       get() {},
       update() {},
       delete() {},
+      purge() {},
       create(className, params, options) {
         expect(className).toBe('SchemaTest');
         expect(params).toEqual({
@@ -211,6 +198,7 @@ describe('ParseSchema', () => {
       get() {},
       create() {},
       delete() {},
+      purge() {},
       update(className, params, options) {
         expect(className).toBe('SchemaTest');
         expect(params).toEqual({
@@ -238,6 +226,7 @@ describe('ParseSchema', () => {
       create() {},
       update() {},
       get() {},
+      purge() {},
       delete(className, options) {
         expect(className).toBe('SchemaTest');
         expect(options).toEqual({});
@@ -252,12 +241,33 @@ describe('ParseSchema', () => {
     });
   });
 
+  it('can purge schema', (done) => {
+    CoreManager.setSchemaController({
+      send() {},
+      create() {},
+      update() {},
+      get() {},
+      delete() {},
+      purge(className) {
+        expect(className).toBe('SchemaTest');
+        return ParsePromise.as([]);
+      },
+    });
+
+    var schema = new ParseSchema('SchemaTest');
+    schema.purge().then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
+  });
+
   it('can get schema', (done) => {
     CoreManager.setSchemaController({
       send() {},
       create() {},
       update() {},
       delete() {},
+      purge() {},
       get(className, options) {
         expect(className).toBe('SchemaTest');
         expect(options).toEqual({});
@@ -278,6 +288,7 @@ describe('ParseSchema', () => {
       create() {},
       update() {},
       delete() {},
+      purge() {},
       get(className, options) {
         expect(className).toBe('SchemaTest');
         expect(options).toEqual({ sessionToken: 1234 });
@@ -298,6 +309,7 @@ describe('ParseSchema', () => {
       create() {},
       update() {},
       delete() {},
+      purge() {},
       get(className, options) {
         expect(className).toBe('SchemaTest');
         expect(options).toEqual({});
@@ -322,6 +334,7 @@ describe('ParseSchema', () => {
       create() {},
       update() {},
       delete() {},
+      purge() {},
       get(className, options) {
         expect(className).toBe('');
         expect(options).toEqual({});
@@ -343,6 +356,7 @@ describe('ParseSchema', () => {
       create() {},
       update() {},
       delete() {},
+      purge() {},
       get(className, options) {
         expect(className).toBe('');
         expect(options).toEqual({ sessionToken: 1234 });
@@ -364,6 +378,7 @@ describe('ParseSchema', () => {
       create() {},
       update() {},
       delete() {},
+      purge() {},
       get(className, options) {
         expect(className).toBe('');
         expect(options).toEqual({});
@@ -388,11 +403,9 @@ describe('SchemaController', () => {
   beforeEach(() => {
     CoreManager.setSchemaController(defaultController);
     var request = function(method, path, data, options) {
-      var name = path.substr(path.indexOf('/') + 1);
       return ParsePromise.as([]);
     };
     var ajax = function(method, path, data, headers) {
-      var name = path.substr(path.indexOf('/') + 1);
       return ParsePromise.as([]);
     };
     CoreManager.setRESTController({ request: request, ajax: ajax });
@@ -425,6 +438,14 @@ describe('SchemaController', () => {
   it('delete schema', (done) => {
     var schema = new ParseSchema('SchemaTest');
     schema.delete().then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
+  });
+
+  it('purge schema', (done) => {
+    var schema = new ParseSchema('SchemaTest');
+    schema.purge().then((results) => {
       expect(results).toEqual([]);
       done();
     });

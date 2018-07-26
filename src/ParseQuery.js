@@ -46,6 +46,24 @@ function quote(s: string) {
   return '\\Q' + s.replace('\\E', '\\E\\\\E\\Q') + '\\E';
 }
 
+/**
+ * Extracts the class name from queries. If not all queries have the same
+ * class name an error will be thrown.
+ */
+function _getClassNameFromQueries(queries: Array<ParseQuery>): string {
+  var className = null;
+  queries.forEach((q) => {
+    if (!className) {
+      className = q.className;
+    }
+
+    if (className !== q.className) {
+      throw new Error('All queries must be for the same class.');
+    }
+  });
+  return className;
+}
+
 /*
  * Handles pre-populating the result data of a query with select fields,
  * making sure that the data object contains keys for all objects that have
@@ -230,6 +248,21 @@ class ParseQuery {
   }
 
   /**
+   * Adds constraint that all of the passed in queries match.
+   * @method _andQuery
+   * @param {Array} queries
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  _andQuery(queries: Array<ParseQuery>): ParseQuery {
+    var queryJSON = queries.map((q) => {
+      return q.toJSON().where;
+    });
+
+    this._where.$and = queryJSON;
+    return this;
+  }
+
+  /**
    * Helper for condition queries
    */
   _addCondition(key: string, condition: string, value: mixed): ParseQuery {
@@ -238,6 +271,13 @@ class ParseQuery {
     }
     this._where[key][condition] = encode(value, false, true);
     return this;
+  }
+
+  /**
+   * Converts string for regular expression at the beginning
+   */
+  _regexStartWith(string: string): String {
+    return '^' + quote(string);
   }
 
   /**
@@ -342,7 +382,7 @@ class ParseQuery {
   /**
    * Constructs a Parse.Object whose id is already known by fetching data from
    * the server.  Either options.success or options.error is called when the
-   * find completes.
+   * find completes. Unlike the <code>first</code> method, it never returns undefined.
    *
    * @param {String} objectId The id of the object to be fetched.
    * @param {Object} options A Backbone-style options object.
@@ -832,6 +872,26 @@ class ParseQuery {
   }
 
   /**
+   * Adds a constraint to the query that requires a particular key's value to
+   * contain each one of the provided list of values starting with given strings.
+   * @param {String} key The key to check.  This key's value must be an array.
+   * @param {Array<String>} values The string values that will match as starting string.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  containsAllStartingWith(key: string, values: Array<string>): ParseQuery {
+    var _this = this;
+    if (!Array.isArray(values)) {
+      values = [values];
+    }
+
+    values = values.map(function (value) {
+      return {"$regex": _this._regexStartWith(value)};
+    });
+
+    return this.containsAll(key, values);
+  }
+
+  /**
    * Adds a constraint for finding objects that contain the given key.
    * @param {String} key The key that should exist.
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -955,6 +1015,80 @@ class ParseQuery {
   }
 
   /**
+  * Adds a constraint for finding string values that contain a provided
+  * string. This may be slow for large datasets. Requires Parse-Server > 2.5.0
+  *
+  * In order to sort you must use select and ascending ($score is required)
+  *  <pre>
+  *   query.fullText('field', 'term');
+  *   query.ascending('$score');
+  *   query.select('$score');
+  *  </pre>
+  *
+  * To retrieve the weight / rank
+  *  <pre>
+  *   object->get('score');
+  *  </pre>
+  *
+  * You can define optionals by providing an object as a third parameter
+  *  <pre>
+  *   query.fullText('field', 'term', { language: 'es', diacriticSensitive: true });
+  *  </pre>
+  *
+  * @param {String} key The key that the string to match is stored in.
+  * @param {String} value The string to search
+  * @param {Object} options (Optional)
+  * @param {String} options.language The language that determines the list of stop words for the search and the rules for the stemmer and tokenizer.
+  * @param {Boolean} options.caseSensitive A boolean flag to enable or disable case sensitive search.
+  * @param {Boolean} options.diacriticSensitive A boolean flag to enable or disable diacritic sensitive search.
+  * @return {Parse.Query} Returns the query, so you can chain this call.
+  */
+  fullText(key: string, value: string, options: ?Object): ParseQuery {
+    options = options || {};
+
+    if (!key) {
+      throw new Error('A key is required.');
+    }
+    if (!value) {
+      throw new Error('A search term is required');
+    }
+    if (typeof value !== 'string') {
+      throw new Error('The value being searched for must be a string.');
+    }
+
+    const fullOptions = { $term: value };
+    for (const option in options) {
+      switch (option) {
+        case 'language':
+          fullOptions.$language = options[option];
+          break;
+        case 'caseSensitive':
+          fullOptions.$caseSensitive = options[option];
+          break;
+        case 'diacriticSensitive':
+          fullOptions.$diacriticSensitive = options[option];
+          break;
+        default:
+          throw new Error(`Unknown option: ${option}`);
+          break;
+      }
+    }
+
+    return this._addCondition(key, '$text', { $search: fullOptions });
+  }
+
+  /**
+   * Method to sort the full text search by text score
+   *
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  sortByTextScore() {
+    this.ascending('$score');
+    this.select(['$score']);
+    return this;
+  }
+
+  /**
    * Adds a constraint for finding string values that start with a provided
    * string.  This query will use the backend index, so it will be fast even
    * for large datasets.
@@ -966,7 +1100,7 @@ class ParseQuery {
     if (typeof value !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this._addCondition(key, '$regex', '^' + quote(value));
+    return this._addCondition(key, '$regex', this._regexStartWith(value));
   }
 
   /**
@@ -1005,11 +1139,18 @@ class ParseQuery {
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
    * @param {Number} maxDistance Maximum distance (in radians) of results to
    *   return.
+   * @param {Boolean} sorted A Bool value that is true if results should be
+   *   sorted by distance ascending, false is no sorting is required,
+   *   defaults to true.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  withinRadians(key: string, point: ParseGeoPoint, distance: number): ParseQuery {
-    this.near(key, point);
-    return this._addCondition(key, '$maxDistance', distance);
+  withinRadians(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {
+    if (sorted || sorted === undefined) {
+      this.near(key, point);
+      return this._addCondition(key, '$maxDistance', distance);
+    } else {
+      return this._addCondition(key, '$geoWithin', { '$centerSphere': [[point.longitude, point.latitude], distance] });
+    }
   }
 
   /**
@@ -1019,11 +1160,14 @@ class ParseQuery {
    * @param {String} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
    * @param {Number} maxDistance Maximum distance (in miles) of results to
-   *     return.
+   *   return.
+   * @param {Boolean} sorted A Bool value that is true if results should be
+   *   sorted by distance ascending, false is no sorting is required,
+   *   defaults to true.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  withinMiles(key: string, point: ParseGeoPoint, distance: number): ParseQuery {
-    return this.withinRadians(key, point, distance / 3958.8);
+  withinMiles(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {
+    return this.withinRadians(key, point, distance / 3958.8, sorted);
   }
 
   /**
@@ -1033,11 +1177,14 @@ class ParseQuery {
    * @param {String} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
    * @param {Number} maxDistance Maximum distance (in kilometers) of results
-   *     to return.
+   *   to return.
+   * @param {Boolean} sorted A Bool value that is true if results should be
+   *   sorted by distance ascending, false is no sorting is required,
+   *   defaults to true.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  withinKilometers(key: string, point: ParseGeoPoint, distance: number): ParseQuery {
-    return this.withinRadians(key, point, distance / 6371.0);
+  withinKilometers(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {
+    return this.withinRadians(key, point, distance / 6371.0, sorted);
   }
 
   /**
@@ -1254,19 +1401,27 @@ class ParseQuery {
    * @return {Parse.Query} The query that is the OR of the passed in queries.
    */
   static or(...queries: Array<ParseQuery>): ParseQuery {
-    var className = null;
-    queries.forEach((q) => {
-      if (!className) {
-        className = q.className;
-      }
-
-      if (className !== q.className) {
-        throw new Error('All queries must be for the same class.');
-      }
-    });
-
+    var className = _getClassNameFromQueries(queries);
     var query = new ParseQuery(className);
     query._orQuery(queries);
+    return query;
+  }
+
+  /**
+   * Constructs a Parse.Query that is the AND of the passed in queries.  For
+   * example:
+   * <pre>var compoundQuery = Parse.Query.and(query1, query2, query3);</pre>
+   *
+   * will create a compoundQuery that is an and of the query1, query2, and
+   * query3.
+   * @param {...Parse.Query} var_args The list of queries to AND.
+   * @static
+   * @return {Parse.Query} The query that is the AND of the passed in queries.
+   */
+  static and(...queries: Array<ParseQuery>): ParseQuery {
+    var className = _getClassNameFromQueries(queries);
+    var query = new ParseQuery(className);
+    query._andQuery(queries);
     return query;
   }
 }

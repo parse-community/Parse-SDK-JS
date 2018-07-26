@@ -20,7 +20,7 @@ class ParseError {
     this.code = code;
     this.message = message;
   }
-  
+
   toString() {
     return 'ParseError: ' + this.code + ' ' + this.message;
   }
@@ -465,6 +465,14 @@ ParseError.INVALID_LINKED_SESSION = 251;
  * @final
  */
 ParseError.UNSUPPORTED_SERVICE = 252;
+
+/**
+ * Error code indicating an invalid operation occured on schema
+ * @property INVALID_SCHEMA_OPERATION
+ * @static
+ * @final
+ */
+ParseError.INVALID_SCHEMA_OPERATION = 255;
 
 /**
  * Error code indicating that there were multiple errors. Aggregate errors

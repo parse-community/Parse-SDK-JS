@@ -17,7 +17,7 @@ import ParseGeoPoint from './ParseGeoPoint';
  *   new Polygon([[0,0],[0,1],[1,1],[1,0]])
  *   new Polygon([GeoPoint, GeoPoint, GeoPoint])
  *   </pre>
- * 
+ *
  * <p>Represents a coordinates that may be associated
  * with a key in a ParseObject or used as a reference point for geo queries.
  * This allows proximity-based queries on the key.</p>
@@ -56,7 +56,7 @@ class ParsePolygon {
   }
 
   /**
-   * Returns a JSON representation of the GeoPoint, suitable for Parse.
+   * Returns a JSON representation of the Polygon, suitable for Parse.
    * @return {Object}
    */
   toJSON(): { __type: string; coordinates: Array;} {
@@ -89,9 +89,9 @@ class ParsePolygon {
   }
 
   /**
-   * 
-   * @param {Parse.GeoPoint} point 
-   * @returns {Boolean} wether the points is contained into the polygon
+   *
+   * @param {Parse.GeoPoint} point
+   * @returns {Boolean} Returns if the point is contained in the polygon
    */
   containsPoint(point: ParseGeoPoint): boolean {
     let minX = this._coordinates[0][0];

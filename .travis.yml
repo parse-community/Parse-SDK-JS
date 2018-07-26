@@ -1,7 +1,7 @@
 language: node_js
 dist: trusty
 node_js:
-- '6.11.4'
+- '8.10'
 
 branches:
   only:
@@ -23,7 +23,7 @@ jobs:
       - npm install -g mongodb-runner
       - mongodb-runner start
       script: npm test -- --maxWorkers=4 && ./run_integration.sh
-      after_script: cat ./coverage/coverage-final.json | ./node_modules/codecov.io/bin/codecov.io.js && rm -rf ./coverage
+      after_script: ./node_modules/codecov/bin/codecov -f ./coverage/coverage-final.json && rm -rf ./coverage
     # release on github latest branch
     - stage: release
       env: 

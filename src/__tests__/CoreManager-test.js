@@ -57,13 +57,19 @@ describe('CoreManager', () => {
     );
 
     expect(CoreManager.setCloudController.bind(null, {
-      run: function() {}
+      run: function() {},
+      getJobsData: function() {},
+      startJob: function() {},
+      getJobStatus: function() {}
     })).not.toThrow();
   });
 
   it('can set and get CloudController', () => {
     var controller = {
-      run: function() {}
+      run: function() {},
+      getJobsData: function() {},
+      startJob: function() {},
+      getJobStatus: function() {}
     };
 
     CoreManager.setCloudController(controller);
@@ -328,7 +334,8 @@ describe('CoreManager', () => {
       get: function() {},
       create: function() {},
       update: function() {},
-      delete: function() {}
+      delete: function() {},
+      purge: function() {},
     })).not.toThrow();
   });
 
@@ -338,7 +345,8 @@ describe('CoreManager', () => {
       get: function() {},
       create: function() {},
       update: function() {},
-      delete: function() {}
+      delete: function() {},
+      purge: function() {},
     };
 
     CoreManager.setSchemaController(controller);

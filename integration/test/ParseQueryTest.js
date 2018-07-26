@@ -578,7 +578,7 @@ describe('Parse Query', () => {
       assert.equal(results[2].get('string'), 'd');
       assert.equal(results[3].get('number'), 1);
       assert.equal(results[3].get('string'), 'b');
-      
+
       let query = new Parse.Query(TestObject);
       query.equalTo('doubleDescending', true);
       query.descending('number, string');
@@ -608,7 +608,7 @@ describe('Parse Query', () => {
       assert.equal(results[2].get('string'), 'd');
       assert.equal(results[3].get('number'), 1);
       assert.equal(results[3].get('string'), 'b');
-      
+
       let query = new Parse.Query(TestObject);
       query.equalTo('doubleDescending', true);
       query.descending('number', 'string');
@@ -623,7 +623,7 @@ describe('Parse Query', () => {
       assert.equal(results[2].get('string'), 'd');
       assert.equal(results[3].get('number'), 1);
       assert.equal(results[3].get('string'), 'b');
-      
+
       done();
     });
   });
@@ -760,7 +760,7 @@ describe('Parse Query', () => {
       assert.equal(results.length, 2);
       assert.equal(results[0].id, objects[0].id);
       assert.equal(results[1].id, objects[1].id);
-      
+
       let query = new Parse.Query('TestObject');
       query.equalTo('timed2', true);
       query.greaterThan('createdAt', objects[2].createdAt);
@@ -1210,7 +1210,7 @@ describe('Parse Query', () => {
     }).then((results) => {
       assert.equal(results.length, 1);
       assert.equal(results[0].get('name'), 'Bob');
-      
+
       let query = new Parse.Query(Restaurant);
       query.greaterThan('rating', 4);
       let mainQuery = new Parse.Query(Person);
@@ -1308,6 +1308,60 @@ describe('Parse Query', () => {
       assert.equal(results.length, 3);
       done();
     });
+  });
+
+  it('can build AND queries', (done) => {
+    let objects = [];
+    for (let i = 0; i < 10; i++) {
+      let obj = new Parse.Object('BoxedNumber');
+      obj.set({ x: i, and: true });
+      objects.push(obj);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      let q1 = new Parse.Query('BoxedNumber');
+      q1.equalTo('and', true);
+      q1.greaterThan('x', 2);
+      let q2 = new Parse.Query('BoxedNumber');
+      q2.equalTo('and', true);
+      q2.lessThan('x', 5);
+      let andQuery = Parse.Query.and(q1, q2);
+      return andQuery.find();
+    }).then((results) => {
+      assert.equal(results.length, 2);
+      results.forEach((number) => {
+        assert(number.get('x') > 2 && number.get('x') < 5);
+      });
+      done();
+    }).fail(e => console.log(e));
+  });
+
+  it('can build complex AND queries', (done) => {
+    let objects = [];
+    for (let i = 0; i < 10; i++) {
+      let child = new Parse.Object('Child');
+      child.set('x', i);
+      child.set('and', true);
+      let parent = new Parse.Object('Parent');
+      parent.set('child', child);
+      parent.set('and', true);
+      parent.set('y', i);
+      objects.push(parent);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      let subQuery = new Parse.Query('Child');
+      subQuery.equalTo('x', 4);
+      subQuery.equalTo('and', true);
+      let q1 = new Parse.Query('Parent');
+      q1.matchesQuery('child', subQuery);
+      let q2 = new Parse.Query('Parent');
+      q2.equalTo('and', true);
+      q2.equalTo('y', 4);
+      let andQuery = new Parse.Query.and(q1, q2);
+      return andQuery.find();
+    }).then((results) => {
+      assert.equal(results.length, 1);
+      done();
+    }).fail(e => console.log(e));
   });
 
   it('can iterate over results with each', (done) => {
@@ -1423,6 +1477,188 @@ describe('Parse Query', () => {
         assert.equal(o.get('bar'), undefined);
       });
     }).then(() => {
+      done();
+    });
+  });
+
+  it('can perform a full text search', () => {
+    const subjects = [
+      'coffee',
+      'Coffee Shopping',
+      'Baking a cake',
+      'baking',
+      'Café Con Leche',
+      'Сырники',
+      'coffee and cream',
+      'Cafe con Leche',
+    ];
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestObject({ subject: subjects[i] });
+      objects.push(obj);
+    }
+    return Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestObject);
+      q.fullText('subject', 'coffee');
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 3);
+    });
+  });
+
+  it('can perform a full text search sort', () => {
+    const subjects = [
+      'coffee',
+      'Coffee Shopping',
+      'Baking a cake',
+      'baking',
+      'Café Con Leche',
+      'Сырники',
+      'coffee and cream',
+      'Cafe con Leche',
+    ];
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestObject({ comment: subjects[i] });
+      objects.push(obj);
+    }
+    return Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestObject);
+      q.fullText('comment', 'coffee');
+      q.ascending('$score');
+      q.select('$score');
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 3);
+      assert.equal(results[0].get('score'), 1);
+      assert.equal(results[1].get('score'), 0.75);
+      assert.equal(results[2].get('score'), 0.75);
+    });
+  });
+
+
+  it('can perform a full text search with language options', () => {
+    const subjects = [
+      'café',
+      'loja de café',
+      'preparando um café',
+      'preparar',
+      'café com leite',
+      'Сырники',
+      'prepare café e creme',
+      'preparação de cafe com leite',
+    ];
+    const TestLanguageOption = Parse.Object.extend('TestLanguageOption');
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestLanguageOption({ language_comment: subjects[i] });
+      objects.push(obj);
+    }
+    return Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestLanguageOption);
+      q.fullText('language_comment', 'preparar', { language: 'portuguese' });
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 1);
+    });
+  });
+
+  it('can perform a full text search with case sensitive options', () => {
+    const subjects = [
+      'café',
+      'loja de café',
+      'Preparando um café',
+      'preparar',
+      'café com leite',
+      'Сырники',
+      'Preparar café e creme',
+      'preparação de cafe com leite',
+    ];
+    const TestCaseOption = Parse.Object.extend('TestCaseOption');
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestCaseOption({ casesensitive_comment: subjects[i] });
+      objects.push(obj);
+    }
+    return Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestCaseOption);
+      q.fullText('casesensitive_comment', 'Preparar', { caseSensitive: true });
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 1);
+    });
+  });
+
+  it('can perform a full text search with diacritic sensitive options', () => {
+    const subjects = [
+      'café',
+      'loja de café',
+      'preparando um café',
+      'Preparar',
+      'café com leite',
+      'Сырники',
+      'preparar café e creme',
+      'preparação de cafe com leite',
+    ];
+    const TestDiacriticOption = Parse.Object.extend('TestDiacriticOption');
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestDiacriticOption({ diacritic_comment: subjects[i] });
+      objects.push(obj);
+    }
+    return Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestDiacriticOption);
+      q.fullText('diacritic_comment', 'cafe', { diacriticSensitive: true });
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 1);
+    });
+  });
+
+  it('can perform a full text search with case and diacritic sensitive options', () => {
+    const subjects = [
+      'Café',
+      'café',
+      'preparar Cafe e creme',
+      'preparação de cafe com leite',
+    ];
+    const TestCaseDiacriticOption = Parse.Object.extend('TestCaseDiacriticOption');
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestCaseDiacriticOption({ diacritic_comment: subjects[i] });
+      objects.push(obj);
+    }
+    return Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestCaseDiacriticOption);
+      q.fullText('diacritic_comment', 'cafe', { caseSensitive: true, diacriticSensitive: true });
+      return q.find();
+    }).then((results) => {
+      assert.equal(results.length, 1);
+      assert.equal(results[0].get('diacritic_comment'), 'preparação de cafe com leite');
+    });
+  });
+
+  it('fails to perform a full text search with unknown options', (done) => {
+    const subjects = [
+      'café',
+      'loja de café',
+      'preparando um café',
+      'preparar',
+      'café com leite',
+      'Сырники',
+      'prepare café e creme',
+      'preparação de cafe com leite',
+    ];
+    const objects = [];
+    for (const i in subjects) {
+      const obj = new TestObject({ comment: subjects[i] });
+      objects.push(obj);
+    }
+    Parse.Object.saveAll(objects).then(() => {
+      const q = new Parse.Query(TestObject);
+      q.fullText('comment', 'preparar', { language: "portuguese", notAnOption: true });
+      return q.find();
+    }).catch((e) => {
       done();
     });
   });

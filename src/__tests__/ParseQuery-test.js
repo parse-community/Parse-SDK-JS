@@ -264,6 +264,33 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can generate contains-all-starting-with queries', () => {
+    var q = new ParseQuery('Item');
+    q.containsAllStartingWith('tags', ['ho', 'out']);
+    expect(q.toJSON()).toEqual({
+      where: {
+        tags: {
+          $all: [
+            {$regex: '^\\Qho\\E'},
+            {$regex: '^\\Qout\\E'}
+          ]
+        }
+      }
+    });
+
+    q.containsAllStartingWith('tags', ['sal', 'ne']);
+    expect(q.toJSON()).toEqual({
+      where: {
+        tags: {
+          $all: [
+            {$regex: '^\\Qsal\\E'},
+            {$regex: '^\\Qne\\E'}
+          ]
+        }
+      }
+    });
+  });
+
   it('can generate exists queries', () => {
     var q = new ParseQuery('Item');
     q.exists('name');
@@ -546,7 +573,7 @@ describe('ParseQuery', () => {
 
   it('can generate near-geopoint queries with ranges', () => {
     var q = new ParseQuery('Shipment');
-    q.withinRadians('shippedTo', [20, 40], 2);
+    q.withinRadians('shippedTo', [20, 40], 2, true);
     expect(q.toJSON()).toEqual({
       where: {
         shippedTo: {
@@ -560,7 +587,7 @@ describe('ParseQuery', () => {
       }
     });
 
-    q.withinMiles('shippedTo', [20, 30], 3958.8);
+    q.withinMiles('shippedTo', [20, 30], 3958.8, true);
     expect(q.toJSON()).toEqual({
       where: {
         shippedTo: {
@@ -574,7 +601,7 @@ describe('ParseQuery', () => {
       }
     });
 
-    q.withinKilometers('shippedTo', [30, 30], 6371.0);
+    q.withinKilometers('shippedTo', [30, 30], 6371.0, true);
     expect(q.toJSON()).toEqual({
       where: {
         shippedTo: {
@@ -584,6 +611,51 @@ describe('ParseQuery', () => {
             longitude: 30
           },
           $maxDistance: 1
+        }
+      }
+    });
+  });
+
+  it('can generate near-geopoint queries without sorting', () => {
+    var q = new ParseQuery('Shipment');
+    q.withinRadians('shippedTo', new ParseGeoPoint(20, 40), 2, false);
+    expect(q.toJSON()).toEqual({
+      where: {
+        shippedTo: {
+          $geoWithin: {
+            $centerSphere: [
+              [40, 20], // This takes [lng, lat] vs. ParseGeoPoint [lat, lng].
+              2
+            ]
+          }
+        }
+      }
+    });
+
+    q.withinMiles('shippedTo', new ParseGeoPoint(20, 30), 3958.8, false);
+    expect(q.toJSON()).toEqual({
+      where: {
+        shippedTo: {
+          $geoWithin: {
+            $centerSphere: [
+              [30, 20], // This takes [lng, lat] vs. ParseGeoPoint [lat, lng].
+              1
+            ]
+          }
+        }
+      }
+    });
+
+    q.withinKilometers('shippedTo', new ParseGeoPoint(30, 30), 6371.0, false);
+    expect(q.toJSON()).toEqual({
+      where: {
+        shippedTo: {
+          $geoWithin: {
+            $centerSphere: [
+              [30, 30], // This takes [lng, lat] vs. ParseGeoPoint [lat, lng].
+              1
+            ]
+          }
         }
       }
     });
@@ -876,6 +948,40 @@ describe('ParseQuery', () => {
     expect(mediumOrLarge.toJSON()).toEqual({
       where: {
         $or: [
+          { size: 'medium' },
+          { size: 'large' }
+        ]
+      }
+    });
+  });
+
+  it('can combine queries with an AND clause', () => {
+    var q = new ParseQuery('Item');
+    var q2 = new ParseQuery('Purchase');
+    expect(ParseQuery.and.bind(null, q, q2)).toThrow(
+      'All queries must be for the same class.'
+    );
+
+    q2 = new ParseQuery('Item');
+    q.equalTo('size', 'medium');
+    q2.equalTo('size', 'large');
+
+    var mediumOrLarge = ParseQuery.and(q, q2);
+    expect(mediumOrLarge.toJSON()).toEqual({
+      where: {
+        $and: [
+          { size: 'medium' },
+          { size: 'large' }
+        ]
+      }
+    });
+
+    // It removes limits, skips, etc
+    q.limit(10);
+    mediumOrLarge = ParseQuery.and(q, q2);
+    expect(mediumOrLarge.toJSON()).toEqual({
+      where: {
+        $and: [
           { size: 'medium' },
           { size: 'large' }
         ]
@@ -1864,4 +1970,102 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('full text search', () => {
+    const query = new ParseQuery('Item');
+    query.fullText('size', 'small');
+
+    expect(query.toJSON()).toEqual({
+      where: {
+        size: {
+          $text: {
+            $search: {
+              $term: "small"
+            }
+          }
+        }
+      }
+    });
+  });
+
+  it('full text search sort', () => {
+    const query = new ParseQuery('Item');
+    query.fullText('size', 'medium');
+    query.ascending('$score');
+    query.select('$score');
+
+    expect(query.toJSON()).toEqual({
+      where: {
+        size: {
+          $text: {
+            $search: {
+              $term: "medium",
+            }
+          }
+        }
+      },
+      keys : "$score",
+      order : "$score"
+    });
+  });
+
+  it('full text search key required', (done) => {
+    const query = new ParseQuery('Item');
+    expect(() => query.fullText()).toThrow('A key is required.');
+    done();
+  });
+
+  it('full text search value required', (done) => {
+    const query = new ParseQuery('Item');
+    expect(() => query.fullText('key')).toThrow('A search term is required');
+    done();
+  });
+
+  it('full text search value must be string', (done) => {
+    const query = new ParseQuery('Item');
+    expect(() => query.fullText('key', [])).toThrow('The value being searched for must be a string.');
+    done();
+  });
+
+  it('full text search with all parameters', () => {
+    let query = new ParseQuery('Item');
+
+    query.fullText('size', 'medium', { language: 'en', caseSensitive: false, diacriticSensitive: true });
+
+    expect(query.toJSON()).toEqual({
+      where: {
+        size: {
+          $text: {
+            $search: {
+              $term: 'medium',
+              $language: 'en',
+              $caseSensitive: false,
+              $diacriticSensitive: true,
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it('add the score for the full text search', () => {
+    const query = new ParseQuery('Item');
+
+    query.fullText('size', 'medium', { language: 'fr' });
+    query.sortByTextScore();
+
+    expect(query.toJSON()).toEqual({
+      where: {
+        size: {
+          $text: {
+            $search: {
+              $term: 'medium',
+              $language: 'fr',
+            },
+          },
+        },
+      },
+      keys: '$score',
+      order: '$score',
+    });
+  });
 });
