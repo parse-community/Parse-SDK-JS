@@ -2,11 +2,10 @@
 
 const assert = require('assert');
 const clear = require('./clear');
-const mocha = require('mocha');
 const Parse = require('../../node');
 
 describe('Parse Cloud', () => {
-  before((done) => {
+  beforeAll((done) => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
@@ -18,7 +17,7 @@ describe('Parse Cloud', () => {
     Parse.Cloud.run('bar', params).then((result) => {
       assert.equal('Foo', result);
       done();
-    });
+    }).catch(done.fail);
   });
 
   it('run function with user', (done) => {
@@ -33,12 +32,12 @@ describe('Parse Cloud', () => {
       return user.destroy({ useMasterKey: true });
     }).then(() => {
       done();
-    });
+    }).catch(done.fail);
   });
 
   it('run function failed', (done) => {
     const params = { key1: 'value1', key2: 'value2' };
-    Parse.Cloud.run('bar', params).then(null).catch((error) => {
+    Parse.Cloud.run('bar', params).then(done.fail).catch((error) => {
       assert.equal(error.code, Parse.Error.SCRIPT_FAILED);
       done();
     });
@@ -46,7 +45,7 @@ describe('Parse Cloud', () => {
 
   it('run function name fail', (done) => {
     const params = { key1: 'value1' };
-    Parse.Cloud.run('unknown_function', params).then(null).catch((error) => {
+    Parse.Cloud.run('unknown_function', params).then(done.fail).catch((error) => {
       assert.equal(error.message, 'Invalid function: "unknown_function"');
       done();
     });
