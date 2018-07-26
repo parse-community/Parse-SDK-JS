@@ -43,7 +43,7 @@
     "babel-preset-react": "6.24.1",
     "babel-preset-stage-2": "6.24.1",
     "browserify": "16.2.2",
-    "codecov": "3.0.2",
+    "codecov": "3.0.3",
     "gulp": "4.0.0",
     "gulp-babel": "7.0.1",
     "gulp-derequire": "2.1.0",
