@@ -1138,28 +1138,14 @@ class ParseObject {
     LocalDatastore.unPinWithName(this._getId());
   }
 
-  static pinAll(objects: any): void {
-    for (let obj of objects) {
-      LocalDatastore.pinWithName(obj._getId(), [obj.toJSON()]);
+  fetchFromLocalDatastore() {
+    const pinned = LocalDatastore.fromPinWithName(this._getId());
+    if (pinned.length === 0 || Object.keys(pinned[0]).length === 0) {
+      throw new Error('Cannot fetch an unsaved ParseObject');
     }
-  }
-
-  static pinAllWithName(name: string, objects: any): void {
-    const toPin = [];
-    for (let obj of objects) {
-      toPin.push(obj.toJSON());
-    }
-    LocalDatastore.pinWithName(name, toPin);
-  }
-
-  static unPinAll(objects: any): void {
-    for (let obj of objects) {
-      LocalDatastore.unPinWithName(obj._getId());
-    }
-  }
-
-  static unPinAllWithName(name: string): void {
-    LocalDatastore.unPinWithName(name);
+    this._clearPendingOps();
+    this._clearServerData();
+    this._finishFetch(pinned[0]);
   }
 
   /** Static methods **/
@@ -1593,6 +1579,30 @@ class ParseObject {
   static disableSingleInstance() {
     singleInstance = false;
     CoreManager.setObjectStateController(UniqueInstanceStateController);
+  }
+
+  static pinAll(objects: any): void {
+    for (let obj of objects) {
+      LocalDatastore.pinWithName(obj._getId(), [obj.toJSON()]);
+    }
+  }
+
+  static pinAllWithName(name: string, objects: any): void {
+    const toPin = [];
+    for (let obj of objects) {
+      toPin.push(obj.toJSON());
+    }
+    LocalDatastore.pinWithName(name, toPin);
+  }
+
+  static unPinAll(objects: any): void {
+    for (let obj of objects) {
+      LocalDatastore.unPinWithName(obj._getId());
+    }
+  }
+
+  static unPinAllWithName(name: string): void {
+    LocalDatastore.unPinWithName(name);
   }
 }
 

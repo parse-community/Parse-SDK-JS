@@ -1278,6 +1278,40 @@ describe('Parse Object', () => {
     });
   });
 
+  it('cannot fetchFromLocalDatastore (unsaved)', (done) => {
+    try {
+      const object = new TestObject();
+      object.fetchFromLocalDatastore();
+    } catch (e) {
+      assert.equal(e.message, 'Cannot fetch an unsaved ParseObject');
+      done();
+    }
+  });
+
+  it('can fetchFromLocalDatastore (saved)', (done) => {
+    const obj1 = new TestObject();
+    const obj2 = new TestObject();
+
+    obj1.set('field', 'test');
+    obj1.pin();
+    obj1.save().then(() => {
+      obj2.id = obj1.id;
+      obj2.fetchFromLocalDatastore();
+      assert.deepEqual(obj1.toJSON(), obj2.toJSON());
+
+      const obj3 = TestObject.createWithoutData(obj1.id);
+      obj3.fetchFromLocalDatastore();
+      assert.deepEqual(obj1.toJSON(), obj3.toJSON());
+
+      const obj4 = TestObject.createWithoutData(obj1.id);
+      obj4.set('field', 'no test');
+      obj4.fetchFromLocalDatastore();
+      assert.deepEqual(obj1.toJSON(), obj4.toJSON());
+
+      done();
+    });
+  });
+
   it('can fetchAll', (done) => {
     let numItems = 11;
     let container = new Container();
