@@ -9,8 +9,8 @@
  * @flow
  */
 
-var memMap = {};
-var LocalDatastoreController = {
+const memMap = {};
+const LocalDatastoreController = {
   fromPinWithName(name: string): ?any {
     if (memMap.hasOwnProperty(name)) {
       return memMap[name];

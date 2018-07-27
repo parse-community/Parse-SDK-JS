@@ -341,6 +341,7 @@ class ParseObject {
 
   _migrateId(serverId: string) {
     if (this._localId && serverId) {
+      LocalDatastore._updateLocalIdForObjectId(this._localId, serverId);
       if (singleInstance) {
         let stateController = CoreManager.getObjectStateController();
         let oldState = stateController.removeState(this._getStateIdentifier());
@@ -1130,7 +1131,7 @@ class ParseObject {
   }
 
   pin(): void {
-    LocalDatastore.pinWithName(this._getId(), [this]);
+    LocalDatastore.pinWithName(this._getId(), [this.toJSON()]);
   }
 
   unPin(): void {
@@ -1138,18 +1139,22 @@ class ParseObject {
   }
 
   static pinAll(objects: any): void {
-    for (var obj in objects) {
-      LocalDatastore.pinWithName(obj._getId(), obj);
+    for (let obj of objects) {
+      LocalDatastore.pinWithName(obj._getId(), [obj.toJSON()]);
     }
   }
 
   static pinAllWithName(name: string, objects: any): void {
-    LocalDatastore.pinWithName(name, objects);
+    const toPin = [];
+    for (let obj of objects) {
+      toPin.push(obj.toJSON());
+    }
+    LocalDatastore.pinWithName(name, toPin);
   }
 
   static unPinAll(objects: any): void {
-    for (var obj in objects) {
-      LocalDatastore.pinWithName(obj._getId(), obj);
+    for (let obj of objects) {
+      LocalDatastore.unPinWithName(obj._getId());
     }
   }
 
@@ -1850,6 +1855,9 @@ var DefaultController = {
           if (objectError) {
             return ParsePromise.error(objectError);
           }
+          for (let object of target) {
+            LocalDatastore._updateObjectIfPinned(object.toJSON());
+          }
           return ParsePromise.as(target);
         });
       });
@@ -1874,6 +1882,7 @@ var DefaultController = {
 
       stateController.pushPendingState(target._getStateIdentifier());
       return stateController.enqueueTask(target._getStateIdentifier(), task).then(() => {
+        LocalDatastore._updateObjectIfPinned(target.toJSON());
         return target;
       }, (error) => {
         return ParsePromise.error(error);

@@ -152,6 +152,7 @@ Parse.File = require('./ParseFile').default;
 Parse.GeoPoint = require('./ParseGeoPoint').default;
 Parse.Polygon = require('./ParsePolygon').default;
 Parse.Installation = require('./ParseInstallation').default;
+Parse.LocalDatastore = require('./LocalDatastore');
 Parse.Object = require('./ParseObject').default;
 Parse.Op = {
   Set: ParseOp.SetOp,

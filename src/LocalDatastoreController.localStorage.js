@@ -9,19 +9,19 @@
  * @flow
  */
 
-var LocalDatastoreController = {
+const LocalDatastoreController = {
   fromPinWithName(name: string): ?any {
-    var values = localStorage.getItem(name);
+    const values = localStorage.getItem(name);
     if (!values) {
       return [];
     }
-    var objects = JSON.parse(values);
+    const objects = JSON.parse(values);
     return objects;
   },
 
   pinWithName(name: string, objects: any) {
     try {
-      var values = JSON.stringify(objects);
+      const values = JSON.stringify(objects);
       localStorage.setItem(name, values);
     } catch (e) {
       // Quota exceeded, possibly due to Safari Private Browsing mode
@@ -33,9 +33,9 @@ var LocalDatastoreController = {
   },
 
   getLocalDatastore() {
-    return Object.keys(localStorage).reduce(function(obj, str) {
+    return Object.keys(localStorage).reduce((obj, str) => {
       obj[str] = localStorage.getItem(str);
-      return obj
+      return obj;
     }, {});
   },
 

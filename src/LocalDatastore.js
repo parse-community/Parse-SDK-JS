@@ -11,25 +11,41 @@
 
 import CoreManager from './CoreManager';
 
-var LocalDatastore = {
+const LocalDatastore = {
   fromPinWithName(name: string): ?any {
-    var controller = CoreManager.getLocalDatastoreController();
+    const controller = CoreManager.getLocalDatastoreController();
     return controller.fromPinWithName(name);
   },
 
   pinWithName(name: string, objects: any): void {
-    var controller = CoreManager.getLocalDatastoreController();
+    const controller = CoreManager.getLocalDatastoreController();
     return controller.pinWithName(name, objects);
   },
 
   unPinWithName(name: string): void {
-    var controller = CoreManager.getLocalDatastoreController();
+    const controller = CoreManager.getLocalDatastoreController();
     return controller.unPinWithName(name);
   },
 
   _getLocalDatastore(): void {
     var controller = CoreManager.getLocalDatastoreController();
-    controller.getLocalDatastore();
+    return controller.getLocalDatastore();
+  },
+
+  _updateObjectIfPinned(object) {
+    const objectId = object.objectId;
+    const pinned = this.fromPinWithName(objectId);
+    if (pinned.length > 0) {
+      this.pinWithName(objectId, [object]);
+    }
+  },
+
+  _updateLocalIdForObjectId(localId, objectId) {
+    const pinned = this.fromPinWithName(localId);
+    if (pinned.length > 0) {
+      this.unPinWithName(localId);
+      this.pinWithName(objectId, [pinned[0]]);
+    }
   },
 
   _clear(): void {
