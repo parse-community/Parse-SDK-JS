@@ -2,14 +2,13 @@
 
 const assert = require('assert');
 const clear = require('./clear');
-const mocha = require('mocha');
 const Parse = require('../../node');
 
 const TestObject = Parse.Object.extend('TestObject');
 const TestPoint = Parse.Object.extend('TestPoint');
 
 describe('Geo Point', () => {
-  before((done) => {
+  beforeAll((done) => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1);
@@ -465,8 +464,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('minimum 3 points withinPolygon', function(done) {
-    return this.skip('Test passes locally but not on CI');
+  xit('minimum 3 points withinPolygon', function(done) {
     const query = new Parse.Query(TestPoint);
     query.withinPolygon('location', []);
     query.find().then(done.fail, (err) => {
@@ -474,5 +472,5 @@ describe('Geo Point', () => {
       done();
     })
     .fail(done.fail);
-  });
+  }, 'Test passes locally but not on CI');
 });

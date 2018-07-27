@@ -2,7 +2,6 @@
 
 const assert = require('assert');
 const clear = require('./clear');
-const mocha = require('mocha');
 const Parse = require('../../node');
 
 const TestObject = Parse.Object.extend('TestObject');
@@ -10,7 +9,7 @@ const Item = Parse.Object.extend('Item');
 const Container = Parse.Object.extend('Container');
 
 describe('Parse Object', () => {
-  before((done) => {
+  beforeEach((done) => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();

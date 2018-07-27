@@ -3,7 +3,7 @@ const clear = require('./clear');
 const Parse = require('../../node');
 
 describe('Schema', () => {
-  before(() => {
+  beforeAll(() => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
@@ -11,9 +11,7 @@ describe('Schema', () => {
   });
 
   beforeEach((done) => {
-    clear().then(() => {
-      done();
-    });
+    clear().then(done);
   });
 
   it('invalid get all no schema', (done) => {

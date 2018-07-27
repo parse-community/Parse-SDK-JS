@@ -22,11 +22,14 @@ jobs:
       before_script:
       - npm install -g mongodb-runner
       - mongodb-runner start
-      script: npm test -- --maxWorkers=4 && ./run_integration.sh
+      script: 
+      - npm test -- --maxWorkers=4
+      - npm run integration
       after_script: ./node_modules/codecov/bin/codecov -f ./coverage/coverage-final.json && rm -rf ./coverage
     # release on github latest branch
     - stage: release
-      env: 
+      env:
+      -
       before_script: skip
       after_script: skip
       script: 

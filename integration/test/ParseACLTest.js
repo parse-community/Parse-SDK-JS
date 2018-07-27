@@ -2,20 +2,19 @@
 
 const assert = require('assert');
 const clear = require('./clear');
-const mocha = require('mocha');
 const Parse = require('../../node');
 
 const TestObject = Parse.Object.extend('TestObject');
 
 describe('Parse.ACL', () => {
-  before((done) => {
+  beforeEach((done) => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
     Parse.User.enableUnsafeCurrentUser();
     clear().then(() => {
-      done();
-    });
+      Parse.User.logOut().then(() => { done() }, () => { done() });
+    }).catch(done.fail);
   });
 
   it('acl must be valid', () => {
@@ -553,7 +552,7 @@ describe('Parse.ACL', () => {
     });
   });
 
-  it('does not grant public update access with another user acl', (done) => {
+  it('does not grant public destroy access with another user acl', (done) => {
     let user1, user2;
     let object = new TestObject();
     Parse.User.signUp('ooo', 'password').then((u) => {
@@ -611,6 +610,6 @@ describe('Parse.ACL', () => {
     }).then((obj1withInclude) => {
       assert(obj1withInclude.get('other').get('ACL'));
       done();
-    });
+    }).catch(done.fail);
   });
 });

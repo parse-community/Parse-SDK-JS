@@ -23,6 +23,6 @@ app.get('/clear', (req, res) => {
   });
 });
 
-app.listen(1337, () => {
-  console.log('parse-server running on port 1337.');
-});
+module.exports = {
+  app
+};

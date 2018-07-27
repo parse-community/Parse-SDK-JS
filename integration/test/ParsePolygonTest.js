@@ -5,7 +5,7 @@ const Parse = require('../../node');
 const TestObject = Parse.Object.extend('TestObject');
 
 describe('Polygon', () => {
-  before(() => {
+  beforeAll(() => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();

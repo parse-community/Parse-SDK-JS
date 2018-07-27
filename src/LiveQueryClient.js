@@ -171,7 +171,7 @@ class LiveQueryClient extends EventEmitter {
    * updates from parse server, it'll try to check whether the sessionToken fulfills 
    * the ParseObject's ACL. The LiveQuery server will only send updates to clients whose 
    * sessionToken is fit for the ParseObject's ACL. You can check the LiveQuery protocol
-   * <a href="https://github.com/ParsePlatform/parse-server/wiki/Parse-LiveQuery-Protocol-Specification">here</a> for more details. The subscription you get is the same subscription you get 
+   * <a href="https://github.com/parse-community/parse-server/wiki/Parse-LiveQuery-Protocol-Specification">here</a> for more details. The subscription you get is the same subscription you get 
    * from our Standard API.
    * 
    * @param {Object} query - the ParseQuery you want to subscribe to
