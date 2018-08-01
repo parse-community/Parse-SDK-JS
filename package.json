@@ -52,6 +52,7 @@
     "gulp-rename": "1.4.0",
     "gulp-replace": "1.0.0",
     "gulp-uglify": "3.0.0",
+    "gulp-watch": "5.0.1",
     "jasmine": "^3.1.0",
     "jasmine-reporters": "2.3.1",
     "jest-cli": "23.2.0",
@@ -66,6 +67,7 @@
     "release": "./build_releases.sh && npm publish",
     "test": "PARSE_BUILD=node jest",
     "preintegration": "npm run build",
+    "watch": "PARSE_BUILD=${PARSE_BUILD:=node} gulp watch",
     "integration": "TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
     "release_docs": "./release_docs.sh"
