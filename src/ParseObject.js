@@ -1130,22 +1130,35 @@ class ParseObject {
     )._thenRunCallbacks(options);
   }
 
-  pin(): void {
-    LocalDatastore.pinWithName(this._getId(), [this.toJSON()]);
+  /**
+   * Stores the object and every object it points to in the local datastore,
+   * recursively, using a default pin name: _default.
+   */
+  pin() {
+    LocalDatastore._handlePinWithName(LocalDatastore.DEFAULT_PIN, this);
   }
 
-  unPin(): void {
-    LocalDatastore.unPinWithName(this._getId());
+  /**
+   * Removes the object and every object it points to in the local datastore, 
+   * recursively, using a default pin name: _default.
+   */
+  unPin() {
+    LocalDatastore._handleUnPinWithName(LocalDatastore.DEFAULT_PIN, this);
   }
 
+  /**
+   * Loads data from the local datastore into this object.
+   */
   fetchFromLocalDatastore() {
     const pinned = LocalDatastore.fromPinWithName(this._getId());
-    if (pinned.length === 0 || Object.keys(pinned[0]).length === 0) {
+    if (!pinned) {
       throw new Error('Cannot fetch an unsaved ParseObject');
     }
+    const result = ParseObject.fromJSON(pinned);
+
     this._clearPendingOps();
     this._clearServerData();
-    this._finishFetch(pinned[0]);
+    this._finishFetch(result.toJSON());
   }
 
   /** Static methods **/
@@ -1581,27 +1594,70 @@ class ParseObject {
     CoreManager.setObjectStateController(UniqueInstanceStateController);
   }
 
-  static pinAll(objects: any): void {
-    for (let obj of objects) {
-      LocalDatastore.pinWithName(obj._getId(), [obj.toJSON()]);
+  /**
+   * Stores the objects and every object they point to in the local datastore,
+   * recursively, using a default pin name: _default.
+   *
+   * @param {Array} objects A list of <code>Parse.Object</code>.
+   * @static
+   */
+  static pinAll(objects: Array<ParseObject>) {
+    ParseObject.pinAllWithName(LocalDatastore.DEFAULT_PIN, objects);
+  }
+
+  /**
+   * Stores the objects and every object they point to in the local datastore, recursively.
+   *
+   * @param {String} name Name of Pin.
+   * @param {Array} objects A list of <code>Parse.Object</code>.
+   * @static
+   */
+  static pinAllWithName(name: string, objects: Array<ParseObject>) {
+    for (let object of objects) {
+      LocalDatastore._handlePinWithName(name, object);
     }
   }
 
-  static pinAllWithName(name: string, objects: any): void {
-    const toPin = [];
-    for (let obj of objects) {
-      toPin.push(obj.toJSON());
-    }
-    LocalDatastore.pinWithName(name, toPin);
+  /**
+   * Removes the objects and every object they point to in the local datastore,
+   * recursively, using a default pin name: _default.
+   *
+   * @param {Array} objects A list of <code>Parse.Object</code>.
+   * @static
+   */
+  static unPinAll(objects: Array<ParseObject>) {
+    ParseObject.unPinAllWithName(LocalDatastore.DEFAULT_PIN, objects);
   }
 
-  static unPinAll(objects: any): void {
-    for (let obj of objects) {
-      LocalDatastore.unPinWithName(obj._getId());
+  /**
+   * Removes the objects and every object they point to in the local datastore, recursively.
+   *
+   * @param {String} name Name of Pin.
+   * @param {Array} objects A list of <code>Parse.Object</code>.
+   * @static
+   */
+  static unPinAllWithName(name: string, objects: Array<ParseObject>) {
+    for (let object of objects) {
+      LocalDatastore._handleUnPinWithName(name, object);
     }
   }
 
-  static unPinAllWithName(name: string): void {
+  /**
+   * Removes all objects in the local datastore using a default pin name: _default.
+   *
+   * @static
+   */
+  static unPinAllObjects() {
+    ParseObject.unPinAllObjectsWithName(LocalDatastore.DEFAULT_PIN);
+  }
+
+  /**
+   * Removes all objects with the specified pin name.
+   *
+   * @param {String} name Name of Pin.
+   * @static
+   */
+  static unPinAllObjectsWithName(name: string) {
     LocalDatastore.unPinWithName(name);
   }
 }
@@ -1692,6 +1748,7 @@ var DefaultController = {
           target._clearServerData();
           target._finishFetch(response);
         }
+        LocalDatastore._updateObjectIfPinned(target);
         return target;
       });
     }
@@ -1866,7 +1923,7 @@ var DefaultController = {
             return ParsePromise.error(objectError);
           }
           for (let object of target) {
-            LocalDatastore._updateObjectIfPinned(object.toJSON());
+            LocalDatastore._updateObjectIfPinned(object);
           }
           return ParsePromise.as(target);
         });
@@ -1892,7 +1949,7 @@ var DefaultController = {
 
       stateController.pushPendingState(target._getStateIdentifier());
       return stateController.enqueueTask(target._getStateIdentifier(), task).then(() => {
-        LocalDatastore._updateObjectIfPinned(target.toJSON());
+        LocalDatastore._updateObjectIfPinned(target);
         return target;
       }, (error) => {
         return ParsePromise.error(error);

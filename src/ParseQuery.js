@@ -16,6 +16,8 @@ import ParseGeoPoint from './ParseGeoPoint';
 import ParsePolygon from './ParsePolygon';
 import ParseObject from './ParseObject';
 import ParsePromise from './ParsePromise';
+import LocalDatastore from './LocalDatastore';
+import { matchesQuery } from 'parse-server/lib/LiveQuery/QueryTools';
 
 import type { RequestOptions, FullOptions } from './RESTController';
 
@@ -199,6 +201,8 @@ class ParseQuery {
   _limit: number;
   _skip: number;
   _order: Array<string>;
+  _queriesLocalDatastore: boolean;
+  _localDatastorePinName: any;
   _extraOptions: { [key: string]: mixed };
 
   /**
@@ -230,6 +234,8 @@ class ParseQuery {
     this._include = [];
     this._limit = -1; // negative limit is not sent in the server request
     this._skip = 0;
+    this._queriesLocalDatastore = false;
+    this._localDatastorePinName = null;
     this._extraOptions = {};
   }
 
@@ -455,6 +461,18 @@ class ParseQuery {
 
     let select = this._select;
 
+    if (this._queriesLocalDatastore) {
+      const objects = LocalDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
+      return objects.map((object) => {
+        if (object.className !== this.className) {
+          return null;
+        }
+        if (!matchesQuery(object.toJSON(), this.toJSON().where)) {
+          return null; 
+        }
+        return object;
+      }).filter((object) => object !== null);
+    }
     return controller.find(
       this.className,
       this.toJSON(),
@@ -1423,6 +1441,28 @@ class ParseQuery {
     var query = new ParseQuery(className);
     query._andQuery(queries);
     return query;
+  }
+
+  /**
+   * Changes the source of this query to all pinned objects.
+   */
+  fromLocalDatastore() {
+    this.fromPinWithName(null);
+  }
+
+  /**
+   * Changes the source of this query to the default group of pinned objects.
+   */
+  fromPin() {
+    this.fromPinWithName(LocalDatastore.DEFAULT_PIN);
+  }
+
+  /**
+   * Changes the source of this query to a specific group of pinned objects.
+   */
+  fromPinWithName(name: string) {
+    this._queriesLocalDatastore = true;
+    this._localDatastorePinName = name;
   }
 }
 

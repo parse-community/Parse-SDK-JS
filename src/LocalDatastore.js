@@ -10,56 +10,164 @@
  */
 
 import CoreManager from './CoreManager';
+import type ParseObject from './ParseObject';
+
+const DEFAULT_PIN = '_default';
+const PIN_PREFIX = 'parsePin_';
 
 const LocalDatastore = {
-  fromPinWithName(name: string): ?any {
+  fromPinWithName(name: string) {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.fromPinWithName(name);
   },
 
-  pinWithName(name: string, objects: any): void {
+  pinWithName(name: string, value: any) {
     const controller = CoreManager.getLocalDatastoreController();
-    return controller.pinWithName(name, objects);
+    return controller.pinWithName(name, value);
   },
 
-  unPinWithName(name: string): void {
+  unPinWithName(name: string) {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.unPinWithName(name);
   },
 
-  _getLocalDatastore(): void {
-    var controller = CoreManager.getLocalDatastoreController();
+  _getLocalDatastore() {
+    const controller = CoreManager.getLocalDatastoreController();
     return controller.getLocalDatastore();
-  },
-
-  _updateObjectIfPinned(object) {
-    const objectId = object.objectId;
-    const pinned = this.fromPinWithName(objectId);
-    if (pinned.length > 0) {
-      this.pinWithName(objectId, [object]);
-    }
-  },
-
-  _updateLocalIdForObjectId(localId, objectId) {
-    const pinned = this.fromPinWithName(localId);
-    if (pinned.length > 0) {
-      this.unPinWithName(localId);
-      this.pinWithName(objectId, [pinned[0]]);
-    }
   },
 
   _clear(): void {
     var controller = CoreManager.getLocalDatastoreController();
     controller.clear();
-  }
+  },
+
+  _handlePinWithName(name: string, object: ParseObject) {
+    let pinName = DEFAULT_PIN;
+    if (name !== DEFAULT_PIN) {
+      pinName = PIN_PREFIX + name;
+    }
+    const children = this._getChildren(object);
+    for (var objectId in children) {
+      this.pinWithName(objectId, children[objectId]);
+    }
+    const pinned = this.fromPinWithName(pinName) || [];
+    const objectIds = Object.keys(children);
+    const toPin = [...new Set([...pinned, ...objectIds])];
+    this.pinWithName(pinName, toPin);
+  },
+
+  _handleUnPinWithName(name: string, object: ParseObject) {
+    let pinName = DEFAULT_PIN;
+    if (name !== DEFAULT_PIN) {
+      pinName = PIN_PREFIX + name;
+    }
+    const children = this._getChildren(object);
+
+    const objectIds = Object.keys(children);
+    let pinned = this.fromPinWithName(pinName) || [];
+    pinned = pinned.filter(item => !objectIds.includes(item));
+    this.pinWithName(pinName, pinned);
+  },
+
+  _getChildren(object) {
+    const encountered = {};
+    const json = object._toFullJSON();
+    encountered[object._getId()] = json;
+    for (let key in json) {
+      if (json[key].__type && json[key].__type === 'Object') {
+        this._traverse(json[key], encountered);
+      }
+    }
+    return encountered;
+  },
+
+  _traverse(object: any, encountered: any) {
+    if (!object.objectId) {
+      return;
+    } else {
+      encountered[object.objectId] = object;
+    }
+    for (let key in object) {
+      if (object[key].__type && object[key].__type === 'Object') {
+        this._traverse(object[key], encountered);
+      }
+    }
+  },
+
+  _serializeObjectsFromPinName(name: string) {
+    const localDatastore = this._getLocalDatastore();
+    const allObjects = [];
+    for (let key in localDatastore) {
+      if (key !== DEFAULT_PIN && !key.startsWith(PIN_PREFIX)) {
+        const json = localDatastore[key];
+        allObjects.push(ParseObject.fromJSON(json));
+      }
+    }
+    if (!name) {
+      return allObjects;
+    }
+    let pinName = DEFAULT_PIN;
+    if (name !== DEFAULT_PIN) {
+      pinName = PIN_PREFIX + name;
+    }
+    const pinned = this.fromPinWithName(pinName);
+    if (!Array.isArray(pinned)) {
+      return [];
+    }
+    return pinned.map((objectId) => {
+      const object = this.fromPinWithName(objectId);
+      return ParseObject.fromJSON(object);
+    });
+  },
+
+  _updateObjectIfPinned(object: ParseObject) {
+    const pinned = this.fromPinWithName(object.id);
+    if (pinned) {
+      this.pinWithName(object.id, object._toFullJSON());
+    }
+  },
+
+  _updateLocalIdForObjectId(localId, objectId) {
+    const unsaved = this.fromPinWithName(localId);
+    if (!unsaved) {
+      return;
+    }
+    this.unPinWithName(localId);
+    this.pinWithName(objectId, unsaved);
+
+    const localDatastore = this._getLocalDatastore();
+
+    for (let key in localDatastore) {
+      if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
+        let pinned = this.fromPinWithName(key) || [];
+        if (pinned.includes(localId)) {
+          pinned = pinned.filter(item => item !== localId);
+          pinned.push(objectId);
+          this.pinWithName(key, pinned);
+        }
+      }
+    }
+  },
 };
+
+LocalDatastore.DEFAULT_PIN = DEFAULT_PIN;
+LocalDatastore.PIN_PREFIX = PIN_PREFIX;
 
 module.exports = LocalDatastore;
 
-try {
-  localStorage.setItem('parse_is_localstorage_enabled', 'parse_is_localstorage_enabled');
-  localStorage.removeItem('parse_is_localstorage_enabled');
+function isLocalStorageEnabled() {
+  const item = 'parse_is_localstorage_enabled';
+  try {
+    localStorage.setItem(item, item);
+    localStorage.removeItem(item);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+if (isLocalStorageEnabled()) {
   CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.localStorage'));
-} catch(e) {
+} else {
   CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.default'));
 }

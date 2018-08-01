@@ -62,11 +62,11 @@ var Parse = {
    * Call this method to set your LocalDatastoreStorage engine
    * Starting Parse@1.12, the ParseSDK do not provide support for Caching
    * is not provided at a stable path and changes over versions.
-   * @param {LocalDatastore} store a cache data storage.
+   * @param {LocalDatastoreController} controller a cache data storage.
    * @static
    */
-  setLocalDatastore(store: any) {
-    CoreManager.setLocalDatastore(store);
+  setLocalDatastoreController(controller: LocalDatastoreController) {
+    CoreManager.setLocalDatastoreController(controller);
   }
 };
 

@@ -15,11 +15,11 @@ const LocalDatastoreController = {
     if (memMap.hasOwnProperty(name)) {
       return memMap[name];
     }
-    return [];
+    return null;
   },
 
-  pinWithName(name: string, objects: any) {
-    memMap[name] = objects;
+  pinWithName(name: string, value: any) {
+    memMap[name] = value;
   },
 
   unPinWithName(name: string) {

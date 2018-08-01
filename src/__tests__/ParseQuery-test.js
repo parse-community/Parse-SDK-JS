@@ -8,6 +8,7 @@
  */
 
 jest.dontMock('../CoreManager');
+jest.dontMock('../LocalDatastore');
 jest.dontMock('../encode');
 jest.dontMock('../decode');
 jest.dontMock('../ParseError');
@@ -36,6 +37,7 @@ mockObject.fromJSON = function(json) {
 jest.setMock('../ParseObject', mockObject);
 
 var CoreManager = require('../CoreManager');
+var LocalDatastore = require('../LocalDatastore');
 var ParseError = require('../ParseError').default;
 var ParseGeoPoint = require('../ParseGeoPoint').default;
 var ParseObject = require('../ParseObject');
@@ -2067,5 +2069,32 @@ describe('ParseQuery', () => {
       keys: '$score',
       order: '$score',
     });
+  });
+
+  it('can query from local datastore', () => {
+    var q = new ParseQuery('Item');
+    expect(q._queriesLocalDatastore).toBe(false);
+    expect(q._localDatastorePinName).toBe(null);
+    q.fromLocalDatastore();
+    expect(q._queriesLocalDatastore).toBe(true);
+    expect(q._localDatastorePinName).toBe(null);
+  });
+
+  it('can query from default pin', () => {
+    var q = new ParseQuery('Item');
+    expect(q._queriesLocalDatastore).toBe(false);
+    expect(q._localDatastorePinName).toBe(null);
+    q.fromPin();
+    expect(q._queriesLocalDatastore).toBe(true);
+    expect(q._localDatastorePinName).toBe(LocalDatastore.DEFAULT_PIN);
+  });
+
+  it('can query from pin with name', () => {
+    var q = new ParseQuery('Item');
+    expect(q._queriesLocalDatastore).toBe(false);
+    expect(q._localDatastorePinName).toBe(null);
+    q.fromPinWithName('test_pin');
+    expect(q._queriesLocalDatastore).toBe(true);
+    expect(q._localDatastorePinName).toBe('test_pin');
   });
 });

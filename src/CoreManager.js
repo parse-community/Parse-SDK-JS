@@ -340,7 +340,7 @@ module.exports = {
   },
 
   setLocalDatastoreController(controller: LocalDatastoreController) {
-    requireMethods('LocalDatastoreController', ['pinWithName', 'fromPinWithName', 'unPinWithName', 'clear'], controller);
+    requireMethods('LocalDatastoreController', ['pinWithName', 'fromPinWithName', 'unPinWithName', 'getLocalDatastore', 'clear'], controller);
     config['LocalDatastoreController'] = controller;
   },
 
@@ -358,14 +358,6 @@ module.exports = {
 
   getAsyncStorage() {
     return config['AsyncStorage'];
-  },
-
-  setLocalDatastore(store: any) {
-    config['LocalDatastore'] = store;
-  },
-
-  getLocalDatastore() {
-    return config['LocalDatastore'];
   },
 
   setUserController(controller: UserController) {

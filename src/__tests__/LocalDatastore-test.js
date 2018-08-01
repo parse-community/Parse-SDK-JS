@@ -10,7 +10,6 @@
 jest.autoMockOff();
 
 var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise').default;
 
 var mockStorage = {};
 var mockStorageInterface = {
@@ -26,14 +25,25 @@ var mockStorageInterface = {
     delete mockStorage[path];
   },
 
+  get length() {
+    return Object.keys(mockStorage).length;
+  },
+
+  key: function(i) {
+    var keys = Object.keys(mockStorage);
+    return keys[i] || null;
+  },
+
   clear() {
     mockStorage = {};
   }
 }
 
-global.localStorage = mockStorageInterface;
-
+var LocalDatastore = require('../LocalDatastore');
 var LocalStorageController = require('../LocalDatastoreController.localStorage');
+var DefaultStorageController = require('../LocalDatastoreController.default');
+
+global.localStorage = mockStorageInterface;
 
 describe('Local DatastoreController', () => {
   beforeEach(() => {
@@ -44,11 +54,12 @@ describe('Local DatastoreController', () => {
     expect(typeof LocalStorageController.fromPinWithName).toBe('function');
     expect(typeof LocalStorageController.pinWithName).toBe('function');
     expect(typeof LocalStorageController.unPinWithName).toBe('function');
+    expect(typeof LocalStorageController.getLocalDatastore).toBe('function');
     expect(typeof LocalStorageController.clear).toBe('function');
   });
 
   it('can store and retrieve values', () => {
-    expect(LocalStorageController.fromPinWithName('myKey')).toEqual([]);
+    expect(LocalStorageController.fromPinWithName('myKey')).toEqual(null);
     LocalStorageController.pinWithName('myKey', [{ name: 'test' }]);
     expect(LocalStorageController.fromPinWithName('myKey')).toEqual([{ name: 'test' }]);
   });
@@ -57,11 +68,9 @@ describe('Local DatastoreController', () => {
     LocalStorageController.pinWithName('myKey', [{ name: 'test' }]);
     expect(LocalStorageController.fromPinWithName('myKey')).toEqual([{ name: 'test' }]);
     LocalStorageController.unPinWithName('myKey');
-    expect(LocalStorageController.fromPinWithName('myKey')).toEqual([]);
+    expect(LocalStorageController.fromPinWithName('myKey')).toEqual(null);
   });
 });
-
-var DefaultStorageController = require('../LocalDatastoreController.default');
 
 describe('Default DataController', () => {
   beforeEach(() => {
@@ -72,59 +81,64 @@ describe('Default DataController', () => {
     expect(typeof DefaultStorageController.fromPinWithName).toBe('function');
     expect(typeof DefaultStorageController.pinWithName).toBe('function');
     expect(typeof DefaultStorageController.unPinWithName).toBe('function');
+    expect(typeof DefaultStorageController.getLocalDatastore).toBe('function');
     expect(typeof DefaultStorageController.clear).toBe('function');
   });
 
   it('can store and retrieve values', () => {
-    expect(DefaultStorageController.fromPinWithName('myKey')).toEqual([]);
+    expect(DefaultStorageController.fromPinWithName('myKey')).toEqual(null);
     DefaultStorageController.pinWithName('myKey', [{ name: 'test' }]);
     expect(DefaultStorageController.fromPinWithName('myKey')).toEqual([{ name: 'test' }]);
+    expect(DefaultStorageController.getLocalDatastore()).toEqual({ myKey: [ { name: 'test' } ] });
   });
 
   it('can remove values', () => {
     DefaultStorageController.pinWithName('myKey', [{ name: 'test' }]);
     expect(DefaultStorageController.fromPinWithName('myKey')).toEqual([{ name: 'test' }]);
     DefaultStorageController.unPinWithName('myKey');
-    expect(DefaultStorageController.fromPinWithName('myKey')).toEqual([]);
+    expect(DefaultStorageController.fromPinWithName('myKey')).toEqual(null);
+    expect(DefaultStorageController.getLocalDatastore()).toEqual({});
   });
 });
 
-var LocalDatastore = require('../LocalDatastore');
-
 describe('LocalDatastore (Default DataStoreController)', () => {
   beforeEach(() => {
-    CoreManager.setLocalDatastoreController(require('../LocalDatastoreController.default'));
+    CoreManager.setLocalDatastoreController(DefaultStorageController);
   });
 
   it('can store and retrieve values', () => {
-    expect(LocalDatastore.fromPinWithName('myKey')).toEqual([]);
+    expect(LocalDatastore.fromPinWithName('myKey')).toEqual(null);
     LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
     expect(LocalDatastore.fromPinWithName('myKey')).toEqual([{ name: 'test' }]);
+    expect(LocalDatastore._getLocalDatastore()).toEqual({ myKey: [ { name: 'test' } ] });
   });
 
   it('can remove values', () => {
     LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
     expect(LocalDatastore.fromPinWithName('myKey')).toEqual([{ name: 'test' }]);
     LocalDatastore.unPinWithName('myKey');
-    expect(LocalDatastore.fromPinWithName('myKey')).toEqual([]);
+    expect(LocalDatastore.fromPinWithName('myKey')).toEqual(null);
+    expect(LocalDatastore._getLocalDatastore()).toEqual({});
   });
 });
 
 describe('LocalDatastore (LocalStorage DataStoreController)', () => {
   beforeEach(() => {
-    CoreManager.setLocalDatastoreController(require('../LocalDatastoreController.localStorage'));
+    CoreManager.setLocalDatastoreController(LocalStorageController);
   });
 
   it('can store and retrieve values', () => {
-    expect(LocalDatastore.fromPinWithName('myKey')).toEqual([]);
+    expect(LocalDatastore.fromPinWithName('myKey')).toEqual(null);
     LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
     expect(LocalDatastore.fromPinWithName('myKey')).toEqual([{ name: 'test' }]);
+    expect(LocalDatastore._getLocalDatastore()).toEqual({ myKey: [ { name: 'test' } ] });
   });
 
   it('can remove values', () => {
     LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
     expect(LocalDatastore.fromPinWithName('myKey')).toEqual([{ name: 'test' }]);
     LocalDatastore.unPinWithName('myKey');
-    expect(LocalDatastore.fromPinWithName('myKey')).toEqual([]);
+    expect(LocalDatastore.fromPinWithName('myKey')).toEqual(null);
+    expect(LocalDatastore._getLocalDatastore()).toEqual({});
   });
 });

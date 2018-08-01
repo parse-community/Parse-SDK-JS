@@ -13,15 +13,15 @@ const LocalDatastoreController = {
   fromPinWithName(name: string): ?any {
     const values = localStorage.getItem(name);
     if (!values) {
-      return [];
+      return null;
     }
     const objects = JSON.parse(values);
     return objects;
   },
 
-  pinWithName(name: string, objects: any) {
+  pinWithName(name: string, value: any) {
     try {
-      const values = JSON.stringify(objects);
+      const values = JSON.stringify(value);
       localStorage.setItem(name, values);
     } catch (e) {
       // Quota exceeded, possibly due to Safari Private Browsing mode
@@ -33,10 +33,13 @@ const LocalDatastoreController = {
   },
 
   getLocalDatastore() {
-    return Object.keys(localStorage).reduce((obj, str) => {
-      obj[str] = localStorage.getItem(str);
-      return obj;
-    }, {});
+    const LDS = {};
+    for (let i = 0; i < localStorage.length; i += 1) {
+      let key = localStorage.key(i);
+      let value = localStorage.getItem(key);
+      LDS[key] = JSON.parse(value);
+    }
+    return LDS;
   },
 
   clear() {
