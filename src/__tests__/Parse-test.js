@@ -44,4 +44,16 @@ describe('Parse module', () => {
     expect(CoreManager.get('MASTER_KEY')).toBe('789');
     expect(Parse.masterKey).toBe('789');
   });
+
+  it('can set LocalDatastoreController', () => {
+    var controller = {
+      fromPinWithName: function() {},
+      pinWithName: function() {},
+      unPinWithName: function() {},
+      getLocalDatastore: function() {},
+      clear: function() {}
+    };
+    Parse.setLocalDatastoreController(controller);
+    expect(CoreManager.getLocalDatastoreController()).toBe(controller);
+  });
 });

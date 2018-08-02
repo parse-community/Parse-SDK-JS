@@ -1,6 +1,6 @@
 'use strict';
 
-var equalObjects = require('./equalObjects');
+var equalObjects = require('./equals');
 var decode = require('./decode');
 
 /**

@@ -348,6 +348,14 @@ module.exports = {
     return config['LocalDatastoreController'];
   },
 
+  setLocalDatastore(store: any) {
+    config['LocalDatastore'] = store;
+  },
+
+  getLocalDatastore() {
+    return config['LocalDatastore'];
+  },
+
   getStorageController(): StorageController {
     return config['StorageController'];
   },

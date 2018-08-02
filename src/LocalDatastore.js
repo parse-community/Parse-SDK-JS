@@ -146,11 +146,6 @@ const LocalDatastore = {
   },
 };
 
-LocalDatastore.DEFAULT_PIN = DEFAULT_PIN;
-LocalDatastore.PIN_PREFIX = PIN_PREFIX;
-
-module.exports = LocalDatastore;
-
 function isLocalStorageEnabled() {
   const item = 'parse_is_localstorage_enabled';
   try {
@@ -161,9 +156,15 @@ function isLocalStorageEnabled() {
     return false;
   }
 }
+LocalDatastore.DEFAULT_PIN = DEFAULT_PIN;
+LocalDatastore.PIN_PREFIX = PIN_PREFIX;
+LocalDatastore.isLocalStorageEnabled = isLocalStorageEnabled();
+module.exports = LocalDatastore;
 
 if (isLocalStorageEnabled()) {
   CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.localStorage'));
 } else {
   CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.default'));
 }
+
+CoreManager.setLocalDatastore(LocalDatastore);

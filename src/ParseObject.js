@@ -1150,7 +1150,7 @@ class ParseObject {
    * Loads data from the local datastore into this object.
    */
   fetchFromLocalDatastore() {
-    const pinned = LocalDatastore.fromPinWithName(this._getId());
+    const pinned = LocalDatastore.fromPinWithName(this.id);
     if (!pinned) {
       throw new Error('Cannot fetch an unsaved ParseObject');
     }
@@ -1648,7 +1648,7 @@ class ParseObject {
    * @static
    */
   static unPinAllObjects() {
-    ParseObject.unPinAllObjectsWithName(LocalDatastore.DEFAULT_PIN);
+    LocalDatastore.unPinWithName(LocalDatastore.DEFAULT_PIN);
   }
 
   /**
@@ -1658,7 +1658,7 @@ class ParseObject {
    * @static
    */
   static unPinAllObjectsWithName(name: string) {
-    LocalDatastore.unPinWithName(name);
+    LocalDatastore.unPinWithName(LocalDatastore.PIN_PREFIX + name);
   }
 }
 

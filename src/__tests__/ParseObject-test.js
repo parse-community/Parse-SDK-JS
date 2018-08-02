@@ -29,6 +29,8 @@ jest.dontMock('../unique');
 jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
+jest.dontMock('../LocalDatastore');
+jest.dontMock('../LocalDatastoreController.default');
 
 jest.dontMock('./test_helpers/mockXHR');
 
@@ -74,6 +76,7 @@ const ParsePromise = require('../ParsePromise').default;
 const RESTController = require('../RESTController');
 const SingleInstanceStateController = require('../SingleInstanceStateController');
 const unsavedChildren = require('../unsavedChildren').default;
+const LocalDatastore = require('../LocalDatastore');
 
 const mockXHR = require('./test_helpers/mockXHR');
 
@@ -2147,5 +2150,74 @@ describe('ParseObject extensions', () => {
 
     var i = new InitObject()
     expect(i.get('field')).toBe(12);
+  });
+});
+
+describe('ParseObject pin', () => {
+  beforeEach(() => {
+    ParseObject.enableSingleInstance();
+    LocalDatastore._clear();
+  });
+
+  it('cannot fetchFromLocalDatastore', () => {
+    try {
+      var o = new MyObject();
+      o.pin();
+      o.unPin();
+      o.fetchFromLocalDatastore();
+    } catch (e) {
+      expect(e.message).toBe('Cannot fetch an unsaved ParseObject');
+    }
+  });
+
+  // // TODO: finish
+  // it('can fetchFromLocalDatastore', (done) => {
+  //   var o = new MyObject();
+  //   o.set('field', 'test');
+  //   o.save().then(() => {
+  //     var o2 = new MyObject();
+  //     o2.id = o.id;
+  //     // o2.fetchFromLocalDatastore();
+  //     expect(true).toBe(true);
+  //     done();
+  //   });
+  // });
+
+  it('can pinAll to default pin', () => {
+    var o = new MyObject();
+    ParseObject.pinAll([o]);
+    const localDatastore = LocalDatastore._getLocalDatastore();
+    expect(localDatastore[LocalDatastore.DEFAULT_PIN]).toEqual([o._getId()]);
+    ParseObject.unPinAll([o]);
+    expect(localDatastore[LocalDatastore.DEFAULT_PIN]).toEqual([]);
+  });
+
+  it('can pinAll to specific pin', () => {
+    var o = new MyObject();
+    ParseObject.pinAllWithName('test_pin', [o]);
+    const localDatastore = LocalDatastore._getLocalDatastore();
+    expect(localDatastore[LocalDatastore.PIN_PREFIX + 'test_pin']).toEqual([o._getId()]);
+    ParseObject.unPinAllWithName('test_pin', [o]);
+    expect(localDatastore[LocalDatastore.PIN_PREFIX + 'test_pin']).toEqual([]);
+  });
+
+  it('can unPinAllObjects in default pin', () => {
+    var o = new MyObject();
+    ParseObject.pinAll([o]);
+    const localDatastore = LocalDatastore._getLocalDatastore();
+    console.log(localDatastore);
+    expect(localDatastore[LocalDatastore.DEFAULT_PIN]).toEqual([o._getId()]);
+    ParseObject.unPinAllObjects();
+    expect(localDatastore[LocalDatastore.DEFAULT_PIN]).toEqual(undefined);
+  });
+
+  it('can unPinAllObjects in specific pin', () => {
+    var o = new MyObject();
+    ParseObject.pinAllWithName('test_pin', [o]);
+    const localDatastore = LocalDatastore._getLocalDatastore();
+    console.log(localDatastore);
+    expect(localDatastore[LocalDatastore.PIN_PREFIX + 'test_pin']).toEqual([o._getId()]);
+    ParseObject.unPinAllObjectsWithName('test_pin');
+    expect(localDatastore[LocalDatastore.PIN_PREFIX + 'test_pin']).toEqual(undefined);
   });
 });

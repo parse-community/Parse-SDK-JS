@@ -11,39 +11,13 @@ jest.autoMockOff();
 
 var CoreManager = require('../CoreManager');
 
-var mockStorage = {};
-var mockStorageInterface = {
-  getItem(path) {
-    return mockStorage[path] || null;
-  },
-
-  setItem(path, value) {
-    mockStorage[path] = value;
-  },
-
-  removeItem(path) {
-    delete mockStorage[path];
-  },
-
-  get length() {
-    return Object.keys(mockStorage).length;
-  },
-
-  key: function(i) {
-    var keys = Object.keys(mockStorage);
-    return keys[i] || null;
-  },
-
-  clear() {
-    mockStorage = {};
-  }
-}
-
 var LocalDatastore = require('../LocalDatastore');
 var LocalStorageController = require('../LocalDatastoreController.localStorage');
 var DefaultStorageController = require('../LocalDatastoreController.default');
 
-global.localStorage = mockStorageInterface;
+var mockLocalStorage = require('./test_helpers/mockLocalStorage');
+
+global.localStorage = mockLocalStorage;
 
 describe('Local DatastoreController', () => {
   beforeEach(() => {
