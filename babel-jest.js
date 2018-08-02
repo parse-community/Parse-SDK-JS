@@ -5,6 +5,6 @@ module.exports = babelJest.createTransformer({
       "targets": {
           "node": "8"
       }
-  }], 'es2015', 'react'],
+  }], 'react'],
   plugins: [],
 });
