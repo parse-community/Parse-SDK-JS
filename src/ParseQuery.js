@@ -17,7 +17,7 @@ import ParsePolygon from './ParsePolygon';
 import ParseObject from './ParseObject';
 import ParsePromise from './ParsePromise';
 import LocalDatastore from './LocalDatastore';
-import { matchesQuery } from 'parse-server/lib/LiveQuery/QueryTools';
+import OfflineQuery from './OfflineQuery';
 
 import type { RequestOptions, FullOptions } from './RESTController';
 
@@ -463,11 +463,12 @@ class ParseQuery {
 
     if (this._queriesLocalDatastore) {
       const objects = LocalDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
-      return objects.map((object) => {
+      return objects.map((json) => {
+        const object = ParseObject.fromJSON(json);
         if (object.className !== this.className) {
           return null;
         }
-        if (!matchesQuery(object.toJSON(), this.toJSON().where)) {
+        if (!OfflineQuery.matchesQuery(object.toJSON(), this.toJSON().where)) {
           return null; 
         }
         return object;

@@ -99,8 +99,7 @@ const LocalDatastore = {
     const allObjects = [];
     for (let key in localDatastore) {
       if (key !== DEFAULT_PIN && !key.startsWith(PIN_PREFIX)) {
-        const json = localDatastore[key];
-        allObjects.push(ParseObject.fromJSON(json));
+        allObjects.push(localDatastore[key]);
       }
     }
     if (!name) {
@@ -114,10 +113,7 @@ const LocalDatastore = {
     if (!Array.isArray(pinned)) {
       return [];
     }
-    return pinned.map((objectId) => {
-      const object = this.fromPinWithName(objectId);
-      return ParseObject.fromJSON(object);
-    });
+    return pinned.map((objectId) => this.fromPinWithName(objectId));
   },
 
   _updateObjectIfPinned(object: ParseObject) {
