@@ -53,7 +53,7 @@ describe('Geo Point', () => {
     let obj = new TestObject();
     obj.set('locationOne', point);
     obj.set('locationTwo', point);
-    obj.save().fail((e) => {
+    obj.save().catch((e) => {
       done();
     });
   });
@@ -449,7 +449,7 @@ describe('Geo Point', () => {
   it('non array withinPolygon', (done) => {
     const query = new Parse.Query(TestPoint);
     query.withinPolygon('location', 1234);
-    query.find().fail((err) => {
+    query.find().catch((err) => {
       assert.equal(err.code, Parse.Error.INVALID_JSON);
       done();
     });
@@ -458,7 +458,7 @@ describe('Geo Point', () => {
   it('invalid array withinPolygon', (done) => {
     const query = new Parse.Query(TestPoint);
     query.withinPolygon('location', [1234]);
-    query.find().fail((err) => {
+    query.find().catch((err) => {
       assert.equal(err.code, Parse.Error.INVALID_JSON);
       done();
     });
@@ -471,6 +471,6 @@ describe('Geo Point', () => {
       assert.equal(err.code, Parse.Error.INVALID_JSON);
       done();
     })
-    .fail(done.fail);
+    .catch(done.fail);
   }, 'Test passes locally but not on CI');
 });

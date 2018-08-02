@@ -11,7 +11,6 @@
 
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
-import ParsePromise from './ParsePromise';
 import Storage from './Storage';
 
 export type RequestOptions = {
@@ -43,7 +42,10 @@ if (typeof XDomainRequest !== 'undefined' &&
 }
 
 function ajaxIE9(method: string, url: string, data: any) {
-  var promise = new ParsePromise();
+  var res, rej;
+  var promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+  promise.resolve = res;
+  promise.reject = rej;
   var xdr = new XDomainRequest();
   xdr.onload = function() {
     var response;
@@ -78,7 +80,10 @@ const RESTController = {
       return ajaxIE9(method, url, data, headers);
     }
 
-    var promise = new ParsePromise();
+    var res, rej;
+    var promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+    promise.resolve = res;
+    promise.reject = rej;
     var attempts = 0;
 
     var dispatch = function() {
@@ -89,7 +94,6 @@ const RESTController = {
       }
       var handled = false;
       var xhr = new XHR();
-
       xhr.onreadystatechange = function() {
         if (xhr.readyState !== 4 || handled) {
           return;
@@ -111,7 +115,7 @@ const RESTController = {
             promise.reject(e.toString());
           }
           if (response) {
-            promise.resolve(response, xhr.status, xhr);
+            promise.resolve({ response, status: xhr.status, xhr });
           }
         } else if (xhr.status >= 500 || xhr.status === 0) { // retry on 5XX or node-xmlhttprequest error
           if (++attempts < CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
@@ -198,7 +202,7 @@ const RESTController = {
     var installationId = options.installationId;
     var installationIdPromise;
     if (installationId && typeof installationId === 'string') {
-      installationIdPromise = ParsePromise.as(installationId);
+      installationIdPromise = Promise.resolve(installationId);
     } else {
       var installationController = CoreManager.getInstallationController();
       installationIdPromise = installationController.currentInstallationId();
@@ -208,16 +212,16 @@ const RESTController = {
       payload._InstallationId = iid;
       var userController = CoreManager.getUserController();
       if (options && typeof options.sessionToken === 'string') {
-        return ParsePromise.as(options.sessionToken);
+        return Promise.resolve(options.sessionToken);
       } else if (userController) {
         return userController.currentUserAsync().then((user) => {
           if (user) {
-            return ParsePromise.as(user.getSessionToken());
+            return Promise.resolve(user.getSessionToken());
           }
-          return ParsePromise.as(null);
+          return Promise.resolve(null);
         });
       }
-      return ParsePromise.as(null);
+      return Promise.resolve(null);
     }).then((token) => {
       if (token) {
         payload._SessionToken = token;
@@ -225,8 +229,10 @@ const RESTController = {
 
       var payloadString = JSON.stringify(payload);
 
-      return RESTController.ajax(method, url, payloadString);
-    }).then(null, function(response: { responseText: string }) {
+      return RESTController.ajax(method, url, payloadString).then(({ response }) => {
+        return response;
+      });
+    }).catch(function(response: { responseText: string }) {
       // Transform the error into an instance of ParseError by trying to parse
       // the error string as JSON
       var error;
@@ -249,7 +255,7 @@ const RESTController = {
         );
       }
 
-      return ParsePromise.error(error);
+      return Promise.reject(error);
     });
   },
 

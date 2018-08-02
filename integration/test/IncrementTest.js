@@ -220,7 +220,7 @@ describe('Increment', () => {
     object.save().then(() => {
       object.set('numeric', 'x');
       return object.save();
-    }).fail(() => {
+    }).catch(() => {
       done();
     });
   });

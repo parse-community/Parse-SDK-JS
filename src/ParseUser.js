@@ -13,7 +13,6 @@ import CoreManager from './CoreManager';
 import isRevocableSession from './isRevocableSession';
 import ParseError from './ParseError';
 import ParseObject from './ParseObject';
-import ParsePromise from './ParsePromise';
 import ParseSession from './ParseSession';
 import Storage from './Storage';
 
@@ -55,10 +54,10 @@ class ParseUser extends ParseObject {
    * Request a revocable session token to replace the older style of token.
 
    * @param {Object} options A Backbone-style options object.
-   * @return {Parse.Promise} A promise that is resolved when the replacement
+   * @return {Promise} A promise that is resolved when the replacement
    *   token has been fetched.
    */
-  _upgradeToRevocableSession(options: RequestOptions): ParsePromise {
+  _upgradeToRevocableSession(options: RequestOptions): Promise {
     options = options || {};
 
     var upgradeOptions = {};
@@ -70,14 +69,14 @@ class ParseUser extends ParseObject {
     return controller.upgradeToRevocableSession(
       this,
       upgradeOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
    * Unlike in the Android/iOS SDKs, logInWith is unnecessary, since you can
    * call linkWith on the user (even if it doesn't exist yet on the server).
    */
-  _linkWith(provider: any, options: { authData?: AuthData }): ParsePromise {
+  _linkWith(provider: any, options: { authData?: AuthData }): Promise {
     var authType;
     if (typeof provider === 'string') {
       authType = provider;
@@ -96,9 +95,12 @@ class ParseUser extends ParseObject {
       return controller.linkWith(
         this,
         authData
-      )._thenRunCallbacks(options, this);
+      );
     } else {
-      var promise = new ParsePromise();
+      var res, rej;
+var promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+promise.resolve = res;
+promise.reject = rej;
       provider.authenticate({
         success: (provider, result) => {
           var opts = {};
@@ -202,8 +204,8 @@ class ParseUser extends ParseObject {
     }
     return this._linkWith(provider, { authData: null }).then(() => {
       this._synchronizeAuthData(provider);
-      return ParsePromise.as(this);
-    })._thenRunCallbacks(options);
+      return Promise.resolve(this);
+    });
   }
 
   /**
@@ -384,10 +386,10 @@ class ParseUser extends ParseObject {
 
    * @param {Object} attrs Extra fields to set on the new user, or null.
    * @param {Object} options A Backbone-style options object.
-   * @return {Parse.Promise} A promise that is fulfilled when the signup
+   * @return {Promise} A promise that is fulfilled when the signup
    *     finishes.
    */
-  signUp(attrs: AttributeMap, options: FullOptions): ParsePromise {
+  signUp(attrs: AttributeMap, options: FullOptions): Promise {
     options = options || {};
 
     var signupOptions = {};
@@ -403,7 +405,7 @@ class ParseUser extends ParseObject {
       this,
       attrs,
       signupOptions
-    )._thenRunCallbacks(options, this);
+    );
   }
 
   /**
@@ -417,10 +419,10 @@ class ParseUser extends ParseObject {
    *
 
    * @param {Object} options A Backbone-style options object.
-   * @return {Parse.Promise} A promise that is fulfilled with the user when
+   * @return {Promise} A promise that is fulfilled with the user when
    *     the login is complete.
    */
-  logIn(options: FullOptions): ParsePromise {
+  logIn(options: FullOptions): Promise {
     options = options || {};
 
     var loginOptions = {};
@@ -432,14 +434,14 @@ class ParseUser extends ParseObject {
     }
 
     var controller = CoreManager.getUserController();
-    return controller.logIn(this, loginOptions)._thenRunCallbacks(options, this);
+    return controller.logIn(this, loginOptions);
   }
 
   /**
    * Wrap the default save behavior with functionality to save to local
    * storage if this is current user.
    */
-  save(...args: Array<any>): ParsePromise {
+  save(...args: Array<any>): Promise {
     return super.save.apply(this, args).then(() => {
       if (this.isCurrent()) {
         return CoreManager.getUserController().updateUserOnDisk(this);
@@ -452,7 +454,7 @@ class ParseUser extends ParseObject {
    * Wrap the default destroy behavior with functionality that logs out
    * the current user when it is destroyed
    */
-  destroy(...args: Array<any>): ParsePromise {
+  destroy(...args: Array<any>): Promise {
     return super.destroy.apply(this, args).then(() => {
       if (this.isCurrent()) {
         return CoreManager.getUserController().removeUserFromDisk();
@@ -465,7 +467,7 @@ class ParseUser extends ParseObject {
    * Wrap the default fetch behavior with functionality to save to local
    * storage if this is current user.
    */
-  fetch(...args: Array<any>): ParsePromise {
+  fetch(...args: Array<any>): Promise {
     return super.fetch.apply(this, args).then(() => {
       if (this.isCurrent()) {
         return CoreManager.getUserController().updateUserOnDisk(this);
@@ -535,12 +537,12 @@ class ParseUser extends ParseObject {
    * Retrieves the currently logged in ParseUser from asynchronous Storage.
 
    * @static
-   * @return {Parse.Promise} A Promise that is resolved with the currently
+   * @return {Promise} A Promise that is resolved with the currently
    *   logged in Parse User
    */
-  static currentAsync(): ParsePromise {
+  static currentAsync(): Promise {
     if (!canUseCurrentUser) {
-      return ParsePromise.as(null);
+      return Promise.resolve(null);
     }
     var controller = CoreManager.getUserController();
     return controller.currentUserAsync();
@@ -560,7 +562,7 @@ class ParseUser extends ParseObject {
    * @param {Object} attrs Extra fields to set on the new user.
    * @param {Object} options A Backbone-style options object.
    * @static
-   * @return {Parse.Promise} A promise that is fulfilled with the user when
+   * @return {Promise} A promise that is fulfilled with the user when
    *     the signup completes.
    */
   static signUp(username, password, attrs, options) {
@@ -583,19 +585,19 @@ class ParseUser extends ParseObject {
    * @param {String} password The password to log in with.
    * @param {Object} options A Backbone-style options object.
    * @static
-   * @return {Parse.Promise} A promise that is fulfilled with the user when
+   * @return {Promise} A promise that is fulfilled with the user when
    *     the login completes.
    */
   static logIn(username, password, options) {
     if (typeof username !== 'string') {
-      return ParsePromise.error(
+      return Promise.reject(
         new ParseError(
           ParseError.OTHER_CAUSE,
           'Username must be a string.'
         )
       );
     } else if (typeof password !== 'string') {
-      return ParsePromise.error(
+      return Promise.reject(
         new ParseError(
           ParseError.OTHER_CAUSE,
           'Password must be a string.'
@@ -618,7 +620,7 @@ class ParseUser extends ParseObject {
    * @param {String} sessionToken The sessionToken to log in with.
    * @param {Object} options A Backbone-style options object.
    * @static
-   * @return {Parse.Promise} A promise that is fulfilled with the user when
+   * @return {Promise} A promise that is fulfilled with the user when
    *     the login completes.
    */
   static become(sessionToken, options) {
@@ -637,7 +639,7 @@ class ParseUser extends ParseObject {
     }
 
     var controller = CoreManager.getUserController();
-    return controller.become(becomeOptions)._thenRunCallbacks(options);
+    return controller.become(becomeOptions);
   }
 
   static logInWith(provider, options) {
@@ -650,7 +652,7 @@ class ParseUser extends ParseObject {
    * <code>current</code> will return <code>null</code>.
 
    * @static
-   * @return {Parse.Promise} A promise that is resolved when the session is
+   * @return {Promise} A promise that is resolved when the session is
    *   destroyed on the server.
    */
   static logOut() {
@@ -676,7 +678,7 @@ class ParseUser extends ParseObject {
    *     forgot their password.
    * @param {Object} options A Backbone-style options object.
    * @static
-   * @returns {Parse.Promise}
+   * @returns {Promise}
    */
   static requestPasswordReset(email, options) {
     options = options || {};
@@ -689,7 +691,7 @@ class ParseUser extends ParseObject {
     var controller = CoreManager.getUserController();
     return controller.requestPasswordReset(
       email, requestOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
@@ -716,7 +718,7 @@ class ParseUser extends ParseObject {
 
    * @param {Object} options A Backbone-style options object.
    * @static
-   * @return {Parse.Promise} A promise that is resolved when the process has
+   * @return {Promise} A promise that is resolved when the process has
    *   completed. If a replacement session token is requested, the promise
    *   will be resolved after a new token has been fetched.
    */
@@ -729,7 +731,7 @@ class ParseUser extends ParseObject {
         return current._upgradeToRevocableSession(options);
       }
     }
-    return ParsePromise.as()._thenRunCallbacks(options);
+    return Promise.resolve();
   }
 
   /**
@@ -847,12 +849,12 @@ var DefaultController = {
     return current;
   },
 
-  currentUserAsync(): ParsePromise {
+  currentUserAsync(): Promise {
     if (currentUserCache) {
-      return ParsePromise.as(currentUserCache)
+      return Promise.resolve(currentUserCache)
     }
     if (currentUserCacheMatchesDisk) {
-      return ParsePromise.as(null);
+      return Promise.resolve(null);
     }
     var path = Storage.generatePath(CURRENT_USER_KEY);
     return Storage.getItemAsync(
@@ -861,7 +863,7 @@ var DefaultController = {
       currentUserCacheMatchesDisk = true;
       if (!userData) {
         currentUserCache = null;
-        return ParsePromise.as(null);
+        return Promise.resolve(null);
       }
       userData = JSON.parse(userData);
       if (!userData.className) {
@@ -880,16 +882,16 @@ var DefaultController = {
       var current = ParseObject.fromJSON(userData);
       currentUserCache = current;
       current._synchronizeAllAuthData();
-      return ParsePromise.as(current);
+      return Promise.resolve(current);
     });
   },
 
-  signUp(user: ParseUser, attrs: AttributeMap, options: RequestOptions): ParsePromise {
+  signUp(user: ParseUser, attrs: AttributeMap, options: RequestOptions): Promise {
     var username = (attrs && attrs.username) || user.get('username');
     var password = (attrs && attrs.password) || user.get('password');
 
     if (!username || !username.length) {
-      return ParsePromise.error(
+      return Promise.reject(
         new ParseError(
           ParseError.OTHER_CAUSE,
           'Cannot sign up user with an empty name.'
@@ -897,7 +899,7 @@ var DefaultController = {
       );
     }
     if (!password || !password.length) {
-      return ParsePromise.error(
+      return Promise.reject(
         new ParseError(
           ParseError.OTHER_CAUSE,
           'Cannot sign up user with an empty password.'
@@ -916,7 +918,7 @@ var DefaultController = {
     });
   },
 
-  logIn(user: ParseUser, options: RequestOptions): ParsePromise {
+  logIn(user: ParseUser, options: RequestOptions): Promise {
     var RESTController = CoreManager.getRESTController();
     var stateController = CoreManager.getObjectStateController();
     var auth = {
@@ -938,13 +940,13 @@ var DefaultController = {
       user._finishFetch(response);
       if (!canUseCurrentUser) {
         // We can't set the current user, so just return the one we logged in
-        return ParsePromise.as(user);
+        return Promise.resolve(user);
       }
       return DefaultController.setCurrentUser(user);
     });
   },
 
-  become(options: RequestOptions): ParsePromise {
+  become(options: RequestOptions): Promise {
     var user = new ParseUser();
     var RESTController = CoreManager.getRESTController();
     return RESTController.request(
@@ -956,7 +958,7 @@ var DefaultController = {
     });
   },
 
-  logOut(): ParsePromise {
+  logOut(): Promise {
     return DefaultController.currentUserAsync().then((currentUser) => {
       var path = Storage.generatePath(CURRENT_USER_KEY);
       var promise = Storage.removeItemAsync(path);
@@ -993,7 +995,7 @@ var DefaultController = {
   upgradeToRevocableSession(user: ParseUser, options: RequestOptions) {
     var token = user.getSessionToken();
     if (!token) {
-      return ParsePromise.error(
+      return Promise.reject(
         new ParseError(
           ParseError.SESSION_MISSING,
           'Cannot upgrade a user with no session token'
@@ -1016,7 +1018,7 @@ var DefaultController = {
       if (user.isCurrent()) {
         return DefaultController.setCurrentUser(user);
       }
-      return ParsePromise.as(user);
+      return Promise.resolve(user);
     });
   },
 

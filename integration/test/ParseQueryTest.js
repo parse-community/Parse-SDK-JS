@@ -154,7 +154,7 @@ describe('Parse Query', () => {
     }).then((results) => {
       assert.equal(results.length, 1);
       done();
-    }).fail(e => console.log(e));
+    }).catch(e => console.log(e));
   });
 
   it('can do containsAll queries with objects', (done) => {
@@ -334,7 +334,7 @@ describe('Parse Query', () => {
   it('handles when find throws errors', (done) => {
     let query = new Parse.Query('BoxedNumber');
     query.equalTo('$foo', 'bar');
-    query.find().fail((e) => {
+    query.find().catch((e) => {
       assert.equal(e.code, Parse.Error.INVALID_KEY_NAME);
       done();
     });
@@ -358,7 +358,7 @@ describe('Parse Query', () => {
     object.save().then(() => {
       let query = new Parse.Query(TestObject);
       return query.get(undefined);
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });
@@ -369,7 +369,7 @@ describe('Parse Query', () => {
     object.save().then(() => {
       let query = new Parse.Query(TestObject);
       return query.get(undefined);
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });
@@ -407,7 +407,7 @@ describe('Parse Query', () => {
   it('handles when first throws errors', (done) => {
     let query = new Parse.Query('BoxedNumber');
     query.equalTo('$foo', 'bar');
-    query.first().fail((e) => {
+    query.first().catch((e) => {
       assert.equal(e.code, Parse.Error.INVALID_KEY_NAME);
       done();
     });
@@ -630,7 +630,7 @@ describe('Parse Query', () => {
   it('can not order by password', (done) => {
     let query = new Parse.Query('BoxedNumber');
     query.ascending('_password');
-    query.find().fail((e) => {
+    query.find().catch((e) => {
       assert.equal(e.code, Parse.Error.INVALID_KEY_NAME);
       done();
     });
@@ -811,7 +811,7 @@ describe('Parse Query', () => {
   it('fails for invalid regex options', (done) => {
     let query = new Parse.Query(TestObject);
     query.matches('myString', 'football', 'some invalid thing');
-    query.find().fail((e) => {
+    query.find().catch((e) => {
       assert.equal(e.code, Parse.Error.INVALID_QUERY);
       done();
     });
@@ -895,7 +895,7 @@ describe('Parse Query', () => {
         assert(results[i].has('y'));
       }
       done();
-    }).fail(e => console.log(e));
+    }).catch(e => console.log(e));
   });
 
   it('can test if a key does not exist', (done) => {
@@ -995,7 +995,7 @@ describe('Parse Query', () => {
       assert(parentAgain.get('child').id);
       assert(!parentAgain.get('child').get('foo'));
       done();
-    }).fail(e => console.log(e));
+    }).catch(e => console.log(e));
   });
 
   it('can include nested objects', (done) => {
@@ -1331,7 +1331,7 @@ describe('Parse Query', () => {
         assert(number.get('x') > 2 && number.get('x') < 5);
       });
       done();
-    }).fail(e => console.log(e));
+    }).catch(e => console.log(e));
   });
 
   it('can build complex AND queries', (done) => {
@@ -1360,7 +1360,7 @@ describe('Parse Query', () => {
     }).then((results) => {
       assert.equal(results.length, 1);
       done();
-    }).fail(e => console.log(e));
+    }).catch(e => console.log(e));
   });
 
   it('can iterate over results with each', (done) => {

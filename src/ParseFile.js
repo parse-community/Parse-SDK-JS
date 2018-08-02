@@ -10,7 +10,6 @@
  */
 
 import CoreManager from './CoreManager';
-import ParsePromise from './ParsePromise';
 
 type Base64 = { base64: string };
 type FileData = Array<number> | Base64 | File;
@@ -55,7 +54,7 @@ class ParseFile {
   _name: string;
   _url: ?string;
   _source: FileSource;
-  _previousSave: ?ParsePromise;
+  _previousSave: ?Promise;
 
   /**
    * @param name {String} The file's name. This will be prefixed by a unique
@@ -158,7 +157,7 @@ class ParseFile {
   /**
    * Saves the file to the Parse cloud.
    * @param {Object} options A Backbone-style options object.
-   * @return {Parse.Promise} Promise that is resolved when the save finishes.
+   * @return {Promise} Promise that is resolved when the save finishes.
    */
   save(options?: { useMasterKey?: boolean, success?: any, error?: any }) {
     options = options || {};
@@ -179,7 +178,7 @@ class ParseFile {
       }
     }
     if (this._previousSave) {
-      return this._previousSave._thenRunCallbacks(options);
+      return this._previousSave;
     }
   }
 

@@ -9,9 +9,9 @@
  */
 
 import EventEmitter from './EventEmitter';
-import ParsePromise from './ParsePromise';
 import ParseObject from './ParseObject';
 import LiveQuerySubscription from './LiveQuerySubscription';
+import { resolvingPromise } from './promiseUtils';
 
 // The LiveQuery client inner state
 const CLIENT_STATE = {
@@ -120,7 +120,7 @@ class LiveQueryClient extends EventEmitter {
   javascriptKey: ?string;
   masterKey: ?string;
   sessionToken: ?string;
-  connectPromise: Object;
+  connectPromise: Promise;
   subscriptions: Map;
   socket: any;
   state: string;
@@ -155,7 +155,7 @@ class LiveQueryClient extends EventEmitter {
     this.javascriptKey = javascriptKey;
     this.masterKey = masterKey;
     this.sessionToken = sessionToken;
-    this.connectPromise = new ParsePromise();
+    this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
     this.state = CLIENT_STATE.INITIALIZED;
   }
@@ -333,7 +333,7 @@ class LiveQueryClient extends EventEmitter {
     this.attempts = 1;;
     this.id = 0;
     this.requestId = 1;
-    this.connectPromise = new ParsePromise();
+    this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
   }
 
@@ -442,7 +442,7 @@ class LiveQueryClient extends EventEmitter {
 
     this.reconnectHandle = setTimeout((() => {
       this.attempts++;
-      this.connectPromise = new ParsePromise();
+      this.connectPromise = resolvingPromise();
       this.open();
     }).bind(this), time);
   }

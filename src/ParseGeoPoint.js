@@ -9,8 +9,6 @@
  * @flow
  */
 
-import ParsePromise from './ParsePromise';
-
 /**
  * Creates a new GeoPoint with any of the following forms:<br>
  *   <pre>
@@ -199,16 +197,9 @@ class ParseGeoPoint {
    * @static
    */
   static current(options) {
-    var promise = new ParsePromise();
-    navigator.geolocation.getCurrentPosition(function(location) {
-      promise.resolve(
-        new ParseGeoPoint(location.coords.latitude, location.coords.longitude)
-      );
-    }, function(error) {
-      promise.reject(error);
+    return navigator.geolocation.getCurrentPosition((location) => {
+      return new ParseGeoPoint(location.coords.latitude, location.coords.longitude);
     });
-
-    return promise._thenRunCallbacks(options);
   }
 }
 

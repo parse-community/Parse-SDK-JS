@@ -11,11 +11,9 @@ jest.dontMock('../Cloud');
 jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
-jest.dontMock('../ParsePromise');
 
 var Cloud = require('../Cloud');
 var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise').default;
 
 var defaultController = CoreManager.getCloudController();
 
@@ -24,13 +22,13 @@ describe('Cloud', () => {
     var run = jest.fn();
     var getJobsData = jest.fn();
     var startJob = jest.fn();
-    run.mockReturnValue(ParsePromise.as({
+    run.mockReturnValue(Promise.resolve({
       result: {}
     }));
-    getJobsData.mockReturnValue(ParsePromise.as({
+    getJobsData.mockReturnValue(Promise.resolve({
       result: {}
     }));
-    startJob.mockReturnValue(ParsePromise.as({
+    startJob.mockReturnValue(Promise.resolve({
       result: {}
     }));
     CoreManager.setCloudController({ run, getJobsData, startJob });
@@ -118,7 +116,7 @@ describe('CloudController', () => {
   beforeEach(() => {
     CoreManager.setCloudController(defaultController);
     var request = jest.fn();
-    request.mockReturnValue(ParsePromise.as({
+    request.mockReturnValue(Promise.resolve({
       success: true,
       result: {}
     }));
@@ -153,7 +151,7 @@ describe('CloudController', () => {
 
   it('run invalid response', () => {
     var request = jest.fn();
-    request.mockReturnValue(ParsePromise.as({
+    request.mockReturnValue(Promise.resolve({
       success: false
     }));
     var ajax = jest.fn();

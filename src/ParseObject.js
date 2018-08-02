@@ -19,6 +19,8 @@ import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
 import ParseFile from './ParseFile';
+import { when, continueWhile } from './promiseUtils';
+
 import {
   opFromJSON,
   Op,
@@ -30,7 +32,6 @@ import {
   RemoveOp,
   RelationOp
 } from './ParseOp';
-import ParsePromise from './ParsePromise';
 import ParseQuery from './ParseQuery';
 import ParseRelation from './ParseRelation';
 import * as SingleInstanceStateController from './SingleInstanceStateController';
@@ -973,10 +974,10 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Parse.Promise} A promise that is fulfilled when the fetch
+   * @return {Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetch(options: RequestOptions): ParsePromise {
+  fetch(options: RequestOptions): Promise {
     options = options || {};
     var fetchOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
@@ -986,7 +987,7 @@ class ParseObject {
       fetchOptions.sessionToken = options.sessionToken;
     }
     var controller = CoreManager.getObjectController();
-    return controller.fetch(this, true, fetchOptions)._thenRunCallbacks(options);
+    return controller.fetch(this, true, fetchOptions);
   }
 
   /**
@@ -1032,14 +1033,14 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Parse.Promise} A promise that is fulfilled when the save
+   * @return {Promise} A promise that is fulfilled when the save
    *     completes.
    */
   save(
     arg1: ?string | { [attr: string]: mixed },
     arg2: FullOptions | mixed,
     arg3?: FullOptions
-  ): ParsePromise {
+  ): Promise {
     var attrs;
     var options;
     if (typeof arg1 === 'object' || typeof arg1 === 'undefined') {
@@ -1072,7 +1073,7 @@ class ParseObject {
         if (options && typeof options.error === 'function') {
           options.error(this, validation);
         }
-        return ParsePromise.error(validation);
+        return Promise.reject(validation);
       }
       this.set(attrs, options);
     }
@@ -1088,9 +1089,9 @@ class ParseObject {
 
     var controller = CoreManager.getObjectController();
     var unsaved = unsavedChildren(this);
-    return controller.save(unsaved, saveOptions).then(() => {
+    return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
-    })._thenRunCallbacks(options, this);
+    });
   }
 
   /**
@@ -1107,10 +1108,10 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Parse.Promise} A promise that is fulfilled when the destroy
+   * @return {Promise} A promise that is fulfilled when the destroy
    *     completes.
    */
-  destroy(options: RequestOptions): ParsePromise {
+  destroy(options: RequestOptions): Promise {
     options = options || {};
     var destroyOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
@@ -1120,12 +1121,12 @@ class ParseObject {
       destroyOptions.sessionToken = options.sessionToken;
     }
     if (!this.id) {
-      return ParsePromise.as()._thenRunCallbacks(options);
+      return Promise.resolve();
     }
     return CoreManager.getObjectController().destroy(
       this,
       destroyOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /** Static methods **/
@@ -1172,7 +1173,7 @@ class ParseObject {
       list,
       true,
       queryOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
@@ -1212,7 +1213,7 @@ class ParseObject {
       list,
       false,
       queryOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
@@ -1266,7 +1267,7 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Parse.Promise} A promise that is fulfilled when the destroyAll
+   * @return {Promise} A promise that is fulfilled when the destroyAll
    *     completes.
    */
   static destroyAll(list: Array<ParseObject>, options) {
@@ -1282,7 +1283,7 @@ class ParseObject {
     return CoreManager.getObjectController().destroy(
       list,
       destroyOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
@@ -1323,7 +1324,7 @@ class ParseObject {
     return CoreManager.getObjectController().save(
       list,
       saveOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
@@ -1563,10 +1564,10 @@ class ParseObject {
 }
 
 var DefaultController = {
-  fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): ParsePromise {
+  fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): Promise {
     if (Array.isArray(target)) {
       if (target.length < 1) {
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       }
       var objs = [];
       var ids = [];
@@ -1599,7 +1600,7 @@ var DefaultController = {
         results.push(el);
       });
       if (error) {
-        return ParsePromise.error(error);
+        return Promise.reject(error);
       }
       var query = new ParseQuery(className);
       query.containedIn('objectId', ids);
@@ -1613,7 +1614,7 @@ var DefaultController = {
           var obj = objs[i];
           if (!obj || !obj.id || !idMap[obj.id]) {
             if (forceFetch) {
-              return ParsePromise.error(
+              return Promise.reject(
                 new ParseError(
                   ParseError.OBJECT_NOT_FOUND,
                   'All objects must exist on the server.'
@@ -1633,7 +1634,7 @@ var DefaultController = {
             }
           }
         }
-        return ParsePromise.as(results);
+        return Promise.resolve(results);
       });
     } else {
       var RESTController = CoreManager.getRESTController();
@@ -1653,11 +1654,11 @@ var DefaultController = {
     }
   },
 
-  destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): ParsePromise {
+  destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
     var RESTController = CoreManager.getRESTController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       }
       var batches = [[]];
       target.forEach((obj) => {
@@ -1673,7 +1674,7 @@ var DefaultController = {
         // If the last batch is empty, remove it
         batches.pop();
       }
-      var deleteCompleted = ParsePromise.as();
+      var deleteCompleted = Promise.resolve();
       var errors = [];
       batches.forEach((batch) => {
         deleteCompleted = deleteCompleted.then(() => {
@@ -1704,9 +1705,9 @@ var DefaultController = {
         if (errors.length) {
           var aggregate = new ParseError(ParseError.AGGREGATE_ERROR);
           aggregate.errors = errors;
-          return ParsePromise.error(aggregate);
+          return Promise.reject(aggregate);
         }
-        return ParsePromise.as(target);
+        return Promise.resolve(target);
       });
     } else if (target instanceof ParseObject) {
       return RESTController.request(
@@ -1715,10 +1716,10 @@ var DefaultController = {
         {},
         options
       ).then(() => {
-        return ParsePromise.as(target);
+        return Promise.resolve(target);
       });
     }
-    return ParsePromise.as(target);
+    return Promise.resolve(target);
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
@@ -1726,7 +1727,7 @@ var DefaultController = {
     var stateController = CoreManager.getObjectStateController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       }
 
       var unsaved = target.concat();
@@ -1737,7 +1738,7 @@ var DefaultController = {
       }
       unsaved = unique(unsaved);
 
-      var filesSaved = ParsePromise.as();
+      var filesSaved = Promise.resolve();
       var pending: Array<ParseObject> = [];
       unsaved.forEach((el) => {
         if (el instanceof ParseFile) {
@@ -1751,7 +1752,7 @@ var DefaultController = {
 
       return filesSaved.then(() => {
         var objectError = null;
-        return ParsePromise._continueWhile(() => {
+        return continueWhile(() => {
           return pending.length > 0;
         }, () => {
           var batch = [];
@@ -1765,7 +1766,7 @@ var DefaultController = {
           });
           pending = nextPending;
           if (batch.length < 1) {
-            return ParsePromise.error(
+            return Promise.reject(
               new ParseError(
                 ParseError.OTHER_CAUSE,
                 'Tried to save a batch with a cycle.'
@@ -1775,11 +1776,17 @@ var DefaultController = {
 
           // Queue up tasks for each object in the batch.
           // When every task is ready, the API request will execute
-          var batchReturned = new ParsePromise();
+          var res, rej;
+          var batchReturned = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+          batchReturned.resolve = res;
+          batchReturned.reject = rej;
           var batchReady = [];
           var batchTasks = [];
           batch.forEach((obj, index) => {
-            var ready = new ParsePromise();
+            var res, rej;
+            var ready = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+            ready.resolve = res;
+            ready.reject = rej;
             batchReady.push(ready);
             var task = function() {
               ready.resolve();
@@ -1801,7 +1808,7 @@ var DefaultController = {
             batchTasks.push(stateController.enqueueTask(obj._getStateIdentifier(), task));
           });
 
-          ParsePromise.when(batchReady).then(() => {
+          when(batchReady).then(() => {
             // Kick off the batch request
             return RESTController.request('POST', 'batch', {
               requests: batch.map((obj) => {
@@ -1816,12 +1823,12 @@ var DefaultController = {
             batchReturned.reject(new ParseError(ParseError.INCORRECT_TYPE, error.message));
           });
 
-          return ParsePromise.when(batchTasks);
+          return when(batchTasks);
         }).then(() => {
           if (objectError) {
-            return ParsePromise.error(objectError);
+            return Promise.reject(objectError);
           }
-          return ParsePromise.as(target);
+          return Promise.resolve(target);
         });
       });
 
@@ -1839,7 +1846,7 @@ var DefaultController = {
           targetCopy._handleSaveResponse(response, status);
         }, (error) => {
           targetCopy._handleSaveError();
-          return ParsePromise.error(error);
+          return Promise.reject(error);
         });
       }
 
@@ -1847,10 +1854,10 @@ var DefaultController = {
       return stateController.enqueueTask(target._getStateIdentifier(), task).then(() => {
         return target;
       }, (error) => {
-        return ParsePromise.error(error);
+        return Promise.reject(error);
       });
     }
-    return ParsePromise.as();
+    return Promise.resolve();
   }
 }
 

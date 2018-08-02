@@ -11,18 +11,16 @@ jest.dontMock('../ParseHooks');
 jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
-jest.dontMock('../ParsePromise');
 
 var Hooks = require('../ParseHooks');
 var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise').default;
 
 var defaultController = CoreManager.getHooksController();
 
 describe('Hooks', () => {
   beforeEach(() => {
     var run = jest.fn();
-    run.mockReturnValue(ParsePromise.as({
+    run.mockReturnValue(Promise.resolve({
       result: {}
     }));
     defaultController.sendRequest = run;
