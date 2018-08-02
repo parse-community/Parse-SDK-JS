@@ -802,7 +802,7 @@ class ParseObject {
   }
 
   /**
-   * Creates a new model with identical attributes to this one, similar to Backbone.Model's clone()
+   * Creates a new model with identical attributes to this one.
    * @return {Parse.Object}
    */
   clone(): any {
@@ -926,8 +926,7 @@ class ParseObject {
   /**
    * Sets the ACL to be used for this object.
    * @param {Parse.ACL} acl An instance of Parse.ACL.
-   * @param {Object} options Optional Backbone-like options object to be
-   *     passed in to set.
+   * @param {Object} options
    * @return {Boolean} Whether the set passed validation.
    * @see Parse.Object#set
    */
@@ -965,10 +964,8 @@ class ParseObject {
    * Fetch the model from the server. If the server's representation of the
    * model differs from its current attributes, they will be overriden.
    *
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback.
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -1006,28 +1003,14 @@ class ParseObject {
    *   gameTurn.save({
    *     player: "Jake Cutter",
    *     diceRoll: 2
-   *   }, {
-   *     success: function(gameTurnAgain) {
-   *       // The save was successful.
-   *     },
-   *     error: function(gameTurnAgain, error) {
-   *       // The save failed.  Error is an instance of Parse.Error.
-   *     }
-   *   });</pre>
-   * or with promises:<pre>
-   *   gameTurn.save({
-   *     player: "Jake Cutter",
-   *     diceRoll: 2
    *   }).then(function(gameTurnAgain) {
    *     // The save was successful.
    *   }, function(error) {
    *     // The save failed.  Error is an instance of Parse.Error.
    *   });</pre>
    *
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback.
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -1054,6 +1037,7 @@ class ParseObject {
       options = arg3;
     }
 
+    // TODO: safely remove me
     // Support save({ success: function() {}, error: function() {} })
     if (!options && attrs) {
       options = {};
@@ -1099,10 +1083,8 @@ class ParseObject {
    * If `wait: true` is passed, waits for the server to respond
    * before removal.
    *
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -1141,23 +1123,17 @@ class ParseObject {
    * If any error is encountered, stops and calls the error handler.
    *
    * <pre>
-   *   Parse.Object.fetchAll([object1, object2, ...], {
-   *     success: function(list) {
-   *       // All the objects were fetched.
-   *     },
-   *     error: function(error) {
-   *       // An error occurred while fetching one of the objects.
-   *     },
-   *   });
+   *   Parse.Object.fetchAll([object1, object2, ...])
+   *    .then((list) => {
+   *      // All the objects were fetched.
+   *    }, (error) => {
+   *      // An error occurred while fetching one of the objects.
+   *    });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * @static
-   * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback.
-   *   <li>error: An Backbone-style error callback.
-   * </ul>
    */
   static fetchAll(list: Array<ParseObject>, options) {
     var options = options || {};
@@ -1181,23 +1157,17 @@ class ParseObject {
    * If any error is encountered, stops and calls the error handler.
    *
    * <pre>
-   *   Parse.Object.fetchAllIfNeeded([object1, ...], {
-   *     success: function(list) {
-   *       // Objects were fetched and updated.
-   *     },
-   *     error: function(error) {
-   *       // An error occurred while fetching one of the objects.
-   *     },
-   *   });
+   *   Parse.Object.fetchAllIfNeeded([object1, ...])
+   *    .then((list) => {
+   *      // Objects were fetched and updated.
+   *    }, (error) => {
+   *      // An error occurred while fetching one of the objects.
+   *    });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * @static
-   * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback.
-   *   <li>error: An Backbone-style error callback.
-   * </ul>
    */
   static fetchAllIfNeeded(list: Array<ParseObject>, options) {
     var options = options || {};
@@ -1237,29 +1207,27 @@ class ParseObject {
    * </ul>
    *
    * <pre>
-   *   Parse.Object.destroyAll([object1, object2, ...], {
-   *     success: function() {
-   *       // All the objects were deleted.
-   *     },
-   *     error: function(error) {
-   *       // An error occurred while deleting one or more of the objects.
-   *       // If this is an aggregate error, then we can inspect each error
-   *       // object individually to determine the reason why a particular
-   *       // object was not deleted.
-   *       if (error.code === Parse.Error.AGGREGATE_ERROR) {
-   *         for (var i = 0; i < error.errors.length; i++) {
-   *           console.log("Couldn't delete " + error.errors[i].object.id +
-   *             "due to " + error.errors[i].message);
-   *         }
-   *       } else {
-   *         console.log("Delete aborted because of " + error.message);
-   *       }
-   *     },
+   *   Parse.Object.destroyAll([object1, object2, ...]) 
+   *    .then((list) => {
+   *      // All the objects were deleted.
+   *    }, (error) => {
+   *      // An error occurred while deleting one or more of the objects.
+   *      // If this is an aggregate error, then we can inspect each error
+   *      // object individually to determine the reason why a particular
+   *      // object was not deleted.
+   *      if (error.code === Parse.Error.AGGREGATE_ERROR) {
+   *        for (var i = 0; i < error.errors.length; i++) {
+   *          console.log("Couldn't delete " + error.errors[i].object.id +
+   *            "due to " + error.errors[i].message);
+   *        }
+   *      } else {
+   *        console.log("Delete aborted because of " + error.message);
+   *      }
    *   });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * @static
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
@@ -1291,18 +1259,16 @@ class ParseObject {
    * If any error is encountered, stops and calls the error handler.
    *
    * <pre>
-   *   Parse.Object.saveAll([object1, object2, ...], {
-   *     success: function(list) {
+   *   Parse.Object.saveAll([object1, object2, ...])
+   *    .then((list) => {
    *       // All the objects were saved.
-   *     },
-   *     error: function(error) {
+   *    }, (error) => {
    *       // An error occurred while saving one of the objects.
-   *     },
-   *   });
+   *    });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * @static
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to

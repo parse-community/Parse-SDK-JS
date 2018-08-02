@@ -48,7 +48,7 @@ import CoreManager from './CoreManager';
   * having happened.
   * @param {Object} dimensions The dictionary of information by which to
   * segment this event.
-  * @param {Object} options A Backbone-style callback object.
+  * @param {Object} options
   * @return {Promise} A promise that is resolved when the round-trip
   * to the server completes.
   */

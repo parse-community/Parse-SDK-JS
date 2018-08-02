@@ -53,7 +53,7 @@ class ParseUser extends ParseObject {
   /**
    * Request a revocable session token to replace the older style of token.
 
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * @return {Promise} A promise that is resolved when the replacement
    *   token has been fetched.
    */
@@ -97,34 +97,22 @@ class ParseUser extends ParseObject {
         authData
       );
     } else {
-      var res, rej;
-var promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
-promise.resolve = res;
-promise.reject = rej;
-      provider.authenticate({
-        success: (provider, result) => {
-          var opts = {};
-          opts.authData = result;
-          if (options.success) {
-            opts.success = options.success;
+      return new Promise((resolve, reject) => {
+        provider.authenticate({
+          success: (provider, result) => {
+            var opts = {};
+            opts.authData = result;
+            this._linkWith(provider, opts).then(() => {
+              resolve(this);
+            }, (error) => {
+              reject(error);
+            });
+          },
+          error: (provider, error) => {
+            reject(error);
           }
-          if (options.error) {
-            opts.error = options.error;
-          }
-          this._linkWith(provider, opts).then(() => {
-            promise.resolve(this);
-          }, (error) => {
-            promise.reject(error);
-          });
-        },
-        error: (provider, error) => {
-          if (typeof options.error === 'function') {
-            options.error(this, error);
-          }
-          promise.reject(error);
-        }
+        });
       });
-      return promise;
     }
   }
 
@@ -295,7 +283,7 @@ promise.reject = rej;
    * Calls set("username", username, options) and returns the result.
 
    * @param {String} username
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * @return {Boolean}
    */
   setUsername(username: string) {
@@ -313,7 +301,7 @@ promise.reject = rej;
    * Calls set("password", password, options) and returns the result.
 
    * @param {String} password
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * @return {Boolean}
    */
   setPassword(password: string) {
@@ -334,14 +322,13 @@ promise.reject = rej;
   }
 
   /**
-   * Calls set("email", email, options) and returns the result.
+   * Calls set("email", email) and returns the result.
 
    * @param {String} email
-   * @param {Object} options A Backbone-style options object.
    * @return {Boolean}
    */
   setEmail(email: string) {
-    this.set('email', email);
+    return this.set('email', email);
   }
 
   /**
@@ -385,7 +372,7 @@ promise.reject = rej;
    *
 
    * @param {Object} attrs Extra fields to set on the new user, or null.
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * @return {Promise} A promise that is fulfilled when the signup
    *     finishes.
    */
@@ -418,7 +405,7 @@ promise.reject = rej;
    * <p>Calls options.success or options.error on completion.</p>
    *
 
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * @return {Promise} A promise that is fulfilled with the user when
    *     the login is complete.
    */
@@ -560,7 +547,7 @@ promise.reject = rej;
    * @param {String} username The username (or email) to sign up with.
    * @param {String} password The password to sign up with.
    * @param {Object} attrs Extra fields to set on the new user.
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * @static
    * @return {Promise} A promise that is fulfilled with the user when
    *     the signup completes.
@@ -583,7 +570,7 @@ promise.reject = rej;
 
    * @param {String} username The username (or email) to log in with.
    * @param {String} password The password to log in with.
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * @static
    * @return {Promise} A promise that is fulfilled with the user when
    *     the login completes.
@@ -618,7 +605,7 @@ promise.reject = rej;
    *
 
    * @param {String} sessionToken The sessionToken to log in with.
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * @static
    * @return {Promise} A promise that is fulfilled with the user when
    *     the login completes.
@@ -676,7 +663,7 @@ promise.reject = rej;
 
    * @param {String} email The email address associated with the user that
    *     forgot their password.
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * @static
    * @returns {Promise}
    */
@@ -716,7 +703,7 @@ promise.reject = rej;
    * handling user signup or login from the server side. In a cloud code call,
    * this function will not attempt to upgrade the current token.
 
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * @static
    * @return {Promise} A promise that is resolved when the process has
    *   completed. If a replacement session token is requested, the promise

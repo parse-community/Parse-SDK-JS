@@ -143,47 +143,35 @@ function handleSelectResult(data: any, select: Array<string>){
  * whether the fetch succeeded or not.
  *
  * <pre>
- * var query = new parse.query(myclass);
- * query.find({
- *   success: function(results) {
- *     // results is an array of parse.object.
- *   },
- *
- *   error: function(error) {
- *     // error is an instance of parse.error.
- *   }
+ * var query = new Parse.Query(myclass);
+ * query.find().then((results) => {
+ *   // results is an array of parse.object.
+ * }).catch((error) =>  {
+ *  // error is an instance of parse.error.
  * });</pre></p>
  *
- * <p>a parse.query can also be used to retrieve a single object whose id is
+ * <p>a Parse.Query can also be used to retrieve a single object whose id is
  * known, through the get method. for example, this sample code fetches an
  * object of class <code>myclass</code> and id <code>myid</code>. it calls a
  * different function depending on whether the fetch succeeded or not.
  *
  * <pre>
- * var query = new parse.query(myclass);
- * query.get(myid, {
- *   success: function(object) {
+ * var query = new Parse.Query(myclass);
+ * query.get(myid).then((object) => {
  *     // object is an instance of parse.object.
- *   },
- *
- *   error: function(object, error) {
- *     // error is an instance of parse.error.
- *   }
+ * }).catch((error) =>  {
+ *  // error is an instance of parse.error.
  * });</pre></p>
  *
- * <p>a parse.query can also be used to count the number of objects that match
+ * <p>a Parse.Query can also be used to count the number of objects that match
  * the query without retrieving all of those objects. for example, this
  * sample code counts the number of objects of the class <code>myclass</code>
  * <pre>
- * var query = new parse.query(myclass);
- * query.count({
- *   success: function(number) {
+ * var query = new Parse.Query(myclass);
+ * query.count().then((number) => {
  *     // there are number instances of myclass.
- *   },
- *
- *   error: function(error) {
+ * }).catch((error) => {
  *     // error is an instance of Parse.Error.
- *   }
  * });</pre></p>
  * @alias Parse.Query
  */
@@ -385,10 +373,8 @@ class ParseQuery {
    * find completes. Unlike the <code>first</code> method, it never returns undefined.
    *
    * @param {String} objectId The id of the object to be fetched.
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -427,10 +413,8 @@ class ParseQuery {
    * Either options.success or options.error is called when the find
    * completes.
    *
-   * @param {Object} options A Backbone-style options object. Valid options
+   * @param {Object} options Valid options
    * are:<ul>
-   *   <li>success: Function to call when the find completes successfully.
-   *   <li>error: Function to call when the find fails.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -485,10 +469,8 @@ class ParseQuery {
    * Either options.success or options.error is called when the count
    * completes.
    *
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the count completes successfully.
-   *   <li>error: Function to call when the find fails.
+   * @param {Object} options 
+   * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -528,10 +510,8 @@ class ParseQuery {
    * Executes a distinct query and returns unique values
    *
    * @param {String} key A field to find distinct values
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the count completes successfully.
-   *   <li>error: Function to call when the find fails.
+   * @param {Object} options 
+   * Valid options are:<ul>
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
@@ -566,10 +546,7 @@ class ParseQuery {
    * Executes an aggregate query and returns aggregate results
    *
    * @param {Mixed} pipeline Array or Object of stages to process query
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the count completes successfully.
-   *   <li>error: Function to call when the find fails.
+   * @param {Object} options Valid options are:<ul>
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
@@ -615,10 +592,7 @@ class ParseQuery {
    * Either options.success or options.error is called when it completes.
    * success is passed the object if there is one. otherwise, undefined.
    *
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the find completes successfully.
-   *   <li>error: Function to call when the find fails.
+   * @param {Object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -679,10 +653,7 @@ class ParseQuery {
    * and may not use limit or skip.
    * @param {Function} callback Callback that will be called with each result
    *     of the query.
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the iteration completes successfully.
-   *   <li>error: Function to call when the iteration fails.
+   * @param {Object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -698,11 +669,6 @@ class ParseQuery {
       var error = 'Cannot iterate on a query with sort, skip, or limit.';
       return Promise.reject(error);
     }
-
-    var res, rej;
-    var promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
-    promise.resolve = res;
-    promise.reject = rej;
 
     var query = new ParseQuery(this.className);
     // We can override the batch size from the options.

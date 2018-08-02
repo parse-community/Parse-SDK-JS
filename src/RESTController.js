@@ -42,36 +42,33 @@ if (typeof XDomainRequest !== 'undefined' &&
 }
 
 function ajaxIE9(method: string, url: string, data: any) {
-  var res, rej;
-  var promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
-  promise.resolve = res;
-  promise.reject = rej;
-  var xdr = new XDomainRequest();
-  xdr.onload = function() {
-    var response;
-    try {
-      response = JSON.parse(xdr.responseText);
-    } catch (e) {
-      promise.reject(e);
-    }
-    if (response) {
-      promise.resolve(response);
-    }
-  };
-  xdr.onerror = xdr.ontimeout = function() {
-    // Let's fake a real error message.
-    var fakeResponse = {
-      responseText: JSON.stringify({
-        code: ParseError.X_DOMAIN_REQUEST,
-        error: 'IE\'s XDomainRequest does not supply error info.'
-      })
+  return new Promise((resolve, reject) => {
+    var xdr = new XDomainRequest();
+    xdr.onload = function() {
+      var response;
+      try {
+        response = JSON.parse(xdr.responseText);
+      } catch (e) {
+        reject(e);
+      }
+      if (response) {
+        resolve({ response });
+      }
     };
-    promise.reject(fakeResponse);
-  };
-  xdr.onprogress = function() { };
-  xdr.open(method, url);
-  xdr.send(data);
-  return promise;
+    xdr.onerror = xdr.ontimeout = function() {
+      // Let's fake a real error message.
+      var fakeResponse = {
+        responseText: JSON.stringify({
+          code: ParseError.X_DOMAIN_REQUEST,
+          error: 'IE\'s XDomainRequest does not supply error info.'
+        })
+      };
+      reject(fakeResponse);
+    };
+    xdr.onprogress = function() { };
+    xdr.open(method, url);
+    xdr.send(data);
+  });
 }
 
 const RESTController = {

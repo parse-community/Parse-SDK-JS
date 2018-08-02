@@ -156,7 +156,7 @@ class ParseFile {
 
   /**
    * Saves the file to the Parse cloud.
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * @return {Promise} Promise that is resolved when the save finishes.
    */
   save(options?: { useMasterKey?: boolean, success?: any, error?: any }) {

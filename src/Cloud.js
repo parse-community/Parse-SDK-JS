@@ -33,11 +33,7 @@ import ParseQuery from './ParseQuery';
   * @name Parse.Cloud.run
   * @param {String} name The function name.
   * @param {Object} data The parameters to send to the cloud function.
-  * @param {Object} options A Backbone-style options object
-  * options.success, if set, should be a function to handle a successful
-  * call to a cloud function.  options.error should be a function that
-  * handles an error running the cloud function.  Both functions are
-  * optional.  Both functions take a single argument.
+  * @param {Object} options
   * @return {Promise} A promise that will be resolved with the result
   * of the function.
   */
@@ -67,11 +63,7 @@ export function run(
   * Gets data for the current set of cloud jobs.
   * @method getJobsData
   * @name Parse.Cloud.getJobsData
-  * @param {Object} options A Backbone-style options object
-  * options.success, if set, should be a function to handle a successful
-  * call to a cloud function.  options.error should be a function that
-  * handles an error running the cloud function.  Both functions are
-  * optional.  Both functions take a single argument.
+  * @param {Object} options
   * @return {Promise} A promise that will be resolved with the result
   * of the function.
   */
@@ -89,11 +81,7 @@ export function getJobsData(options: { [key: string]: mixed }): Promise {
   * @name Parse.Cloud.startJob
   * @param {String} name The function name.
   * @param {Object} data The parameters to send to the cloud function.
-  * @param {Object} options A Backbone-style options object
-  * options.success, if set, should be a function to handle a successful
-  * call to a cloud function.  options.error should be a function that
-  * handles an error running the cloud function.  Both functions are
-  * optional.  Both functions take a single argument.
+  * @param {Object} options
   * @return {Promise} A promise that will be resolved with the result
   * of the function.
   */
