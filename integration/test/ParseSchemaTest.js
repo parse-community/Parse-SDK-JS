@@ -15,14 +15,14 @@ describe('Schema', () => {
   });
 
   it('invalid get all no schema', (done) => {
-    Parse.Schema.all().then(() => {}).fail((e) => {
+    Parse.Schema.all().then(() => {}).catch((e) => {
       done();
     });
   });
 
   it('invalid get no schema', (done) => {
     const testSchema = new Parse.Schema('SchemaTest');
-    testSchema.get().then(() => {}).fail((e) => {
+    testSchema.get().then(() => {}).catch((e) => {
       done();
     });
   });
@@ -142,7 +142,7 @@ describe('Schema', () => {
         }).catch((error) => {
           assert.equal(error.code, Parse.Error.INVALID_SCHEMA_OPERATION);
           assert.equal(error.message, 'Class SchemaTest is not empty, contains 1 objects, cannot drop schema.');
-          return Parse.Promise.as();
+          return Promise.resolve();
         });
     }).then(() => {
       return testSchema.purge();

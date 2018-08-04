@@ -10,6 +10,7 @@
 jest.dontMock('../arrayContainsObject');
 jest.dontMock('../canBeSerialized');
 jest.dontMock('../CoreManager');
+jest.dontMock('../promiseUtils');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../equals');
@@ -21,7 +22,6 @@ jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../RESTController');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../TaskQueue');
@@ -58,7 +58,7 @@ mockQuery.prototype.containedIn = function(field, ids) {
   });
 };
 mockQuery.prototype.find = function() {
-  return ParsePromise.as(this.results);
+  return Promise.resolve(this.results);
 };
 jest.setMock('../ParseQuery', mockQuery);
 
@@ -70,7 +70,6 @@ const ParseFile = require('../ParseFile').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
 const ParseObject = require('../ParseObject').default;
 const ParseOp = require('../ParseOp');
-const ParsePromise = require('../ParsePromise').default;
 const RESTController = require('../RESTController');
 const SingleInstanceStateController = require('../SingleInstanceStateController');
 const unsavedChildren = require('../unsavedChildren').default;
@@ -80,7 +79,7 @@ const mockXHR = require('./test_helpers/mockXHR');
 CoreManager.setRESTController(RESTController);
 CoreManager.setInstallationController({
   currentInstallationId() {
-    return ParsePromise.as('iid');
+    return Promise.resolve('iid');
   }
 });
 CoreManager.set('APPLICATION_ID', 'A');
@@ -93,6 +92,10 @@ const {
   UnsetOp,
   IncrementOp
 } = require('../ParseOp');
+
+function flushPromises() {
+  return new Promise(resolve => setImmediate(resolve));
+}
 
 describe('ParseObject', () => {
   beforeEach(() => {
@@ -902,7 +905,7 @@ describe('ParseObject', () => {
     });
   });
 
-  it('can make changes while in the process of a save', (done) => {
+  it('can make changes while in the process of a save', async () => {
     var xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
@@ -911,13 +914,13 @@ describe('ParseObject', () => {
     RESTController._setXHR(function() { return xhr; });
     var p = new ParseObject('Person');
     p.set('age', 38);
-    p.save().then(() => {
+    const result = p.save().then(() => {
       expect(p._getServerData()).toEqual({ age: 38 });
       expect(p._getPendingOps().length).toBe(1);
       expect(p.get('age')).toBe(39);
-      done();
     });
     jest.runAllTicks();
+    await flushPromises();
     expect(p._getPendingOps().length).toBe(2);
     p.increment('age');
     expect(p.get('age')).toBe(39);
@@ -926,9 +929,10 @@ describe('ParseObject', () => {
     xhr.responseText = JSON.stringify({ objectId: 'P12' });
     xhr.readyState = 4;
     xhr.onreadystatechange();
+    await result;
   });
 
-  it('will queue save operations', () => {
+  it('will queue save operations', async () => {
     var xhrs = [];
     RESTController._setXHR(function() {
       var xhr = {
@@ -945,11 +949,13 @@ describe('ParseObject', () => {
     p.increment('updates');
     p.save();
     jest.runAllTicks();
+    await flushPromises();
     expect(p._getPendingOps().length).toBe(2);
     expect(xhrs.length).toBe(1);
     p.increment('updates');
     p.save();
     jest.runAllTicks();
+    await flushPromises();
     expect(p._getPendingOps().length).toBe(3);
     expect(xhrs.length).toBe(1);
 
@@ -958,6 +964,7 @@ describe('ParseObject', () => {
     xhrs[0].readyState = 4;
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
+    await flushPromises();
 
     expect(p._getServerData()).toEqual({ updates: 1 });
     expect(p.get('updates')).toBe(2);
@@ -965,7 +972,7 @@ describe('ParseObject', () => {
     expect(xhrs.length).toBe(2);
   });
 
-  it('will leave the pending ops queue untouched when a lone save fails', (done) => {
+  it('will leave the pending ops queue untouched when a lone save fails', async () => {
     var xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
@@ -975,24 +982,24 @@ describe('ParseObject', () => {
     var p = new ParseObject('Per$on');
     expect(p._getPendingOps().length).toBe(1);
     p.increment('updates');
-    p.save().then(null, (err) => {
+    const result = p.save().then(null, (err) => {
       expect(err.code).toBe(103);
       expect(err.message).toBe('Invalid class name');
       expect(p._getPendingOps().length).toBe(1);
       expect(p.dirtyKeys()).toEqual(['updates']);
       expect(p.get('updates')).toBe(1);
-
-      done();
     });
     jest.runAllTicks();
+    await flushPromises();
 
     xhr.status = 404;
     xhr.responseText = JSON.stringify({ code: 103, error: 'Invalid class name' });
     xhr.readyState = 4;
     xhr.onreadystatechange();
+    await result;
   });
 
-  it('will merge pending Ops when a save fails and others are pending', () => {
+  it('will merge pending Ops when a save fails and others are pending', async () => {
     var xhrs = [];
     RESTController._setXHR(function() {
       var xhr = {
@@ -1006,12 +1013,15 @@ describe('ParseObject', () => {
     var p = new ParseObject('Per$on');
     expect(p._getPendingOps().length).toBe(1);
     p.increment('updates');
-    p.save();
+    p.save().catch(() => {});
     jest.runAllTicks();
+    await flushPromises();
     expect(p._getPendingOps().length).toBe(2);
     p.set('updates', 12);
-    p.save();
+    p.save().catch(() => {});
     jest.runAllTicks();
+    await flushPromises();
+
     expect(p._getPendingOps().length).toBe(3);
 
     xhrs[0].status = 404;
@@ -1019,14 +1029,14 @@ describe('ParseObject', () => {
     xhrs[0].readyState = 4;
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
-
+    await flushPromises();
     expect(p._getPendingOps().length).toBe(2);
     expect(p._getPendingOps()[0]).toEqual({
       updates: new ParseOp.SetOp(12)
     });
   });
 
-  it('will deep-save the children of an object', (done) => {
+  it('will deep-save the children of an object', async () => {
     var xhrs = [];
     RESTController._setXHR(function() {
       var xhr = {
@@ -1043,13 +1053,13 @@ describe('ParseObject', () => {
     var child = new ParseObject('Item');
     child.set('value', 5);
     parent.set('child', child);
-    parent.save().then(() => {
+    const result = parent.save().then(() => {
       expect(child.id).toBe('child');
       expect(child.dirty()).toBe(false);
       expect(parent.id).toBe('parent');
-      done();
     });
     jest.runAllTicks();
+    await flushPromises();
 
     expect(xhrs.length).toBe(1);
     expect(xhrs[0].open.mock.calls[0]).toEqual(
@@ -1058,11 +1068,13 @@ describe('ParseObject', () => {
     xhrs[0].responseText = JSON.stringify([ { success: { objectId: 'child' } } ]);
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
+    await flushPromises();
 
     expect(xhrs.length).toBe(2);
     xhrs[1].responseText = JSON.stringify({ objectId: 'parent' });
     xhrs[1].onreadystatechange();
     jest.runAllTicks();
+    await result;
   });
 
   it('will fail for a circular dependency of non-existing objects', () => {
@@ -1097,7 +1109,7 @@ describe('ParseObject', () => {
     expect(unsavedChildren(comment)).toEqual([]);
   });
 
-  it('can fetch an object given an id', (done) => {
+  it('can fetch an object given an id', async () => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{
         status: 200,
@@ -1108,10 +1120,9 @@ describe('ParseObject', () => {
     );
     var p = new ParseObject('Person');
     p.id = 'P55';
-    p.fetch().then((res) => {
+    await p.fetch().then((res) => {
       expect(p).toBe(res);
       expect(p.attributes).toEqual({ count: 10 });
-      done();
     });
   });
 
@@ -1120,7 +1131,7 @@ describe('ParseObject', () => {
     obj.set('when', new Date(Date.parse(null)));
     ParseObject.saveAll([obj]).then(() => {
       done.fail('Expected invalid date to fail');
-    }).fail((error) => {
+    }).catch((error) => {
       expect(error[0].code).toEqual(ParseError.INCORRECT_TYPE);
       expect(error[0].message).toEqual('Tried to encode an invalid date.');
       done();
@@ -1128,7 +1139,7 @@ describe('ParseObject', () => {
     jest.runAllTicks();
   });
 
-  it('can save a ring of objects, given one exists', (done) => {
+  it('can save a ring of objects, given one exists', async () => {
     var xhrs = [];
     RESTController._setXHR(function() {
       var xhr = {
@@ -1147,12 +1158,12 @@ describe('ParseObject', () => {
     parent.set('child', child);
     child.set('parent', parent);
 
-    ParseObject.saveAll([parent, child]).then(() => {
+    const result = ParseObject.saveAll([parent, child]).then(() => {
       expect(child.dirty()).toBe(false);
       expect(parent.id).toBe('parent');
-      done();
     });
     jest.runAllTicks();
+    await flushPromises();
 
     expect(xhrs.length).toBe(1);
     expect(xhrs[0].open.mock.calls[0]).toEqual(
@@ -1174,6 +1185,7 @@ describe('ParseObject', () => {
     xhrs[0].responseText = JSON.stringify([ { success: { objectId: 'parent' } } ]);
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
+    await flushPromises();
 
     expect(parent.id).toBe('parent');
 
@@ -1181,9 +1193,11 @@ describe('ParseObject', () => {
     xhrs[1].responseText = JSON.stringify([ { success: {} } ]);
     xhrs[1].onreadystatechange();
     jest.runAllTicks();
+
+    await result;
   });
 
-  it('can save a chain of unsaved objects', (done) => {
+  it('can save a chain of unsaved objects', async () => {
     var xhrs = [];
     RESTController._setXHR(function() {
       var xhr = {
@@ -1202,15 +1216,15 @@ describe('ParseObject', () => {
     parent.set('child', child);
     child.set('child', grandchild);
 
-    ParseObject.saveAll([parent]).then(() => {
+    const result = ParseObject.saveAll([parent]).then(() => {
       expect(child.dirty()).toBe(false);
       expect(grandchild.dirty()).toBe(false);
       expect(parent.id).toBe('parent');
       expect(child.id).toBe('child');
       expect(grandchild.id).toBe('grandchild');
-      done();
     });
     jest.runAllTicks();
+    await flushPromises();
 
     expect(xhrs.length).toBe(1);
     expect(xhrs[0].open.mock.calls[0]).toEqual(
@@ -1226,6 +1240,7 @@ describe('ParseObject', () => {
     xhrs[0].responseText = JSON.stringify([ { success: { objectId: 'grandchild' } } ]);
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
+    await flushPromises();
 
     expect(xhrs.length).toBe(2);
     expect(xhrs[1].open.mock.calls[0]).toEqual(
@@ -1247,6 +1262,7 @@ describe('ParseObject', () => {
     xhrs[1].responseText = JSON.stringify([ { success: { objectId: 'child' } } ]);
     xhrs[1].onreadystatechange();
     jest.runAllTicks();
+    await flushPromises();
 
     expect(xhrs.length).toBe(3);
     expect(xhrs[2].open.mock.calls[0]).toEqual(
@@ -1268,6 +1284,7 @@ describe('ParseObject', () => {
     xhrs[2].responseText = JSON.stringify([ { success: { objectId: 'parent' } } ]);
     xhrs[2].onreadystatechange();
     jest.runAllTicks();
+    await result;
   });
 
   it('can update fields via a fetch() call', (done) => {
@@ -1323,7 +1340,7 @@ describe('ParseObject', () => {
     });
   });
 
-  it('can destroy an object', (done) => {
+  it('can destroy an object', async () => {
     var xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
@@ -1332,23 +1349,23 @@ describe('ParseObject', () => {
     RESTController._setXHR(function() { return xhr; });
     var p = new ParseObject('Person');
     p.id = 'pid';
-    p.destroy().then(() => {
+    const result = p.destroy().then(() => {
       expect(xhr.open.mock.calls[0]).toEqual(
         ['POST', 'https://api.parse.com/1/classes/Person/pid', true]
       );
       expect(JSON.parse(xhr.send.mock.calls[0])._method).toBe('DELETE');
-      done();
     });
     jest.runAllTicks();
-
+    await flushPromises();
     xhr.status = 200;
     xhr.responseText = JSON.stringify({});
     xhr.readyState = 4;
     xhr.onreadystatechange();
     jest.runAllTicks();
+    await result;
   });
 
-  it('can save an array of objects', (done) => {
+  it('can save an array of objects', async (done) => {
     var xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
@@ -1371,7 +1388,7 @@ describe('ParseObject', () => {
       done();
     });
     jest.runAllTicks();
-
+    await flushPromises();
     xhr.status = 200;
     xhr.responseText = JSON.stringify([
       { success: { objectId: 'pid0' } },
@@ -1385,7 +1402,7 @@ describe('ParseObject', () => {
     jest.runAllTicks();
   });
 
-  it('returns the first error when saving an array of objects', (done) => {
+  it('returns the first error when saving an array of objects', async (done) => {
     var xhrs = [];
     for (var i = 0; i < 2; i++) {
       xhrs[i] = {
@@ -1411,7 +1428,7 @@ describe('ParseObject', () => {
       expect(error.message).toBe('first error');
       done();
     });
-    jest.runAllTicks();
+    await flushPromises();
 
     xhrs[0].responseText = JSON.stringify([
       { success: { objectId: 'pid0' } },
@@ -1441,7 +1458,7 @@ describe('ParseObject', () => {
 });
 
 describe('ObjectController', () => {
-  it('can fetch a single object', (done) => {
+  it('can fetch a single object', async (done) => {
     var objectController = CoreManager.getObjectController();
     var xhr = {
       setRequestHeader: jest.fn(),
@@ -1459,7 +1476,7 @@ describe('ObjectController', () => {
       expect(body._method).toBe('GET');
       done();
     });
-    jest.runAllTicks();
+    await flushPromises();
 
     xhr.status = 200;
     xhr.responseText = JSON.stringify({});
@@ -1484,7 +1501,7 @@ describe('ObjectController', () => {
     });
   });
 
-  it('can destroy an object', (done) => {
+  it('can destroy an object', async () => {
     var objectController = CoreManager.getObjectController();
     var xhr = {
       setRequestHeader: jest.fn(),
@@ -1494,7 +1511,7 @@ describe('ObjectController', () => {
     RESTController._setXHR(function() { return xhr; });
     var p = new ParseObject('Person');
     p.id = 'pid';
-    objectController.destroy(p, {}).then(() => {
+    const result = objectController.destroy(p, {}).then(async () => {
       expect(xhr.open.mock.calls[0]).toEqual(
         ['POST', 'https://api.parse.com/1/classes/Person/pid', true]
       );
@@ -1505,6 +1522,7 @@ describe('ObjectController', () => {
         useMasterKey: true
       });
       jest.runAllTicks();
+      await flushPromises();
       xhr.onreadystatechange();
       jest.runAllTicks();
       return destroy;
@@ -1515,18 +1533,18 @@ describe('ObjectController', () => {
       var body = JSON.parse(xhr.send.mock.calls[1]);
       expect(body._method).toBe('DELETE');
       expect(body._MasterKey).toBe('C');
-      done();
     });
     jest.runAllTicks();
-
+    await flushPromises();
     xhr.status = 200;
     xhr.responseText = JSON.stringify({});
     xhr.readyState = 4;
     xhr.onreadystatechange();
     jest.runAllTicks();
+    await result;
   });
 
-  it('can destroy an array of objects', (done) => {
+  it('can destroy an array of objects', async () => {
     var objectController = CoreManager.getObjectController();
     var xhrs = [];
     for (var i = 0; i < 3; i++) {
@@ -1546,7 +1564,7 @@ describe('ObjectController', () => {
       objects[i] = new ParseObject('Person');
       objects[i].id = 'pid' + i;
     }
-    objectController.destroy(objects, {}).then(() => {
+    const result = objectController.destroy(objects, {}).then(async () => {
       expect(xhrs[0].open.mock.calls[0]).toEqual(
         ['POST', 'https://api.parse.com/1/batch', true]
       );
@@ -1581,8 +1599,10 @@ describe('ObjectController', () => {
       }
       var destroy = objectController.destroy(objects, {});
       jest.runAllTicks();
+      await flushPromises();
       xhrs[1].onreadystatechange();
       jest.runAllTicks();
+      await flushPromises();
       expect(xhrs[1].open.mock.calls.length).toBe(1);
       xhrs[2].onreadystatechange();
       jest.runAllTicks();
@@ -1590,15 +1610,16 @@ describe('ObjectController', () => {
     }).then(() => {
       expect(JSON.parse(xhrs[1].send.mock.calls[0]).requests.length).toBe(20);
       expect(JSON.parse(xhrs[2].send.mock.calls[0]).requests.length).toBe(2);
-      done();
     });
     jest.runAllTicks();
+    await flushPromises();
 
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
+    await result;
   });
 
-  it('can save an object', (done) => {
+  it('can save an object', async () => {
     var objectController = CoreManager.getObjectController();
     var xhr = {
       setRequestHeader: jest.fn(),
@@ -1609,21 +1630,21 @@ describe('ObjectController', () => {
     var p = new ParseObject('Person');
     p.id = 'pid';
     p.set('key', 'value');
-    objectController.save(p, {}).then(() => {
+    const result = objectController.save(p, {}).then(() => {
       expect(xhr.open.mock.calls[0]).toEqual(
         ['POST', 'https://api.parse.com/1/classes/Person/pid', true]
       );
       var body = JSON.parse(xhr.send.mock.calls[0]);
       expect(body.key).toBe('value');
-      done();
     });
     jest.runAllTicks();
-
+    await flushPromises();
     xhr.status = 200;
     xhr.responseText = JSON.stringify({});
     xhr.readyState = 4;
     xhr.onreadystatechange();
     jest.runAllTicks();
+    await result;
   });
 
   it('returns an empty promise from an empty save', (done) => {
@@ -1634,7 +1655,7 @@ describe('ObjectController', () => {
     jest.runAllTicks();
   });
 
-  it('can save an array of files', (done) => {
+  it('can save an array of files', async () => {
     var objectController = CoreManager.getObjectController();
     var xhrs = [];
     for (var i = 0; i < 4; i++) {
@@ -1653,7 +1674,7 @@ describe('ObjectController', () => {
       new ParseFile('parse2.txt', { base64: 'ParseA==' }),
       new ParseFile('parse3.txt', { base64: 'ParseA==' })
     ];
-    objectController.save(files, {}).then(() => {
+    const result = objectController.save(files, {}).then(() => {
       expect(files[0].url()).toBe(
         'http://files.parsetfss.com/a/parse.txt'
       );
@@ -1663,22 +1684,23 @@ describe('ObjectController', () => {
       expect(files[2].url()).toBe(
         'http://files.parsetfss.com/a/parse3.txt'
       );
-      done();
     });
     jest.runAllTicks();
-
+    await flushPromises();
     var names = ['parse.txt', 'parse2.txt', 'parse3.txt'];
     for (var i = 0; i < 3; i++) {
       xhrs[i].responseText = JSON.stringify({
         name: 'parse.txt',
         url: 'http://files.parsetfss.com/a/' + names[i]
       });
+      await flushPromises();
       xhrs[i].onreadystatechange();
       jest.runAllTicks();
     }
+    await result;
   });
 
-  it('can save an array of objects', (done) => {
+  it('can save an array of objects', async () => {
     var objectController = CoreManager.getObjectController();
     var xhrs = [];
     for (var i = 0; i < 3; i++) {
@@ -1696,7 +1718,7 @@ describe('ObjectController', () => {
     for (var i = 0; i < 5; i++) {
       objects[i] = new ParseObject('Person');
     }
-    objectController.save(objects, {}).then((results) => {
+    const result = objectController.save(objects, {}).then(async (results) => {
       expect(results.length).toBe(5);
       expect(results[0].id).toBe('pid0');
       expect(results[0].get('index')).toBe(0);
@@ -1712,6 +1734,8 @@ describe('ObjectController', () => {
       }
       var save = objectController.save(objects, {});
       jest.runAllTicks();
+      await flushPromises();
+
       xhrs[1].responseText = JSON.stringify(response.slice(0, 20));
       xhrs[2].responseText = JSON.stringify(response.slice(20));
 
@@ -1724,6 +1748,7 @@ describe('ObjectController', () => {
 
       xhrs[1].onreadystatechange();
       jest.runAllTicks();
+      await flushPromises();
       expect(objects[0].dirty()).toBe(false);
       expect(objects[0].id).toBe('pid0');
       expect(objects[20].dirty()).toBe(true);
@@ -1731,16 +1756,16 @@ describe('ObjectController', () => {
 
       xhrs[2].onreadystatechange();
       jest.runAllTicks();
+      await flushPromises();
       expect(objects[20].dirty()).toBe(false);
       expect(objects[20].get('index')).toBe(0);
       expect(objects[20].id).toBe('pid20');
       return save;
     }).then((results) => {
       expect(results.length).toBe(22);
-      done();
     });
     jest.runAllTicks();
-
+    await flushPromises();
     xhrs[0].responseText = JSON.stringify([
       { success: { objectId: 'pid0', index: 0 } },
       { success: { objectId: 'pid1', index: 1 } },
@@ -1750,9 +1775,10 @@ describe('ObjectController', () => {
     ]);
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
+    await result;
   });
 
-  it('does not fail when checking if arrays of pointers are dirty', () => {
+  it('does not fail when checking if arrays of pointers are dirty', async () => {
     var objectController = CoreManager.getObjectController();
     var xhrs = [];
     for (var i = 0; i < 2; i++) {
@@ -1779,7 +1805,7 @@ describe('ObjectController', () => {
     brand.set('items', items);
     expect(function() { brand.save(); }).not.toThrow();
     jest.runAllTicks();
-
+    await flushPromises();
     xhrs[0].onreadystatechange();
   });
 
@@ -1912,7 +1938,7 @@ describe('ParseObject (unique instance mode)', () => {
     });
   });
 
-  it('can save an array of objects', (done) => {
+  it('can save an array of objects', async () => {
     var xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
@@ -1923,7 +1949,7 @@ describe('ParseObject (unique instance mode)', () => {
     for (var i = 0; i < 5; i++) {
       objects[i] = new ParseObject('Person');
     }
-    ParseObject.saveAll(objects).then(() => {
+    const result = ParseObject.saveAll(objects).then(() => {
       expect(xhr.open.mock.calls[0]).toEqual(
         ['POST', 'https://api.parse.com/1/batch', true]
       );
@@ -1932,7 +1958,6 @@ describe('ParseObject (unique instance mode)', () => {
         path: '/1/classes/Person',
         body: {}
       });
-      done();
     });
     jest.runAllTicks();
 
@@ -1944,9 +1969,11 @@ describe('ParseObject (unique instance mode)', () => {
       { success: { objectId: 'pid3' } },
       { success: { objectId: 'pid4' } },
     ]);
+    await flushPromises();
     xhr.readyState = 4;
     xhr.onreadystatechange();
     jest.runAllTicks();
+    await result;
   });
 
   it('preserves changes when changing the id', () => {

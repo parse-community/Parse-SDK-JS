@@ -8,7 +8,6 @@
  */
 
 jest.dontMock('../CoreManager');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../Push');
 jest.dontMock('./test_helpers/asyncHelper');
 
@@ -25,7 +24,6 @@ mockQuery.prototype = {
 jest.setMock('../ParseQuery', mockQuery);
 
 var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise').default;
 var ParseQuery = require('../ParseQuery');
 var Push = require('../Push');
 
@@ -36,7 +34,7 @@ describe('Push', () => {
     CoreManager.setPushController({
       send(data, options) {
         // Pipe data through so we can test it
-        return ParsePromise.as(data);
+        return Promise.resolve(data);
       }
     });
   });

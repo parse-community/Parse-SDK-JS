@@ -59,8 +59,10 @@ describe('Parse Aggregate Query', () => {
     const query = new Parse.Query(TestObject);
     return query.distinct('score').then((results) => {
       assert.equal(results.length, 2);
-      assert.equal(results[0], 10);
-      assert.equal(results[1], 20);
+      // Order the results in case
+      const orderedResults = results.sort((a, b) => a - b);
+      assert.equal(orderedResults[0], 10);
+      assert.equal(orderedResults[1], 20);
     });
   });
 

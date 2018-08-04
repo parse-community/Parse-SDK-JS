@@ -11,11 +11,11 @@
 
 import CoreManager from './CoreManager';
 import encode from './encode';
+import { continueWhile } from './promiseUtils';
 import ParseError from './ParseError';
 import ParseGeoPoint from './ParseGeoPoint';
 import ParsePolygon from './ParsePolygon';
 import ParseObject from './ParseObject';
-import ParsePromise from './ParsePromise';
 
 import type { RequestOptions, FullOptions } from './RESTController';
 
@@ -143,47 +143,35 @@ function handleSelectResult(data: any, select: Array<string>){
  * whether the fetch succeeded or not.
  *
  * <pre>
- * var query = new parse.query(myclass);
- * query.find({
- *   success: function(results) {
- *     // results is an array of parse.object.
- *   },
- *
- *   error: function(error) {
- *     // error is an instance of parse.error.
- *   }
+ * var query = new Parse.Query(myclass);
+ * query.find().then((results) => {
+ *   // results is an array of parse.object.
+ * }).catch((error) =>  {
+ *  // error is an instance of parse.error.
  * });</pre></p>
  *
- * <p>a parse.query can also be used to retrieve a single object whose id is
+ * <p>a Parse.Query can also be used to retrieve a single object whose id is
  * known, through the get method. for example, this sample code fetches an
  * object of class <code>myclass</code> and id <code>myid</code>. it calls a
  * different function depending on whether the fetch succeeded or not.
  *
  * <pre>
- * var query = new parse.query(myclass);
- * query.get(myid, {
- *   success: function(object) {
+ * var query = new Parse.Query(myclass);
+ * query.get(myid).then((object) => {
  *     // object is an instance of parse.object.
- *   },
- *
- *   error: function(object, error) {
- *     // error is an instance of parse.error.
- *   }
+ * }).catch((error) =>  {
+ *  // error is an instance of parse.error.
  * });</pre></p>
  *
- * <p>a parse.query can also be used to count the number of objects that match
+ * <p>a Parse.Query can also be used to count the number of objects that match
  * the query without retrieving all of those objects. for example, this
  * sample code counts the number of objects of the class <code>myclass</code>
  * <pre>
- * var query = new parse.query(myclass);
- * query.count({
- *   success: function(number) {
+ * var query = new Parse.Query(myclass);
+ * query.count().then((number) => {
  *     // there are number instances of myclass.
- *   },
- *
- *   error: function(error) {
+ * }).catch((error) => {
  *     // error is an instance of Parse.Error.
- *   }
  * });</pre></p>
  * @alias Parse.Query
  */
@@ -385,20 +373,18 @@ class ParseQuery {
    * find completes. Unlike the <code>first</code> method, it never returns undefined.
    *
    * @param {String} objectId The id of the object to be fetched.
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the result when
+   * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  get(objectId: string, options?: FullOptions): ParsePromise {
+  get(objectId: string, options?: FullOptions): Promise {
     this.equalTo('objectId', objectId);
 
     var firstOptions = {};
@@ -418,8 +404,8 @@ class ParseQuery {
         ParseError.OBJECT_NOT_FOUND,
         'Object not found.'
       );
-      return ParsePromise.error(errorObject);
-    })._thenRunCallbacks(options, null);
+      return Promise.reject(errorObject);
+    });
   }
 
   /**
@@ -427,20 +413,18 @@ class ParseQuery {
    * Either options.success or options.error is called when the find
    * completes.
    *
-   * @param {Object} options A Backbone-style options object. Valid options
+   * @param {Object} options Valid options
    * are:<ul>
-   *   <li>success: Function to call when the find completes successfully.
-   *   <li>error: Function to call when the find fails.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the results when
+   * @return {Promise} A promise that is resolved with the results when
    * the query completes.
    */
-  find(options?: FullOptions): ParsePromise {
+  find(options?: FullOptions): Promise {
     options = options || {};
 
     let findOptions = {};
@@ -477,7 +461,7 @@ class ParseQuery {
 
         return ParseObject.fromJSON(data, !select);
       });
-    })._thenRunCallbacks(options);
+    });
   }
 
   /**
@@ -485,20 +469,18 @@ class ParseQuery {
    * Either options.success or options.error is called when the count
    * completes.
    *
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the count completes successfully.
-   *   <li>error: Function to call when the find fails.
+   * @param {Object} options 
+   * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the count when
+   * @return {Promise} A promise that is resolved with the count when
    * the query completes.
    */
-  count(options?: FullOptions): ParsePromise {
+  count(options?: FullOptions): Promise {
     options = options || {};
 
     var findOptions = {};
@@ -521,24 +503,22 @@ class ParseQuery {
       findOptions
     ).then((result) => {
       return result.count;
-    })._thenRunCallbacks(options);
+    });
   }
 
   /**
    * Executes a distinct query and returns unique values
    *
    * @param {String} key A field to find distinct values
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the count completes successfully.
-   *   <li>error: Function to call when the find fails.
+   * @param {Object} options 
+   * Valid options are:<ul>
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the query completes.
+   * @return {Promise} A promise that is resolved with the query completes.
    */
-  distinct(key: string, options?: FullOptions): ParsePromise {
+  distinct(key: string, options?: FullOptions): Promise {
     options = options || {};
 
     const distinctOptions = {
@@ -559,24 +539,21 @@ class ParseQuery {
       distinctOptions
     ).then((results) => {
       return results.results;
-    })._thenRunCallbacks(options);
+    });
   }
 
    /**
    * Executes an aggregate query and returns aggregate results
    *
    * @param {Mixed} pipeline Array or Object of stages to process query
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the count completes successfully.
-   *   <li>error: Function to call when the find fails.
+   * @param {Object} options Valid options are:<ul>
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the query completes.
+   * @return {Promise} A promise that is resolved with the query completes.
    */
-  aggregate(pipeline: mixed, options?: FullOptions): ParsePromise {
+  aggregate(pipeline: mixed, options?: FullOptions): Promise {
     options = options || {};
 
     const aggregateOptions = {
@@ -606,7 +583,7 @@ class ParseQuery {
       aggregateOptions
     ).then((results) => {
       return results.results;
-    })._thenRunCallbacks(options);
+    });
   }
 
   /**
@@ -615,20 +592,17 @@ class ParseQuery {
    * Either options.success or options.error is called when it completes.
    * success is passed the object if there is one. otherwise, undefined.
    *
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the find completes successfully.
-   *   <li>error: Function to call when the find fails.
+   * @param {Object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the object when
+   * @return {Promise} A promise that is resolved with the object when
    * the query completes.
    */
-  first(options?: FullOptions): ParsePromise {
+  first(options?: FullOptions): Promise {
     options = options || {};
 
     var findOptions = {};
@@ -667,7 +641,7 @@ class ParseQuery {
       }
 
       return ParseObject.fromJSON(objects[0], !select);
-    })._thenRunCallbacks(options);
+    });
   }
 
   /**
@@ -679,27 +653,22 @@ class ParseQuery {
    * and may not use limit or skip.
    * @param {Function} callback Callback that will be called with each result
    *     of the query.
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the iteration completes successfully.
-   *   <li>error: Function to call when the iteration fails.
+   * @param {Object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Parse.Promise} A promise that will be fulfilled once the
+   * @return {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
-  each(callback: (obj: ParseObject) => any, options?: BatchOptions): ParsePromise {
+  each(callback: (obj: ParseObject) => any, options?: BatchOptions): Promise {
     options = options || {};
 
     if (this._order || this._skip || (this._limit >= 0)) {
       var error = 'Cannot iterate on a query with sort, skip, or limit.';
-      return ParsePromise.error(error)._thenRunCallbacks(options);
+      return Promise.reject(error);
     }
-
-    var promise = new ParsePromise();
 
     var query = new ParseQuery(this.className);
     // We can override the batch size from the options.
@@ -743,11 +712,11 @@ class ParseQuery {
     }
 
     var finished = false;
-    return ParsePromise._continueWhile(() => {
+    return continueWhile(() => {
       return !finished;
     }, () => {
       return query.find(findOptions).then((results) => {
-        var callbacksDone = ParsePromise.as();
+        var callbacksDone = Promise.resolve();
         results.forEach((result) => {
           callbacksDone = callbacksDone.then(() => {
             return callback(result);
@@ -762,7 +731,7 @@ class ParseQuery {
           }
         });
       });
-    })._thenRunCallbacks(options);
+    });
   }
 
   /** Query Conditions **/
@@ -1427,7 +1396,7 @@ class ParseQuery {
 }
 
 var DefaultController = {
-  find(className: string, params: QueryJSON, options: RequestOptions): ParsePromise {
+  find(className: string, params: QueryJSON, options: RequestOptions): Promise {
     var RESTController = CoreManager.getRESTController();
 
     return RESTController.request(
@@ -1438,7 +1407,7 @@ var DefaultController = {
     );
   },
 
-  aggregate(className: string, params: any, options: RequestOptions): ParsePromise {
+  aggregate(className: string, params: any, options: RequestOptions): Promise {
     const RESTController = CoreManager.getRESTController();
 
     return RESTController.request(

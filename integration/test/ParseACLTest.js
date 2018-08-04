@@ -57,7 +57,7 @@ describe('Parse.ACL', () => {
       Parse.User.logOut();
 
       return new Parse.Query(TestObject).get(object.id);
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });
@@ -106,7 +106,7 @@ describe('Parse.ACL', () => {
 
       object.set('score', 10);
       return object.save();
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });
@@ -130,7 +130,7 @@ describe('Parse.ACL', () => {
       Parse.User.logOut();
 
       return object.destroy();
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });
@@ -262,7 +262,7 @@ describe('Parse.ACL', () => {
       Parse.User.logOut();
       object.set('score', 10);
       return object.save();
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });
@@ -283,7 +283,7 @@ describe('Parse.ACL', () => {
     }).then(() => {
       Parse.User.logOut();
       return object.destroy();
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });
@@ -304,7 +304,7 @@ describe('Parse.ACL', () => {
     }).then(() => {
       Parse.User.logOut();
       return new Parse.Query(TestObject).get(object.id);
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });
@@ -494,7 +494,7 @@ describe('Parse.ACL', () => {
     }).then(() => {
       let query = new Parse.Query(TestObject);
       return query.get(object.id);
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });
@@ -546,7 +546,7 @@ describe('Parse.ACL', () => {
     }).then(() => {
       object.set('score', 10);
       return object.save();
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });
@@ -571,7 +571,7 @@ describe('Parse.ACL', () => {
       return Parse.User.logOut();
     }).then(() => {
       return object.destroy();
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });

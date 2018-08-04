@@ -12,7 +12,6 @@
 import EventEmitter from './EventEmitter';
 import LiveQueryClient from './LiveQueryClient';
 import CoreManager from './CoreManager';
-import ParsePromise from './ParsePromise';
 
 function open() {
   const LiveQueryController = CoreManager.getLiveQueryController();
@@ -96,9 +95,9 @@ const DefaultLiveQueryController = {
   setDefaultLiveQueryClient(liveQueryClient: any) {
     defaultLiveQueryClient = liveQueryClient;
   },
-  getDefaultLiveQueryClient(): ParsePromise {
+  getDefaultLiveQueryClient(): Promise {
     if (defaultLiveQueryClient) {
-      return ParsePromise.as(defaultLiveQueryClient);
+      return Promise.resolve(defaultLiveQueryClient);
     }
 
     return getSessionToken().then((sessionToken) => {
@@ -151,12 +150,12 @@ const DefaultLiveQueryController = {
   },
   open() {
     getLiveQueryClient().then((liveQueryClient) => {
-      this.resolve(liveQueryClient.open());
+      return liveQueryClient.open();
     });
   },
   close() {
     getLiveQueryClient().then((liveQueryClient) => {
-      this.resolve(liveQueryClient.close());
+      return liveQueryClient.close();
     });
   },
   subscribe(query: any): EventEmitter {
@@ -202,15 +201,13 @@ const DefaultLiveQueryController = {
         subscription.on('error', (object) => {
           subscriptionWrap.emit('error', object);
         });
-
-        this.resolve();
       });
     });
     return subscriptionWrap;
   },
   unsubscribe(subscription: any) {
     getLiveQueryClient().then((liveQueryClient) => {
-      this.resolve(liveQueryClient.unsubscribe(subscription));
+      return liveQueryClient.unsubscribe(subscription);
     });
   },
   _clearCachedDefaultClient() {

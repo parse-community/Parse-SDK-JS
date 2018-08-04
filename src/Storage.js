@@ -10,7 +10,6 @@
  */
 
 import CoreManager from './CoreManager';
-import ParsePromise from './ParsePromise';
 
 var Storage = {
   async(): boolean {
@@ -28,12 +27,12 @@ var Storage = {
     return controller.getItem(path);
   },
 
-  getItemAsync(path: string): ParsePromise {
+  getItemAsync(path: string): Promise {
     var controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.getItemAsync(path);
     }
-    return ParsePromise.as(controller.getItem(path));
+    return Promise.resolve(controller.getItem(path));
   },
 
   setItem(path: string, value: string): void {
@@ -46,12 +45,12 @@ var Storage = {
     return controller.setItem(path, value);
   },
 
-  setItemAsync(path: string, value: string): ParsePromise {
+  setItemAsync(path: string, value: string): Promise {
     var controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.setItemAsync(path, value);
     }
-    return ParsePromise.as(controller.setItem(path, value));
+    return Promise.resolve(controller.setItem(path, value));
   },
 
   removeItem(path: string): void {
@@ -64,12 +63,12 @@ var Storage = {
     return controller.removeItem(path);
   },
 
-  removeItemAsync(path: string): ParsePromise {
+  removeItemAsync(path: string): Promise {
     var controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.removeItemAsync(path);
     }
-    return ParsePromise.as(controller.removeItem(path));
+    return Promise.resolve(controller.removeItem(path));
   },
 
   generatePath(path: string): string {

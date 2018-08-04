@@ -271,7 +271,7 @@ describe('Array Operations', () => {
     object.save().then(() => {
       object.add('strings', 'bar');
       object.addUnique('strings', 'bar');
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.message, 'Cannot merge AddUnique Op with the previous Op');
       done();
     });
@@ -283,7 +283,7 @@ describe('Array Operations', () => {
     object.save().then(() => {
       object.addUnique('strings', 'bar');
       object.add('strings', 'bar');
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.message, 'Cannot merge Add Op with the previous Op');
       done();
     });
@@ -295,7 +295,7 @@ describe('Array Operations', () => {
     object.save().then(() => {
       object.add('strings', 'bar');
       object.remove('strings', 'bar');
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.message, 'Cannot merge Remove Op with the previous Op');
       done();
     });
@@ -307,7 +307,7 @@ describe('Array Operations', () => {
     object.save().then(() => {
       object.remove('strings', 'bar');
       object.add('strings', 'bar');
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.message, 'Cannot merge Add Op with the previous Op');
       done();
     });
@@ -319,7 +319,7 @@ describe('Array Operations', () => {
     object.save().then(() => {
       object.addUnique('strings', 'bar');
       object.remove('strings', 'bar');
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.message, 'Cannot merge Remove Op with the previous Op');
       done();
     });
@@ -331,7 +331,7 @@ describe('Array Operations', () => {
     object.save().then(() => {
       object.remove('strings', 'bar');
       object.addUnique('strings', 'bar');
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.message, 'Cannot merge AddUnique Op with the previous Op');
       done();
     });

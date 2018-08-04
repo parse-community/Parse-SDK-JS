@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "1.11.1",
+  "version": "2.0.0",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://www.parse.com",
   "keywords": [
@@ -39,6 +39,8 @@
     "babel-plugin-minify-dead-code-elimination": "0.4.3",
     "babel-plugin-transform-inline-environment-variables": "0.4.3",
     "babel-plugin-transform-runtime": "6.23.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "babel-preset-es2015": "6.24.1",
     "babel-preset-react": "6.24.1",
     "babel-preset-stage-2": "6.24.1",
@@ -70,7 +72,8 @@
     "watch": "PARSE_BUILD=${PARSE_BUILD:=node} gulp watch",
     "integration": "TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
-    "release_docs": "./release_docs.sh"
+    "release_docs": "./release_docs.sh",
+    "prepare": "npm run build"
   },
   "jest": {
     "automock": true,

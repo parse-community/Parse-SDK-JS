@@ -36,13 +36,13 @@ describe('Master Key', () => {
     }).then(() => {
       // expect success
       done();
-    }).fail((e) => console.log(e));
+    }).catch((e) => console.log(e));
   });
 
   it('throws when no master key is provided', (done) => {
     Parse.CoreManager.set('MASTER_KEY', null);
     let object = new TestObject();
-    object.save(null, { useMasterKey: true }).fail(() => {
+    object.save(null, { useMasterKey: true }).catch(() => {
       // should fail
       done();
     });
