@@ -11,14 +11,13 @@
 
 import CoreManager from './CoreManager';
 
-import type ParsePromise from './ParsePromise';
-
 /**
  * Parse.Analytics provides an interface to Parse's logging and analytics
  * backend.
  *
  * @class Parse.Analytics
  * @static
+ * @hideconstructor
  */
 
  /**
@@ -44,19 +43,20 @@ import type ParsePromise from './ParsePromise';
   * There is a default limit of 8 dimensions per event tracked.
   *
   * @method track
+  * @name Parse.Analytics.track
   * @param {String} name The name of the custom event to report to Parse as
   * having happened.
   * @param {Object} dimensions The dictionary of information by which to
   * segment this event.
-  * @param {Object} options A Backbone-style callback object.
-  * @return {Parse.Promise} A promise that is resolved when the round-trip
+  * @param {Object} options
+  * @return {Promise} A promise that is resolved when the round-trip
   * to the server completes.
   */
 export function track(
     name: string,
     dimensions: { [key: string]: string },
     options?: mixed
-  ): ParsePromise {
+  ): Promise {
   name = name || '';
   name = name.replace(/^\s*/, '');
   name = name.replace(/\s*$/, '');
@@ -73,11 +73,8 @@ export function track(
   }
 
   options = options || {};
-  return (
-    CoreManager.getAnalyticsController()
-      .track(name, dimensions)
-      ._thenRunCallbacks(options)
-  );
+  return CoreManager.getAnalyticsController()
+    .track(name, dimensions);
 }
 
 var DefaultController = {

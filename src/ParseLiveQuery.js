@@ -12,7 +12,6 @@
 import EventEmitter from './EventEmitter';
 import LiveQueryClient from './LiveQueryClient';
 import CoreManager from './CoreManager';
-import ParsePromise from './ParsePromise';
 
 function open() {
   const LiveQueryController = CoreManager.getLiveQueryController();
@@ -59,7 +58,7 @@ let LiveQuery = new EventEmitter();
  * After open is called, the LiveQuery will try to send a connect request
  * to the LiveQuery server.
  * 
- * @method open
+
  */ 
 LiveQuery.open = open;
 
@@ -70,7 +69,7 @@ LiveQuery.open = open;
  * If you call query.subscribe() after this, we'll create a new WebSocket
  * connection to the LiveQuery server.
  * 
- * @method close
+
  */
 
 LiveQuery.close = close;
@@ -96,9 +95,9 @@ const DefaultLiveQueryController = {
   setDefaultLiveQueryClient(liveQueryClient: any) {
     defaultLiveQueryClient = liveQueryClient;
   },
-  getDefaultLiveQueryClient(): ParsePromise {
+  getDefaultLiveQueryClient(): Promise {
     if (defaultLiveQueryClient) {
-      return ParsePromise.as(defaultLiveQueryClient);
+      return Promise.resolve(defaultLiveQueryClient);
     }
 
     return getSessionToken().then((sessionToken) => {
@@ -151,12 +150,12 @@ const DefaultLiveQueryController = {
   },
   open() {
     getLiveQueryClient().then((liveQueryClient) => {
-      this.resolve(liveQueryClient.open());
+      return liveQueryClient.open();
     });
   },
   close() {
     getLiveQueryClient().then((liveQueryClient) => {
-      this.resolve(liveQueryClient.close());
+      return liveQueryClient.close();
     });
   },
   subscribe(query: any): EventEmitter {
@@ -196,15 +195,19 @@ const DefaultLiveQueryController = {
         subscription.on('delete', (object) => {
           subscriptionWrap.emit('delete', object);
         });
-
-        this.resolve();
+        subscription.on('close', (object) => {
+          subscriptionWrap.emit('close', object);
+        });
+        subscription.on('error', (object) => {
+          subscriptionWrap.emit('error', object);
+        });
       });
     });
     return subscriptionWrap;
   },
   unsubscribe(subscription: any) {
     getLiveQueryClient().then((liveQueryClient) => {
-      this.resolve(liveQueryClient.unsubscribe(subscription));
+      return liveQueryClient.unsubscribe(subscription);
     });
   },
   _clearCachedDefaultClient() {

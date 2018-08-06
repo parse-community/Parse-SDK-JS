@@ -15,6 +15,7 @@ jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../equals');
 jest.dontMock('../escape');
+jest.dontMock('../promiseUtils');
 jest.dontMock('../EventEmitter');
 jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../parseDate');
@@ -23,7 +24,6 @@ jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../RESTController');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../TaskQueue');
@@ -51,13 +51,13 @@ describe('LiveQueryClient', () => {
     });
     // Mock _getWebSocketImplementation
     liveQueryClient._getWebSocketImplementation = function() {
-      return jest.genMockFunction();
+      return jest.fn();
     }
     // Mock handlers
-    liveQueryClient._handleWebSocketOpen = jest.genMockFunction();
-    liveQueryClient._handleWebSocketMessage = jest.genMockFunction();
-    liveQueryClient._handleWebSocketClose = jest.genMockFunction();
-    liveQueryClient._handleWebSocketError = jest.genMockFunction();
+    liveQueryClient._handleWebSocketOpen = jest.fn();
+    liveQueryClient._handleWebSocketMessage = jest.fn();
+    liveQueryClient._handleWebSocketClose = jest.fn();
+    liveQueryClient._handleWebSocketError = jest.fn();
 
     liveQueryClient.open();
 
@@ -83,7 +83,7 @@ describe('LiveQueryClient', () => {
       sessionToken: 'sessionToken'
     });
     liveQueryClient.socket = {
-      send: jest.genMockFunction()
+      send: jest.fn()
     };
 
     liveQueryClient._handleWebSocketOpen();
@@ -98,7 +98,7 @@ describe('LiveQueryClient', () => {
     expect(message.sessionToken).toEqual('sessionToken');
   });
 
-  it('can handle WebSocket connected response message', () => {
+  it('can handle WebSocket connected response message', async () => {
     var liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
       serverURL: 'ws://test',
@@ -123,7 +123,7 @@ describe('LiveQueryClient', () => {
 
     expect(isChecked).toBe(true);
     expect(liveQueryClient.id).toBe(1);
-    expect(liveQueryClient.connectPromise._resolved).toBe(true);
+    await liveQueryClient.connectPromise;
     expect(liveQueryClient.state).toEqual('connected');
   });
 
@@ -257,7 +257,7 @@ describe('LiveQueryClient', () => {
       sessionToken: 'sessionToken'
     });
 
-    liveQueryClient.open = jest.genMockFunction();
+    liveQueryClient.open = jest.fn();
 
     let attempts = liveQueryClient.attempts;
     liveQueryClient._handleReconnect();
@@ -289,7 +289,7 @@ describe('LiveQueryClient', () => {
     expect(isChecked).toBe(true);
   });
 
-  it('can subscribe', () => {
+  it('can subscribe', async () => {
     var liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
       serverURL: 'ws://test',
@@ -298,16 +298,16 @@ describe('LiveQueryClient', () => {
       sessionToken: 'sessionToken'
     });
     liveQueryClient.socket = {
-      send: jest.genMockFunction()
+      send: jest.fn()
     };
     var query = new ParseQuery('Test');
     query.equalTo('key', 'value');
 
     var subscription = liveQueryClient.subscribe(query);
     liveQueryClient.connectPromise.resolve();
-
     expect(subscription).toBe(liveQueryClient.subscriptions.get(1));
     expect(liveQueryClient.requestId).toBe(2);
+    await liveQueryClient.connectPromise;
     var messageStr = liveQueryClient.socket.send.mock.calls[0][0];
     var message = JSON.parse(messageStr);
     expect(message).toEqual({
@@ -322,7 +322,7 @@ describe('LiveQueryClient', () => {
     });
   });
 
-  it('can unsubscribe', () => {
+  it('can unsubscribe', async () => {
     var liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
       serverURL: 'ws://test',
@@ -331,7 +331,7 @@ describe('LiveQueryClient', () => {
       sessionToken: 'sessionToken'
     });
     liveQueryClient.socket = {
-      send: jest.genMockFunction()
+      send: jest.fn()
     };
     var subscription = {
       id: 1
@@ -340,8 +340,8 @@ describe('LiveQueryClient', () => {
 
     liveQueryClient.unsubscribe(subscription);
     liveQueryClient.connectPromise.resolve();
-
     expect(liveQueryClient.subscriptions.size).toBe(0);
+    await liveQueryClient.connectPromise;
     var messageStr = liveQueryClient.socket.send.mock.calls[0][0];
     var message = JSON.parse(messageStr);
     expect(message).toEqual({
@@ -350,7 +350,7 @@ describe('LiveQueryClient', () => {
     });
   });
 
-  it('can resubscribe', () => {
+  it('can resubscribe', async () => {
     var liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
       serverURL: 'ws://test',
@@ -359,7 +359,7 @@ describe('LiveQueryClient', () => {
       sessionToken: 'sessionToken'
     });
     liveQueryClient.socket = {
-      send: jest.genMockFunction()
+      send: jest.fn()
     };
     var query = new ParseQuery('Test');
     query.equalTo('key', 'value');
@@ -369,6 +369,7 @@ describe('LiveQueryClient', () => {
     liveQueryClient.resubscribe();
 
     expect(liveQueryClient.requestId).toBe(2);
+    await liveQueryClient.connectPromise;
     var messageStr = liveQueryClient.socket.send.mock.calls[0][0];
     var message = JSON.parse(messageStr);
     expect(message).toEqual({
@@ -393,7 +394,7 @@ describe('LiveQueryClient', () => {
     });
     liveQueryClient.state = 'connected';
     liveQueryClient.socket = {
-      close: jest.genMockFunction()
+      close: jest.fn()
     }
     var subscription = new events.EventEmitter();
     liveQueryClient.subscriptions.set(1, subscription);

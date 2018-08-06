@@ -9,51 +9,53 @@
  * @flow
  */
 
-import ParsePromise from './ParsePromise';
-// RN packager nonsense
-import { AsyncStorage } from 'react-native/Libraries/react-native/react-native.js';
+import CoreManager from './CoreManager';
 
 var StorageController = {
   async: 1,
 
-  getItemAsync(path: string): ParsePromise {
-    var p = new ParsePromise();
-    AsyncStorage.getItem(path, function(err, value) {
-      if (err) {
-        p.reject(err);
-      } else {
-        p.resolve(value);
-      }
-    });
-    return p;
+  getAsyncStorage(): any {
+    return CoreManager.getAsyncStorage();
   },
 
-  setItemAsync(path: string, value: string): ParsePromise {
-    var p = new ParsePromise();
-    AsyncStorage.setItem(path, value, function(err) {
-      if (err) {
-        p.reject(err);
-      } else {
-        p.resolve(value);
-      }
+  getItemAsync(path: string): Promise {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().getItem(path, function(err, value) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(value);
+        }
+      });
     });
-    return p;
   },
 
-  removeItemAsync(path: string): ParsePromise {
-    var p = new ParsePromise();
-    AsyncStorage.removeItem(path, function(err) {
-      if (err) {
-        p.reject(err);
-      } else {
-        p.resolve();
-      }
+  setItemAsync(path: string, value: string): Promise {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().setItem(path, value, function(err, value) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(value);
+        }
+      });
     });
-    return p;
+  },
+
+  removeItemAsync(path: string): Promise {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().removeItem(path, function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
   },
 
   clear() {
-    AsyncStorage.clear();
+    this.getAsyncStorage().clear();
   }
 };
 

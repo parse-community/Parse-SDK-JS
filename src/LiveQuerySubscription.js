@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015-present, Parse, LLC.
  * All rights reserved.
  *
@@ -16,10 +16,6 @@ import CoreManager from './CoreManager';
  * Extends events.EventEmitter
  * <a href="https://nodejs.org/api/events.html#events_class_eventemitter">cloud functions</a>.
  * 
- * @constructor
- * @param {string} id - subscription id
- * @param {string} query - query to subscribe to
- * @param {string} sessionToken - optional session token
  *
  * <p>Open Event - When you call query.subscribe(), we send a subscribe request to 
  * the LiveQuery server, when we get the confirmation from the LiveQuery server,
@@ -88,9 +84,14 @@ import CoreManager from './CoreManager';
  * 
  * });</pre></p>
  *
- * 
+ * @alias Parse.LiveQuerySubscription
  */
-export default class Subscription extends EventEmitter {
+class Subscription extends EventEmitter {
+  /*
+   * @param {string} id - subscription id
+   * @param {string} query - query to subscribe to
+   * @param {string} sessionToken - optional session token
+   */
   constructor(id, query, sessionToken) {
     super();
     this.id = id;
@@ -99,14 +100,15 @@ export default class Subscription extends EventEmitter {
   }
 
   /**
-   * @method unsubscribe
+   * closes the subscription
    */
   unsubscribe() {
-    let _this = this;
-    CoreManager.getLiveQueryController().getDefaultLiveQueryClient().then((liveQueryClient) => {
-      liveQueryClient.unsubscribe(_this);
-      _this.emit('close');
+    return CoreManager.getLiveQueryController().getDefaultLiveQueryClient().then((liveQueryClient) => {
+      liveQueryClient.unsubscribe(this);
+      this.emit('close');
       this.resolve();
     });
   }
 }
+
+export default Subscription;

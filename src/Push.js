@@ -12,7 +12,6 @@
 import CoreManager from './CoreManager';
 import ParseQuery from './ParseQuery';
 
-import type ParsePromise from './ParsePromise';
 import type { WhereClause } from './ParseQuery';
 import type { RequestOptions } from './RESTController';
 
@@ -27,11 +26,13 @@ export type PushData = {
  * Contains functions to deal with Push in Parse.
  * @class Parse.Push
  * @static
+ * @hideconstructor
  */
 
  /**
   * Sends a push notification.
   * @method send
+  * @name Parse.Push.send
   * @param {Object} data -  The data of the push notification.  Valid fields
   * are:
   *   <ol>
@@ -48,13 +49,13 @@ export type PushData = {
   * that takes no arguments and will be called on a successful push, and
   * an error function that takes a Parse.Error and will be called if the push
   * failed.
-  * @return {Parse.Promise} A promise that is fulfilled when the push request
+  * @return {Promise} A promise that is fulfilled when the push request
   *     completes.
   */
 export function send(
   data: PushData,
   options?: { useMasterKey?: boolean, success?: any, error?: any }
-): ParsePromise {
+): Promise {
   options = options || {};
 
   if (data.where && data.where instanceof ParseQuery) {
@@ -75,11 +76,9 @@ export function send(
     );
   }
 
-  return (
-    CoreManager.getPushController().send(data, {
-      useMasterKey: options.useMasterKey
-    })._thenRunCallbacks(options)
-  );
+  return CoreManager.getPushController().send(data, {
+    useMasterKey: options.useMasterKey
+  });
 }
 
 var DefaultController = {
@@ -93,7 +92,7 @@ var DefaultController = {
       { useMasterKey: !!options.useMasterKey }
     );
 
-    return request._thenRunCallbacks(options);
+    return request;
   }
 }
 

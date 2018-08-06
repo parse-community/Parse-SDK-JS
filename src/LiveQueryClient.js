@@ -9,9 +9,9 @@
  */
 
 import EventEmitter from './EventEmitter';
-import ParsePromise from './ParsePromise';
 import ParseObject from './ParseObject';
 import LiveQuerySubscription from './LiveQuerySubscription';
+import { resolvingPromise } from './promiseUtils';
 
 // The LiveQuery client inner state
 const CLIENT_STATE = {
@@ -78,16 +78,6 @@ let generateInterval = (k) => {
  *
  * javascriptKey and masterKey are used for verifying the LiveQueryClient when it tries
  * to connect to the LiveQuery server
- * 
- * @class Parse.LiveQueryClient
- * @constructor
- * @param {Object} options
- * @param {string} options.applicationId - applicationId of your Parse app
- * @param {string} options.serverURL - <b>the URL of your LiveQuery server</b>
- * @param {string} options.javascriptKey (optional)
- * @param {string} options.masterKey (optional) Your Parse Master Key. (Node.js only!)
- * @param {string} options.sessionToken (optional)
- *
  *
  * We expose three events to help you monitor the status of the LiveQueryClient.
  *
@@ -119,10 +109,9 @@ let generateInterval = (k) => {
  * client.on('error', (error) => {
  * 
  * });</pre>
- * 
- * 
+ * @alias Parse.LiveQueryClient
  */
-export default class LiveQueryClient extends EventEmitter {
+class LiveQueryClient extends EventEmitter {
   attempts: number;
   id: number;
   requestId: number;
@@ -131,11 +120,19 @@ export default class LiveQueryClient extends EventEmitter {
   javascriptKey: ?string;
   masterKey: ?string;
   sessionToken: ?string;
-  connectPromise: Object;
+  connectPromise: Promise;
   subscriptions: Map;
   socket: any;
   state: string;
 
+  /**
+   * @param {Object} options
+   * @param {string} options.applicationId - applicationId of your Parse app
+   * @param {string} options.serverURL - <b>the URL of your LiveQuery server</b>
+   * @param {string} options.javascriptKey (optional)
+   * @param {string} options.masterKey (optional) Your Parse Master Key. (Node.js only!)
+   * @param {string} options.sessionToken (optional)
+   */
   constructor({
     applicationId,
     serverURL,
@@ -158,7 +155,7 @@ export default class LiveQueryClient extends EventEmitter {
     this.javascriptKey = javascriptKey;
     this.masterKey = masterKey;
     this.sessionToken = sessionToken;
-    this.connectPromise = new ParsePromise();
+    this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
     this.state = CLIENT_STATE.INITIALIZED;
   }
@@ -174,10 +171,9 @@ export default class LiveQueryClient extends EventEmitter {
    * updates from parse server, it'll try to check whether the sessionToken fulfills 
    * the ParseObject's ACL. The LiveQuery server will only send updates to clients whose 
    * sessionToken is fit for the ParseObject's ACL. You can check the LiveQuery protocol
-   * <a href="https://github.com/ParsePlatform/parse-server/wiki/Parse-LiveQuery-Protocol-Specification">here</a> for more details. The subscription you get is the same subscription you get 
+   * <a href="https://github.com/parse-community/parse-server/wiki/Parse-LiveQuery-Protocol-Specification">here</a> for more details. The subscription you get is the same subscription you get 
    * from our Standard API.
    * 
-   * @method subscribe
    * @param {Object} query - the ParseQuery you want to subscribe to
    * @param {string} sessionToken (optional) 
    * @return {Object} subscription
@@ -186,14 +182,17 @@ export default class LiveQueryClient extends EventEmitter {
     if (!query) {
       return;
     }
-    let where = query.toJSON().where;
     let className = query.className;
+    let queryJSON = query.toJSON();
+    let where = queryJSON.where;
+    let fields = queryJSON.keys ? queryJSON.keys.split(',') : undefined;
     let subscribeRequest = {
       op: OP_TYPES.SUBSCRIBE,
       requestId: this.requestId,
       query: {
         className,
-        where
+        where,
+        fields
       }
     };
 
@@ -218,7 +217,6 @@ export default class LiveQueryClient extends EventEmitter {
   /**
    * After calling unsubscribe you'll stop receiving events from the subscription object.
    * 
-   * @method unsubscribe
    * @param {Object} subscription - subscription you would like to unsubscribe from.
    */ 
   unsubscribe(subscription: Object) {
@@ -240,7 +238,6 @@ export default class LiveQueryClient extends EventEmitter {
    * After open is called, the LiveQueryClient will try to send a connect request
    * to the LiveQuery server.
    * 
-   * @method open
    */ 
   open() {
     let WebSocketImplementation = this._getWebSocketImplementation();
@@ -277,7 +274,9 @@ export default class LiveQueryClient extends EventEmitter {
   resubscribe() {
     this.subscriptions.forEach((subscription, requestId) => {
       let query = subscription.query;
-      let where = query.toJSON().where;
+      let queryJSON = query.toJSON();
+      let where = queryJSON.where;
+      let fields = queryJSON.keys ? queryJSON.keys.split(',') : undefined;
       let className = query.className;
       let sessionToken = subscription.sessionToken;
       let subscribeRequest = {
@@ -285,7 +284,8 @@ export default class LiveQueryClient extends EventEmitter {
         requestId,
         query: {
           className,
-          where
+          where,
+          fields
         }
       };
 
@@ -303,7 +303,6 @@ export default class LiveQueryClient extends EventEmitter {
    * This method will close the WebSocket connection to this LiveQueryClient, 
    * cancel the auto reconnect and unsubscribe all subscriptions based on it.
    * 
-   * @method close
    */ 
   close() {
     if (this.state === CLIENT_STATE.INITIALIZED || this.state === CLIENT_STATE.DISCONNECTED) {
@@ -334,7 +333,7 @@ export default class LiveQueryClient extends EventEmitter {
     this.attempts = 1;;
     this.id = 0;
     this.requestId = 1;
-    this.connectPromise = new ParsePromise();
+    this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
   }
 
@@ -443,8 +442,10 @@ export default class LiveQueryClient extends EventEmitter {
 
     this.reconnectHandle = setTimeout((() => {
       this.attempts++;
-      this.connectPromise = new ParsePromise();
+      this.connectPromise = resolvingPromise();
       this.open();
     }).bind(this), time);
   }
 }
+
+export default LiveQueryClient;

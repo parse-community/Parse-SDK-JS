@@ -29,12 +29,7 @@ var mockRNStorageInterface = {
   },
 };
 
-jest.mock('react-native/Libraries/react-native/react-native.js', () => {
-  return {AsyncStorage: mockRNStorageInterface};
-}, {virtual: true});
-
 var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise').default;
 
 var mockStorage = {};
 var mockStorageInterface = {
@@ -43,7 +38,7 @@ var mockStorageInterface = {
   },
 
   getItemAsync(path) {
-    return ParsePromise.as(mockStorageInterface.getItem(path));
+    return Promise.resolve(mockStorageInterface.getItem(path));
   },
 
   setItem(path, value) {
@@ -51,7 +46,7 @@ var mockStorageInterface = {
   },
 
   setItemAsync(path, value) {
-    return ParsePromise.as(mockStorageInterface.setItem(path, value));
+    return Promise.resolve(mockStorageInterface.setItem(path, value));
   },
 
   removeItem(path) {
@@ -59,7 +54,7 @@ var mockStorageInterface = {
   },
 
   removeItemAsync(path) {
-    return ParsePromise.as(mockStorageInterface.removeItem(path));
+    return Promise.resolve(mockStorageInterface.removeItem(path));
   },
 
   clear() {
@@ -101,6 +96,7 @@ var RNStorageController = require('../StorageController.react-native');
 
 describe('React Native StorageController', () => {
   beforeEach(() => {
+    CoreManager.setAsyncStorage(mockRNStorageInterface);
     RNStorageController.clear();
   });
 

@@ -16,7 +16,6 @@ jest.dontMock('../parseDate');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../ParseUser');
 jest.dontMock('../RESTController');
 jest.dontMock('../SingleInstanceStateController');
@@ -30,7 +29,6 @@ jest.dontMock('./test_helpers/mockXHR');
 
 var CoreManager = require('../CoreManager');
 var ParseObject = require('../ParseObject').default;
-var ParsePromise = require('../ParsePromise').default;
 var ParseUser = require('../ParseUser').default;
 var Storage = require('../Storage');
 var ParseError = require('../ParseError').default;
@@ -131,7 +129,7 @@ describe('ParseUser', () => {
       'It is not memory-safe to become a user in a server environment'
     );
     expect(ParseUser.logOut).toThrow(
-      'There is no current user user on a node.js server environment.'
+      'There is no current user on a node.js server environment.'
     );
   });
 
@@ -145,7 +143,7 @@ describe('ParseUser', () => {
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
 
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'uid',
         }, 201);
       },
@@ -190,7 +188,7 @@ describe('ParseUser', () => {
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
 
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'uid2',
           username: 'username',
           sessionToken: '123abc'
@@ -239,7 +237,7 @@ describe('ParseUser', () => {
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
 
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'uid3',
           username: 'username',
           sessionToken: '123abc'
@@ -269,7 +267,7 @@ describe('ParseUser', () => {
         expect(path).toBe('users/me');
         expect(options.sessionToken).toBe('123abc');
 
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'uid3',
           username: 'username',
           sessionToken: '123abc'
@@ -293,7 +291,7 @@ describe('ParseUser', () => {
         expect(path).toBe('requestPasswordReset');
         expect(body).toEqual({ email: 'me@parse.com' });
 
-        return ParsePromise.as({}, 200);
+        return Promise.resolve({}, 200);
       },
       ajax() {}
     });
@@ -306,7 +304,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     CoreManager.setRESTController({
       request(method, path, body, options) {
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'uid5',
           username: 'username',
           sessionToken: '123abc'
@@ -320,7 +318,7 @@ describe('ParseUser', () => {
         request(method, path, body, options) {
           // Shouldn't be called
           expect(true).toBe(false);
-          return ParsePromise.as({}, 200);
+          return Promise.resolve({}, 200);
         },
         ajax() {}
       });
@@ -336,7 +334,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     CoreManager.setRESTController({
       request(method, path, body, options) {
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'uid6',
           username: 'username',
           sessionToken: 'r:123abc'
@@ -353,7 +351,7 @@ describe('ParseUser', () => {
           expect(options).toEqual({
             sessionToken: 'r:123abc'
           });
-          return ParsePromise.as({}, 200);
+          return Promise.resolve({}, 200);
         },
         ajax() {}
       });
@@ -370,7 +368,7 @@ describe('ParseUser', () => {
     Storage._clear();
     CoreManager.setRESTController({
       request(method, path, body, options) {
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'uid6',
           username: 'username',
           sessionToken: 'r:123abc'
@@ -420,7 +418,7 @@ describe('ParseUser', () => {
     Storage._clear();
     CoreManager.setRESTController({
       request() {
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'uid5',
         }, 201);
       },
@@ -432,7 +430,7 @@ describe('ParseUser', () => {
       ParseUser._clearCache();
       CoreManager.setRESTController({
         request() {
-          return ParsePromise.as({}, 200);
+          return Promise.resolve({}, 200);
         },
         ajax() {}
       });
@@ -456,7 +454,7 @@ describe('ParseUser', () => {
     Storage._clear();
     CoreManager.setRESTController({
       request() {
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'uid9',
         }, 201);
       },
@@ -467,7 +465,7 @@ describe('ParseUser', () => {
       expect(u.isCurrent()).toBe(true);
       CoreManager.setRESTController({
         request() {
-          return ParsePromise.as({}, 200);
+          return Promise.resolve({}, 200);
         },
         ajax() {}
       });
@@ -487,7 +485,7 @@ describe('ParseUser', () => {
     Storage._clear();
     CoreManager.setRESTController({
       request() {
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'uid6'
         }, 200);
       },
@@ -499,7 +497,7 @@ describe('ParseUser', () => {
       ParseUser._clearCache();
       CoreManager.setRESTController({
         request() {
-          return ParsePromise.as({
+          return Promise.resolve({
             count: 15
           }, 200);
         },
@@ -525,7 +523,7 @@ describe('ParseUser', () => {
     Storage._clear();
     CoreManager.setRESTController({
       request() {
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'uid5',
         }, 201);
       },
@@ -539,7 +537,7 @@ describe('ParseUser', () => {
       ParseUser._clearCache();
       CoreManager.setRESTController({
         request() {
-          return ParsePromise.as({}, 200);
+          return Promise.resolve({}, 200);
         },
         ajax() {}
       });
@@ -565,7 +563,7 @@ describe('ParseUser', () => {
           ParseError.ACCOUNT_ALREADY_LINKED,
           'Another user is already linked to this facebook id.'
         );
-        return ParsePromise.error(error);
+        return Promise.reject(error);
       },
       ajax() {}
     });
@@ -619,7 +617,7 @@ describe('ParseUser', () => {
     Storage._clear();
     CoreManager.setRESTController({
       request() {
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'uidfetch',
           username: 'temporary',
           number: 123,

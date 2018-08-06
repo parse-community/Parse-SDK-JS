@@ -2,19 +2,18 @@
 
 const assert = require('assert');
 const clear = require('./clear');
-const mocha = require('mocha');
 const Parse = require('../../node');
 
 describe('Geo Box', () => {
-  before(() => {
+  beforeAll(() => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
   });
-
-  beforeEach((done) => {
+    
+  beforeEach((done) => {  
     clear().then(() => {
-      done();
+      Parse.User.logOut().then(() => { done() }, () => { done() });
     });
   });
 
@@ -61,7 +60,7 @@ describe('Geo Box', () => {
       let query = new Parse.Query('Location');
       query.withinGeoBox('location', northeastOfSF, southwestOfSF);
       return query.find();
-    }).fail(() => {
+    }).catch(() => {
       // Query should fail for crossing the date line
       done();
     });

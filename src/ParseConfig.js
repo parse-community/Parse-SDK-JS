@@ -14,18 +14,16 @@ import decode from './decode';
 import encode from './encode';
 import escape from './escape';
 import ParseError from './ParseError';
-import ParsePromise from './ParsePromise';
 import Storage from './Storage';
 
 /**
  * Parse.Config is a local representation of configuration data that
  * can be set from the Parse dashboard.
  *
- * @class Parse.Config
- * @constructor
+ * @alias Parse.Config
  */
 
-export default class ParseConfig {
+class ParseConfig {
   attributes: { [key: string]: any };
   _escapedAttributes: { [key: string]: any };
 
@@ -36,7 +34,6 @@ export default class ParseConfig {
 
   /**
    * Gets the value of an attribute.
-   * @method get
    * @param {String} attr The name of an attribute.
    */
   get(attr: string): any {
@@ -45,7 +42,6 @@ export default class ParseConfig {
 
   /**
    * Gets the HTML-escaped value of an attribute.
-   * @method escape
    * @param {String} attr The name of an attribute.
    */
   escape(attr: string): string {
@@ -66,7 +62,6 @@ export default class ParseConfig {
    * Retrieves the most recently-fetched configuration object, either from
    * memory or from local storage if necessary.
    *
-   * @method current
    * @static
    * @return {Config} The most recently-fetched Parse.Config if it
    *     exists, else an empty Parse.Config.
@@ -78,21 +73,16 @@ export default class ParseConfig {
 
   /**
    * Gets a new configuration object from the server.
-   * @method get
    * @static
-   * @param {Object} options A Backbone-style options object.
-   * Valid options are:<ul>
-   *   <li>success: Function to call when the get completes successfully.
-   *   <li>error: Function to call when the get fails.
-   * </ul>
-   * @return {Parse.Promise} A promise that is resolved with a newly-created
+   * @param {Object} options
+   * @return {Promise} A promise that is resolved with a newly-created
    *     configuration object when the get completes.
    */
   static get(options) {
     options = options || {};
 
     var controller = CoreManager.getConfigController();
-    return controller.get()._thenRunCallbacks(options);
+    return controller.get();
   }
 }
 
@@ -156,7 +146,7 @@ var DefaultController = {
           ParseError.INVALID_JSON,
           'Config JSON response invalid.'
         );
-        return ParsePromise.error(error);
+        return Promise.reject(error);
       }
 
       var config = new ParseConfig();
@@ -176,3 +166,5 @@ var DefaultController = {
 };
 
 CoreManager.setConfigController(DefaultController);
+
+export default ParseConfig;
