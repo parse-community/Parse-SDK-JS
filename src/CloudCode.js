@@ -2,11 +2,13 @@
  * Defines a Cloud Function.
  *
  * **Available in Cloud Code only.**
+ * **Starting parse-server 3.0.0, all cloud hooks and functions are asynchronous**
+ * **All response objects are removed and replaced by promises / async/await based resolution**
  *
  * @method define
  * @name Parse.Cloud.define
  * @param {String} name The name of the Cloud Function
- * @param {Function} data The Cloud Function to register. This function should take two parameters a {@link Parse.Cloud.FunctionRequest} and a {@link Parse.Cloud.FunctionResponse}
+ * @param {Function} data The Cloud Function to register. This function can be an async function and should take one parameter a {@link Parse.Cloud.FunctionRequest}.
  */
 
 /**
@@ -16,11 +18,11 @@
  *
  * If you want to use afterDelete for a predefined class in the Parse JavaScript SDK (e.g. {@link Parse.User}), you should pass the class itself and not the String for arg1.
  * ```
- * Parse.Cloud.afterDelete('MyCustomClass', (request) => {
+ * Parse.Cloud.afterDelete('MyCustomClass', async (request) => {
  *   // code here
  * })
  *
- * Parse.Cloud.afterDelete(Parse.User, (request) => {
+ * Parse.Cloud.afterDelete(Parse.User, async (request) => {
  *   // code here
  * })
  *```
@@ -28,7 +30,7 @@
  * @method afterDelete
  * @name Parse.Cloud.afterDelete
  * @param {(String|Parse.Object)} arg1 The Parse.Object subclass to register the after delete function for. This can instead be a String that is the className of the subclass.
- * @param {Function} func The function to run after a delete. This function should take just one parameter, {@link Parse.Cloud.TriggerRequest}.
+ * @param {Function} func The function to run after a delete. This function can be async and should take just one parameter, {@link Parse.Cloud.TriggerRequest}.
  */
 
 /**
@@ -40,11 +42,11 @@
  * If you want to use afterSave for a predefined class in the Parse JavaScript SDK (e.g. {@link Parse.User}), you should pass the class itself and not the String for arg1.
  *
  * ```
- * Parse.Cloud.afterSave('MyCustomClass', function(request) {
+ * Parse.Cloud.afterSave('MyCustomClass', async function(request) {
  *   // code here
  * })
  *
- * Parse.Cloud.afterSave(Parse.User, function(request) {
+ * Parse.Cloud.afterSave(Parse.User, async function(request) {
  *   // code here
  * })
  * ```
@@ -52,7 +54,7 @@
  * @method afterSave
  * @name Parse.Cloud.afterSave
  * @param {(String|Parse.Object)} arg1 The Parse.Object subclass to register the after save function for. This can instead be a String that is the className of the subclass.
- * @param {Function} func The function to run after a save. This function should take just one parameter, {@link Parse.Cloud.TriggerRequest}.
+ * @param {Function} func The function to run after a save. This function can be an async function and should take just one parameter, {@link Parse.Cloud.TriggerRequest}.
  */
 
 /**
@@ -62,11 +64,11 @@
  *
  * If you want to use beforeDelete for a predefined class in the Parse JavaScript SDK (e.g. {@link Parse.User}), you should pass the class itself and not the String for arg1.
  * ```
- * Parse.Cloud.beforeDelete('MyCustomClass', (request, response) => {
+ * Parse.Cloud.beforeDelete('MyCustomClass', (request) => {
  *   // code here
  * })
  *
- * Parse.Cloud.beforeDelete(Parse.User, (request, response) => {
+ * Parse.Cloud.beforeDelete(Parse.User, (request) => {
  *   // code here
  * })
  *```
@@ -74,7 +76,7 @@
  * @method beforeDelete
  * @name Parse.Cloud.beforeDelete
  * @param {(String|Parse.Object)} arg1 The Parse.Object subclass to register the before delete function for. This can instead be a String that is the className of the subclass.
- * @param {Function} func The function to run before a delete. This function should take two parameters a {@link Parse.Cloud.TriggerRequest} and a {@link Parse.Cloud.BeforeDeleteResponse}.
+ * @param {Function} func The function to run before a delete. This function can be async and should take one parameter, a {@link Parse.Cloud.TriggerRequest}.
  */
 
 /**
@@ -86,11 +88,11 @@
  * If you want to use beforeSave for a predefined class in the Parse JavaScript SDK (e.g. {@link Parse.User}), you should pass the class itself and not the String for arg1.
  *
  * ```
- * Parse.Cloud.beforeSave('MyCustomClass', (request, response) => {
+ * Parse.Cloud.beforeSave('MyCustomClass', (request) => {
  *   // code here
  * })
  *
- * Parse.Cloud.beforeSave(Parse.User, (request, response) => {
+ * Parse.Cloud.beforeSave(Parse.User, (request) => {
  *   // code here
  * })
  * ```
@@ -98,7 +100,7 @@
  * @method beforeSave
  * @name Parse.Cloud.beforeSave
  * @param {(String|Parse.Object)} arg1 The Parse.Object subclass to register the after save function for. This can instead be a String that is the className of the subclass.
- * @param {Function} func The function to run before a save. This function should take two parameters a {@link Parse.Cloud.TriggerRequest} and a {@link Parse.Cloud.BeforeSaveResponse}.
+ * @param {Function} func The function to run before a save. This function can be async and should take one parameter a {@link Parse.Cloud.TriggerRequest};
  */
 
 /**
@@ -135,7 +137,7 @@
  * @method job
  * @name Parse.Cloud.job
  * @param {String} name The name of the Background Job
- * @param {Function} func The Background Job to register. This function should take two parameters a {@link Parse.Cloud.JobRequest} and a {@link Parse.Cloud.JobStatus}
+ * @param {Function} func The Background Job to register. This function can be async should take a single parameters a {@link Parse.Cloud.JobRequest}
  *
  */
 
@@ -163,31 +165,7 @@
 /**
  * @typedef Parse.Cloud.JobRequest
  * @property {Object} params The params passed to the background job.
- */
-
- /**
- * @typedef Parse.Cloud.JobStatus
- * @property {function} error If error is called, will end the job unsuccessfully with an optional completion message to be stored in the job status.
  * @property {function} message If message is called with a string argument, will update the current message to be stored in the job status.
- * @property {function} success If success is called, will end the job successfullly with the optional completion message to be stored in the job status.
- */
-
-/**
- * @typedef Parse.Cloud.BeforeSaveResponse
- * @property {function} success If called, will allow the save to happen. If a Parse.Object is passed in, then the passed in object will be saved instead.
- * @property {function} error If called, will reject the save. An optional error message may be passed in.
- */
-
-/**
- * @typedef Parse.Cloud.BeforeDeleteResponse
- * @property {function} success If called, will allow the delete to happen.
- * @property {function} error If called, will reject the save. An optional error message may be passed in.
- */
-
-/**
- * @typedef Parse.Cloud.FunctionResponse
- * @property {function} success If success is called, will return a successful response with the optional argument to the caller.
- * @property {function} error If error is called, will return an error response with an optionally passed message.
  */
 
 /**
