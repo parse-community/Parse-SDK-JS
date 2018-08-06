@@ -9,17 +9,15 @@
 
 jest.dontMock('../ParseLiveQuery');
 jest.dontMock('../CoreManager');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../LiveQueryClient');
 jest.dontMock('../LiveQuerySubscription');
 jest.dontMock('../ParseObject');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../ParseQuery');
 jest.dontMock('../EventEmitter');
+jest.dontMock('../promiseUtils');
 
 const ParseLiveQuery = require('../ParseLiveQuery');
 const CoreManager = require('../CoreManager');
-const ParsePromise = require('../ParsePromise').default;
 const ParseQuery = require('../ParseQuery').default;
 
 describe('ParseLiveQuery', () => {
@@ -31,12 +29,12 @@ describe('ParseLiveQuery', () => {
   it('fails with an invalid livequery server url', (done) => {
     CoreManager.set('UserController', {
       currentUserAsync() {
-        return ParsePromise.as(undefined);
+        return Promise.resolve(undefined);
       }
     });
     CoreManager.set('LIVEQUERY_SERVER_URL', 'notaurl');
     const controller = CoreManager.getLiveQueryController();
-    controller.getDefaultLiveQueryClient().fail((err) => {
+    controller.getDefaultLiveQueryClient().catch((err) => {
       expect(err.message).toBe(
         'You need to set a proper Parse LiveQuery server url before using LiveQueryClient'
       );
@@ -47,7 +45,7 @@ describe('ParseLiveQuery', () => {
   it('initializes the client', (done) => {
     CoreManager.set('UserController', {
       currentUserAsync() {
-        return ParsePromise.as(undefined);
+        return Promise.resolve(undefined);
       }
     });
     CoreManager.set('APPLICATION_ID', 'appid');
@@ -66,7 +64,7 @@ describe('ParseLiveQuery', () => {
   it('automatically generates a websocket url', (done) => {
     CoreManager.set('UserController', {
       currentUserAsync() {
-        return ParsePromise.as(undefined);
+        return Promise.resolve(undefined);
       }
     });
     CoreManager.set('APPLICATION_ID', 'appid');
@@ -85,7 +83,7 @@ describe('ParseLiveQuery', () => {
   it('populates the session token', (done) => {
     CoreManager.set('UserController', {
       currentUserAsync() {
-        return ParsePromise.as({
+        return Promise.resolve({
           getSessionToken() {
             return 'token';
           }
@@ -109,7 +107,7 @@ describe('ParseLiveQuery', () => {
 
     CoreManager.set('UserController', {
       currentUserAsync() {
-        return ParsePromise.as({
+        return Promise.resolve({
           getSessionToken() {
             return 'token';
           }

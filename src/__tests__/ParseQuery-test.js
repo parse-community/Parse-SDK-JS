@@ -12,8 +12,8 @@ jest.dontMock('../encode');
 jest.dontMock('../decode');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseGeoPoint');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../ParseQuery');
+jest.dontMock('../promiseUtils');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../ObjectStateMutations');
@@ -39,7 +39,6 @@ var CoreManager = require('../CoreManager');
 var ParseError = require('../ParseError').default;
 var ParseGeoPoint = require('../ParseGeoPoint').default;
 var ParseObject = require('../ParseObject');
-var ParsePromise = require('../ParsePromise').default;
 var ParseQuery = require('../ParseQuery').default;
 
 describe('ParseQuery', () => {
@@ -1001,7 +1000,7 @@ describe('ParseQuery', () => {
           }
         });
         expect(options).toEqual({});
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [
             { objectId: 'I1', size: 'small', name: 'Product 3' }
           ]
@@ -1037,7 +1036,7 @@ describe('ParseQuery', () => {
           useMasterKey: true,
           sessionToken: '1234'
         });
-        return ParsePromise.as({
+        return Promise.resolve({
           results: []
         });
       }
@@ -1065,7 +1064,7 @@ describe('ParseQuery', () => {
           }
         });
         expect(options).toEqual({});
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [
             { objectId: 'I27', size: 'large', name: 'Product 27' }
           ]
@@ -1098,7 +1097,7 @@ describe('ParseQuery', () => {
           }
         });
         expect(options).toEqual({});
-        return ParsePromise.as({
+        return Promise.resolve({
           results: []
         });
       }
@@ -1131,7 +1130,7 @@ describe('ParseQuery', () => {
           useMasterKey: true,
           sessionToken: '1234'
         });
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [
             { objectId: 'I27', size: 'large', name: 'Product 27' }
           ]
@@ -1161,7 +1160,7 @@ describe('ParseQuery', () => {
           }
         });
         expect(options).toEqual({});
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [],
           count: 145
         });
@@ -1191,7 +1190,7 @@ describe('ParseQuery', () => {
           useMasterKey: true,
           sessionToken: '1234'
         });
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [],
           count: 145
         });
@@ -1226,7 +1225,7 @@ describe('ParseQuery', () => {
           }
         });
         expect(options).toEqual({});
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
             { objectId: 'I89', size: 'small', name: 'Product 89' },
@@ -1274,7 +1273,7 @@ describe('ParseQuery', () => {
           useMasterKey: true,
           sessionToken: '1234'
         });
-        return ParsePromise.as({
+        return Promise.resolve({
           results: []
         });
       }
@@ -1320,7 +1319,7 @@ describe('ParseQuery', () => {
           }
         });
         expect(options).toEqual({});
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
             { objectId: 'I89', size: 'small', name: 'Product 89' },
@@ -1369,7 +1368,7 @@ describe('ParseQuery', () => {
           useMasterKey: true,
           sessionToken: '1234'
         });
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
             { objectId: 'I89', size: 'small', name: 'Product 89' },
@@ -1422,7 +1421,7 @@ describe('ParseQuery', () => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [
             { className: 'Product', objectId: 'P40', name: 'Product 40' },
           ]
@@ -1441,7 +1440,7 @@ describe('ParseQuery', () => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [
             { objectId: 'P41', name: 'Product 41' },
           ],
@@ -1479,7 +1478,7 @@ describe('ParseQuery', () => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [objectToReturn]
         });
       }
@@ -1528,7 +1527,7 @@ describe('ParseQuery', () => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [objectToReturn]
         });
       }
@@ -1591,7 +1590,7 @@ describe('ParseQuery', () => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [objectToReturn]
         });
       }
@@ -1640,7 +1639,7 @@ describe('ParseQuery', () => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [objectToReturn]
         });
       }
@@ -1720,7 +1719,7 @@ describe('ParseQuery', () => {
           }
         });
         expect(options).toEqual({ useMasterKey: true });
-        return ParsePromise.as({
+        return Promise.resolve({
           results: ['L'],
         });
       }
@@ -1748,7 +1747,7 @@ describe('ParseQuery', () => {
           useMasterKey: true,
           sessionToken: '1234'
         });
-        return ParsePromise.as({
+        return Promise.resolve({
           results: ['L']
         });
       }
@@ -1776,7 +1775,7 @@ describe('ParseQuery', () => {
           group: { objectId: '$name' }
         });
         expect(options).toEqual({ useMasterKey: true });
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [],
         });
       }
@@ -1801,7 +1800,7 @@ describe('ParseQuery', () => {
           group: { objectId: '$name' }
         });
         expect(options).toEqual({ useMasterKey: true });
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [],
         });
       }
@@ -1824,7 +1823,7 @@ describe('ParseQuery', () => {
           group: { objectId: '$name' }
         });
         expect(options).toEqual({ useMasterKey: true });
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [],
         });
       }
@@ -1853,7 +1852,7 @@ describe('ParseQuery', () => {
           useMasterKey: true,
           sessionToken: '1234'
         });
-        return ParsePromise.as({
+        return Promise.resolve({
           results: []
         });
       }
@@ -1888,7 +1887,7 @@ describe('ParseQuery', () => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [objectToReturn]
         });
       }
@@ -1935,7 +1934,7 @@ describe('ParseQuery', () => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
-        return ParsePromise.as({
+        return Promise.resolve({
           results: [objectToReturn]
         });
       }

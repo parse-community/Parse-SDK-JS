@@ -10,12 +10,11 @@
 jest.autoMockOff();
 
 var ParseFile = require('../ParseFile').default;
-var ParsePromise = require('../ParsePromise').default;
 var CoreManager = require('../CoreManager');
 
 function generateSaveMock(prefix) {
   return function(name, payload) {
-    return ParsePromise.as({
+    return Promise.resolve({
       name: name,
       url: prefix + name
     });
@@ -191,14 +190,14 @@ describe('FileController', () => {
     CoreManager.setFileController(defaultController);
     var request = function(method, path, data) {
       var name = path.substr(path.indexOf('/') + 1);
-      return ParsePromise.as({
+      return Promise.resolve({
         name: name,
         url: 'https://files.parsetfss.com/a/' + name
       });
     };
     var ajax = function(method, path, data, headers) {
       var name = path.substr(path.indexOf('/') + 1);
-      return ParsePromise.as({
+      return Promise.resolve({
         name: name,
         url: 'https://files.parsetfss.com/a/' + name
       });

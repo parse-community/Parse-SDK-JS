@@ -9,11 +9,9 @@
  * @flow
  */
 
-import ParsePromise from './ParsePromise';
-
 type Task = {
-  task: () => ParsePromise;
-  _completion: ParsePromise
+  task: () => Promise;
+  _completion: Promise
 };
 
 class TaskQueue {
@@ -23,8 +21,15 @@ class TaskQueue {
     this.queue = [];
   }
 
-  enqueue(task: () => ParsePromise): ParsePromise {
-    var taskComplete = new ParsePromise();
+  enqueue(task: () => Promise): Promise {
+    var res;
+    var rej;
+    var taskComplete = new Promise((resolve, reject) => {
+      res = resolve;
+      rej = reject;
+    });
+    taskComplete.resolve = res;
+    taskComplete.reject = rej;
     this.queue.push({
       task: task,
       _completion: taskComplete

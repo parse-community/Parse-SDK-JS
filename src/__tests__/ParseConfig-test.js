@@ -14,7 +14,6 @@ jest.dontMock('../ParseConfig');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../RESTController');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
@@ -22,7 +21,6 @@ jest.dontMock('../StorageController.default');
 var CoreManager = require('../CoreManager');
 var ParseConfig = require('../ParseConfig').default;
 var ParseGeoPoint = require('../ParseGeoPoint').default;
-var ParsePromise = require('../ParsePromise').default;
 var Storage = require('../Storage');
 
 CoreManager.set('APPLICATION_ID', 'A');
@@ -69,7 +67,7 @@ describe('ParseConfig', () => {
   it('can get a config object from the network', (done) => {
     CoreManager.setRESTController({
       request(method, path, body, options) {
-        return ParsePromise.as({
+        return Promise.resolve({
           params: {
             str: 'hello',
             num: 45,
@@ -105,7 +103,7 @@ describe('ParseConfig', () => {
   it('rejects the promise when an invalid payload comes back', (done) => {
     CoreManager.setRESTController({
       request(method, path, body, options) {
-        return ParsePromise.as(null);
+        return Promise.resolve(null);
       },
       ajax() {}
     });
@@ -120,7 +118,7 @@ describe('ParseConfig', () => {
   it('rejects the promise when the http request fails', (done) => {
     CoreManager.setRESTController({
       request(method, path, body, options) {
-        return ParsePromise.error('failure');
+        return Promise.reject('failure');
       },
       ajax() {}
     });

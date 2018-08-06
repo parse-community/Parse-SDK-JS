@@ -16,7 +16,6 @@ jest.dontMock('../parseDate');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../ParseSession');
 jest.dontMock('../RESTController');
 jest.dontMock('../Storage');
@@ -40,7 +39,6 @@ jest.setMock('../ParseUser', mockUser);
 
 var CoreManager = require('../CoreManager');
 var ParseObject = require('../ParseObject').default;
-var ParsePromise = require('../ParsePromise').default;
 var ParseSession = require('../ParseSession').default;
 var ParseUser = require('../ParseUser');
 
@@ -106,7 +104,7 @@ describe('ParseSession', () => {
         expect(options).toEqual({
           sessionToken: 'abc123'
         });
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'session1',
           sessionToken: 'abc123'
         });
@@ -115,7 +113,7 @@ describe('ParseSession', () => {
     });
 
     mockUser.currentAsync = function() {
-      return ParsePromise.as(new mockUser('abc123'));
+      return Promise.resolve(new mockUser('abc123'));
     };
     ParseSession.current().then((session) => {
       expect(session instanceof ParseSession).toBe(true);

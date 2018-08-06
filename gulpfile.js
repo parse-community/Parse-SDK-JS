@@ -8,6 +8,7 @@ var rename     = require('gulp-rename');
 var replace    = require('gulp-replace');
 var source     = require('vinyl-source-stream');
 var uglify     = require('gulp-uglify');
+var watch      = require('gulp-watch');
 
 var BUILD = process.env.PARSE_BUILD || 'browser';
 var VERSION = require('./package.json').version;
@@ -85,4 +86,17 @@ gulp.task('minify', function() {
     .pipe(insert.prepend(FULL_HEADER))
     .pipe(rename({ extname: '.min.js' }))
     .pipe(gulp.dest('./dist'))
+});
+
+gulp.task('watch', function() {
+  return watch('src/*.js', { ignoreInitial: false, verbose: true })
+    .pipe(babel({
+      presets: PRESETS[BUILD],
+      plugins: PLUGINS[BUILD],
+    }))
+    // Second pass to kill BUILD-switched code
+    .pipe(babel({
+      plugins: ['minify-dead-code-elimination'],
+    }))
+    .pipe(gulp.dest(path.join('lib', BUILD)));
 });

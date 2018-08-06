@@ -26,6 +26,21 @@ $ npm install # install all the node dependencies
 $ code . # launch vscode
 ```
 
+### Building the SDK
+
+The Parse JS SDK is built for three platforms:
+
+- The browser
+- nodejs
+- react-native
+
+When developing the SDK you can use `npm run watch` in order to rebuild your changes upon each saves.
+By default, the watch command will rebuild the SDK for the node platform. You can toggle this by setting the environment variable PARSE_BUILD. Valid values are:
+
+- node
+- browser
+- react-native
+
 ### Testing the code
 
 The SDK is tested through two lenses. unit tests are run with jest and integrationt tests with jasmine.

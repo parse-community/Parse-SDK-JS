@@ -10,7 +10,6 @@
 jest.autoMockOff();
 
 var ParseSchema = require('../ParseSchema').default;
-var ParsePromise = require('../ParsePromise').default;
 var CoreManager = require('../CoreManager');
 
 var defaultController = CoreManager.getSchemaController();
@@ -179,7 +178,7 @@ describe('ParseSchema', () => {
           indexes: { testIndex: { name: 1 } }
         });
         expect(options).toEqual({});
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       },
     });
 
@@ -207,7 +206,7 @@ describe('ParseSchema', () => {
           indexes: { testIndex: { name: 1 } }
         });
         expect(options).toEqual({});
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       },
     });
 
@@ -230,7 +229,7 @@ describe('ParseSchema', () => {
       delete(className, options) {
         expect(className).toBe('SchemaTest');
         expect(options).toEqual({});
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       },
     });
 
@@ -250,7 +249,7 @@ describe('ParseSchema', () => {
       delete() {},
       purge(className) {
         expect(className).toBe('SchemaTest');
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       },
     });
 
@@ -271,7 +270,7 @@ describe('ParseSchema', () => {
       get(className, options) {
         expect(className).toBe('SchemaTest');
         expect(options).toEqual({});
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       },
     });
 
@@ -292,7 +291,7 @@ describe('ParseSchema', () => {
       get(className, options) {
         expect(className).toBe('SchemaTest');
         expect(options).toEqual({ sessionToken: 1234 });
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       },
     });
 
@@ -313,7 +312,7 @@ describe('ParseSchema', () => {
       get(className, options) {
         expect(className).toBe('SchemaTest');
         expect(options).toEqual({});
-        return ParsePromise.as(null);
+        return Promise.resolve(null);
       },
     });
 
@@ -338,7 +337,7 @@ describe('ParseSchema', () => {
       get(className, options) {
         expect(className).toBe('');
         expect(options).toEqual({});
-        return ParsePromise.as({
+        return Promise.resolve({
           results: ['all']
         });
       },
@@ -360,7 +359,7 @@ describe('ParseSchema', () => {
       get(className, options) {
         expect(className).toBe('');
         expect(options).toEqual({ sessionToken: 1234 });
-        return ParsePromise.as({
+        return Promise.resolve({
           results: ['all']
         });
       },
@@ -382,7 +381,7 @@ describe('ParseSchema', () => {
       get(className, options) {
         expect(className).toBe('');
         expect(options).toEqual({});
-        return ParsePromise.as({
+        return Promise.resolve({
           results: []
         });
       },
@@ -403,10 +402,10 @@ describe('SchemaController', () => {
   beforeEach(() => {
     CoreManager.setSchemaController(defaultController);
     var request = function(method, path, data, options) {
-      return ParsePromise.as([]);
+      return Promise.resolve([]);
     };
     var ajax = function(method, path, data, headers) {
-      return ParsePromise.as([]);
+      return Promise.resolve([]);
     };
     CoreManager.setRESTController({ request: request, ajax: ajax });
   });

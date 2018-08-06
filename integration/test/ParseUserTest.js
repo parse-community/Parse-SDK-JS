@@ -14,7 +14,7 @@ describe('Parse User', () => {
   });
 
   beforeEach((done) => {
-    let promise = Parse.Promise.as();
+    let promise = Promise.resolve();
     try {
       promise = Parse.User.logOut();
     } catch (e) {}

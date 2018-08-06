@@ -9,7 +9,6 @@
 
 jest.dontMock('../CoreManager');
 jest.dontMock('../InstallationController');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
 
