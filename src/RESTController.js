@@ -71,6 +71,21 @@ function ajaxIE9(method: string, url: string, data: any) {
   });
 }
 
+function serialize(obj, prefix) {
+  var str = [],
+    p;
+  for (p in obj) {
+    if (obj.hasOwnProperty(p)) {
+      var k = prefix ? prefix + "[" + p + "]" : p,
+        v = obj[p];
+      str.push((v !== null && typeof v === "object") ?
+        serialize(v, k) :
+        encodeURIComponent(k) + "=" + encodeURIComponent(v));
+    }
+  }
+  return str.join("&");
+}
+
 const RESTController = {
   ajax(method: string, url: string, data: any, headers?: any) {
     if (useXDomainRequest) {
@@ -160,23 +175,27 @@ const RESTController = {
     url += path;
 
     var payload = {};
+    var headers = {};
     if (data && typeof data === 'object') {
       for (var k in data) {
         payload[k] = data[k];
       }
     }
 
-    if (method !== 'POST') {
+    if (method !== 'GET') {
       payload._method = method;
       method = 'POST';
+    } else {
+      url += "?" + serialize(payload)
     }
 
-    payload._ApplicationId = CoreManager.get('APPLICATION_ID');
+    headers["X-Parse-Application-Id"] = CoreManager.get('APPLICATION_ID');
+
     let jsKey = CoreManager.get('JAVASCRIPT_KEY');
     if (jsKey) {
-      payload._JavaScriptKey = jsKey;
+      headers["X-Parse-REST-API-Key"] = jsKey;
     }
-    payload._ClientVersion = CoreManager.get('VERSION');
+    headers["X-Parse-Client-Version"] = CoreManager.get('VERSION');
 
     var useMasterKey = options.useMasterKey;
     if (typeof useMasterKey === 'undefined') {
@@ -184,15 +203,15 @@ const RESTController = {
     }
     if (useMasterKey) {
       if (CoreManager.get('MASTER_KEY')) {
-        delete payload._JavaScriptKey;
-        payload._MasterKey = CoreManager.get('MASTER_KEY');
-      } else {
+        delete headers["X-Parse-REST-API-Key"]
+        headers["X-Parse-Master-Key"] = CoreManager.get('MASTER_KEY');
+        } else {
         throw new Error('Cannot use the Master Key, it has not been provided.');
       }
     }
 
     if (CoreManager.get('FORCE_REVOCABLE_SESSION')) {
-      payload._RevocableSession = '1';
+      headers["X-Parse-Revocable-Session"] = "1";
     }
 
     var installationId = options.installationId;
@@ -205,7 +224,7 @@ const RESTController = {
     }
 
     return installationIdPromise.then((iid) => {
-      payload._InstallationId = iid;
+      headers["X-Parse-Installation-Id"] = iid
       var userController = CoreManager.getUserController();
       if (options && typeof options.sessionToken === 'string') {
         return Promise.resolve(options.sessionToken);
@@ -220,12 +239,12 @@ const RESTController = {
       return Promise.resolve(null);
     }).then((token) => {
       if (token) {
-        payload._SessionToken = token;
+        headers["X-Parse-Session-Token"] = token
       }
 
       var payloadString = JSON.stringify(payload);
 
-      return RESTController.ajax(method, url, payloadString).then(({ response }) => {
+      return RESTController.ajax(method, url, payloadString, headers).then(({ response }) => {
         return response;
       });
     }).catch(function(response: { responseText: string }) {
