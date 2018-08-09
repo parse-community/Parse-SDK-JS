@@ -7,6 +7,8 @@ const path = require('path');
 const TestObject = Parse.Object.extend('TestObject');
 const Item = Parse.Object.extend('Item');
 
+global.localStorage = require('./mockLocalStorage');
+
 describe('Parse Query', () => {
   beforeEach((done) => {
     Parse.initialize('integration', null, 'notsosecret');
@@ -1664,71 +1666,68 @@ describe('Parse Query', () => {
     });
   });
 
-  describe('Parse Query Pinning (Default)', () => {
-    beforeEach((done) => {
-      const DefaultStorageController = require(path.resolve(__dirname, '../../lib/node/LocalDatastoreController.default'));
-      Parse.CoreManager.setLocalDatastoreController(DefaultStorageController);
-      done();
-    });
+  const controllers = [
+    { name: 'In-Memory', file: require(path.resolve(__dirname, '../../lib/node/LocalDatastoreController.default')) },
+    { name: 'LocalStorage', file: require(path.resolve(__dirname, '../../lib/node/LocalDatastoreController.localStorage')) }
+  ];
 
-    it('can query from pin with name', (done) => {
-      const obj1 = new TestObject({ field: 1 });
-      const obj2 = new TestObject({ field: 2 });
-      const obj3 = new TestObject({ field: 3 });
-      const item = new Item();
-      const objects = [obj1, obj2, obj3, item];
-      Parse.Object.saveAll(objects).then(() => {
+  for (let i = 0; i < controllers.length; i += 1) {
+    const controller = controllers[i];
+
+    describe(`Parse Query Pinning (${controller.name})`, () => {
+      beforeEach(() => {
+        const StorageController = controller.file;
+        Parse.CoreManager.setLocalDatastoreController(StorageController);
+      });
+
+      it(`${controller.name} can query from pin with name`, async () => {
+        const obj1 = new TestObject({ field: 1 });
+        const obj2 = new TestObject({ field: 2 });
+        const obj3 = new TestObject({ field: 3 });
+        const item = new Item();
+        const objects = [obj1, obj2, obj3, item];
+        await Parse.Object.saveAll(objects);
+
         Parse.Object.pinAllWithName('test_pin', objects);
         const query = new Parse.Query(TestObject);
         query.greaterThan('field', 1);
         query.fromPinWithName('test_pin');
-        return query.find();
-      }).then((results) => {
+        const results = await query.find();
+
         assert.equal(results.length, 2);
         assert(results[0].get('field') > 1);
         assert(results[1].get('field') > 1);
-        done();
       });
-    });
 
-    it('can query from local datastore', (done) => {
-      const obj1 = new TestObject({ field: 1 });
-      const obj2 = new TestObject({ field: 2 });
-      const obj3 = new TestObject({ field: 3 });
-      const objects = [obj1, obj2, obj3];
-      Parse.Object.saveAll(objects).then(() => {
+      it(`${controller.name} can query from local datastore`, async () => {
+        const obj1 = new TestObject({ field: 1 });
+        const obj2 = new TestObject({ field: 2 });
+        const obj3 = new TestObject({ field: 3 });
+        const objects = [obj1, obj2, obj3];
+        await Parse.Object.saveAll(objects);
+
         Parse.Object.pinAll(objects);
         const query = new Parse.Query(TestObject);
         query.fromLocalDatastore();
-        return query.find();
-      }).then((results) => {
-        assert.equal(results.length, 3);
-        done();
-      });
-    });
+        const results = await query.find();
 
-    it('can query from pin', (done) => {
-      const obj1 = new TestObject({ field: 1 });
-      const obj2 = new TestObject({ field: 2 });
-      const obj3 = new TestObject({ field: 3 });
-      const objects = [obj1, obj2, obj3];
-      Parse.Object.saveAll(objects).then(() => {
+        assert.equal(results.length, 3);
+      });
+
+      it(`${controller.name} can query from pin`, async () => {
+        const obj1 = new TestObject({ field: 1 });
+        const obj2 = new TestObject({ field: 2 });
+        const obj3 = new TestObject({ field: 3 });
+        const objects = [obj1, obj2, obj3];
+        await Parse.Object.saveAll(objects);
+
         Parse.Object.pinAll(objects);
         const query = new Parse.Query(TestObject);
         query.fromPin();
-        return query.find();
-      }).then((results) => {
+        const results = await query.find();
+
         assert.equal(results.length, 3);
-        done();
       });
     });
-  });
-
-  describe('Parse Query Pinning (LocalStorage)', () => {
-    beforeEach((done) => {
-      const LocalStorageController = require(path.resolve(__dirname, '../../lib/node/LocalDatastoreController.localStorage'));
-      Parse.CoreManager.setLocalDatastoreController(LocalStorageController);
-      done();
-    });
-  });
+  }
 });

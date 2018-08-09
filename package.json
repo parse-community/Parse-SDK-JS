@@ -88,9 +88,6 @@
     "transform": {
       ".*": "./babel-jest.js"
     },
-    "setupTestFrameworkScriptFile": "./setup-jest.js",
-    "unmockedModulePathPatterns": [
-      "parse-server"
-    ]
+    "setupTestFrameworkScriptFile": "./setup-jest.js"
   }
 }
