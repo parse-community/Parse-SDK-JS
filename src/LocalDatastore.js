@@ -125,13 +125,12 @@ const LocalDatastore = {
   },
 
   _destroyObjectIfPinned(object: ParseObject) {
-    const pinned = this.fromPinWithName(object.id);
-    if (!pinned) {
+    const pin = this.fromPinWithName(object.id);
+    if (!pin) {
       return;
     }
     this.unPinWithName(object.id);
     const localDatastore = this._getLocalDatastore();
-    const allObjects = [];
     for (let key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
         let pinned = this.fromPinWithName(key) || [];

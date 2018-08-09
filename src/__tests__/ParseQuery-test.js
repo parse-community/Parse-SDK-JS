@@ -18,6 +18,7 @@ jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../LocalDatastore');
+jest.dontMock('../OfflineQuery');
 
 var mockObject = function(className) {
   this.className = className;
@@ -36,6 +37,11 @@ mockObject.fromJSON = function(json) {
 };
 jest.setMock('../ParseObject', mockObject);
 
+const mockLocalDatastore = {
+  _serializeObjectsFromPinName: jest.fn(),
+};
+jest.setMock('../LocalDatastore', mockLocalDatastore);
+
 var CoreManager = require('../CoreManager');
 var LocalDatastore = require('../LocalDatastore');
 var ParseError = require('../ParseError').default;
@@ -43,10 +49,9 @@ var ParseGeoPoint = require('../ParseGeoPoint').default;
 var ParseObject = require('../ParseObject');
 var ParseQuery = require('../ParseQuery').default;
 
+CoreManager.setLocalDatastore(mockLocalDatastore);
+
 describe('ParseQuery', () => {
-  beforeEach(() => {
-    LocalDatastore._clear();
-  });
   it('can be constructed from a class name', () => {
     var q = new ParseQuery('Item');
     expect(q.className).toBe('Item');
@@ -2099,5 +2104,33 @@ describe('ParseQuery', () => {
     q.fromPinWithName('test_pin');
     expect(q._queriesLocalDatastore).toBe(true);
     expect(q._localDatastorePinName).toBe('test_pin');
+  });
+
+  it('can query offline', () => {
+    var obj1 = {
+      className: 'Item',
+      objectId: 'objectId1',
+      count: 2,
+    };
+
+    var obj2 = {
+      className: 'Item',
+      objectId: 'objectId2',
+    };
+
+    var obj3 = {
+      className: 'Unknown',
+      objectId: 'objectId3',
+    };
+
+    mockLocalDatastore
+      ._serializeObjectsFromPinName
+      .mockImplementationOnce((name) => [obj1, obj2, obj3]);
+
+    var q = new ParseQuery('Item');
+    q.equalTo('count', 2);
+    q.fromLocalDatastore();
+    const results = q.find();
+    expect(results[0].id).toEqual(obj1.objectId);
   });
 });
