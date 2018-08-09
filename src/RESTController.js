@@ -186,7 +186,7 @@ const RESTController = {
       payload._method = method;
       method = 'POST';
     } else {
-      url += "?" + serialize(payload)
+      url += "?" + serialize(payload);
     }
 
     headers["X-Parse-Application-Id"] = CoreManager.get('APPLICATION_ID');
@@ -203,7 +203,7 @@ const RESTController = {
     }
     if (useMasterKey) {
       if (CoreManager.get('MASTER_KEY')) {
-        delete headers["X-Parse-REST-API-Key"]
+        delete headers["X-Parse-REST-API-Key"];
         headers["X-Parse-Master-Key"] = CoreManager.get('MASTER_KEY');
         } else {
         throw new Error('Cannot use the Master Key, it has not been provided.');
@@ -224,7 +224,7 @@ const RESTController = {
     }
 
     return installationIdPromise.then((iid) => {
-      headers["X-Parse-Installation-Id"] = iid
+      headers["X-Parse-Installation-Id"] = iid;
       var userController = CoreManager.getUserController();
       if (options && typeof options.sessionToken === 'string') {
         return Promise.resolve(options.sessionToken);
@@ -239,7 +239,7 @@ const RESTController = {
       return Promise.resolve(null);
     }).then((token) => {
       if (token) {
-        headers["X-Parse-Session-Token"] = token
+        headers["X-Parse-Session-Token"] = token;
       }
 
       var payloadString = JSON.stringify(payload);
