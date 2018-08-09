@@ -198,8 +198,10 @@ describe('FileController', () => {
     var ajax = function(method, path, data, headers) {
       var name = path.substr(path.indexOf('/') + 1);
       return Promise.resolve({
-        name: name,
-        url: 'https://files.parsetfss.com/a/' + name
+        response: {
+          name: name,
+          url: 'https://files.parsetfss.com/a/' + name
+        }
       });
     };
     CoreManager.setRESTController({ request: request, ajax: ajax });
@@ -211,6 +213,17 @@ describe('FileController', () => {
       expect(f).toBe(file);
       expect(f.name()).toBe('parse.txt');
       expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
+    });
+  });
+
+  it('saves files via ajax', () => {
+    var file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file._source.format = 'file';
+
+    return file.save().then(function(f) {
+      expect(f).toBe(file);
+      expect(f.name()).toBe('/api.parse.com/1/files/parse.txt');
+      expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
     });
   });
 });
