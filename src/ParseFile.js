@@ -254,7 +254,7 @@ var DefaultController = {
       url += '/';
     }
     url += 'files/' + name;
-    return CoreManager.getRESTController().ajax('POST', url, source.file, headers);
+    return CoreManager.getRESTController().ajax('POST', url, source.file, headers).then(res=>res.response)
   },
 
   saveBase64: function(name: string, source: FileSource, options?: { useMasterKey?: boolean, success?: any, error?: any }) {
