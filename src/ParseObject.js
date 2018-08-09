@@ -1119,7 +1119,7 @@ class ParseObject {
    */
   pin() {
     const localDatastore = CoreManager.getLocalDatastore();
-    localDatastore._handlePinWithName(localDatastore.DEFAULT_PIN, this);
+    ParseObject.pinAllWithName(localDatastore.DEFAULT_PIN, [this]);
   }
 
   /**
@@ -1128,7 +1128,23 @@ class ParseObject {
    */
   unPin() {
     const localDatastore = CoreManager.getLocalDatastore();
-    localDatastore._handleUnPinWithName(localDatastore.DEFAULT_PIN, this);
+    ParseObject.unPinAllWithName(localDatastore.DEFAULT_PIN, [this]);
+  }
+
+  /**
+   * Stores the objects and every object they point to in the local datastore, recursively.
+   *
+   * @param {String} name Name of Pin.
+   */
+  pinWithName(name: string) {
+    ParseObject.pinAllWithName(name, [this]);
+  }
+
+  /**
+   * Removes the object and every object it points to in the local datastor, recursively.
+   */
+  unPinWithName(name: string) {
+    ParseObject.unPinAllWithName(name, [this]);
   }
 
   /**
@@ -1640,6 +1656,7 @@ class ParseObject {
 
 var DefaultController = {
   fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
     if (Array.isArray(target)) {
       if (target.length < 1) {
         return Promise.resolve([]);
@@ -1709,6 +1726,9 @@ var DefaultController = {
             }
           }
         }
+        for (let object of results) {
+          localDatastore._updateObjectIfPinned(object);
+        }
         return Promise.resolve(results);
       });
     } else {
@@ -1724,7 +1744,6 @@ var DefaultController = {
           target._clearServerData();
           target._finishFetch(response);
         }
-        const localDatastore = CoreManager.getLocalDatastore();
         localDatastore._updateObjectIfPinned(target);
         return target;
       });
@@ -1732,6 +1751,7 @@ var DefaultController = {
   },
 
   destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
     var RESTController = CoreManager.getRESTController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
@@ -1784,6 +1804,9 @@ var DefaultController = {
           aggregate.errors = errors;
           return Promise.reject(aggregate);
         }
+        for (let object of target) {
+          localDatastore._destroyObjectIfPinned(object);
+        }
         return Promise.resolve(target);
       });
     } else if (target instanceof ParseObject) {
@@ -1793,13 +1816,16 @@ var DefaultController = {
         {},
         options
       ).then(() => {
+        localDatastore._destroyObjectIfPinned(target);
         return Promise.resolve(target);
       });
     }
+    localDatastore._destroyObjectIfPinned(target);
     return Promise.resolve(target);
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
+    const localDatastore = CoreManager.getLocalDatastore();
     var RESTController = CoreManager.getRESTController();
     var stateController = CoreManager.getObjectStateController();
     if (Array.isArray(target)) {
@@ -1905,7 +1931,6 @@ var DefaultController = {
           if (objectError) {
             return Promise.reject(objectError);
           }
-          const localDatastore = CoreManager.getLocalDatastore();
           for (let object of target) {
             localDatastore._updateObjectIfPinned(object);
           }
@@ -1933,7 +1958,6 @@ var DefaultController = {
 
       stateController.pushPendingState(target._getStateIdentifier());
       return stateController.enqueueTask(target._getStateIdentifier(), task).then(() => {
-        const localDatastore = CoreManager.getLocalDatastore();
         localDatastore._updateObjectIfPinned(target);
         return target;
       }, (error) => {

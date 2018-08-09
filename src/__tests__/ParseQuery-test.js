@@ -18,7 +18,6 @@ jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../LocalDatastore');
-jest.dontMock('../LocalDatastoreController.default');
 
 var mockObject = function(className) {
   this.className = className;

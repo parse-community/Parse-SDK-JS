@@ -11,6 +11,8 @@
 
 import CoreManager from './CoreManager';
 
+import type ParseObject from './ParseObject';
+
 const DEFAULT_PIN = '_default';
 const PIN_PREFIX = 'parsePin_';
 
@@ -40,7 +42,7 @@ const LocalDatastore = {
     controller.clear();
   },
 
-  _handlePinWithName(name: string, object: any) {
+  _handlePinWithName(name: string, object: ParseObject) {
     let pinName = DEFAULT_PIN;
     if (name !== DEFAULT_PIN) {
       pinName = PIN_PREFIX + name;
@@ -56,7 +58,7 @@ const LocalDatastore = {
     this.pinWithName(pinName, toPin);
   },
 
-  _handleUnPinWithName(name: string, object: any) {
+  _handleUnPinWithName(name: string, object: ParseObject) {
     let pinName = DEFAULT_PIN;
     if (name !== DEFAULT_PIN) {
       pinName = PIN_PREFIX + name;
@@ -69,7 +71,7 @@ const LocalDatastore = {
     this.pinWithName(pinName, pinned);
   },
 
-  _getChildren(object) {
+  _getChildren(object: ParseObject) {
     const encountered = {};
     const json = object._toFullJSON();
     for (let key in json) {
@@ -115,10 +117,29 @@ const LocalDatastore = {
     return pinned.map((objectId) => this.fromPinWithName(objectId));
   },
 
-  _updateObjectIfPinned(object: any) {
+  _updateObjectIfPinned(object: ParseObject) {
     const pinned = this.fromPinWithName(object.id);
     if (pinned) {
       this.pinWithName(object.id, object._toFullJSON());
+    }
+  },
+
+  _destroyObjectIfPinned(object: ParseObject) {
+    const pinned = this.fromPinWithName(object.id);
+    if (!pinned) {
+      return;
+    }
+    this.unPinWithName(object.id);
+    const localDatastore = this._getLocalDatastore();
+    const allObjects = [];
+    for (let key in localDatastore) {
+      if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
+        let pinned = this.fromPinWithName(key) || [];
+        if (pinned.includes(object.id)) {
+          pinned = pinned.filter(item => item !== object.id);
+          this.pinWithName(key, pinned);
+        }
+      }
     }
   },
 

@@ -50,7 +50,7 @@ describe('OfflineQuery', () => {
     const day = new Date();
     const location = new ParseGeoPoint({
       latitude: 37.484815,
-      longitude: -122.148377
+      longitude: -122.148377,
     });
     const obj = new ParseObject('Person');
     obj
@@ -58,7 +58,7 @@ describe('OfflineQuery', () => {
       .set('name', 'Bill')
       .set('birthday', day)
       .set('lastLocation', location);
-    console.log(obj.toJSON());
+
     let q = new ParseQuery('Person');
     q.equalTo('score', 12);
     expect(matchesQuery(obj, q)).toBe(true);
@@ -92,13 +92,13 @@ describe('OfflineQuery', () => {
     expect(matchesQuery(obj, q)).toBe(true);
     q.equalTo('lastLocation', new ParseGeoPoint({
       latitude: 37.4848,
-      longitude: -122.1483
+      longitude: -122.1483,
     }));
     expect(matchesQuery(obj, q)).toBe(false);
 
     q.equalTo('lastLocation', new ParseGeoPoint({
       latitude: 37.484815,
-      longitude: -122.148377
+      longitude: -122.148377,
     }));
     q.equalTo('score', 12);
     q.equalTo('name', 'Bill');
@@ -110,7 +110,7 @@ describe('OfflineQuery', () => {
 
     let img = new ParseObject('Image');
     img.set('tags', ['nofilter', 'latergram', 'tbt']);
-    
+
     q = new ParseQuery('Image');
     q.equalTo('tags', 'selfie');
     expect(matchesQuery(img, q)).toBe(false);
@@ -130,7 +130,7 @@ describe('OfflineQuery', () => {
 
     img = new ParseObject('Image');
     img.set('owner', u);
-  
+
     expect(matchesQuery(img, q)).toBe(true);
 
     let json = img.toJSON();
@@ -267,7 +267,7 @@ describe('OfflineQuery', () => {
 
     const ptNull = new ParseObject('Checkin');
     ptNull.set('location', null);
-    
+
     expect(matchesQuery(pt, q)).toBe(true);
     expect(matchesQuery(ptUndefined, q)).toBe(false);
     expect(matchesQuery(ptNull, q)).toBe(false);
@@ -305,7 +305,7 @@ describe('OfflineQuery', () => {
     let q = new ParseQuery('Checkin').withinGeoBox(
       'location',
       new ParseGeoPoint(37.708813, -122.526398),
-      new ParseGeoPoint(37.822802, -122.373962)
+      new ParseGeoPoint(37.822802, -122.373962),
     );
 
     expect(matchesQuery(caltrainStation, q)).toBe(true);
@@ -316,7 +316,7 @@ describe('OfflineQuery', () => {
     q = new ParseQuery('Checkin').withinGeoBox(
       'location',
       new ParseGeoPoint(37.822802, -122.373962),
-      new ParseGeoPoint(37.708813, -122.526398)
+      new ParseGeoPoint(37.708813, -122.526398),
     );
 
     expect(matchesQuery(caltrainStation, q)).toBe(false);
@@ -325,7 +325,7 @@ describe('OfflineQuery', () => {
     q = new ParseQuery('Checkin').withinGeoBox(
       'location',
       new ParseGeoPoint(37.708813, -122.373962),
-      new ParseGeoPoint(37.822802, -122.526398)
+      new ParseGeoPoint(37.822802, -122.526398),
     );
 
     expect(matchesQuery(caltrainStation, q)).toBe(false);
@@ -390,7 +390,6 @@ describe('OfflineQuery', () => {
     q.equalTo('status.x', 'read');
     q.doesNotExist('status.y');
     expect(matchesQuery(message, q)).toBe(false);
-
   });
 
   it('should support containedIn with pointers', () => {
@@ -411,7 +410,7 @@ describe('OfflineQuery', () => {
   });
 
   it('should support notContainedIn with pointers', () => {
-    let profile = new ParseObject('Profile');
+    const profile = new ParseObject('Profile');
     profile.id = 'abc';
     let message = new ParseObject('Message');
     message.id = 'O1';
@@ -436,7 +435,7 @@ describe('OfflineQuery', () => {
     profile.id = 'abc';
     let message = new ParseObject('Message');
     message.set('profile', profile);
-  
+
     let q = new ParseQuery('Message');
     q.containedIn('profile', ['abc', 'def']);
     expect(matchesQuery(message, q)).toBe(true);
@@ -450,11 +449,10 @@ describe('OfflineQuery', () => {
     expect(matchesQuery(message, q)).toBe(false);
   });
 
-  
   it('should support notContainedIn queries with [objectId]', () => {
     const profile = new ParseObject('Profile');
     profile.id = 'ghi';
-    let message = new ParseObject('Message');
+    const message = new ParseObject('Message');
     message.set('profile', profile);
 
     let q = new ParseQuery('Message');

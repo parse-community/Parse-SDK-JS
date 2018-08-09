@@ -30,7 +30,6 @@ jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 jest.dontMock('../LocalDatastore');
-jest.dontMock('../LocalDatastoreController.default');
 
 jest.dontMock('./test_helpers/mockXHR');
 
@@ -75,6 +74,7 @@ const mockLocalDatastore = {
   _getLocalDatastore: jest.fn(),
   _serializeObjectsFromPinName: jest.fn(),
   _updateObjectIfPinned: jest.fn(),
+  _destroyObjectIfPinned: jest.fn(),
   _updateLocalIdForObjectId: jest.fn(),
   _clear: jest.fn(),
 };
@@ -2215,6 +2215,20 @@ describe('ParseObject pin', () => {
     object.unPin();
     expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledWith(LocalDatastore.DEFAULT_PIN, object);
+  });
+
+  it('can pin to specific pin', () => {
+    const object = new ParseObject('Item');
+    object.pinWithName('test_pin');
+    expect(mockLocalDatastore._handlePinWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalDatastore._handlePinWithName).toHaveBeenCalledWith('test_pin', object);
+  });
+
+  it('can unPin to specific', () => {
+    const object = new ParseObject('Item');
+    object.unPinWithName('test_pin');
+    expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledWith('test_pin', object);
   });
 
   it('can fetchFromLocalDatastore', () => {

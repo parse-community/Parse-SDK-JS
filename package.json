@@ -89,6 +89,8 @@
       ".*": "./babel-jest.js"
     },
     "setupTestFrameworkScriptFile": "./setup-jest.js",
-    "unmockedModulePathPatterns": ["parse-server"]
+    "unmockedModulePathPatterns": [
+      "parse-server"
+    ]
   }
 }

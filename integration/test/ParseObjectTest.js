@@ -1380,7 +1380,7 @@ describe('Parse Object', () => {
       done();
     });
 
-    it('can pin (unsaved)', (done) => {
+    it('can pin (unsaved)', async () => {
       const object = new TestObject();
       object.pin();
       // Since object not saved check localId
@@ -1388,17 +1388,15 @@ describe('Parse Object', () => {
       assert.equal(Object.keys(localDatastore).length, 2);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [object._localId]);
       assert.deepEqual(localDatastore[object._localId], object._toFullJSON());
-      object.save().then(() => {
-        // Check if localDatastore updated localId to objectId
-        localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 2);
-        assert.deepEqual(localDatastore[DEFAULT_PIN], [object.id]);
-        assert.deepEqual(localDatastore[object.id], object._toFullJSON());
-        done();
-      });
+      await object.save();
+      // Check if localDatastore updated localId to objectId
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 2);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], [object.id]);
+      assert.deepEqual(localDatastore[object.id], object._toFullJSON());
     });
 
-    it('cannot pin unsaved pointer', (done) => {
+    it('cannot pin unsaved pointer', () => {
       try {
         const object = new TestObject();
         const pointer = new Item();
@@ -1406,65 +1404,61 @@ describe('Parse Object', () => {
         object.pin();
       } catch (e) {
         assert.equal(e.message, 'Cannot create a pointer to an unsaved ParseObject');
-        done();
       }
     });
 
-    it('can pin (saved)', (done) => {
+    it('can pin (saved)', async () => {
       const object = new TestObject();
       object.set('field', 'test');
-      object.save().then(() => {
-        object.pin();
-        const localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        const cachedObject = localDatastore[object.id];
-        assert.equal(Object.keys(localDatastore).length, 2);
-        assert.deepEqual(localDatastore[DEFAULT_PIN], [object.id]);
-        assert.deepEqual(localDatastore[object.id], object._toFullJSON());
-        assert.equal(cachedObject.objectId, object.id);
-        assert.equal(cachedObject.field, 'test');
-        done();
-      });
+      await object.save();
+      object.pin();
+      const localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      const cachedObject = localDatastore[object.id];
+      assert.equal(Object.keys(localDatastore).length, 2);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], [object.id]);
+      assert.deepEqual(localDatastore[object.id], object._toFullJSON());
+      assert.equal(cachedObject.objectId, object.id);
+      assert.equal(cachedObject.field, 'test');
     });
 
-    it('can pin (twice saved)', (done) => {
+    it('can pin (twice saved)', async () => {
       const object = new TestObject();
       object.set('field', 'test');
-      object.save().then(() => {
-        object.pin();
-        object.set('field', 'new info');
-        return object.save();
-      }).then(() => {
-        const localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        const cachedObject = localDatastore[object.id];
-        assert.equal(Object.keys(localDatastore).length, 2);
-        assert.deepEqual(localDatastore[DEFAULT_PIN], [object.id]);
-        assert.deepEqual(localDatastore[object.id], object._toFullJSON());
-        assert.equal(cachedObject.objectId, object.id);
-        assert.equal(cachedObject.field, 'new info');
-        done();
-      });
+      await object.save();
+
+      object.pin();
+      object.set('field', 'new info');
+      await object.save();
+    
+      const localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      const cachedObject = localDatastore[object.id];
+      assert.equal(Object.keys(localDatastore).length, 2);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], [object.id]);
+      assert.deepEqual(localDatastore[object.id], object._toFullJSON());
+      assert.equal(cachedObject.objectId, object.id);
+      assert.equal(cachedObject.field, 'new info');
     });
 
-    it('can pin (recursive)', (done) => {
+    it('can pin (recursive)', async () => {
       const parent = new TestObject();
       const child = new Item();
       const grandchild = new Item();
       child.set('grandchild', grandchild);
       parent.set('field', 'test');
       parent.set('child', child);
-      Parse.Object.saveAll([parent, child, grandchild]).then(() => {
-        parent.pin();
-        const localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 4);
-        assert.deepEqual(localDatastore[DEFAULT_PIN], [parent.id, child.id, grandchild.id]);
-        assert.deepEqual(localDatastore[parent.id], parent._toFullJSON());
-        assert.deepEqual(localDatastore[child.id], child._toFullJSON());
-        assert.deepEqual(localDatastore[grandchild.id], grandchild._toFullJSON());
-        done();
-      });
+      await Parse.Object.saveAll([parent, child, grandchild]);
+      parent.pin();
+      const localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 4);
+      assert.equal(localDatastore[DEFAULT_PIN].includes(parent.id), true);
+      assert.equal(localDatastore[DEFAULT_PIN].includes(child.id), true);
+      assert.equal(localDatastore[DEFAULT_PIN].includes(grandchild.id), true);
+      assert.deepEqual(localDatastore[parent.id], parent._toFullJSON());
+      assert.deepEqual(localDatastore[child.id], child._toFullJSON());
+      assert.deepEqual(localDatastore[grandchild.id], grandchild._toFullJSON());
     });
     
-    it('can pinAll (unsaved)', (done) => {
+    it('can pinAll (unsaved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
@@ -1479,35 +1473,34 @@ describe('Parse Object', () => {
       assert.deepEqual(localDatastore[obj2._localId], obj2._toFullJSON());
       assert.deepEqual(localDatastore[obj3._localId], obj3._toFullJSON());
 
-      Parse.Object.saveAll(objects).then(() => {
-        localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 4);
-        assert.deepEqual(localDatastore[DEFAULT_PIN], [obj1.id, obj2.id, obj3.id]);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+      await Parse.Object.saveAll(objects);
+
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 4);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], [obj1.id, obj2.id, obj3.id]);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    it('can pinAll (saved)', (done) => {
+    it('can pinAll (saved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
       const objects = [obj1, obj2, obj3];
-      Parse.Object.saveAll(objects).then(() => {
-        Parse.Object.pinAll(objects);
-        const localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 4);
-        assert.deepEqual(localDatastore[DEFAULT_PIN], [obj1.id, obj2.id, obj3.id]);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+
+      await Parse.Object.saveAll(objects);
+
+      Parse.Object.pinAll(objects);
+      const localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 4);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], [obj1.id, obj2.id, obj3.id]);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    it('can pinAllWithName (unsaved)', (done) => {
+    it('can pinAllWithName (unsaved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
@@ -1522,55 +1515,91 @@ describe('Parse Object', () => {
       assert.deepEqual(localDatastore[obj2._localId], obj2._toFullJSON());
       assert.deepEqual(localDatastore[obj3._localId], obj3._toFullJSON());
 
-      Parse.Object.saveAll(objects).then(() => {
-        localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 4);
-        assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [obj1.id, obj2.id, obj3.id]);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+      await Parse.Object.saveAll(objects);
+
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 4);
+      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [obj1.id, obj2.id, obj3.id]);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    it('can pinAllWithName (saved)', (done) => {
+    it('can pinAllWithName (saved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
       const objects = [obj1, obj2, obj3];
-      Parse.Object.saveAll(objects).then(() => {
-        Parse.Object.pinAllWithName('test_pin', objects);
-        const localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 4);
-        assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [obj1.id, obj2.id, obj3.id]);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+      await Parse.Object.saveAll(objects);
+
+      Parse.Object.pinAllWithName('test_pin', objects);
+      const localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 4);
+      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [obj1.id, obj2.id, obj3.id]);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    // it('can unPin on delete', (done) => {
-    //   const object = new TestObject();
-    //   object.pin();
-    //   object.save().then(() => {
-    //     const localDatastore = Parse.LocalDatastore._getLocalDatastore();
-    //     assert(Object.keys(localDatastore).length === 2);
-    //     assert(localDatastore[DEFAULT_PIN]);
-    //     assert(localDatastore[object.id]);
-    //     return object.destroy();
-    //   }).then(() => {
-    //     const localDatastore = Parse.LocalDatastore._getLocalDatastore();
-    //     assert(Object.keys(localDatastore).length === 1);
-    //     assert(localDatastore[DEFAULT_PIN]);
-    //     done();
-    //   }).catch((e) => {
-    //     console.log(e);
-    //     done();
-    //   });
-    // });
+    it('can unPin on destroy', async () => {
+      const obj1 = new TestObject();
+      const obj2 = new TestObject();
+      obj1.pin();
+      obj2.pin();
+      obj1.pinWithName('test_pin');
+      obj2.pinWithName('test_pin');
 
-    it('can unPin with pinAll (unsaved)', (done) => {
+      await Parse.Object.saveAll([obj1, obj2]);
+
+      let localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert(Object.keys(localDatastore).length === 4);
+      assert.equal(localDatastore[DEFAULT_PIN].includes(obj1.id), true);
+      assert.equal(localDatastore[DEFAULT_PIN].includes(obj2.id), true);
+      assert.equal(localDatastore[PIN_PREFIX + 'test_pin'].includes(obj1.id), true);
+      assert.equal(localDatastore[PIN_PREFIX + 'test_pin'].includes(obj2.id), true);
+      assert(localDatastore[obj1.id]);
+      assert(localDatastore[obj2.id]);
+
+      await obj1.destroy();
+      
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert(Object.keys(localDatastore).length === 3);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], [obj2.id]);
+      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [obj2.id]);
+      assert(localDatastore[obj2.id]);
+    });
+
+    it('can unPin on destroyAll', async () => {
+      const obj1 = new TestObject();
+      const obj2 = new TestObject();
+      const obj3 = new TestObject();
+      const objects = [obj1, obj2, obj3];
+      Parse.Object.pinAll(objects);
+      Parse.Object.pinAllWithName('test_pin', objects);
+      await Parse.Object.saveAll(objects);
+
+      let localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert(Object.keys(localDatastore).length === 5);
+      assert.equal(localDatastore[DEFAULT_PIN].includes(obj1.id), true);
+      assert.equal(localDatastore[DEFAULT_PIN].includes(obj2.id), true);
+      assert.equal(localDatastore[DEFAULT_PIN].includes(obj3.id), true);
+      assert.equal(localDatastore[PIN_PREFIX + 'test_pin'].includes(obj1.id), true);
+      assert.equal(localDatastore[PIN_PREFIX + 'test_pin'].includes(obj2.id), true);
+      assert.equal(localDatastore[PIN_PREFIX + 'test_pin'].includes(obj3.id), true);
+      assert(localDatastore[obj1.id]);
+      assert(localDatastore[obj2.id]);
+      assert(localDatastore[obj3.id]);
+
+      await Parse.Object.destroyAll([obj1, obj3]);
+
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert(Object.keys(localDatastore).length === 3);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], [obj2.id]);
+      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [obj2.id]);
+      assert(localDatastore[obj2.id]);
+    });
+
+    it('can unPin with pinAll (unsaved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
@@ -1593,17 +1622,16 @@ describe('Parse Object', () => {
       assert.deepEqual(localDatastore[obj1._localId], obj1._toFullJSON());
       assert.deepEqual(localDatastore[obj3._localId], obj3._toFullJSON());
       
-      Parse.Object.saveAll(objects).then(() => {
-        localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 4);
-        assert.deepEqual(localDatastore[DEFAULT_PIN], [obj1.id, obj3.id]);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+      await Parse.Object.saveAll(objects);
+
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 4);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], [obj1.id, obj3.id]);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    it('can unPin with pinAll (saved)', (done) => {
+    it('can unPin with pinAll (saved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
@@ -1618,20 +1646,19 @@ describe('Parse Object', () => {
       assert.deepEqual(localDatastore[obj2._localId], obj2._toFullJSON());
       assert.deepEqual(localDatastore[obj3._localId], obj3._toFullJSON());
 
-      Parse.Object.saveAll(objects).then(() => {
-        obj2.unPin();
+      await Parse.Object.saveAll(objects);
 
-        localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 4);
-        assert.deepEqual(localDatastore[DEFAULT_PIN], [obj1.id, obj3.id]);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+      obj2.unPin();
+
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 4);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], [obj1.id, obj3.id]);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    it('can unPin / unPinAll without pin (unsaved)', (done) => {
+    it('can unPin / unPinAll without pin (unsaved)', () => {
       const obj1 = new TestObject();
       obj1.unPin();
       let localDatastore = Parse.LocalDatastore._getLocalDatastore();
@@ -1644,10 +1671,9 @@ describe('Parse Object', () => {
       localDatastore = Parse.LocalDatastore._getLocalDatastore();
       assert.equal(Object.keys(localDatastore).length, 1);
       assert(localDatastore[DEFAULT_PIN]);
-      done();
     });
 
-    it('can unPin / unPinAll without pin (saved)', (done) => {
+    it('can unPin / unPinAll without pin (saved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
@@ -1655,23 +1681,22 @@ describe('Parse Object', () => {
 
       const objects = [obj1, obj2, obj3];
 
-      Parse.Object.saveAll(objects).then(() => {
-        Parse.Object.unPinAll(objects);
-        const localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 1);
-        assert.deepEqual(localDatastore[DEFAULT_PIN], []);
+      await Parse.Object.saveAll(objects);
 
-        return unPinObject.save();
-      }).then(() => {
-        unPinObject.unPin();
-        const localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 1);
-        assert.deepEqual(localDatastore[DEFAULT_PIN], []);
-        done();
-      });
+      Parse.Object.unPinAll(objects);
+      let localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 1);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], []);
+
+      await unPinObject.save();
+      unPinObject.unPin();
+
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 1);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], []);
     });
 
-    it('can unPinAll (unsaved)', (done) => {
+    it('can unPinAll (unsaved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
@@ -1695,18 +1720,17 @@ describe('Parse Object', () => {
       assert.deepEqual(localDatastore[obj2._localId], obj2._toFullJSON());
       assert.deepEqual(localDatastore[obj3._localId], obj3._toFullJSON());
 
-      Parse.Object.saveAll(objects).then(() => {
-        localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 4);
-        assert.deepEqual(localDatastore[DEFAULT_PIN], [obj3.id]);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+      await Parse.Object.saveAll(objects);
+
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 4);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], [obj3.id]);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    it('can unPinAll (saved)', (done) => {
+    it('can unPinAll (saved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
@@ -1721,19 +1745,18 @@ describe('Parse Object', () => {
       assert.deepEqual(localDatastore[obj2._localId], obj2._toFullJSON());
       assert.deepEqual(localDatastore[obj3._localId], obj3._toFullJSON());
 
-      Parse.Object.saveAll(objects).then(() => {
-        Parse.Object.unPinAll([obj1, obj2]);
-        localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 4);
-        assert.deepEqual(localDatastore[DEFAULT_PIN], [obj3.id]);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+      await Parse.Object.saveAll(objects);
+
+      Parse.Object.unPinAll([obj1, obj2]);
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 4);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], [obj3.id]);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    it('can unPinAllObjects (unsaved)', (done) => {
+    it('can unPinAllObjects (unsaved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
@@ -1756,17 +1779,16 @@ describe('Parse Object', () => {
       assert.deepEqual(localDatastore[obj2._localId], obj2._toFullJSON());
       assert.deepEqual(localDatastore[obj3._localId], obj3._toFullJSON());
 
-      Parse.Object.saveAll(objects).then(() => {
-        localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 3);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+      await Parse.Object.saveAll(objects);
+
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 3);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    it('can unPinAllObjects (saved)', (done) => {
+    it('can unPinAllObjects (saved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
@@ -1781,18 +1803,17 @@ describe('Parse Object', () => {
       assert.deepEqual(localDatastore[obj2._localId], obj2._toFullJSON());
       assert.deepEqual(localDatastore[obj3._localId], obj3._toFullJSON());
 
-      Parse.Object.saveAll(objects).then(() => {
-        Parse.Object.unPinAllObjects();
-        localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 3);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+      await Parse.Object.saveAll(objects);
+
+      Parse.Object.unPinAllObjects();
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 3);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    it('can unPinAllWithName (unsaved)', (done) => {
+    it('can unPinAllWithName (unsaved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
@@ -1816,18 +1837,17 @@ describe('Parse Object', () => {
       assert.deepEqual(localDatastore[obj2._localId], obj2._toFullJSON());
       assert.deepEqual(localDatastore[obj3._localId], obj3._toFullJSON());
 
-      Parse.Object.saveAll(objects).then(() => {
-        localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 4);
-        assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [obj3.id]);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+      await Parse.Object.saveAll(objects);
+
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 4);
+      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [obj3.id]);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    it('can unPinAllWithName (saved)', (done) => {
+    it('can unPinAllWithName (saved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
@@ -1842,19 +1862,18 @@ describe('Parse Object', () => {
       assert.deepEqual(localDatastore[obj2._localId], obj2._toFullJSON());
       assert.deepEqual(localDatastore[obj3._localId], obj3._toFullJSON());
 
-      Parse.Object.saveAll(objects).then(() => {
-        Parse.Object.unPinAllWithName('test_unpin', [obj1, obj2]);
-        localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 4);
-        assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [obj3.id]);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+      await Parse.Object.saveAll(objects);
+
+      Parse.Object.unPinAllWithName('test_unpin', [obj1, obj2]);
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 4);
+      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [obj3.id]);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    it('can unPinAllObjectsWithName (unsaved)', (done) => {
+    it('can unPinAllObjectsWithName (unsaved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
@@ -1877,17 +1896,16 @@ describe('Parse Object', () => {
       assert.deepEqual(localDatastore[obj2._localId], obj2._toFullJSON());
       assert.deepEqual(localDatastore[obj3._localId], obj3._toFullJSON());
 
-      Parse.Object.saveAll(objects).then(() => {
-        localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 3);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+      await Parse.Object.saveAll(objects);
+
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 3);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    it('can unPinAllObjectsWithName (saved)', (done) => {
+    it('can unPinAllObjectsWithName (saved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
       const obj3 = new TestObject();
@@ -1902,71 +1920,65 @@ describe('Parse Object', () => {
       assert.deepEqual(localDatastore[obj2._localId], obj2._toFullJSON());
       assert.deepEqual(localDatastore[obj3._localId], obj3._toFullJSON());
 
-      Parse.Object.saveAll(objects).then(() => {
-        Parse.Object.unPinAllObjectsWithName('test_unpin');
-        localDatastore = Parse.LocalDatastore._getLocalDatastore();
-        assert.equal(Object.keys(localDatastore).length, 3);
-        assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
-        assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
-        assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
-        done();
-      });
+      await Parse.Object.saveAll(objects);
+
+      Parse.Object.unPinAllObjectsWithName('test_unpin');
+      localDatastore = Parse.LocalDatastore._getLocalDatastore();
+      assert.equal(Object.keys(localDatastore).length, 3);
+      assert.deepEqual(localDatastore[obj1.id], obj1._toFullJSON());
+      assert.deepEqual(localDatastore[obj2.id], obj2._toFullJSON());
+      assert.deepEqual(localDatastore[obj3.id], obj3._toFullJSON());
     });
 
-    it('cannot fetchFromLocalDatastore (unsaved)', (done) => {
+    it('cannot fetchFromLocalDatastore (unsaved)', () => {
       try {
         const object = new TestObject();
         object.fetchFromLocalDatastore();
       } catch (e) {
         assert.equal(e.message, 'Cannot fetch an unsaved ParseObject');
-        done();
       }
     });
 
-    it('cannot fetchFromLocalDatastore (pinned but not saved)', (done) => {
+    it('cannot fetchFromLocalDatastore (pinned but not saved)', () => {
       try {
         const object = new TestObject();
         object.pin();
         object.fetchFromLocalDatastore();
       } catch (e) {
         assert.equal(e.message, 'Cannot fetch an unsaved ParseObject');
-        done();
       }
     });
 
-    it('can fetchFromLocalDatastore (saved)', (done) => {
+    it('can fetchFromLocalDatastore (saved)', async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
 
       obj1.set('field', 'test');
       obj1.pin();
-      obj1.save().then(() => {
-        obj2.id = obj1.id;
-        obj2.fetchFromLocalDatastore();
-        assert.deepEqual(obj1.toJSON(), obj2.toJSON());
-        assert.deepEqual(obj1._toFullJSON(), obj2._toFullJSON());
+      await obj1.save();
 
-        const obj3 = TestObject.createWithoutData(obj1.id);
-        obj3.fetchFromLocalDatastore();
-        assert.deepEqual(obj1.toJSON(), obj3.toJSON());
-        assert.deepEqual(obj1._toFullJSON(), obj3._toFullJSON());
+      obj2.id = obj1.id;
+      obj2.fetchFromLocalDatastore();
+      assert.deepEqual(obj1.toJSON(), obj2.toJSON());
+      assert.deepEqual(obj1._toFullJSON(), obj2._toFullJSON());
 
-        const obj4 = TestObject.createWithoutData(obj1.id);
-        obj4.set('field', 'no override');
-        obj4.fetchFromLocalDatastore();
-        assert.deepEqual(obj1.toJSON(), obj4.toJSON());
-        assert.deepEqual(obj1._toFullJSON(), obj4._toFullJSON());
+      const obj3 = TestObject.createWithoutData(obj1.id);
+      obj3.fetchFromLocalDatastore();
+      assert.deepEqual(obj1.toJSON(), obj3.toJSON());
+      assert.deepEqual(obj1._toFullJSON(), obj3._toFullJSON());
 
-        done();
-      });
+      const obj4 = TestObject.createWithoutData(obj1.id);
+      obj4.set('field', 'no override');
+      obj4.fetchFromLocalDatastore();
+      assert.deepEqual(obj1.toJSON(), obj4.toJSON());
+      assert.deepEqual(obj1._toFullJSON(), obj4._toFullJSON());
     });
   });
 
   describe('Parse Object Pinning (LocalStorage)', () => {
-    beforeEach((done) => {
+    beforeEach(() => {
       const LocalStorageController = require(path.resolve(__dirname, '../../lib/node/LocalDatastoreController.localStorage'));
       Parse.CoreManager.setLocalDatastoreController(LocalStorageController);
-      done();
     });
   });
 });
