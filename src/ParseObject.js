@@ -19,6 +19,8 @@ import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
 import ParseFile from './ParseFile';
+import { when, continueWhile } from './promiseUtils';
+
 import {
   opFromJSON,
   Op,
@@ -30,7 +32,6 @@ import {
   RemoveOp,
   RelationOp
 } from './ParseOp';
-import ParsePromise from './ParsePromise';
 import ParseQuery from './ParseQuery';
 import ParseRelation from './ParseRelation';
 import * as SingleInstanceStateController from './SingleInstanceStateController';
@@ -803,7 +804,7 @@ class ParseObject {
   }
 
   /**
-   * Creates a new model with identical attributes to this one, similar to Backbone.Model's clone()
+   * Creates a new model with identical attributes to this one.
    * @return {Parse.Object}
    */
   clone(): any {
@@ -927,8 +928,7 @@ class ParseObject {
   /**
    * Sets the ACL to be used for this object.
    * @param {Parse.ACL} acl An instance of Parse.ACL.
-   * @param {Object} options Optional Backbone-like options object to be
-   *     passed in to set.
+   * @param {Object} options
    * @return {Boolean} Whether the set passed validation.
    * @see Parse.Object#set
    */
@@ -966,19 +966,17 @@ class ParseObject {
    * Fetch the model from the server. If the server's representation of the
    * model differs from its current attributes, they will be overriden.
    *
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback.
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Parse.Promise} A promise that is fulfilled when the fetch
+   * @return {Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetch(options: RequestOptions): ParsePromise {
+  fetch(options: RequestOptions): Promise {
     options = options || {};
     var fetchOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
@@ -988,7 +986,7 @@ class ParseObject {
       fetchOptions.sessionToken = options.sessionToken;
     }
     var controller = CoreManager.getObjectController();
-    return controller.fetch(this, true, fetchOptions)._thenRunCallbacks(options);
+    return controller.fetch(this, true, fetchOptions);
   }
 
   /**
@@ -1007,41 +1005,27 @@ class ParseObject {
    *   gameTurn.save({
    *     player: "Jake Cutter",
    *     diceRoll: 2
-   *   }, {
-   *     success: function(gameTurnAgain) {
-   *       // The save was successful.
-   *     },
-   *     error: function(gameTurnAgain, error) {
-   *       // The save failed.  Error is an instance of Parse.Error.
-   *     }
-   *   });</pre>
-   * or with promises:<pre>
-   *   gameTurn.save({
-   *     player: "Jake Cutter",
-   *     diceRoll: 2
    *   }).then(function(gameTurnAgain) {
    *     // The save was successful.
    *   }, function(error) {
    *     // The save failed.  Error is an instance of Parse.Error.
    *   });</pre>
    *
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback.
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Parse.Promise} A promise that is fulfilled when the save
+   * @return {Promise} A promise that is fulfilled when the save
    *     completes.
    */
   save(
     arg1: ?string | { [attr: string]: mixed },
     arg2: FullOptions | mixed,
     arg3?: FullOptions
-  ): ParsePromise {
+  ): Promise {
     var attrs;
     var options;
     if (typeof arg1 === 'object' || typeof arg1 === 'undefined') {
@@ -1055,6 +1039,7 @@ class ParseObject {
       options = arg3;
     }
 
+    // TODO: safely remove me
     // Support save({ success: function() {}, error: function() {} })
     if (!options && attrs) {
       options = {};
@@ -1074,7 +1059,7 @@ class ParseObject {
         if (options && typeof options.error === 'function') {
           options.error(this, validation);
         }
-        return ParsePromise.error(validation);
+        return Promise.reject(validation);
       }
       this.set(attrs, options);
     }
@@ -1090,9 +1075,9 @@ class ParseObject {
 
     var controller = CoreManager.getObjectController();
     var unsaved = unsavedChildren(this);
-    return controller.save(unsaved, saveOptions).then(() => {
+    return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
-    })._thenRunCallbacks(options, this);
+    });
   }
 
   /**
@@ -1100,19 +1085,17 @@ class ParseObject {
    * If `wait: true` is passed, waits for the server to respond
    * before removal.
    *
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Parse.Promise} A promise that is fulfilled when the destroy
+   * @return {Promise} A promise that is fulfilled when the destroy
    *     completes.
    */
-  destroy(options: RequestOptions): ParsePromise {
+  destroy(options: RequestOptions): Promise {
     options = options || {};
     var destroyOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
@@ -1122,12 +1105,12 @@ class ParseObject {
       destroyOptions.sessionToken = options.sessionToken;
     }
     if (!this.id) {
-      return ParsePromise.as()._thenRunCallbacks(options);
+      return Promise.resolve();
     }
     return CoreManager.getObjectController().destroy(
       this,
       destroyOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
@@ -1176,23 +1159,17 @@ class ParseObject {
    * If any error is encountered, stops and calls the error handler.
    *
    * <pre>
-   *   Parse.Object.fetchAll([object1, object2, ...], {
-   *     success: function(list) {
-   *       // All the objects were fetched.
-   *     },
-   *     error: function(error) {
-   *       // An error occurred while fetching one of the objects.
-   *     },
-   *   });
+   *   Parse.Object.fetchAll([object1, object2, ...])
+   *    .then((list) => {
+   *      // All the objects were fetched.
+   *    }, (error) => {
+   *      // An error occurred while fetching one of the objects.
+   *    });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * @static
-   * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback.
-   *   <li>error: An Backbone-style error callback.
-   * </ul>
    */
   static fetchAll(list: Array<ParseObject>, options) {
     var options = options || {};
@@ -1208,7 +1185,7 @@ class ParseObject {
       list,
       true,
       queryOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
@@ -1216,23 +1193,17 @@ class ParseObject {
    * If any error is encountered, stops and calls the error handler.
    *
    * <pre>
-   *   Parse.Object.fetchAllIfNeeded([object1, ...], {
-   *     success: function(list) {
-   *       // Objects were fetched and updated.
-   *     },
-   *     error: function(error) {
-   *       // An error occurred while fetching one of the objects.
-   *     },
-   *   });
+   *   Parse.Object.fetchAllIfNeeded([object1, ...])
+   *    .then((list) => {
+   *      // Objects were fetched and updated.
+   *    }, (error) => {
+   *      // An error occurred while fetching one of the objects.
+   *    });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * @static
-   * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback.
-   *   <li>error: An Backbone-style error callback.
-   * </ul>
    */
   static fetchAllIfNeeded(list: Array<ParseObject>, options) {
     var options = options || {};
@@ -1248,7 +1219,7 @@ class ParseObject {
       list,
       false,
       queryOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
@@ -1272,29 +1243,27 @@ class ParseObject {
    * </ul>
    *
    * <pre>
-   *   Parse.Object.destroyAll([object1, object2, ...], {
-   *     success: function() {
-   *       // All the objects were deleted.
-   *     },
-   *     error: function(error) {
-   *       // An error occurred while deleting one or more of the objects.
-   *       // If this is an aggregate error, then we can inspect each error
-   *       // object individually to determine the reason why a particular
-   *       // object was not deleted.
-   *       if (error.code === Parse.Error.AGGREGATE_ERROR) {
-   *         for (var i = 0; i < error.errors.length; i++) {
-   *           console.log("Couldn't delete " + error.errors[i].object.id +
-   *             "due to " + error.errors[i].message);
-   *         }
-   *       } else {
-   *         console.log("Delete aborted because of " + error.message);
-   *       }
-   *     },
+   *   Parse.Object.destroyAll([object1, object2, ...]) 
+   *    .then((list) => {
+   *      // All the objects were deleted.
+   *    }, (error) => {
+   *      // An error occurred while deleting one or more of the objects.
+   *      // If this is an aggregate error, then we can inspect each error
+   *      // object individually to determine the reason why a particular
+   *      // object was not deleted.
+   *      if (error.code === Parse.Error.AGGREGATE_ERROR) {
+   *        for (var i = 0; i < error.errors.length; i++) {
+   *          console.log("Couldn't delete " + error.errors[i].object.id +
+   *            "due to " + error.errors[i].message);
+   *        }
+   *      } else {
+   *        console.log("Delete aborted because of " + error.message);
+   *      }
    *   });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * @static
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
@@ -1302,7 +1271,7 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Parse.Promise} A promise that is fulfilled when the destroyAll
+   * @return {Promise} A promise that is fulfilled when the destroyAll
    *     completes.
    */
   static destroyAll(list: Array<ParseObject>, options) {
@@ -1318,7 +1287,7 @@ class ParseObject {
     return CoreManager.getObjectController().destroy(
       list,
       destroyOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
@@ -1326,18 +1295,16 @@ class ParseObject {
    * If any error is encountered, stops and calls the error handler.
    *
    * <pre>
-   *   Parse.Object.saveAll([object1, object2, ...], {
-   *     success: function(list) {
+   *   Parse.Object.saveAll([object1, object2, ...])
+   *    .then((list) => {
    *       // All the objects were saved.
-   *     },
-   *     error: function(error) {
+   *    }, (error) => {
    *       // An error occurred while saving one of the objects.
-   *     },
-   *   });
+   *    });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * @static
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
@@ -1359,7 +1326,7 @@ class ParseObject {
     return CoreManager.getObjectController().save(
       list,
       saveOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
@@ -1672,10 +1639,10 @@ class ParseObject {
 }
 
 var DefaultController = {
-  fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): ParsePromise {
+  fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): Promise {
     if (Array.isArray(target)) {
       if (target.length < 1) {
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       }
       var objs = [];
       var ids = [];
@@ -1708,7 +1675,7 @@ var DefaultController = {
         results.push(el);
       });
       if (error) {
-        return ParsePromise.error(error);
+        return Promise.reject(error);
       }
       var query = new ParseQuery(className);
       query.containedIn('objectId', ids);
@@ -1722,7 +1689,7 @@ var DefaultController = {
           var obj = objs[i];
           if (!obj || !obj.id || !idMap[obj.id]) {
             if (forceFetch) {
-              return ParsePromise.error(
+              return Promise.reject(
                 new ParseError(
                   ParseError.OBJECT_NOT_FOUND,
                   'All objects must exist on the server.'
@@ -1742,7 +1709,7 @@ var DefaultController = {
             }
           }
         }
-        return ParsePromise.as(results);
+        return Promise.resolve(results);
       });
     } else {
       var RESTController = CoreManager.getRESTController();
@@ -1764,11 +1731,11 @@ var DefaultController = {
     }
   },
 
-  destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): ParsePromise {
+  destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
     var RESTController = CoreManager.getRESTController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       }
       var batches = [[]];
       target.forEach((obj) => {
@@ -1784,7 +1751,7 @@ var DefaultController = {
         // If the last batch is empty, remove it
         batches.pop();
       }
-      var deleteCompleted = ParsePromise.as();
+      var deleteCompleted = Promise.resolve();
       var errors = [];
       batches.forEach((batch) => {
         deleteCompleted = deleteCompleted.then(() => {
@@ -1815,9 +1782,9 @@ var DefaultController = {
         if (errors.length) {
           var aggregate = new ParseError(ParseError.AGGREGATE_ERROR);
           aggregate.errors = errors;
-          return ParsePromise.error(aggregate);
+          return Promise.reject(aggregate);
         }
-        return ParsePromise.as(target);
+        return Promise.resolve(target);
       });
     } else if (target instanceof ParseObject) {
       return RESTController.request(
@@ -1826,10 +1793,10 @@ var DefaultController = {
         {},
         options
       ).then(() => {
-        return ParsePromise.as(target);
+        return Promise.resolve(target);
       });
     }
-    return ParsePromise.as(target);
+    return Promise.resolve(target);
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
@@ -1837,7 +1804,7 @@ var DefaultController = {
     var stateController = CoreManager.getObjectStateController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       }
 
       var unsaved = target.concat();
@@ -1848,7 +1815,7 @@ var DefaultController = {
       }
       unsaved = unique(unsaved);
 
-      var filesSaved = ParsePromise.as();
+      var filesSaved = Promise.resolve();
       var pending: Array<ParseObject> = [];
       unsaved.forEach((el) => {
         if (el instanceof ParseFile) {
@@ -1862,7 +1829,7 @@ var DefaultController = {
 
       return filesSaved.then(() => {
         var objectError = null;
-        return ParsePromise._continueWhile(() => {
+        return continueWhile(() => {
           return pending.length > 0;
         }, () => {
           var batch = [];
@@ -1876,7 +1843,7 @@ var DefaultController = {
           });
           pending = nextPending;
           if (batch.length < 1) {
-            return ParsePromise.error(
+            return Promise.reject(
               new ParseError(
                 ParseError.OTHER_CAUSE,
                 'Tried to save a batch with a cycle.'
@@ -1886,11 +1853,17 @@ var DefaultController = {
 
           // Queue up tasks for each object in the batch.
           // When every task is ready, the API request will execute
-          var batchReturned = new ParsePromise();
+          var res, rej;
+          var batchReturned = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+          batchReturned.resolve = res;
+          batchReturned.reject = rej;
           var batchReady = [];
           var batchTasks = [];
           batch.forEach((obj, index) => {
-            var ready = new ParsePromise();
+            var res, rej;
+            var ready = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+            ready.resolve = res;
+            ready.reject = rej;
             batchReady.push(ready);
             var task = function() {
               ready.resolve();
@@ -1912,7 +1885,7 @@ var DefaultController = {
             batchTasks.push(stateController.enqueueTask(obj._getStateIdentifier(), task));
           });
 
-          ParsePromise.when(batchReady).then(() => {
+          when(batchReady).then(() => {
             // Kick off the batch request
             return RESTController.request('POST', 'batch', {
               requests: batch.map((obj) => {
@@ -1927,16 +1900,16 @@ var DefaultController = {
             batchReturned.reject(new ParseError(ParseError.INCORRECT_TYPE, error.message));
           });
 
-          return ParsePromise.when(batchTasks);
+          return when(batchTasks);
         }).then(() => {
           if (objectError) {
-            return ParsePromise.error(objectError);
+            return Promise.reject(objectError);
           }
           const localDatastore = CoreManager.getLocalDatastore();
           for (let object of target) {
             localDatastore._updateObjectIfPinned(object);
           }
-          return ParsePromise.as(target);
+          return Promise.resolve(target);
         });
       });
 
@@ -1954,7 +1927,7 @@ var DefaultController = {
           targetCopy._handleSaveResponse(response, status);
         }, (error) => {
           targetCopy._handleSaveError();
-          return ParsePromise.error(error);
+          return Promise.reject(error);
         });
       }
 
@@ -1964,10 +1937,10 @@ var DefaultController = {
         localDatastore._updateObjectIfPinned(target);
         return target;
       }, (error) => {
-        return ParsePromise.error(error);
+        return Promise.reject(error);
       });
     }
-    return ParsePromise.as();
+    return Promise.resolve();
   }
 }
 

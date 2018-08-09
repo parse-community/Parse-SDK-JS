@@ -13,7 +13,6 @@ jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseOp');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../TaskQueue');
 
@@ -25,7 +24,6 @@ jest.useFakeTimers();
 var ParseFile = require('../ParseFile').default;
 var ParseGeoPoint = require('../ParseGeoPoint').default;
 var ParseOps = require('../ParseOp');
-var ParsePromise = require('../ParsePromise').default;
 var SingleInstanceStateController = require('../SingleInstanceStateController');
 var TaskQueue = require('../TaskQueue');
 
@@ -289,9 +287,10 @@ describe('SingleInstanceStateController', () => {
     });
   });
 
-  it('can enqueue a chain of tasks', () => {
-    var p1 = new ParsePromise();
-    var p2 = new ParsePromise();
+  it('can enqueue a chain of tasks', async () => {
+    var p1Resolve, p2Resolve;
+    var p1 = new Promise((resolve) => { p1Resolve = resolve });
+    var p2 = new Promise((resolve) => { p2Resolve = resolve });
     var called = [false, false, false];
     var t1 = SingleInstanceStateController.enqueueTask({ className: 'someClass', id: 'M' }, () => {
       return p1.then(() => {
@@ -305,18 +304,15 @@ describe('SingleInstanceStateController', () => {
     });
     var t3 = SingleInstanceStateController.enqueueTask({ className: 'someClass', id: 'M' }, () => {
       called[2] = true;
-      return ParsePromise.as();
+      return Promise.resolve();
     });
     expect(called).toEqual([false, false, false]);
-    p1.resolve();
-    jest.runAllTicks();
-    expect(t1._resolved).toBe(true);
-    expect(t2._resolved).toBe(false);
+    p1Resolve();
+    await p1;
     expect(called).toEqual([true, false, false]);
-    p2.resolve();
-    jest.runAllTicks();
-    expect(t2._resolved).toBe(true);
-    expect(t3._resolved).toBe(true);
+    p2Resolve();
+    await p2;
+    await new Promise(resolve => setImmediate(resolve));
     expect(called).toEqual([true, true, true]);
   });
 

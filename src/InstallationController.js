@@ -10,7 +10,6 @@
  */
 
 import CoreManager from './CoreManager';
-import ParsePromise from './ParsePromise';
 import Storage from './Storage';
 
 var iidCache = null;
@@ -32,9 +31,9 @@ function generateId() {
 }
 
 var InstallationController = {
-  currentInstallationId(): ParsePromise {
+  currentInstallationId(): Promise {
     if (typeof iidCache === 'string') {
-      return ParsePromise.as(iidCache);
+      return Promise.resolve(iidCache);
     }
     var path = Storage.generatePath('installationId');
     return Storage.getItemAsync(path).then((iid) => {

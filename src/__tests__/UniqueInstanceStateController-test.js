@@ -13,9 +13,9 @@ jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseOp');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../TaskQueue');
+jest.dontMock('../promiseUtils');
 jest.useFakeTimers();
 
 const mockObject = function(className) {
@@ -28,9 +28,9 @@ const ParseFile = require('../ParseFile').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
 const ParseObject = require('../ParseObject'); 
 const ParseOps = require('../ParseOp');
-const ParsePromise = require('../ParsePromise').default;
 const UniqueInstanceStateController = require('../UniqueInstanceStateController');
 const TaskQueue = require('../TaskQueue');
+const { resolvingPromise } = require('../promiseUtils');
 
 describe('UniqueInstanceStateController', () => {
   it('returns null state for an unknown object', () => {
@@ -308,10 +308,10 @@ describe('UniqueInstanceStateController', () => {
     });
   });
 
-  it('can enqueue a chain of tasks', () => {
+  it('can enqueue a chain of tasks', async () => {
     let obj = new ParseObject();
-    let p1 = new ParsePromise();
-    let p2 = new ParsePromise();
+    let p1 = resolvingPromise();
+    let p2 = resolvingPromise();
     let called = [false, false, false];
     let t1 = UniqueInstanceStateController.enqueueTask(obj, () => {
       return p1.then(() => {
@@ -325,18 +325,17 @@ describe('UniqueInstanceStateController', () => {
     });
     let t3 = UniqueInstanceStateController.enqueueTask(obj, () => {
       called[2] = true;
-      return ParsePromise.as();
+      return Promise.resolve();
     });
     expect(called).toEqual([false, false, false]);
     p1.resolve();
     jest.runAllTicks();
-    expect(t1._resolved).toBe(true);
-    expect(t2._resolved).toBe(false);
+    await t1;
     expect(called).toEqual([true, false, false]);
     p2.resolve();
     jest.runAllTicks();
-    expect(t2._resolved).toBe(true);
-    expect(t3._resolved).toBe(true);
+    await t2;
+    await t3;
     expect(called).toEqual([true, true, true]);
   });
 

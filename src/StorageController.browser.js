@@ -9,8 +9,6 @@
  * @flow
  */
 
-import ParsePromise from './ParsePromise';
-
 var StorageController = {
   async: 0,
 

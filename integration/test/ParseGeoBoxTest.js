@@ -60,7 +60,7 @@ describe('Geo Box', () => {
       let query = new Parse.Query('Location');
       query.withinGeoBox('location', northeastOfSF, southwestOfSF);
       return query.find();
-    }).fail(() => {
+    }).catch(() => {
       // Query should fail for crossing the date line
       done();
     });

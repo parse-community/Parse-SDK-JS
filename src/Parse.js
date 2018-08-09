@@ -163,7 +163,7 @@ Parse.Op = {
   AddUnique: ParseOp.AddUniqueOp,
   Relation: ParseOp.RelationOp
 };
-Parse.Promise = require('./ParsePromise').default;
+Promise = Promise;
 Parse.Push = require('./Push');
 Parse.Query = require('./ParseQuery').default;
 Parse.Relation = require('./ParseRelation').default;

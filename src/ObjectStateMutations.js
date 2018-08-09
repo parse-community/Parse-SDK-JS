@@ -12,7 +12,6 @@
 import encode from './encode';
 import ParseFile from './ParseFile';
 import ParseObject from './ParseObject';
-import ParsePromise from './ParsePromise';
 import ParseRelation from './ParseRelation';
 import TaskQueue from './TaskQueue';
 import { RelationOp } from './ParseOp';

@@ -2,7 +2,6 @@ import CoreManager from './CoreManager';
 import decode from './decode';
 import encode from './encode';
 import ParseError from './ParseError';
-import ParsePromise from './ParsePromise';
 
 export function getFunctions() {
   return CoreManager.getHooksController().get("functions");
@@ -115,9 +114,9 @@ var DefaultController = {
     return CoreManager.getRESTController().request(method, url, body, {useMasterKey: true}).then((res) => {
       var decoded = decode(res);
       if (decoded) {
-        return ParsePromise.as(decoded);
+        return Promise.resolve(decoded);
       }
-      return ParsePromise.error(
+      return Promise.reject(
         new ParseError(
           ParseError.INVALID_JSON,
           'The server returned an invalid response.'

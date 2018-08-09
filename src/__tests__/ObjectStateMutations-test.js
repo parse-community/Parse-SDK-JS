@@ -13,7 +13,6 @@ jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseOp');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../ParseRelation');
 jest.dontMock('../TaskQueue');
 

@@ -79,7 +79,7 @@ describe('Parse Object', () => {
       return object.destroy();
     }).then(() => {
       return object.fetch();
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });
@@ -163,7 +163,7 @@ describe('Parse Object', () => {
     }).then((itemAgain) => {
       assert.equal(item.get('foo'), itemAgain.get('foo'));
       done();
-    }).fail(e => console.log(e));
+    }).catch(done.fail);
   });
 
   it('does not remove old fields on fetch', (done) => {
@@ -253,14 +253,14 @@ describe('Parse Object', () => {
   it('cannot set an invalid date', (done) => {
     let obj = new TestObject();
     obj.set('when', new Date(Date.parse(null)));
-    obj.save().fail((e) => {
+    obj.save().catch((e) => {
       done();
     });
   });
 
   it('cannot create invalid class names', (done) => {
     let item = new Parse.Object('Foo^Bar');
-    item.save().fail((e) => {
+    item.save().catch((e) => {
       done();
     });
   });
@@ -268,7 +268,7 @@ describe('Parse Object', () => {
   it('cannot create invalid key names', (done) => {
     let item = new Parse.Object('Item');
     assert(!item.set({ 'foo^bar': 'baz' }));
-    item.save({ 'foo^bar': 'baz' }).fail((e) => {
+    item.save({ 'foo^bar': 'baz' }).catch((e) => {
       assert.equal(e.code, Parse.Error.INVALID_KEY_NAME);
       done();
     });
@@ -793,7 +793,7 @@ describe('Parse Object', () => {
       other = new TestObject();
       other.set('number', 'two');
       return other.save();
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.INCORRECT_TYPE);
       other.set('number', 2);
       return other.save();
@@ -944,7 +944,7 @@ describe('Parse Object', () => {
     let bryan = new PickyEater();
     bryan.save({ meal: 'burrito' }).then(() => {
       return bryan.save({ meal: 'tomatoes' });
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e, 'Ew. Gross.');
       done();
     });
@@ -983,7 +983,7 @@ describe('Parse Object', () => {
     }).then(() => {
       let query = new Parse.Query(TestObject);
       return query.get(o.id);
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });
@@ -1009,7 +1009,7 @@ describe('Parse Object', () => {
   it('can destroyAll an object that does not exist', (done) => {
     let o = new TestObject();
     o.id = 'fakeobject';
-    Parse.Object.destroyAll([o]).fail((e) => {
+    Parse.Object.destroyAll([o]).catch((e) => {
       assert.equal(e.code, Parse.Error.AGGREGATE_ERROR);
       assert.equal(e.errors.length, 1);
       done();
@@ -1024,7 +1024,7 @@ describe('Parse Object', () => {
     Parse.Object.saveAll(objects).then(() => {
       objects[0].id = 'fakeobject';
       return Parse.Object.destroyAll(objects);
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.AGGREGATE_ERROR);
       assert.equal(e.errors.length, 1);
       assert.equal(e.errors[0].code, Parse.Error.OBJECT_NOT_FOUND);
@@ -1041,7 +1041,7 @@ describe('Parse Object', () => {
     Parse.Object.saveAll(objects).then(() => {
       objects[19].id = 'fakeobject';
       return Parse.Object.destroyAll(objects);
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.AGGREGATE_ERROR);
       assert.equal(e.errors.length, 1);
       assert.equal(e.errors[0].code, Parse.Error.OBJECT_NOT_FOUND);
@@ -1058,7 +1058,7 @@ describe('Parse Object', () => {
     Parse.Object.saveAll(objects).then(() => {
       objects[20].id = 'fakeobject';
       return Parse.Object.destroyAll(objects);
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.AGGREGATE_ERROR);
       assert.equal(e.errors.length, 1);
       assert.equal(e.errors[0].code, Parse.Error.OBJECT_NOT_FOUND);
@@ -1077,7 +1077,7 @@ describe('Parse Object', () => {
       objects[19].id = 'fakeobject';
       objects[20].id = 'fakeobject';
       return Parse.Object.destroyAll(objects);
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.AGGREGATE_ERROR);
       assert.equal(e.errors.length, 3);
       assert.equal(e.errors[0].code, Parse.Error.OBJECT_NOT_FOUND);
@@ -1162,14 +1162,14 @@ describe('Parse Object', () => {
       let itemAgain = containerAgain.get('item');
       let multiClassArray = [subContainerAgain, itemAgain];
       return Parse.Object.fetchAll(multiClassArray);
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.INVALID_CLASS_NAME);
     });
   });
 
   it('fails fetchAll on unsaved object', () => {
     let unsavedObjectArray = [new TestObject()];
-    return Parse.Object.fetchAll(unsavedObjectArray).fail((e) => {
+    return Parse.Object.fetchAll(unsavedObjectArray).catch((e) => {
       assert.equal(e.code, Parse.Error.MISSING_OBJECT_ID);
     });
   });
@@ -1193,7 +1193,7 @@ describe('Parse Object', () => {
       let nonExistentObject = new Item({ objectId: deletedObject.id });
       let nonExistentObjectArray = [nonExistentObject, items[1]];
       return Parse.Object.fetchAll(nonExistentObjectArray);
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       done();
     });
@@ -1270,7 +1270,7 @@ describe('Parse Object', () => {
 
   it('can fetchAllIfNeeded with an unsaved object', () => {
     let unsavedObjectArray = [new TestObject()];
-    Parse.Object.fetchAllIfNeeded(unsavedObjectArray).fail((e) => {
+    Parse.Object.fetchAllIfNeeded(unsavedObjectArray).catch((e) => {
       assert.equal(e.code, Parse.Error.MISSING_OBJECT_ID);
       done();
     });
@@ -1288,7 +1288,7 @@ describe('Parse Object', () => {
       let itemAgain = containerAgain.get('item');
       let multiClassArray = [subContainerAgain, itemAgain];
       return Parse.Object.fetchAllIfNeeded(multiClassArray);
-    }).fail((e) => {
+    }).catch((e) => {
       assert.equal(e.code, Parse.Error.INVALID_CLASS_NAME);
     });
   });
