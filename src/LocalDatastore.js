@@ -10,7 +10,6 @@
  */
 
 import CoreManager from './CoreManager';
-import type ParseObject from './ParseObject';
 
 const DEFAULT_PIN = '_default';
 const PIN_PREFIX = 'parsePin_';
@@ -41,29 +40,30 @@ const LocalDatastore = {
     controller.clear();
   },
 
-  _handlePinWithName(name: string, object: ParseObject) {
+  _handlePinWithName(name: string, object: any) {
     let pinName = DEFAULT_PIN;
     if (name !== DEFAULT_PIN) {
       pinName = PIN_PREFIX + name;
     }
-    const children = this._getChildren(object);
-    for (var objectId in children) {
-      this.pinWithName(objectId, children[objectId]);
+    const objects = this._getChildren(object);
+    objects[object._getId()] = object._toFullJSON();
+    for (var objectId in objects) {
+      this.pinWithName(objectId, objects[objectId]);
     }
     const pinned = this.fromPinWithName(pinName) || [];
-    const objectIds = Object.keys(children);
+    const objectIds = Object.keys(objects);
     const toPin = [...new Set([...pinned, ...objectIds])];
     this.pinWithName(pinName, toPin);
   },
 
-  _handleUnPinWithName(name: string, object: ParseObject) {
+  _handleUnPinWithName(name: string, object: any) {
     let pinName = DEFAULT_PIN;
     if (name !== DEFAULT_PIN) {
       pinName = PIN_PREFIX + name;
     }
-    const children = this._getChildren(object);
-
-    const objectIds = Object.keys(children);
+    const objects = this._getChildren(object);
+    const objectIds = Object.keys(objects);
+    objectIds.push(object._getId());
     let pinned = this.fromPinWithName(pinName) || [];
     pinned = pinned.filter(item => !objectIds.includes(item));
     this.pinWithName(pinName, pinned);
@@ -72,7 +72,6 @@ const LocalDatastore = {
   _getChildren(object) {
     const encountered = {};
     const json = object._toFullJSON();
-    encountered[object._getId()] = json;
     for (let key in json) {
       if (json[key].__type && json[key].__type === 'Object') {
         this._traverse(json[key], encountered);
@@ -116,7 +115,7 @@ const LocalDatastore = {
     return pinned.map((objectId) => this.fromPinWithName(objectId));
   },
 
-  _updateObjectIfPinned(object: ParseObject) {
+  _updateObjectIfPinned(object: any) {
     const pinned = this.fromPinWithName(object.id);
     if (pinned) {
       this.pinWithName(object.id, object._toFullJSON());
@@ -166,5 +165,4 @@ if (isLocalStorageEnabled()) {
 } else {
   CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.default'));
 }
-
 CoreManager.setLocalDatastore(LocalDatastore);

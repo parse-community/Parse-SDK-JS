@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
+const toString = Object.prototype.toString;
 
 import ParseACL from './ParseACL';
 import ParseFile from './ParseFile';
@@ -20,6 +21,13 @@ export default function equals(a, b) {
   if (!a || typeof a !== 'object') {
     // a is a primitive
     return (a === b);
+  }
+
+  if (toString.call(a) === '[object Date]') {
+    if (toString.call(b) === '[object Date]') {
+      return (+a === +b);
+    }
+    return false;
   }
 
   if (Array.isArray(a) || Array.isArray(b)) {

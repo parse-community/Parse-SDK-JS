@@ -113,6 +113,7 @@ type LocalDatastoreController = {
   fromPinWithName: (name: string) => ?any;
   pinWithName: (name: string, objects: any) => void;
   unPinWithName: (name: string) => void;
+  getLocalDatastore: () => ?any;
   clear: () => void;
 };
 type UserController = {

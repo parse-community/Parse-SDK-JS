@@ -19,7 +19,6 @@ import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
 import ParseFile from './ParseFile';
-import LocalDatastore from './LocalDatastore';
 import {
   opFromJSON,
   Op,
@@ -341,7 +340,8 @@ class ParseObject {
 
   _migrateId(serverId: string) {
     if (this._localId && serverId) {
-      LocalDatastore._updateLocalIdForObjectId(this._localId, serverId);
+      const localDatastore = CoreManager.getLocalDatastore();
+      localDatastore._updateLocalIdForObjectId(this._localId, serverId);
       if (singleInstance) {
         let stateController = CoreManager.getObjectStateController();
         let oldState = stateController.removeState(this._getStateIdentifier());
@@ -1135,7 +1135,8 @@ class ParseObject {
    * recursively, using a default pin name: _default.
    */
   pin() {
-    LocalDatastore._handlePinWithName(LocalDatastore.DEFAULT_PIN, this);
+    const localDatastore = CoreManager.getLocalDatastore();
+    localDatastore._handlePinWithName(localDatastore.DEFAULT_PIN, this);
   }
 
   /**
@@ -1143,14 +1144,16 @@ class ParseObject {
    * recursively, using a default pin name: _default.
    */
   unPin() {
-    LocalDatastore._handleUnPinWithName(LocalDatastore.DEFAULT_PIN, this);
+    const localDatastore = CoreManager.getLocalDatastore();
+    localDatastore._handleUnPinWithName(localDatastore.DEFAULT_PIN, this);
   }
 
   /**
    * Loads data from the local datastore into this object.
    */
   fetchFromLocalDatastore() {
-    const pinned = LocalDatastore.fromPinWithName(this.id);
+    const localDatastore = CoreManager.getLocalDatastore();
+    const pinned = localDatastore.fromPinWithName(this.id);
     if (!pinned) {
       throw new Error('Cannot fetch an unsaved ParseObject');
     }
@@ -1602,7 +1605,8 @@ class ParseObject {
    * @static
    */
   static pinAll(objects: Array<ParseObject>) {
-    ParseObject.pinAllWithName(LocalDatastore.DEFAULT_PIN, objects);
+    const localDatastore = CoreManager.getLocalDatastore();
+    ParseObject.pinAllWithName(localDatastore.DEFAULT_PIN, objects);
   }
 
   /**
@@ -1613,8 +1617,9 @@ class ParseObject {
    * @static
    */
   static pinAllWithName(name: string, objects: Array<ParseObject>) {
+    const localDatastore = CoreManager.getLocalDatastore();
     for (let object of objects) {
-      LocalDatastore._handlePinWithName(name, object);
+      localDatastore._handlePinWithName(name, object);
     }
   }
 
@@ -1626,7 +1631,8 @@ class ParseObject {
    * @static
    */
   static unPinAll(objects: Array<ParseObject>) {
-    ParseObject.unPinAllWithName(LocalDatastore.DEFAULT_PIN, objects);
+    const localDatastore = CoreManager.getLocalDatastore();
+    ParseObject.unPinAllWithName(localDatastore.DEFAULT_PIN, objects);
   }
 
   /**
@@ -1637,8 +1643,9 @@ class ParseObject {
    * @static
    */
   static unPinAllWithName(name: string, objects: Array<ParseObject>) {
+    const localDatastore = CoreManager.getLocalDatastore();
     for (let object of objects) {
-      LocalDatastore._handleUnPinWithName(name, object);
+      localDatastore._handleUnPinWithName(name, object);
     }
   }
 
@@ -1648,7 +1655,8 @@ class ParseObject {
    * @static
    */
   static unPinAllObjects() {
-    LocalDatastore.unPinWithName(LocalDatastore.DEFAULT_PIN);
+    const localDatastore = CoreManager.getLocalDatastore();
+    localDatastore.unPinWithName(localDatastore.DEFAULT_PIN);
   }
 
   /**
@@ -1658,7 +1666,8 @@ class ParseObject {
    * @static
    */
   static unPinAllObjectsWithName(name: string) {
-    LocalDatastore.unPinWithName(LocalDatastore.PIN_PREFIX + name);
+    const localDatastore = CoreManager.getLocalDatastore();
+    localDatastore.unPinWithName(localDatastore.PIN_PREFIX + name);
   }
 }
 
@@ -1748,7 +1757,8 @@ var DefaultController = {
           target._clearServerData();
           target._finishFetch(response);
         }
-        LocalDatastore._updateObjectIfPinned(target);
+        const localDatastore = CoreManager.getLocalDatastore();
+        localDatastore._updateObjectIfPinned(target);
         return target;
       });
     }
@@ -1922,8 +1932,9 @@ var DefaultController = {
           if (objectError) {
             return ParsePromise.error(objectError);
           }
+          const localDatastore = CoreManager.getLocalDatastore();
           for (let object of target) {
-            LocalDatastore._updateObjectIfPinned(object);
+            localDatastore._updateObjectIfPinned(object);
           }
           return ParsePromise.as(target);
         });
@@ -1949,7 +1960,8 @@ var DefaultController = {
 
       stateController.pushPendingState(target._getStateIdentifier());
       return stateController.enqueueTask(target._getStateIdentifier(), task).then(() => {
-        LocalDatastore._updateObjectIfPinned(target);
+        const localDatastore = CoreManager.getLocalDatastore();
+        localDatastore._updateObjectIfPinned(target);
         return target;
       }, (error) => {
         return ParsePromise.error(error);

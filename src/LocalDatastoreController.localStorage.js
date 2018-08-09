@@ -35,8 +35,8 @@ const LocalDatastoreController = {
   getLocalDatastore() {
     const LDS = {};
     for (let i = 0; i < localStorage.length; i += 1) {
-      let key = localStorage.key(i);
-      let value = localStorage.getItem(key);
+      const key = localStorage.key(i);
+      const value = localStorage.getItem(key);
       LDS[key] = JSON.parse(value);
     }
     return LDS;

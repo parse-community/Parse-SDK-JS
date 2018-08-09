@@ -8,7 +8,6 @@
  */
 
 jest.dontMock('../CoreManager');
-jest.dontMock('../LocalDatastore');
 jest.dontMock('../encode');
 jest.dontMock('../decode');
 jest.dontMock('../ParseError');
@@ -18,6 +17,8 @@ jest.dontMock('../ParseQuery');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../ObjectStateMutations');
+jest.dontMock('../LocalDatastore');
+jest.dontMock('../LocalDatastoreController.default');
 
 var mockObject = function(className) {
   this.className = className;
@@ -45,6 +46,9 @@ var ParsePromise = require('../ParsePromise').default;
 var ParseQuery = require('../ParseQuery').default;
 
 describe('ParseQuery', () => {
+  beforeEach(() => {
+    LocalDatastore._clear();
+  });
   it('can be constructed from a class name', () => {
     var q = new ParseQuery('Item');
     expect(q.className).toBe('Item');
@@ -2081,6 +2085,7 @@ describe('ParseQuery', () => {
   });
 
   it('can query from default pin', () => {
+    CoreManager.setLocalDatastore(LocalDatastore);
     var q = new ParseQuery('Item');
     expect(q._queriesLocalDatastore).toBe(false);
     expect(q._localDatastorePinName).toBe(null);

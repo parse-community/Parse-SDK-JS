@@ -16,7 +16,6 @@ import ParseGeoPoint from './ParseGeoPoint';
 import ParsePolygon from './ParsePolygon';
 import ParseObject from './ParseObject';
 import ParsePromise from './ParsePromise';
-import LocalDatastore from './LocalDatastore';
 import OfflineQuery from './OfflineQuery';
 
 import type { RequestOptions, FullOptions } from './RESTController';
@@ -462,13 +461,14 @@ class ParseQuery {
     let select = this._select;
 
     if (this._queriesLocalDatastore) {
-      const objects = LocalDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
+      const localDatastore = CoreManager.getLocalDatastore();
+      const objects = localDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
       return objects.map((json) => {
         const object = ParseObject.fromJSON(json);
         if (object.className !== this.className) {
           return null;
         }
-        if (!OfflineQuery.matchesQuery(object.toJSON(), this.toJSON().where)) {
+        if (!OfflineQuery.matchesQuery(object, this)) {
           return null; 
         }
         return object;
@@ -1455,7 +1455,8 @@ class ParseQuery {
    * Changes the source of this query to the default group of pinned objects.
    */
   fromPin() {
-    this.fromPinWithName(LocalDatastore.DEFAULT_PIN);
+    const localDatastore = CoreManager.getLocalDatastore();
+    this.fromPinWithName(localDatastore.DEFAULT_PIN);
   }
 
   /**

@@ -1,45 +1,5 @@
-'use strict';
-
-var equalObjects = require('./equals');
-var decode = require('./decode');
-
-/**
- * Convert $or queries into an array of where conditions
- */
-function flattenOrQueries(where) {
-  if (!where.hasOwnProperty('$or')) {
-    return where;
-  }
-  var accum = [];
-  for (var i = 0; i < where.$or.length; i++) {
-    accum = accum.concat(where.$or[i]);
-  }
-  return accum;
-}
-
-/**
- * Deterministically turns an object into a string. Disregards ordering
- */
-function stringify(object) {
-  if (typeof object !== 'object' || object === null) {
-    if (typeof object === 'string') {
-      return '"' + object.replace(/\|/g, '%|') + '"';
-    }
-    return object + '';
-  }
-  if (Array.isArray(object)) {
-    var copy = object.map(stringify);
-    copy.sort();
-    return '[' + copy.join(',') + ']';
-  }
-  var sections = [];
-  var keys = Object.keys(object);
-  keys.sort();
-  for (var k = 0; k < keys.length; k++) {
-    sections.push(stringify(keys[k]) + ':' + stringify(object[keys[k]]));
-  }
-  return '{' + sections.join(',') + '}';
-}
+var equalObjects = require('./equals').default;
+var decode = require('./decode').default;
 
 /**
  * contains -- Determines if an object is contained in a list with special handling for Parse pointers.
@@ -66,8 +26,16 @@ function contains(haystack, needle) {
  * queries, we can avoid building a full-blown query tool.
  */
 function matchesQuery(object, query) {
-  for (var field in query) {
-    if (!matchesKeyConstraints(object, field, query[field])) {
+  let obj = object;
+  let q = query;
+  if (object.toJSON) {
+    obj = object.toJSON();
+  }
+  if (query.toJSON) {
+    q = query.toJSON().where;
+  }
+  for (var field in q) {
+    if (!matchesKeyConstraints(obj, field, q[field])) {
       return false;
     }
   }
@@ -76,14 +44,13 @@ function matchesQuery(object, query) {
 
 function equalObjectsGeneric(obj, compareTo, eqlFn) {
   if (Array.isArray(obj)) {
-    for (var i = 0; i < obj.length; i++) {
+    for (let i = 0; i < obj.length; i++) {
       if (eqlFn(obj[i], compareTo)) {
         return true;
       }
     }
     return false;
   }
-
   return eqlFn(obj, compareTo);
 }
 
@@ -94,11 +61,11 @@ function matchesKeyConstraints(object, key, constraints) {
   if (constraints === null) {
     return false;
   }
-  if (key.indexOf(".") >= 0) {
+  if (key.indexOf('.') >= 0) {
     // Key references a subobject
-    var keyComponents = key.split(".");
+    var keyComponents = key.split('.');
     var subObjectKey = keyComponents[0];
-    var keyRemainder = keyComponents.slice(1).join(".");
+    var keyRemainder = keyComponents.slice(1).join('.');
     return matchesKeyConstraints(object[subObjectKey] || {}, keyRemainder, constraints);
   }
   var i;
@@ -128,14 +95,13 @@ function matchesKeyConstraints(object, key, constraints) {
         return typeof obj !== 'undefined' && ptr.className === obj.className && ptr.objectId === obj.objectId;
       });
     }
-
-    return equalObjectsGeneric(object[key], decode(key, constraints), equalObjects);
+    return equalObjectsGeneric(decode(object[key]), decode(constraints), equalObjects);
   }
   // More complex cases
   for (var condition in constraints) {
     compareTo = constraints[condition];
     if (compareTo.__type) {
-      compareTo = decode(key, compareTo);
+      compareTo = decode(compareTo);
     }
     switch (condition) {
       case '$lt':

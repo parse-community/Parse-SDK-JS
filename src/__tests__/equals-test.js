@@ -122,4 +122,16 @@ describe('equals', () => {
     b.id = 'myobj';
     expect(equals(a, b)).toBe(true);
   });
+
+  it('tests equality of Date', () => {
+    const a = new Date('2018-08-09T00:01:53.964Z');
+    const b = new Date('2018-08-10T00:00:00.000Z');
+
+    expect(equals(a, a)).toBe(true);
+    expect(equals(a, b)).toBe(false);
+    expect(equals(b, a)).toBe(false);
+
+    const c = [];
+    expect(equals(a, c)).toBe(false);
+  });
 });
