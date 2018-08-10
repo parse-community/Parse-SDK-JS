@@ -1327,6 +1327,10 @@ class ParseQuery {
   /**
    * Includes nested Parse.Objects for the provided key.  You can use dot
    * notation to specify which fields in the included object are also fetched.
+   * 
+   * If you want to include all nested Parse.Objects pass in '*'
+   * <pre>query.include('*');</pre>
+   * 
    * @param {...String|Array<String>} key The name(s) of the key(s) to include.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1338,6 +1342,10 @@ class ParseQuery {
         this._include.push(key);
       }
     });
+    if (this._include.includes('*')) {
+      this._includeAll = true;
+      this._include.splice(this._include.indexOf('*'), 1);
+    }
     return this;
   }
 
@@ -1347,8 +1355,7 @@ class ParseQuery {
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   includeAll(): ParseQuery {
-    this._includeAll = true;
-    return this;
+    return this.include('*');
   }
 
   /**
