@@ -1316,7 +1316,8 @@ class ParseQuery {
    * Includes nested Parse.Objects for the provided key.  You can use dot
    * notation to specify which fields in the included object are also fetched.
    * 
-   * If you want to include all nested Parse.Objects pass in '*'
+   * You can include all nested Parse.Objects by passing in '*'.
+   * Requires Parse Server 3.0.0+
    * <pre>query.include('*');</pre>
    * 
    * @param {...String|Array<String>} key The name(s) of the key(s) to include.
@@ -1335,6 +1336,8 @@ class ParseQuery {
 
   /**
    * Includes all nested Parse.Objects.
+   * 
+   * Requires Parse Server 3.0.0+
    * 
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
