@@ -1348,16 +1348,19 @@ describe('Parse Object', () => {
     await parent.save();
 
     const obj1 = TestObject.createWithoutData(parent.id);
-    await obj1.fetchWithInclude('child');
+    const fetchedObj1 = await obj1.fetchWithInclude('child');
     assert.equal(obj1.get('child').get('field'), 'isChild');
+    assert.equal(fetchedObj1.get('child').get('field'), 'isChild');
 
     const obj2 = TestObject.createWithoutData(parent.id);
-    await obj2.fetchWithInclude(['child']);
+    const fetchedObj2 = await obj2.fetchWithInclude(['child']);
     assert.equal(obj2.get('child').get('field'), 'isChild');
+    assert.equal(fetchedObj2.get('child').get('field'), 'isChild');
 
     const obj3 = TestObject.createWithoutData(parent.id);
-    await obj3.fetchWithInclude([ ['child'] ]);
+    const fetchedObj3 = await obj3.fetchWithInclude([ ['child'] ]);
     assert.equal(obj3.get('child').get('field'), 'isChild');
+    assert.equal(fetchedObj3.get('child').get('field'), 'isChild');
   });
 
   it('can fetchWithInclude dot notation', async () => {

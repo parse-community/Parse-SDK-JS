@@ -517,6 +517,83 @@ describe('ParseUser', () => {
     });
   });
 
+  it('updates the current user on disk when fetched with include', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid6',
+        }, 200);
+      },
+      ajax() {},
+    });
+    const child = new ParseObject('TestObject');
+    child.set('foo', 'bar');
+    await child.save();
+
+    let u = await ParseUser.signUp('spot', 'fetchWithInclude');
+    expect(u.isCurrent()).toBe(true);
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          child: child.toJSON(),
+          count: 15,
+        }, 200);
+      },
+      ajax() {},
+    });
+    u = await u.fetchWithInclude('child');
+
+    ParseUser._clearCache();
+    ParseObject._clearAllState();
+    expect(u.attributes).toEqual({});
+    expect(u.get('count')).toBe(undefined);
+    const current = await ParseUser.currentAsync();
+    expect(current.id).toBe('uid6');
+    expect(current.get('count')).toBe(15);
+    expect(current.get('child').foo).toBe('bar');
+  });
+
+  it('does not update non-auth user when fetched with include', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid6',
+        }, 200);
+      },
+      ajax() {},
+    });
+    const child = new ParseObject('TestObject');
+    child.set('foo', 'bar');
+    await child.save();
+
+    let u = await ParseUser.signUp('spot', 'fetchWithInclude');
+    await ParseUser.logOut();
+    expect(u.isCurrent()).toBe(false);
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          child: child.toJSON(),
+          count: 15,
+        }, 200);
+      },
+      ajax() {},
+    });
+    const fetchedUser = await u.fetchWithInclude('child');
+
+    const current = await ParseUser.currentAsync();
+    expect(current).toBe(null);
+    expect(fetchedUser.get('count')).toBe(15);
+    expect(fetchedUser.get('child').foo).toBe('bar');
+  });
+
   it('clears the current user on disk when logged out', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();

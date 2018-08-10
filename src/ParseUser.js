@@ -463,6 +463,19 @@ class ParseUser extends ParseObject {
     });
   }
 
+  /**
+   * Wrap the default fetchWithInclude behavior with functionality to save to local
+   * storage if this is current user.
+   */
+  fetchWithInclude(...args: Array<any>): Promise {
+    return super.fetchWithInclude.apply(this, args).then(() => {
+      if (this.isCurrent()) {
+        return CoreManager.getUserController().updateUserOnDisk(this);
+      }
+      return this;
+    });
+  }
+
   static readOnlyAttributes() {
     return ['sessionToken'];
   }
