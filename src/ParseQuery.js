@@ -831,6 +831,17 @@ class ParseQuery {
 
   /**
    * Adds a constraint to the query that requires a particular key's value to
+   * be contained by the provided list of values. Get objects where all array elements match.
+   * @param {String} key The key to check.
+   * @param {Array} values The values that will match.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  containedBy(key: string, value: Array<mixed>): ParseQuery {
+    return this._addCondition(key, '$containedBy', value);
+  }
+
+  /**
+   * Adds a constraint to the query that requires a particular key's value to
    * contain each one of the provided list of values.
    * @param {String} key The key to check.  This key's value must be an array.
    * @param {Array} values The values that will match.
