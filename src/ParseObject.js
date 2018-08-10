@@ -970,6 +970,8 @@ class ParseObject {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>include: The name(s) of the key(s) to include. Can be a string, an array of strings,
+   *       or an array of array of strings.
    * </ul>
    * @return {Promise} A promise that is fulfilled when the fetch
    *     completes.
@@ -1171,6 +1173,14 @@ class ParseObject {
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {Object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   *   <li>include: The name(s) of the key(s) to include. Can be a string, an array of strings,
+   *       or an array of array of strings.
+   * </ul>
    * @static
    */
   static fetchAll(list: Array<ParseObject>, options: RequestOptions) {
@@ -1224,6 +1234,12 @@ class ParseObject {
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {String|Array<string|Array<string>>} keys The name(s) of the key(s) to include.
    * @param {Object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
    * @static
    */
   static fetchAllWithInclude(list: Array<ParseObject>, keys: String|Array<string|Array<string>>, options: RequestOptions) {
