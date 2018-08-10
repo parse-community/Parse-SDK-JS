@@ -183,7 +183,6 @@ class ParseQuery {
   className: string;
   _where: any;
   _include: Array<string>;
-  _includeAll: boolean;
   _select: Array<string>;
   _limit: number;
   _skip: number;
@@ -217,7 +216,6 @@ class ParseQuery {
 
     this._where = {};
     this._include = [];
-    this._includeAll = false;
     this._limit = -1; // negative limit is not sent in the server request
     this._skip = 0;
     this._extraOptions = {};
@@ -282,9 +280,6 @@ class ParseQuery {
     if (this._include.length) {
       params.include = this._include.join(',');
     }
-    if (this._includeAll) {
-      params.includeAll = true;
-    }
     if (this._select) {
       params.keys = this._select.join(',');
     }
@@ -334,10 +329,6 @@ class ParseQuery {
       this._include = json.include.split(",");
     }
 
-    if (json.includeAll) {
-      this._includeAll = true;
-    }
-
     if (json.keys) {
       this._select = json.keys.split(",");
     }
@@ -356,7 +347,7 @@ class ParseQuery {
 
     for (let key in json) {
       if (json.hasOwnProperty(key))  {
-        if (["where", "include", "includeAll", "keys", "limit", "skip", "order"].indexOf(key) === -1) {
+        if (["where", "include", "keys", "limit", "skip", "order"].indexOf(key) === -1) {
           this._extraOptions[key] = json[key];
         }
       }
@@ -688,9 +679,6 @@ class ParseQuery {
     query._include = this._include.map((i) => {
       return i;
     });
-    if (this._includeAll) {
-      query._includeAll = true;
-    }
     if (this._select) {
       query._select = this._select.map((s) => {
         return s;
@@ -1342,10 +1330,6 @@ class ParseQuery {
         this._include.push(key);
       }
     });
-    if (this._include.includes('*')) {
-      this._includeAll = true;
-      this._include.splice(this._include.indexOf('*'), 1);
-    }
     return this;
   }
 

@@ -905,11 +905,11 @@ describe('ParseQuery', () => {
     const json = q.toJSON();
     expect(json).toEqual({
       where: {},
-      includeAll: true,
+      include: '*',
     });
     const q2 = new ParseQuery('Item');
     q2.withJSON(json);
-    expect(q2._includeAll).toBe(true);
+    expect(q2._include).toEqual(['*']);
   });
 
   it('can use extraOptions', () => {
@@ -1326,7 +1326,7 @@ describe('ParseQuery', () => {
           limit: 100,
           order: 'objectId',
           keys: 'size,name',
-          includeAll: true,
+          include: '*',
           where: {
             size: {
               $in: ['small', 'medium']
