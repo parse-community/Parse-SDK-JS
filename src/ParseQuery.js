@@ -237,7 +237,6 @@ class ParseQuery {
 
   /**
    * Adds constraint that all of the passed in queries match.
-   * @method _andQuery
    * @param {Array} queries
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -247,6 +246,20 @@ class ParseQuery {
     });
 
     this._where.$and = queryJSON;
+    return this;
+  }
+
+  /**
+   * Adds constraint that all of the passed in queries match.
+   * @param {Array} queries
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  _norQuery(queries: Array<ParseQuery>): ParseQuery {
+    var queryJSON = queries.map((q) => {
+      return q.toJSON().where;
+    });
+
+    this._where.$nor = queryJSON;
     return this;
   }
 
@@ -1391,6 +1404,24 @@ class ParseQuery {
     var className = _getClassNameFromQueries(queries);
     var query = new ParseQuery(className);
     query._andQuery(queries);
+    return query;
+  }
+
+  /**
+   * Constructs a Parse.Query that is the NOR of the passed in queries.  For
+   * example:
+   * <pre>const compoundQuery = Parse.Query.nor(query1, query2, query3);</pre>
+   *
+   * will create a compoundQuery that is a nor of the query1, query2, and
+   * query3.
+   * @param {...Parse.Query} var_args The list of queries to AND.
+   * @static
+   * @return {Parse.Query} The query that is the AND of the passed in queries.
+   */
+  static nor(...queries: Array<ParseQuery>): ParseQuery {
+    const className = _getClassNameFromQueries(queries);
+    const query = new ParseQuery(className);
+    query._norQuery(queries);
     return query;
   }
 }

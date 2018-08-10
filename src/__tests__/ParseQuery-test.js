@@ -988,6 +988,40 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can combine queries with a NOR clause', () => {
+    const q = new ParseQuery('Item');
+    let q2 = new ParseQuery('Purchase');
+    expect(ParseQuery.nor.bind(null, q, q2)).toThrow(
+      'All queries must be for the same class.',
+    );
+
+    q2 = new ParseQuery('Item');
+    q.equalTo('size', 'medium');
+    q2.equalTo('size', 'large');
+
+    let mediumOrLarge = ParseQuery.nor(q, q2);
+    expect(mediumOrLarge.toJSON()).toEqual({
+      where: {
+        $nor: [
+          { size: 'medium' },
+          { size: 'large' },
+        ],
+      },
+    });
+
+    // It removes limits, skips, etc
+    q.limit(10);
+    mediumOrLarge = ParseQuery.nor(q, q2);
+    expect(mediumOrLarge.toJSON()).toEqual({
+      where: {
+        $nor: [
+          { size: 'medium' },
+          { size: 'large' },
+        ],
+      },
+    });
+  });
+
   it('can get the first object of a query', (done) => {
     CoreManager.setQueryController({
       aggregate() {},
