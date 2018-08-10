@@ -983,8 +983,46 @@ class ParseObject {
     if (options.hasOwnProperty('sessionToken')) {
       fetchOptions.sessionToken = options.sessionToken;
     }
+    if (options.hasOwnProperty('include')) {
+      fetchOptions.include = [];
+      if (Array.isArray(options.include)) {
+        options.include.forEach((key) => {
+          if (Array.isArray(key)) {
+            fetchOptions.include = fetchOptions.include.concat(key);
+          } else {
+            fetchOptions.include.push(key);
+          }
+        });
+      } else {
+        fetchOptions.include.push(options.include);
+      }
+    }
     var controller = CoreManager.getObjectController();
     return controller.fetch(this, true, fetchOptions);
+  }
+
+  /**
+   * Fetch the model from the server. If the server's representation of the
+   * model differs from its current attributes, they will be overriden.
+   *
+   * Includes nested Parse.Objects for the provided key. You can use dot
+   * notation to specify which fields in the included object are also fetched.
+   * 
+   * @param {String|Array<string|Array<string>>} keys The name(s) of the key(s) to include.
+   * @param {Object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @return {Promise} A promise that is fulfilled when the fetch
+   *     completes.
+   */
+  fetchWithInclude(keys: String|Array<string|Array<string>>, options: RequestOptions): Promise {
+    options = options || {};
+    options.include = keys;
+    return this.fetch(options);
   }
 
   /**
@@ -1135,7 +1173,7 @@ class ParseObject {
    * @param {Object} options
    * @static
    */
-  static fetchAll(list: Array<ParseObject>, options) {
+  static fetchAll(list: Array<ParseObject>, options: RequestOptions) {
     var options = options || {};
 
     var queryOptions = {};
@@ -1145,11 +1183,53 @@ class ParseObject {
     if (options.hasOwnProperty('sessionToken')) {
       queryOptions.sessionToken = options.sessionToken;
     }
+    if (options.hasOwnProperty('include')) {
+      queryOptions.include = [];
+      if (Array.isArray(options.include)) {
+        options.include.forEach((key) => {
+          if (Array.isArray(key)) {
+            queryOptions.include = queryOptions.include.concat(key);
+          } else {
+            queryOptions.include.push(key);
+          }
+        });
+      } else {
+        queryOptions.include.push(options.include);
+      }
+    }
     return CoreManager.getObjectController().fetch(
       list,
       true,
       queryOptions
     );
+  }
+
+    /**
+   * Fetches the given list of Parse.Object.
+   * 
+   * Includes nested Parse.Objects for the provided key. You can use dot
+   * notation to specify which fields in the included object are also fetched.
+   * 
+   * If any error is encountered, stops and calls the error handler.
+   *
+   * <pre>
+   *   Parse.Object.fetchAllWithInclude([object1, object2, ...], [pointer1, pointer2, ...])
+   *    .then((list) => {
+   *      // All the objects were fetched.
+   *    }, (error) => {
+   *      // An error occurred while fetching one of the objects.
+   *    });
+   * </pre>
+   *
+   * @param {Array} list A list of <code>Parse.Object</code>.
+   * @param {String|Array<string|Array<string>>} keys The name(s) of the key(s) to include.
+   * @param {Object} options
+   * @static
+   */
+  static fetchAllWithInclude(list: Array<ParseObject>, keys: String|Array<string|Array<string>>, options: RequestOptions) {
+    options = options || {};
+    options.include = keys;
+    return ParseObject.fetchAll(list, options);
   }
 
   /**
@@ -1570,6 +1650,9 @@ var DefaultController = {
       }
       var query = new ParseQuery(className);
       query.containedIn('objectId', ids);
+      if (options && options.include) {
+        query.include(options.include);
+      }
       query._limit = ids.length;
       return query.find(options).then((objects) => {
         var idMap = {};
@@ -1604,10 +1687,14 @@ var DefaultController = {
       });
     } else {
       var RESTController = CoreManager.getRESTController();
+      const params = {};
+      if (options && options.include) {
+        params.include = options.include.join();
+      }
       return RESTController.request(
         'GET',
         'classes/' + target.className + '/' + target._getId(),
-        {},
+        params,
         options
       ).then((response, status, xhr) => {
         if (target instanceof ParseObject) {
