@@ -345,9 +345,11 @@ class ParseQuery {
       this._order = json.order.split(",");
     }
 
-    for (let key in json) if (json.hasOwnProperty(key))  {
-      if (["where", "include", "keys", "limit", "skip", "order"].indexOf(key) === -1) {
-        this._extraOptions[key] = json[key];
+    for (let key in json) {
+      if (json.hasOwnProperty(key))  {
+        if (["where", "include", "keys", "limit", "skip", "order"].indexOf(key) === -1) {
+          this._extraOptions[key] = json[key];
+        }
       }
     }
 
@@ -1324,6 +1326,11 @@ class ParseQuery {
   /**
    * Includes nested Parse.Objects for the provided key.  You can use dot
    * notation to specify which fields in the included object are also fetched.
+   * 
+   * You can include all nested Parse.Objects by passing in '*'.
+   * Requires Parse Server 3.0.0+
+   * <pre>query.include('*');</pre>
+   * 
    * @param {...String|Array<String>} key The name(s) of the key(s) to include.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1336,6 +1343,17 @@ class ParseQuery {
       }
     });
     return this;
+  }
+
+  /**
+   * Includes all nested Parse.Objects.
+   * 
+   * Requires Parse Server 3.0.0+
+   * 
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  includeAll(): ParseQuery {
+    return this.include('*');
   }
 
   /**
