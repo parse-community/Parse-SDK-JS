@@ -263,6 +263,27 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can generate containedBy queries', () => {
+    const q = new ParseQuery('Item');
+    q.containedBy('tags', ['hot', 'sold-out']);
+    expect(q.toJSON()).toEqual({
+      where: {
+        tags: {
+          $containedBy: ['hot', 'sold-out']
+        },
+      },
+    });
+
+    q.containedBy('tags', ['sale', 'new']);
+    expect(q.toJSON()).toEqual({
+      where: {
+        tags: {
+          $containedBy: ['sale', 'new']
+        },
+      },
+    });
+  });
+
   it('can generate contains-all-starting-with queries', () => {
     var q = new ParseQuery('Item');
     q.containsAllStartingWith('tags', ['ho', 'out']);
