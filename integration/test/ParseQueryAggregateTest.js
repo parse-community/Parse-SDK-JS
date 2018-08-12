@@ -86,13 +86,12 @@ describe('Parse Aggregate Query', () => {
       },
     }, {
       match: { 'tempPointer.value': 2 },
-    }
-  ];
+    }];
     await Parse.Object.saveAll([pointer1, pointer2, pointer3, obj1, obj2, obj3]);
 
     const query = new Parse.Query(TestObject);
     const results = await query.aggregate(pipeline);
-    console.log(results);
+    
     expect(results.length).toEqual(1);
     expect(results[0].tempPointer.value).toEqual(2);
   });
