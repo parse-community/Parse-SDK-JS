@@ -250,7 +250,7 @@ class ParseQuery {
   }
 
   /**
-   * Adds constraint that all of the passed in queries match.
+   * Adds constraint that none of the passed in queries match.
    * @param {Array} queries
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1443,9 +1443,9 @@ class ParseQuery {
    *
    * will create a compoundQuery that is a nor of the query1, query2, and
    * query3.
-   * @param {...Parse.Query} var_args The list of queries to AND.
+   * @param {...Parse.Query} var_args The list of queries to NOR.
    * @static
-   * @return {Parse.Query} The query that is the AND of the passed in queries.
+   * @return {Parse.Query} The query that is the NOR of the passed in queries.
    */
   static nor(...queries: Array<ParseQuery>): ParseQuery {
     const className = _getClassNameFromQueries(queries);
