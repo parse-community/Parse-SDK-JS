@@ -1340,6 +1340,93 @@ describe('Parse Object', () => {
     });
   });
 
+  it('can fetchWithInclude', async () => {
+    const parent = new TestObject();
+    const child = new TestObject();
+    child.set('field', 'isChild');
+    parent.set('child', child);
+    await parent.save();
+
+    const obj1 = TestObject.createWithoutData(parent.id);
+    const fetchedObj1 = await obj1.fetchWithInclude('child');
+    assert.equal(obj1.get('child').get('field'), 'isChild');
+    assert.equal(fetchedObj1.get('child').get('field'), 'isChild');
+
+    const obj2 = TestObject.createWithoutData(parent.id);
+    const fetchedObj2 = await obj2.fetchWithInclude(['child']);
+    assert.equal(obj2.get('child').get('field'), 'isChild');
+    assert.equal(fetchedObj2.get('child').get('field'), 'isChild');
+
+    const obj3 = TestObject.createWithoutData(parent.id);
+    const fetchedObj3 = await obj3.fetchWithInclude([ ['child'] ]);
+    assert.equal(obj3.get('child').get('field'), 'isChild');
+    assert.equal(fetchedObj3.get('child').get('field'), 'isChild');
+  });
+
+  it('can fetchWithInclude dot notation', async () => {
+    const parent = new TestObject();
+    const child = new TestObject();
+    const grandchild = new TestObject();
+    grandchild.set('field', 'isGrandchild');
+    child.set('grandchild', grandchild);
+    parent.set('child', child);
+    await Parse.Object.saveAll([parent, child, grandchild]);
+
+    const obj1 = TestObject.createWithoutData(parent.id);
+    await obj1.fetchWithInclude('child.grandchild');
+    assert.equal(obj1.get('child').get('grandchild').get('field'), 'isGrandchild');
+
+    const obj2 = TestObject.createWithoutData(parent.id);
+    await obj2.fetchWithInclude(['child.grandchild']);
+    assert.equal(obj2.get('child').get('grandchild').get('field'), 'isGrandchild');
+
+    const obj3 = TestObject.createWithoutData(parent.id);
+    await obj3.fetchWithInclude([ ['child.grandchild'] ]);
+    assert.equal(obj3.get('child').get('grandchild').get('field'), 'isGrandchild');
+  });
+
+  it('can fetchAllWithInclude', async () => {
+    const parent = new TestObject();
+    const child = new TestObject();
+    child.set('field', 'isChild');
+    parent.set('child', child);
+    await parent.save();
+
+    const obj1 = TestObject.createWithoutData(parent.id);
+    await Parse.Object.fetchAllWithInclude([obj1], 'child');
+    assert.equal(obj1.get('child').get('field'), 'isChild');
+
+    const obj2 = TestObject.createWithoutData(parent.id);
+    await Parse.Object.fetchAllWithInclude([obj2], ['child']);
+    assert.equal(obj2.get('child').get('field'), 'isChild');
+
+    const obj3 = TestObject.createWithoutData(parent.id);
+    await Parse.Object.fetchAllWithInclude([obj3], [ ['child'] ]);
+    assert.equal(obj3.get('child').get('field'), 'isChild');
+  });
+
+  it('can fetchAllWithInclude dot notation', async () => {
+    const parent = new TestObject();
+    const child = new TestObject();
+    const grandchild = new TestObject();
+    grandchild.set('field', 'isGrandchild');
+    child.set('grandchild', grandchild);
+    parent.set('child', child);
+    await Parse.Object.saveAll([parent, child, grandchild]);
+
+    const obj1 = TestObject.createWithoutData(parent.id);
+    await Parse.Object.fetchAllWithInclude([obj1], 'child.grandchild');
+    assert.equal(obj1.get('child').get('grandchild').get('field'), 'isGrandchild');
+
+    const obj2 = TestObject.createWithoutData(parent.id);
+    await Parse.Object.fetchAllWithInclude([obj2], ['child.grandchild']);
+    assert.equal(obj2.get('child').get('grandchild').get('field'), 'isGrandchild');
+
+    const obj3 = TestObject.createWithoutData(parent.id);
+    await Parse.Object.fetchAllWithInclude([obj3], [ ['child.grandchild'] ]);
+    assert.equal(obj3.get('child').get('grandchild').get('field'), 'isGrandchild');
+  });
+
   it('fires errors when readonly attributes are changed', (done) => {
     let LimitedObject = Parse.Object.extend('LimitedObject');
     LimitedObject.readOnlyAttributes = function() {

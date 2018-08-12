@@ -17,6 +17,7 @@ export type RequestOptions = {
   useMasterKey?: boolean;
   sessionToken?: string;
   installationId?: string;
+  include?: any;
 };
 
 export type FullOptions = {
