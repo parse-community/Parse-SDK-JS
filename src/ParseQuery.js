@@ -237,7 +237,6 @@ class ParseQuery {
 
   /**
    * Adds constraint that all of the passed in queries match.
-   * @method _andQuery
    * @param {Array} queries
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -247,6 +246,20 @@ class ParseQuery {
     });
 
     this._where.$and = queryJSON;
+    return this;
+  }
+
+  /**
+   * Adds constraint that none of the passed in queries match.
+   * @param {Array} queries
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  _norQuery(queries: Array<ParseQuery>): ParseQuery {
+    var queryJSON = queries.map((q) => {
+      return q.toJSON().where;
+    });
+
+    this._where.$nor = queryJSON;
     return this;
   }
 
@@ -345,9 +358,11 @@ class ParseQuery {
       this._order = json.order.split(",");
     }
 
-    for (let key in json) if (json.hasOwnProperty(key))  {
-      if (["where", "include", "keys", "limit", "skip", "order"].indexOf(key) === -1) {
-        this._extraOptions[key] = json[key];
+    for (let key in json) {
+      if (json.hasOwnProperty(key))  {
+        if (["where", "include", "keys", "limit", "skip", "order"].indexOf(key) === -1) {
+          this._extraOptions[key] = json[key];
+        }
       }
     }
 
@@ -827,6 +842,17 @@ class ParseQuery {
    */
   notContainedIn(key: string, value: mixed): ParseQuery {
     return this._addCondition(key, '$nin', value);
+  }
+
+  /**
+   * Adds a constraint to the query that requires a particular key's value to
+   * be contained by the provided list of values. Get objects where all array elements match.
+   * @param {String} key The key to check.
+   * @param {Array} values The values that will match.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  containedBy(key: string, value: Array<mixed>): ParseQuery {
+    return this._addCondition(key, '$containedBy', value);
   }
 
   /**
@@ -1313,6 +1339,11 @@ class ParseQuery {
   /**
    * Includes nested Parse.Objects for the provided key.  You can use dot
    * notation to specify which fields in the included object are also fetched.
+   * 
+   * You can include all nested Parse.Objects by passing in '*'.
+   * Requires Parse Server 3.0.0+
+   * <pre>query.include('*');</pre>
+   * 
    * @param {...String|Array<String>} key The name(s) of the key(s) to include.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1325,6 +1356,17 @@ class ParseQuery {
       }
     });
     return this;
+  }
+
+  /**
+   * Includes all nested Parse.Objects.
+   * 
+   * Requires Parse Server 3.0.0+
+   * 
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  includeAll(): ParseQuery {
+    return this.include('*');
   }
 
   /**
@@ -1391,6 +1433,24 @@ class ParseQuery {
     var className = _getClassNameFromQueries(queries);
     var query = new ParseQuery(className);
     query._andQuery(queries);
+    return query;
+  }
+
+  /**
+   * Constructs a Parse.Query that is the NOR of the passed in queries.  For
+   * example:
+   * <pre>const compoundQuery = Parse.Query.nor(query1, query2, query3);</pre>
+   *
+   * will create a compoundQuery that is a nor of the query1, query2, and
+   * query3.
+   * @param {...Parse.Query} var_args The list of queries to NOR.
+   * @static
+   * @return {Parse.Query} The query that is the NOR of the passed in queries.
+   */
+  static nor(...queries: Array<ParseQuery>): ParseQuery {
+    const className = _getClassNameFromQueries(queries);
+    const query = new ParseQuery(className);
+    query._norQuery(queries);
     return query;
   }
 }

@@ -192,6 +192,53 @@ describe('Parse Query', () => {
     });
   });
 
+  it('can do containedBy queries with numbers', async () => {
+    const NumberSet = Parse.Object.extend('NumberSet');
+    const objectsList = [];
+    objectsList.push(new NumberSet({ numbers: [0, 1, 2] }));
+    objectsList.push(new NumberSet({ numbers: [2, 0] }));
+    objectsList.push(new NumberSet({ numbers: [1, 2, 3, 4] }));
+
+    await Parse.Object.saveAll(objectsList);
+
+    const query = new Parse.Query(NumberSet);
+    query.containedBy('numbers', [1, 2, 3, 4, 5]);
+    const results = await query.find();
+    assert.equal(results.length, 1);
+  });
+
+  it('can do containedBy queries with pointer', async () => {
+    const objects = Array.from(Array(10).keys()).map((idx) => {
+      const obj = new Parse.Object('Object');
+      obj.set('key', idx);
+      return obj;
+    });
+
+    const parent1 = new Parse.Object('Parent');
+    const parent2 = new Parse.Object('Parent');
+    const parent3 = new Parse.Object('Parent');
+
+    await Parse.Object.saveAll(objects);
+
+    // [0, 1, 2]
+    parent1.set('objects', objects.slice(0, 3));
+
+    const shift = objects.shift();
+    // [2, 0]
+    parent2.set('objects', [objects[1], shift]);
+
+    // [1, 2, 3, 4]
+    parent3.set('objects', objects.slice(1, 4));
+
+    await Parse.Object.saveAll([parent1, parent2, parent3]);
+    const query = new Parse.Query('Parent');
+    query.containedBy('objects', objects);
+    const results = await query.find();
+
+    assert.equal(results.length, 1);
+    assert.equal(results[0].id, parent3.id);
+  });
+
   it('can do equalTo queries', (done) => {
     let query = new Parse.Query('BoxedNumber');
     query.equalTo('number', 3);
@@ -1018,6 +1065,50 @@ describe('Parse Query', () => {
     });
   });
 
+  it('can includeAll nested objects', async () => {
+    const child1 = new TestObject({ foo: 'bar' });
+    const child2 = new TestObject({ foo: 'baz' });
+    const child3 = new TestObject({ foo: 'bin' });
+    const parent = new Parse.Object('Container');
+    parent.set('child1', child1);
+    parent.set('child2', child2);
+    parent.set('child3', child3);
+    await Parse.Object.saveAll([child1, child2, child3, parent]);
+
+    const query = new Parse.Query('Container');
+    query.equalTo('objectId', parent.id);
+    query.includeAll();
+
+    const results = await query.find();
+
+    assert.equal(results.length, 1);
+    const parentAgain = results[0];
+    assert.equal(parentAgain.get('child1').get('foo'), 'bar');
+    assert.equal(parentAgain.get('child2').get('foo'), 'baz');
+    assert.equal(parentAgain.get('child3').get('foo'), 'bin');
+  });
+
+  it('can includeAll nested objects in .each', async () => {
+    const child1 = new TestObject({ foo: 'bar' });
+    const child2 = new TestObject({ foo: 'baz' });
+    const child3 = new TestObject({ foo: 'bin' });
+    const parent = new Parse.Object('Container');
+    parent.set('child1', child1);
+    parent.set('child2', child2);
+    parent.set('child3', child3);
+    await Parse.Object.saveAll([child1, child2, child3, parent]);
+
+    const query = new Parse.Query('Container');
+    query.equalTo('objectId', parent.id);
+    query.includeAll();
+
+    await query.each((obj) => {
+      assert.equal(obj.get('child1').get('foo'), 'bar');
+      assert.equal(obj.get('child2').get('foo'), 'baz');
+      assert.equal(obj.get('child3').get('foo'), 'bin');
+    });
+  });
+
   it('can include nested objects via array', (done) => {
     let child = new TestObject();
     let parent = new Parse.Object('Container');
@@ -1361,6 +1452,55 @@ describe('Parse Query', () => {
       assert.equal(results.length, 1);
       done();
     }).catch(e => console.log(e));
+  });
+
+  it('can build NOR queries', async () => {
+    const objects = [];
+    for (let i = 0; i < 10; i += 1) {
+      const obj = new Parse.Object('NORTest');
+      obj.set({ x: i });
+      objects.push(obj);
+    }
+    await Parse.Object.saveAll(objects);
+
+    const q1 = new Parse.Query('NORTest');
+    q1.greaterThan('x', 5);
+    const q2 = new Parse.Query('NORTest');
+    q2.lessThan('x', 3);
+    const norQuery = Parse.Query.nor(q1, q2);
+    const results = await norQuery.find();
+
+    assert.equal(results.length, 3);
+    results.forEach((number) => {
+      assert(number.get('x') >= 3 && number.get('x') <= 5);
+    });
+  });
+
+  it('can build complex NOR queries', async () => {
+    const objects = [];
+    for (let i = 0; i < 10; i += 1) {
+      const child = new Parse.Object('Child');
+      child.set('x', i);
+      const parent = new Parse.Object('Parent');
+      parent.set('child', child);
+      parent.set('y', i);
+      objects.push(parent);
+    }
+    await Parse.Object.saveAll(objects);
+
+    const subQuery = new Parse.Query('Child');
+    subQuery.equalTo('x', 4);
+    const q1 = new Parse.Query('Parent');
+    q1.matchesQuery('child', subQuery);
+    const q2 = new Parse.Query('Parent');
+    q2.equalTo('y', 5);
+    const norQuery = new Parse.Query.nor(q1, q2);
+    const results = await norQuery.find();
+
+    assert.equal(results.length, 8);
+    results.forEach((number) => {
+      assert(number.get('x') !== 4 || number.get('x') !== 5);
+    });
   });
 
   it('can iterate over results with each', (done) => {

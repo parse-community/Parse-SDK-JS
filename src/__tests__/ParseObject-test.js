@@ -57,6 +57,11 @@ mockQuery.prototype.containedIn = function(field, ids) {
     }));
   });
 };
+
+mockQuery.prototype.include = function(keys) {
+  this._include = keys;
+};
+
 mockQuery.prototype.find = function() {
   return Promise.resolve(this.results);
 };
@@ -848,6 +853,64 @@ describe('ParseObject', () => {
     expect(o.op('count')).toBe(undefined);
   });
 
+  it('can fetchWithInclude', async () => {
+    const objectController = CoreManager.getObjectController();
+    const spy = jest.spyOn(
+      objectController,
+      'fetch' 
+    )
+      .mockImplementationOnce((target, forceFetch, options) => {})
+      .mockImplementationOnce((target, forceFetch, options) => {})
+      .mockImplementationOnce((target, forceFetch, options) => {});
+
+    const parent = new ParseObject('Person');
+    await parent.fetchWithInclude('child', { useMasterKey: true, sessionToken: '123'});
+    await parent.fetchWithInclude(['child']);
+    await parent.fetchWithInclude([['child']]);
+    expect(objectController.fetch).toHaveBeenCalledTimes(3);
+
+    expect(objectController.fetch.mock.calls[0]).toEqual([
+      parent, true, { useMasterKey: true, sessionToken: '123', include: ['child'] }
+    ]);
+    expect(objectController.fetch.mock.calls[1]).toEqual([
+      parent, true, { include: ['child'] }
+    ]);
+    expect(objectController.fetch.mock.calls[2]).toEqual([
+      parent, true, { include: ['child'] }
+    ]);
+
+    spy.mockRestore();
+  });
+
+  it('can fetchAllWithInclude', async () => {
+    const objectController = CoreManager.getObjectController();
+    const spy = jest.spyOn(
+      objectController,
+      'fetch' 
+    )
+      .mockImplementationOnce((target, forceFetch, options) => {})
+      .mockImplementationOnce((target, forceFetch, options) => {})
+      .mockImplementationOnce((target, forceFetch, options) => {});
+
+    const parent = new ParseObject('Person');
+    await ParseObject.fetchAllWithInclude([parent], 'child', { useMasterKey: true, sessionToken: '123'});
+    await ParseObject.fetchAllWithInclude([parent], ['child']);
+    await ParseObject.fetchAllWithInclude([parent], [['child']]);
+    expect(objectController.fetch).toHaveBeenCalledTimes(3);
+
+    expect(objectController.fetch.mock.calls[0]).toEqual([
+      [parent], true, { useMasterKey: true, sessionToken: '123', include: ['child'] }
+    ]);
+    expect(objectController.fetch.mock.calls[1]).toEqual([
+      [parent], true, { include: ['child'] }
+    ]);
+    expect(objectController.fetch.mock.calls[2]).toEqual([
+      [parent], true, { include: ['child'] }
+    ]);
+
+    spy.mockRestore();
+  });
+
   it('can save the object', (done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{
@@ -1499,6 +1562,47 @@ describe('ObjectController', () => {
       expect(results[0].className).toBe('Person');
       done();
     });
+  });
+
+  it('can fetch a single object with include', async (done) => {
+    var objectController = CoreManager.getObjectController();
+    var xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    var o = new ParseObject('Person');
+    o.id = 'pid';
+    objectController.fetch(o, false, { include: ['child'] }).then(() => {
+      expect(xhr.open.mock.calls[0]).toEqual(
+        ['POST', 'https://api.parse.com/1/classes/Person/pid', true]
+      );
+      var body = JSON.parse(xhr.send.mock.calls[0]);
+      expect(body._method).toBe('GET');
+      done();
+    });
+    await flushPromises();
+
+    xhr.status = 200;
+    xhr.responseText = JSON.stringify({});
+    xhr.readyState = 4;
+    xhr.onreadystatechange();
+    jest.runAllTicks();
+  });
+
+  it('can fetch an array of objects with include', async () => {
+    var objectController = CoreManager.getObjectController();
+    var objects = [];
+    for (var i = 0; i < 5; i++) {
+      objects[i] = new ParseObject('Person');
+      objects[i].id = 'pid' + i;
+    }
+    const results = await objectController.fetch(objects, false, { include: ['child'] });
+    expect(results.length).toBe(5);
+    expect(results[0] instanceof ParseObject).toBe(true);
+    expect(results[0].id).toBe('pid0');
+    expect(results[0].className).toBe('Person');
   });
 
   it('can destroy an object', async () => {

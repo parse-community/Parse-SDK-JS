@@ -221,6 +221,9 @@ describe('RESTController', () => {
         this.responseText = '{}';
         this.readyState = 4;
         this.onreadystatechange();
+      },
+      getAllResponseHeaders: function() {
+        return 'x-parse-job-status-id: 1234';
       }
     };
     RESTController._setXHR(XHR);
@@ -239,6 +242,9 @@ describe('RESTController', () => {
         this.responseText = '{"result":"hello"}';
         this.readyState = 4;
         this.onreadystatechange();
+      },
+      getAllResponseHeaders: function() {
+        return null;
       }
     };
     RESTController._setXHR(XHR);

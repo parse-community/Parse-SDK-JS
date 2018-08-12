@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://www.parse.com",
   "keywords": [
@@ -33,6 +33,7 @@
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
+    "@parse/minami": "^1.0.0",
     "babel-jest": "23.2.0",
     "babel-plugin-flow-comments": "6.3.19",
     "babel-plugin-inline-package-json": "2.0.0",
@@ -60,7 +61,6 @@
     "jest-cli": "23.2.0",
     "jsdoc": "3.5.5",
     "jsdoc-babel": "0.4.0",
-    "minami": "1.2.3",
     "parse-server": "github:parseplatform/parse-server#master",
     "vinyl-source-stream": "2.0.0"
   },

@@ -17,6 +17,7 @@ export type RequestOptions = {
   useMasterKey?: boolean;
   sessionToken?: string;
   installationId?: string;
+  include?: any;
 };
 
 export type FullOptions = {
@@ -103,9 +104,8 @@ const RESTController = {
             response = JSON.parse(xhr.responseText);
 
             if (typeof xhr.getResponseHeader === 'function') {
-              var jobStatusId = xhr.getResponseHeader('x-parse-job-status-id');
-              if (jobStatusId) {
-                response = jobStatusId;
+              if ((xhr.getAllResponseHeaders() || '').includes('x-parse-job-status-id: ')) {
+                response = xhr.getResponseHeader('x-parse-job-status-id');
               }
             }
           } catch (e) {
