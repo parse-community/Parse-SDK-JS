@@ -1214,7 +1214,7 @@ class ParseObject {
     );
   }
 
-    /**
+  /**
    * Fetches the given list of Parse.Object.
    * 
    * Includes nested Parse.Objects for the provided key. You can use dot
