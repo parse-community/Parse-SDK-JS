@@ -263,6 +263,27 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can generate containedBy queries', () => {
+    const q = new ParseQuery('Item');
+    q.containedBy('tags', ['hot', 'sold-out']);
+    expect(q.toJSON()).toEqual({
+      where: {
+        tags: {
+          $containedBy: ['hot', 'sold-out']
+        },
+      },
+    });
+
+    q.containedBy('tags', ['sale', 'new']);
+    expect(q.toJSON()).toEqual({
+      where: {
+        tags: {
+          $containedBy: ['sale', 'new']
+        },
+      },
+    });
+  });
+
   it('can generate contains-all-starting-with queries', () => {
     var q = new ParseQuery('Item');
     q.containsAllStartingWith('tags', ['ho', 'out']);
@@ -899,6 +920,32 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can includeAll for pointers', () => {
+    const q = new ParseQuery('Item');
+    q.includeAll();
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      include: '*',
+    });
+    const q2 = new ParseQuery('Item');
+    q2.withJSON(json);
+    expect(q2._include).toEqual(['*']);
+  });
+
+  it('can use extraOptions', () => {
+    const q = new ParseQuery('Item');
+    q._extraOptions.randomOption = 'test';
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      randomOption: 'test',
+    });
+    const q2 = new ParseQuery('Item');
+    q2.withJSON(json);
+    expect(q2._extraOptions.randomOption).toBe('test');
+  });
+
   it('can specify certain fields to send back', () => {
     var q = new ParseQuery('Item');
     q.select('size');
@@ -1334,6 +1381,7 @@ describe('ParseQuery', () => {
           limit: 100,
           order: 'objectId',
           keys: 'size,name',
+          include: '*',
           where: {
             size: {
               $in: ['small', 'medium']
@@ -1372,6 +1420,7 @@ describe('ParseQuery', () => {
     );
     q.equalTo('valid', true);
     q.select('size', 'name');
+    q.includeAll();
     var calls = 0;
 
     q.each((o) => {
