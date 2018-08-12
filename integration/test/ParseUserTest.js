@@ -193,6 +193,55 @@ describe('Parse User', () => {
     });
   });
 
+  it('can fetch non-auth user with include', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const child = new Parse.Object('TestObject');
+    child.set('field', 'test');
+    let user = new Parse.User();
+    user.set('password', 'asdf');
+    user.set('email', 'asdf@exxample.com');
+    user.set('username', 'zxcv');
+    user.set('child', child);
+    await user.signUp();
+
+    const query = new Parse.Query(Parse.User);
+    const userNotAuthed = await query.get(user.id);
+
+    assert.equal(userNotAuthed.get('child').get('field'), undefined);
+
+    const fetchedUser = await userNotAuthed.fetchWithInclude('child');
+
+    assert.equal(userNotAuthed.get('child').get('field'), 'test');
+    assert.equal(fetchedUser.get('child').get('field'), 'test');
+  });
+
+  it('can fetch auth user with include', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const child = new Parse.Object('TestObject');
+    child.set('field', 'test');
+    let user = new Parse.User();
+    user.set('password', 'asdf');
+    user.set('email', 'asdf@exxample.com');
+    user.set('username', 'zxcv');
+    user.set('child', child);
+    await user.signUp();
+
+    user = await Parse.User.logIn('zxcv', 'asdf');
+
+    assert.equal(user.get('child').get('field'), undefined);
+    assert.equal(Parse.User.current().get('child').get('field'), undefined);
+
+    const fetchedUser = await user.fetchWithInclude('child');
+    const current = await Parse.User.currentAsync();
+    
+    assert.equal(user.get('child').get('field'), 'test');
+    assert.equal(current.get('child').get('field'), 'test');
+    assert.equal(fetchedUser.get('child').get('field'), 'test');
+    assert.equal(Parse.User.current().get('child').get('field'), 'test');
+  });
+
   it('can store the current user', (done) => {
     Parse.User.enableUnsafeCurrentUser();
     let user = new Parse.User();
