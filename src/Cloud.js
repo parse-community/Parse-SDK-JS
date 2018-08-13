@@ -27,7 +27,7 @@ import ParseQuery from './ParseQuery';
  * @hideconstructor
  */
 
- /**
+/**
   * Makes a call to a cloud function.
   * @method run
   * @name Parse.Cloud.run
@@ -59,7 +59,7 @@ export function run(
   return CoreManager.getCloudController().run(name, data, requestOptions);
 }
 
- /**
+/**
   * Gets data for the current set of cloud jobs.
   * @method getJobsData
   * @name Parse.Cloud.getJobsData
@@ -67,15 +67,14 @@ export function run(
   * @return {Promise} A promise that will be resolved with the result
   * of the function.
   */
-export function getJobsData(options: { [key: string]: mixed }): Promise {
-  options = options || {};
+export function getJobsData(): Promise {
   const requestOptions = {
     useMasterKey: true
   };
   return CoreManager.getCloudController().getJobsData(requestOptions);
 }
 
- /**
+/**
   * Starts a given cloud job, which will process asynchronously.
   * @method startJob
   * @name Parse.Cloud.startJob
@@ -88,9 +87,7 @@ export function getJobsData(options: { [key: string]: mixed }): Promise {
 export function startJob(
   name: string,
   data: mixed,
-  options: { [key: string]: mixed }
 ): Promise {
-  options = options || {};
 
   if (typeof name !== 'string' || name.length === 0) {
     throw new TypeError('Cloud job name must be a string.');
@@ -101,7 +98,7 @@ export function startJob(
   return CoreManager.getCloudController().startJob(name, data, requestOptions);
 }
 
- /**
+/**
   * Gets job status by Id
   * @method getJobStatus
   * @name Parse.Cloud.getJobStatus
@@ -126,7 +123,7 @@ const DefaultController = {
       options
     );
 
-    return request.then((res) => {
+    return request.then((res) => {
       const decoded = decode(res);
       if (decoded && decoded.hasOwnProperty('result')) {
         return Promise.resolve(decoded.result);

@@ -211,7 +211,7 @@ class ParseSchema {
    * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  purge(options: FullOptions) {
+  purge() {
     this.assertClassName();
 
     const controller = CoreManager.getSchemaController();
@@ -421,7 +421,7 @@ class ParseSchema {
     this._fields[name] = { __op: 'Delete'};
   }
 
-   /**
+  /**
    * Deleting an Index to Update on a Schema
    *
    * @param {String} name Name of the field that will be created on Parse

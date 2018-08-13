@@ -8,7 +8,7 @@
  *
  * @flow
  */
-
+/* global File */
 import CoreManager from './CoreManager';
 
 type Base64 = { base64: string };
@@ -243,7 +243,7 @@ var DefaultController = {
     // To directly upload a File, we use a REST-style AJAX request
     var headers = {
       'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
-      'Content-Type': source.type || (source.file? source.file.type : null)
+      'Content-Type': source.type || (source.file ? source.file.type : null)
     };
     var jsKey = CoreManager.get('JAVASCRIPT_KEY');
     if (jsKey) {

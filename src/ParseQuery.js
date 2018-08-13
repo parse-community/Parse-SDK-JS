@@ -14,7 +14,6 @@ import encode from './encode';
 import { continueWhile } from './promiseUtils';
 import ParseError from './ParseError';
 import ParseGeoPoint from './ParseGeoPoint';
-import ParsePolygon from './ParsePolygon';
 import ParseObject from './ParseObject';
 
 import type { RequestOptions, FullOptions } from './RESTController';
@@ -73,14 +72,14 @@ function handleSelectResult(data: any, select: Array<string>){
   var serverDataMask = {};
 
   select.forEach((field) => {
-    let hasSubObjectSelect = field.indexOf(".") !== -1;
+    const hasSubObjectSelect = field.indexOf(".") !== -1;
     if (!hasSubObjectSelect && !data.hasOwnProperty(field)){
       // this field was selected, but is missing from the retrieved data
       data[field] = undefined
     } else if (hasSubObjectSelect) {
       // this field references a sub-object,
       // so we need to walk down the path components
-      let pathComponents = field.split(".");
+      const pathComponents = field.split(".");
       var obj = data;
       var serverMask = serverDataMask;
 
@@ -94,7 +93,7 @@ function handleSelectResult(data: any, select: Array<string>){
         }
 
         //add this path component to the server mask so we can fill it in later if needed
-        if (index < arr.length-1) {
+        if (index < arr.length - 1) {
           if (!serverMask[component]) {
             serverMask[component] = {};
           }
@@ -110,26 +109,26 @@ function handleSelectResult(data: any, select: Array<string>){
     // missing selected keys to sub-objects, but we still need to add in the
     // data for any previously retrieved sub-objects that were not selected.
 
-    let serverData = CoreManager.getObjectStateController().getServerData({id:data.objectId, className:data.className});
-
-    function copyMissingDataWithMask(src, dest, mask, copyThisLevel){
-      //copy missing elements at this level
-      if (copyThisLevel) {
-        for (var key in src) {
-          if (src.hasOwnProperty(key) && !dest.hasOwnProperty(key)) {
-            dest[key] = src[key]
-          }
-        }
-      }
-      for (var key in mask) {
-        if (dest[key] !== undefined && dest[key] !== null && src !== undefined && src !== null) {
-          //traverse into objects as needed
-          copyMissingDataWithMask(src[key], dest[key], mask[key], true);
-        }
-      }
-    }
+    const serverData = CoreManager.getObjectStateController().getServerData({id:data.objectId, className:data.className});
 
     copyMissingDataWithMask(serverData, data, serverDataMask, false);
+  }
+}
+
+function copyMissingDataWithMask(src, dest, mask, copyThisLevel){
+  //copy missing elements at this level
+  if (copyThisLevel) {
+    for (const key in src) {
+      if (src.hasOwnProperty(key) && !dest.hasOwnProperty(key)) {
+        dest[key] = src[key]
+      }
+    }
+  }
+  for (const key in mask) {
+    if (dest[key] !== undefined && dest[key] !== null && src !== undefined && src !== null) {
+      //traverse into objects as needed
+      copyMissingDataWithMask(src[key], dest[key], mask[key], true);
+    }
   }
 }
 
@@ -146,7 +145,7 @@ function handleSelectResult(data: any, select: Array<string>){
  * var query = new Parse.Query(myclass);
  * query.find().then((results) => {
  *   // results is an array of parse.object.
- * }).catch((error) =>  {
+ * }).catch((error) =>  {
  *  // error is an instance of parse.error.
  * });</pre></p>
  *
@@ -159,7 +158,7 @@ function handleSelectResult(data: any, select: Array<string>){
  * var query = new Parse.Query(myclass);
  * query.get(myid).then((object) => {
  *     // object is an instance of parse.object.
- * }).catch((error) =>  {
+ * }).catch((error) =>  {
  *  // error is an instance of parse.error.
  * });</pre></p>
  *
@@ -358,7 +357,7 @@ class ParseQuery {
       this._order = json.order.split(",");
     }
 
-    for (let key in json) {
+    for (const key in json) {
       if (json.hasOwnProperty(key))  {
         if (["where", "include", "keys", "limit", "skip", "order"].indexOf(key) === -1) {
           this._extraOptions[key] = json[key];
@@ -370,7 +369,7 @@ class ParseQuery {
 
   }
 
-    /**
+  /**
      * Static method to restore Parse.Query by json representation
      * Internally calling Parse.Query.withJSON
      * @param {String} className
@@ -442,7 +441,7 @@ class ParseQuery {
   find(options?: FullOptions): Promise {
     options = options || {};
 
-    let findOptions = {};
+    const findOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       findOptions.useMasterKey = options.useMasterKey;
     }
@@ -450,9 +449,9 @@ class ParseQuery {
       findOptions.sessionToken = options.sessionToken;
     }
 
-    let controller = CoreManager.getQueryController();
+    const controller = CoreManager.getQueryController();
 
-    let select = this._select;
+    const select = this._select;
 
     return controller.find(
       this.className,
@@ -462,7 +461,7 @@ class ParseQuery {
       return response.results.map((data) => {
         // In cases of relations, the server may send back a className
         // on the top level of the payload
-        let override = response.className || this.className;
+        const override = response.className || this.className;
         if (!data.className) {
           data.className = override;
         }
@@ -484,7 +483,7 @@ class ParseQuery {
    * Either options.success or options.error is called when the count
    * completes.
    *
-   * @param {Object} options 
+   * @param {Object} options
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -525,7 +524,7 @@ class ParseQuery {
    * Executes a distinct query and returns unique values
    *
    * @param {String} key A field to find distinct values
-   * @param {Object} options 
+   * @param {Object} options
    * Valid options are:<ul>
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
@@ -557,7 +556,7 @@ class ParseQuery {
     });
   }
 
-   /**
+  /**
    * Executes an aggregate query and returns aggregate results
    *
    * @param {Mixed} pipeline Array or Object of stages to process query
@@ -1047,18 +1046,17 @@ class ParseQuery {
     const fullOptions = { $term: value };
     for (const option in options) {
       switch (option) {
-        case 'language':
-          fullOptions.$language = options[option];
-          break;
-        case 'caseSensitive':
-          fullOptions.$caseSensitive = options[option];
-          break;
-        case 'diacriticSensitive':
-          fullOptions.$diacriticSensitive = options[option];
-          break;
-        default:
-          throw new Error(`Unknown option: ${option}`);
-          break;
+      case 'language':
+        fullOptions.$language = options[option];
+        break;
+      case 'caseSensitive':
+        fullOptions.$caseSensitive = options[option];
+        break;
+      case 'diacriticSensitive':
+        fullOptions.$diacriticSensitive = options[option];
+        break;
+      default:
+        throw new Error(`Unknown option: ${option}`);
       }
     }
 
@@ -1332,11 +1330,11 @@ class ParseQuery {
   /**
    * Includes nested Parse.Objects for the provided key.  You can use dot
    * notation to specify which fields in the included object are also fetched.
-   * 
+   *
    * You can include all nested Parse.Objects by passing in '*'.
    * Requires Parse Server 3.0.0+
    * <pre>query.include('*');</pre>
-   * 
+   *
    * @param {...String|Array<String>} key The name(s) of the key(s) to include.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1353,9 +1351,9 @@ class ParseQuery {
 
   /**
    * Includes all nested Parse.Objects.
-   * 
+   *
    * Requires Parse Server 3.0.0+
-   * 
+   *
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   includeAll(): ParseQuery {
@@ -1389,7 +1387,7 @@ class ParseQuery {
    * which can be used to get liveQuery updates.
    */
   subscribe(): any {
-    let controller = CoreManager.getLiveQueryController();
+    const controller = CoreManager.getLiveQueryController();
     return controller.subscribe(this);
   }
 

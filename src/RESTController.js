@@ -8,10 +8,9 @@
  *
  * @flow
  */
-
+/* global XMLHttpRequest, XDomainRequest */
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
-import Storage from './Storage';
 
 export type RequestOptions = {
   useMasterKey?: boolean;
@@ -173,7 +172,7 @@ const RESTController = {
     }
 
     payload._ApplicationId = CoreManager.get('APPLICATION_ID');
-    let jsKey = CoreManager.get('JAVASCRIPT_KEY');
+    const jsKey = CoreManager.get('JAVASCRIPT_KEY');
     if (jsKey) {
       payload._JavaScriptKey = jsKey;
     }
@@ -226,7 +225,7 @@ const RESTController = {
 
       var payloadString = JSON.stringify(payload);
 
-      return RESTController.ajax(method, url, payloadString).then(({ response }) => {
+      return RESTController.ajax(method, url, payloadString).then(({ response }) => {
         return response;
       });
     }).catch(function(response: { responseText: string }) {

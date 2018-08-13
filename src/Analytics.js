@@ -20,7 +20,7 @@ import CoreManager from './CoreManager';
  * @hideconstructor
  */
 
- /**
+/**
   * Tracks the occurrence of a custom event with additional dimensions.
   * Parse will store a data point at the time of invocation with the given
   * event name.
@@ -53,10 +53,9 @@ import CoreManager from './CoreManager';
   * to the server completes.
   */
 export function track(
-    name: string,
-    dimensions: { [key: string]: string },
-    options?: mixed
-  ): Promise {
+  name: string,
+  dimensions: { [key: string]: string }
+): Promise {
   name = name || '';
   name = name.replace(/^\s*/, '');
   name = name.replace(/\s*$/, '');
@@ -72,7 +71,6 @@ export function track(
     }
   }
 
-  options = options || {};
   return CoreManager.getAnalyticsController()
     .track(name, dimensions);
 }
