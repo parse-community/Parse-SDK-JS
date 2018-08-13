@@ -71,7 +71,7 @@
     "build": "./build_releases.sh",
     "release": "./build_releases.sh && npm publish",
     "test": "PARSE_BUILD=node jest",
-    "lint": "eslint --cache src/",
+    "lint": "eslint --cache src/ integration/",
     "preintegration": "npm run build",
     "watch": "PARSE_BUILD=${PARSE_BUILD:=node} gulp watch",
     "integration": "TESTING=1 jasmine --config=jasmine.json",

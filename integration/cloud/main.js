@@ -1,3 +1,4 @@
+/* global Parse */
 Parse.Cloud.define("bar", function(request, response) {
   if (request.params.key2 === "value1") {
     response.success('Foo');

@@ -18,20 +18,20 @@ describe('Parse.ACL', () => {
   });
 
   it('acl must be valid', () => {
-    let user = new Parse.User();
+    const user = new Parse.User();
     assert.equal(user.setACL(`Ceci n'est pas un ACL.`), false);
   });
 
   it('can refresh object with acl', (done) => {
-    let user = new Parse.User();
-    let object = new TestObject();
+    const user = new Parse.User();
+    const object = new TestObject();
     user.set('username', 'alice');
     user.set('password', 'wonderland');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
-    }).then((x) => {
+    }).then(() => {
       return object.fetch();
     }).then((o) => {
       assert(o);
@@ -40,12 +40,12 @@ describe('Parse.ACL', () => {
   });
 
   it('disables public get access', (done) => {
-    let user = new Parse.User();
-    let object = new TestObject();
+    const user = new Parse.User();
+    const object = new TestObject();
     user.set('username', 'getter');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -64,12 +64,12 @@ describe('Parse.ACL', () => {
   });
 
   it('disables public find access', (done) => {
-    let user = new Parse.User();
-    let object = new Parse.Object('UniqueObject');
+    const user = new Parse.User();
+    const object = new Parse.Object('UniqueObject');
     user.set('username', 'finder');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -88,12 +88,12 @@ describe('Parse.ACL', () => {
   });
 
   it('disables public update access', (done) => {
-    let user = new Parse.User();
-    let object = new Parse.Object('UniqueObject');
+    const user = new Parse.User();
+    const object = new Parse.Object('UniqueObject');
     user.set('username', 'updater');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -113,12 +113,12 @@ describe('Parse.ACL', () => {
   });
 
   it('disables public delete access', (done) => {
-    let user = new Parse.User();
-    let object = new Parse.Object(TestObject);
+    const user = new Parse.User();
+    const object = new Parse.Object(TestObject);
     user.set('username', 'deleter');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -137,12 +137,12 @@ describe('Parse.ACL', () => {
   });
 
   it('allows logged in get', (done) => {
-    let user = new Parse.User();
-    let object = new TestObject();
+    const user = new Parse.User();
+    const object = new TestObject();
     user.set('username', 'getter2');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -154,12 +154,12 @@ describe('Parse.ACL', () => {
   });
 
   it('allows logged in find', (done) => {
-    let user = new Parse.User();
-    let object = new Parse.Object('UniqueObject');
+    const user = new Parse.User();
+    const object = new Parse.Object('UniqueObject');
     user.set('username', 'finder2');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -171,12 +171,12 @@ describe('Parse.ACL', () => {
   });
 
   it('allows logged in update', (done) => {
-    let user = new Parse.User();
-    let object = new Parse.Object('UniqueObject');
+    const user = new Parse.User();
+    const object = new Parse.Object('UniqueObject');
     user.set('username', 'updater2');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -189,12 +189,12 @@ describe('Parse.ACL', () => {
   });
 
   it('allows logged in delete', (done) => {
-    let user = new Parse.User();
-    let object = new Parse.Object(TestObject);
+    const user = new Parse.User();
+    const object = new Parse.Object(TestObject);
     user.set('username', 'deleter2');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -205,12 +205,12 @@ describe('Parse.ACL', () => {
   });
 
   it('enables get with public read', (done) => {
-    let user = new Parse.User();
-    let object = new TestObject();
+    const user = new Parse.User();
+    const object = new TestObject();
     user.set('username', 'getter3');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -226,12 +226,12 @@ describe('Parse.ACL', () => {
   });
 
   it('enables find with public read', (done) => {
-    let user = new Parse.User();
-    let object = new Parse.Object('AlsoUniqueObject');
+    const user = new Parse.User();
+    const object = new Parse.Object('AlsoUniqueObject');
     user.set('username', 'finder3');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -247,12 +247,12 @@ describe('Parse.ACL', () => {
   });
 
   it('does not enable update with public read', (done) => {
-    let user = new Parse.User();
-    let object = new Parse.Object('UniqueObject');
+    const user = new Parse.User();
+    const object = new Parse.Object('UniqueObject');
     user.set('username', 'updater3');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -269,12 +269,12 @@ describe('Parse.ACL', () => {
   });
 
   it('does not enable delete with public read', (done) => {
-    let user = new Parse.User();
-    let object = new Parse.Object(TestObject);
+    const user = new Parse.User();
+    const object = new Parse.Object(TestObject);
     user.set('username', 'deleter3');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -290,12 +290,12 @@ describe('Parse.ACL', () => {
   });
 
   it('does not enable get with public write', (done) => {
-    let user = new Parse.User();
-    let object = new TestObject();
+    const user = new Parse.User();
+    const object = new TestObject();
     user.set('username', 'getter4');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -311,12 +311,12 @@ describe('Parse.ACL', () => {
   });
 
   it('does not enable find with public write', (done) => {
-    let user = new Parse.User();
-    let object = new Parse.Object('AnotherUniqueObject');
+    const user = new Parse.User();
+    const object = new Parse.Object('AnotherUniqueObject');
     user.set('username', 'finder4');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -332,12 +332,12 @@ describe('Parse.ACL', () => {
   });
 
   it('enables update with public read', (done) => {
-    let user = new Parse.User();
-    let object = new Parse.Object('UniqueObject');
+    const user = new Parse.User();
+    const object = new Parse.Object('UniqueObject');
     user.set('username', 'updater4');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -353,12 +353,12 @@ describe('Parse.ACL', () => {
   });
 
   it('enables delete with public read', (done) => {
-    let user = new Parse.User();
-    let object = new TestObject();
+    const user = new Parse.User();
+    const object = new TestObject();
     user.set('username', 'deleter4');
     user.set('password', 'secret');
     user.signUp().then(() => {
-      let acl = new Parse.ACL(user);
+      const acl = new Parse.ACL(user);
       object.setACL(acl);
       return object.save();
     }).then(() => {
@@ -374,7 +374,7 @@ describe('Parse.ACL', () => {
 
   it('can grant get access to another user', (done) => {
     let user1, user2;
-    let object = new TestObject();
+    const object = new TestObject();
     Parse.User.signUp('aaa', 'password').then((u) => {
       user1 = u;
       Parse.User.logOut();
@@ -382,7 +382,7 @@ describe('Parse.ACL', () => {
       return Parse.User.signUp('bbb', 'password');
     }).then((u) => {
       user2 = u;
-      let acl = new Parse.ACL(user2);
+      const acl = new Parse.ACL(user2);
       acl.setWriteAccess(user1, true);
       acl.setReadAccess(user1, true);
       object.setACL(acl);
@@ -390,7 +390,7 @@ describe('Parse.ACL', () => {
     }).then(() => {
       return Parse.User.logIn('aaa', 'password');
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(o.id, object.id);
@@ -400,7 +400,7 @@ describe('Parse.ACL', () => {
 
   it('can grant find access to another user', (done) => {
     let user1, user2;
-    let object = new Parse.Object('ThatOneObject');
+    const object = new Parse.Object('ThatOneObject');
     Parse.User.signUp('ccc', 'password').then((u) => {
       user1 = u;
       Parse.User.logOut();
@@ -408,7 +408,7 @@ describe('Parse.ACL', () => {
       return Parse.User.signUp('ddd', 'password');
     }).then((u) => {
       user2 = u;
-      let acl = new Parse.ACL(user2);
+      const acl = new Parse.ACL(user2);
       acl.setWriteAccess(user1, true);
       acl.setReadAccess(user1, true);
       object.setACL(acl);
@@ -416,7 +416,7 @@ describe('Parse.ACL', () => {
     }).then(() => {
       return Parse.User.logIn('ccc', 'password');
     }).then(() => {
-      let query = new Parse.Query('ThatOneObject');
+      const query = new Parse.Query('ThatOneObject');
       return query.find();
     }).then((o) => {
       assert(o.length > 0);
@@ -426,7 +426,7 @@ describe('Parse.ACL', () => {
 
   it('can grant update access to another user', (done) => {
     let user1, user2;
-    let object = new TestObject();
+    const object = new TestObject();
     Parse.User.signUp('eee', 'password').then((u) => {
       user1 = u;
       Parse.User.logOut();
@@ -434,7 +434,7 @@ describe('Parse.ACL', () => {
       return Parse.User.signUp('fff', 'password');
     }).then((u) => {
       user2 = u;
-      let acl = new Parse.ACL(user2);
+      const acl = new Parse.ACL(user2);
       acl.setWriteAccess(user1, true);
       acl.setReadAccess(user1, true);
       object.setACL(acl);
@@ -452,7 +452,7 @@ describe('Parse.ACL', () => {
 
   it('can grant delete access to another user', (done) => {
     let user1, user2;
-    let object = new TestObject();
+    const object = new TestObject();
     Parse.User.signUp('ggg', 'password').then((u) => {
       user1 = u;
       Parse.User.logOut();
@@ -460,7 +460,7 @@ describe('Parse.ACL', () => {
       return Parse.User.signUp('hhh', 'password');
     }).then((u) => {
       user2 = u;
-      let acl = new Parse.ACL(user2);
+      const acl = new Parse.ACL(user2);
       acl.setWriteAccess(user1, true);
       acl.setReadAccess(user1, true);
       object.setACL(acl);
@@ -476,7 +476,7 @@ describe('Parse.ACL', () => {
 
   it('does not grant public get access with another user acl', (done) => {
     let user1, user2;
-    let object = new TestObject();
+    const object = new TestObject();
     Parse.User.signUp('iii', 'password').then((u) => {
       user1 = u;
       Parse.User.logOut();
@@ -484,7 +484,7 @@ describe('Parse.ACL', () => {
       return Parse.User.signUp('jjj', 'password');
     }).then((u) => {
       user2 = u;
-      let acl = new Parse.ACL(user2);
+      const acl = new Parse.ACL(user2);
       acl.setWriteAccess(user1, true);
       acl.setReadAccess(user1, true);
       object.setACL(acl);
@@ -492,7 +492,7 @@ describe('Parse.ACL', () => {
     }).then(() => {
       return Parse.User.logOut();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).catch((e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
@@ -502,7 +502,7 @@ describe('Parse.ACL', () => {
 
   it('does not grant public find access with another user acl', (done) => {
     let user1, user2;
-    let object = new Parse.Object('ThatOneObject');
+    const object = new Parse.Object('ThatOneObject');
     Parse.User.signUp('kkk', 'password').then((u) => {
       user1 = u;
       Parse.User.logOut();
@@ -510,7 +510,7 @@ describe('Parse.ACL', () => {
       return Parse.User.signUp('lll', 'password');
     }).then((u) => {
       user2 = u;
-      let acl = new Parse.ACL(user2);
+      const acl = new Parse.ACL(user2);
       acl.setWriteAccess(user1, true);
       acl.setReadAccess(user1, true);
       object.setACL(acl);
@@ -518,7 +518,7 @@ describe('Parse.ACL', () => {
     }).then(() => {
       return Parse.User.logOut();
     }).then(() => {
-      let query = new Parse.Query('ThatOneObject');
+      const query = new Parse.Query('ThatOneObject');
       return query.find();
     }).then((o) => {
       assert.equal(o.length, 0);
@@ -528,7 +528,7 @@ describe('Parse.ACL', () => {
 
   it('does not grant public update access with another user acl', (done) => {
     let user1, user2;
-    let object = new TestObject();
+    const object = new TestObject();
     Parse.User.signUp('mmm', 'password').then((u) => {
       user1 = u;
       Parse.User.logOut();
@@ -536,7 +536,7 @@ describe('Parse.ACL', () => {
       return Parse.User.signUp('nnn', 'password');
     }).then((u) => {
       user2 = u;
-      let acl = new Parse.ACL(user2);
+      const acl = new Parse.ACL(user2);
       acl.setWriteAccess(user1, true);
       acl.setReadAccess(user1, true);
       object.setACL(acl);
@@ -554,7 +554,7 @@ describe('Parse.ACL', () => {
 
   it('does not grant public destroy access with another user acl', (done) => {
     let user1, user2;
-    let object = new TestObject();
+    const object = new TestObject();
     Parse.User.signUp('ooo', 'password').then((u) => {
       user1 = u;
       Parse.User.logOut();
@@ -562,7 +562,7 @@ describe('Parse.ACL', () => {
       return Parse.User.signUp('ppp', 'password');
     }).then((u) => {
       user2 = u;
-      let acl = new Parse.ACL(user2);
+      const acl = new Parse.ACL(user2);
       acl.setWriteAccess(user1, true);
       acl.setReadAccess(user1, true);
       object.setACL(acl);
@@ -581,7 +581,7 @@ describe('Parse.ACL', () => {
     Parse.User.signUp('tdurden', 'mayhem', {
       ACL: new Parse.ACL(),
       foo: 'bar'
-    }).then((user) => {
+    }).then(() => {
       Parse.User.logOut();
       return Parse.User.logIn('tdurden', 'mayhem');
     }).then((user) => {
@@ -591,20 +591,20 @@ describe('Parse.ACL', () => {
   });
 
   it('fetches the ACL with included pointers', (done) => {
-    let obj1 = new Parse.Object('TestClass1');
-    let obj2 = new Parse.Object('TestClass2');
-    let acl = new Parse.ACL();
+    const obj1 = new Parse.Object('TestClass1');
+    const obj2 = new Parse.Object('TestClass2');
+    const acl = new Parse.ACL();
 
     acl.setPublicReadAccess(true);
     obj2.set('ACL', acl);
     obj1.set('other', obj2);
     obj1.save().then(() => {
-      let query = new Parse.Query('TestClass1');
+      const query = new Parse.Query('TestClass1');
       return query.first();
     }).then((obj1again) => {
       assert(obj1again);
       assert(!obj1again.get('other').get('ACL'));
-      let query = new Parse.Query('TestClass1');
+      const query = new Parse.Query('TestClass1');
       query.include('other');
       return query.first();
     }).then((obj1withInclude) => {

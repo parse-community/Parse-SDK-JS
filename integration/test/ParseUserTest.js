@@ -17,7 +17,7 @@ describe('Parse User', () => {
     let promise = Promise.resolve();
     try {
       promise = Parse.User.logOut();
-    } catch (e) {}
+    } catch (e) { /**/ } // eslint-disable-line no-unused-vars
     promise.then(() => {
       return clear();
     }).then(() => {
@@ -33,7 +33,7 @@ describe('Parse User', () => {
   });
 
   it('can sign up via instance method', (done) => {
-    let user = new Parse.User();
+    const user = new Parse.User();
     user.setPassword('asdf');
     user.setUsername('zxcv');
     user.signUp().then((user) => {
@@ -69,11 +69,11 @@ describe('Parse User', () => {
 
   it('can become a user', (done) => {
     Parse.User.enableUnsafeCurrentUser();
-    let user = null;
     let session = null;
-    Parse.User.signUp('jason', 'parse', {'code': 'red'}).then((newUser) => {
+    let newUser = null;
+    Parse.User.signUp('jason', 'parse', {'code': 'red'}).then((user) => {
+      newUser = user;
       assert.equal(Parse.User.current(), newUser);
-      user = newUser;
       session = newUser.getSessionToken();
       assert(session);
 
@@ -81,7 +81,7 @@ describe('Parse User', () => {
     }).then(() => {
       assert(!Parse.User.current());
 
-      return Parse.User.become(sessionToken);
+      return Parse.User.become(session);
     }).then((user) => {
       assert.equal(Parse.User.current(), user);
       assert(user);
@@ -108,7 +108,7 @@ describe('Parse User', () => {
     });
     user.signUp().then((userAgain) => {
       assert.equal(user, userAgain);
-      let query = new Parse.Query(Parse.User);
+      const query = new Parse.Query(Parse.User);
       return query.get(user.id);
     }).then((userNotAuthed) => {
       notAuthed = userNotAuthed;
@@ -136,7 +136,7 @@ describe('Parse User', () => {
       email: 'asdf@example.com',
       username: 'zxcv',
     }).then(() => {
-      let query = new Parse.Query(Parse.User);
+      const query = new Parse.Query(Parse.User);
       return query.get(user.id);
     }).then((userNotAuthed) => {
       notAuthed = userNotAuthed;
@@ -163,7 +163,7 @@ describe('Parse User', () => {
       email: 'asdf@example.com',
       username: 'zxcv',
     }).then(() => {
-      let query = new Parse.Query(Parse.User);
+      const query = new Parse.Query(Parse.User);
       return query.get(user.id);
     }).then((userNotAuthed) => {
       notAuthed = userNotAuthed;
@@ -173,18 +173,18 @@ describe('Parse User', () => {
         password: 'password',
       });
     }).then(() => {
-      let query = new Parse.Query(Parse.User);
+      const query = new Parse.Query(Parse.User);
       return query.get(user.id);
     }).then((userNotAuthedNotChanged) => {
       notAuthed.set('username', 'changed');
-      let object = new TestObject();
+      const object = new TestObject();
       return object.save({ user: userNotAuthedNotChanged });
-    }).then((o) => {
-      let item1 = new TestObject();
+    }).then(() => {
+      const item1 = new TestObject();
       return item1.save({ number: 0 });
     }).then((item1) => {
       item1.set('number', 1);
-      let item2 = new TestObject();
+      const item2 = new TestObject();
       item2.set('number', 2);
       return Parse.Object.saveAll([item1, item2, notAuthed]);
     }).then(null, (e) => {
@@ -198,7 +198,7 @@ describe('Parse User', () => {
 
     const child = new Parse.Object('TestObject');
     child.set('field', 'test');
-    let user = new Parse.User();
+    const user = new Parse.User();
     user.set('password', 'asdf');
     user.set('email', 'asdf@exxample.com');
     user.set('username', 'zxcv');
@@ -235,7 +235,7 @@ describe('Parse User', () => {
 
     const fetchedUser = await user.fetchWithInclude('child');
     const current = await Parse.User.currentAsync();
-    
+
     assert.equal(user.get('child').get('field'), 'test');
     assert.equal(current.get('child').get('field'), 'test');
     assert.equal(fetchedUser.get('child').get('field'), 'test');
@@ -244,16 +244,16 @@ describe('Parse User', () => {
 
   it('can store the current user', (done) => {
     Parse.User.enableUnsafeCurrentUser();
-    let user = new Parse.User();
+    const user = new Parse.User();
     user.set('password', 'asdf');
     user.set('email', 'asdf@example.com');
     user.set('username', 'zxcv');
     user.signUp().then(() => {
-      let current = Parse.User.current();
+      const current = Parse.User.current();
       assert.equal(user.id, current.id);
       assert(user.getSessionToken());
 
-      let currentAgain = Parse.User.current();
+      const currentAgain = Parse.User.current();
       assert.equal(current, currentAgain);
 
       return Parse.User.logOut();
@@ -265,9 +265,9 @@ describe('Parse User', () => {
 
   it('can test if a user is current', (done) => {
     Parse.User.enableUnsafeCurrentUser();
-    let user1 = new Parse.User();
-    let user2 = new Parse.User();
-    let user3 = new Parse.User();
+    const user1 = new Parse.User();
+    const user2 = new Parse.User();
+    const user3 = new Parse.User();
 
     user1.set('username', 'a');
     user2.set('username', 'b');
@@ -320,12 +320,12 @@ describe('Parse User', () => {
   });
 
   it('can query for users', (done) => {
-    let user = new Parse.User();
+    const user = new Parse.User();
     user.set('password', 'asdf');
     user.set('email', 'asdf@exxample.com');
     user.set('username', 'zxcv');
     user.signUp().then(() => {
-      let query = new Parse.Query(Parse.User);
+      const query = new Parse.Query(Parse.User);
       return query.get(user.id);
     }).then((u) => {
       assert.equal(u.id, user.id);
@@ -338,13 +338,13 @@ describe('Parse User', () => {
   });
 
   it('preserves the session token when querying the current user', (done) => {
-    let user = new Parse.User();
+    const user = new Parse.User();
     user.set('password', 'asdf');
     user.set('email', 'asdf@example.com');
     user.set('username', 'zxcv');
     user.signUp().then(() => {
       assert(user.has('sessionToken'));
-      let query = new Parse.Query(Parse.User);
+      const query = new Parse.Query(Parse.User);
       return query.get(user.id);
     }).then((u) => {
       // Old object maintains token
@@ -357,7 +357,7 @@ describe('Parse User', () => {
 
   it('does not log in a user when saving', (done) => {
     Parse.User.enableUnsafeCurrentUser();
-    let user = new Parse.User();
+    const user = new Parse.User();
     user.save({
       password: 'asdf',
       email: 'asdf@example.com',
@@ -369,7 +369,7 @@ describe('Parse User', () => {
   });
 
   it('can update users', (done) => {
-    let user = new Parse.User();
+    const user = new Parse.User();
     user.signUp({
       password: 'asdf',
       email: 'asdf@example.com',
@@ -383,7 +383,7 @@ describe('Parse User', () => {
       assert(user.attributes.hasOwnProperty('email'));
       return user.destroy();
     }).then(() => {
-      let query = new Parse.Query(Parse.User);
+      const query = new Parse.Query(Parse.User);
       return query.get(user.id);
     }).then(null, (e) => {
       assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
@@ -392,16 +392,16 @@ describe('Parse User', () => {
   });
 
   it('can count users', (done) => {
-    let james = new Parse.User();
+    const james = new Parse.User();
     james.set('username', 'james');
     james.set('password', 'mypass');
     james.signUp().then(() => {
-      let kevin = new Parse.User();
+      const kevin = new Parse.User();
       kevin.set('username', 'kevin');
       kevin.set('password', 'mypass');
       return kevin.signUp();
     }).then(() => {
-      let query = new Parse.Query(Parse.User);
+      const query = new Parse.Query(Parse.User);
       return query.count();
     }).then((c) => {
       assert.equal(c, 2);
@@ -416,8 +416,8 @@ describe('Parse User', () => {
   });
 
   it('handles user subclassing', (done) => {
-    let SuperUser = new Parse.Object.extend('User');
-    let user = new SuperUser();
+    const SuperUser = new Parse.Object.extend('User');
+    const user = new SuperUser();
     user.set('username', 'bob');
     user.set('password', 'welcome');
     assert(user instanceof Parse.User);
@@ -427,7 +427,7 @@ describe('Parse User', () => {
   });
 
   it('uses subclasses when doing signup', (done) => {
-    let SuperUser = Parse.User.extend({
+    const SuperUser = Parse.User.extend({
       secret() {
         return 1337;
       }
