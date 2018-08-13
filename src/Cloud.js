@@ -63,7 +63,6 @@ export function run(
   * Gets data for the current set of cloud jobs.
   * @method getJobsData
   * @name Parse.Cloud.getJobsData
-  * @param {Object} options
   * @return {Promise} A promise that will be resolved with the result
   * of the function.
   */
@@ -80,7 +79,6 @@ export function getJobsData(): Promise {
   * @name Parse.Cloud.startJob
   * @param {String} name The function name.
   * @param {Object} data The parameters to send to the cloud function.
-  * @param {Object} options
   * @return {Promise} A promise that will be resolved with the result
   * of the function.
   */

@@ -73,7 +73,6 @@ class ParseConfig {
   /**
    * Gets a new configuration object from the server.
    * @static
-   * @param {Object} options
    * @return {Promise} A promise that is resolved with a newly-created
    *     configuration object when the get completes.
    */

@@ -193,8 +193,6 @@ class ParseGeoPoint {
   /**
    * Creates a GeoPoint with the user's current location, if available.
    * Calls options.success with a new GeoPoint instance or calls options.error.
-
-   * @param {Object} options An object with success and error callbacks.
    * @static
    */
   static current() {

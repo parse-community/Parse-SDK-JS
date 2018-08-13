@@ -199,15 +199,6 @@ class ParseSchema {
   /**
    * Removes all objects from a Schema (class) in Parse.
    * EXERCISE CAUTION, running this will delete all objects for this schema and cannot be reversed
-   *
-   * @param {Object} options
-   * Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
-   *
    * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
