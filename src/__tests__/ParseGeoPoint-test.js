@@ -201,4 +201,26 @@ describe('GeoPoint', () => {
     expect(a.equals(b)).toBe(false);
     expect(b.equals(a)).toBe(false);
   });
+
+  it('can be built from string array or a string object or 2 strings variables in constructor', () => {
+    var string_test_a = new ParseGeoPoint(40, 40);
+    var string_test_b = new ParseGeoPoint("40", "40");
+    var string_test_c = new ParseGeoPoint(["40", "40"]);
+    var string_test_d = new ParseGeoPoint({latitude: "40", longitude: "40"});
+    
+    expect(function() {
+      new ParseGeoPoint("a40a", "a40a");
+    }).toThrow('GeoPoint latitude and longitude must be valid numbers');
+    expect(function() {
+      new ParseGeoPoint(["a40a", "a40a"]);
+    }).toThrow('GeoPoint latitude and longitude must be valid numbers');
+    expect(function() {
+      new ParseGeoPoint({latitude: "a40a", longitude: "a40a"});
+    }).toThrow('GeoPoint latitude and longitude must be valid numbers');
+
+    //valid string conversions equals same number constructed geopoint
+    expect(string_test_a.equals(string_test_b)).toBe(true);
+    expect(string_test_a.equals(string_test_c)).toBe(true);
+    expect(string_test_a.equals(string_test_d)).toBe(true);
+  });
 });

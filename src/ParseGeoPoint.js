@@ -16,6 +16,9 @@
  *   new GeoPoint(30, 30)
  *   new GeoPoint([30, 30])
  *   new GeoPoint({latitude: 30, longitude: 30})
+ *   new GeoPoint("30", "30")
+ *   new GeoPoint(["30", "30"])
+ *   new GeoPoint({latitude: "30", longitude: "30"})
  *   new GeoPoint()  // defaults to (0, 0)
  *   </pre>
  * <p>Represents a latitude / longitude point that may be associated
@@ -45,21 +48,23 @@ class ParseGeoPoint {
     { latitude: number; longitude: number } |
     number, arg2?: number
   ) {
-    if (Array.isArray(arg1)) {
-      ParseGeoPoint._validate(arg1[0], arg1[1]);
+    if (Array.isArray(arg1) && !isNaN(arg1[0] = parseFloat(arg1[0])) && !isNaN(arg1[1] = parseFloat(arg1[1]))) {
+      ParseGeoPoint._validate(arg1[0],arg1[1]);
       this._latitude = arg1[0];
       this._longitude = arg1[1];
-    } else if (typeof arg1 === 'object') {
-      ParseGeoPoint._validate(arg1.latitude, arg1.longitude);
+    } else if (typeof arg1 === 'object' && !isNaN(arg1.latitude = parseFloat(arg1.latitude)) && !isNaN(arg1.longitude = parseFloat(arg1.longitude))) {
+      ParseGeoPoint._validate(arg1.latitude,arg1.longitude);
       this._latitude = arg1.latitude;
       this._longitude = arg1.longitude;
-    } else if (typeof arg1 === 'number' && typeof arg2 === 'number') {
-      ParseGeoPoint._validate(arg1, arg2);
-      this._latitude = arg1;
-      this._longitude = arg2;
-    } else {
+    } else if (!isNaN(parseFloat(arg1)) && !isNaN(parseFloat(arg2))) {
+      ParseGeoPoint._validate(parseFloat(arg1), parseFloat(arg2));
+      this._latitude = parseFloat(arg1);
+      this._longitude = parseFloat(arg2);
+    } else if(!Array.isArray(arg1) && typeof arg1 !== 'object' && (arg1 === undefined || isNaN(arg2)) && arg2 === undefined){
       this._latitude = 0;
       this._longitude = 0;
+    } else {
+      throw("GeoPoint latitude and longitude must be valid numbers");
     }
   }
 
