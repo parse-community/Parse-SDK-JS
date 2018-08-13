@@ -17,11 +17,9 @@ class MockObject {
   constructor (className) {
     this.className = className;
     this.attributes = {};
-   
+
     this.id = String(objectCount++);
   }
-
-  static registerSubclass(className, constructor) {}
 
   toJSON() {
     return this.attributes;
@@ -38,11 +36,11 @@ class MockObject {
   dirty() {}
 
   _toFullJSON() {
-    var json = {
+    const json = {
       __type: 'Object',
       className: this.className
     };
-    for (var attr in this.attributes) {
+    for (const attr in this.attributes) {
       if (this.attributes[attr].id) {
         json[attr] = this.attributes[attr]._toFullJSON();
       } else {
@@ -55,10 +53,10 @@ class MockObject {
     return json;
   }
 
-  fromJSON() {
-    const o = new mockObject(json.className);
+  fromJSON(json) {
+    const o = new MockObject(json.className);
     o.id = json.objectId;
-    for (var attr in json) {
+    for (const attr in json) {
       if (attr !== 'className' && attr !== '__type' && attr !== 'objectId') {
         o.attributes[attr] = json[attr];
       }
@@ -83,13 +81,13 @@ const mockLocalStorageController = {
   clear: jest.fn(),
 };
 jest.setMock('../ParseObject', MockObject);
-var CoreManager = require('../CoreManager');
-var LocalDatastore = require('../LocalDatastore');
-var ParseObject = require('../ParseObject');
-var LocalStorageController = require('../LocalDatastoreController.localStorage');
-var DefaultStorageController = require('../LocalDatastoreController.default');
+const CoreManager = require('../CoreManager');
+const LocalDatastore = require('../LocalDatastore');
+const ParseObject = require('../ParseObject');
+const LocalStorageController = require('../LocalDatastoreController.localStorage');
+const DefaultStorageController = require('../LocalDatastoreController.default');
 
-var mockLocalStorage = require('./test_helpers/mockLocalStorage');
+const mockLocalStorage = require('./test_helpers/mockLocalStorage');
 
 global.localStorage = mockLocalStorage;
 
@@ -99,8 +97,8 @@ describe('LocalDatastore', () => {
     jest.clearAllMocks();
   });
 
-  it('isLocalStorageDisabled', () => {
-    expect(LocalDatastore.isLocalStorageEnabled).toBe(false);
+  it('isLocalStorageEnabled', () => {
+    expect(LocalDatastore.isLocalStorageEnabled()).toBe(true);
   });
 
   it('can clear', () => {
@@ -112,7 +110,7 @@ describe('LocalDatastore', () => {
     LocalDatastore._getLocalDatastore();
     expect(mockLocalStorageController.getLocalDatastore).toHaveBeenCalledTimes(1);
   });
-  
+
   it('_handlePinWithName no children', () => {
     const object = new ParseObject('Item');
     LocalDatastore._handlePinWithName('test_pin', object);
@@ -145,16 +143,36 @@ describe('LocalDatastore', () => {
 
   it('_handleUnPinWithName default pin', () => {
     const object = new ParseObject('Item');
+    mockLocalStorageController
+      .fromPinWithName
+      .mockImplementationOnce(() => [object._getId(), '1234']);
     LocalDatastore._handleUnPinWithName(LocalDatastore.DEFAULT_PIN, object);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(1);
-    expect(mockLocalStorageController.pinWithName).toHaveBeenCalledWith(LocalDatastore.DEFAULT_PIN, []);
+    expect(mockLocalStorageController.pinWithName).toHaveBeenCalledWith(LocalDatastore.DEFAULT_PIN, ['1234']);
   });
 
   it('_handleUnPinWithName specific pin', () => {
     const object = new ParseObject('Item');
+    mockLocalStorageController
+      .fromPinWithName
+      .mockImplementationOnce(() => [object._getId(), '1234']);
     LocalDatastore._handleUnPinWithName('test_pin', object);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(1);
-    expect(mockLocalStorageController.pinWithName).toHaveBeenCalledWith(LocalDatastore.PIN_PREFIX + 'test_pin', []);
+    expect(mockLocalStorageController.pinWithName).toHaveBeenCalledWith(LocalDatastore.PIN_PREFIX + 'test_pin', ['1234']);
+  });
+
+  it('_handleUnPinWithName default pin remove pinName', () => {
+    const object = new ParseObject('Item');
+    LocalDatastore._handleUnPinWithName(LocalDatastore.DEFAULT_PIN, object);
+    expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledWith(LocalDatastore.DEFAULT_PIN);
+  });
+
+  it('_handleUnPinWithName specific pin remove pinName', () => {
+    const object = new ParseObject('Item');
+    LocalDatastore._handleUnPinWithName('test_pin', object);
+    expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledWith(LocalDatastore.PIN_PREFIX + 'test_pin');
   });
 
   it('_handleUnPinWithName remove if exist', () => {
@@ -164,7 +182,7 @@ describe('LocalDatastore', () => {
     const objects = [obj1.id, obj2.id, obj3.id];
     mockLocalStorageController
       .fromPinWithName
-      .mockImplementationOnce((name) => objects);
+      .mockImplementationOnce(() => objects);
 
     LocalDatastore._handleUnPinWithName('test_pin', obj1);
 
@@ -185,7 +203,7 @@ describe('LocalDatastore', () => {
     const object = new ParseObject('Item');
     mockLocalStorageController
       .fromPinWithName
-      .mockImplementationOnce((name) => [object]);
+      .mockImplementationOnce(() => [object]);
 
     LocalDatastore._updateObjectIfPinned(object);
 
@@ -207,14 +225,14 @@ describe('LocalDatastore', () => {
     const localId = 'local' + object.id;
     mockLocalStorageController
       .fromPinWithName
-      .mockImplementationOnce((name) => json);
+      .mockImplementationOnce(() => json);
 
-      mockLocalStorageController
+    mockLocalStorageController
       .getLocalDatastore
       .mockImplementationOnce(() => json);
 
     LocalDatastore._updateLocalIdForObjectId(localId, object.id);
-    
+
     expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalStorageController.fromPinWithName.mock.results[0].value).toEqual(json);
 
@@ -223,7 +241,7 @@ describe('LocalDatastore', () => {
 
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledWith(object.id, json);
-    
+
     expect(mockLocalStorageController.getLocalDatastore).toHaveBeenCalledTimes(1);
   });
 
@@ -237,24 +255,24 @@ describe('LocalDatastore', () => {
     };
     mockLocalStorageController
       .fromPinWithName
-      .mockImplementationOnce((name) => json)
-      .mockImplementationOnce((key) => [localId]);
+      .mockImplementationOnce(() => json)
+      .mockImplementationOnce(() => [localId]);
 
-      mockLocalStorageController
+    mockLocalStorageController
       .getLocalDatastore
       .mockImplementationOnce(() => LDS);
 
     LocalDatastore._updateLocalIdForObjectId(localId, object.id);
-    
+
     expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(2);
     expect(mockLocalStorageController.fromPinWithName.mock.results[0].value).toEqual(json);
-    
+
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledWith(localId);
 
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(2);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledWith(object.id, json);
-    
+
     expect(mockLocalStorageController.getLocalDatastore).toHaveBeenCalledTimes(1);
   });
 
@@ -268,24 +286,24 @@ describe('LocalDatastore', () => {
     };
     mockLocalStorageController
       .fromPinWithName
-      .mockImplementationOnce((name) => json)
-      .mockImplementationOnce((key) => null);
+      .mockImplementationOnce(() => json)
+      .mockImplementationOnce(() => null);
 
-      mockLocalStorageController
+    mockLocalStorageController
       .getLocalDatastore
       .mockImplementationOnce(() => LDS);
 
     LocalDatastore._updateLocalIdForObjectId(localId, object.id);
-    
+
     expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(2);
     expect(mockLocalStorageController.fromPinWithName.mock.results[0].value).toEqual(json);
-    
+
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledWith(localId);
 
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledWith(object.id, json);
-    
+
     expect(mockLocalStorageController.getLocalDatastore).toHaveBeenCalledTimes(1);
   });
 
@@ -303,7 +321,7 @@ describe('LocalDatastore', () => {
 
     const results = LocalDatastore._serializeObjectsFromPinName(null);
     expect(results).toEqual([json]);
-    
+
     expect(mockLocalStorageController.getLocalDatastore).toHaveBeenCalledTimes(1);
   });
 
@@ -322,7 +340,7 @@ describe('LocalDatastore', () => {
 
     const results = LocalDatastore._serializeObjectsFromPinName(LocalDatastore.DEFAULT_PIN);
     expect(results).toEqual([]);
-    
+
     expect(mockLocalStorageController.getLocalDatastore).toHaveBeenCalledTimes(1);
   });
 
@@ -340,10 +358,10 @@ describe('LocalDatastore', () => {
 
     mockLocalStorageController
       .fromPinWithName
-      .mockImplementationOnce((name) => LDS.testPin)
-      .mockImplementationOnce((objectId) => LDS[obj1.id])
-      .mockImplementationOnce((objectId) => LDS[obj2.id])
-      .mockImplementationOnce((objectId) => LDS[obj3.id]);
+      .mockImplementationOnce(() => LDS.testPin)
+      .mockImplementationOnce(() => LDS[obj1.id])
+      .mockImplementationOnce(() => LDS[obj2.id])
+      .mockImplementationOnce(() => LDS[obj3.id]);
 
     mockLocalStorageController
       .getLocalDatastore
@@ -351,7 +369,7 @@ describe('LocalDatastore', () => {
 
     const results = LocalDatastore._serializeObjectsFromPinName('testPin');
     expect(results).toEqual([obj1._toFullJSON(), obj2._toFullJSON(), obj3._toFullJSON()]);
-    
+
     expect(mockLocalStorageController.getLocalDatastore).toHaveBeenCalledTimes(1);
 
     expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(4);
@@ -376,15 +394,15 @@ describe('LocalDatastore', () => {
 
     mockLocalStorageController
       .fromPinWithName
-      .mockImplementationOnce((name) => obj1)
-      .mockImplementationOnce((objectId) => null);
+      .mockImplementationOnce(() => obj1)
+      .mockImplementationOnce(() => null);
 
     mockLocalStorageController
       .getLocalDatastore
       .mockImplementationOnce(() => LDS);
 
     LocalDatastore._destroyObjectIfPinned(obj1);
-    
+
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledWith(obj1.id);
 
@@ -393,6 +411,49 @@ describe('LocalDatastore', () => {
     expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(2);
     expect(mockLocalStorageController.fromPinWithName.mock.calls[0][0]).toEqual(obj1.id);
     expect(mockLocalStorageController.fromPinWithName.mock.calls[1][0]).toEqual(LocalDatastore.DEFAULT_PIN);
+
+    expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(0);
+  });
+
+  it('_destroyObjectIfPinned no objects found in pinName remove pinName', () => {
+    const object = new ParseObject('Item');
+    LocalDatastore._destroyObjectIfPinned(object);
+    expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(0);
+
+    jest.clearAllMocks();
+
+    const obj1 = new ParseObject('Item');
+    const obj2 = new ParseObject('Item');
+
+    const LDS = {
+      [obj1.id]: obj1._toFullJSON(),
+      [obj2.id]: obj2._toFullJSON(),
+      [LocalDatastore.PIN_PREFIX + 'Custom_Pin']: [obj2.id],
+      [LocalDatastore.DEFAULT_PIN]: [obj2.id],
+    };
+
+    mockLocalStorageController
+      .fromPinWithName
+      .mockImplementationOnce(() => obj2)
+      .mockImplementationOnce(() => [obj2.id]);
+
+    mockLocalStorageController
+      .getLocalDatastore
+      .mockImplementationOnce(() => LDS);
+
+    LocalDatastore._destroyObjectIfPinned(obj2);
+
+    expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(2);
+    expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledWith(obj2.id);
+
+    expect(mockLocalStorageController.getLocalDatastore).toHaveBeenCalledTimes(1);
+
+    console.log(mockLocalStorageController.fromPinWithName.mock.calls);
+    expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(3);
+    expect(mockLocalStorageController.fromPinWithName.mock.calls[0][0]).toEqual(obj2.id);
+    expect(mockLocalStorageController.fromPinWithName.mock.calls[1][0]).toEqual(LocalDatastore.PIN_PREFIX + 'Custom_Pin');
+    expect(mockLocalStorageController.fromPinWithName.mock.calls[2][0]).toEqual(LocalDatastore.DEFAULT_PIN);
 
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(0);
   });
@@ -409,20 +470,20 @@ describe('LocalDatastore', () => {
 
     mockLocalStorageController
       .fromPinWithName
-      .mockImplementationOnce((name) => obj1)
-      .mockImplementationOnce((objectId) => LDS[LocalDatastore.DEFAULT_PIN]);
+      .mockImplementationOnce(() => obj1)
+      .mockImplementationOnce(() => LDS[LocalDatastore.DEFAULT_PIN]);
 
     mockLocalStorageController
       .getLocalDatastore
       .mockImplementationOnce(() => LDS);
 
     LocalDatastore._destroyObjectIfPinned(obj1);
-    
+
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledWith(obj1.id);
 
     expect(mockLocalStorageController.getLocalDatastore).toHaveBeenCalledTimes(1);
-    
+
     expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(2);
     expect(mockLocalStorageController.fromPinWithName.mock.calls[0][0]).toEqual(obj1.id);
     expect(mockLocalStorageController.fromPinWithName.mock.calls[1][0]).toEqual(LocalDatastore.DEFAULT_PIN);

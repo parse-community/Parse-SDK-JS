@@ -9,14 +9,14 @@
 
 jest.autoMockOff();
 
-// Set LocalStorage First Before LocalDatastore
-var mockLocalStorage = require('./test_helpers/mockLocalStorage');
-global.localStorage = mockLocalStorage;
+/* global window */
 
-var LocalDatastore = require('../LocalDatastore');
-
-describe('LocalDatastore LocalStorage enabled', () => {
-  it('isLocalStorageEnabled', () => {
-    expect(LocalDatastore.isLocalStorageEnabled).toBe(true);
+describe('LocalDatastore LocalStorage disabled', () => {
+  it('isLocalStorageDisabled', () => {
+    Object.defineProperty(window, 'localStorage', {
+      value: null,
+    });
+    const LocalDatastore = require('../LocalDatastore');
+    expect(LocalDatastore.isLocalStorageEnabled()).toBe(false);
   });
 });

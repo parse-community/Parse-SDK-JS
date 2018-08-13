@@ -9,6 +9,8 @@
  * @flow
  */
 
+/* global localStorage */
+
 const LocalDatastoreController = {
   fromPinWithName(name: string): ?any {
     const values = localStorage.getItem(name);

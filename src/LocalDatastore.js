@@ -9,6 +9,8 @@
  * @flow
  */
 
+/* global localStorage */
+
 import CoreManager from './CoreManager';
 
 import type ParseObject from './ParseObject';
@@ -68,13 +70,17 @@ const LocalDatastore = {
     objectIds.push(object._getId());
     let pinned = this.fromPinWithName(pinName) || [];
     pinned = pinned.filter(item => !objectIds.includes(item));
-    this.pinWithName(pinName, pinned);
+    if (pinned.length == 0) {
+      this.unPinWithName(pinName);
+    } else {
+      this.pinWithName(pinName, pinned);
+    }
   },
 
   _getChildren(object: ParseObject) {
     const encountered = {};
     const json = object._toFullJSON();
-    for (let key in json) {
+    for (const key in json) {
       if (json[key].__type && json[key].__type === 'Object') {
         this._traverse(json[key], encountered);
       }
@@ -88,7 +94,7 @@ const LocalDatastore = {
     } else {
       encountered[object.objectId] = object;
     }
-    for (let key in object) {
+    for (const key in object) {
       if (object[key].__type && object[key].__type === 'Object') {
         this._traverse(object[key], encountered);
       }
@@ -98,7 +104,7 @@ const LocalDatastore = {
   _serializeObjectsFromPinName(name: string) {
     const localDatastore = this._getLocalDatastore();
     const allObjects = [];
-    for (let key in localDatastore) {
+    for (const key in localDatastore) {
       if (key !== DEFAULT_PIN && !key.startsWith(PIN_PREFIX)) {
         allObjects.push(localDatastore[key]);
       }
@@ -131,12 +137,16 @@ const LocalDatastore = {
     }
     this.unPinWithName(object.id);
     const localDatastore = this._getLocalDatastore();
-    for (let key in localDatastore) {
+    for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
         let pinned = this.fromPinWithName(key) || [];
         if (pinned.includes(object.id)) {
           pinned = pinned.filter(item => item !== object.id);
-          this.pinWithName(key, pinned);
+          if (pinned.length == 0) {
+            this.unPinWithName(key);
+          } else {
+            this.pinWithName(key, pinned);
+          }
         }
       }
     }
@@ -152,7 +162,7 @@ const LocalDatastore = {
 
     const localDatastore = this._getLocalDatastore();
 
-    for (let key in localDatastore) {
+    for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
         let pinned = this.fromPinWithName(key) || [];
         if (pinned.includes(localId)) {
@@ -177,7 +187,7 @@ function isLocalStorageEnabled() {
 }
 LocalDatastore.DEFAULT_PIN = DEFAULT_PIN;
 LocalDatastore.PIN_PREFIX = PIN_PREFIX;
-LocalDatastore.isLocalStorageEnabled = isLocalStorageEnabled();
+LocalDatastore.isLocalStorageEnabled = isLocalStorageEnabled;
 module.exports = LocalDatastore;
 
 if (isLocalStorageEnabled()) {

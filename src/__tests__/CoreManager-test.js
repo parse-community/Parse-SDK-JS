@@ -368,7 +368,7 @@ describe('CoreManager', () => {
   });
 
   it('can set and get setLocalDatastoreController', () => {
-    var controller = {
+    const controller = {
       fromPinWithName: function() {},
       pinWithName: function() {},
       unPinWithName: function() {},

@@ -46,7 +46,7 @@ describe('Parse module', () => {
   });
 
   it('can set LocalDatastoreController', () => {
-    var controller = {
+    const controller = {
       fromPinWithName: function() {},
       pinWithName: function() {},
       unPinWithName: function() {},

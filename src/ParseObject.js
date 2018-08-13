@@ -1160,7 +1160,7 @@ class ParseObject {
   }
 
   /**
-   * Removes the object and every object it points to in the local datastore, 
+   * Removes the object and every object it points to in the local datastore,
    * recursively, using a default pin name: _default.
    */
   unPin() {
@@ -1688,7 +1688,7 @@ class ParseObject {
    */
   static pinAllWithName(name: string, objects: Array<ParseObject>) {
     const localDatastore = CoreManager.getLocalDatastore();
-    for (let object of objects) {
+    for (const object of objects) {
       localDatastore._handlePinWithName(name, object);
     }
   }
@@ -1714,7 +1714,7 @@ class ParseObject {
    */
   static unPinAllWithName(name: string, objects: Array<ParseObject>) {
     const localDatastore = CoreManager.getLocalDatastore();
-    for (let object of objects) {
+    for (const object of objects) {
       localDatastore._handleUnPinWithName(name, object);
     }
   }
@@ -1816,7 +1816,7 @@ var DefaultController = {
             }
           }
         }
-        for (let object of results) {
+        for (const object of results) {
           localDatastore._updateObjectIfPinned(object);
         }
         return Promise.resolve(results);
@@ -1897,7 +1897,7 @@ var DefaultController = {
           aggregate.errors = errors;
           return Promise.reject(aggregate);
         }
-        for (let object of target) {
+        for (const object of target) {
           localDatastore._destroyObjectIfPinned(object);
         }
         return Promise.resolve(target);
@@ -2024,7 +2024,7 @@ var DefaultController = {
           if (objectError) {
             return Promise.reject(objectError);
           }
-          for (let object of target) {
+          for (const object of target) {
             localDatastore._updateObjectIfPinned(object);
           }
           return Promise.resolve(target);

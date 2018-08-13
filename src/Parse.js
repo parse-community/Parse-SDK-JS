@@ -67,7 +67,7 @@ var Parse = {
    * @param {LocalDatastoreController} controller a cache data storage.
    * @static
    */
-  setLocalDatastoreController(controller: LocalDatastoreController) {
+  setLocalDatastoreController(controller: any) {
     CoreManager.setLocalDatastoreController(controller);
   }
 };

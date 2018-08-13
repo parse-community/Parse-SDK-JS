@@ -2161,7 +2161,7 @@ describe('ParseQuery', () => {
   });
 
   it('can query from local datastore', () => {
-    var q = new ParseQuery('Item');
+    const q = new ParseQuery('Item');
     expect(q._queriesLocalDatastore).toBe(false);
     expect(q._localDatastorePinName).toBe(null);
     q.fromLocalDatastore();
@@ -2171,7 +2171,7 @@ describe('ParseQuery', () => {
 
   it('can query from default pin', () => {
     CoreManager.setLocalDatastore(LocalDatastore);
-    var q = new ParseQuery('Item');
+    const q = new ParseQuery('Item');
     expect(q._queriesLocalDatastore).toBe(false);
     expect(q._localDatastorePinName).toBe(null);
     q.fromPin();
@@ -2180,7 +2180,7 @@ describe('ParseQuery', () => {
   });
 
   it('can query from pin with name', () => {
-    var q = new ParseQuery('Item');
+    const q = new ParseQuery('Item');
     expect(q._queriesLocalDatastore).toBe(false);
     expect(q._localDatastorePinName).toBe(null);
     q.fromPinWithName('test_pin');
@@ -2189,27 +2189,27 @@ describe('ParseQuery', () => {
   });
 
   it('can query offline', () => {
-    var obj1 = {
+    const obj1 = {
       className: 'Item',
       objectId: 'objectId1',
       count: 2,
     };
 
-    var obj2 = {
+    const obj2 = {
       className: 'Item',
       objectId: 'objectId2',
     };
 
-    var obj3 = {
+    const obj3 = {
       className: 'Unknown',
       objectId: 'objectId3',
     };
 
     mockLocalDatastore
       ._serializeObjectsFromPinName
-      .mockImplementationOnce((name) => [obj1, obj2, obj3]);
+      .mockImplementationOnce(() => [obj1, obj2, obj3]);
 
-    var q = new ParseQuery('Item');
+    const q = new ParseQuery('Item');
     q.equalTo('count', 2);
     q.fromLocalDatastore();
     const results = q.find();

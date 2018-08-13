@@ -467,7 +467,7 @@ class ParseQuery {
           return null;
         }
         if (!OfflineQuery.matchesQuery(object, this)) {
-          return null; 
+          return null;
         }
         return object;
       }).filter((object) => object !== null);
@@ -1463,7 +1463,7 @@ class ParseQuery {
     query._norQuery(queries);
     return query;
   }
-  
+
   /**
    * Changes the source of this query to all pinned objects.
    */

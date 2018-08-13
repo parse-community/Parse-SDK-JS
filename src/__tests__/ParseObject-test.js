@@ -2337,7 +2337,7 @@ describe('ParseObject pin', () => {
     object.id = '123';
     mockLocalDatastore
       .fromPinWithName
-      .mockImplementationOnce((name) => object._toFullJSON());
+      .mockImplementationOnce(() => object._toFullJSON());
 
     object.fetchFromLocalDatastore();
     expect(mockLocalDatastore.fromPinWithName).toHaveBeenCalledTimes(1);
