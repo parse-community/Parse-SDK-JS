@@ -1855,7 +1855,7 @@ describe('ParseQuery', () => {
       aggregate(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
-          group: { objectId: '$name' }
+          pipeline: [{ group: { objectId: '$name' } }]
         });
         expect(options).toEqual({ useMasterKey: true });
         return Promise.resolve({
@@ -1880,7 +1880,7 @@ describe('ParseQuery', () => {
       aggregate(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
-          group: { objectId: '$name' }
+          pipeline: { group: { objectId: '$name' } }
         });
         expect(options).toEqual({ useMasterKey: true });
         return Promise.resolve({
@@ -1929,7 +1929,7 @@ describe('ParseQuery', () => {
       aggregate(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
-          group: { objectId: '$name' }
+          pipeline: [{ group: { objectId: '$name' } }]
         });
         expect(options).toEqual({
           useMasterKey: true,

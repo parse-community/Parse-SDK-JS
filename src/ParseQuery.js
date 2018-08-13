@@ -572,30 +572,23 @@ class ParseQuery {
     options = options || {};
 
     const aggregateOptions = {
-      useMasterKey: true
+      useMasterKey: true,
     };
     if (options.hasOwnProperty('sessionToken')) {
       aggregateOptions.sessionToken = options.sessionToken;
     }
     const controller = CoreManager.getQueryController();
-    let stages = {};
 
-    if (Array.isArray(pipeline)) {
-      pipeline.forEach((stage) => {
-        for (let op in stage) {
-          stages[op] = stage[op];
-        }
-      });
-    } else if (pipeline && typeof pipeline === 'object') {
-      stages = pipeline;
-    } else {
+    if (!Array.isArray(pipeline) && typeof pipeline !== 'object') {
       throw new Error('Invalid pipeline must be Array or Object');
     }
 
+    const params = { pipeline };
+
     return controller.aggregate(
       this.className,
-      stages,
-      aggregateOptions
+      params,
+      aggregateOptions,
     ).then((results) => {
       return results.results;
     });
