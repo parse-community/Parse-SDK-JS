@@ -10,8 +10,8 @@
 jest.dontMock('../CoreManager');
 jest.dontMock('../Parse');
 
-var CoreManager = require('../CoreManager');
-var Parse = require('../Parse');
+const CoreManager = require('../CoreManager');
+const Parse = require('../Parse');
 
 describe('Parse module', () => {
   it('can be initialized with keys', () => {

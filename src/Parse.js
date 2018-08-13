@@ -32,10 +32,12 @@ var Parse = {
    */
   initialize(applicationId: string, javaScriptKey: string) {
     if (process.env.PARSE_BUILD === 'browser' && CoreManager.get('IS_NODE') && !process.env.SERVER_RENDERING) {
+      /* eslint-disable no-console */
       console.log(
         'It looks like you\'re using the browser version of the SDK in a ' +
         'node.js environment. You should require(\'parse/node\') instead.'
       );
+      /* eslint-enable no-console */
     }
     Parse._initialize(applicationId, javaScriptKey);
   },
@@ -163,7 +165,6 @@ Parse.Op = {
   AddUnique: ParseOp.AddUniqueOp,
   Relation: ParseOp.RelationOp
 };
-Promise = Promise;
 Parse.Push = require('./Push');
 Parse.Query = require('./ParseQuery').default;
 Parse.Relation = require('./ParseRelation').default;

@@ -9,11 +9,11 @@
 
 jest.autoMockOff();
 
-var equals = require('../equals').default;
-var ParseACL = require('../ParseACL').default;
-var ParseFile = require('../ParseFile').default;
-var ParseGeoPoint = require('../ParseGeoPoint').default;
-var ParseObject = require('../ParseObject').default;
+const equals = require('../equals').default;
+const ParseACL = require('../ParseACL').default;
+const ParseFile = require('../ParseFile').default;
+const ParseGeoPoint = require('../ParseGeoPoint').default;
+const ParseObject = require('../ParseObject').default;
 
 describe('equals', () => {
   it('tests equality of primitives', () => {
@@ -43,7 +43,7 @@ describe('equals', () => {
   });
 
   it('tests equality of objects and arrays', () => {
-    var a = {};
+    const a = {};
     expect(equals(a, a)).toBe(true);
     expect(equals({}, {})).toBe(true);
     expect(equals({ a: 1 }, { a: 1 })).toBe(true);
@@ -62,8 +62,8 @@ describe('equals', () => {
 
   it('tests equality of ACLs', () => {
     // Defer to ParseACL tests for the majority of testing
-    var a = new ParseACL();
-    var b = new ParseACL();
+    const a = new ParseACL();
+    const b = new ParseACL();
 
     expect(equals(a, a)).toBe(true);
     expect(equals(a, b)).toBe(true);
@@ -77,10 +77,10 @@ describe('equals', () => {
 
   it('tests equality of GeoPoints', () => {
     // Defer to ParseGeoPoint tests for the majority of testing
-    var a = new ParseGeoPoint(40, 40);
+    const a = new ParseGeoPoint(40, 40);
     expect(equals(a, a)).toBe(true);
 
-    var b = new ParseGeoPoint(40, 40);
+    let b = new ParseGeoPoint(40, 40);
     expect(equals(a, b)).toBe(true);
     expect(equals(b, a)).toBe(true);
 
@@ -91,8 +91,8 @@ describe('equals', () => {
 
   it('tests equality of Files', () => {
     // Defer to ParseFile tests for the majority of testing
-    var a = new ParseFile('parse.txt', [61, 170, 236, 120]);
-    var b = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    let a = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    let b = new ParseFile('parse.txt', [61, 170, 236, 120]);
 
     expect(equals(a, a)).toBe(true);
     // unsaved files are never equal
@@ -113,8 +113,8 @@ describe('equals', () => {
 
   it('tests equality of ParseObjects', () => {
     // Defer to ParseObject tests for the majority of testing
-    var a = new ParseObject('Item');
-    var b = new ParseObject('Item');
+    const a = new ParseObject('Item');
+    const b = new ParseObject('Item');
     expect(equals(a, a)).toBe(true);
     expect(equals(a, b)).toBe(false);
 

@@ -11,7 +11,6 @@
 
 import CoreManager from './CoreManager';
 import decode from './decode';
-import encode from './encode';
 import escape from './escape';
 import ParseError from './ParseError';
 import Storage from './Storage';
@@ -74,13 +73,10 @@ class ParseConfig {
   /**
    * Gets a new configuration object from the server.
    * @static
-   * @param {Object} options
    * @return {Promise} A promise that is resolved with a newly-created
    *     configuration object when the get completes.
    */
-  static get(options) {
-    options = options || {};
-
+  static get() {
     var controller = CoreManager.getConfigController();
     return controller.get();
   }

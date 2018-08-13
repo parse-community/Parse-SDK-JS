@@ -10,14 +10,14 @@
 jest.dontMock('../Analytics');
 jest.dontMock('../CoreManager');
 
-var Analytics = require('../Analytics');
-var CoreManager = require('../CoreManager');
+const Analytics = require('../Analytics');
+const CoreManager = require('../CoreManager');
 
-var defaultController = CoreManager.getAnalyticsController();
+const defaultController = CoreManager.getAnalyticsController();
 
 describe('Analytics', () => {
   beforeEach(() => {
-    var track = jest.fn();
+    const track = jest.fn();
     track.mockReturnValue(Promise.resolve());
     CoreManager.setAnalyticsController({ track: track });
   });
@@ -62,12 +62,12 @@ describe('Analytics', () => {
 describe('AnalyticsController', () => {
   beforeEach(() => {
     CoreManager.setAnalyticsController(defaultController);
-    var request = jest.fn();
+    const request = jest.fn();
     request.mockReturnValue(Promise.resolve({
       success: true,
       result: {}
     }));
-    var ajax = jest.fn();
+    const ajax = jest.fn();
     CoreManager.setRESTController({ request: request, ajax: ajax });
   });
 

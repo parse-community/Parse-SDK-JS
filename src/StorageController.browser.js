@@ -8,7 +8,7 @@
  *
  * @flow
  */
-
+/* global localStorage */
 var StorageController = {
   async: 0,
 

@@ -15,14 +15,14 @@ describe('Schema', () => {
   });
 
   it('invalid get all no schema', (done) => {
-    Parse.Schema.all().then(() => {}).catch((e) => {
+    Parse.Schema.all().then(() => {}).catch(() => {
       done();
     });
   });
 
   it('invalid get no schema', (done) => {
     const testSchema = new Parse.Schema('SchemaTest');
-    testSchema.get().then(() => {}).catch((e) => {
+    testSchema.get().then(() => {}).catch(() => {
       done();
     });
   });
@@ -136,14 +136,14 @@ describe('Schema', () => {
     const testSchema = new Parse.Schema('SchemaTest');
     const obj = new Parse.Object('SchemaTest');
     obj.save().then(() => {
-        return testSchema.delete().then(() => {
-          // Should never reach here
-          assert.equal(true, false);
-        }).catch((error) => {
-          assert.equal(error.code, Parse.Error.INVALID_SCHEMA_OPERATION);
-          assert.equal(error.message, 'Class SchemaTest is not empty, contains 1 objects, cannot drop schema.');
-          return Promise.resolve();
-        });
+      return testSchema.delete().then(() => {
+        // Should never reach here
+        assert.equal(true, false);
+      }).catch((error) => {
+        assert.equal(error.code, Parse.Error.INVALID_SCHEMA_OPERATION);
+        assert.equal(error.message, 'Class SchemaTest is not empty, contains 1 objects, cannot drop schema.');
+        return Promise.resolve();
+      });
     }).then(() => {
       return testSchema.purge();
     }).then(() => {
@@ -173,8 +173,8 @@ describe('Schema', () => {
 
   it('update index', (done) => {
     const testSchema = new Parse.Schema('SchemaTest');
-    testSchema.save().then((result) => {
-        const index = {
+    testSchema.save().then(() => {
+      const index = {
         name: 1
       };
       testSchema.addString('name');
@@ -188,8 +188,8 @@ describe('Schema', () => {
 
   it('delete index', (done) => {
     const testSchema = new Parse.Schema('SchemaTest');
-    testSchema.save().then((result) => {
-        const index = {
+    testSchema.save().then(() => {
+      const index = {
         name: 1
       };
       testSchema.addString('name');

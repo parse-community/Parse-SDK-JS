@@ -9,8 +9,8 @@
 
 jest.dontMock('../arrayContainsObject');
 
-var localCount = 0;
-var mockObject = function(className, id) {
+let localCount = 0;
+const mockObject = function(className, id) {
   this.className = className;
   this.id = id;
   if (!id) {
@@ -22,12 +22,12 @@ mockObject.prototype._getId = function() {
 }
 jest.setMock('../ParseObject', mockObject);
 
-var arrayContainsObject = require('../arrayContainsObject').default;
-var ParseObject = require('../ParseObject');
+const arrayContainsObject = require('../arrayContainsObject').default;
+const ParseObject = require('../ParseObject');
 
 describe('arrayContainsObject', () => {
   it('detects objects by their id', () => {
-    var o = new ParseObject('Item');
+    const o = new ParseObject('Item');
     expect(arrayContainsObject([], o)).toBe(false);
     expect(arrayContainsObject([1, 'string'], o)).toBe(false);
     expect(arrayContainsObject([o], o)).toBe(true);

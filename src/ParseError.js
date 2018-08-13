@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
- /**
+/**
   * Constructs a new Parse.Error object with the given code and message.
   * @alias Parse.Error
   */

@@ -41,7 +41,7 @@ export function defaultState(): State {
 }
 
 export function setServerData(serverData: AttributeMap, attributes: AttributeMap) {
-  for (let attr in attributes) {
+  for (const attr in attributes) {
     if (typeof attributes[attr] !== 'undefined') {
       serverData[attr] = attributes[attr];
     } else {
@@ -51,7 +51,7 @@ export function setServerData(serverData: AttributeMap, attributes: AttributeMap
 }
 
 export function setPendingOp(pendingOps: Array<OpsMap>, attr: string, op: ?Op) {
-  let last = pendingOps.length - 1;
+  const last = pendingOps.length - 1;
   if (op) {
     pendingOps[last][attr] = op;
   } else {
@@ -64,7 +64,7 @@ export function pushPendingState(pendingOps: Array<OpsMap>) {
 }
 
 export function popPendingState(pendingOps: Array<OpsMap>): OpsMap {
-  let first = pendingOps.shift();
+  const first = pendingOps.shift();
   if (!pendingOps.length) {
     pendingOps[0] = {};
   }
@@ -72,11 +72,11 @@ export function popPendingState(pendingOps: Array<OpsMap>): OpsMap {
 }
 
 export function mergeFirstPendingState(pendingOps: Array<OpsMap>) {
-  let first = popPendingState(pendingOps);
-  let next = pendingOps[0];
-  for (let attr in first) {
+  const first = popPendingState(pendingOps);
+  const next = pendingOps[0];
+  for (const attr in first) {
     if (next[attr] && first[attr]) {
-      let merged = next[attr].mergeWith(first[attr]);
+      const merged = next[attr].mergeWith(first[attr]);
       if (merged) {
         next[attr] = merged;
       }
@@ -107,7 +107,7 @@ export function estimateAttribute(serverData: AttributeMap, pendingOps: Array<Op
 }
 
 export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<OpsMap>, className: string, id: ?string): AttributeMap {
-  let data = {};
+  const data = {};
   let attr;
   for (attr in serverData) {
     data[attr] = serverData[attr];
@@ -131,8 +131,8 @@ export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<O
 }
 
 export function commitServerChanges(serverData: AttributeMap, objectCache: ObjectCache, changes: AttributeMap) {
-  for (let attr in changes) {
-    let val = changes[attr];
+  for (const attr in changes) {
+    const val = changes[attr];
     serverData[attr] = val;
     if (val &&
       typeof val === 'object' &&
@@ -140,7 +140,7 @@ export function commitServerChanges(serverData: AttributeMap, objectCache: Objec
       !(val instanceof ParseFile) &&
       !(val instanceof ParseRelation)
     ) {
-      let json = encode(val, false, true);
+      const json = encode(val, false, true);
       objectCache[attr] = JSON.stringify(json);
     }
   }

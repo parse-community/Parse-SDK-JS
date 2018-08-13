@@ -19,8 +19,8 @@ describe('Dirty Objects', () => {
   });
 
   it('tracks dirty arrays', (done) => {
-    let array = [1];
-    let object = new TestObject();
+    const array = [1];
+    const object = new TestObject();
     object.set('scores', array);
     assert.equal(object.get('scores').length, 1);
     object.save().then(() => {
@@ -28,7 +28,7 @@ describe('Dirty Objects', () => {
       assert.equal(object.get('scores').length, 2);
       return object.save();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(o.get('scores').length, 2);
@@ -37,17 +37,17 @@ describe('Dirty Objects', () => {
   });
 
   it('tracks dirty arrays after fetch', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.set('scores', [1]);
     object.save().then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
-      let array = o.get('scores');
+      const array = o.get('scores');
       array.push(2);
       return o.save();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(o.get('scores').length, 2);
@@ -56,14 +56,14 @@ describe('Dirty Objects', () => {
   });
 
   it('tracks dirty objects', (done) => {
-    let dict = {player1: 1};
-    let object = new TestObject();
+    const dict = {player1: 1};
+    const object = new TestObject();
     object.set('scoreMap', dict);
     object.save().then(() => {
       dict.player2 = 2;
       return object.save();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(Object.keys(o.get('scoreMap')).length, 2);
@@ -72,18 +72,18 @@ describe('Dirty Objects', () => {
   });
 
   it('tracks dirty objects after fetch', (done) => {
-    let dict = {player1: 1};
-    let object = new TestObject();
+    const dict = {player1: 1};
+    const object = new TestObject();
     object.set('scoreMap', dict);
     object.save().then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
-      let dictAgain = o.get('scoreMap');
+      const dictAgain = o.get('scoreMap');
       dictAgain.player2 = 2;
       return o.save();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(Object.keys(o.get('scoreMap')).length, 2);
@@ -92,14 +92,14 @@ describe('Dirty Objects', () => {
   });
 
   it('tracks dirty geo points', (done) => {
-    let geo = new Parse.GeoPoint(5, 5);
-    let object = new TestObject();
+    const geo = new Parse.GeoPoint(5, 5);
+    const object = new TestObject();
     object.set('location', geo);
     object.save().then(() => {
       geo.latitude = 10;
       return object.save();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(o.get('location').latitude, 10);
@@ -108,12 +108,12 @@ describe('Dirty Objects', () => {
   });
 
   it('tracks dirty geo points on fresh objects', (done) => {
-    let geo = new Parse.GeoPoint(1.0, 1.0);
-    let object = new TestObject();
+    const geo = new Parse.GeoPoint(1.0, 1.0);
+    const object = new TestObject();
     object.set('location', geo);
     geo.latitude = 2.0;
     object.save().then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(o.get('location').latitude, 2);
@@ -121,9 +121,9 @@ describe('Dirty Objects', () => {
     });
   });
 
-  it('does not resave relations with dirty children', () => {
-    let parent = new Parent();
-    let child = new Child();
+  it('does not resave relations with dirty children', (done) => {
+    const parent = new Parent();
+    const child = new Child();
     let newChild;
     let parentAgain;
     child.set('ghostbuster', 'peter');
@@ -132,7 +132,7 @@ describe('Dirty Objects', () => {
       assert.equal(parent.get('child'), child);
       assert.equal(child.get('ghostbuster'), 'peter');
 
-      let query = new Parse.Query(Parent);
+      const query = new Parse.Query(Parent);
       return query.get(parent.id);
     }).then((again) => {
       parentAgain = again;
@@ -158,7 +158,7 @@ describe('Dirty Objects', () => {
       assert.equal(child.get('ghostbuster'), 'egon');
       assert.equal(newChild.get('ghostbuster'), 'ray');
 
-      let query = new Parse.Query(Parent);
+      const query = new Parse.Query(Parent);
       return query.get(parent.id);
     }).then((yetAgain) => {
       assert.equal(parent.get('child'), child);
@@ -167,7 +167,7 @@ describe('Dirty Objects', () => {
       assert.equal(child.get('ghostbuster'), 'egon');
       assert.equal(newChild.get('ghostbuster'), 'ray');
 
-      let newChildAgain = yetAgain.get('child');
+      const newChildAgain = yetAgain.get('child');
       assert.equal(newChildAgain.id, newChild.id);
       return newChildAgain.fetch();
     }).then((c) => {
@@ -177,8 +177,8 @@ describe('Dirty Objects', () => {
   });
 
   it('does not dirty two-way pointers on saveAll', (done) => {
-    let parent = new Parent();
-    let child = new Child();
+    const parent = new Parent();
+    const child = new Child();
 
     child.save().then(() => {
       child.set('property', 'x');
@@ -193,7 +193,7 @@ describe('Dirty Objects', () => {
   });
 
   it('unset fields should not stay dirty', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.save({ foo: 'bar' }).then(() => {
       assert.equal(object.dirty(), false);
       object.unset('foo');
