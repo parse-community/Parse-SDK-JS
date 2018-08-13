@@ -579,7 +579,7 @@ class ParseQuery {
     }
     const controller = CoreManager.getQueryController();
 
-    if (!pipeline || !Array.isArray(pipeline) || typeof pipeline !== 'object') {
+    if (!Array.isArray(pipeline) && typeof pipeline !== 'object') {
       throw new Error('Invalid pipeline must be Array or Object');
     }
 

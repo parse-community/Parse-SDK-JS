@@ -25,7 +25,7 @@ describe('Parse Aggregate Query', () => {
 
   it('aggregate pipeline object query', (done) => {
     const pipeline = {
-      group: { objectId: '$name' }
+      group: { objectId: '$name' },
     };
     const query = new Parse.Query(TestObject);
     query.aggregate(pipeline).then((results) => {
@@ -74,7 +74,7 @@ describe('Parse Aggregate Query', () => {
     }, {
       // Left Join, replace objectId stored in tempPointer with an actual object
       lookup: {
-        from: 'test_TestObject',
+        from: 'TestObject',
         localField: 'tempPointer',
         foreignField: '_id',
         as: 'tempPointer',
@@ -91,7 +91,7 @@ describe('Parse Aggregate Query', () => {
 
     const query = new Parse.Query(TestObject);
     const results = await query.aggregate(pipeline);
-    
+
     expect(results.length).toEqual(1);
     expect(results[0].tempPointer.value).toEqual(2);
   });
