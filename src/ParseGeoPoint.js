@@ -31,12 +31,13 @@
  *   object.save();</pre></p>
  * @alias Parse.GeoPoint
  */
+/* global navigator */
 class ParseGeoPoint {
   _latitude: number;
   _longitude: number;
 
   /**
-   * @param {(Number[]|Object|Number)} options Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point. 
+   * @param {(Number[]|Object|Number)} options Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point.
    * @param {Number} longitude The longitude of the GeoPoint
    */
   constructor(
@@ -192,11 +193,9 @@ class ParseGeoPoint {
   /**
    * Creates a GeoPoint with the user's current location, if available.
    * Calls options.success with a new GeoPoint instance or calls options.error.
-
-   * @param {Object} options An object with success and error callbacks.
    * @static
    */
-  static current(options) {
+  static current() {
     return navigator.geolocation.getCurrentPosition((location) => {
       return new ParseGeoPoint(location.coords.latitude, location.coords.longitude);
     });

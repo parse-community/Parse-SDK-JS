@@ -13,7 +13,6 @@ import CoreManager from './CoreManager';
 import canBeSerialized from './canBeSerialized';
 import decode from './decode';
 import encode from './encode';
-import equals from './equals';
 import escape from './escape';
 import ParseACL from './ParseACL';
 import parseDate from './parseDate';
@@ -148,7 +147,7 @@ class ParseObject {
   /** Prototype getters / setters **/
 
   get attributes(): AttributeMap {
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     return Object.freeze(stateController.estimateAttributes(this._getStateIdentifier()));
   }
 
@@ -206,7 +205,7 @@ class ParseObject {
   }
 
   _getServerData(): AttributeMap {
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     return stateController.getServerData(this._getStateIdentifier());
   }
 
@@ -216,12 +215,12 @@ class ParseObject {
     for (var attr in serverData) {
       unset[attr] = undefined;
     }
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     stateController.setServerData(this._getStateIdentifier(), unset);
   }
 
   _getPendingOps(): Array<OpsMap> {
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     return stateController.getPendingOps(this._getStateIdentifier());
   }
 
@@ -306,7 +305,7 @@ class ParseObject {
     if (!this.id && serverData.objectId) {
       this.id = serverData.objectId;
     }
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     stateController.initializeState(this._getStateIdentifier());
     var decoded = {};
     for (var attr in serverData) {
@@ -332,8 +331,8 @@ class ParseObject {
   }
 
   _setExisted(existed: boolean) {
-    let stateController = CoreManager.getObjectStateController();
-    let state = stateController.getState(this._getStateIdentifier());
+    const stateController = CoreManager.getObjectStateController();
+    const state = stateController.getState(this._getStateIdentifier());
     if (state) {
       state.existed = existed;
     }
@@ -342,8 +341,8 @@ class ParseObject {
   _migrateId(serverId: string) {
     if (this._localId && serverId) {
       if (singleInstance) {
-        let stateController = CoreManager.getObjectStateController();
-        let oldState = stateController.removeState(this._getStateIdentifier());
+        const stateController = CoreManager.getObjectStateController();
+        const oldState = stateController.removeState(this._getStateIdentifier());
         this.id = serverId;
         delete this._localId;
         if (oldState) {
@@ -396,8 +395,7 @@ class ParseObject {
   }
 
   _handleSaveError() {
-    var pending = this._getPendingOps();
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     stateController.mergeFirstPendingState(this._getStateIdentifier());
   }
 
@@ -412,19 +410,19 @@ class ParseObject {
    * @return {Object}
    */
   toJSON(seen: Array<any> | void): AttributeMap {
-    var seenEntry = this.id ? this.className + ':' + this.id : this;
-    var seen = seen || [seenEntry];
-    var json = {};
-    var attrs = this.attributes;
-    for (var attr in attrs) {
+    const seenEntry = this.id ? this.className + ':' + this.id : this;
+    seen = seen || [seenEntry];
+    const json = {};
+    const attrs = this.attributes;
+    for (const attr in attrs) {
       if ((attr === 'createdAt' || attr === 'updatedAt') && attrs[attr].toJSON) {
         json[attr] = attrs[attr].toJSON();
       } else {
         json[attr] = encode(attrs[attr], false, false, seen);
       }
     }
-    var pending = this._getPendingOps();
-    for (var attr in pending[0]) {
+    const pending = this._getPendingOps();
+    for (const attr in pending[0]) {
       json[attr] = pending[0][attr].toJSON();
     }
 
@@ -497,7 +495,7 @@ class ParseObject {
       }
     }
     var dirtyObjects = this._getDirtyObjectAttributes();
-    for (var attr in dirtyObjects) {
+    for (const attr in dirtyObjects) {
       keys[attr] = true;
     }
     return Object.keys(keys);
@@ -548,11 +546,10 @@ class ParseObject {
    * @param {String} attr The string name of an attribute.
    */
   escape(attr: string): string {
-    var val = this.attributes[attr];
+    let val = this.attributes[attr];
     if (val == null) {
       return '';
     }
-    var str = val;
     if (typeof val !== 'string') {
       if (typeof val.toString !== 'function') {
         return '';
@@ -680,7 +677,7 @@ class ParseObject {
     var pendingOps = this._getPendingOps();
     var last = pendingOps.length - 1;
     var stateController = CoreManager.getObjectStateController();
-    for (var attr in newOps) {
+    for (const attr in newOps) {
       var nextOp = newOps[attr].mergeWith(pendingOps[last][attr]);
       stateController.setPendingOp(this._getStateIdentifier(), attr, nextOp);
     }
@@ -806,17 +803,17 @@ class ParseObject {
    * @return {Parse.Object}
    */
   clone(): any {
-    let clone = new this.constructor();
+    const clone = new this.constructor();
     if (!clone.className) {
       clone.className = this.className;
     }
     let attributes = this.attributes;
     if (typeof this.constructor.readOnlyAttributes === 'function') {
-      let readonly = this.constructor.readOnlyAttributes() || [];
+      const readonly = this.constructor.readOnlyAttributes() || [];
       // Attributes are frozen, so we have to rebuild an object,
       // rather than delete readonly keys
-      let copy = {};
-      for (let a in attributes) {
+      const copy = {};
+      for (const a in attributes) {
         if (readonly.indexOf(a) < 0) {
           copy[a] = attributes[a];
         }
@@ -834,7 +831,7 @@ class ParseObject {
    * @return {Parse.Object}
    */
   newInstance(): any {
-    let clone = new this.constructor();
+    const clone = new this.constructor();
     if (!clone.className) {
       clone.className = this.className;
     }
@@ -844,7 +841,7 @@ class ParseObject {
       return clone;
     }
 
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     if (stateController) {
       stateController.duplicateState(this._getStateIdentifier(), clone._getStateIdentifier());
     }
@@ -869,8 +866,8 @@ class ParseObject {
     if (!this.id) {
       return false;
     }
-    let stateController = CoreManager.getObjectStateController();
-    let state = stateController.getState(this._getStateIdentifier());
+    const stateController = CoreManager.getObjectStateController();
+    const state = stateController.getState(this._getStateIdentifier());
     if (state) {
       return state.existed;
     }
@@ -1009,7 +1006,7 @@ class ParseObject {
    *
    * Includes nested Parse.Objects for the provided key. You can use dot
    * notation to specify which fields in the included object are also fetched.
-   * 
+   *
    * @param {String|Array<string|Array<string>>} keys The name(s) of the key(s) to include.
    * @param {Object} options
    * Valid options are:<ul>
@@ -1113,7 +1110,7 @@ class ParseObject {
 
     var controller = CoreManager.getObjectController();
     var unsaved = unsavedChildren(this);
-    return controller.save(unsaved, saveOptions).then(() => {
+    return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
     });
   }
@@ -1154,7 +1151,7 @@ class ParseObject {
   /** Static methods **/
 
   static _clearAllState() {
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     stateController.clearAllState();
   }
 
@@ -1183,9 +1180,7 @@ class ParseObject {
    * </ul>
    * @static
    */
-  static fetchAll(list: Array<ParseObject>, options: RequestOptions) {
-    var options = options || {};
-
+  static fetchAll(list: Array<ParseObject>, options: RequestOptions = {}) {
     var queryOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       queryOptions.useMasterKey = options.useMasterKey;
@@ -1216,10 +1211,10 @@ class ParseObject {
 
   /**
    * Fetches the given list of Parse.Object.
-   * 
+   *
    * Includes nested Parse.Objects for the provided key. You can use dot
    * notation to specify which fields in the included object are also fetched.
-   * 
+   *
    * If any error is encountered, stops and calls the error handler.
    *
    * <pre>
@@ -1266,7 +1261,7 @@ class ParseObject {
    * @static
    */
   static fetchAllIfNeeded(list: Array<ParseObject>, options) {
-    var options = options || {};
+    options = options || {};
 
     var queryOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
@@ -1303,7 +1298,7 @@ class ParseObject {
    * </ul>
    *
    * <pre>
-   *   Parse.Object.destroyAll([object1, object2, ...]) 
+   *   Parse.Object.destroyAll([object1, object2, ...])
    *    .then((list) => {
    *      // All the objects were deleted.
    *    }, (error) => {
@@ -1334,9 +1329,7 @@ class ParseObject {
    * @return {Promise} A promise that is fulfilled when the destroyAll
    *     completes.
    */
-  static destroyAll(list: Array<ParseObject>, options) {
-    var options = options || {};
-
+  static destroyAll(list: Array<ParseObject>, options = {}) {
     var destroyOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       destroyOptions.useMasterKey = options.useMasterKey;
@@ -1373,9 +1366,7 @@ class ParseObject {
    *       behalf of a specific user.
    * </ul>
    */
-  static saveAll(list: Array<ParseObject>, options) {
-    var options = options || {};
-
+  static saveAll(list: Array<ParseObject>, options = {}) {
     var saveOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       saveOptions.useMasterKey = options.useMasterKey;
@@ -1576,7 +1567,7 @@ class ParseObject {
     }
 
     if (classProps) {
-      for (var prop in classProps) {
+      for (const prop in classProps) {
         if (prop !== 'className') {
           Object.defineProperty(ParseObjectSubclass, prop, {
             value: classProps[prop],
@@ -1636,7 +1627,7 @@ var DefaultController = {
       var className = null;
       var results = [];
       var error = null;
-      target.forEach((el, i) => {
+      target.forEach((el) => {
         if (error) {
           return;
         }
@@ -1690,8 +1681,8 @@ var DefaultController = {
         }
         if (!singleInstance) {
           // If single instance objects are disabled, we need to replace the
-          for (var i = 0; i < results.length; i++) {
-            var obj = results[i];
+          for (let i = 0; i < results.length; i++) {
+            const obj = results[i];
             if (obj && obj.id && idMap[obj.id]) {
               var id = obj.id;
               obj._finishFetch(idMap[id].toJSON());
@@ -1712,7 +1703,7 @@ var DefaultController = {
         'classes/' + target.className + '/' + target._getId(),
         params,
         options
-      ).then((response, status, xhr) => {
+      ).then((response) => {
         if (target instanceof ParseObject) {
           target._clearPendingOps();
           target._clearServerData();
@@ -1756,7 +1747,6 @@ var DefaultController = {
               };
             })
           }, options).then((results) => {
-            var error = null;
             for (var i = 0; i < results.length; i++) {
               if (results[i] && results[i].hasOwnProperty('error')) {
                 var err = new ParseError(
@@ -1886,7 +1876,7 @@ var DefaultController = {
                 return params;
               })
             }, options);
-          }).then((response, status, xhr) => {
+          }).then((response, status) => {
             batchReturned.resolve(response, status);
           }, (error) => {
             batchReturned.reject(new ParseError(ParseError.INCORRECT_TYPE, error.message));

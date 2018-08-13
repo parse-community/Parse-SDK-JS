@@ -20,7 +20,7 @@ describe('Parse Aggregate Query', () => {
     }).then(() => {
       return Parse.User.logOut();
     })
-    .then(() => { done() }, () => { done() });
+      .then(() => { done() }, () => { done() });
   });
 
   it('aggregate pipeline object query', (done) => {

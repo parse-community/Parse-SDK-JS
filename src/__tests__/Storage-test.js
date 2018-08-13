@@ -8,8 +8,8 @@
  */
 
 jest.autoMockOff();
-var mockRNStorage = {};
-var mockRNStorageInterface = {
+let mockRNStorage = {};
+const mockRNStorageInterface = {
   getItem(path, cb) {
     cb(undefined, mockRNStorage[path] || null);
   },
@@ -29,10 +29,10 @@ var mockRNStorageInterface = {
   },
 };
 
-var CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager');
 
-var mockStorage = {};
-var mockStorageInterface = {
+let mockStorage = {};
+const mockStorageInterface = {
   getItem(path) {
     return mockStorage[path] || null;
   },
@@ -64,7 +64,7 @@ var mockStorageInterface = {
 
 global.localStorage = mockStorageInterface;
 
-var BrowserStorageController = require('../StorageController.browser');
+const BrowserStorageController = require('../StorageController.browser');
 
 describe('Browser StorageController', () => {
   beforeEach(() => {
@@ -92,7 +92,7 @@ describe('Browser StorageController', () => {
   });
 });
 
-var RNStorageController = require('../StorageController.react-native');
+const RNStorageController = require('../StorageController.react-native');
 
 describe('React Native StorageController', () => {
   beforeEach(() => {
@@ -134,7 +134,7 @@ describe('React Native StorageController', () => {
   });
 });
 
-var DefaultStorageController = require('../StorageController.default');
+const DefaultStorageController = require('../StorageController.default');
 
 describe('Default StorageController', () => {
   beforeEach(() => {
@@ -162,7 +162,7 @@ describe('Default StorageController', () => {
   });
 });
 
-var Storage = require('../Storage');
+const Storage = require('../Storage');
 
 describe('Storage (Default StorageController)', () => {
   beforeEach(() => {
@@ -193,7 +193,7 @@ describe('Storage (Default StorageController)', () => {
       return Storage.removeItemAsync('myKey');
     }).then(() => {
       return Storage.getItemAsync('myKey');
-    }).then((result) => {
+    }).then(() => {
       done();
     });
   });
@@ -241,7 +241,7 @@ describe('Storage (Async StorageController)', () => {
       return Storage.removeItemAsync('myKey');
     }).then(() => {
       return Storage.getItemAsync('myKey');
-    }).then((result) => {
+    }).then(() => {
       done();
     });
   });

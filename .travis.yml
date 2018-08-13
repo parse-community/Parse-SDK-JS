@@ -23,6 +23,7 @@ jobs:
       - npm install -g mongodb-runner
       - mongodb-runner start
       script: 
+      - npm run lint
       - npm test -- --maxWorkers=4
       - npm run integration
       after_script: ./node_modules/codecov/bin/codecov -f ./coverage/coverage-final.json && rm -rf ./coverage

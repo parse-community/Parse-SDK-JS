@@ -26,7 +26,7 @@ import type { RequestOptions, FullOptions } from './RESTController';
  */
 class ParseSession extends ParseObject {
   /**
-   * 
+   *
    * @param {Object} attributes The initial set of data to store in the user.
    */
   constructor(attributes: ?AttributeMap) {
@@ -82,7 +82,6 @@ class ParseSession extends ParseObject {
       if (!user) {
         return Promise.reject('There is no current user.');
       }
-      var token = user.getSessionToken();
       sessionOptions.sessionToken = user.getSessionToken();
       return controller.getSession(sessionOptions);
     });

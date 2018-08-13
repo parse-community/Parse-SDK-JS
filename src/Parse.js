@@ -32,10 +32,12 @@ var Parse = {
    */
   initialize(applicationId: string, javaScriptKey: string) {
     if (process.env.PARSE_BUILD === 'browser' && CoreManager.get('IS_NODE') && !process.env.SERVER_RENDERING) {
+      /* eslint-disable no-console */
       console.log(
         'It looks like you\'re using the browser version of the SDK in a ' +
         'node.js environment. You should require(\'parse/node\') instead.'
       );
+      /* eslint-enable no-console */
     }
     Parse._initialize(applicationId, javaScriptKey);
   },
@@ -60,7 +62,7 @@ var Parse = {
 };
 
 /** These legacy setters may eventually be deprecated **/
-/** 
+/**
  * @member Parse.applicationId
  * @type string
  * @static
@@ -74,7 +76,7 @@ Object.defineProperty(Parse, 'applicationId', {
   }
 });
 
-/** 
+/**
  * @member Parse.javaScriptKey
  * @type string
  * @static
@@ -88,7 +90,7 @@ Object.defineProperty(Parse, 'javaScriptKey', {
   }
 });
 
-/** 
+/**
  * @member Parse.masterKey
  * @type string
  * @static
@@ -102,7 +104,7 @@ Object.defineProperty(Parse, 'masterKey', {
   }
 });
 
-/** 
+/**
  * @member Parse.serverURL
  * @type string
  * @static
@@ -115,7 +117,7 @@ Object.defineProperty(Parse, 'serverURL', {
     CoreManager.set('SERVER_URL', value);
   }
 });
-/** 
+/**
  * @member Parse.liveQueryServerURL
  * @type string
  * @static
@@ -151,7 +153,6 @@ Parse.Op = {
   AddUnique: ParseOp.AddUniqueOp,
   Relation: ParseOp.RelationOp
 };
-Promise = Promise;
 Parse.Push = require('./Push');
 Parse.Query = require('./ParseQuery').default;
 Parse.Relation = require('./ParseRelation').default;

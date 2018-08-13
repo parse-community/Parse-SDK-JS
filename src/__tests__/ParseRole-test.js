@@ -28,19 +28,19 @@ describe('ParseRole', () => {
   });
 
   it('can create Roles', () => {
-    var role = new ParseRole();
+    let role = new ParseRole();
     expect(role.getName()).toBe(undefined);
     expect(role.getACL()).toBe(null);
 
-    var acl = new ParseACL({ aUserId: { read: true, write: true } });
+    const acl = new ParseACL({ aUserId: { read: true, write: true } });
     role = new ParseRole('admin', acl);
     expect(role.getName()).toBe('admin');
     expect(role.getACL()).toBe(acl);
   });
 
   it('can validate attributes', () => {
-    var acl = new ParseACL({ aUserId: { read: true, write: true } });
-    var role = new ParseRole('admin', acl);
+    const acl = new ParseACL({ aUserId: { read: true, write: true } });
+    const role = new ParseRole('admin', acl);
     role.id = '101';
     expect(role.validate({
       name: 'author'
@@ -71,7 +71,7 @@ describe('ParseRole', () => {
   });
 
   it('can be constructed from JSON', () => {
-    var role = ParseObject.fromJSON({
+    const role = ParseObject.fromJSON({
       className: '_Role',
       objectId: '102',
       name: 'admin'
