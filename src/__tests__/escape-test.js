@@ -9,7 +9,7 @@
 
 jest.autoMockOff();
 
-var escape = require('../escape.js').default;
+const escape = require('../escape.js').default;
 
 describe('escape', () => {
   it('escapes special HTML characters', () => {

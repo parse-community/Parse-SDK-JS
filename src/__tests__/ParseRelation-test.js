@@ -12,8 +12,8 @@ jest.dontMock('../ParseRelation');
 jest.dontMock('../ParseOp');
 jest.dontMock('../unique');
 
-var mockStore = {};
-var mockObject = function(className) {
+const mockStore = {};
+const mockObject = function(className) {
   this.className = className;
   this.ops = {};
 };
@@ -45,8 +45,8 @@ mockObject.prototype = {
     );
   },
   op(key) {
-    var finalOp = undefined;
-    for (var i = 0; i < mockStore[this.id][key].length; i++) {
+    let finalOp = undefined;
+    for (let i = 0; i < mockStore[this.id][key].length; i++) {
       finalOp = mockStore[this.id][key][i].mergeWith(finalOp);
     }
     return finalOp;
@@ -54,7 +54,7 @@ mockObject.prototype = {
 };
 jest.setMock('../ParseObject', mockObject);
 
-var mockQuery = function(className) {
+const mockQuery = function(className) {
   this.className = className;
   this.where = {};
   this._extraOptions = {};
@@ -67,26 +67,26 @@ mockQuery.prototype = {
 };
 jest.setMock('../ParseQuery', mockQuery);
 
-var ParseObject = require('../ParseObject');
-var ParseRelation = require('../ParseRelation').default;
+const ParseObject = require('../ParseObject');
+const ParseRelation = require('../ParseRelation').default;
 
 describe('ParseRelation', () => {
   it('can be constructed with a reference parent and key', () => {
-    var parent = new ParseObject('Item');
+    const parent = new ParseObject('Item');
     parent.id = 'I1';
-    var r = new ParseRelation(parent, 'shipments');
+    const r = new ParseRelation(parent, 'shipments');
     expect(r.parent).toBe(parent);
     expect(r.key).toBe('shipments');
     expect(r.targetClassName).toBe(null);
   });
 
   it('can add objects to a relation', () => {
-    var parent = new ParseObject('Item');
+    const parent = new ParseObject('Item');
     parent.id = 'I1';
-    var r = new ParseRelation(parent, 'shipments');
-    var o = new ParseObject('Delivery');
+    const r = new ParseRelation(parent, 'shipments');
+    const o = new ParseObject('Delivery');
     o.id = 'D1';
-    var p = r.add(o);
+    const p = r.add(o);
     expect(p).toBeTruthy();
     expect(r.toJSON()).toEqual({
       __type: 'Relation',
@@ -99,9 +99,9 @@ describe('ParseRelation', () => {
       ]
     });
 
-    var o2 = new ParseObject('Delivery');
+    const o2 = new ParseObject('Delivery');
     o2.id = 'D2';
-    var o3 = new ParseObject('Delivery');
+    const o3 = new ParseObject('Delivery');
     o3.id = 'D3';
     r.add([o2, o3]);
     expect(r.toJSON()).toEqual({
@@ -119,10 +119,10 @@ describe('ParseRelation', () => {
   });
 
   it('can remove objects from a relation', () => {
-    var parent = new ParseObject('Item');
+    const parent = new ParseObject('Item');
     parent.id = 'I2';
-    var r = new ParseRelation(parent, 'shipments');
-    var o = new ParseObject('Delivery');
+    const r = new ParseRelation(parent, 'shipments');
+    const o = new ParseObject('Delivery');
     o.id = 'D1';
     r.remove(o);
     expect(r.toJSON()).toEqual({
@@ -136,9 +136,9 @@ describe('ParseRelation', () => {
       ]
     });
 
-    var o2 = new ParseObject('Delivery');
+    const o2 = new ParseObject('Delivery');
     o2.id = 'D2';
-    var o3 = new ParseObject('Delivery');
+    const o3 = new ParseObject('Delivery');
     o3.id = 'D3';
     r.remove([o2, o3]);
     expect(r.toJSON()).toEqual({
@@ -156,10 +156,10 @@ describe('ParseRelation', () => {
   });
 
   it('can generate a query for relation objects', () => {
-    var parent = new ParseObject('Item');
+    const parent = new ParseObject('Item');
     parent.id = 'I1';
-    var r = new ParseRelation(parent, 'shipments');
-    var q = r.query();
+    let r = new ParseRelation(parent, 'shipments');
+    let q = r.query();
     expect(q.className).toBe('Item');
     expect(q._extraOptions).toEqual({
       redirectClassNameForKey: 'shipments'
@@ -176,7 +176,7 @@ describe('ParseRelation', () => {
     });
 
     r = new ParseRelation(parent, 'shipments');
-    var o = new ParseObject('Delivery');
+    const o = new ParseObject('Delivery');
     o.id = 'D1';
     r.add(o);
     q = r.query();
@@ -194,9 +194,9 @@ describe('ParseRelation', () => {
   });
 
   it('can ensure it relates to the correct parent and key', () => {
-    var parent = new ParseObject('Item');
+    const parent = new ParseObject('Item');
     parent.id = 'I3';
-    var r = new ParseRelation(parent, 'shipments');
+    const r = new ParseRelation(parent, 'shipments');
     expect(r._ensureParentAndKey.bind(r, new ParseObject('Item'), 'shipments'))
       .toThrow('Internal Error. Relation retrieved from two different Objects.');
     expect(r._ensureParentAndKey.bind(r, parent, 'partners'))
