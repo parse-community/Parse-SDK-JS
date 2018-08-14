@@ -51,7 +51,7 @@ function quote(s: string) {
  * class name an error will be thrown.
  */
 function _getClassNameFromQueries(queries: Array<ParseQuery>): string {
-  let className = null;
+  var className = null;
   queries.forEach((q) => {
     if (!className) {
       className = q.className;
@@ -70,7 +70,7 @@ function _getClassNameFromQueries(queries: Array<ParseQuery>): string {
  * been requested with a select, so that our cached state updates correctly.
  */
 function handleSelectResult(data: any, select: Array<string>){
-  const serverDataMask = {};
+  var serverDataMask = {};
 
   select.forEach((field) => {
     const hasSubObjectSelect = field.indexOf(".") !== -1;
@@ -81,8 +81,8 @@ function handleSelectResult(data: any, select: Array<string>){
       // this field references a sub-object,
       // so we need to walk down the path components
       const pathComponents = field.split(".");
-      let obj = data;
-      let serverMask = serverDataMask;
+      var obj = data;
+      var serverMask = serverDataMask;
 
       pathComponents.forEach((component, index, arr) => {
         // add keys if the expected data is missing
@@ -207,7 +207,7 @@ class ParseQuery {
       if (typeof objectClass.className === 'string') {
         this.className = objectClass.className;
       } else {
-        const obj = new objectClass();
+        var obj = new objectClass();
         this.className = obj.className;
       }
     } else {
@@ -231,7 +231,7 @@ class ParseQuery {
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   _orQuery(queries: Array<ParseQuery>): ParseQuery {
-    const queryJSON = queries.map((q) => {
+    var queryJSON = queries.map((q) => {
       return q.toJSON().where;
     });
 
@@ -245,7 +245,7 @@ class ParseQuery {
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   _andQuery(queries: Array<ParseQuery>): ParseQuery {
-    const queryJSON = queries.map((q) => {
+    var queryJSON = queries.map((q) => {
       return q.toJSON().where;
     });
 
@@ -259,7 +259,7 @@ class ParseQuery {
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   _norQuery(queries: Array<ParseQuery>): ParseQuery {
-    const queryJSON = queries.map((q) => {
+    var queryJSON = queries.map((q) => {
       return q.toJSON().where;
     });
 
@@ -290,7 +290,7 @@ class ParseQuery {
    * @return {Object} The JSON representation of the query.
    */
   toJSON(): QueryJSON {
-    const params: QueryJSON = {
+    var params: QueryJSON = {
       where: this._where
     };
 
@@ -309,7 +309,7 @@ class ParseQuery {
     if (this._order) {
       params.order = this._order.join(',');
     }
-    for (const key in this._extraOptions) {
+    for (var key in this._extraOptions) {
       params[key] = this._extraOptions[key];
     }
 
@@ -406,7 +406,7 @@ class ParseQuery {
   get(objectId: string, options?: FullOptions): Promise {
     this.equalTo('objectId', objectId);
 
-    const firstOptions = {};
+    var firstOptions = {};
     if (options && options.hasOwnProperty('useMasterKey')) {
       firstOptions.useMasterKey = options.useMasterKey;
     }
@@ -419,7 +419,7 @@ class ParseQuery {
         return response;
       }
 
-      const errorObject = new ParseError(
+      var errorObject = new ParseError(
         ParseError.OBJECT_NOT_FOUND,
         'Object not found.'
       );
@@ -516,7 +516,7 @@ class ParseQuery {
   count(options?: FullOptions): Promise {
     options = options || {};
 
-    const findOptions = {};
+    var findOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       findOptions.useMasterKey = options.useMasterKey;
     }
@@ -524,9 +524,9 @@ class ParseQuery {
       findOptions.sessionToken = options.sessionToken;
     }
 
-    const controller = CoreManager.getQueryController();
+    var controller = CoreManager.getQueryController();
 
-    const params = this.toJSON();
+    var params = this.toJSON();
     params.limit = 0;
     params.count = 1;
 
@@ -631,7 +631,7 @@ class ParseQuery {
   first(options?: FullOptions): Promise {
     options = options || {};
 
-    const findOptions = {};
+    var findOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       findOptions.useMasterKey = options.useMasterKey;
     }
@@ -639,19 +639,19 @@ class ParseQuery {
       findOptions.sessionToken = options.sessionToken;
     }
 
-    const controller = CoreManager.getQueryController();
+    var controller = CoreManager.getQueryController();
 
-    const params = this.toJSON();
+    var params = this.toJSON();
     params.limit = 1;
 
-    const select = this._select;
+    var select = this._select;
 
     return controller.find(
       this.className,
       params,
       findOptions
     ).then((response) => {
-      const objects = response.results;
+      var objects = response.results;
       if (!objects[0]) {
         return undefined;
       }
@@ -692,11 +692,11 @@ class ParseQuery {
     options = options || {};
 
     if (this._order || this._skip || (this._limit >= 0)) {
-      const error = 'Cannot iterate on a query with sort, skip, or limit.';
+      var error = 'Cannot iterate on a query with sort, skip, or limit.';
       return Promise.reject(error);
     }
 
-    const query = new ParseQuery(this.className);
+    var query = new ParseQuery(this.className);
     // We can override the batch size from the options.
     // This is undocumented, but useful for testing.
     query._limit = options.batchSize || 100;
@@ -710,16 +710,16 @@ class ParseQuery {
     }
 
     query._where = {};
-    for (const attr in this._where) {
-      const val = this._where[attr];
+    for (var attr in this._where) {
+      var val = this._where[attr];
       if (Array.isArray(val)) {
         query._where[attr] = val.map((v) => {
           return v;
         });
       } else if (val && typeof val === 'object') {
-        const conditionMap = {};
+        var conditionMap = {};
         query._where[attr] = conditionMap;
-        for (const cond in val) {
+        for (var cond in val) {
           conditionMap[cond] = val[cond];
         }
       } else {
@@ -729,7 +729,7 @@ class ParseQuery {
 
     query.ascending('objectId');
 
-    const findOptions = {};
+    var findOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       findOptions.useMasterKey = options.useMasterKey;
     }
@@ -737,12 +737,12 @@ class ParseQuery {
       findOptions.sessionToken = options.sessionToken;
     }
 
-    let finished = false;
+    var finished = false;
     return continueWhile(() => {
       return !finished;
     }, () => {
       return query.find(findOptions).then((results) => {
-        let callbacksDone = Promise.resolve();
+        var callbacksDone = Promise.resolve();
         results.forEach((result) => {
           callbacksDone = callbacksDone.then(() => {
             return callback(result);
@@ -885,7 +885,7 @@ class ParseQuery {
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   containsAllStartingWith(key: string, values: Array<string>): ParseQuery {
-    const _this = this;
+    var _this = this;
     if (!Array.isArray(values)) {
       values = [values];
     }
@@ -949,7 +949,7 @@ class ParseQuery {
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   matchesQuery(key: string, query: ParseQuery): ParseQuery {
-    const queryJSON = query.toJSON();
+    var queryJSON = query.toJSON();
     queryJSON.className = query.className;
     return this._addCondition(key, '$inQuery', queryJSON);
   }
@@ -963,7 +963,7 @@ class ParseQuery {
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   doesNotMatchQuery(key: string, query: ParseQuery): ParseQuery {
-    const queryJSON = query.toJSON();
+    var queryJSON = query.toJSON();
     queryJSON.className = query.className;
     return this._addCondition(key, '$notInQuery', queryJSON);
   }
@@ -979,7 +979,7 @@ class ParseQuery {
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   matchesKeyInQuery(key: string, queryKey: string, query: ParseQuery): ParseQuery {
-    const queryJSON = query.toJSON();
+    var queryJSON = query.toJSON();
     queryJSON.className = query.className;
     return this._addCondition(key, '$select', {
       key: queryKey,
@@ -998,7 +998,7 @@ class ParseQuery {
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   doesNotMatchKeyInQuery(key: string, queryKey: string, query: ParseQuery): ParseQuery {
-    const queryJSON = query.toJSON();
+    var queryJSON = query.toJSON();
     queryJSON.className = query.className;
     return this._addCondition(key, '$dontSelect', {
       key: queryKey,
@@ -1422,8 +1422,8 @@ class ParseQuery {
    * @return {Parse.Query} The query that is the OR of the passed in queries.
    */
   static or(...queries: Array<ParseQuery>): ParseQuery {
-    const className = _getClassNameFromQueries(queries);
-    const query = new ParseQuery(className);
+    var className = _getClassNameFromQueries(queries);
+    var query = new ParseQuery(className);
     query._orQuery(queries);
     return query;
   }
@@ -1440,8 +1440,8 @@ class ParseQuery {
    * @return {Parse.Query} The query that is the AND of the passed in queries.
    */
   static and(...queries: Array<ParseQuery>): ParseQuery {
-    const className = _getClassNameFromQueries(queries);
-    const query = new ParseQuery(className);
+    var className = _getClassNameFromQueries(queries);
+    var query = new ParseQuery(className);
     query._andQuery(queries);
     return query;
   }
@@ -1483,17 +1483,14 @@ class ParseQuery {
    * Changes the source of this query to a specific group of pinned objects.
    */
   fromPinWithName(name: string) {
-    const localDatastore = CoreManager.getLocalDatastore();
-    if (localDatastore.checkIfEnabled()) {
-      this._queriesLocalDatastore = true;
-      this._localDatastorePinName = name;
-    }
+    this._queriesLocalDatastore = true;
+    this._localDatastorePinName = name;
   }
 }
 
-const DefaultController = {
+var DefaultController = {
   find(className: string, params: QueryJSON, options: RequestOptions): Promise {
-    const RESTController = CoreManager.getRESTController();
+    var RESTController = CoreManager.getRESTController();
 
     return RESTController.request(
       'GET',

@@ -17,14 +17,14 @@ import ParseObject from './ParseObject';
 import { Op } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
-const toString = Object.prototype.toString;
+var toString = Object.prototype.toString;
 
 function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, seen: Array<mixed>): any {
   if (value instanceof ParseObject) {
     if (disallowObjects) {
       throw new Error('Parse Objects not allowed here');
     }
-    const seenEntry = value.id ? value.className + ':' + value.id : value;
+    var seenEntry = value.id ? value.className + ':' + value.id : value;
     if (forcePointers ||
       !seen ||
       seen.indexOf(seenEntry) > -1 ||
@@ -67,8 +67,8 @@ function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, 
   }
 
   if (value && typeof value === 'object') {
-    const output = {};
-    for (const k in value) {
+    var output = {};
+    for (var k in value) {
       output[k] = encode(value[k], disallowObjects, forcePointers, seen);
     }
     return output;

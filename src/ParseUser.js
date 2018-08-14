@@ -21,12 +21,12 @@ import type { RequestOptions, FullOptions } from './RESTController';
 
 export type AuthData = ?{ [key: string]: mixed };
 
-const CURRENT_USER_KEY = 'currentUser';
-let canUseCurrentUser = !CoreManager.get('IS_NODE');
-let currentUserCacheMatchesDisk = false;
-let currentUserCache = null;
+var CURRENT_USER_KEY = 'currentUser';
+var canUseCurrentUser = !CoreManager.get('IS_NODE');
+var currentUserCacheMatchesDisk = false;
+var currentUserCache = null;
 
-const authProviders = {};
+var authProviders = {};
 
 /**
  * <p>A Parse.User object is a local representation of a user persisted to the
@@ -60,12 +60,12 @@ class ParseUser extends ParseObject {
   _upgradeToRevocableSession(options: RequestOptions): Promise {
     options = options || {};
 
-    const upgradeOptions = {};
+    var upgradeOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       upgradeOptions.useMasterKey = options.useMasterKey;
     }
 
-    const controller = CoreManager.getUserController();
+    var controller = CoreManager.getUserController();
     return controller.upgradeToRevocableSession(
       this,
       upgradeOptions
@@ -77,7 +77,7 @@ class ParseUser extends ParseObject {
    * call linkWith on the user (even if it doesn't exist yet on the server).
    */
   _linkWith(provider: any, options: { authData?: AuthData }): Promise {
-    let authType;
+    var authType;
     if (typeof provider === 'string') {
       authType = provider;
       provider = authProviders[provider];
@@ -85,13 +85,13 @@ class ParseUser extends ParseObject {
       authType = provider.getAuthType();
     }
     if (options && options.hasOwnProperty('authData')) {
-      const authData = this.get('authData') || {};
+      var authData = this.get('authData') || {};
       if (typeof authData !== 'object') {
         throw new Error('Invalid type: authData field should be an object');
       }
       authData[authType] = options.authData;
 
-      const controller = CoreManager.getUserController();
+      var controller = CoreManager.getUserController();
       return controller.linkWith(
         this,
         authData
@@ -100,7 +100,7 @@ class ParseUser extends ParseObject {
       return new Promise((resolve, reject) => {
         provider.authenticate({
           success: (provider, result) => {
-            const opts = {};
+            var opts = {};
             opts.authData = result;
             this._linkWith(provider, opts).then(() => {
               resolve(this);
@@ -125,18 +125,18 @@ class ParseUser extends ParseObject {
     if (!this.isCurrent() || !provider) {
       return;
     }
-    let authType;
+    var authType;
     if (typeof provider === 'string') {
       authType = provider;
       provider = authProviders[authType];
     } else {
       authType = provider.getAuthType();
     }
-    const authData = this.get('authData');
+    var authData = this.get('authData');
     if (!provider || !authData || typeof authData !== 'object') {
       return;
     }
-    const success = provider.restoreAuthentication(authData[authType]);
+    var success = provider.restoreAuthentication(authData[authType]);
     if (!success) {
       this._unlinkFrom(provider);
     }
@@ -147,12 +147,12 @@ class ParseUser extends ParseObject {
 
    */
   _synchronizeAllAuthData() {
-    const authData = this.get('authData');
+    var authData = this.get('authData');
     if (typeof authData !== 'object') {
       return;
     }
 
-    for (const key in authData) {
+    for (var key in authData) {
       this._synchronizeAuthData(key);
     }
   }
@@ -166,12 +166,12 @@ class ParseUser extends ParseObject {
     if (!this.isCurrent()) {
       return;
     }
-    const authData = this.get('authData');
+    var authData = this.get('authData');
     if (typeof authData !== 'object') {
       return;
     }
 
-    for (const key in authData) {
+    for (var key in authData) {
       if (!authData[key]) {
         delete authData[key];
       }
@@ -197,13 +197,13 @@ class ParseUser extends ParseObject {
 
    */
   _isLinked(provider: any): boolean {
-    let authType;
+    var authType;
     if (typeof provider === 'string') {
       authType = provider;
     } else {
       authType = provider.getAuthType();
     }
-    const authData = this.get('authData') || {};
+    var authData = this.get('authData') || {};
     if (typeof authData !== 'object') {
       return false;
     }
@@ -215,12 +215,12 @@ class ParseUser extends ParseObject {
 
    */
   _logOutWithAll() {
-    const authData = this.get('authData');
+    var authData = this.get('authData');
     if (typeof authData !== 'object') {
       return;
     }
 
-    for (const key in authData) {
+    for (var key in authData) {
       this._logOutWith(key);
     }
   }
@@ -258,7 +258,7 @@ class ParseUser extends ParseObject {
    * @return {Boolean}
    */
   isCurrent(): boolean {
-    const current = ParseUser.current();
+    var current = ParseUser.current();
     return !!current && current.id === this.id;
   }
 
@@ -285,7 +285,7 @@ class ParseUser extends ParseObject {
   setUsername(username: string) {
     // Strip anonymity, even we do not support anonymous user in js SDK, we may
     // encounter anonymous user created by android/iOS in cloud code.
-    const authData = this.get('authData');
+    var authData = this.get('authData');
     if (authData && typeof authData === 'object' && authData.hasOwnProperty('anonymous')) {
       // We need to set anonymous to null instead of deleting it in order to remove it from Parse.
       authData.anonymous = null;
@@ -348,7 +348,7 @@ class ParseUser extends ParseObject {
    * @return (Boolean) whether this user is the current user and is logged in.
    */
   authenticated(): boolean {
-    const current = ParseUser.current();
+    var current = ParseUser.current();
     return (
       !!this.get('sessionToken') &&
       !!current &&
@@ -375,7 +375,7 @@ class ParseUser extends ParseObject {
   signUp(attrs: AttributeMap, options: FullOptions): Promise {
     options = options || {};
 
-    const signupOptions = {};
+    var signupOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       signupOptions.useMasterKey = options.useMasterKey;
     }
@@ -383,7 +383,7 @@ class ParseUser extends ParseObject {
       signupOptions.installationId = options.installationId;
     }
 
-    const controller = CoreManager.getUserController();
+    var controller = CoreManager.getUserController();
     return controller.signUp(
       this,
       attrs,
@@ -408,7 +408,7 @@ class ParseUser extends ParseObject {
   logIn(options: FullOptions): Promise {
     options = options || {};
 
-    const loginOptions = {};
+    var loginOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       loginOptions.useMasterKey = options.useMasterKey;
     }
@@ -416,7 +416,7 @@ class ParseUser extends ParseObject {
       loginOptions.installationId = options.installationId;
     }
 
-    const controller = CoreManager.getUserController();
+    var controller = CoreManager.getUserController();
     return controller.logIn(this, loginOptions);
   }
 
@@ -486,7 +486,7 @@ class ParseUser extends ParseObject {
    */
   static extend(protoProps: {[prop: string]: any}, classProps: {[prop: string]: any}) {
     if (protoProps) {
-      for (const prop in protoProps) {
+      for (var prop in protoProps) {
         if (prop !== 'className') {
           Object.defineProperty(ParseUser.prototype, prop, {
             value: protoProps[prop],
@@ -525,7 +525,7 @@ class ParseUser extends ParseObject {
     if (!canUseCurrentUser) {
       return null;
     }
-    const controller = CoreManager.getUserController();
+    var controller = CoreManager.getUserController();
     return controller.currentUser();
   }
 
@@ -540,7 +540,7 @@ class ParseUser extends ParseObject {
     if (!canUseCurrentUser) {
       return Promise.resolve(null);
     }
-    const controller = CoreManager.getUserController();
+    var controller = CoreManager.getUserController();
     return controller.currentUserAsync();
   }
 
@@ -565,7 +565,7 @@ class ParseUser extends ParseObject {
     attrs = attrs || {};
     attrs.username = username;
     attrs.password = password;
-    const user = new ParseUser(attrs);
+    var user = new ParseUser(attrs);
     return user.signUp({}, options);
   }
 
@@ -600,7 +600,7 @@ class ParseUser extends ParseObject {
         )
       );
     }
-    const user = new ParseUser();
+    var user = new ParseUser();
     user._finishFetch({ username: username, password: password });
     return user.logIn(options);
   }
@@ -627,14 +627,14 @@ class ParseUser extends ParseObject {
     }
     options = options || {};
 
-    const becomeOptions: RequestOptions = {
+    var becomeOptions: RequestOptions = {
       sessionToken: sessionToken
     };
     if (options.hasOwnProperty('useMasterKey')) {
       becomeOptions.useMasterKey = options.useMasterKey;
     }
 
-    const controller = CoreManager.getUserController();
+    var controller = CoreManager.getUserController();
     return controller.become(becomeOptions);
   }
 
@@ -658,7 +658,7 @@ class ParseUser extends ParseObject {
       );
     }
 
-    const controller = CoreManager.getUserController();
+    var controller = CoreManager.getUserController();
     return controller.logOut();
   }
 
@@ -679,12 +679,12 @@ class ParseUser extends ParseObject {
   static requestPasswordReset(email, options) {
     options = options || {};
 
-    const requestOptions = {};
+    var requestOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       requestOptions.useMasterKey = options.useMasterKey;
     }
 
-    const controller = CoreManager.getUserController();
+    var controller = CoreManager.getUserController();
     return controller.requestPasswordReset(
       email, requestOptions
     );
@@ -722,7 +722,7 @@ class ParseUser extends ParseObject {
     options = options || {};
     CoreManager.set('FORCE_REVOCABLE_SESSION', true);
     if (canUseCurrentUser) {
-      const current = ParseUser.current();
+      var current = ParseUser.current();
       if (current) {
         return current._upgradeToRevocableSession(options);
       }
@@ -763,7 +763,7 @@ class ParseUser extends ParseObject {
   }
 
   static _logInWith(provider, options) {
-    const user = new ParseUser();
+    var user = new ParseUser();
     return user._linkWith(provider, options);
   }
 
@@ -779,10 +779,10 @@ class ParseUser extends ParseObject {
 
 ParseObject.registerSubclass('_User', ParseUser);
 
-const DefaultController = {
+var DefaultController = {
   updateUserOnDisk(user) {
-    const path = Storage.generatePath(CURRENT_USER_KEY);
-    const json = user.toJSON();
+    var path = Storage.generatePath(CURRENT_USER_KEY);
+    var json = user.toJSON();
     json.className = '_User';
     return Storage.setItemAsync(
       path, JSON.stringify(json)
@@ -818,8 +818,8 @@ const DefaultController = {
         'storage system. Call currentUserAsync() instead.'
       );
     }
-    const path = Storage.generatePath(CURRENT_USER_KEY);
-    let userData = Storage.getItem(path);
+    var path = Storage.generatePath(CURRENT_USER_KEY);
+    var userData = Storage.getItem(path);
     currentUserCacheMatchesDisk = true;
     if (!userData) {
       currentUserCache = null;
@@ -839,7 +839,7 @@ const DefaultController = {
       userData.sessionToken = userData._sessionToken;
       delete userData._sessionToken;
     }
-    const current = ParseObject.fromJSON(userData);
+    var current = ParseObject.fromJSON(userData);
     currentUserCache = current;
     current._synchronizeAllAuthData();
     return current;
@@ -852,7 +852,7 @@ const DefaultController = {
     if (currentUserCacheMatchesDisk) {
       return Promise.resolve(null);
     }
-    const path = Storage.generatePath(CURRENT_USER_KEY);
+    var path = Storage.generatePath(CURRENT_USER_KEY);
     return Storage.getItemAsync(
       path
     ).then((userData) => {
@@ -875,7 +875,7 @@ const DefaultController = {
         userData.sessionToken = userData._sessionToken;
         delete userData._sessionToken;
       }
-      const current = ParseObject.fromJSON(userData);
+      var current = ParseObject.fromJSON(userData);
       currentUserCache = current;
       current._synchronizeAllAuthData();
       return Promise.resolve(current);
@@ -883,8 +883,8 @@ const DefaultController = {
   },
 
   signUp(user: ParseUser, attrs: AttributeMap, options: RequestOptions): Promise {
-    const username = (attrs && attrs.username) || user.get('username');
-    const password = (attrs && attrs.password) || user.get('password');
+    var username = (attrs && attrs.username) || user.get('username');
+    var password = (attrs && attrs.password) || user.get('password');
 
     if (!username || !username.length) {
       return Promise.reject(
@@ -915,9 +915,9 @@ const DefaultController = {
   },
 
   logIn(user: ParseUser, options: RequestOptions): Promise {
-    const RESTController = CoreManager.getRESTController();
-    const stateController = CoreManager.getObjectStateController();
-    const auth = {
+    var RESTController = CoreManager.getRESTController();
+    var stateController = CoreManager.getObjectStateController();
+    var auth = {
       username: user.get('username'),
       password: user.get('password')
     };
@@ -943,8 +943,8 @@ const DefaultController = {
   },
 
   become(options: RequestOptions): Promise {
-    const user = new ParseUser();
-    const RESTController = CoreManager.getRESTController();
+    var user = new ParseUser();
+    var RESTController = CoreManager.getRESTController();
     return RESTController.request(
       'GET', 'users/me', {}, options
     ).then((response) => {
@@ -956,11 +956,11 @@ const DefaultController = {
 
   logOut(): Promise {
     return DefaultController.currentUserAsync().then((currentUser) => {
-      const path = Storage.generatePath(CURRENT_USER_KEY);
-      let promise = Storage.removeItemAsync(path);
-      const RESTController = CoreManager.getRESTController();
+      var path = Storage.generatePath(CURRENT_USER_KEY);
+      var promise = Storage.removeItemAsync(path);
+      var RESTController = CoreManager.getRESTController();
       if (currentUser !== null) {
-        const currentSession = currentUser.getSessionToken();
+        var currentSession = currentUser.getSessionToken();
         if (currentSession && isRevocableSession(currentSession)) {
           promise = promise.then(() => {
             return RESTController.request(
@@ -979,7 +979,7 @@ const DefaultController = {
   },
 
   requestPasswordReset(email: string, options: RequestOptions) {
-    const RESTController = CoreManager.getRESTController();
+    var RESTController = CoreManager.getRESTController();
     return RESTController.request(
       'POST',
       'requestPasswordReset',
@@ -989,7 +989,7 @@ const DefaultController = {
   },
 
   upgradeToRevocableSession(user: ParseUser, options: RequestOptions) {
-    const token = user.getSessionToken();
+    var token = user.getSessionToken();
     if (!token) {
       return Promise.reject(
         new ParseError(
@@ -1001,14 +1001,14 @@ const DefaultController = {
 
     options.sessionToken = token;
 
-    const RESTController = CoreManager.getRESTController();
+    var RESTController = CoreManager.getRESTController();
     return RESTController.request(
       'POST',
       'upgradeToRevocableSession',
       {},
       options
     ).then((result) => {
-      const session = new ParseSession();
+      var session = new ParseSession();
       session._finishFetch(result);
       user._finishFetch({ sessionToken: session.getSessionToken() });
       if (user.isCurrent()) {

@@ -48,7 +48,7 @@ export function opFromJSON(json: { [key: string]: any }): ?Op {
   case 'Batch': {
     let toAdd = [];
     let toRemove = [];
-    for (let i = 0; i < json.ops.length; i++) {
+    for (var i = 0; i < json.ops.length; i++) {
       if (json.ops[i].__op === 'AddRelation') {
         toAdd = toAdd.concat(decode(json.ops[i].objects));
       } else if (json.ops[i].__op === 'RemoveRelation') {
@@ -200,8 +200,8 @@ export class AddUniqueOp extends Op {
     }
     if (Array.isArray(value)) {
       // copying value lets Flow guarantee the pointer isn't modified elsewhere
-      const valueCopy = value;
-      const toAdd = [];
+      var valueCopy = value;
+      var toAdd = [];
       this._value.forEach((v) => {
         if (v instanceof ParseObject) {
           if (!arrayContainsObject(valueCopy, v)) {
@@ -253,15 +253,15 @@ export class RemoveOp extends Op {
     }
     if (Array.isArray(value)) {
       // var i = value.indexOf(this._value);
-      const removed = value.concat([]);
+      var removed = value.concat([]);
       for (let i = 0; i < this._value.length; i++) {
-        let index = removed.indexOf(this._value[i]);
+        var index = removed.indexOf(this._value[i]);
         while (index > -1) {
           removed.splice(index, 1);
           index = removed.indexOf(this._value[i]);
         }
         if (this._value[i] instanceof ParseObject && this._value[i].id) {
-          for (let j = 0; j < removed.length; j++) {
+          for (var j = 0; j < removed.length; j++) {
             if (removed[j] instanceof ParseObject &&
               this._value[i].id === removed[j].id
             ) {
@@ -287,8 +287,8 @@ export class RemoveOp extends Op {
       return new UnsetOp();
     }
     if (previous instanceof RemoveOp) {
-      const uniques = previous._value.concat([]);
-      for (let i = 0; i < this._value.length; i++) {
+      var uniques = previous._value.concat([]);
+      for (var i = 0; i < this._value.length; i++) {
         if (this._value[i] instanceof ParseObject) {
           if (!arrayContainsObject(uniques, this._value[i])) {
             uniques.push(this._value[i]);
@@ -356,13 +356,13 @@ export class RelationOp extends Op {
       if (!object || !key) {
         throw new Error('Cannot apply a RelationOp without either a previous value, or an object and a key');
       }
-      const parent = new ParseObject(object.className);
+      var parent = new ParseObject(object.className);
       if (object.id && object.id.indexOf('local') === 0) {
         parent._localId = object.id;
       } else if (object.id) {
         parent.id = object.id;
       }
-      const relation = new ParseRelation(parent, key);
+      var relation = new ParseRelation(parent, key);
       relation.targetClassName = this._targetClassName;
       return relation;
     }
@@ -400,35 +400,35 @@ export class RelationOp extends Op {
           (this._targetClassName || 'null') + ' was passed in.'
         );
       }
-      const newAdd = previous.relationsToAdd.concat([]);
+      var newAdd = previous.relationsToAdd.concat([]);
       this.relationsToRemove.forEach((r) => {
-        const index = newAdd.indexOf(r);
+        var index = newAdd.indexOf(r);
         if (index > -1) {
           newAdd.splice(index, 1);
         }
       });
       this.relationsToAdd.forEach((r) => {
-        const index = newAdd.indexOf(r);
+        var index = newAdd.indexOf(r);
         if (index < 0) {
           newAdd.push(r);
         }
       });
 
-      const newRemove = previous.relationsToRemove.concat([]);
+      var newRemove = previous.relationsToRemove.concat([]);
       this.relationsToAdd.forEach((r) => {
-        const index = newRemove.indexOf(r);
+        var index = newRemove.indexOf(r);
         if (index > -1) {
           newRemove.splice(index, 1);
         }
       });
       this.relationsToRemove.forEach((r) => {
-        const index = newRemove.indexOf(r);
+        var index = newRemove.indexOf(r);
         if (index < 0) {
           newRemove.push(r);
         }
       });
 
-      const newRelation = new RelationOp(newAdd, newRemove);
+      var newRelation = new RelationOp(newAdd, newRemove);
       newRelation._targetClassName = this._targetClassName;
       return newRelation;
     }
@@ -436,7 +436,7 @@ export class RelationOp extends Op {
   }
 
   toJSON(): { __op?: string; objects?: mixed; ops?: mixed } {
-    const idToPointer = (id) => {
+    var idToPointer = (id) => {
       return {
         __type: 'Pointer',
         className: this._targetClassName,
@@ -444,9 +444,9 @@ export class RelationOp extends Op {
       };
     };
 
-    let adds = null;
-    let removes = null;
-    let pointers = null;
+    var adds = null;
+    var removes = null;
+    var pointers = null;
 
     if (this.relationsToAdd.length > 0) {
       pointers = this.relationsToAdd.map(idToPointer);

@@ -44,12 +44,12 @@ class ParseConfig {
    * @param {String} attr The name of an attribute.
    */
   escape(attr: string): string {
-    const html = this._escapedAttributes[attr];
+    var html = this._escapedAttributes[attr];
     if (html) {
       return html;
     }
-    const val = this.attributes[attr];
-    let escaped = '';
+    var val = this.attributes[attr];
+    var escaped = '';
     if (val != null) {
       escaped = escape(val.toString());
     }
@@ -66,7 +66,7 @@ class ParseConfig {
    *     exists, else an empty Parse.Config.
    */
   static current() {
-    const controller = CoreManager.getConfigController();
+    var controller = CoreManager.getConfigController();
     return controller.current();
   }
 
@@ -77,18 +77,18 @@ class ParseConfig {
    *     configuration object when the get completes.
    */
   static get() {
-    const controller = CoreManager.getConfigController();
+    var controller = CoreManager.getConfigController();
     return controller.get();
   }
 }
 
-let currentConfig = null;
+var currentConfig = null;
 
-const CURRENT_CONFIG_KEY = 'currentConfig';
+var CURRENT_CONFIG_KEY = 'currentConfig';
 
 function decodePayload(data) {
   try {
-    const json = JSON.parse(data);
+    var json = JSON.parse(data);
     if (json && typeof json === 'object') {
       return decode(json);
     }
@@ -97,20 +97,20 @@ function decodePayload(data) {
   }
 }
 
-const DefaultController = {
+var DefaultController = {
   current() {
     if (currentConfig) {
       return currentConfig;
     }
 
-    const config = new ParseConfig();
-    const storagePath = Storage.generatePath(CURRENT_CONFIG_KEY);
-    let configData;
+    var config = new ParseConfig();
+    var storagePath = Storage.generatePath(CURRENT_CONFIG_KEY);
+    var configData;
     if (!Storage.async()) {
       configData = Storage.getItem(storagePath);
 
       if (configData) {
-        const attributes = decodePayload(configData);
+        var attributes = decodePayload(configData);
         if (attributes) {
           config.attributes = attributes;
           currentConfig = config;
@@ -121,7 +121,7 @@ const DefaultController = {
     // Return a promise for async storage controllers
     return Storage.getItemAsync(storagePath).then((configData) => {
       if (configData) {
-        const attributes = decodePayload(configData);
+        var attributes = decodePayload(configData);
         if (attributes) {
           config.attributes = attributes;
           currentConfig = config;
@@ -132,22 +132,22 @@ const DefaultController = {
   },
 
   get() {
-    const RESTController = CoreManager.getRESTController();
+    var RESTController = CoreManager.getRESTController();
 
     return RESTController.request(
       'GET', 'config', {}, {}
     ).then((response) => {
       if (!response || !response.params) {
-        const error = new ParseError(
+        var error = new ParseError(
           ParseError.INVALID_JSON,
           'Config JSON response invalid.'
         );
         return Promise.reject(error);
       }
 
-      const config = new ParseConfig();
+      var config = new ParseConfig();
       config.attributes = {};
-      for (const attr in response.params) {
+      for (var attr in response.params) {
         config.attributes[attr] = decode(response.params[attr]);
       }
       currentConfig = config;

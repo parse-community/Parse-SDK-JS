@@ -27,7 +27,7 @@ export type FullOptions = {
   installationId?: string;
 };
 
-let XHR = null;
+var XHR = null;
 if (typeof XMLHttpRequest !== 'undefined') {
   XHR = XMLHttpRequest;
 }
@@ -35,7 +35,7 @@ if (process.env.PARSE_BUILD === 'node') {
   XHR = require('xmlhttprequest').XMLHttpRequest;
 }
 
-let useXDomainRequest = false;
+var useXDomainRequest = false;
 if (typeof XDomainRequest !== 'undefined' &&
     !('withCredentials' in new XMLHttpRequest())) {
   useXDomainRequest = true;
@@ -43,9 +43,9 @@ if (typeof XDomainRequest !== 'undefined' &&
 
 function ajaxIE9(method: string, url: string, data: any) {
   return new Promise((resolve, reject) => {
-    const xdr = new XDomainRequest();
+    var xdr = new XDomainRequest();
     xdr.onload = function() {
-      let response;
+      var response;
       try {
         response = JSON.parse(xdr.responseText);
       } catch (e) {
@@ -57,7 +57,7 @@ function ajaxIE9(method: string, url: string, data: any) {
     };
     xdr.onerror = xdr.ontimeout = function() {
       // Let's fake a real error message.
-      const fakeResponse = {
+      var fakeResponse = {
         responseText: JSON.stringify({
           code: ParseError.X_DOMAIN_REQUEST,
           error: 'IE\'s XDomainRequest does not supply error info.'
@@ -77,20 +77,20 @@ const RESTController = {
       return ajaxIE9(method, url, data, headers);
     }
 
-    let res, rej;
-    const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+    var res, rej;
+    var promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
     promise.resolve = res;
     promise.reject = rej;
-    let attempts = 0;
+    var attempts = 0;
 
-    const dispatch = function() {
+    var dispatch = function() {
       if (XHR == null) {
         throw new Error(
           'Cannot make a request: No definition of XMLHttpRequest was found.'
         );
       }
-      let handled = false;
-      const xhr = new XHR();
+      var handled = false;
+      var xhr = new XHR();
       xhr.onreadystatechange = function() {
         if (xhr.readyState !== 4 || handled) {
           return;
@@ -98,7 +98,7 @@ const RESTController = {
         handled = true;
 
         if (xhr.status >= 200 && xhr.status < 300) {
-          let response;
+          var response;
           try {
             response = JSON.parse(xhr.responseText);
 
@@ -116,7 +116,7 @@ const RESTController = {
         } else if (xhr.status >= 500 || xhr.status === 0) { // retry on 5XX or node-xmlhttprequest error
           if (++attempts < CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
             // Exponentially-growing random delay
-            const delay = Math.round(
+            var delay = Math.round(
               Math.random() * 125 * Math.pow(2, attempts)
             );
             setTimeout(dispatch, delay);
@@ -141,7 +141,7 @@ const RESTController = {
       }
 
       xhr.open(method, url, true);
-      for (const h in headers) {
+      for (var h in headers) {
         xhr.setRequestHeader(h, headers[h]);
       }
       xhr.send(data);
@@ -153,15 +153,15 @@ const RESTController = {
 
   request(method: string, path: string, data: mixed, options?: RequestOptions) {
     options = options || {};
-    let url = CoreManager.get('SERVER_URL');
+    var url = CoreManager.get('SERVER_URL');
     if (url[url.length - 1] !== '/') {
       url += '/';
     }
     url += path;
 
-    const payload = {};
+    var payload = {};
     if (data && typeof data === 'object') {
-      for (const k in data) {
+      for (var k in data) {
         payload[k] = data[k];
       }
     }
@@ -178,7 +178,7 @@ const RESTController = {
     }
     payload._ClientVersion = CoreManager.get('VERSION');
 
-    let useMasterKey = options.useMasterKey;
+    var useMasterKey = options.useMasterKey;
     if (typeof useMasterKey === 'undefined') {
       useMasterKey = CoreManager.get('USE_MASTER_KEY');
     }
@@ -195,18 +195,18 @@ const RESTController = {
       payload._RevocableSession = '1';
     }
 
-    const installationId = options.installationId;
-    let installationIdPromise;
+    var installationId = options.installationId;
+    var installationIdPromise;
     if (installationId && typeof installationId === 'string') {
       installationIdPromise = Promise.resolve(installationId);
     } else {
-      const installationController = CoreManager.getInstallationController();
+      var installationController = CoreManager.getInstallationController();
       installationIdPromise = installationController.currentInstallationId();
     }
 
     return installationIdPromise.then((iid) => {
       payload._InstallationId = iid;
-      const userController = CoreManager.getUserController();
+      var userController = CoreManager.getUserController();
       if (options && typeof options.sessionToken === 'string') {
         return Promise.resolve(options.sessionToken);
       } else if (userController) {
@@ -223,7 +223,7 @@ const RESTController = {
         payload._SessionToken = token;
       }
 
-      const payloadString = JSON.stringify(payload);
+      var payloadString = JSON.stringify(payload);
 
       return RESTController.ajax(method, url, payloadString).then(({ response }) => {
         return response;
@@ -231,10 +231,10 @@ const RESTController = {
     }).catch(function(response: { responseText: string }) {
       // Transform the error into an instance of ParseError by trying to parse
       // the error string as JSON
-      let error;
+      var error;
       if (response && response.responseText) {
         try {
-          const errorJSON = JSON.parse(response.responseText);
+          var errorJSON = JSON.parse(response.responseText);
           error = new ParseError(errorJSON.code, errorJSON.error);
         } catch (e) {
           // If we fail to parse the error text, that's okay.

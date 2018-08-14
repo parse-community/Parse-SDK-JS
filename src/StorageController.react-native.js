@@ -11,7 +11,7 @@
 
 import CoreManager from './CoreManager';
 
-const StorageController = {
+var StorageController = {
   async: 1,
 
   getAsyncStorage(): any {

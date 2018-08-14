@@ -11,19 +11,19 @@ export function resolvingPromise() {
 }
 
 export function when(promises) {
-  let objects;
-  const arrayArgument = Array.isArray(promises);
+  var objects;
+  var arrayArgument = Array.isArray(promises);
   if (arrayArgument) {
     objects = promises;
   } else {
     objects = arguments;
   }
 
-  let total = objects.length;
-  let hadError = false;
-  const results = [];
-  const returnValue = arrayArgument ? [results] : results;
-  const errors = [];
+  var total = objects.length;
+  var hadError = false;
+  var results = [];
+  var returnValue = arrayArgument ? [results] : results;
+  var errors = [];
   results.length = objects.length;
   errors.length = objects.length;
 
@@ -31,9 +31,9 @@ export function when(promises) {
     return Promise.resolve(returnValue);
   }
 
-  const promise = new resolvingPromise();
+  var promise = new resolvingPromise();
 
-  const resolveOne = function() {
+  var resolveOne = function() {
     total--;
     if (total <= 0) {
       if (hadError) {
@@ -44,7 +44,7 @@ export function when(promises) {
     }
   };
 
-  const chain = function(object, index) {
+  var chain = function(object, index) {
     if (object && typeof object.then  === 'function') {
       object.then(function(result) {
         results[index] = result;
@@ -59,7 +59,7 @@ export function when(promises) {
       resolveOne();
     }
   };
-  for (var i = 0; i < objects.length; i++) { // eslint-disable-line no-var
+  for (var i = 0; i < objects.length; i++) {
     chain(objects[i], i);
   }
 

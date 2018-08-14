@@ -21,7 +21,7 @@ export default function decode(value: any): any {
     return value;
   }
   if (Array.isArray(value)) {
-    const dup = [];
+    var dup = [];
     value.forEach((v, i) => {
       dup[i] = decode(v);
     });
@@ -38,7 +38,7 @@ export default function decode(value: any): any {
   }
   if (value.__type === 'Relation') {
     // The parent and key fields will be populated by the parent
-    const relation = new ParseRelation(null, null);
+    var relation = new ParseRelation(null, null);
     relation.targetClassName = value.className;
     return relation;
   }
@@ -57,8 +57,8 @@ export default function decode(value: any): any {
   if (value.__type === 'Polygon') {
     return new ParsePolygon(value.coordinates);
   }
-  const copy = {};
-  for (const k in value) {
+  var copy = {};
+  for (var k in value) {
     copy[k] = decode(value[k]);
   }
   return copy;

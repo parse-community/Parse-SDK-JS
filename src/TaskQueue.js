@@ -22,9 +22,9 @@ class TaskQueue {
   }
 
   enqueue(task: () => Promise): Promise {
-    let res;
-    let rej;
-    const taskComplete = new Promise((resolve, reject) => {
+    var res;
+    var rej;
+    var taskComplete = new Promise((resolve, reject) => {
       res = resolve;
       rej = reject;
     });
@@ -49,7 +49,7 @@ class TaskQueue {
   _dequeue() {
     this.queue.shift();
     if (this.queue.length) {
-      const next = this.queue[0];
+      var next = this.queue[0];
       next.task().then(() => {
         this._dequeue();
         next._completion.resolve();

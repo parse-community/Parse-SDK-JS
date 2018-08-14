@@ -81,11 +81,11 @@ export function send(
   });
 }
 
-const DefaultController = {
+var DefaultController = {
   send(data: PushData, options: RequestOptions) {
-    const RESTController = CoreManager.getRESTController();
+    var RESTController = CoreManager.getRESTController();
 
-    const request = RESTController.request(
+    var request = RESTController.request(
       'POST',
       'push',
       data,

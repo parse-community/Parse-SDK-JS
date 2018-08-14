@@ -72,9 +72,9 @@ class ParseSession extends ParseObject {
    */
   static current(options: FullOptions) {
     options = options || {};
-    const controller = CoreManager.getSessionController();
+    var controller = CoreManager.getSessionController();
 
-    const sessionOptions = {};
+    var sessionOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       sessionOptions.useMasterKey = options.useMasterKey;
     }
@@ -98,7 +98,7 @@ class ParseSession extends ParseObject {
    * @return {Boolean}
    */
   static isCurrentSessionRevocable(): boolean {
-    const currentUser = ParseUser.current();
+    var currentUser = ParseUser.current();
     if (currentUser) {
       return isRevocableSession(currentUser.getSessionToken() || '');
     }
@@ -108,10 +108,10 @@ class ParseSession extends ParseObject {
 
 ParseObject.registerSubclass('_Session', ParseSession);
 
-const DefaultController = {
+var DefaultController = {
   getSession(options: RequestOptions): Promise {
-    const RESTController = CoreManager.getRESTController();
-    const session = new ParseSession();
+    var RESTController = CoreManager.getRESTController();
+    var session = new ParseSession();
 
     return RESTController.request(
       'GET', 'sessions/me', {}, options

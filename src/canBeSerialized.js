@@ -17,9 +17,9 @@ export default function canBeSerialized(obj: ParseObject): boolean {
   if (!(obj instanceof ParseObject)) {
     return true;
   }
-  const attributes = obj.attributes;
-  for (const attr in attributes) {
-    const val = attributes[attr];
+  var attributes = obj.attributes;
+  for (var attr in attributes) {
+    var val = attributes[attr];
     if (!canBeSerializedHelper(val)) {
       return false;
     }
@@ -44,14 +44,14 @@ function canBeSerializedHelper(value: any): boolean {
     return false;
   }
   if (Array.isArray(value)) {
-    for (let i = 0; i < value.length; i++) {
+    for (var i = 0; i < value.length; i++) {
       if (!canBeSerializedHelper(value[i])) {
         return false;
       }
     }
     return true;
   }
-  for (const k in value) {
+  for (var k in value) {
     if (!canBeSerializedHelper(value[k])) {
       return false;
     }

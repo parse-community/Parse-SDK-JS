@@ -48,7 +48,7 @@ export function run(
     throw new TypeError('Cloud function name must be a string.');
   }
 
-  const requestOptions = {};
+  var requestOptions = {};
   if (options.useMasterKey) {
     requestOptions.useMasterKey = options.useMasterKey;
   }
@@ -104,15 +104,15 @@ export function startJob(
   * @return {Parse.Object} Status of Job.
   */
 export function getJobStatus(jobStatusId: string): Promise {
-  const query = new ParseQuery('_JobStatus');
+  var query = new ParseQuery('_JobStatus');
   return query.get(jobStatusId, { useMasterKey: true });
 }
 
 const DefaultController = {
   run(name, data, options) {
-    const RESTController = CoreManager.getRESTController();
+    var RESTController = CoreManager.getRESTController();
 
-    const payload = encode(data, true);
+    var payload = encode(data, true);
 
     const request = RESTController.request(
       'POST',
@@ -134,7 +134,7 @@ const DefaultController = {
   },
 
   getJobsData(options) {
-    const RESTController = CoreManager.getRESTController();
+    var RESTController = CoreManager.getRESTController();
 
     return RESTController.request(
       'GET',
@@ -145,9 +145,9 @@ const DefaultController = {
   },
 
   startJob(name, data, options) {
-    const RESTController = CoreManager.getRESTController();
+    var RESTController = CoreManager.getRESTController();
 
-    const payload = encode(data, true);
+    var payload = encode(data, true);
 
     return RESTController.request(
       'POST',

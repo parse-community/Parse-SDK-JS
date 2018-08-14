@@ -10,8 +10,8 @@
  */
 
 // When there is no native storage interface, we default to an in-memory map
-const memMap = {};
-const StorageController = {
+var memMap = {};
+var StorageController = {
   async: 0,
 
   getItem(path: string): ?string {
@@ -30,7 +30,7 @@ const StorageController = {
   },
 
   clear() {
-    for (const key in memMap) {
+    for (var key in memMap) {
       if (memMap.hasOwnProperty(key)) {
         delete memMap[key];
       }

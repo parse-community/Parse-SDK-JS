@@ -1476,7 +1476,6 @@ describe('Parse Object', () => {
       beforeEach(() => {
         const StorageController = controller.file;
         Parse.CoreManager.setLocalDatastoreController(StorageController);
-        Parse.enableLocalDatastore();
       });
 
       it(`${controller.name} can pin (unsaved)`, async () => {

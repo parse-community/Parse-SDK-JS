@@ -13,7 +13,7 @@ import arrayContainsObject from './arrayContainsObject';
 import ParseObject from './ParseObject';
 
 export default function unique<T>(arr: Array<T>): Array<T> {
-  const uniques = [];
+  var uniques = [];
   arr.forEach((value) => {
     if (value instanceof ParseObject) {
       if (!arrayContainsObject(uniques, value)) {

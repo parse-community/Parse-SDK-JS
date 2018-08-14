@@ -22,7 +22,6 @@
         "no-multiple-empty-lines": 1,
         "prefer-const": "error",
         "space-infix-ops": "error",
-        "no-useless-escape": "off",
-        "no-var": "error"
+        "no-useless-escape": "off"
     }
 }

@@ -26,22 +26,22 @@ export default function unsavedChildren(
   obj: ParseObject,
   allowDeepUnsaved?: boolean
 ): Array<ParseFile | ParseObject> {
-  const encountered = {
+  var encountered = {
     objects: {},
     files: []
   };
-  const identifier = obj.className + ':' + obj._getId();
+  var identifier = obj.className + ':' + obj._getId();
   encountered.objects[identifier] = (
     obj.dirty() ? obj : true
   );
-  const attributes = obj.attributes;
-  for (const attr in attributes) {
+  var attributes = obj.attributes;
+  for (var attr in attributes) {
     if (typeof attributes[attr] === 'object') {
       traverse(attributes[attr], encountered, false, !!allowDeepUnsaved);
     }
   }
-  const unsaved = [];
-  for (const id in encountered.objects) {
+  var unsaved = [];
+  for (var id in encountered.objects) {
     if (id !== identifier && encountered.objects[id] !== true) {
       unsaved.push(encountered.objects[id]);
     }
@@ -59,13 +59,13 @@ function traverse(
     if (!obj.id && shouldThrow) {
       throw new Error('Cannot create a pointer to an unsaved Object.');
     }
-    const identifier = obj.className + ':' + obj._getId();
+    var identifier = obj.className + ':' + obj._getId();
     if (!encountered.objects[identifier]) {
       encountered.objects[identifier] = (
         obj.dirty() ? obj : true
       );
-      const attributes = obj.attributes;
-      for (const attr in attributes) {
+      var attributes = obj.attributes;
+      for (var attr in attributes) {
         if (typeof attributes[attr] === 'object') {
           traverse(attributes[attr], encountered, !allowDeepUnsaved, allowDeepUnsaved);
         }
@@ -89,7 +89,7 @@ function traverse(
       }
     });
   }
-  for (const k in obj) {
+  for (var k in obj) {
     if (typeof obj[k] === 'object') {
       traverse(obj[k], encountered, shouldThrow, allowDeepUnsaved);
     }

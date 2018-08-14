@@ -9,7 +9,7 @@
  * @flow
  */
 /* global localStorage */
-const StorageController = {
+var StorageController = {
   async: 0,
 
   getItem(path: string): ?string {
