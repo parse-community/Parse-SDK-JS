@@ -40,18 +40,15 @@ const LocalDatastore = {
   },
 
   _clear(): void {
-    var controller = CoreManager.getLocalDatastoreController();
+    const controller = CoreManager.getLocalDatastoreController();
     controller.clear();
   },
 
   _handlePinWithName(name: string, object: ParseObject) {
-    let pinName = DEFAULT_PIN;
-    if (name !== DEFAULT_PIN) {
-      pinName = PIN_PREFIX + name;
-    }
+    const pinName = this.getPinName(name);
     const objects = this._getChildren(object);
     objects[object._getId()] = object._toFullJSON();
-    for (var objectId in objects) {
+    for (const objectId in objects) {
       this.pinWithName(objectId, objects[objectId]);
     }
     const pinned = this.fromPinWithName(pinName) || [];
@@ -61,10 +58,7 @@ const LocalDatastore = {
   },
 
   _handleUnPinWithName(name: string, object: ParseObject) {
-    let pinName = DEFAULT_PIN;
-    if (name !== DEFAULT_PIN) {
-      pinName = PIN_PREFIX + name;
-    }
+    const pinName = this.getPinName(name);
     const objects = this._getChildren(object);
     const objectIds = Object.keys(objects);
     objectIds.push(object._getId());
@@ -112,10 +106,7 @@ const LocalDatastore = {
     if (!name) {
       return allObjects;
     }
-    let pinName = DEFAULT_PIN;
-    if (name !== DEFAULT_PIN) {
-      pinName = PIN_PREFIX + name;
-    }
+    const pinName = this.getPinName(name);
     const pinned = this.fromPinWithName(pinName);
     if (!Array.isArray(pinned)) {
       return [];
@@ -124,6 +115,9 @@ const LocalDatastore = {
   },
 
   _updateObjectIfPinned(object: ParseObject) {
+    if (!this.isEnabled) {
+      return;
+    }
     const pinned = this.fromPinWithName(object.id);
     if (pinned) {
       this.pinWithName(object.id, object._toFullJSON());
@@ -131,6 +125,9 @@ const LocalDatastore = {
   },
 
   _destroyObjectIfPinned(object: ParseObject) {
+    if (!this.isEnabled) {
+      return;
+    }
     const pin = this.fromPinWithName(object.id);
     if (!pin) {
       return;
@@ -173,6 +170,20 @@ const LocalDatastore = {
       }
     }
   },
+
+  getPinName(pinName: ?string) {
+    if (!pinName || pinName === DEFAULT_PIN) {
+      return DEFAULT_PIN;
+    }
+    return PIN_PREFIX + pinName;
+  },
+
+  checkIfEnabled() {
+    if (!this.isEnabled) {
+      console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
+    }
+    return this.isEnabled;
+  }
 };
 
 function isLocalStorageEnabled() {
@@ -188,6 +199,7 @@ function isLocalStorageEnabled() {
 LocalDatastore.DEFAULT_PIN = DEFAULT_PIN;
 LocalDatastore.PIN_PREFIX = PIN_PREFIX;
 LocalDatastore.isLocalStorageEnabled = isLocalStorageEnabled;
+LocalDatastore.isEnabled = false;
 module.exports = LocalDatastore;
 
 if (isLocalStorageEnabled()) {

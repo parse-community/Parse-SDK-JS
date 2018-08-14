@@ -1483,8 +1483,11 @@ class ParseQuery {
    * Changes the source of this query to a specific group of pinned objects.
    */
   fromPinWithName(name: string) {
-    this._queriesLocalDatastore = true;
-    this._localDatastorePinName = name;
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (localDatastore.checkIfEnabled()) {
+      this._queriesLocalDatastore = true;
+      this._localDatastorePinName = name;
+    }
   }
 }
 

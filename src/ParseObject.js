@@ -1189,15 +1189,17 @@ class ParseObject {
    */
   fetchFromLocalDatastore() {
     const localDatastore = CoreManager.getLocalDatastore();
-    const pinned = localDatastore.fromPinWithName(this.id);
-    if (!pinned) {
-      throw new Error('Cannot fetch an unsaved ParseObject');
-    }
-    const result = ParseObject.fromJSON(pinned);
+    if (localDatastore.checkIfEnabled()) {
+      const pinned = localDatastore.fromPinWithName(this.id);
+      if (!pinned) {
+        throw new Error('Cannot fetch an unsaved ParseObject');
+      }
+      const result = ParseObject.fromJSON(pinned);
 
-    this._clearPendingOps();
-    this._clearServerData();
-    this._finishFetch(result.toJSON());
+      this._clearPendingOps();
+      this._clearServerData();
+      this._finishFetch(result.toJSON());
+    }
   }
 
   /** Static methods **/
@@ -1676,7 +1678,9 @@ class ParseObject {
    */
   static pinAll(objects: Array<ParseObject>) {
     const localDatastore = CoreManager.getLocalDatastore();
-    ParseObject.pinAllWithName(localDatastore.DEFAULT_PIN, objects);
+    if (localDatastore.checkIfEnabled()) {
+      ParseObject.pinAllWithName(localDatastore.DEFAULT_PIN, objects);
+    }
   }
 
   /**
@@ -1688,8 +1692,10 @@ class ParseObject {
    */
   static pinAllWithName(name: string, objects: Array<ParseObject>) {
     const localDatastore = CoreManager.getLocalDatastore();
-    for (const object of objects) {
-      localDatastore._handlePinWithName(name, object);
+    if (localDatastore.checkIfEnabled()) {
+      for (const object of objects) {
+        localDatastore._handlePinWithName(name, object);
+      }
     }
   }
 
@@ -1702,7 +1708,9 @@ class ParseObject {
    */
   static unPinAll(objects: Array<ParseObject>) {
     const localDatastore = CoreManager.getLocalDatastore();
-    ParseObject.unPinAllWithName(localDatastore.DEFAULT_PIN, objects);
+    if (localDatastore.checkIfEnabled()) {
+      ParseObject.unPinAllWithName(localDatastore.DEFAULT_PIN, objects);
+    }
   }
 
   /**
@@ -1714,8 +1722,10 @@ class ParseObject {
    */
   static unPinAllWithName(name: string, objects: Array<ParseObject>) {
     const localDatastore = CoreManager.getLocalDatastore();
-    for (const object of objects) {
-      localDatastore._handleUnPinWithName(name, object);
+    if (localDatastore.checkIfEnabled()) {
+      for (const object of objects) {
+        localDatastore._handleUnPinWithName(name, object);
+      }
     }
   }
 
@@ -1726,7 +1736,9 @@ class ParseObject {
    */
   static unPinAllObjects() {
     const localDatastore = CoreManager.getLocalDatastore();
-    localDatastore.unPinWithName(localDatastore.DEFAULT_PIN);
+    if (localDatastore.checkIfEnabled()) {
+      localDatastore.unPinWithName(localDatastore.DEFAULT_PIN);
+    }
   }
 
   /**
@@ -1737,7 +1749,9 @@ class ParseObject {
    */
   static unPinAllObjectsWithName(name: string) {
     const localDatastore = CoreManager.getLocalDatastore();
-    localDatastore.unPinWithName(localDatastore.PIN_PREFIX + name);
+    if (localDatastore.checkIfEnabled()) {
+      localDatastore.unPinWithName(localDatastore.PIN_PREFIX + name);
+    }
   }
 }
 

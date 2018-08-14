@@ -70,6 +70,7 @@ jest.setMock('../ParseQuery', mockQuery);
 const mockLocalDatastore = {
   DEFAULT_PIN: '_default',
   PIN_PREFIX: 'parsePin_',
+  isEnabled: false,
   fromPinWithName: jest.fn(),
   pinWithName: jest.fn(),
   unPinWithName: jest.fn(),
@@ -81,6 +82,12 @@ const mockLocalDatastore = {
   _destroyObjectIfPinned: jest.fn(),
   _updateLocalIdForObjectId: jest.fn(),
   _clear: jest.fn(),
+  checkIfEnabled: jest.fn(() => {
+    if (!mockLocalDatastore.isEnabled) {
+      console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
+    }
+    return mockLocalDatastore.isEnabled;
+  }),
 };
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
@@ -2302,6 +2309,7 @@ describe('ParseObject pin', () => {
   beforeEach(() => {
     ParseObject.enableSingleInstance();
     jest.clearAllMocks();
+    mockLocalDatastore.isEnabled = true;
   });
 
   it('can pin to default', () => {
@@ -2381,5 +2389,31 @@ describe('ParseObject pin', () => {
     ParseObject.unPinAllObjectsWithName('123');
     expect(mockLocalDatastore.unPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalDatastore.unPinWithName.mock.calls[0]).toEqual([LocalDatastore.PIN_PREFIX + '123']);
+  });
+
+  it('cannot pin when localDatastore disabled', () => {
+    mockLocalDatastore.isEnabled = false;
+    const spy = jest.spyOn(
+      console,
+      'log'
+    );
+    const name = 'test_pin';
+    const obj = new ParseObject('Item');
+    obj.pin();
+    obj.unPin();
+    obj.pinWithName(name);
+    obj.unPinWithName(name);
+    obj.fetchFromLocalDatastore();
+
+    ParseObject.pinAll([obj]);
+    ParseObject.unPinAll([obj]);
+    ParseObject.pinAllWithName(name, [obj]);
+    ParseObject.unPinAllWithName(name, [obj]);
+    ParseObject.unPinAllObjects();
+    ParseObject.unPinAllObjectsWithName(name);
+
+    expect(spy).toHaveBeenCalledTimes(11);
+    expect(spy).toHaveBeenCalledWith('Parse.enableLocalDatastore() must be called first');
+    spy.mockRestore();
   });
 });

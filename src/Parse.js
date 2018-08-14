@@ -192,7 +192,9 @@ Parse._encode = function(value, _, disallowObjects) {
 Parse._getInstallationId = function() {
   return CoreManager.getInstallationController().currentInstallationId();
 }
-
+Parse.enableLocalDatastore = function() {
+  Parse.LocalDatastore.isEnabled = true;
+}
 CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);
 
