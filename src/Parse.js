@@ -21,7 +21,7 @@ import RESTController from './RESTController';
  * @class
  * @hideconstructor
  */
-var Parse = {
+const Parse = {
   /**
    * Call this method first to set up your authentication tokens for Parse.
    * You can get your keys from the Data Browser on parse.com.
@@ -191,6 +191,10 @@ Parse._encode = function(value, _, disallowObjects) {
 }
 Parse._getInstallationId = function() {
   return CoreManager.getInstallationController().currentInstallationId();
+}
+
+Parse.enableLocalDatastore = function() {
+  Parse.LocalDatastore.isEnabled = true;
 }
 
 CoreManager.setInstallationController(InstallationController);

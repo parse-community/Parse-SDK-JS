@@ -39,6 +39,7 @@ jest.setMock('../ParseObject', mockObject);
 
 const mockLocalDatastore = {
   _serializeObjectsFromPinName: jest.fn(),
+  checkIfEnabled: jest.fn(),
 };
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
@@ -48,8 +49,6 @@ const ParseError = require('../ParseError').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
 let ParseObject = require('../ParseObject');
 let ParseQuery = require('../ParseQuery').default;
-
-CoreManager.setLocalDatastore(mockLocalDatastore);
 
 describe('ParseQuery', () => {
   it('can be constructed from a class name', () => {
@@ -2160,7 +2159,19 @@ describe('ParseQuery', () => {
     });
   });
 
+});
+
+describe('ParseQuery LocalDatastore', () => {
+  beforeEach(() => {
+    CoreManager.setLocalDatastore(mockLocalDatastore);
+    jest.clearAllMocks();
+  });
+
   it('can query from local datastore', () => {
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementationOnce(() => true);
+
     const q = new ParseQuery('Item');
     expect(q._queriesLocalDatastore).toBe(false);
     expect(q._localDatastorePinName).toBe(null);
@@ -2170,7 +2181,10 @@ describe('ParseQuery', () => {
   });
 
   it('can query from default pin', () => {
-    CoreManager.setLocalDatastore(LocalDatastore);
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementationOnce(() => true);
+
     const q = new ParseQuery('Item');
     expect(q._queriesLocalDatastore).toBe(false);
     expect(q._localDatastorePinName).toBe(null);
@@ -2180,12 +2194,43 @@ describe('ParseQuery', () => {
   });
 
   it('can query from pin with name', () => {
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementationOnce(() => true);
+
     const q = new ParseQuery('Item');
     expect(q._queriesLocalDatastore).toBe(false);
     expect(q._localDatastorePinName).toBe(null);
     q.fromPinWithName('test_pin');
     expect(q._queriesLocalDatastore).toBe(true);
     expect(q._localDatastorePinName).toBe('test_pin');
+  });
+
+  it('cannot query from local datastore if disabled', () => {
+    const q = new ParseQuery('Item');
+    expect(q._queriesLocalDatastore).toBe(false);
+    expect(q._localDatastorePinName).toBe(null);
+    q.fromLocalDatastore();
+    expect(q._queriesLocalDatastore).toBe(false);
+    expect(q._localDatastorePinName).toBe(null);
+  });
+
+  it('can query from default pin if disabled', () => {
+    const q = new ParseQuery('Item');
+    expect(q._queriesLocalDatastore).toBe(false);
+    expect(q._localDatastorePinName).toBe(null);
+    q.fromPin();
+    expect(q._queriesLocalDatastore).toBe(false);
+    expect(q._localDatastorePinName).toBe(null);
+  });
+
+  it('can query from pin with name if disabled', () => {
+    const q = new ParseQuery('Item');
+    expect(q._queriesLocalDatastore).toBe(false);
+    expect(q._localDatastorePinName).toBe(null);
+    q.fromPinWithName('test_pin');
+    expect(q._queriesLocalDatastore).toBe(false);
+    expect(q._localDatastorePinName).toBe(null);
   });
 
   it('can query offline', () => {
@@ -2208,6 +2253,10 @@ describe('ParseQuery', () => {
     mockLocalDatastore
       ._serializeObjectsFromPinName
       .mockImplementationOnce(() => [obj1, obj2, obj3]);
+
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementationOnce(() => true);
 
     const q = new ParseQuery('Item');
     q.equalTo('count', 2);

@@ -101,6 +101,21 @@ describe('LocalDatastore', () => {
     expect(LocalDatastore.isLocalStorageEnabled()).toBe(true);
   });
 
+  it('isEnabled', () => {
+    LocalDatastore.isEnabled = true;
+    const isEnabled = LocalDatastore.checkIfEnabled();
+    expect(isEnabled).toBe(true);
+  });
+
+  it('isDisabled', () => {
+    const spy = jest.spyOn(console, 'log');
+    LocalDatastore.isEnabled = false;
+    const isEnabled = LocalDatastore.checkIfEnabled();
+    expect(isEnabled).toBe(false);
+    expect(spy).toHaveBeenCalledWith('Parse.enableLocalDatastore() must be called first');
+    spy.mockRestore();
+  });
+
   it('can clear', () => {
     LocalDatastore._clear();
     expect(mockLocalStorageController.clear).toHaveBeenCalledTimes(1);
@@ -195,6 +210,7 @@ describe('LocalDatastore', () => {
 
   it('_updateObjectIfPinned not pinned', () => {
     const object = new ParseObject('Item');
+    LocalDatastore.isEnabled = true;
     LocalDatastore._updateObjectIfPinned(object);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(0);
   });
@@ -205,6 +221,7 @@ describe('LocalDatastore', () => {
       .fromPinWithName
       .mockImplementationOnce(() => [object]);
 
+    LocalDatastore.isEnabled = true;
     LocalDatastore._updateObjectIfPinned(object);
 
     expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(1);
@@ -377,6 +394,8 @@ describe('LocalDatastore', () => {
 
   it('_destroyObjectIfPinned no objects found in pinName', () => {
     const object = new ParseObject('Item');
+
+    LocalDatastore.isEnabled = true;
     LocalDatastore._destroyObjectIfPinned(object);
     expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(0);
@@ -401,6 +420,7 @@ describe('LocalDatastore', () => {
       .getLocalDatastore
       .mockImplementationOnce(() => LDS);
 
+    LocalDatastore.isEnabled = true;
     LocalDatastore._destroyObjectIfPinned(obj1);
 
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(1);
@@ -417,6 +437,7 @@ describe('LocalDatastore', () => {
 
   it('_destroyObjectIfPinned no objects found in pinName remove pinName', () => {
     const object = new ParseObject('Item');
+    LocalDatastore.isEnabled = true;
     LocalDatastore._destroyObjectIfPinned(object);
     expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(0);
@@ -442,6 +463,7 @@ describe('LocalDatastore', () => {
       .getLocalDatastore
       .mockImplementationOnce(() => LDS);
 
+    LocalDatastore.isEnabled = true;
     LocalDatastore._destroyObjectIfPinned(obj2);
 
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(2);
@@ -449,7 +471,6 @@ describe('LocalDatastore', () => {
 
     expect(mockLocalStorageController.getLocalDatastore).toHaveBeenCalledTimes(1);
 
-    console.log(mockLocalStorageController.fromPinWithName.mock.calls);
     expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(3);
     expect(mockLocalStorageController.fromPinWithName.mock.calls[0][0]).toEqual(obj2.id);
     expect(mockLocalStorageController.fromPinWithName.mock.calls[1][0]).toEqual(LocalDatastore.PIN_PREFIX + 'Custom_Pin');
@@ -477,6 +498,7 @@ describe('LocalDatastore', () => {
       .getLocalDatastore
       .mockImplementationOnce(() => LDS);
 
+    LocalDatastore.isEnabled = true;
     LocalDatastore._destroyObjectIfPinned(obj1);
 
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(1);

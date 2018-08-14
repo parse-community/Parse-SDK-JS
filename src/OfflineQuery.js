@@ -1,5 +1,5 @@
-var equalObjects = require('./equals').default;
-var decode = require('./decode').default;
+const equalObjects = require('./equals').default;
+const decode = require('./decode').default;
 
 /**
  * contains -- Determines if an object is contained in a list with special handling for Parse pointers.
@@ -34,7 +34,7 @@ function matchesQuery(object, query) {
   if (query.toJSON) {
     q = query.toJSON().where;
   }
-  for (var field in q) {
+  for (const field in q) {
     if (!matchesKeyConstraints(obj, field, q[field])) {
       return false;
     }
@@ -63,12 +63,12 @@ function matchesKeyConstraints(object, key, constraints) {
   }
   if (key.indexOf('.') >= 0) {
     // Key references a subobject
-    var keyComponents = key.split('.');
-    var subObjectKey = keyComponents[0];
-    var keyRemainder = keyComponents.slice(1).join('.');
+    const keyComponents = key.split('.');
+    const subObjectKey = keyComponents[0];
+    const keyRemainder = keyComponents.slice(1).join('.');
     return matchesKeyConstraints(object[subObjectKey] || {}, keyRemainder, constraints);
   }
-  var i;
+  let i;
   if (key === '$or') {
     for (i = 0; i < constraints.length; i++) {
       if (matchesQuery(object, constraints[i])) {
@@ -88,7 +88,7 @@ function matchesKeyConstraints(object, key, constraints) {
     }
     return object[key] === constraints;
   }
-  var compareTo;
+  let compareTo;
   if (constraints.__type) {
     if (constraints.__type === 'Pointer') {
       return equalObjectsGeneric(object[key], constraints, function (obj, ptr) {
@@ -98,7 +98,7 @@ function matchesKeyConstraints(object, key, constraints) {
     return equalObjectsGeneric(decode(object[key]), decode(constraints), equalObjects);
   }
   // More complex cases
-  for (var condition in constraints) {
+  for (const condition in constraints) {
     compareTo = constraints[condition];
     if (compareTo.__type) {
       compareTo = decode(compareTo);
@@ -160,14 +160,14 @@ function matchesKeyConstraints(object, key, constraints) {
       }
       break;
     }
-    case '$regex':
+    case '$regex': {
       if (typeof compareTo === 'object') {
         return compareTo.test(object[key]);
       }
       // JS doesn't support perl-style escaping
-      var expString = '';
-      var escapeEnd = -2;
-      var escapeStart = compareTo.indexOf('\\Q');
+      let expString = '';
+      let escapeEnd = -2;
+      let escapeStart = compareTo.indexOf('\\Q');
       while (escapeStart > -1) {
         // Add the unescaped portion
         expString += compareTo.substring(escapeEnd + 2, escapeStart);
@@ -179,29 +179,32 @@ function matchesKeyConstraints(object, key, constraints) {
         escapeStart = compareTo.indexOf('\\Q', escapeEnd);
       }
       expString += compareTo.substring(Math.max(escapeStart, escapeEnd + 2));
-      var exp = new RegExp(expString, constraints.$options || '');
+      const exp = new RegExp(expString, constraints.$options || '');
       if (!exp.test(object[key])) {
         return false;
       }
       break;
-    case '$nearSphere':
+    }
+    case '$nearSphere': {
       if (!compareTo || !object[key]) {
         return false;
       }
-      var distance = compareTo.radiansTo(object[key]);
-      var max = constraints.$maxDistance || Infinity;
+      const distance = compareTo.radiansTo(object[key]);
+      const max = constraints.$maxDistance || Infinity;
       return distance <= max;
-    case '$within':
+    }
+    case '$within': {
       if (!compareTo || !object[key]) {
         return false;
       }
-      var southWest = compareTo.$box[0];
-      var northEast = compareTo.$box[1];
+      const southWest = compareTo.$box[0];
+      const northEast = compareTo.$box[1];
       if (southWest.latitude > northEast.latitude || southWest.longitude > northEast.longitude) {
         // Invalid box, crosses the date line
         return false;
       }
       return object[key].latitude > southWest.latitude && object[key].latitude < northEast.latitude && object[key].longitude > southWest.longitude && object[key].longitude < northEast.longitude;
+    }
     case '$options':
       // Not a query type, but a way to add options to $regex. Ignore and
       // avoid the default
@@ -221,7 +224,7 @@ function matchesKeyConstraints(object, key, constraints) {
   return true;
 }
 
-var OfflineQuery = {
+const OfflineQuery = {
   matchesQuery: matchesQuery
 };
 
