@@ -12,40 +12,42 @@
 /* global localStorage */
 
 const LocalDatastoreController = {
-  fromPinWithName(name: string): ?any {
+  fromPinWithName(name: string): Promise {
     const values = localStorage.getItem(name);
     if (!values) {
-      return null;
+      return Promise.resolve(null);
     }
     const objects = JSON.parse(values);
-    return objects;
+    return Promise.resolve(objects);
   },
 
-  pinWithName(name: string, value: any) {
+  pinWithName(name: string, value: any): Promise {
     try {
       const values = JSON.stringify(value);
       localStorage.setItem(name, values);
     } catch (e) {
       // Quota exceeded, possibly due to Safari Private Browsing mode
+      console.log(e.message); // eslint-disable-line no-console
     }
+    return Promise.resolve();
   },
 
-  unPinWithName(name: string) {
-    localStorage.removeItem(name);
+  unPinWithName(name: string): Promise {
+    return Promise.resolve(localStorage.removeItem(name));
   },
 
-  getAllContents() {
+  getAllContents(): Promise {
     const LDS = {};
     for (let i = 0; i < localStorage.length; i += 1) {
       const key = localStorage.key(i);
       const value = localStorage.getItem(key);
       LDS[key] = JSON.parse(value);
     }
-    return LDS;
+    return Promise.resolve(LDS);
   },
 
-  clear() {
-    localStorage.clear();
+  clear(): Promise {
+    return Promise.resolve(localStorage.clear());
   }
 };
 

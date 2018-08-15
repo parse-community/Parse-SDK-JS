@@ -8,27 +8,8 @@
  */
 
 jest.autoMockOff();
-let mockRNStorage = {};
-const mockRNStorageInterface = {
-  getItem(path, cb) {
-    cb(undefined, mockRNStorage[path] || null);
-  },
 
-  setItem(path, value, cb) {
-    mockRNStorage[path] = value;
-    cb();
-  },
-
-  removeItem(path, cb) {
-    delete mockRNStorage[path];
-    cb();
-  },
-
-  clear() {
-    mockRNStorage = {};
-  },
-};
-
+const mockRNStorageInterface = require('./test_helpers/mockRNStorage');
 const CoreManager = require('../CoreManager');
 
 let mockStorage = {};

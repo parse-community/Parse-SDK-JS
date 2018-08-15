@@ -8,6 +8,7 @@ const TestObject = Parse.Object.extend('TestObject');
 const Item = Parse.Object.extend('Item');
 
 global.localStorage = require('./mockLocalStorage');
+const mockRNStorage = require('./mockRNStorage');
 
 describe('Parse Query', () => {
   beforeEach((done) => {
@@ -1807,8 +1808,9 @@ describe('Parse Query', () => {
   });
 
   const controllers = [
-    { name: 'In-Memory', file: require(path.resolve(__dirname, '../../lib/node/LocalDatastoreController.default')) },
-    { name: 'LocalStorage', file: require(path.resolve(__dirname, '../../lib/node/LocalDatastoreController.localStorage')) }
+    { name: 'Default', file: require(path.resolve(__dirname, '../../lib/node/LocalDatastoreController.default')) },
+    { name: 'Browser', file: require(path.resolve(__dirname, '../../lib/node/LocalDatastoreController.browser')) },
+    { name: 'React-Native', file: require(path.resolve(__dirname, '../../lib/node/LocalDatastoreController.react-native')) },
   ];
 
   for (let i = 0; i < controllers.length; i += 1) {
@@ -1817,7 +1819,9 @@ describe('Parse Query', () => {
     describe(`Parse Query Pinning (${controller.name})`, () => {
       beforeEach(() => {
         const StorageController = controller.file;
+        Parse.CoreManager.setAsyncStorage(mockRNStorage);
         Parse.CoreManager.setLocalDatastoreController(StorageController);
+        Parse.enableLocalDatastore();
       });
 
       it(`${controller.name} can query from pin with name`, async () => {
@@ -1828,7 +1832,7 @@ describe('Parse Query', () => {
         const objects = [obj1, obj2, obj3, item];
         await Parse.Object.saveAll(objects);
 
-        Parse.Object.pinAllWithName('test_pin', objects);
+        await Parse.Object.pinAllWithName('test_pin', objects);
         const query = new Parse.Query(TestObject);
         query.greaterThan('field', 1);
         query.fromPinWithName('test_pin');
@@ -1846,7 +1850,7 @@ describe('Parse Query', () => {
         const objects = [obj1, obj2, obj3];
         await Parse.Object.saveAll(objects);
 
-        Parse.Object.pinAll(objects);
+        await Parse.Object.pinAll(objects);
         const query = new Parse.Query(TestObject);
         query.fromLocalDatastore();
         const results = await query.find();
@@ -1861,7 +1865,7 @@ describe('Parse Query', () => {
         const objects = [obj1, obj2, obj3];
         await Parse.Object.saveAll(objects);
 
-        Parse.Object.pinAll(objects);
+        await Parse.Object.pinAll(objects);
         const query = new Parse.Query(TestObject);
         query.fromPin();
         const results = await query.find();

@@ -443,7 +443,7 @@ class ParseQuery {
    * @return {Promise} A promise that is resolved with the results when
    * the query completes.
    */
-  find(options?: FullOptions): Promise {
+  async find(options?: FullOptions): Promise {
     options = options || {};
 
     const findOptions = {};
@@ -459,8 +459,8 @@ class ParseQuery {
     const select = this._select;
 
     if (this._queriesLocalDatastore) {
-      const localDatastore = CoreManager.getAllContents();
-      const objects = localDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
+      const localDatastore = CoreManager.getLocalDatastore();
+      const objects = await localDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
       return objects.map((json) => {
         const object = ParseObject.fromJSON(json);
         if (object.className !== this.className) {
@@ -1475,7 +1475,7 @@ class ParseQuery {
    * Changes the source of this query to the default group of pinned objects.
    */
   fromPin() {
-    const localDatastore = CoreManager.getAllContents();
+    const localDatastore = CoreManager.getLocalDatastore();
     this.fromPinWithName(localDatastore.DEFAULT_PIN);
   }
 
@@ -1483,7 +1483,7 @@ class ParseQuery {
    * Changes the source of this query to a specific group of pinned objects.
    */
   fromPinWithName(name: string) {
-    const localDatastore = CoreManager.getAllContents();
+    const localDatastore = CoreManager.getLocalDatastore();
     if (localDatastore.checkIfEnabled()) {
       this._queriesLocalDatastore = true;
       this._localDatastorePinName = name;

@@ -352,7 +352,7 @@ module.exports = {
     config['LocalDatastore'] = store;
   },
 
-  getAllContents() {
+  getLocalDatastore() {
     return config['LocalDatastore'];
   },
 

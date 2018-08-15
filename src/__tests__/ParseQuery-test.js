@@ -2233,7 +2233,7 @@ describe('ParseQuery LocalDatastore', () => {
     expect(q._localDatastorePinName).toBe(null);
   });
 
-  it('can query offline', () => {
+  it('can query offline', async () => {
     const obj1 = {
       className: 'Item',
       objectId: 'objectId1',
@@ -2261,7 +2261,7 @@ describe('ParseQuery LocalDatastore', () => {
     const q = new ParseQuery('Item');
     q.equalTo('count', 2);
     q.fromLocalDatastore();
-    const results = q.find();
+    const results = await q.find();
     expect(results[0].id).toEqual(obj1.objectId);
   });
 });

@@ -9,8 +9,6 @@
  * @flow
  */
 
-/* global localStorage */
-
 import CoreManager from './CoreManager';
 
 import type ParseObject from './ParseObject';
@@ -19,55 +17,55 @@ const DEFAULT_PIN = '_default';
 const PIN_PREFIX = 'parsePin_';
 
 const LocalDatastore = {
-  fromPinWithName(name: string) {
+  fromPinWithName(name: string): Promise {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.fromPinWithName(name);
   },
 
-  pinWithName(name: string, value: any) {
+  pinWithName(name: string, value: any): Promise {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.pinWithName(name, value);
   },
 
-  unPinWithName(name: string) {
+  unPinWithName(name: string): Promise {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.unPinWithName(name);
   },
 
-  _getAllContents() {
+  _getAllContents(): Promise {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.getAllContents();
   },
 
-  _clear(): void {
+  _clear(): Promise {
     const controller = CoreManager.getLocalDatastoreController();
-    controller.clear();
+    return controller.clear();
   },
 
-  _handlePinWithName(name: string, object: ParseObject) {
+  async _handlePinWithName(name: string, object: ParseObject): Promise {
     const pinName = this.getPinName(name);
     const objects = this._getChildren(object);
     objects[object._getId()] = object._toFullJSON();
     for (const objectId in objects) {
-      this.pinWithName(objectId, objects[objectId]);
+      await this.pinWithName(objectId, objects[objectId]);
     }
-    const pinned = this.fromPinWithName(pinName) || [];
+    const pinned = await this.fromPinWithName(pinName) || [];
     const objectIds = Object.keys(objects);
     const toPin = [...new Set([...pinned, ...objectIds])];
-    this.pinWithName(pinName, toPin);
+    await this.pinWithName(pinName, toPin);
   },
 
-  _handleUnPinWithName(name: string, object: ParseObject) {
+  async _handleUnPinWithName(name: string, object: ParseObject) {
     const pinName = this.getPinName(name);
     const objects = this._getChildren(object);
     const objectIds = Object.keys(objects);
     objectIds.push(object._getId());
-    let pinned = this.fromPinWithName(pinName) || [];
+    let pinned = await this.fromPinWithName(pinName) || [];
     pinned = pinned.filter(item => !objectIds.includes(item));
     if (pinned.length == 0) {
-      this.unPinWithName(pinName);
+      await this.unPinWithName(pinName);
     } else {
-      this.pinWithName(pinName, pinned);
+      await this.pinWithName(pinName, pinned);
     }
   },
 
@@ -95,8 +93,8 @@ const LocalDatastore = {
     }
   },
 
-  _serializeObjectsFromPinName(name: string) {
-    const localDatastore = this._getAllContents();
+  async _serializeObjectsFromPinName(name: string) {
+    const localDatastore = await this._getAllContents();
     const allObjects = [];
     for (const key in localDatastore) {
       if (key !== DEFAULT_PIN && !key.startsWith(PIN_PREFIX)) {
@@ -104,68 +102,72 @@ const LocalDatastore = {
       }
     }
     if (!name) {
-      return allObjects;
+      return Promise.resolve(allObjects);
     }
-    const pinName = this.getPinName(name);
-    const pinned = this.fromPinWithName(pinName);
+    const pinName = await this.getPinName(name);
+    const pinned = await this.fromPinWithName(pinName);
     if (!Array.isArray(pinned)) {
-      return [];
+      return Promise.resolve([]);
     }
-    return pinned.map((objectId) => this.fromPinWithName(objectId));
+    const objects = pinned.map(async (objectId) => await this.fromPinWithName(objectId));
+    return Promise.all(objects);
   },
 
-  _updateObjectIfPinned(object: ParseObject) {
+  async _updateObjectIfPinned(object: ParseObject) {
     if (!this.isEnabled) {
       return;
     }
-    const pinned = this.fromPinWithName(object.id);
+    const pinned = await this.fromPinWithName(object.id);
     if (pinned) {
-      this.pinWithName(object.id, object._toFullJSON());
+      await this.pinWithName(object.id, object._toFullJSON());
     }
   },
 
-  _destroyObjectIfPinned(object: ParseObject) {
+  async _destroyObjectIfPinned(object: ParseObject) {
     if (!this.isEnabled) {
       return;
     }
-    const pin = this.fromPinWithName(object.id);
+    const pin = await this.fromPinWithName(object.id);
     if (!pin) {
       return;
     }
-    this.unPinWithName(object.id);
-    const localDatastore = this._getAllContents();
+    await this.unPinWithName(object.id);
+    const localDatastore = await this._getAllContents();
     for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
-        let pinned = this.fromPinWithName(key) || [];
+        let pinned = await this.fromPinWithName(key) || [];
         if (pinned.includes(object.id)) {
           pinned = pinned.filter(item => item !== object.id);
           if (pinned.length == 0) {
-            this.unPinWithName(key);
+            await this.unPinWithName(key);
           } else {
-            this.pinWithName(key, pinned);
+            await this.pinWithName(key, pinned);
           }
         }
       }
     }
   },
 
-  _updateLocalIdForObjectId(localId, objectId) {
-    const unsaved = this.fromPinWithName(localId);
+  async _updateLocalIdForObjectId(localId, objectId) {
+    if (!this.isEnabled) {
+      return;
+    }
+    const unsaved = await this.fromPinWithName(localId);
     if (!unsaved) {
       return;
     }
-    this.unPinWithName(localId);
-    this.pinWithName(objectId, unsaved);
+    await this.unPinWithName(localId);
+    await this.pinWithName(objectId, unsaved);
 
-    const localDatastore = this._getAllContents();
+    const localDatastore = await this._getAllContents();
 
     for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
-        let pinned = this.fromPinWithName(key) || [];
+        let pinned = await this.fromPinWithName(key) || [];
         if (pinned.includes(localId)) {
           pinned = pinned.filter(item => item !== localId);
           pinned.push(objectId);
-          this.pinWithName(key, pinned);
+          await this.pinWithName(key, pinned);
         }
       }
     }
@@ -186,24 +188,16 @@ const LocalDatastore = {
   }
 };
 
-function isLocalStorageEnabled() {
-  const item = 'parse_is_localstorage_enabled';
-  try {
-    localStorage.setItem(item, item);
-    localStorage.removeItem(item);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
 LocalDatastore.DEFAULT_PIN = DEFAULT_PIN;
 LocalDatastore.PIN_PREFIX = PIN_PREFIX;
-LocalDatastore.isLocalStorageEnabled = isLocalStorageEnabled;
 LocalDatastore.isEnabled = false;
+
 module.exports = LocalDatastore;
 
-if (isLocalStorageEnabled()) {
-  CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.localStorage'));
+if (process.env.PARSE_BUILD === 'react-native') {
+  CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.react-native'));
+} else if (process.env.PARSE_BUILD === 'browser') {
+  CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.browser'));
 } else {
   CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.default'));
 }

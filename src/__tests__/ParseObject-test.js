@@ -2312,86 +2312,86 @@ describe('ParseObject pin', () => {
     mockLocalDatastore.isEnabled = true;
   });
 
-  it('can pin to default', () => {
+  it('can pin to default', async () => {
     const object = new ParseObject('Item');
-    object.pin();
+    await object.pin();
     expect(mockLocalDatastore._handlePinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalDatastore._handlePinWithName).toHaveBeenCalledWith(LocalDatastore.DEFAULT_PIN, object);
   });
 
-  it('can unPin to default', () => {
+  it('can unPin to default', async () => {
     const object = new ParseObject('Item');
-    object.unPin();
+    await object.unPin();
     expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledWith(LocalDatastore.DEFAULT_PIN, object);
   });
 
-  it('can pin to specific pin', () => {
+  it('can pin to specific pin', async () => {
     const object = new ParseObject('Item');
-    object.pinWithName('test_pin');
+    await object.pinWithName('test_pin');
     expect(mockLocalDatastore._handlePinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalDatastore._handlePinWithName).toHaveBeenCalledWith('test_pin', object);
   });
 
-  it('can unPin to specific', () => {
+  it('can unPin to specific', async () => {
     const object = new ParseObject('Item');
-    object.unPinWithName('test_pin');
+    await object.unPinWithName('test_pin');
     expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledWith('test_pin', object);
   });
 
-  it('can fetchFromLocalDatastore', () => {
+  it('can fetchFromLocalDatastore', async () => {
     const object = new ParseObject('Item');
     object.id = '123';
     mockLocalDatastore
       .fromPinWithName
       .mockImplementationOnce(() => object._toFullJSON());
 
-    object.fetchFromLocalDatastore();
+    await object.fetchFromLocalDatastore();
     expect(mockLocalDatastore.fromPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalDatastore.fromPinWithName).toHaveBeenCalledWith('123');
   });
 
-  it('cannot fetchFromLocalDatastore if unsaved', () => {
+  it('cannot fetchFromLocalDatastore if unsaved', async () => {
     try {
       const object = new ParseObject('Item');
-      object.fetchFromLocalDatastore();
+      await object.fetchFromLocalDatastore();
     } catch (e) {
       expect(e.message).toBe('Cannot fetch an unsaved ParseObject');
     }
   });
 
-  it('can pinAll', () => {
+  it('can pinAll', async () => {
     const obj1 = new ParseObject('Item');
     const obj2 = new ParseObject('Item');
-    ParseObject.pinAll([obj1, obj2]);
+    await ParseObject.pinAll([obj1, obj2]);
     expect(mockLocalDatastore._handlePinWithName).toHaveBeenCalledTimes(2);
     expect(mockLocalDatastore._handlePinWithName.mock.calls[0]).toEqual([LocalDatastore.DEFAULT_PIN, obj1]);
     expect(mockLocalDatastore._handlePinWithName.mock.calls[1]).toEqual([LocalDatastore.DEFAULT_PIN, obj2]);
   });
 
-  it('can unPinAll', () => {
+  it('can unPinAll', async () => {
     const obj1 = new ParseObject('Item');
     const obj2 = new ParseObject('Item');
-    ParseObject.unPinAll([obj1, obj2]);
+    await ParseObject.unPinAll([obj1, obj2]);
     expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledTimes(2);
     expect(mockLocalDatastore._handleUnPinWithName.mock.calls[0]).toEqual([LocalDatastore.DEFAULT_PIN, obj1]);
     expect(mockLocalDatastore._handleUnPinWithName.mock.calls[1]).toEqual([LocalDatastore.DEFAULT_PIN, obj2]);
   });
 
-  it('can unPinAllObjects', () => {
-    ParseObject.unPinAllObjects();
+  it('can unPinAllObjects', async () => {
+    await ParseObject.unPinAllObjects();
     expect(mockLocalDatastore.unPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalDatastore.unPinWithName.mock.calls[0]).toEqual([LocalDatastore.DEFAULT_PIN]);
   });
 
-  it('can unPinAllObjectsWithName', () => {
-    ParseObject.unPinAllObjectsWithName('123');
+  it('can unPinAllObjectsWithName', async () => {
+    await ParseObject.unPinAllObjectsWithName('123');
     expect(mockLocalDatastore.unPinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalDatastore.unPinWithName.mock.calls[0]).toEqual([LocalDatastore.PIN_PREFIX + '123']);
   });
 
-  it('cannot pin when localDatastore disabled', () => {
+  it('cannot pin when localDatastore disabled', async () => {
     mockLocalDatastore.isEnabled = false;
     const spy = jest.spyOn(
       console,
@@ -2399,18 +2399,18 @@ describe('ParseObject pin', () => {
     );
     const name = 'test_pin';
     const obj = new ParseObject('Item');
-    obj.pin();
-    obj.unPin();
-    obj.pinWithName(name);
-    obj.unPinWithName(name);
-    obj.fetchFromLocalDatastore();
+    await obj.pin();
+    await obj.unPin();
+    await obj.pinWithName(name);
+    await obj.unPinWithName(name);
+    await obj.fetchFromLocalDatastore();
 
-    ParseObject.pinAll([obj]);
-    ParseObject.unPinAll([obj]);
-    ParseObject.pinAllWithName(name, [obj]);
-    ParseObject.unPinAllWithName(name, [obj]);
-    ParseObject.unPinAllObjects();
-    ParseObject.unPinAllObjectsWithName(name);
+    await ParseObject.pinAll([obj]);
+    await ParseObject.unPinAll([obj]);
+    await ParseObject.pinAllWithName(name, [obj]);
+    await ParseObject.unPinAllWithName(name, [obj]);
+    await ParseObject.unPinAllObjects();
+    await ParseObject.unPinAllObjectsWithName(name);
 
     expect(spy).toHaveBeenCalledTimes(11);
     expect(spy).toHaveBeenCalledWith('Parse.enableLocalDatastore() must be called first');

@@ -340,8 +340,6 @@ class ParseObject {
 
   _migrateId(serverId: string) {
     if (this._localId && serverId) {
-      const localDatastore = CoreManager.getAllContents();
-      localDatastore._updateLocalIdForObjectId(this._localId, serverId);
       if (singleInstance) {
         const stateController = CoreManager.getObjectStateController();
         const oldState = stateController.removeState(this._getStateIdentifier());
@@ -1154,18 +1152,18 @@ class ParseObject {
    * Stores the object and every object it points to in the local datastore,
    * recursively, using a default pin name: _default.
    */
-  pin() {
-    const localDatastore = CoreManager.getAllContents();
-    ParseObject.pinAllWithName(localDatastore.DEFAULT_PIN, [this]);
+  pin(): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    return ParseObject.pinAllWithName(localDatastore.DEFAULT_PIN, [this]);
   }
 
   /**
    * Removes the object and every object it points to in the local datastore,
    * recursively, using a default pin name: _default.
    */
-  unPin() {
-    const localDatastore = CoreManager.getAllContents();
-    ParseObject.unPinAllWithName(localDatastore.DEFAULT_PIN, [this]);
+  unPin(): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    return ParseObject.unPinAllWithName(localDatastore.DEFAULT_PIN, [this]);
   }
 
   /**
@@ -1173,24 +1171,24 @@ class ParseObject {
    *
    * @param {String} name Name of Pin.
    */
-  pinWithName(name: string) {
-    ParseObject.pinAllWithName(name, [this]);
+  pinWithName(name: string): Promise {
+    return ParseObject.pinAllWithName(name, [this]);
   }
 
   /**
    * Removes the object and every object it points to in the local datastor, recursively.
    */
-  unPinWithName(name: string) {
-    ParseObject.unPinAllWithName(name, [this]);
+  unPinWithName(name: string): Promise {
+    return ParseObject.unPinAllWithName(name, [this]);
   }
 
   /**
    * Loads data from the local datastore into this object.
    */
-  fetchFromLocalDatastore() {
-    const localDatastore = CoreManager.getAllContents();
+  async fetchFromLocalDatastore(): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
     if (localDatastore.checkIfEnabled()) {
-      const pinned = localDatastore.fromPinWithName(this.id);
+      const pinned = await localDatastore.fromPinWithName(this.id);
       if (!pinned) {
         throw new Error('Cannot fetch an unsaved ParseObject');
       }
@@ -1199,6 +1197,8 @@ class ParseObject {
       this._clearPendingOps();
       this._clearServerData();
       this._finishFetch(result.toJSON());
+
+      return Promise.resolve(this);
     }
   }
 
@@ -1676,10 +1676,10 @@ class ParseObject {
    * @param {Array} objects A list of <code>Parse.Object</code>.
    * @static
    */
-  static pinAll(objects: Array<ParseObject>) {
-    const localDatastore = CoreManager.getAllContents();
+  static pinAll(objects: Array<ParseObject>): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
     if (localDatastore.checkIfEnabled()) {
-      ParseObject.pinAllWithName(localDatastore.DEFAULT_PIN, objects);
+      return ParseObject.pinAllWithName(localDatastore.DEFAULT_PIN, objects);
     }
   }
 
@@ -1690,11 +1690,11 @@ class ParseObject {
    * @param {Array} objects A list of <code>Parse.Object</code>.
    * @static
    */
-  static pinAllWithName(name: string, objects: Array<ParseObject>) {
-    const localDatastore = CoreManager.getAllContents();
+  static async pinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
     if (localDatastore.checkIfEnabled()) {
       for (const object of objects) {
-        localDatastore._handlePinWithName(name, object);
+        await localDatastore._handlePinWithName(name, object);
       }
     }
   }
@@ -1706,10 +1706,10 @@ class ParseObject {
    * @param {Array} objects A list of <code>Parse.Object</code>.
    * @static
    */
-  static unPinAll(objects: Array<ParseObject>) {
-    const localDatastore = CoreManager.getAllContents();
+  static unPinAll(objects: Array<ParseObject>): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
     if (localDatastore.checkIfEnabled()) {
-      ParseObject.unPinAllWithName(localDatastore.DEFAULT_PIN, objects);
+      return ParseObject.unPinAllWithName(localDatastore.DEFAULT_PIN, objects);
     }
   }
 
@@ -1720,11 +1720,11 @@ class ParseObject {
    * @param {Array} objects A list of <code>Parse.Object</code>.
    * @static
    */
-  static unPinAllWithName(name: string, objects: Array<ParseObject>) {
-    const localDatastore = CoreManager.getAllContents();
+  static async unPinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
     if (localDatastore.checkIfEnabled()) {
       for (const object of objects) {
-        localDatastore._handleUnPinWithName(name, object);
+        await localDatastore._handleUnPinWithName(name, object);
       }
     }
   }
@@ -1734,10 +1734,10 @@ class ParseObject {
    *
    * @static
    */
-  static unPinAllObjects() {
-    const localDatastore = CoreManager.getAllContents();
+  static unPinAllObjects(): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
     if (localDatastore.checkIfEnabled()) {
-      localDatastore.unPinWithName(localDatastore.DEFAULT_PIN);
+      return localDatastore.unPinWithName(localDatastore.DEFAULT_PIN);
     }
   }
 
@@ -1747,17 +1747,17 @@ class ParseObject {
    * @param {String} name Name of Pin.
    * @static
    */
-  static unPinAllObjectsWithName(name: string) {
-    const localDatastore = CoreManager.getAllContents();
+  static unPinAllObjectsWithName(name: string): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
     if (localDatastore.checkIfEnabled()) {
-      localDatastore.unPinWithName(localDatastore.PIN_PREFIX + name);
+      return localDatastore.unPinWithName(localDatastore.PIN_PREFIX + name);
     }
   }
 }
 
 var DefaultController = {
   fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): Promise {
-    const localDatastore = CoreManager.getAllContents();
+    const localDatastore = CoreManager.getLocalDatastore();
     if (Array.isArray(target)) {
       if (target.length < 1) {
         return Promise.resolve([]);
@@ -1801,7 +1801,7 @@ var DefaultController = {
         query.include(options.include);
       }
       query._limit = ids.length;
-      return query.find(options).then((objects) => {
+      return query.find(options).then(async (objects) => {
         var idMap = {};
         objects.forEach((o) => {
           idMap[o.id] = o;
@@ -1831,7 +1831,7 @@ var DefaultController = {
           }
         }
         for (const object of results) {
-          localDatastore._updateObjectIfPinned(object);
+          await localDatastore._updateObjectIfPinned(object);
         }
         return Promise.resolve(results);
       });
@@ -1846,20 +1846,20 @@ var DefaultController = {
         'classes/' + target.className + '/' + target._getId(),
         params,
         options
-      ).then((response) => {
+      ).then(async (response) => {
         if (target instanceof ParseObject) {
           target._clearPendingOps();
           target._clearServerData();
           target._finishFetch(response);
         }
-        localDatastore._updateObjectIfPinned(target);
+        await localDatastore._updateObjectIfPinned(target);
         return target;
       });
     }
   },
 
-  destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
-    const localDatastore = CoreManager.getAllContents();
+  async destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
     var RESTController = CoreManager.getRESTController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
@@ -1905,14 +1905,14 @@ var DefaultController = {
           });
         });
       });
-      return deleteCompleted.then(() => {
+      return deleteCompleted.then(async () => {
         if (errors.length) {
           var aggregate = new ParseError(ParseError.AGGREGATE_ERROR);
           aggregate.errors = errors;
           return Promise.reject(aggregate);
         }
         for (const object of target) {
-          localDatastore._destroyObjectIfPinned(object);
+          await localDatastore._destroyObjectIfPinned(object);
         }
         return Promise.resolve(target);
       });
@@ -1922,17 +1922,18 @@ var DefaultController = {
         'classes/' + target.className + '/' + target._getId(),
         {},
         options
-      ).then(() => {
-        localDatastore._destroyObjectIfPinned(target);
+      ).then(async () => {
+        await localDatastore._destroyObjectIfPinned(target);
         return Promise.resolve(target);
       });
     }
-    localDatastore._destroyObjectIfPinned(target);
+    await localDatastore._destroyObjectIfPinned(target);
     return Promise.resolve(target);
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
-    const localDatastore = CoreManager.getAllContents();
+    const localDatastore = CoreManager.getLocalDatastore();
+    const mapIdForPin = {};
     var RESTController = CoreManager.getRESTController();
     var stateController = CoreManager.getObjectStateController();
     if (Array.isArray(target)) {
@@ -2002,6 +2003,8 @@ var DefaultController = {
               ready.resolve();
               return batchReturned.then((responses, status) => {
                 if (responses[index].hasOwnProperty('success')) {
+                  const objectId = responses[index].success.objectId;
+                  mapIdForPin[objectId] = obj._localId;
                   obj._handleSaveResponse(responses[index].success, status);
                 } else {
                   if (!objectError && responses[index].hasOwnProperty('error')) {
@@ -2034,12 +2037,13 @@ var DefaultController = {
           });
 
           return when(batchTasks);
-        }).then(() => {
+        }).then(async () => {
           if (objectError) {
             return Promise.reject(objectError);
           }
           for (const object of target) {
-            localDatastore._updateObjectIfPinned(object);
+            await localDatastore._updateLocalIdForObjectId(mapIdForPin[object.id], object.id);
+            await localDatastore._updateObjectIfPinned(object);
           }
           return Promise.resolve(target);
         });
@@ -2047,6 +2051,7 @@ var DefaultController = {
 
     } else if (target instanceof ParseObject) {
       // copying target lets Flow guarantee the pointer isn't modified elsewhere
+      const localId = target._localId;
       var targetCopy = target;
       var task = function() {
         var params = targetCopy._getSaveParams();
@@ -2064,8 +2069,9 @@ var DefaultController = {
       }
 
       stateController.pushPendingState(target._getStateIdentifier());
-      return stateController.enqueueTask(target._getStateIdentifier(), task).then(() => {
-        localDatastore._updateObjectIfPinned(target);
+      return stateController.enqueueTask(target._getStateIdentifier(), task).then(async () => {
+        await localDatastore._updateLocalIdForObjectId(localId, target.id);
+        await localDatastore._updateObjectIfPinned(target);
         return target;
       }, (error) => {
         return Promise.reject(error);
