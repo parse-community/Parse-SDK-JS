@@ -76,7 +76,7 @@ const mockLocalDatastore = {
   unPinWithName: jest.fn(),
   _handlePinWithName: jest.fn(),
   _handleUnPinWithName: jest.fn(),
-  _getLocalDatastore: jest.fn(),
+  _getAllContent: jest.fn(),
   _serializeObjectsFromPinName: jest.fn(),
   _updateObjectIfPinned: jest.fn(),
   _destroyObjectIfPinned: jest.fn(),

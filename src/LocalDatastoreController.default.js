@@ -26,7 +26,7 @@ const LocalDatastoreController = {
     delete memMap[name];
   },
 
-  getLocalDatastore() {
+  getAllContents() {
     return memMap;
   },
 

@@ -50,7 +50,7 @@ describe('Parse module', () => {
       fromPinWithName: function() {},
       pinWithName: function() {},
       unPinWithName: function() {},
-      getLocalDatastore: function() {},
+      getAllContents: function() {},
       clear: function() {}
     };
     Parse.setLocalDatastoreController(controller);

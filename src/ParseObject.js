@@ -340,7 +340,7 @@ class ParseObject {
 
   _migrateId(serverId: string) {
     if (this._localId && serverId) {
-      const localDatastore = CoreManager.getLocalDatastore();
+      const localDatastore = CoreManager.getAllContents();
       localDatastore._updateLocalIdForObjectId(this._localId, serverId);
       if (singleInstance) {
         const stateController = CoreManager.getObjectStateController();
@@ -1155,7 +1155,7 @@ class ParseObject {
    * recursively, using a default pin name: _default.
    */
   pin() {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     ParseObject.pinAllWithName(localDatastore.DEFAULT_PIN, [this]);
   }
 
@@ -1164,7 +1164,7 @@ class ParseObject {
    * recursively, using a default pin name: _default.
    */
   unPin() {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     ParseObject.unPinAllWithName(localDatastore.DEFAULT_PIN, [this]);
   }
 
@@ -1188,7 +1188,7 @@ class ParseObject {
    * Loads data from the local datastore into this object.
    */
   fetchFromLocalDatastore() {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     if (localDatastore.checkIfEnabled()) {
       const pinned = localDatastore.fromPinWithName(this.id);
       if (!pinned) {
@@ -1677,7 +1677,7 @@ class ParseObject {
    * @static
    */
   static pinAll(objects: Array<ParseObject>) {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     if (localDatastore.checkIfEnabled()) {
       ParseObject.pinAllWithName(localDatastore.DEFAULT_PIN, objects);
     }
@@ -1691,7 +1691,7 @@ class ParseObject {
    * @static
    */
   static pinAllWithName(name: string, objects: Array<ParseObject>) {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     if (localDatastore.checkIfEnabled()) {
       for (const object of objects) {
         localDatastore._handlePinWithName(name, object);
@@ -1707,7 +1707,7 @@ class ParseObject {
    * @static
    */
   static unPinAll(objects: Array<ParseObject>) {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     if (localDatastore.checkIfEnabled()) {
       ParseObject.unPinAllWithName(localDatastore.DEFAULT_PIN, objects);
     }
@@ -1721,7 +1721,7 @@ class ParseObject {
    * @static
    */
   static unPinAllWithName(name: string, objects: Array<ParseObject>) {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     if (localDatastore.checkIfEnabled()) {
       for (const object of objects) {
         localDatastore._handleUnPinWithName(name, object);
@@ -1735,7 +1735,7 @@ class ParseObject {
    * @static
    */
   static unPinAllObjects() {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     if (localDatastore.checkIfEnabled()) {
       localDatastore.unPinWithName(localDatastore.DEFAULT_PIN);
     }
@@ -1748,7 +1748,7 @@ class ParseObject {
    * @static
    */
   static unPinAllObjectsWithName(name: string) {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     if (localDatastore.checkIfEnabled()) {
       localDatastore.unPinWithName(localDatastore.PIN_PREFIX + name);
     }
@@ -1757,7 +1757,7 @@ class ParseObject {
 
 var DefaultController = {
   fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): Promise {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     if (Array.isArray(target)) {
       if (target.length < 1) {
         return Promise.resolve([]);
@@ -1859,7 +1859,7 @@ var DefaultController = {
   },
 
   destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     var RESTController = CoreManager.getRESTController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
@@ -1932,7 +1932,7 @@ var DefaultController = {
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     var RESTController = CoreManager.getRESTController();
     var stateController = CoreManager.getObjectStateController();
     if (Array.isArray(target)) {

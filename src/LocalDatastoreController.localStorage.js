@@ -34,7 +34,7 @@ const LocalDatastoreController = {
     localStorage.removeItem(name);
   },
 
-  getLocalDatastore() {
+  getAllContents() {
     const LDS = {};
     for (let i = 0; i < localStorage.length; i += 1) {
       const key = localStorage.key(i);

@@ -362,7 +362,7 @@ describe('CoreManager', () => {
       fromPinWithName: function() {},
       pinWithName: function() {},
       unPinWithName: function() {},
-      getLocalDatastore: function() {},
+      getAllContents: function() {},
       clear: function() {}
     })).not.toThrow();
   });
@@ -372,7 +372,7 @@ describe('CoreManager', () => {
       fromPinWithName: function() {},
       pinWithName: function() {},
       unPinWithName: function() {},
-      getLocalDatastore: function() {},
+      getAllContents: function() {},
       clear: function() {}
     };
 

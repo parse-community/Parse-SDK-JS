@@ -112,7 +112,7 @@ type LocalDatastoreController = {
   fromPinWithName: (name: string) => ?any;
   pinWithName: (name: string, objects: any) => void;
   unPinWithName: (name: string) => void;
-  getLocalDatastore: () => ?any;
+  getAllContents: () => ?any;
   clear: () => void;
 };
 type UserController = {
@@ -340,7 +340,7 @@ module.exports = {
   },
 
   setLocalDatastoreController(controller: LocalDatastoreController) {
-    requireMethods('LocalDatastoreController', ['pinWithName', 'fromPinWithName', 'unPinWithName', 'getLocalDatastore', 'clear'], controller);
+    requireMethods('LocalDatastoreController', ['pinWithName', 'fromPinWithName', 'unPinWithName', 'getAllContents', 'clear'], controller);
     config['LocalDatastoreController'] = controller;
   },
 
@@ -352,7 +352,7 @@ module.exports = {
     config['LocalDatastore'] = store;
   },
 
-  getLocalDatastore() {
+  getAllContents() {
     return config['LocalDatastore'];
   },
 

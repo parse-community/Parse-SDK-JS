@@ -459,7 +459,7 @@ class ParseQuery {
     const select = this._select;
 
     if (this._queriesLocalDatastore) {
-      const localDatastore = CoreManager.getLocalDatastore();
+      const localDatastore = CoreManager.getAllContents();
       const objects = localDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
       return objects.map((json) => {
         const object = ParseObject.fromJSON(json);
@@ -1475,7 +1475,7 @@ class ParseQuery {
    * Changes the source of this query to the default group of pinned objects.
    */
   fromPin() {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     this.fromPinWithName(localDatastore.DEFAULT_PIN);
   }
 
@@ -1483,7 +1483,7 @@ class ParseQuery {
    * Changes the source of this query to a specific group of pinned objects.
    */
   fromPinWithName(name: string) {
-    const localDatastore = CoreManager.getLocalDatastore();
+    const localDatastore = CoreManager.getAllContents();
     if (localDatastore.checkIfEnabled()) {
       this._queriesLocalDatastore = true;
       this._localDatastorePinName = name;

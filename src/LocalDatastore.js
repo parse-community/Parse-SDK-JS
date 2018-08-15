@@ -34,9 +34,9 @@ const LocalDatastore = {
     return controller.unPinWithName(name);
   },
 
-  _getLocalDatastore() {
+  _getAllContents() {
     const controller = CoreManager.getLocalDatastoreController();
-    return controller.getLocalDatastore();
+    return controller.getAllContents();
   },
 
   _clear(): void {
@@ -96,7 +96,7 @@ const LocalDatastore = {
   },
 
   _serializeObjectsFromPinName(name: string) {
-    const localDatastore = this._getLocalDatastore();
+    const localDatastore = this._getAllContents();
     const allObjects = [];
     for (const key in localDatastore) {
       if (key !== DEFAULT_PIN && !key.startsWith(PIN_PREFIX)) {
@@ -133,7 +133,7 @@ const LocalDatastore = {
       return;
     }
     this.unPinWithName(object.id);
-    const localDatastore = this._getLocalDatastore();
+    const localDatastore = this._getAllContents();
     for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
         let pinned = this.fromPinWithName(key) || [];
@@ -157,7 +157,7 @@ const LocalDatastore = {
     this.unPinWithName(localId);
     this.pinWithName(objectId, unsaved);
 
-    const localDatastore = this._getLocalDatastore();
+    const localDatastore = this._getAllContents();
 
     for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
