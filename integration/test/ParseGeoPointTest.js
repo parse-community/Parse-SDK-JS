@@ -251,7 +251,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('can measure distance within km - mid peninsula', (done) => {
+  it('can measure distance within miles - mid peninsula', (done) => {
     const sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
     const query = new Parse.Query(TestPoint);
     query.withinMiles('location', sfo, 10.0);
@@ -406,7 +406,7 @@ describe('Geo Point', () => {
     });
   });
 
-  it('can measure distance within km unsorted - mid peninsula', (done) => {
+  it('can measure distance within miles unsorted - mid peninsula', (done) => {
     const sfo = new Parse.GeoPoint(37.6189722, -122.3748889);
     const query = new Parse.Query(TestPoint);
     query.withinMiles('location', sfo, 10.0, false);
