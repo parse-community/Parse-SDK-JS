@@ -20,6 +20,7 @@ jest.dontMock('../promiseUtils');
 require('../ParseLiveQuery');
 const CoreManager = require('../CoreManager');
 const ParseQuery = require('../ParseQuery').default;
+const LiveQuerySubscription = require('../LiveQuerySubscription').default;
 
 describe('ParseLiveQuery', () => {
   beforeEach(() => {
@@ -181,5 +182,12 @@ describe('ParseLiveQuery', () => {
       }, 1);
     });
 
+  });
+
+  it('should not throw on usubscribe', (done) => {
+    const query = new ParseQuery("ObjectType");
+    query.equalTo("test", "value");
+    const subscription = new LiveQuerySubscription('0', query, 'token');
+    subscription.unsubscribe().then(done).catch(done.fail);
   });
 });
