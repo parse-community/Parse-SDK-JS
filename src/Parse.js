@@ -62,9 +62,8 @@ var Parse = {
 
   /**
    * Call this method to set your LocalDatastoreStorage engine
-   * Starting Parse@1.12, the ParseSDK do not provide support for Caching
-   * is not provided at a stable path and changes over versions.
-   * @param {LocalDatastoreController} controller a cache data storage.
+   * If using React-Native use {@link Parse.setAsyncStorage Parse.setAsyncStorage()}
+   * @param {LocalDatastoreController} controller a data storage.
    * @static
    */
   setLocalDatastoreController(controller: any) {
@@ -192,8 +191,30 @@ Parse._encode = function(value, _, disallowObjects) {
 Parse._getInstallationId = function() {
   return CoreManager.getInstallationController().currentInstallationId();
 }
+/**
+ * Enable pinning in your application.
+ * This must be called before your application can use pinning.
+ *
+ * @static
+ */
 Parse.enableLocalDatastore = function() {
   Parse.LocalDatastore.isEnabled = true;
+}
+/**
+ * Flag that indicates whether Local Datastore is enabled.
+ *
+ * @static
+ */
+Parse.isLocalDatastoreEnabled = function() {
+  return Parse.LocalDatastore.isEnabled;
+}
+/**
+ * Gets all contents from Local Datastore
+ *
+ * @static
+ */
+Parse.dumpLocalDatastore = function() {
+  return Parse.LocalDatastore._getAllContents();
 }
 CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);

@@ -1176,7 +1176,7 @@ class ParseObject {
   }
 
   /**
-   * Removes the object and every object it points to in the local datastor, recursively.
+   * Removes the object and every object it points to in the local datastore, recursively.
    */
   unPinWithName(name: string): Promise {
     return ParseObject.unPinAllWithName(name, [this]);
@@ -1184,6 +1184,7 @@ class ParseObject {
 
   /**
    * Loads data from the local datastore into this object.
+   * TODO: Should include all pointers?
    */
   async fetchFromLocalDatastore(): Promise {
     const localDatastore = CoreManager.getLocalDatastore();

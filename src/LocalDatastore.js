@@ -42,6 +42,8 @@ const LocalDatastore = {
     return controller.clear();
   },
 
+  // Pin the object and children recursively
+  // Saves the object and children key to Pin Name
   async _handlePinWithName(name: string, object: ParseObject): Promise {
     const pinName = this.getPinName(name);
     const objects = this._getChildren(object);
@@ -55,6 +57,8 @@ const LocalDatastore = {
     await this.pinWithName(pinName, toPin);
   },
 
+  // Removes object and children keys from pin name
+  // Keeps the object and children pinned
   async _handleUnPinWithName(name: string, object: ParseObject) {
     const pinName = this.getPinName(name);
     const objects = this._getChildren(object);
@@ -69,6 +73,7 @@ const LocalDatastore = {
     }
   },
 
+  // Retrieve all pointer fields from object recursively
   _getChildren(object: ParseObject) {
     const encountered = {};
     const json = object._toFullJSON();
@@ -94,6 +99,8 @@ const LocalDatastore = {
     }
   },
 
+  // Transform keys in pin name to objects
+  // TODO: Transform children?
   async _serializeObjectsFromPinName(name: string) {
     const localDatastore = await this._getAllContents();
     const allObjects = [];
@@ -114,6 +121,8 @@ const LocalDatastore = {
     return Promise.all(objects);
   },
 
+  // Called when an object is save / fetched
+  // Update object pin value
   async _updateObjectIfPinned(object: ParseObject) {
     if (!this.isEnabled) {
       return;
@@ -125,6 +134,9 @@ const LocalDatastore = {
     }
   },
 
+  // Called when object is destroyed
+  // Unpin object and remove all references from pin names
+  // TODO: Destroy children?
   async _destroyObjectIfPinned(object: ParseObject) {
     if (!this.isEnabled) {
       return;
@@ -151,6 +163,7 @@ const LocalDatastore = {
     }
   },
 
+  // Update pin and references of the unsaved object
   async _updateLocalIdForObject(localId, object: ParseObject) {
     if (!this.isEnabled) {
       return;
