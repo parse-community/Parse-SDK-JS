@@ -51,7 +51,7 @@ describe('Parse Query', () => {
       return query.find();
     }).then((results) => {
       assert.equal(results.length, 1);
-      assert.equal(results[0].get('foo'), 'baz');
+      assert.equal(['baz', 'qux'].includes(results[0].get('foo')), true);
       done();
     }).catch(done.fail);
   });

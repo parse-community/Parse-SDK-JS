@@ -1117,8 +1117,6 @@ class ParseObject {
 
   /**
    * Destroy this model on the server if it was already persisted.
-   * If `wait: true` is passed, waits for the server to respond
-   * before removal.
    *
    * @param {Object} options
    * Valid options are:<ul>
