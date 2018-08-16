@@ -1188,7 +1188,8 @@ class ParseObject {
   async fetchFromLocalDatastore(): Promise {
     const localDatastore = CoreManager.getLocalDatastore();
     if (localDatastore.checkIfEnabled()) {
-      const pinned = await localDatastore.fromPinWithName(this.id);
+      const objectKey = localDatastore.getKeyForObject(this);
+      const pinned = await localDatastore.fromPinWithName(objectKey);
       if (!pinned) {
         throw new Error('Cannot fetch an unsaved ParseObject');
       }
@@ -2042,7 +2043,7 @@ var DefaultController = {
             return Promise.reject(objectError);
           }
           for (const object of target) {
-            await localDatastore._updateLocalIdForObjectId(mapIdForPin[object.id], object.id);
+            await localDatastore._updateLocalIdForObject(mapIdForPin[object.id], object);
             await localDatastore._updateObjectIfPinned(object);
           }
           return Promise.resolve(target);
@@ -2070,7 +2071,7 @@ var DefaultController = {
 
       stateController.pushPendingState(target._getStateIdentifier());
       return stateController.enqueueTask(target._getStateIdentifier(), task).then(async () => {
-        await localDatastore._updateLocalIdForObjectId(localId, target.id);
+        await localDatastore._updateLocalIdForObject(localId, target);
         await localDatastore._updateObjectIfPinned(target);
         return target;
       }, (error) => {

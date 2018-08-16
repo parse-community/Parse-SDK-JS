@@ -45,9 +45,9 @@ const LocalDatastore = {
   async _handlePinWithName(name: string, object: ParseObject): Promise {
     const pinName = this.getPinName(name);
     const objects = this._getChildren(object);
-    objects[object._getId()] = object._toFullJSON();
-    for (const objectId in objects) {
-      await this.pinWithName(objectId, objects[objectId]);
+    objects[this.getKeyForObject(object)] = object._toFullJSON();
+    for (const objectKey in objects) {
+      await this.pinWithName(objectKey, objects[objectKey]);
     }
     const pinned = await this.fromPinWithName(pinName) || [];
     const objectIds = Object.keys(objects);
@@ -59,7 +59,7 @@ const LocalDatastore = {
     const pinName = this.getPinName(name);
     const objects = this._getChildren(object);
     const objectIds = Object.keys(objects);
-    objectIds.push(object._getId());
+    objectIds.push(this.getKeyForObject(object));
     let pinned = await this.fromPinWithName(pinName) || [];
     pinned = pinned.filter(item => !objectIds.includes(item));
     if (pinned.length == 0) {
@@ -84,7 +84,8 @@ const LocalDatastore = {
     if (!object.objectId) {
       return;
     } else {
-      encountered[object.objectId] = object;
+      const objectKey = this.getKeyForObject(object);
+      encountered[objectKey] = object;
     }
     for (const key in object) {
       if (object[key].__type && object[key].__type === 'Object') {
@@ -109,7 +110,7 @@ const LocalDatastore = {
     if (!Array.isArray(pinned)) {
       return Promise.resolve([]);
     }
-    const objects = pinned.map(async (objectId) => await this.fromPinWithName(objectId));
+    const objects = pinned.map(async (objectKey) => await this.fromPinWithName(objectKey));
     return Promise.all(objects);
   },
 
@@ -117,9 +118,10 @@ const LocalDatastore = {
     if (!this.isEnabled) {
       return;
     }
-    const pinned = await this.fromPinWithName(object.id);
+    const objectKey = this.getKeyForObject(object);
+    const pinned = await this.fromPinWithName(objectKey);
     if (pinned) {
-      await this.pinWithName(object.id, object._toFullJSON());
+      await this.pinWithName(objectKey, object._toFullJSON());
     }
   },
 
@@ -127,17 +129,18 @@ const LocalDatastore = {
     if (!this.isEnabled) {
       return;
     }
-    const pin = await this.fromPinWithName(object.id);
+    const objectKey = this.getKeyForObject(object);
+    const pin = await this.fromPinWithName(objectKey);
     if (!pin) {
       return;
     }
-    await this.unPinWithName(object.id);
+    await this.unPinWithName(objectKey);
     const localDatastore = await this._getAllContents();
     for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
         let pinned = await this.fromPinWithName(key) || [];
-        if (pinned.includes(object.id)) {
-          pinned = pinned.filter(item => item !== object.id);
+        if (pinned.includes(objectKey)) {
+          pinned = pinned.filter(item => item !== objectKey);
           if (pinned.length == 0) {
             await this.unPinWithName(key);
           } else {
@@ -148,29 +151,37 @@ const LocalDatastore = {
     }
   },
 
-  async _updateLocalIdForObjectId(localId, objectId) {
+  async _updateLocalIdForObject(localId, object: ParseObject) {
     if (!this.isEnabled) {
       return;
     }
-    const unsaved = await this.fromPinWithName(localId);
+    const localKey = `${object.className}_${localId}`;
+    const objectKey = this.getKeyForObject(object);
+
+    const unsaved = await this.fromPinWithName(localKey);
     if (!unsaved) {
       return;
     }
-    await this.unPinWithName(localId);
-    await this.pinWithName(objectId, unsaved);
+    await this.unPinWithName(localKey);
+    await this.pinWithName(objectKey, unsaved);
 
     const localDatastore = await this._getAllContents();
 
     for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
         let pinned = await this.fromPinWithName(key) || [];
-        if (pinned.includes(localId)) {
-          pinned = pinned.filter(item => item !== localId);
-          pinned.push(objectId);
+        if (pinned.includes(localKey)) {
+          pinned = pinned.filter(item => item !== localKey);
+          pinned.push(objectKey);
           await this.pinWithName(key, pinned);
         }
       }
     }
+  },
+
+  getKeyForObject(object: any) {
+    const objectId = object.objectId || object._getId();
+    return `${object.className}_${objectId}`;
   },
 
   getPinName(pinName: ?string) {

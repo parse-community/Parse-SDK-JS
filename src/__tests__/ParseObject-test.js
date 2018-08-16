@@ -80,8 +80,9 @@ const mockLocalDatastore = {
   _serializeObjectsFromPinName: jest.fn(),
   _updateObjectIfPinned: jest.fn(),
   _destroyObjectIfPinned: jest.fn(),
-  _updateLocalIdForObjectId: jest.fn(),
+  _updateLocalIdForObject: jest.fn(),
   _clear: jest.fn(),
+  getKeyForObject: jest.fn(),
   checkIfEnabled: jest.fn(() => {
     if (!mockLocalDatastore.isEnabled) {
       console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
@@ -2344,12 +2345,16 @@ describe('ParseObject pin', () => {
     const object = new ParseObject('Item');
     object.id = '123';
     mockLocalDatastore
+      .getKeyForObject
+      .mockImplementationOnce(() => 'Item_123');
+
+    mockLocalDatastore
       .fromPinWithName
       .mockImplementationOnce(() => object._toFullJSON());
 
     await object.fetchFromLocalDatastore();
     expect(mockLocalDatastore.fromPinWithName).toHaveBeenCalledTimes(1);
-    expect(mockLocalDatastore.fromPinWithName).toHaveBeenCalledWith('123');
+    expect(mockLocalDatastore.fromPinWithName).toHaveBeenCalledWith('Item_123');
   });
 
   it('cannot fetchFromLocalDatastore if unsaved', async () => {
