@@ -1,5 +1,6 @@
 var equalObjects = require('./equals').default;
 var decode = require('./decode').default;
+var ParseError = require('./ParseError').default;
 
 /**
  * contains -- Determines if an object is contained in a list with special handling for Parse pointers.
@@ -25,7 +26,10 @@ function contains(haystack, needle) {
  * Since we find queries that match objects, rather than objects that match
  * queries, we can avoid building a full-blown query tool.
  */
-function matchesQuery(object, query) {
+function matchesQuery(className, object, objects, query) {
+  if (object.className !== className) {
+    return false;
+  }
   let obj = object;
   let q = query;
   if (object.toJSON) {
@@ -34,8 +38,9 @@ function matchesQuery(object, query) {
   if (query.toJSON) {
     q = query.toJSON().where;
   }
+  obj.className = className;
   for (var field in q) {
-    if (!matchesKeyConstraints(obj, field, q[field])) {
+    if (!matchesKeyConstraints(className, obj, objects, field, q[field])) {
       return false;
     }
   }
@@ -57,7 +62,7 @@ function equalObjectsGeneric(obj, compareTo, eqlFn) {
 /**
  * Determines whether an object matches a single key's constraints
  */
-function matchesKeyConstraints(object, key, constraints) {
+function matchesKeyConstraints(className, object, objects, key, constraints) {
   if (constraints === null) {
     return false;
   }
@@ -66,20 +71,39 @@ function matchesKeyConstraints(object, key, constraints) {
     var keyComponents = key.split('.');
     var subObjectKey = keyComponents[0];
     var keyRemainder = keyComponents.slice(1).join('.');
-    return matchesKeyConstraints(object[subObjectKey] || {}, keyRemainder, constraints);
+    return matchesKeyConstraints(className, object[subObjectKey] || {}, objects, keyRemainder, constraints);
   }
   var i;
   if (key === '$or') {
     for (i = 0; i < constraints.length; i++) {
-      if (matchesQuery(object, constraints[i])) {
+      if (matchesQuery(className, object, objects, constraints[i])) {
         return true;
       }
     }
     return false;
   }
+  if (key === '$and') {
+    for (i = 0; i < constraints.length; i++) {
+      if (!matchesQuery(className, object, objects, constraints[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (key === '$nor') {
+    for (i = 0; i < constraints.length; i++) {
+      if (matchesQuery(className, object, objects, constraints[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
   if (key === '$relatedTo') {
     // Bail! We can't handle relational queries locally
     return false;
+  }
+  if (!(/^[A-Za-z][0-9A-Za-z_]*$/).test(key)) {
+    throw new ParseError(ParseError.INVALID_KEY_NAME);
   }
   // Equality (or Array contains) cases
   if (typeof constraints !== 'object') {
@@ -102,6 +126,9 @@ function matchesKeyConstraints(object, key, constraints) {
     compareTo = constraints[condition];
     if (compareTo.__type) {
       compareTo = decode(compareTo);
+    }
+    if (toString.call(compareTo) === '[object Date]') {
+      object[key] = new Date(object[key]);
     }
     switch (condition) {
     case '$lt':
@@ -160,7 +187,7 @@ function matchesKeyConstraints(object, key, constraints) {
       }
       break;
     }
-    case '$regex':
+    case '$regex': {
       if (typeof compareTo === 'object') {
         return compareTo.test(object[key]);
       }
@@ -179,11 +206,15 @@ function matchesKeyConstraints(object, key, constraints) {
         escapeStart = compareTo.indexOf('\\Q', escapeEnd);
       }
       expString += compareTo.substring(Math.max(escapeStart, escapeEnd + 2));
-      var exp = new RegExp(expString, constraints.$options || '');
+      let modifiers = constraints.$options || '';
+      modifiers = modifiers.replace('x', '').replace('s', '')
+      // Parse Server / Mongo support x and s modifiers but JS RegExp doesn't
+      var exp = new RegExp(expString, modifiers);
       if (!exp.test(object[key])) {
         return false;
       }
       break;
+    }
     case '$nearSphere':
       if (!compareTo || !object[key]) {
         return false;
@@ -210,10 +241,54 @@ function matchesKeyConstraints(object, key, constraints) {
       // Not a query type, but a way to add a cap to $nearSphere. Ignore and
       // avoid the default
       break;
-    case '$select':
+    case '$select': {
+      const subQueryObjects = objects.filter((obj, index, arr) => {
+        return matchesQuery(compareTo.query.className, obj, arr, compareTo.query.where);
+      });
+      for (let i = 0; i < subQueryObjects.length; i += 1) {
+        const subObject = subQueryObjects[i];
+        return equalObjects(object[key], subObject[compareTo.key]);
+      }
       return false;
-    case '$dontSelect':
+    }
+    case '$dontSelect': {
+      const subQueryObjects = objects.filter((obj, index, arr) => {
+        return matchesQuery(compareTo.query.className, obj, arr, compareTo.query.where);
+      });
+      for (let i = 0; i < subQueryObjects.length; i += 1) {
+        const subObject = subQueryObjects[i];
+        return !equalObjects(object[key], subObject[compareTo.key]);
+      }
       return false;
+    }
+    case '$inQuery': {
+      const subQueryObjects = objects.filter((obj, index, arr) => {
+        return matchesQuery(compareTo.className, obj, arr, compareTo.where);
+      });
+
+      for (let i = 0; i < subQueryObjects.length; i += 1) {
+        const subObject = subQueryObjects[i];
+        if (object[key].className === subObject.className &&
+            object[key].objectId === subObject.objectId) {
+          return true;
+        }
+      }
+      return false;
+    }
+    case '$notInQuery': {
+      const subQueryObjects = objects.filter((obj, index, arr) => {
+        return matchesQuery(compareTo.className, obj, arr, compareTo.where);
+      });
+
+      for (let i = 0; i < subQueryObjects.length; i += 1) {
+        const subObject = subQueryObjects[i];
+        if (object[key].className === subObject.className &&
+            object[key].objectId === subObject.objectId) {
+          return false;
+        }
+      }
+      return true;
+    }
     default:
       return false;
     }
@@ -221,8 +296,31 @@ function matchesKeyConstraints(object, key, constraints) {
   return true;
 }
 
+function validateQuery(query: any) {
+  let q = query;
+
+  if (query.toJSON) {
+    q = query.toJSON().where;
+  }
+  const specialQuerykeys = ['$and', '$or', '$nor', '_rperm', '_wperm', '_perishable_token', '_email_verify_token', '_email_verify_token_expires_at', '_account_lockout_expires_at', '_failed_login_count'];
+
+  Object.keys(q).forEach(key => {
+    if (q && q[key] && q[key].$regex) {
+      if (typeof q[key].$options === 'string') {
+        if (!q[key].$options.match(/^[imxs]+$/)) {
+          throw new ParseError(ParseError.INVALID_QUERY, `Bad $options value for query: ${q[key].$options}`);
+        }
+      }
+    }
+    if (specialQuerykeys.indexOf(key) < 0 && !key.match(/^[a-zA-Z][a-zA-Z0-9_\.]*$/)) {
+      throw new ParseError(ParseError.INVALID_KEY_NAME, `Invalid key name: ${key}`);
+    }
+  });
+}
+
 var OfflineQuery = {
-  matchesQuery: matchesQuery
+  matchesQuery: matchesQuery,
+  validateQuery: validateQuery,
 };
 
 module.exports = OfflineQuery;

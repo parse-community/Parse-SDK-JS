@@ -133,6 +133,37 @@ function copyMissingDataWithMask(src, dest, mask, copyThisLevel){
   }
 }
 
+function handleOfflineSort(a, b, sorts) {
+  let order = sorts[0];
+  const operator = order.slice(0, 1);
+  const isDescending = operator === '-';
+  if (isDescending) {
+    order = order.substring(1);
+  }
+  if (order === '_created_at') {
+    order = 'createdAt';
+  }
+  if (order === '_updated_at') {
+    order = 'updatedAt';
+  }
+  if (!(/^[A-Za-z][0-9A-Za-z_]*$/).test(order) || order === 'password') {
+    throw new ParseError(ParseError.INVALID_KEY_NAME);
+  }
+  const field1 = a.get(order);
+  const field2 = b.get(order);
+
+  if (field1 < field2) {
+    return isDescending ? 1 : -1;
+  }
+  if (field1 > field2) {
+    return isDescending ? -1 : 1;
+  }
+  if (sorts.length > 1) {
+    const remainingSorts = sorts.slice(1);
+    return handleOfflineSort(a, b, remainingSorts);
+  }
+  return 0;
+}
 /**
  * Creates a new parse Parse.Query for the given Parse.Object subclass.
  *
@@ -283,6 +314,51 @@ class ParseQuery {
    */
   _regexStartWith(string: string): String {
     return '^' + quote(string);
+  }
+
+  // TODO: handle limit/skip/params/count/get/each/first
+  async _handleOfflineQuery(params: any) {
+    OfflineQuery.validateQuery(this);
+    const localDatastore = CoreManager.getLocalDatastore();
+    const objects = await localDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
+    let results = objects.map((json, index, arr) => {
+      const object = ParseObject.fromJSON(json);
+
+      if (!OfflineQuery.matchesQuery(this.className, object, arr, this)) {
+        return null;
+      }
+      return object;
+    }).filter((object) => object !== null);
+    if (params.keys) {
+      let keys = params.keys.split(',');
+      const alwaysSelectedKeys = ['className', 'objectId', 'createdAt', 'updatedAt', 'ACL'];
+      keys = keys.concat(alwaysSelectedKeys);
+      results = results.map((object) => {
+        const json = object._toFullJSON();
+        Object.keys(json).forEach((key) => {
+          if (!keys.includes(key)) {
+            delete json[key];
+          }
+        });
+        return ParseObject.fromJSON(json);
+      });
+    }
+    if (params.order) {
+      const sorts = params.order.split(',');
+      results.sort((a, b) => {
+        return handleOfflineSort(a, b, sorts);
+      });
+    }
+    let limit = results.length;
+    if (params.limit !== 0 && params.limit < results.length) {
+      limit = params.limit;
+    }
+    results = results.splice(0, limit);
+    if (params.skip) {
+      const skip = params.skip > limit ? limit : params.skip;
+      results = results.splice(skip, limit);
+    }
+    return results;
   }
 
   /**
@@ -443,7 +519,7 @@ class ParseQuery {
    * @return {Promise} A promise that is resolved with the results when
    * the query completes.
    */
-  async find(options?: FullOptions): Promise {
+  find(options?: FullOptions): Promise {
     options = options || {};
 
     const findOptions = {};
@@ -459,18 +535,7 @@ class ParseQuery {
     const select = this._select;
 
     if (this._queriesLocalDatastore) {
-      const localDatastore = CoreManager.getLocalDatastore();
-      const objects = await localDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
-      return objects.map((json) => {
-        const object = ParseObject.fromJSON(json);
-        if (object.className !== this.className) {
-          return null;
-        }
-        if (!OfflineQuery.matchesQuery(object, this)) {
-          return null;
-        }
-        return object;
-      }).filter((object) => object !== null);
+      return this._handleOfflineQuery(this.toJSON());
     }
     return controller.find(
       this.className,
@@ -645,6 +710,15 @@ class ParseQuery {
     params.limit = 1;
 
     var select = this._select;
+
+    if (this._queriesLocalDatastore) {
+      return this._handleOfflineQuery(params).then((objects) => {
+        if (!objects[0]) {
+          return undefined;
+        }
+        return objects[0];
+      });
+    }
 
     return controller.find(
       this.className,

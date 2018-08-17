@@ -14,6 +14,12 @@ import ParseGeoPoint from './ParseGeoPoint';
 import ParseObject from './ParseObject';
 
 export default function equals(a, b) {
+  if (toString.call(a) === '[object Date]' || toString.call(b) === '[object Date]') {
+    const dateA = new Date(a);
+    const dateB = new Date(b);
+    return (+dateA === +dateB);
+  }
+
   if (typeof a !== typeof b) {
     return false;
   }
@@ -51,7 +57,11 @@ export default function equals(a, b) {
       (a instanceof ParseObject)) {
     return a.equals(b);
   }
-
+  if (b instanceof ParseObject) {
+    if (a.__type === 'Object' || a.__type === 'Pointer') {
+      return a.objectId === b.id && a.className === b.className;
+    }
+  }
   if (Object.keys(a).length !== Object.keys(b).length) {
     return false;
   }

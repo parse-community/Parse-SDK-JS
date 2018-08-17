@@ -90,11 +90,18 @@ const LocalDatastore = {
       return;
     } else {
       const objectKey = this.getKeyForObject(object);
+      if (encountered[objectKey]) {
+        return;
+      }
       encountered[objectKey] = object;
     }
     for (const key in object) {
-      if (object[key].__type && object[key].__type === 'Object') {
-        this._traverse(object[key], encountered);
+      let json = object[key];
+      if (!object[key]) {
+        json = object;
+      }
+      if (json.__type && json.__type === 'Object') {
+        this._traverse(json, encountered);
       }
     }
   },

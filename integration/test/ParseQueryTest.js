@@ -3,19 +3,14 @@
 const assert = require('assert');
 const clear = require('./clear');
 const Parse = require('../../node');
-const path = require('path');
-const TestObject = Parse.Object.extend('TestObject');
-const Item = Parse.Object.extend('Item');
 
-global.localStorage = require('./mockLocalStorage');
-const mockRNStorage = require('./mockRNStorage');
+const TestObject = Parse.Object.extend('TestObject');
 
 describe('Parse Query', () => {
   beforeEach((done) => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
-    Parse.LocalDatastore._clear();
     clear().then(() => {
       const numbers = [];
       for (let i = 0; i < 10; i++) {
@@ -1806,72 +1801,4 @@ describe('Parse Query', () => {
       done();
     });
   });
-
-  const controllers = [
-    { name: 'Default', file: require(path.resolve(__dirname, '../../lib/node/LocalDatastoreController.default')) },
-    { name: 'Browser', file: require(path.resolve(__dirname, '../../lib/node/LocalDatastoreController.browser')) },
-    { name: 'React-Native', file: require(path.resolve(__dirname, '../../lib/node/LocalDatastoreController.react-native')) },
-  ];
-
-  for (let i = 0; i < controllers.length; i += 1) {
-    const controller = controllers[i];
-
-    describe(`Parse Query Pinning (${controller.name})`, () => {
-      beforeEach(() => {
-        const StorageController = controller.file;
-        Parse.CoreManager.setAsyncStorage(mockRNStorage);
-        Parse.CoreManager.setLocalDatastoreController(StorageController);
-        Parse.enableLocalDatastore();
-      });
-
-      it(`${controller.name} can query from pin with name`, async () => {
-        const obj1 = new TestObject({ field: 1 });
-        const obj2 = new TestObject({ field: 2 });
-        const obj3 = new TestObject({ field: 3 });
-        const item = new Item();
-        const objects = [obj1, obj2, obj3, item];
-        await Parse.Object.saveAll(objects);
-
-        await Parse.Object.pinAllWithName('test_pin', objects);
-        const query = new Parse.Query(TestObject);
-        query.greaterThan('field', 1);
-        query.fromPinWithName('test_pin');
-        const results = await query.find();
-
-        assert.equal(results.length, 2);
-        assert(results[0].get('field') > 1);
-        assert(results[1].get('field') > 1);
-      });
-
-      it(`${controller.name} can query from local datastore`, async () => {
-        const obj1 = new TestObject({ field: 1 });
-        const obj2 = new TestObject({ field: 2 });
-        const obj3 = new TestObject({ field: 3 });
-        const objects = [obj1, obj2, obj3];
-        await Parse.Object.saveAll(objects);
-
-        await Parse.Object.pinAll(objects);
-        const query = new Parse.Query(TestObject);
-        query.fromLocalDatastore();
-        const results = await query.find();
-
-        assert.equal(results.length, 3);
-      });
-
-      it(`${controller.name} can query from pin`, async () => {
-        const obj1 = new TestObject({ field: 1 });
-        const obj2 = new TestObject({ field: 2 });
-        const obj3 = new TestObject({ field: 3 });
-        const objects = [obj1, obj2, obj3];
-        await Parse.Object.saveAll(objects);
-
-        await Parse.Object.pinAll(objects);
-        const query = new Parse.Query(TestObject);
-        query.fromPin();
-        const results = await query.find();
-
-        assert.equal(results.length, 3);
-      });
-    });
-  }
 });
