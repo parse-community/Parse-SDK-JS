@@ -1149,14 +1149,14 @@ class ParseObject {
   /**
    * Asynchronously stores the object and every object it points to in the local datastore,
    * recursively, using a default pin name: _default.
-   * 
-   * If those other objects have not been fetched from Parse, they will not be stored. 
+   *
+   * If those other objects have not been fetched from Parse, they will not be stored.
    * However, if they have changed data, all the changes will be retained.
-   * 
+   *
    * <pre>
    * await object.pin();
    * </pre>
-   * 
+   *
    * To retrieve object:
    * <code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code>
    */
@@ -1168,7 +1168,7 @@ class ParseObject {
   /**
    * Asynchronously removes the object and every object it points to in the local datastore,
    * recursively, using a default pin name: _default.
-   * 
+   *
    * <pre>
    * await object.unPin();
    * </pre>
@@ -1180,17 +1180,17 @@ class ParseObject {
 
   /**
    * Asynchronously stores the objects and every object they point to in the local datastore, recursively.
-   * 
-   * If those other objects have not been fetched from Parse, they will not be stored. 
+   *
+   * If those other objects have not been fetched from Parse, they will not be stored.
    * However, if they have changed data, all the changes will be retained.
-   * 
+   *
    * <pre>
    * await object.pinWithName(name);
    * </pre>
    *
    * To retrieve object:
    * <code>query.fromLocalDatastore()</code> or <code>query.fromPinWithName(name)</code>
-   * 
+   *
    * @param {String} name Name of Pin.
    */
   pinWithName(name: string): Promise {
@@ -1199,7 +1199,7 @@ class ParseObject {
 
   /**
    * Asynchronously removes the object and every object it points to in the local datastore, recursively.
-   * 
+   *
    * <pre>
    * await object.unPinWithName(name);
    * </pre>
@@ -1210,11 +1210,11 @@ class ParseObject {
 
   /**
    * Asynchronously loads data from the local datastore into this object.
-   * 
+   *
    * <pre>
    * await object.fetchFromLocalDatastore();
    * </pre>
-   * 
+   *
    * You can create an unfetched pointer with <code>Parse.Object.createWithoutData()</code>
    * and then call <code>fetchFromLocalDatastore()</code> on it.
    */
@@ -1707,16 +1707,16 @@ class ParseObject {
    * Asynchronously stores the objects and every object they point to in the local datastore,
    * recursively, using a default pin name: _default.
    *
-   * If those other objects have not been fetched from Parse, they will not be stored. 
+   * If those other objects have not been fetched from Parse, they will not be stored.
    * However, if they have changed data, all the changes will be retained.
-   * 
+   *
    * <pre>
    * await Parse.Object.pinAll([...]);
    * </pre>
-   * 
+   *
    * To retrieve object:
    * <code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code>
-   * 
+   *
    * @param {Array} objects A list of <code>Parse.Object</code>.
    * @static
    */
@@ -1730,16 +1730,16 @@ class ParseObject {
   /**
    * Asynchronously stores the objects and every object they point to in the local datastore, recursively.
    *
-   * If those other objects have not been fetched from Parse, they will not be stored. 
+   * If those other objects have not been fetched from Parse, they will not be stored.
    * However, if they have changed data, all the changes will be retained.
-   * 
+   *
    * <pre>
    * await Parse.Object.pinAllWithName(name, [obj1, obj2, ...]);
    * </pre>
-   * 
+   *
    * To retrieve object:
    * <code>query.fromLocalDatastore()</code> or <code>query.fromPinWithName(name)</code>
-   * 
+   *
    * @param {String} name Name of Pin.
    * @param {Array} objects A list of <code>Parse.Object</code>.
    * @static
@@ -1760,7 +1760,7 @@ class ParseObject {
    * <pre>
    * await Parse.Object.unPinAll([...]);
    * </pre>
-   * 
+   *
    * @param {Array} objects A list of <code>Parse.Object</code>.
    * @static
    */
@@ -1777,7 +1777,7 @@ class ParseObject {
    * <pre>
    * await Parse.Object.unPinAllWithName(name, [obj1, obj2, ...]);
    * </pre>
-   * 
+   *
    * @param {String} name Name of Pin.
    * @param {Array} objects A list of <code>Parse.Object</code>.
    * @static
@@ -1793,11 +1793,11 @@ class ParseObject {
 
   /**
    * Asynchronously removes all objects in the local datastore using a default pin name: _default.
-   * 
+   *
    * <pre>
    * await Parse.Object.unPinAllObjects();
    * </pre>
-   * 
+   *
    * @static
    */
   static unPinAllObjects(): Promise {
@@ -1814,7 +1814,7 @@ class ParseObject {
    * <pre>
    * await Parse.Object.unPinAllObjectsWithName(name);
    * </pre>
-   * 
+   *
    * @param {String} name Name of Pin.
    * @static
    */
