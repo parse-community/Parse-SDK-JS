@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@parse/minami": "^1.0.0",
-    "babel-eslint": "^8.2.6",
+    "babel-eslint": "^9.0.0",
     "babel-jest": "23.2.0",
     "babel-plugin-flow-comments": "6.3.19",
     "babel-plugin-inline-package-json": "2.0.0",
