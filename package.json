@@ -63,7 +63,7 @@
     "jasmine-reporters": "2.3.2",
     "jest-cli": "23.2.0",
     "jsdoc": "3.5.5",
-    "jsdoc-babel": "0.4.0",
+    "jsdoc-babel": "0.5.0",
     "parse-server": "github:parseplatform/parse-server#master",
     "vinyl-source-stream": "2.0.0"
   },
