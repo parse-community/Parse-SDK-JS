@@ -29,9 +29,9 @@ var PRESETS = {
   'react-native': ['@babel/preset-react'],
 };
 var PLUGINS = {
-  'browser': [transformRuntime, '@babel/plugin-transform-flow-strip-types', '@babel/plugin-proposal-class-properties', 'inline-package-json', 'transform-inline-environment-variables'],
-  'node': ['@babel/plugin-transform-flow-strip-types', 'inline-package-json', 'transform-inline-environment-variables'],
-  'react-native': ['@babel/plugin-transform-flow-strip-types', 'inline-package-json', 'transform-inline-environment-variables'],
+  'browser': [transformRuntime, '@babel/plugin-transform-flow-comments', '@babel/plugin-proposal-class-properties', 'inline-package-json', 'transform-inline-environment-variables'],
+  'node': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables'],
+  'react-native': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables'],
 };
 
 var DEV_HEADER = (

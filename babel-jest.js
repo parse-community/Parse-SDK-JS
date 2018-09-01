@@ -5,6 +5,6 @@ module.exports = babelJest.createTransformer({
     "targets": {
       "node": "8"
     }
-  }], '@babel/preset-react'],
-  plugins: [],
+  }]],
+  plugins: ['@babel/plugin-transform-flow-comments'],
 });
