@@ -5,7 +5,6 @@ var gulp       = require('gulp');
 var insert     = require('gulp-insert');
 var path       = require('path');
 var rename     = require('gulp-rename');
-var replace    = require('gulp-replace');
 var source     = require('vinyl-source-stream');
 var uglify     = require('gulp-uglify');
 var watch      = require('gulp-watch');
@@ -23,9 +22,9 @@ var PRESETS = {
   'react-native': ['@babel/preset-react'],
 };
 var PLUGINS = {
-  'browser': ['@babel/plugin-proposal-class-properties', '@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables', '@babel/plugin-transform-runtime'],
-  'node': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables', '@babel/plugin-transform-runtime'],
-  'react-native': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables'],
+  'browser': ['@babel/plugin-transform-runtime', '@babel/plugin-transform-flow-strip-types', '@babel/plugin-proposal-class-properties', 'inline-package-json', 'transform-inline-environment-variables'],
+  'node': ['@babel/plugin-transform-runtime', '@babel/plugin-transform-flow-strip-types', 'inline-package-json', 'transform-inline-environment-variables'],
+  'react-native': ['@babel/plugin-transform-flow-strip-types', 'inline-package-json', 'transform-inline-environment-variables'],
 };
 
 var DEV_HEADER = (
@@ -53,9 +52,6 @@ var FULL_HEADER = (
 );
 
 gulp.task('compile', function() {
-  var packageJSON = {
-    version: VERSION
-  };
   return gulp.src('src/*.js')
     .pipe(babel({
       presets: PRESETS[BUILD],
@@ -68,16 +64,18 @@ gulp.task('compile', function() {
     .pipe(gulp.dest(path.join('lib', BUILD)));
 });
 
-gulp.task('browserify', function() {
+gulp.task('browserify', function(cb) {
   var stream = browserify({
     builtins: ['_process', 'events'],
     entries: 'lib/browser/Parse.js',
     standalone: 'Parse'
   })
-  .exclude('xmlhttprequest')
-  .ignore('_process')
-  .bundle();
-
+    .exclude('xmlhttprequest')
+    .ignore('_process')
+    .bundle();
+  stream.on('end', () => {
+    cb();
+  });
   return stream.pipe(source('parse.js'))
     .pipe(derequire())
     .pipe(insert.prepend(DEV_HEADER))

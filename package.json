@@ -35,12 +35,12 @@
   "devDependencies": {
     "@babel/core": "^7.0.0",
     "@babel/plugin-proposal-class-properties": "^7.0.0",
-    "@babel/plugin-transform-flow-comments": "7.0.0",
+    "@babel/plugin-transform-flow-strip-types": "7.0.0",
     "@babel/plugin-transform-runtime": "7.0.0",
     "@babel/polyfill": "7.0.0",
     "@babel/preset-env": "7.0.0",
     "@babel/preset-react": "7.0.0",
-    "@babel/preset-stage-2": "^7.0.0",
+    "@babel/runtime": "^7.0.0",
     "@parse/minami": "^1.0.0",
     "babel-eslint": "^8.2.6",
     "babel-jest": "23.2.0",
@@ -57,7 +57,6 @@
     "gulp-derequire": "2.1.0",
     "gulp-insert": "0.5.0",
     "gulp-rename": "1.4.0",
-    "gulp-replace": "1.0.0",
     "gulp-uglify": "3.0.0",
     "gulp-watch": "5.0.1",
     "jasmine": "^3.1.0",
@@ -66,7 +65,8 @@
     "jsdoc": "3.5.5",
     "jsdoc-babel": "0.5.0",
     "parse-server": "github:parseplatform/parse-server#master",
-    "vinyl-source-stream": "2.0.0"
+    "vinyl-source-stream": "2.0.0",
+    "vinyl-transform": "^1.0.0"
   },
   "scripts": {
     "build": "./build_releases.sh",
