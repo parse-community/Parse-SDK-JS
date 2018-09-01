@@ -486,12 +486,12 @@ describe('Parse Object', () => {
       assert(!object.has('cat'));
       assert(object.op('cat') instanceof Parse.Op.Unset);
 
-      const Related = new Parse.Object.extend('RelatedObject');
+      const Related = Parse.Object.extend('RelatedObject');
       const relatedObjects = [];
       for (let i = 0; i < 5; i++) {
         relatedObjects.push(new Related({ i: i }));
       }
-      Parse.Object.saveAll(relatedObjects).then(() => {
+      return Parse.Object.saveAll(relatedObjects).then(() => {
         object.set({
           relation: {
             __op: 'Batch',
@@ -520,9 +520,8 @@ describe('Parse Object', () => {
         assert.equal(relation.relationsToAdd.length, 3);
         assert.equal(relation.relationsToRemove.length, 2);
 
-        done();
-      });
-    });
+      }).then(done).catch(done.fail);
+    }).catch(done.fail);
   });
 
   it('can repeatedly unset old attributes', (done) => {
