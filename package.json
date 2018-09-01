@@ -28,7 +28,7 @@
     "react-native": false
   },
   "dependencies": {
-    "babel-runtime": "6.26.0",
+    "@babel/runtime": "^7.0.0",
     "ws": "6.0.0",
     "xmlhttprequest": "1.8.0"
   },
@@ -40,7 +40,6 @@
     "@babel/polyfill": "7.0.0",
     "@babel/preset-env": "7.0.0",
     "@babel/preset-react": "7.0.0",
-    "@babel/runtime": "^7.0.0",
     "@parse/minami": "^1.0.0",
     "babel-eslint": "^8.2.6",
     "babel-jest": "23.2.0",
@@ -65,8 +64,7 @@
     "jsdoc": "3.5.5",
     "jsdoc-babel": "0.5.0",
     "parse-server": "github:parseplatform/parse-server#master",
-    "vinyl-source-stream": "2.0.0",
-    "vinyl-transform": "^1.0.0"
+    "vinyl-source-stream": "2.0.0"
   },
   "scripts": {
     "build": "./build_releases.sh",

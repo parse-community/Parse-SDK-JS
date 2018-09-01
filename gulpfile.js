@@ -12,6 +12,13 @@ var watch      = require('gulp-watch');
 var BUILD = process.env.PARSE_BUILD || 'browser';
 var VERSION = require('./package.json').version;
 
+var transformRuntime = ["@babel/plugin-transform-runtime", {
+  "corejs": false,
+  "helpers": true,
+  "regenerator": false,
+  "useESModules": false
+}];
+
 var PRESETS = {
   'browser': [["@babel/preset-env", {
     "targets": "> 0.25%, not dead"
@@ -22,8 +29,8 @@ var PRESETS = {
   'react-native': ['@babel/preset-react'],
 };
 var PLUGINS = {
-  'browser': ['@babel/plugin-transform-runtime', '@babel/plugin-transform-flow-strip-types', '@babel/plugin-proposal-class-properties', 'inline-package-json', 'transform-inline-environment-variables'],
-  'node': ['@babel/plugin-transform-runtime', '@babel/plugin-transform-flow-strip-types', 'inline-package-json', 'transform-inline-environment-variables'],
+  'browser': [transformRuntime, '@babel/plugin-transform-flow-strip-types', '@babel/plugin-proposal-class-properties', 'inline-package-json', 'transform-inline-environment-variables'],
+  'node': ['@babel/plugin-transform-flow-strip-types', 'inline-package-json', 'transform-inline-environment-variables'],
   'react-native': ['@babel/plugin-transform-flow-strip-types', 'inline-package-json', 'transform-inline-environment-variables'],
 };
 
