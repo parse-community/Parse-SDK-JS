@@ -1,10 +1,10 @@
 const babelJest = require('babel-jest');
 
 module.exports = babelJest.createTransformer({
-  presets: [["env", {
-      "targets": {
-          "node": "8"
-      }
-  }], 'react'],
+  presets: [["@babel/preset-env", {
+    "targets": {
+      "node": "8"
+    }
+  }], '@babel/preset-react'],
   plugins: [],
 });

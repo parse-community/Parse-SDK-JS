@@ -14,14 +14,18 @@ var BUILD = process.env.PARSE_BUILD || 'browser';
 var VERSION = require('./package.json').version;
 
 var PRESETS = {
-  'browser': ['es2015', 'react', 'stage-2'],
-  'node': ['es2015', 'react', 'stage-2'],
-  'react-native': ['react'],
+  'browser': [["@babel/preset-env", {
+    "targets": "> 0.25%, not dead"
+  }], '@babel/preset-react'],
+  'node': [["@babel/preset-env", {
+    "targets": { "node": "8" }
+  }]],
+  'react-native': ['@babel/preset-react'],
 };
 var PLUGINS = {
-  'browser': ['inline-package-json', 'transform-inline-environment-variables', 'transform-runtime'],
-  'node': ['inline-package-json', 'transform-inline-environment-variables', 'transform-runtime'],
-  'react-native': ['inline-package-json', 'transform-inline-environment-variables'],
+  'browser': ['@babel/plugin-proposal-class-properties', '@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables', '@babel/plugin-transform-runtime'],
+  'node': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables', '@babel/plugin-transform-runtime'],
+  'react-native': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables'],
 };
 
 var DEV_HEADER = (
