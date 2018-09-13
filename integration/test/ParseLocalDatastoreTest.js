@@ -610,6 +610,63 @@ function runTest(controller) {
       assert.deepEqual(obj1.toJSON(), obj4.toJSON());
       assert.deepEqual(obj1._toFullJSON(), obj4._toFullJSON());
     });
+
+    it('fetch updates LocalDatastore', async () => {
+      const item = new Item({ foo: 'bar' });
+      await item.save();
+      await item.pin();
+
+      const params = { id: item.id };
+      await Parse.Cloud.run('TestFetchFromLocalDatastore', params);
+
+      let localDatastore = await Parse.LocalDatastore._getAllContents();
+
+      assert.equal(localDatastore[`Item_${item.id}`].foo, 'bar');
+
+      const itemAgain = new Item();
+      itemAgain.id = item.id;
+      const fetchedItem = await itemAgain.fetch();
+
+      localDatastore = await Parse.LocalDatastore._getAllContents();
+
+      assert.equal(itemAgain.get('foo'), 'changed');
+      assert.equal(fetchedItem.get('foo'), 'changed');
+      assert.equal(localDatastore[`Item_${item.id}`].foo, 'changed');
+    });
+
+    it('fetchAll updates LocalDatastore', async () => {
+      const item1 = new Item({ foo: 'bar' });
+      const item2 = new Item({ foo: 'baz' });
+
+      await Parse.Object.saveAll([item1, item2]);
+      await Parse.Object.pinAll([item1, item2]);
+
+      let params = { id: item1.id };
+      await Parse.Cloud.run('TestFetchFromLocalDatastore', params);
+      params = { id: item2.id };
+      await Parse.Cloud.run('TestFetchFromLocalDatastore', params);
+
+      let localDatastore = await Parse.LocalDatastore._getAllContents();
+
+      assert.equal(localDatastore[`Item_${item1.id}`].foo, 'bar');
+      assert.equal(localDatastore[`Item_${item2.id}`].foo, 'baz');
+
+      const item1Again = new Item();
+      item1Again.id = item1.id;
+      const item2Again = new Item();
+      item2Again.id = item2.id;
+
+      const fetchedItems = await Parse.Object.fetchAll([item1Again, item2Again]);
+
+      localDatastore = await Parse.LocalDatastore._getAllContents();
+
+      assert.equal(item1Again.get('foo'), 'changed');
+      assert.equal(item2Again.get('foo'), 'changed');
+      assert.equal(fetchedItems[0].get('foo'), 'changed');
+      assert.equal(fetchedItems[1].get('foo'), 'changed');
+      assert.equal(localDatastore[`Item_${fetchedItems[0].id}`].foo, 'changed');
+      assert.equal(localDatastore[`Item_${fetchedItems[1].id}`].foo, 'changed');
+    });
   });
 
   describe(`Parse Query Pinning (${controller.name})`, () => {
