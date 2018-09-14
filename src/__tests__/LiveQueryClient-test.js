@@ -416,4 +416,44 @@ describe('LiveQueryClient', () => {
     expect(liveQueryClient.socket.close).toBeCalled();
     expect(liveQueryClient.state).toBe('disconnected');
   });
+
+  it('can handle WebSocket subclass', () => {
+    const MyExtendedClass = ParseObject.extend('MyExtendedClass');
+    ParseObject.registerSubclass('MyExtendedClass', MyExtendedClass);
+
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken'
+    });
+    // Add mock subscription
+    const subscription = new events.EventEmitter();
+    liveQueryClient.subscriptions.set(1, subscription);
+    const object = new MyExtendedClass();
+    object.set('key', 'value');
+    const data = {
+      op: 'create',
+      clientId: 1,
+      requestId: 1,
+      object: object._toFullJSON(),
+    };
+    const event = {
+      data: JSON.stringify(data)
+    }
+    // Register checked in advance
+    let isChecked = false;
+    subscription.on('create', function(parseObject) {
+      isChecked = true;
+      expect(parseObject instanceof MyExtendedClass).toBe(true);
+      expect(parseObject.get('key')).toEqual('value');
+      expect(parseObject.get('className')).toBeUndefined();
+      expect(parseObject.get('__type')).toBeUndefined();
+    });
+
+    liveQueryClient._handleWebSocketMessage(event);
+
+    expect(isChecked).toBe(true);
+  });
 });
