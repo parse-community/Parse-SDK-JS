@@ -676,7 +676,7 @@ function runTest(controller) {
 
       obj2.id = obj1.id;
       await obj2.fetchFromLocalDatastore();
-      console.log(obj2.toJSON());
+
       assert.deepEqual(obj1.toJSON(), obj2.toJSON());
       assert.deepEqual(obj1._toFullJSON(), obj2._toFullJSON());
       assert.deepEqual(obj2.toJSON().child.field, 'shouldHave');
@@ -902,7 +902,6 @@ function runTest(controller) {
       query.equalTo('containedBy', true);
       query.containedBy('numbers', [1, 2, 3, 4, 5]);
       query.fromLocalDatastore();
-      console.log(query.toJSON());
       const results = await query.find();
       assert.equal(results.length, 1);
     });

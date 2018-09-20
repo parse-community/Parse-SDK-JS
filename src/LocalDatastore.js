@@ -217,22 +217,26 @@ const LocalDatastore = {
     if (!this.isEnabled) {
       return;
     }
+    const localDatastore = await this._getAllContents();
     const objectKey = this.getKeyForObject(object);
-    const pin = await this.fromPinWithName(objectKey);
+    const pin = localDatastore[objectKey];
     if (!pin) {
       return;
     }
     await this.unPinWithName(objectKey);
-    const localDatastore = await this._getAllContents();
+    delete localDatastore[objectKey];
+
     for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
-        let pinned = await this.fromPinWithName(key) || [];
+        let pinned = localDatastore[key] || [];
         if (pinned.includes(objectKey)) {
           pinned = pinned.filter(item => item !== objectKey);
           if (pinned.length == 0) {
             await this.unPinWithName(key);
+            delete localDatastore[key];
           } else {
             await this.pinWithName(key, pinned);
+            localDatastore[key] = pinned;
           }
         }
       }
@@ -258,11 +262,12 @@ const LocalDatastore = {
 
     for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
-        let pinned = await this.fromPinWithName(key) || [];
+        let pinned = localDatastore[key] || [];
         if (pinned.includes(localKey)) {
           pinned = pinned.filter(item => item !== localKey);
           pinned.push(objectKey);
           await this.pinWithName(key, pinned);
+          localDatastore[key] = pinned;
         }
       }
     }

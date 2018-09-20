@@ -78,6 +78,8 @@ const mockLocalDatastore = {
   _handleUnPinWithName: jest.fn(),
   _getAllContent: jest.fn(),
   _serializeObjectsFromPinName: jest.fn(),
+  _serializeObject: jest.fn(),
+  _transverseSerializeObject: jest.fn(),
   _updateObjectIfPinned: jest.fn(),
   _destroyObjectIfPinned: jest.fn(),
   _updateLocalIdForObject: jest.fn(),
@@ -2349,12 +2351,12 @@ describe('ParseObject pin', () => {
       .mockImplementationOnce(() => 'Item_123');
 
     mockLocalDatastore
-      .fromPinWithName
+      ._serializeObject
       .mockImplementationOnce(() => object._toFullJSON());
 
     await object.fetchFromLocalDatastore();
-    expect(mockLocalDatastore.fromPinWithName).toHaveBeenCalledTimes(1);
-    expect(mockLocalDatastore.fromPinWithName).toHaveBeenCalledWith('Item_123');
+    expect(mockLocalDatastore._serializeObject).toHaveBeenCalledTimes(1);
+    expect(mockLocalDatastore._serializeObject).toHaveBeenCalledWith('Item_123');
   });
 
   it('cannot fetchFromLocalDatastore if unsaved', async () => {
