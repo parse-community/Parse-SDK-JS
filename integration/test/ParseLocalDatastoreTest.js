@@ -658,6 +658,78 @@ function runTest(controller) {
       assert.deepEqual(obj1._toFullJSON(), obj4._toFullJSON());
     });
 
+    it(`${controller.name} can fetchFromLocalDatastore with children`, async () => {
+      const obj1 = new TestObject();
+      const obj2 = new TestObject();
+      const child = new TestObject();
+      const grandchild = new TestObject();
+
+      obj1.set('field', 'test');
+      obj1.set('child', child);
+      await obj1.save();
+      await obj1.pin();
+
+      grandchild.set('field', 'shouldAlsoHave');
+      child.set('field', 'shouldHave');
+      child.set('grandchild', grandchild);
+      await child.save();
+
+      obj2.id = obj1.id;
+      await obj2.fetchFromLocalDatastore();
+      console.log(obj2.toJSON());
+      assert.deepEqual(obj1.toJSON(), obj2.toJSON());
+      assert.deepEqual(obj1._toFullJSON(), obj2._toFullJSON());
+      assert.deepEqual(obj2.toJSON().child.field, 'shouldHave');
+      assert.deepEqual(obj2.toJSON().child.grandchild.field, 'shouldAlsoHave');
+    });
+
+    it(`${controller.name} can fetchFromLocalDatastore break multiple cycle`, async () => {
+      const A = new TestObject({ value: 'A'});
+      const B = new TestObject({ value: 'B'});
+      const C = new TestObject({ value: 'C'});
+      const D = new TestObject({ value: 'D'});
+      const E = new TestObject({ value: 'E'});
+
+      await Parse.Object.saveAll([A, B, C, D, E]);
+      /*
+        Cycles: 
+          A->B->A
+          A->C->D->C
+          A->E->C
+
+                A ------|
+              / | \     |
+             B  C  E    D
+            /   |   \
+           A    D    C
+                |
+                C
+      */
+      A.set('B', B);
+      A.set('C', C);
+      A.set('E', E);
+      A.set('D', D);
+      B.set('A', A);
+      C.set('D', D);
+      D.set('C', C);
+      E.set('C', C);
+      await A.save();
+      await A.pin();
+
+      const object = new TestObject();     
+
+      object.id = A.id;
+      await object.fetchFromLocalDatastore();
+      const root = object.toJSON();
+
+      assert.deepEqual(root.B.A.__type, 'Pointer');
+      assert.deepEqual(root.C.D.C.__type, 'Pointer');
+      assert.deepEqual(root.E.C.__type, 'Pointer');
+      // TODO: dplewis
+      //assert.deepEqual(root.E.C.D.C__type, 'Pointer');
+      //assert.deepEqual(root.D.__type, 'Object');
+    });
+
     it('fetch updates LocalDatastore', async () => {
       const item = new Item({ foo: 'bar' });
       await item.save();

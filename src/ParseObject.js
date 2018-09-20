@@ -1222,7 +1222,7 @@ class ParseObject {
     const localDatastore = CoreManager.getLocalDatastore();
     if (localDatastore.checkIfEnabled()) {
       const objectKey = localDatastore.getKeyForObject(this);
-      const pinned = await localDatastore.fromPinWithName(objectKey);
+      const pinned = await localDatastore._serializeObject(objectKey);
       if (!pinned) {
         throw new Error('Cannot fetch an unsaved ParseObject');
       }
