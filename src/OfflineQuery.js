@@ -1,12 +1,15 @@
 var equalObjects = require('./equals').default;
 var decode = require('./decode').default;
 var ParseError = require('./ParseError').default;
+var ParsePolygon = require('./ParsePolygon').default;
+var ParseGeoPoint = require('./ParseGeoPoint').default;
 
 /**
  * contains -- Determines if an object is contained in a list with special handling for Parse pointers.
  */
 function contains(haystack, needle) {
-  if (needle && needle.__type && needle.__type === 'Pointer') {
+
+  if (needle && needle.__type && (needle.__type === 'Pointer' || needle.__type === 'Object')) {
     for (const i in haystack) {
       const ptr = haystack[i];
       if (typeof ptr === 'string' && ptr === needle.objectId) {
@@ -288,6 +291,24 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
         }
       }
       return true;
+    }
+    case '$containedBy': {
+      for (const value of object[key]) {
+        if (!contains(compareTo, value)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    case '$geoWithin': {
+      const points = compareTo.$polygon.map((geoPoint) => [geoPoint.latitude, geoPoint.longitude]);
+      const polygon = new ParsePolygon(points);
+      return polygon.containsPoint(object[key]);
+    }
+    case '$geoIntersects': {
+      const polygon = new ParsePolygon(object[key].coordinates);
+      const point = new ParseGeoPoint(compareTo.$point);
+      return polygon.containsPoint(point);
     }
     default:
       return false;

@@ -888,6 +888,61 @@ function runTest(controller) {
       assert.equal(results.length, 1);
     });
 
+    it('can do containedBy queries with numbers', async () => {
+      const objects = [
+        new TestObject({ containedBy:true, numbers: [0, 1, 2] }),
+        new TestObject({ containedBy:true, numbers: [2, 0] }),
+        new TestObject({ containedBy:true, numbers: [1, 2, 3, 4] }),
+      ];
+  
+      await Parse.Object.saveAll(objects);
+      await Parse.Object.pinAll(objects);
+
+      const query = new Parse.Query(TestObject);
+      query.equalTo('containedBy', true);
+      query.containedBy('numbers', [1, 2, 3, 4, 5]);
+      query.fromLocalDatastore();
+      console.log(query.toJSON());
+      const results = await query.find();
+      assert.equal(results.length, 1);
+    });
+  
+    it('can do containedBy queries with pointer', async () => {
+      const objects = Array.from(Array(10).keys()).map((idx) => {
+        const obj = new Parse.Object('Object');
+        obj.set('key', idx);
+        return obj;
+      });
+  
+      const parent1 = new Parse.Object('Parent');
+      const parent2 = new Parse.Object('Parent');
+      const parent3 = new Parse.Object('Parent');
+  
+      await Parse.Object.saveAll(objects);
+      await Parse.Object.pinAll(objects);
+  
+      // [0, 1, 2]
+      parent1.set('objects', objects.slice(0, 3));
+  
+      const shift = objects.shift();
+      // [2, 0]
+      parent2.set('objects', [objects[1], shift]);
+  
+      // [1, 2, 3, 4]
+      parent3.set('objects', objects.slice(1, 4));
+  
+      await Parse.Object.saveAll([parent1, parent2, parent3]);
+      await Parse.Object.pinAll([parent1, parent2, parent3]);
+
+      const query = new Parse.Query('Parent');
+      query.containedBy('objects', objects);
+      query.fromLocalDatastore();
+      const results = await query.find();
+  
+      assert.equal(results.length, 1);
+      assert.equal(results[0].id, parent3.id);
+    });
+    
     it(`${controller.name} can test equality with undefined`, async () => {
       const query = new Parse.Query('BoxedNumber');
       query.equalTo('number', undefined);
@@ -2271,6 +2326,59 @@ function runTest(controller) {
         assert.equal(o.get('foo'), 'baz');
         assert.equal(o.get('bar'), undefined);
       });
+    });
+
+    it('supports withinPolygon', async () => {
+      const sacramento = new TestObject();
+      sacramento.set('location', new Parse.GeoPoint(38.52, -121.50));
+      sacramento.set('name', 'Sacramento');
+
+      const honolulu = new TestObject();
+      honolulu.set('location', new Parse.GeoPoint(21.35, -157.93));
+      honolulu.set('name', 'Honolulu');
+
+      const sf = new TestObject();
+      sf.set('location', new Parse.GeoPoint(37.75, -122.68));
+      sf.set('name', 'San Francisco');
+
+      await Parse.Object.saveAll([sacramento, honolulu, sf]);
+      await Parse.Object.pinAll([sacramento, honolulu, sf]);
+
+      const points = [
+        new Parse.GeoPoint(37.85, -122.33),
+        new Parse.GeoPoint(37.85, -122.90),
+        new Parse.GeoPoint(37.68, -122.90),
+        new Parse.GeoPoint(37.68, -122.33)
+      ];
+      const query = new Parse.Query(TestObject);
+      query.withinPolygon('location', points);
+      query.fromLocalDatastore();
+      const results = await query.find();
+      assert.equal(results.length, 1);
+    });
+
+    it('supports polygonContains', async () => {
+      const p1 = [[0,0], [0,1], [1,1], [1,0]];
+      const p2 = [[0,0], [0,2], [2,2], [2,0]];
+      const p3 = [[10,10], [10,15], [15,15], [15,10], [10,10]];
+  
+      const polygon1 = new Parse.Polygon(p1);
+      const polygon2 = new Parse.Polygon(p2);
+      const polygon3 = new Parse.Polygon(p3);
+  
+      const obj1 = new TestObject({ polygon: polygon1 });
+      const obj2 = new TestObject({ polygon: polygon2 });
+      const obj3 = new TestObject({ polygon: polygon3 });
+  
+      await Parse.Object.saveAll([obj1, obj2, obj3]);
+      await Parse.Object.pinAll([obj1, obj2, obj3]);
+
+      const point = new Parse.GeoPoint(0.5, 0.5);
+      const query = new Parse.Query(TestObject);
+      query.polygonContains('polygon', point);
+      query.fromLocalDatastore();
+      const results = await query.find();
+      assert.equal(results.length, 2);
     });
   });
 }
