@@ -416,7 +416,7 @@ describe('Parse User', () => {
   });
 
   it('handles user subclassing', (done) => {
-    const SuperUser = new Parse.Object.extend('User');
+    const SuperUser = Parse.Object.extend('User');
     const user = new SuperUser();
     user.set('username', 'bob');
     user.set('password', 'welcome');
