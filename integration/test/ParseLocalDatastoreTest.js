@@ -2083,7 +2083,7 @@ function runTest(controller) {
       q2.equalTo('complexor', true);
       q2.lessThan('y', 2);
 
-      const orQuery = new Parse.Query.or(q1, q2);
+      const orQuery = Parse.Query.or(q1, q2);
       orQuery.fromLocalDatastore();
       const results = await  orQuery.find();
       assert.equal(results.length, 3);
@@ -2142,7 +2142,7 @@ function runTest(controller) {
       q2.equalTo('and', true);
       q2.equalTo('y', 4);
 
-      const andQuery = new Parse.Query.and(q1, q2);
+      const andQuery = Parse.Query.and(q1, q2);
       andQuery.fromLocalDatastore();
       const results = await andQuery.find();
       assert.equal(results.length, 1);
@@ -2191,7 +2191,7 @@ function runTest(controller) {
       q1.matchesQuery('child', subQuery);
       const q2 = new Parse.Query('Parent');
       q2.equalTo('y', 5);
-      const norQuery = new Parse.Query.nor(q1, q2);
+      const norQuery = Parse.Query.nor(q1, q2);
       norQuery.fromLocalDatastore();
       const results = await norQuery.find();
 
