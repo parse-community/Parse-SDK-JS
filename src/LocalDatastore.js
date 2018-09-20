@@ -60,16 +60,34 @@ const LocalDatastore = {
   // Removes object and children keys from pin name
   // Keeps the object and children pinned
   async _handleUnPinWithName(name: string, object: ParseObject) {
+    const localDatastore = await this._getAllContents();
     const pinName = this.getPinName(name);
     const objects = this._getChildren(object);
     const objectIds = Object.keys(objects);
     objectIds.push(this.getKeyForObject(object));
-    let pinned = await this.fromPinWithName(pinName) || [];
+    let pinned = localDatastore[pinName] || [];
     pinned = pinned.filter(item => !objectIds.includes(item));
     if (pinned.length == 0) {
       await this.unPinWithName(pinName);
+      delete localDatastore[pinName];
     } else {
       await this.pinWithName(pinName, pinned);
+      localDatastore[pinName] = pinned;
+    }
+    for (const objectKey of objectIds) {
+      let hasReference = false;
+      for (const key in localDatastore) {
+        if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
+          const pinnedObjects = localDatastore[key] || [];
+          if (pinnedObjects.includes(objectKey)) {
+            hasReference = true;
+            break;
+          }
+        }
+      }
+      if (!hasReference) {
+        await this.unPinWithName(objectKey);
+      }
     }
   },
 
