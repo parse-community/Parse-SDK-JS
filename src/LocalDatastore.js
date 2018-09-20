@@ -178,7 +178,7 @@ const LocalDatastore = {
       const pointer = {
         objectId: seen[childKey].objectId,
         className: seen[childKey].className,
-        __type: 'Pointer', 
+        __type: 'Pointer',
       };
       return pointer;
     }
