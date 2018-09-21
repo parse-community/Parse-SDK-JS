@@ -145,6 +145,8 @@ const LocalDatastore = {
     return Promise.all(objects);
   },
 
+  // Replaces object pointers with pinned pointers
+  // The object pointers may contain old data
   async _serializeObject(objectKey: string, localDatastore: any) {
     let LDS = localDatastore;
     if (!LDS) {
@@ -259,7 +261,6 @@ const LocalDatastore = {
     await this.pinWithName(objectKey, unsaved);
 
     const localDatastore = await this._getAllContents();
-
     for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
         let pinned = localDatastore[key] || [];

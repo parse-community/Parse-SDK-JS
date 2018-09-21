@@ -18,6 +18,7 @@ function runTest(controller) {
       const StorageController = require(controller.file);
       Parse.CoreManager.setAsyncStorage(mockRNStorage);
       Parse.CoreManager.setLocalDatastoreController(StorageController);
+      Parse.enableLocalDatastore();
       Parse.LocalDatastore._clear();
     });
 
@@ -793,6 +794,7 @@ function runTest(controller) {
       const StorageController = require(controller.file);
       Parse.CoreManager.setAsyncStorage(mockRNStorage);
       Parse.CoreManager.setLocalDatastoreController(StorageController);
+      Parse.enableLocalDatastore();
       Parse.LocalDatastore._clear();
 
       const numbers = [];
@@ -1230,7 +1232,7 @@ function runTest(controller) {
       assert.equal(results[9].get('number'), 0);
     });
 
-    it(`${controller.name} can order by asecending number then descending string`, async () => {
+    it(`${controller.name} can order by ascending number then descending string`, async () => {
       const objects = [
         new TestObject({ doubleOrder: true, number: 3, string: 'a' }),
         new TestObject({ doubleOrder: true, number: 1, string: 'b' }),

@@ -2264,4 +2264,367 @@ describe('ParseQuery LocalDatastore', () => {
     const results = await q.find();
     expect(results[0].id).toEqual(obj1.objectId);
   });
+
+  it('can query offline first', async () => {
+    const obj1 = {
+      className: 'Item',
+      objectId: 'objectId1',
+      count: 2,
+    };
+
+    const obj2 = {
+      className: 'Item',
+      objectId: 'objectId2',
+    };
+
+    const obj3 = {
+      className: 'Unknown',
+      objectId: 'objectId3',
+    };
+
+    mockLocalDatastore
+      ._serializeObjectsFromPinName
+      .mockImplementationOnce(() => [obj1, obj2, obj3]);
+
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementationOnce(() => true);
+
+    let q = new ParseQuery('Item');
+    q.fromLocalDatastore();
+    let result = await q.first();
+    expect(result.id).toEqual(obj1.objectId);
+
+    jest.clearAllMocks();
+    mockLocalDatastore
+      ._serializeObjectsFromPinName
+      .mockImplementationOnce(() => []);
+
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementationOnce(() => true);
+
+    q = new ParseQuery('Item');
+    q.fromLocalDatastore();
+    result = await q.first();
+    expect(result).toEqual(undefined);
+  });
+
+  it('can query offline sort', async () => {
+    const obj1 = {
+      className: 'Item',
+      objectId: 'objectId1',
+      password: 123,
+      number: 2,
+      createdAt: new Date('2018-08-10T00:00:00.000Z'),
+      updatedAt: new Date('2018-08-10T00:00:00.000Z'),
+    };
+
+    const obj2 = {
+      className: 'Item',
+      objectId: 'objectId2',
+      password: 123,
+      number: 3,
+      createdAt: new Date('2018-08-11T00:00:00.000Z'),
+      updatedAt: new Date('2018-08-11T00:00:00.000Z'),
+    };
+
+    const obj3 = {
+      className: 'Item',
+      objectId: 'objectId3',
+      password: 123,
+      number: 4,
+      createdAt: new Date('2018-08-12T00:00:00.000Z'),
+      updatedAt: new Date('2018-08-12T00:00:00.000Z'),
+    };
+
+    mockLocalDatastore
+      ._serializeObjectsFromPinName
+      .mockImplementation(() => [obj1, obj2, obj3]);
+
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementation(() => true);
+
+    let q = new ParseQuery('Item');
+    q.ascending('number');
+    q.fromLocalDatastore();
+    let results = await q.find();
+    expect(results[0].get('number')).toEqual(2);
+    expect(results[1].get('number')).toEqual(3);
+    expect(results[2].get('number')).toEqual(4);
+
+    q = new ParseQuery('Item');
+    q.descending('number');
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results[0].get('number')).toEqual(4);
+    expect(results[1].get('number')).toEqual(3);
+    expect(results[2].get('number')).toEqual(2);
+
+    q = new ParseQuery('Item');
+    q.descending('number');
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results[0].get('number')).toEqual(4);
+    expect(results[1].get('number')).toEqual(3);
+    expect(results[2].get('number')).toEqual(2);
+
+    q = new ParseQuery('Item');
+    q.descending('password');
+    q.fromLocalDatastore();
+    try {
+      results = await q.find();
+    } catch (e) {
+      expect(e.message).toEqual('Invalid Key: password');
+    }
+  });
+
+  it('can query offline sort multiple', async () => {
+    const obj1 = {
+      className: 'Item',
+      objectId: 'objectId1',
+      password: 123,
+      number: 3,
+      string: 'a',
+    };
+
+    const obj2 = {
+      className: 'Item',
+      objectId: 'objectId2',
+      number: 1,
+      string: 'b',
+    };
+
+    const obj3 = {
+      className: 'Item',
+      objectId: 'objectId3',
+      number: 3,
+      string: 'c',
+    };
+
+    const obj4 = {
+      className: 'Item',
+      objectId: 'objectId4',
+      number: 2,
+      string: 'd',
+    };
+
+    mockLocalDatastore
+      ._serializeObjectsFromPinName
+      .mockImplementation(() => [obj1, obj2, obj3, obj4]);
+
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementation(() => true);
+
+    let q = new ParseQuery('Item');
+    q.ascending('number,string');
+    q.fromLocalDatastore();
+    let results = await q.find();
+    expect(results[0].get('number')).toEqual(1);
+    expect(results[1].get('number')).toEqual(2);
+    expect(results[2].get('number')).toEqual(3);
+    expect(results[3].get('number')).toEqual(3);
+    expect(results[0].get('string')).toEqual('b');
+    expect(results[1].get('string')).toEqual('d');
+    expect(results[2].get('string')).toEqual('a');
+    expect(results[3].get('string')).toEqual('c');
+
+    q = new ParseQuery('Item');
+    q.ascending('number').addDescending('string');
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results[0].get('number')).toEqual(1);
+    expect(results[1].get('number')).toEqual(2);
+    expect(results[2].get('number')).toEqual(3);
+    expect(results[3].get('number')).toEqual(3);
+    expect(results[0].get('string')).toEqual('b');
+    expect(results[1].get('string')).toEqual('d');
+    expect(results[2].get('string')).toEqual('c');
+    expect(results[3].get('string')).toEqual('a');
+
+    q = new ParseQuery('Item');
+    q.descending('number,string');
+    q.fromLocalDatastore();
+    results = await q.find();
+
+    expect(results[0].get('number')).toEqual(3);
+    expect(results[1].get('number')).toEqual(3);
+    expect(results[2].get('number')).toEqual(2);
+    expect(results[3].get('number')).toEqual(1);
+    expect(results[0].get('string')).toEqual('c');
+    expect(results[1].get('string')).toEqual('a');
+    expect(results[2].get('string')).toEqual('d');
+    expect(results[3].get('string')).toEqual('b');
+
+    q = new ParseQuery('Item');
+    q.descending('number').addAscending('string');
+    q.fromLocalDatastore();
+    results = await q.find();
+
+    expect(results[0].get('number')).toEqual(3);
+    expect(results[1].get('number')).toEqual(3);
+    expect(results[2].get('number')).toEqual(2);
+    expect(results[3].get('number')).toEqual(1);
+    expect(results[0].get('string')).toEqual('a');
+    expect(results[1].get('string')).toEqual('c');
+    expect(results[2].get('string')).toEqual('d');
+    expect(results[3].get('string')).toEqual('b');
+  });
+
+  it('can query offline limit', async () => {
+    const obj1 = {
+      className: 'Item',
+      objectId: 'objectId1',
+      number: 3,
+      string: 'a',
+    };
+
+    const obj2 = {
+      className: 'Item',
+      objectId: 'objectId2',
+      number: 1,
+      string: 'b',
+    };
+
+    mockLocalDatastore
+      ._serializeObjectsFromPinName
+      .mockImplementation(() => [obj1, obj2]);
+
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementation(() => true);
+
+    let q = new ParseQuery('Item');
+    q.limit(0);
+    q.fromLocalDatastore();
+    let results = await q.find();
+    expect(results.length).toEqual(2);
+
+    q = new ParseQuery('Item');
+    q.limit(1);
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results.length).toEqual(1);
+
+    q = new ParseQuery('Item');
+    q.limit(2);
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results.length).toEqual(2);
+
+    q = new ParseQuery('Item');
+    q.limit(3);
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results.length).toEqual(2);
+
+    q = new ParseQuery('Item');
+    q.limit(-1);
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results.length).toEqual(2);
+  });
+
+  it('can query offline skip', async () => {
+    const obj1 = {
+      className: 'Item',
+      objectId: 'objectId1',
+      password: 123,
+      number: 3,
+      string: 'a',
+    };
+
+    const obj2 = {
+      className: 'Item',
+      objectId: 'objectId2',
+      number: 1,
+      string: 'b',
+    };
+
+    const obj3 = {
+      className: 'Item',
+      objectId: 'objectId3',
+      number: 2,
+      string: 'c',
+    };
+
+    const objects = [obj1, obj2, obj3];
+    mockLocalDatastore
+      ._serializeObjectsFromPinName
+      .mockImplementation(() => objects);
+
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementation(() => true);
+
+    let q = new ParseQuery('Item');
+    q.skip(0);
+    q.fromLocalDatastore();
+    let results = await q.find();
+    expect(results.length).toEqual(3);
+
+    q = new ParseQuery('Item');
+    q.skip(1);
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results.length).toEqual(2);
+
+    q = new ParseQuery('Item');
+    q.skip(3);
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results.length).toEqual(0);
+
+    q = new ParseQuery('Item');
+    q.skip(4);
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results.length).toEqual(0);
+
+    q = new ParseQuery('Item');
+    q.limit(1);
+    q.skip(2);
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results.length).toEqual(1);
+
+    q = new ParseQuery('Item');
+    q.limit(1);
+    q.skip(1);
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results.length).toEqual(1);
+
+    q = new ParseQuery('Item');
+    q.limit(2);
+    q.skip(1);
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results.length).toEqual(2);
+  });
+
+  it('can query offline select keys', async () => {
+    const obj1 = {
+      className: 'Item',
+      objectId: 'objectId1',
+      foo: 'baz',
+      bar: 1,
+    };
+
+    mockLocalDatastore
+      ._serializeObjectsFromPinName
+      .mockImplementation(() => [obj1]);
+
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementation(() => true);
+
+    const q = new ParseQuery('Item');
+    q.select('foo');
+    q.fromLocalDatastore();
+    const results = await q.find();
+    expect(results[0].get('foo')).toEqual('baz');
+  });
 });

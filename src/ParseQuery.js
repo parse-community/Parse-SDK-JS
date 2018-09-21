@@ -147,7 +147,7 @@ function handleOfflineSort(a, b, sorts) {
     order = 'updatedAt';
   }
   if (!(/^[A-Za-z][0-9A-Za-z_]*$/).test(order) || order === 'password') {
-    throw new ParseError(ParseError.INVALID_KEY_NAME);
+    throw new ParseError(ParseError.INVALID_KEY_NAME, `Invalid Key: ${order}`);
   }
   const field1 = a.get(order);
   const field2 = b.get(order);
@@ -316,13 +316,12 @@ class ParseQuery {
     return '^' + quote(string);
   }
 
-  // TODO: handle limit/skip/params/count/get/each/first
   async _handleOfflineQuery(params: any) {
     OfflineQuery.validateQuery(this);
     const localDatastore = CoreManager.getLocalDatastore();
     const objects = await localDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
     let results = objects.map((json, index, arr) => {
-      const object = ParseObject.fromJSON(json);
+      const object = ParseObject.fromJSON(json, false);
 
       if (!OfflineQuery.matchesQuery(this.className, object, arr, this)) {
         return null;
@@ -340,7 +339,7 @@ class ParseQuery {
             delete json[key];
           }
         });
-        return ParseObject.fromJSON(json);
+        return ParseObject.fromJSON(json, false);
       });
     }
     if (params.order) {
@@ -349,15 +348,18 @@ class ParseQuery {
         return handleOfflineSort(a, b, sorts);
       });
     }
+    if (params.skip) {
+      if (params.skip >= results.length) {
+        results = [];
+      } else {
+        results = results.splice(params.skip, results.length);
+      }
+    }
     let limit = results.length;
     if (params.limit !== 0 && params.limit < results.length) {
       limit = params.limit;
     }
     results = results.splice(0, limit);
-    if (params.skip) {
-      const skip = params.skip > limit ? limit : params.skip;
-      results = results.splice(skip, limit);
-    }
     return results;
   }
 

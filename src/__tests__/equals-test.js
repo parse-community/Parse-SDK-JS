@@ -121,6 +121,25 @@ describe('equals', () => {
     a.id = 'myobj';
     b.id = 'myobj';
     expect(equals(a, b)).toBe(true);
+
+    const c = {
+      __type: 'Pointer',
+      className: 'Item',
+      objectId: 'myobj',
+    };
+    const d = {
+      __type: 'Object',
+      className: 'Item',
+      objectId: 'myobj',
+    };
+    const e = {
+      __type: 'Unknown',
+      className: 'Item',
+      objectId: 'myobj',
+    };
+    expect(equals(c, b)).toBe(true);
+    expect(equals(d, b)).toBe(true);
+    expect(equals(e, b)).toBe(false);
   });
 
   it('tests equality of Date', () => {

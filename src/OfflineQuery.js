@@ -23,6 +23,13 @@ function contains(haystack, needle) {
   }
   return haystack.indexOf(needle) > -1;
 }
+
+function transformObject(object) {
+  if (object._toFullJSON) {
+    return object._toFullJSON();
+  }
+  return object;
+}
 /**
  * matchesQuery -- Determines if an object would be returned by a Parse Query
  * It's a lightweight, where-clause only implementation of a full query engine.
@@ -106,7 +113,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
     return false;
   }
   if (!(/^[A-Za-z][0-9A-Za-z_]*$/).test(key)) {
-    throw new ParseError(ParseError.INVALID_KEY_NAME);
+    throw new ParseError(ParseError.INVALID_KEY_NAME, `Invalid Key: ${key}`);
   }
   // Equality (or Array contains) cases
   if (typeof constraints !== 'object') {
@@ -249,7 +256,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
         return matchesQuery(compareTo.query.className, obj, arr, compareTo.query.where);
       });
       for (let i = 0; i < subQueryObjects.length; i += 1) {
-        const subObject = subQueryObjects[i];
+        const subObject = transformObject(subQueryObjects[i]);
         return equalObjects(object[key], subObject[compareTo.key]);
       }
       return false;
@@ -259,7 +266,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
         return matchesQuery(compareTo.query.className, obj, arr, compareTo.query.where);
       });
       for (let i = 0; i < subQueryObjects.length; i += 1) {
-        const subObject = subQueryObjects[i];
+        const subObject = transformObject(subQueryObjects[i]);
         return !equalObjects(object[key], subObject[compareTo.key]);
       }
       return false;
@@ -270,7 +277,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
       });
 
       for (let i = 0; i < subQueryObjects.length; i += 1) {
-        const subObject = subQueryObjects[i];
+        const subObject = transformObject(subQueryObjects[i]);
         if (object[key].className === subObject.className &&
             object[key].objectId === subObject.objectId) {
           return true;
@@ -284,7 +291,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
       });
 
       for (let i = 0; i < subQueryObjects.length; i += 1) {
-        const subObject = subQueryObjects[i];
+        const subObject = transformObject(subQueryObjects[i]);
         if (object[key].className === subObject.className &&
             object[key].objectId === subObject.objectId) {
           return false;

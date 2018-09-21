@@ -211,10 +211,19 @@ Parse.isLocalDatastoreEnabled = function() {
 /**
  * Gets all contents from Local Datastore
  *
+ * <pre>
+ * await Parse.dumpLocalDatastore();
+ * </pre>
+ *
  * @static
  */
 Parse.dumpLocalDatastore = function() {
-  return Parse.LocalDatastore._getAllContents();
+  if (!Parse.LocalDatastore.isEnabled) {
+    console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
+    return Promise.resolve({});
+  } else {
+    return Parse.LocalDatastore._getAllContents();
+  }
 }
 CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);

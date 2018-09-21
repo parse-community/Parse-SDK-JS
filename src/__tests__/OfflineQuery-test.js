@@ -10,17 +10,63 @@
 jest.autoMockOff();
 
 const matchesQuery = require('../OfflineQuery').matchesQuery;
+const validateQuery = require('../OfflineQuery').validateQuery;
+const ParseError = require('../ParseError').default;
 const ParseObject = require('../ParseObject').default;
 const ParseQuery = require('../ParseQuery').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
+const ParsePolygon = require('../ParsePolygon').default;
 const ParseUser = require('../ParseUser').default;
 
 describe('OfflineQuery', () => {
+
   it('matches blank queries', () => {
     const obj = new ParseObject('Item');
     const q = new ParseQuery('Item');
     expect(matchesQuery(q.className, obj, [], q)).toBe(true);
     expect(matchesQuery(q.className, obj._toFullJSON(), [], q.toJSON().where)).toBe(true);
+  });
+
+  it('can handle unknown query', () => {
+    const obj = new ParseObject('Item');
+    const q = new ParseQuery('Item');
+    q._addCondition('key', 'unknown', 'value');
+    expect(matchesQuery(q.className, obj, [], q)).toBe(false);
+    expect(matchesQuery(q.className, obj._toFullJSON(), [], q.toJSON().where)).toBe(false);
+  });
+
+  it('matches queries null field', () => {
+    const obj = new ParseObject('Item');
+    const q = new ParseQuery('Item');
+    q.equalTo('field', null);
+    expect(matchesQuery(q.className, obj, [], q)).toBe(false);
+  });
+
+  it('matches queries invalid key', () => {
+    const obj = new ParseObject('Item');
+    const q = new ParseQuery('Item');
+    q.equalTo('$foo', 'bar');
+    try {
+      matchesQuery(q.className, obj, [], q)
+    } catch (e) {
+      expect(e.message).toBe('Invalid Key: $foo');
+    }
+  });
+
+  it('matches queries date field', () => {
+    const date = new Date();
+    const obj = new ParseObject('Item');
+    obj.set('field', date)
+    const q = new ParseQuery('Item');
+    q.greaterThanOrEqualTo('field', date);
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+  });
+
+  it('matches queries relation', () => {
+    const obj = new ParseObject('Item');
+    const relation = obj.relation("author");
+    const q = relation.query();
+    expect(matchesQuery(q.className, obj, [], q)).toBe(false);
   });
 
   it('matches existence queries', () => {
@@ -202,10 +248,56 @@ describe('OfflineQuery', () => {
     q.equalTo('name', 'Player 1');
     const q2 = new ParseQuery('Player');
     q2.equalTo('name', 'Player 2');
-    const orQuery = ParseQuery.or(q, q2);
+    const q3 = new ParseQuery('Player');
+    q3.equalTo('name', 'Player 3');
+    const orQuery1 = ParseQuery.or(q, q2);
+    const orQuery2 = ParseQuery.or(q2, q3);
     expect(matchesQuery(q.className, player, [], q)).toBe(true);
     expect(matchesQuery(q.className, player, [], q2)).toBe(false);
-    expect(matchesQuery(q.className, player, [], orQuery)).toBe(true);
+    expect(matchesQuery(q.className, player, [], orQuery1)).toBe(true);
+    expect(matchesQuery(q.className, player, [], orQuery2)).toBe(false);
+  });
+
+  it('matches an $and query', () => {
+    const player = new ParseObject('Player');
+    player
+      .set('score', 12)
+      .set('name', 'Player 1');
+
+    const q = new ParseQuery('Player');
+    q.equalTo('name', 'Player 1');
+    const q2 = new ParseQuery('Player');
+    q2.equalTo('score',  12);
+    const q3 = new ParseQuery('Player');
+    q3.equalTo('score',  100);
+    const andQuery1 = ParseQuery.and(q, q2);
+    const andQuery2 = ParseQuery.and(q, q3);
+    expect(matchesQuery(q.className, player, [], q)).toBe(true);
+    expect(matchesQuery(q.className, player, [], q2)).toBe(true);
+    expect(matchesQuery(q.className, player, [], andQuery1)).toBe(true);
+    expect(matchesQuery(q.className, player, [], andQuery2)).toBe(false);
+  });
+
+  it('matches an $nor query', () => {
+    const player = new ParseObject('Player');
+    player
+      .set('score', 12)
+      .set('name', 'Player 1');
+
+    const q = new ParseQuery('Player');
+    q.equalTo('name', 'Player 1');
+    const q2 = new ParseQuery('Player');
+    q2.equalTo('name', 'Player 2');
+    const q3 = new ParseQuery('Player');
+    q3.equalTo('name', 'Player 3');
+
+    const norQuery1 = ParseQuery.nor(q, q2);
+    const norQuery2 = ParseQuery.nor(q2, q3);
+    expect(matchesQuery(q.className, player, [], q)).toBe(true);
+    expect(matchesQuery(q.className, player, [], q2)).toBe(false);
+    expect(matchesQuery(q.className, player, [], q3)).toBe(false);
+    expect(matchesQuery(q.className, player, [], norQuery1)).toBe(false);
+    expect(matchesQuery(q.className, player, [], norQuery2)).toBe(true);
   });
 
   it('matches $regex queries', () => {
@@ -233,7 +325,7 @@ describe('OfflineQuery', () => {
     expect(matchesQuery(q.className, player, [], q)).toBe(true);
 
     q = new ParseQuery('Player');
-    q.matches('name', /A.d/);
+    q.matches('name', /A.d/, 'm');
     expect(matchesQuery(q.className, player, [], q)).toBe(true);
 
     q.matches('name', /A[^n]d/);
@@ -254,6 +346,10 @@ describe('OfflineQuery', () => {
     expect(matchesQuery(q.className, player, [], q)).toBe(true);
     q.contains('name', 'h \\Q or');
     expect(matchesQuery(q.className, player, [], q)).toBe(false);
+
+    q = new ParseQuery('Player');
+    q._addCondition('status', '$regex', { test: function() { return true } });
+    expect(matchesQuery(q.className, player, [], q)).toBe(true);
   });
 
   it('matches $nearSphere queries', () => {
@@ -280,6 +376,10 @@ describe('OfflineQuery', () => {
 
     q.withinRadians('location', new ParseGeoPoint(30, 30), 0.2);
     expect(matchesQuery(q.className, pt, [], q)).toBe(false);
+
+    q = new ParseQuery('Checkin');
+    q._addCondition('location', '$maxDistance', 100);
+    expect(matchesQuery(q.className, pt, [], q)).toBe(true);
   });
 
   it('matches $within queries', () => {
@@ -390,6 +490,10 @@ describe('OfflineQuery', () => {
     q.equalTo('status.x', 'read');
     q.doesNotExist('status.y');
     expect(matchesQuery(q.className, message, [], q)).toBe(false);
+
+    q = new ParseQuery('Message');
+    q._addCondition('status', '$exists', 'invalid');
+    expect(matchesQuery(q.className, message, [], q)).toBe(true);
   });
 
   it('should support containedIn with pointers', () => {
@@ -462,5 +566,164 @@ describe('OfflineQuery', () => {
     q = new ParseQuery('Message');
     q.notContainedIn('profile', ['abc', 'def', 'ghi']);
     expect(matchesQuery(q.className, message, [], q)).toBe(false);
+  });
+
+  it('should support matchesKeyInQuery', () => {
+    const restaurant = new ParseObject('Restaurant');
+    restaurant.set('ratings', 5);
+    restaurant.set('location', 'Earth');
+    const person1 = new ParseObject('Person');
+    person1.set('hometown', 'Earth');
+    const person2 = new ParseObject('Person');
+    person2.set('hometown', 'Mars');
+
+    let query = new ParseQuery('Restaurant');
+    query.greaterThan('rating', 4);
+    let mainQuery = new ParseQuery('Person');
+
+    mainQuery.matchesKeyInQuery('hometown', 'location', query);
+    expect(matchesQuery(mainQuery.className, person1, [person1, person2, restaurant], mainQuery)).toBe(true);
+    expect(matchesQuery(mainQuery.className, person2, [person1, person2, restaurant], mainQuery)).toBe(false);
+    expect(matchesQuery(mainQuery.className, person1, [], mainQuery)).toBe(false);
+
+    query = new ParseQuery('Restaurant');
+    query.greaterThan('rating', 4);
+    mainQuery = new ParseQuery('Person');
+
+    mainQuery.doesNotMatchKeyInQuery('hometown', 'location', query);
+    expect(matchesQuery(mainQuery.className, person1, [person1, person2, restaurant._toFullJSON()], mainQuery)).toBe(false);
+    expect(matchesQuery(mainQuery.className, person2, [person1, person2, restaurant], mainQuery)).toBe(true);
+    expect(matchesQuery(mainQuery.className, person1, [], mainQuery)).toBe(false);
+  });
+
+  it('should support matchesQuery', () => {
+    const parentObjects = [];
+    const childObjects = [];
+    for (let i = 0; i < 10; i += 1) {
+      const child = new ParseObject('ChildObject');
+      child.id = 100 + i;
+      child.set('x', i);
+      const parent = new ParseObject('ParentObject');
+      parent.id = 10 + i;
+      parent.set('child', child);
+      childObjects.push(child);
+      parentObjects.push(parent);
+    }
+    let subQuery = new ParseQuery('ChildObject');
+    subQuery.greaterThan('x', 5);
+    let q = new ParseQuery('ParentObject');
+    q.matchesQuery('child', subQuery);
+    expect(matchesQuery(q.className, parentObjects[0], [...parentObjects, ...childObjects], q)).toBe(false);
+    expect(matchesQuery(q.className, parentObjects[9], [...parentObjects, ...childObjects], q)).toBe(true);
+    expect(matchesQuery(q.className, parentObjects[0], [], q)).toBe(false);
+
+    subQuery = new ParseQuery('ChildObject');
+    subQuery.greaterThan('x', 5);
+    q = new ParseQuery('ParentObject');
+    q.doesNotMatchQuery('child', subQuery);
+    expect(matchesQuery(q.className, parentObjects[0], [...parentObjects, ...childObjects], q)).toBe(true);
+    expect(matchesQuery(q.className, parentObjects[9], [...parentObjects, ...childObjects], q)).toBe(false);
+    expect(matchesQuery(q.className, parentObjects[0], [], q)).toBe(true);
+  });
+
+  it('should support containedBy query', () => {
+    const obj1 = new ParseObject('Numbers');
+    const obj2 = new ParseObject('Numbers');
+    const obj3 = new ParseObject('Numbers');
+    obj1.set('numbers', [0, 1, 2]);
+    obj2.set('numbers', [2, 0]);
+    obj3.set('numbers', [1, 2, 3, 4]);
+
+    const q = new ParseQuery('Numbers');
+    q.containedBy('numbers', [1, 2, 3, 4, 5]);
+    expect(matchesQuery(q.className, obj1, [], q)).toBe(false);
+    expect(matchesQuery(q.className, obj2, [], q)).toBe(false);
+    expect(matchesQuery(q.className, obj3, [], q)).toBe(true);
+  });
+
+  it('should support withinPolygon query', () => {
+    const sacramento = new ParseObject('Location');
+    sacramento.set('location', new ParseGeoPoint(38.52, -121.50));
+    sacramento.set('name', 'Sacramento');
+
+    const honolulu = new ParseObject('Location');
+    honolulu.set('location', new ParseGeoPoint(21.35, -157.93));
+    honolulu.set('name', 'Honolulu');
+
+    const sf = new ParseObject('Location');
+    sf.set('location', new ParseGeoPoint(37.75, -122.68));
+    sf.set('name', 'San Francisco')
+
+    const points = [
+      new ParseGeoPoint(37.85, -122.33),
+      new ParseGeoPoint(37.85, -122.90),
+      new ParseGeoPoint(37.68, -122.90),
+      new ParseGeoPoint(37.68, -122.33)
+    ];
+    const q = new ParseQuery('Location');
+    q.withinPolygon('location', points);
+
+    expect(matchesQuery(q.className, sacramento, [], q)).toBe(false);
+    expect(matchesQuery(q.className, honolulu, [], q)).toBe(false);
+    expect(matchesQuery(q.className, sf, [], q)).toBe(true);
+  });
+
+  it('should support polygonContains query', () => {
+    const p1 = [[0,0], [0,1], [1,1], [1,0]];
+    const p2 = [[0,0], [0,2], [2,2], [2,0]];
+    const p3 = [[10,10], [10,15], [15,15], [15,10], [10,10]];
+
+    const polygon1 = new ParsePolygon(p1);
+    const polygon2 = new ParsePolygon(p2);
+    const polygon3 = new ParsePolygon(p3);
+    const obj1 = new ParseObject('Bounds');
+    const obj2 = new ParseObject('Bounds');
+    const obj3 = new ParseObject('Bounds');
+    obj1.set('polygon', polygon1);
+    obj2.set('polygon', polygon2);
+    obj3.set('polygon', polygon3);
+
+    const point = new ParseGeoPoint(0.5, 0.5);
+    const q = new ParseQuery('Bounds');
+    q.polygonContains('polygon', point);
+
+    expect(matchesQuery(q.className, obj1, [], q)).toBe(true);
+    expect(matchesQuery(q.className, obj2, [], q)).toBe(true);
+    expect(matchesQuery(q.className, obj3, [], q)).toBe(false);
+  });
+
+  it('should validate query', () => {
+    let query = new ParseQuery('TestObject');
+    query.equalTo('foo', 'bar');
+    try {
+      validateQuery(query);
+      validateQuery(query.toJSON());
+
+      query.matches('myString', 'football', 'm');
+      validateQuery(query);
+
+      expect(true).toBe(true);
+    } catch (e) {
+      // Should not reach here
+      expect(false).toEqual(true);
+    }
+
+    query = new ParseQuery('TestObject');
+    query.matches('myString', 'football', 'some invalid thing');
+    try {
+      validateQuery(query);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.code).toEqual(ParseError.INVALID_QUERY);
+    }
+
+    query = new ParseQuery('TestObject');
+    query.equalTo('$foo', 'bar');
+    try {
+      validateQuery(query);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.code).toEqual(ParseError.INVALID_KEY_NAME);
+    }
   });
 });
