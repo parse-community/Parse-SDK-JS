@@ -29,13 +29,6 @@ export default function equals(a, b) {
     return (a === b);
   }
 
-  if (toString.call(a) === '[object Date]') {
-    if (toString.call(b) === '[object Date]') {
-      return (+a === +b);
-    }
-    return false;
-  }
-
   if (Array.isArray(a) || Array.isArray(b)) {
     if (!Array.isArray(a) || !Array.isArray(b)) {
       return false;

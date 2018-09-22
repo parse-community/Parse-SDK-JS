@@ -703,6 +703,22 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
     expect(await LocalDatastore.fromPinWithName('myKey')).toEqual(null);
     expect(await LocalDatastore._getAllContents()).toEqual({});
   });
+
+  it('can handle store error', async () => {
+    const mockStorageError = {
+      setItem() {
+        throw new Error('error thrown');
+      },
+    };
+    Object.defineProperty(window, 'localStorage', {
+      value: mockStorageError
+    });
+    try {
+      await LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
+    } catch (e) {
+      expect(e.message).toBe('error thrown');
+    }
+  });
 });
 
 describe('LocalDatastore (DefaultDatastoreController)', () => {
@@ -747,5 +763,19 @@ describe('LocalDatastore (RNDatastoreController)', () => {
     await LocalDatastore.unPinWithName('myKey');
     expect(await LocalDatastore.fromPinWithName('myKey')).toEqual(null);
     expect(await LocalDatastore._getAllContents()).toEqual({});
+  });
+
+  it('can handle store error', async () => {
+    const mockStorageError = {
+      setItem() {
+        throw new Error('error thrown');
+      },
+    };
+    CoreManager.setAsyncStorage(mockStorageError);
+    try {
+      await LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
+    } catch (e) {
+      expect(e.message).toBe('error thrown');
+    }
   });
 });

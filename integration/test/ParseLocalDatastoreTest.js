@@ -639,6 +639,7 @@ function runTest(controller) {
       const obj2 = new TestObject();
 
       obj1.set('field', 'test');
+      obj1.set('foo', 'bar');
       await obj1.pin();
       await obj1.save();
 
@@ -653,10 +654,10 @@ function runTest(controller) {
       assert.deepEqual(obj1._toFullJSON(), obj3._toFullJSON());
 
       const obj4 = TestObject.createWithoutData(obj1.id);
-      obj4.set('field', 'no override');
+      obj4.set('field', 'will not override');
       await obj4.fetchFromLocalDatastore();
-      assert.deepEqual(obj1.toJSON(), obj4.toJSON());
-      assert.deepEqual(obj1._toFullJSON(), obj4._toFullJSON());
+      assert.equal(obj4.get('field'), 'will not override');
+      assert.equal(obj4.get('foo'), 'bar');
     });
 
     it(`${controller.name} can fetchFromLocalDatastore with children`, async () => {

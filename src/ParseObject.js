@@ -1227,9 +1227,6 @@ class ParseObject {
         throw new Error('Cannot fetch an unsaved ParseObject');
       }
       const result = ParseObject.fromJSON(pinned);
-
-      this._clearPendingOps();
-      this._clearServerData();
       this._finishFetch(result.toJSON());
 
       return Promise.resolve(this);
