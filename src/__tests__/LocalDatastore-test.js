@@ -710,7 +710,7 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
         throw new Error('error thrown');
       },
     };
-    Object.defineProperty(window, 'localStorage', {
+    Object.defineProperty(window, 'localStorage', { // eslint-disable-line
       value: mockStorageError
     });
     try {
