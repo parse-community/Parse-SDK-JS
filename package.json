@@ -48,7 +48,7 @@
     "babel-plugin-inline-package-json": "2.0.0",
     "babel-plugin-minify-dead-code-elimination": "0.5.0",
     "babel-plugin-transform-inline-environment-variables": "0.4.3",
-    "browserify": "16.2.2",
+    "browserify": "16.2.3",
     "codecov": "3.1.0",
     "eslint": "^5.3.0",
     "eslint-plugin-flowtype": "^2.50.0",
