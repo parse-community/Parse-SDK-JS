@@ -147,56 +147,41 @@ const LocalDatastore = {
 
   // Replaces object pointers with pinned pointers
   // The object pointers may contain old data
+  // Uses Breadth First Search Algorithm
   async _serializeObject(objectKey: string, localDatastore: any) {
     let LDS = localDatastore;
     if (!LDS) {
       LDS = await this._getAllContents();
     }
-    const object = LDS[objectKey];
-    if (!object) {
+    const root = LDS[objectKey];
+    if (!root) {
       return null;
     }
-    const seen = {};
-    seen[objectKey] = object;
-    for (const field in object) {
-      const value = object[field];
-      if (value.objectId) {
-        const childKey = this.getKeyForObject(value);
-        const child = LDS[childKey];
-        if (child) {
-          object[field] = await this._transverseSerializeObject(childKey, seen, LDS);
-        }
-      }
-    }
-    return object;
-  },
 
-  async _transverseSerializeObject(childKey: string, seen: any, localDatastore: any) {
-    let LDS = localDatastore;
-    if (!LDS) {
-      LDS = await this._getAllContents();
-    }
-    if (seen[childKey]) {
-      const pointer = {
-        objectId: seen[childKey].objectId,
-        className: seen[childKey].className,
-        __type: 'Pointer',
-      };
-      return pointer;
-    }
-    const object = LDS[childKey];
-    seen[childKey] = object;
-    for (const field in object) {
-      const value = object[field];
-      if (value.objectId) {
-        const key = this.getKeyForObject(value);
-        const child = LDS[key];
-        if (child) {
-          object[field] = await this._transverseSerializeObject(key, seen, LDS);
+    const queue = [];
+    const meta = {};
+    let uniqueId = 0;
+    meta[uniqueId] = root;
+    queue.push(uniqueId);
+
+    while(queue.length !== 0) {
+      const nodeId = queue.shift();
+      const subTreeRoot = meta[nodeId];
+      for (const field in subTreeRoot) {
+        const value = subTreeRoot[field];
+        if (value.__type && value.__type === 'Object') {
+          const key = this.getKeyForObject(value);
+          const pointer = LDS[key];
+          if (pointer) {
+            uniqueId++;
+            meta[uniqueId] = pointer;
+            subTreeRoot[field] = pointer;
+            queue.push(uniqueId);
+          }
         }
       }
     }
-    return object;
+    return root;
   },
 
   // Called when an object is save / fetched

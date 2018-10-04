@@ -697,7 +697,6 @@ function runTest(controller) {
         Cycles:
           A->B->A
           A->C->D->C
-          A->E->C
 
                 A ------|
               / | \     |
@@ -715,7 +714,7 @@ function runTest(controller) {
       C.set('D', D);
       D.set('C', C);
       E.set('C', C);
-      await A.save();
+      await Parse.Object.saveAll([A, B, C, D, E]);
       await A.pin();
 
       const object = new TestObject();
@@ -726,10 +725,8 @@ function runTest(controller) {
 
       assert.deepEqual(root.B.A.__type, 'Pointer');
       assert.deepEqual(root.C.D.C.__type, 'Pointer');
-      assert.deepEqual(root.E.C.__type, 'Pointer');
-      // TODO: dplewis
-      //assert.deepEqual(root.E.C.D.C__type, 'Pointer');
-      //assert.deepEqual(root.D.__type, 'Object');
+      assert.deepEqual(root.E.C.__type, 'Object');
+      assert.deepEqual(root.D.__type, 'Object');
     });
 
     it('fetch updates LocalDatastore', async () => {

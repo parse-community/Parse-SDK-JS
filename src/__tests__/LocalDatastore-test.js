@@ -451,63 +451,10 @@ describe('LocalDatastore', () => {
       .getAllContents
       .mockImplementationOnce(() => LDS);
 
-    const spy = jest.spyOn(LocalDatastore, '_transverseSerializeObject');
-
     const expectedResults = object._toFullJSON();
     expectedResults.child = newData;
     const result = await LocalDatastore._serializeObject(`Item_${object.id}`);
     expect(result).toEqual(expectedResults);
-    expect(spy).toHaveBeenCalledTimes(1);
-    spy.mockRestore();
-  });
-
-  it('_transverseSerializeObject convert to pointer', async () => {
-    const object = new ParseObject('Item');
-    object.id = 1234;
-    const child = new ParseObject('Item');
-    child.id = 5678;
-    object.set('child', child);
-    const LDS = {};
-
-    mockLocalStorageController
-      .getAllContents
-      .mockImplementationOnce(() => LDS);
-
-    const expectedResults = {
-      __type: 'Pointer',
-      objectId: child.id,
-      className: child.className,
-    };
-    const seen = { [`Item_${child.id}`]: child._toFullJSON() };
-    const result = await LocalDatastore._transverseSerializeObject(`Item_${child.id}`, seen);
-    expect(result).toEqual(expectedResults);
-  });
-
-  it('_transverseSerializeObject with children', async () => {
-    const object = new ParseObject('Item');
-    object.id = 1234;
-    const child = new ParseObject('Item');
-    child.id = 5678;
-    object.set('child', child);
-    const newData = child._toFullJSON();
-    newData.field = 'Serialize Me';
-    const LDS = {
-      [LocalDatastore.DEFAULT_PIN]: [`Item_${object.id}`, `Item_${child.id}`],
-      [`Item_${object.id}`]: object._toFullJSON(),
-      [`Item_${child.id}`]: newData,
-    };
-
-    mockLocalStorageController
-      .getAllContents
-      .mockImplementationOnce(() => LDS);
-
-    const spy = jest.spyOn(LocalDatastore, '_transverseSerializeObject');
-    const expectedResults = object._toFullJSON();
-    expectedResults.child = newData;
-    const result = await LocalDatastore._transverseSerializeObject(`Item_${object.id}`, {});
-    expect(result).toEqual(expectedResults);
-    expect(spy).toHaveBeenCalledTimes(2);
-    spy.mockRestore();
   });
 
   it('_destroyObjectIfPinned no objects found in pinName', async () => {
