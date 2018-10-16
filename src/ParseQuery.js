@@ -11,11 +11,10 @@
 
 import CoreManager from './CoreManager';
 import encode from './encode';
+import { continueWhile } from './promiseUtils';
 import ParseError from './ParseError';
 import ParseGeoPoint from './ParseGeoPoint';
-import ParsePolygon from './ParsePolygon';
 import ParseObject from './ParseObject';
-import ParsePromise from './ParsePromise';
 
 import type { RequestOptions, FullOptions } from './RESTController';
 
@@ -73,14 +72,14 @@ function handleSelectResult(data: any, select: Array<string>){
   var serverDataMask = {};
 
   select.forEach((field) => {
-    let hasSubObjectSelect = field.indexOf(".") !== -1;
+    const hasSubObjectSelect = field.indexOf(".") !== -1;
     if (!hasSubObjectSelect && !data.hasOwnProperty(field)){
       // this field was selected, but is missing from the retrieved data
       data[field] = undefined
     } else if (hasSubObjectSelect) {
       // this field references a sub-object,
       // so we need to walk down the path components
-      let pathComponents = field.split(".");
+      const pathComponents = field.split(".");
       var obj = data;
       var serverMask = serverDataMask;
 
@@ -94,7 +93,7 @@ function handleSelectResult(data: any, select: Array<string>){
         }
 
         //add this path component to the server mask so we can fill it in later if needed
-        if (index < arr.length-1) {
+        if (index < arr.length - 1) {
           if (!serverMask[component]) {
             serverMask[component] = {};
           }
@@ -110,26 +109,26 @@ function handleSelectResult(data: any, select: Array<string>){
     // missing selected keys to sub-objects, but we still need to add in the
     // data for any previously retrieved sub-objects that were not selected.
 
-    let serverData = CoreManager.getObjectStateController().getServerData({id:data.objectId, className:data.className});
-
-    function copyMissingDataWithMask(src, dest, mask, copyThisLevel){
-      //copy missing elements at this level
-      if (copyThisLevel) {
-        for (var key in src) {
-          if (src.hasOwnProperty(key) && !dest.hasOwnProperty(key)) {
-            dest[key] = src[key]
-          }
-        }
-      }
-      for (var key in mask) {
-        if (dest[key] !== undefined && dest[key] !== null && src !== undefined && src !== null) {
-          //traverse into objects as needed
-          copyMissingDataWithMask(src[key], dest[key], mask[key], true);
-        }
-      }
-    }
+    const serverData = CoreManager.getObjectStateController().getServerData({id:data.objectId, className:data.className});
 
     copyMissingDataWithMask(serverData, data, serverDataMask, false);
+  }
+}
+
+function copyMissingDataWithMask(src, dest, mask, copyThisLevel){
+  //copy missing elements at this level
+  if (copyThisLevel) {
+    for (const key in src) {
+      if (src.hasOwnProperty(key) && !dest.hasOwnProperty(key)) {
+        dest[key] = src[key]
+      }
+    }
+  }
+  for (const key in mask) {
+    if (dest[key] !== undefined && dest[key] !== null && src !== undefined && src !== null) {
+      //traverse into objects as needed
+      copyMissingDataWithMask(src[key], dest[key], mask[key], true);
+    }
   }
 }
 
@@ -143,47 +142,35 @@ function handleSelectResult(data: any, select: Array<string>){
  * whether the fetch succeeded or not.
  *
  * <pre>
- * var query = new parse.query(myclass);
- * query.find({
- *   success: function(results) {
- *     // results is an array of parse.object.
- *   },
- *
- *   error: function(error) {
- *     // error is an instance of parse.error.
- *   }
+ * var query = new Parse.Query(myclass);
+ * query.find().then((results) => {
+ *   // results is an array of parse.object.
+ * }).catch((error) =>  {
+ *  // error is an instance of parse.error.
  * });</pre></p>
  *
- * <p>a parse.query can also be used to retrieve a single object whose id is
+ * <p>a Parse.Query can also be used to retrieve a single object whose id is
  * known, through the get method. for example, this sample code fetches an
  * object of class <code>myclass</code> and id <code>myid</code>. it calls a
  * different function depending on whether the fetch succeeded or not.
  *
  * <pre>
- * var query = new parse.query(myclass);
- * query.get(myid, {
- *   success: function(object) {
+ * var query = new Parse.Query(myclass);
+ * query.get(myid).then((object) => {
  *     // object is an instance of parse.object.
- *   },
- *
- *   error: function(object, error) {
- *     // error is an instance of parse.error.
- *   }
+ * }).catch((error) =>  {
+ *  // error is an instance of parse.error.
  * });</pre></p>
  *
- * <p>a parse.query can also be used to count the number of objects that match
+ * <p>a Parse.Query can also be used to count the number of objects that match
  * the query without retrieving all of those objects. for example, this
  * sample code counts the number of objects of the class <code>myclass</code>
  * <pre>
- * var query = new parse.query(myclass);
- * query.count({
- *   success: function(number) {
+ * var query = new Parse.Query(myclass);
+ * query.count().then((number) => {
  *     // there are number instances of myclass.
- *   },
- *
- *   error: function(error) {
+ * }).catch((error) => {
  *     // error is an instance of Parse.Error.
- *   }
  * });</pre></p>
  * @alias Parse.Query
  */
@@ -249,7 +236,6 @@ class ParseQuery {
 
   /**
    * Adds constraint that all of the passed in queries match.
-   * @method _andQuery
    * @param {Array} queries
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -259,6 +245,20 @@ class ParseQuery {
     });
 
     this._where.$and = queryJSON;
+    return this;
+  }
+
+  /**
+   * Adds constraint that none of the passed in queries match.
+   * @param {Array} queries
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  _norQuery(queries: Array<ParseQuery>): ParseQuery {
+    var queryJSON = queries.map((q) => {
+      return q.toJSON().where;
+    });
+
+    this._where.$nor = queryJSON;
     return this;
   }
 
@@ -357,9 +357,11 @@ class ParseQuery {
       this._order = json.order.split(",");
     }
 
-    for (let key in json) if (json.hasOwnProperty(key))  {
-      if (["where", "include", "keys", "limit", "skip", "order"].indexOf(key) === -1) {
-        this._extraOptions[key] = json[key];
+    for (const key in json) {
+      if (json.hasOwnProperty(key))  {
+        if (["where", "include", "keys", "limit", "skip", "order"].indexOf(key) === -1) {
+          this._extraOptions[key] = json[key];
+        }
       }
     }
 
@@ -367,7 +369,7 @@ class ParseQuery {
 
   }
 
-    /**
+  /**
      * Static method to restore Parse.Query by json representation
      * Internally calling Parse.Query.withJSON
      * @param {String} className
@@ -385,20 +387,18 @@ class ParseQuery {
    * find completes. Unlike the <code>first</code> method, it never returns undefined.
    *
    * @param {String} objectId The id of the object to be fetched.
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the result when
+   * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  get(objectId: string, options?: FullOptions): ParsePromise {
+  get(objectId: string, options?: FullOptions): Promise {
     this.equalTo('objectId', objectId);
 
     var firstOptions = {};
@@ -418,8 +418,8 @@ class ParseQuery {
         ParseError.OBJECT_NOT_FOUND,
         'Object not found.'
       );
-      return ParsePromise.error(errorObject);
-    })._thenRunCallbacks(options, null);
+      return Promise.reject(errorObject);
+    });
   }
 
   /**
@@ -427,23 +427,21 @@ class ParseQuery {
    * Either options.success or options.error is called when the find
    * completes.
    *
-   * @param {Object} options A Backbone-style options object. Valid options
+   * @param {Object} options Valid options
    * are:<ul>
-   *   <li>success: Function to call when the find completes successfully.
-   *   <li>error: Function to call when the find fails.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the results when
+   * @return {Promise} A promise that is resolved with the results when
    * the query completes.
    */
-  find(options?: FullOptions): ParsePromise {
+  find(options?: FullOptions): Promise {
     options = options || {};
 
-    let findOptions = {};
+    const findOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       findOptions.useMasterKey = options.useMasterKey;
     }
@@ -451,9 +449,9 @@ class ParseQuery {
       findOptions.sessionToken = options.sessionToken;
     }
 
-    let controller = CoreManager.getQueryController();
+    const controller = CoreManager.getQueryController();
 
-    let select = this._select;
+    const select = this._select;
 
     return controller.find(
       this.className,
@@ -463,7 +461,7 @@ class ParseQuery {
       return response.results.map((data) => {
         // In cases of relations, the server may send back a className
         // on the top level of the payload
-        let override = response.className || this.className;
+        const override = response.className || this.className;
         if (!data.className) {
           data.className = override;
         }
@@ -477,7 +475,7 @@ class ParseQuery {
 
         return ParseObject.fromJSON(data, !select);
       });
-    })._thenRunCallbacks(options);
+    });
   }
 
   /**
@@ -485,20 +483,18 @@ class ParseQuery {
    * Either options.success or options.error is called when the count
    * completes.
    *
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the count completes successfully.
-   *   <li>error: Function to call when the find fails.
+   * @param {Object} options
+   * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the count when
+   * @return {Promise} A promise that is resolved with the count when
    * the query completes.
    */
-  count(options?: FullOptions): ParsePromise {
+  count(options?: FullOptions): Promise {
     options = options || {};
 
     var findOptions = {};
@@ -521,24 +517,22 @@ class ParseQuery {
       findOptions
     ).then((result) => {
       return result.count;
-    })._thenRunCallbacks(options);
+    });
   }
 
   /**
    * Executes a distinct query and returns unique values
    *
    * @param {String} key A field to find distinct values
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the count completes successfully.
-   *   <li>error: Function to call when the find fails.
+   * @param {Object} options
+   * Valid options are:<ul>
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the query completes.
+   * @return {Promise} A promise that is resolved with the query completes.
    */
-  distinct(key: string, options?: FullOptions): ParsePromise {
+  distinct(key: string, options?: FullOptions): Promise {
     options = options || {};
 
     const distinctOptions = {
@@ -559,54 +553,44 @@ class ParseQuery {
       distinctOptions
     ).then((results) => {
       return results.results;
-    })._thenRunCallbacks(options);
+    });
   }
 
-   /**
+  /**
    * Executes an aggregate query and returns aggregate results
    *
    * @param {Mixed} pipeline Array or Object of stages to process query
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the count completes successfully.
-   *   <li>error: Function to call when the find fails.
+   * @param {Object} options Valid options are:<ul>
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the query completes.
+   * @return {Promise} A promise that is resolved with the query completes.
    */
-  aggregate(pipeline: mixed, options?: FullOptions): ParsePromise {
+  aggregate(pipeline: mixed, options?: FullOptions): Promise {
     options = options || {};
 
     const aggregateOptions = {
-      useMasterKey: true
+      useMasterKey: true,
     };
     if (options.hasOwnProperty('sessionToken')) {
       aggregateOptions.sessionToken = options.sessionToken;
     }
     const controller = CoreManager.getQueryController();
-    let stages = {};
 
-    if (Array.isArray(pipeline)) {
-      pipeline.forEach((stage) => {
-        for (let op in stage) {
-          stages[op] = stage[op];
-        }
-      });
-    } else if (pipeline && typeof pipeline === 'object') {
-      stages = pipeline;
-    } else {
+    if (!Array.isArray(pipeline) && typeof pipeline !== 'object') {
       throw new Error('Invalid pipeline must be Array or Object');
     }
 
+    const params = { pipeline };
+
     return controller.aggregate(
       this.className,
-      stages,
-      aggregateOptions
+      params,
+      aggregateOptions,
     ).then((results) => {
       return results.results;
-    })._thenRunCallbacks(options);
+    });
   }
 
   /**
@@ -615,20 +599,17 @@ class ParseQuery {
    * Either options.success or options.error is called when it completes.
    * success is passed the object if there is one. otherwise, undefined.
    *
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the find completes successfully.
-   *   <li>error: Function to call when the find fails.
+   * @param {Object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the object when
+   * @return {Promise} A promise that is resolved with the object when
    * the query completes.
    */
-  first(options?: FullOptions): ParsePromise {
+  first(options?: FullOptions): Promise {
     options = options || {};
 
     var findOptions = {};
@@ -667,7 +648,7 @@ class ParseQuery {
       }
 
       return ParseObject.fromJSON(objects[0], !select);
-    })._thenRunCallbacks(options);
+    });
   }
 
   /**
@@ -679,27 +660,22 @@ class ParseQuery {
    * and may not use limit or skip.
    * @param {Function} callback Callback that will be called with each result
    *     of the query.
-   * @param {Object} options A Backbone-style options object. Valid options
-   * are:<ul>
-   *   <li>success: Function to call when the iteration completes successfully.
-   *   <li>error: Function to call when the iteration fails.
+   * @param {Object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Parse.Promise} A promise that will be fulfilled once the
+   * @return {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
-  each(callback: (obj: ParseObject) => any, options?: BatchOptions): ParsePromise {
+  each(callback: (obj: ParseObject) => any, options?: BatchOptions): Promise {
     options = options || {};
 
     if (this._order || this._skip || (this._limit >= 0)) {
       var error = 'Cannot iterate on a query with sort, skip, or limit.';
-      return ParsePromise.error(error)._thenRunCallbacks(options);
+      return Promise.reject(error);
     }
-
-    var promise = new ParsePromise();
 
     var query = new ParseQuery(this.className);
     // We can override the batch size from the options.
@@ -743,11 +719,11 @@ class ParseQuery {
     }
 
     var finished = false;
-    return ParsePromise._continueWhile(() => {
+    return continueWhile(() => {
       return !finished;
     }, () => {
       return query.find(findOptions).then((results) => {
-        var callbacksDone = ParsePromise.as();
+        var callbacksDone = Promise.resolve();
         results.forEach((result) => {
           callbacksDone = callbacksDone.then(() => {
             return callback(result);
@@ -762,7 +738,7 @@ class ParseQuery {
           }
         });
       });
-    })._thenRunCallbacks(options);
+    });
   }
 
   /** Query Conditions **/
@@ -858,6 +834,17 @@ class ParseQuery {
    */
   notContainedIn(key: string, value: mixed): ParseQuery {
     return this._addCondition(key, '$nin', value);
+  }
+
+  /**
+   * Adds a constraint to the query that requires a particular key's value to
+   * be contained by the provided list of values. Get objects where all array elements match.
+   * @param {String} key The key to check.
+   * @param {Array} values The values that will match.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  containedBy(key: string, value: Array<mixed>): ParseQuery {
+    return this._addCondition(key, '$containedBy', value);
   }
 
   /**
@@ -1059,18 +1046,17 @@ class ParseQuery {
     const fullOptions = { $term: value };
     for (const option in options) {
       switch (option) {
-        case 'language':
-          fullOptions.$language = options[option];
-          break;
-        case 'caseSensitive':
-          fullOptions.$caseSensitive = options[option];
-          break;
-        case 'diacriticSensitive':
-          fullOptions.$diacriticSensitive = options[option];
-          break;
-        default:
-          throw new Error(`Unknown option: ${option}`);
-          break;
+      case 'language':
+        fullOptions.$language = options[option];
+        break;
+      case 'caseSensitive':
+        fullOptions.$caseSensitive = options[option];
+        break;
+      case 'diacriticSensitive':
+        fullOptions.$diacriticSensitive = options[option];
+        break;
+      default:
+        throw new Error(`Unknown option: ${option}`);
       }
     }
 
@@ -1344,10 +1330,15 @@ class ParseQuery {
   /**
    * Includes nested Parse.Objects for the provided key.  You can use dot
    * notation to specify which fields in the included object are also fetched.
-   * @param {String} key The name of the key to include.
+   *
+   * You can include all nested Parse.Objects by passing in '*'.
+   * Requires Parse Server 3.0.0+
+   * <pre>query.include('*');</pre>
+   *
+   * @param {...String|Array<String>} key The name(s) of the key(s) to include.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  include(...keys: Array<string>): ParseQuery {
+  include(...keys: Array<string|Array<string>>): ParseQuery {
     keys.forEach((key) => {
       if (Array.isArray(key)) {
         this._include = this._include.concat(key);
@@ -1359,13 +1350,24 @@ class ParseQuery {
   }
 
   /**
+   * Includes all nested Parse.Objects.
+   *
+   * Requires Parse Server 3.0.0+
+   *
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  includeAll(): ParseQuery {
+    return this.include('*');
+  }
+
+  /**
    * Restricts the fields of the returned Parse.Objects to include only the
    * provided keys.  If this is called multiple times, then all of the keys
    * specified in each of the calls will be included.
-   * @param {Array} keys The names of the keys to include.
+   * @param {...String|Array<String>} keys The name(s) of the key(s) to include.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  select(...keys: Array<string>): ParseQuery {
+  select(...keys: Array<string|Array<string>>): ParseQuery {
     if (!this._select) {
       this._select = [];
     }
@@ -1385,7 +1387,7 @@ class ParseQuery {
    * which can be used to get liveQuery updates.
    */
   subscribe(): any {
-    let controller = CoreManager.getLiveQueryController();
+    const controller = CoreManager.getLiveQueryController();
     return controller.subscribe(this);
   }
 
@@ -1424,10 +1426,28 @@ class ParseQuery {
     query._andQuery(queries);
     return query;
   }
+
+  /**
+   * Constructs a Parse.Query that is the NOR of the passed in queries.  For
+   * example:
+   * <pre>const compoundQuery = Parse.Query.nor(query1, query2, query3);</pre>
+   *
+   * will create a compoundQuery that is a nor of the query1, query2, and
+   * query3.
+   * @param {...Parse.Query} var_args The list of queries to NOR.
+   * @static
+   * @return {Parse.Query} The query that is the NOR of the passed in queries.
+   */
+  static nor(...queries: Array<ParseQuery>): ParseQuery {
+    const className = _getClassNameFromQueries(queries);
+    const query = new ParseQuery(className);
+    query._norQuery(queries);
+    return query;
+  }
 }
 
 var DefaultController = {
-  find(className: string, params: QueryJSON, options: RequestOptions): ParsePromise {
+  find(className: string, params: QueryJSON, options: RequestOptions): Promise {
     var RESTController = CoreManager.getRESTController();
 
     return RESTController.request(
@@ -1438,7 +1458,7 @@ var DefaultController = {
     );
   },
 
-  aggregate(className: string, params: any, options: RequestOptions): ParsePromise {
+  aggregate(className: string, params: any, options: RequestOptions): Promise {
     const RESTController = CoreManager.getRESTController();
 
     return RESTController.request(

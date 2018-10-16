@@ -7,18 +7,22 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
- /**
+/**
   * Constructs a new Parse.Error object with the given code and message.
   * @alias Parse.Error
   */
-class ParseError {
+class ParseError extends Error {
   /**
    * @param {Number} code An error code constant from <code>Parse.Error</code>.
    * @param {String} message A detailed description of the error.
    */
   constructor(code, message) {
+    super(message);
     this.code = code;
-    this.message = message;
+    Object.defineProperty(this, 'message', {
+      enumerable: true,
+      value: message
+    });
   }
 
   toString() {

@@ -14,23 +14,21 @@ jest.dontMock('../ParseConfig');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../RESTController');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
 
-var CoreManager = require('../CoreManager');
-var ParseConfig = require('../ParseConfig').default;
-var ParseGeoPoint = require('../ParseGeoPoint').default;
-var ParsePromise = require('../ParsePromise').default;
-var Storage = require('../Storage');
+const CoreManager = require('../CoreManager');
+const ParseConfig = require('../ParseConfig').default;
+const ParseGeoPoint = require('../ParseGeoPoint').default;
+const Storage = require('../Storage');
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 
 describe('ParseConfig', () => {
   it('exposes attributes via get()', () => {
-    var c = new ParseConfig();
+    const c = new ParseConfig();
     c.attributes = {
       str: 'hello',
       num: 44
@@ -41,7 +39,7 @@ describe('ParseConfig', () => {
   });
 
   it('exposes escaped attributes', () => {
-    var c = new ParseConfig();
+    const c = new ParseConfig();
     c.attributes = {
       brackets: '<>',
       phone: 'AT&T'
@@ -51,7 +49,7 @@ describe('ParseConfig', () => {
   });
 
   it('can retrieve the current config from disk or cache', () => {
-    var path = Storage.generatePath('currentConfig');
+    const path = Storage.generatePath('currentConfig');
     Storage.setItem(path, JSON.stringify({
       count: 12,
       point: {
@@ -68,8 +66,8 @@ describe('ParseConfig', () => {
 
   it('can get a config object from the network', (done) => {
     CoreManager.setRESTController({
-      request(method, path, body, options) {
-        return ParsePromise.as({
+      request() {
+        return Promise.resolve({
           params: {
             str: 'hello',
             num: 45,
@@ -87,7 +85,7 @@ describe('ParseConfig', () => {
       expect(config.get('str')).toBe('hello');
       expect(config.get('num')).toBe(45);
       expect(config.get('file').name()).toBe('parse.txt');
-      var path = Storage.generatePath('currentConfig');
+      const path = Storage.generatePath('currentConfig');
       expect(JSON.parse(Storage.getItem(path))).toEqual({
         str: 'hello',
         num: 45,
@@ -104,8 +102,8 @@ describe('ParseConfig', () => {
 
   it('rejects the promise when an invalid payload comes back', (done) => {
     CoreManager.setRESTController({
-      request(method, path, body, options) {
-        return ParsePromise.as(null);
+      request() {
+        return Promise.resolve(null);
       },
       ajax() {}
     });
@@ -119,8 +117,8 @@ describe('ParseConfig', () => {
 
   it('rejects the promise when the http request fails', (done) => {
     CoreManager.setRESTController({
-      request(method, path, body, options) {
-        return ParsePromise.error('failure');
+      request() {
+        return Promise.reject('failure');
       },
       ajax() {}
     });

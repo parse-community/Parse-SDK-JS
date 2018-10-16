@@ -14,7 +14,6 @@ import type ParseFile from './ParseFile';
 import type { FileSource } from './ParseFile';
 import type { Op } from './ParseOp';
 import type ParseObject from './ParseObject';
-import type ParsePromise from './ParsePromise';
 import type { QueryJSON } from './ParseQuery';
 import type ParseUser from './ParseUser';
 import type { AuthData } from './ParseUser';
@@ -26,28 +25,28 @@ type RequestOptions = {
   installationId?: string;
 };
 type AnalyticsController = {
-  track: (name: string, dimensions: { [key: string]: string }) => ParsePromise;
+  track: (name: string, dimensions: { [key: string]: string }) => Promise;
 };
 type CloudController = {
-  run: (name: string, data: mixed, options: { [key: string]: mixed }) => ParsePromise;
-  getJobsData: (options: { [key: string]: mixed }) => ParsePromise;
-  startJob: (name: string, data: mixed, options: { [key: string]: mixed }) => ParsePromise;
+  run: (name: string, data: mixed, options: { [key: string]: mixed }) => Promise;
+  getJobsData: (options: { [key: string]: mixed }) => Promise;
+  startJob: (name: string, data: mixed, options: { [key: string]: mixed }) => Promise;
 };
 type ConfigController = {
-  current: () => ParsePromise;
-  get: () => ParsePromise;
+  current: () => Promise;
+  get: () => Promise;
 };
 type FileController = {
-  saveFile: (name: string, source: FileSource) => ParsePromise;
-  saveBase64: (name: string, source: FileSource) => ParsePromise;
+  saveFile: (name: string, source: FileSource) => Promise;
+  saveBase64: (name: string, source: FileSource) => Promise;
 };
 type InstallationController = {
-  currentInstallationId: () => ParsePromise;
+  currentInstallationId: () => Promise;
 };
 type ObjectController = {
-  fetch: (object: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions) => ParsePromise;
-  save: (object: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) => ParsePromise;
-  destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => ParsePromise;
+  fetch: (object: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions) => Promise;
+  save: (object: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) => Promise;
+  destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => Promise;
 };
 type ObjectStateController = {
   getState: (obj: any) => ?State;
@@ -64,71 +63,71 @@ type ObjectStateController = {
   estimateAttribute: (obj: any, attr: string) => mixed;
   estimateAttributes: (obj: any) => AttributeMap;
   commitServerChanges: (obj: any, changes: AttributeMap) => void;
-  enqueueTask: (obj: any, task: () => ParsePromise) => ParsePromise;
+  enqueueTask: (obj: any, task: () => Promise) => Promise;
   clearAllState: () => void;
   duplicateState: (source: any, dest: any) => void;
 };
 type PushController = {
-  send: (data: PushData, options: RequestOptions) => ParsePromise;
+  send: (data: PushData, options: RequestOptions) => Promise;
 };
 type QueryController = {
-  find: (className: string, params: QueryJSON, options: RequestOptions) => ParsePromise;
-  aggregate: (className: string, params: any, options: RequestOptions) => ParsePromise;
+  find: (className: string, params: QueryJSON, options: RequestOptions) => Promise;
+  aggregate: (className: string, params: any, options: RequestOptions) => Promise;
 };
 type RESTController = {
-  request: (method: string, path: string, data: mixed) => ParsePromise;
-  ajax: (method: string, url: string, data: any, headers?: any) => ParsePromise;
+  request: (method: string, path: string, data: mixed) => Promise;
+  ajax: (method: string, url: string, data: any, headers?: any) => Promise;
 };
 type SchemaController = {
-  purge: (className: string) => ParsePromise;
-  get: (className: string, options: RequestOptions) => ParsePromise;
-  delete: (className: string, options: RequestOptions) => ParsePromise;
-  create: (className: string, params: any, options: RequestOptions) => ParsePromise;
-  update: (className: string, params: any, options: RequestOptions) => ParsePromise;
-  send(className: string, method: string, params: any, options: RequestOptions): ParsePromise;
+  purge: (className: string) => Promise;
+  get: (className: string, options: RequestOptions) => Promise;
+  delete: (className: string, options: RequestOptions) => Promise;
+  create: (className: string, params: any, options: RequestOptions) => Promise;
+  update: (className: string, params: any, options: RequestOptions) => Promise;
+  send(className: string, method: string, params: any, options: RequestOptions): Promise;
 };
 type SessionController = {
-  getSession: (token: RequestOptions) => ParsePromise;
+  getSession: (token: RequestOptions) => Promise;
 };
 type StorageController = {
   async: 0;
   getItem: (path: string) => ?string;
   setItem: (path: string, value: string) => void;
   removeItem: (path: string) => void;
-  getItemAsync?: (path: string) => ParsePromise;
-  setItemAsync?: (path: string, value: string) => ParsePromise;
-  removeItemAsync?: (path: string) => ParsePromise;
+  getItemAsync?: (path: string) => Promise;
+  setItemAsync?: (path: string, value: string) => Promise;
+  removeItemAsync?: (path: string) => Promise;
   clear: () => void;
 } | {
   async: 1;
   getItem?: (path: string) => ?string;
   setItem?: (path: string, value: string) => void;
   removeItem?: (path: string) => void;
-  getItemAsync: (path: string) => ParsePromise;
-  setItemAsync: (path: string, value: string) => ParsePromise;
-  removeItemAsync: (path: string) => ParsePromise;
+  getItemAsync: (path: string) => Promise;
+  setItemAsync: (path: string, value: string) => Promise;
+  removeItemAsync: (path: string) => Promise;
   clear: () => void;
 };
 type UserController = {
-  setCurrentUser: (user: ParseUser) => ParsePromise;
+  setCurrentUser: (user: ParseUser) => Promise;
   currentUser: () => ?ParseUser;
-  currentUserAsync: () => ParsePromise;
-  signUp: (user: ParseUser, attrs: AttributeMap, options: RequestOptions) => ParsePromise;
-  logIn: (user: ParseUser, options: RequestOptions) => ParsePromise;
-  become: (options: RequestOptions) => ParsePromise;
-  logOut: () => ParsePromise;
-  requestPasswordReset: (email: string, options: RequestOptions) => ParsePromise;
-  updateUserOnDisk: (user: ParseUser) => ParsePromise;
-  upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => ParsePromise;
-  linkWith: (user: ParseUser, authData: AuthData) => ParsePromise;
-  removeUserFromDisk: () => ParsePromise;
+  currentUserAsync: () => Promise;
+  signUp: (user: ParseUser, attrs: AttributeMap, options: RequestOptions) => Promise;
+  logIn: (user: ParseUser, options: RequestOptions) => Promise;
+  become: (options: RequestOptions) => Promise;
+  logOut: () => Promise;
+  requestPasswordReset: (email: string, options: RequestOptions) => Promise;
+  updateUserOnDisk: (user: ParseUser) => Promise;
+  upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => Promise;
+  linkWith: (user: ParseUser, authData: AuthData) => Promise;
+  removeUserFromDisk: () => Promise;
 };
 type HooksController = {
-  get: (type: string, functionName?: string, triggerName?: string) => ParsePromise;
-  create: (hook: mixed) => ParsePromise;
-  delete: (hook: mixed) => ParsePromise;
-  update: (hook: mixed) => ParsePromise;
-  send: (method: string, path: string, body?: mixed) => ParsePromise;
+  get: (type: string, functionName?: string, triggerName?: string) => Promise;
+  create: (hook: mixed) => Promise;
+  delete: (hook: mixed) => Promise;
+  update: (hook: mixed) => Promise;
+  send: (method: string, path: string, body?: mixed) => Promise;
 };
 
 type Config = {

@@ -9,20 +9,19 @@
 
 jest.autoMockOff();
 
-var ParseFile = require('../ParseFile').default;
-var ParsePromise = require('../ParsePromise').default;
-var CoreManager = require('../CoreManager');
+const ParseFile = require('../ParseFile').default;
+const CoreManager = require('../CoreManager');
 
 function generateSaveMock(prefix) {
-  return function(name, payload) {
-    return ParsePromise.as({
+  return function(name) {
+    return Promise.resolve({
       name: name,
       url: prefix + name
     });
   };
 }
 
-var defaultController = CoreManager.getFileController();
+const defaultController = CoreManager.getFileController();
 
 describe('ParseFile', () => {
   beforeEach(() => {
@@ -33,13 +32,13 @@ describe('ParseFile', () => {
   });
 
   it('can create files with base64 encoding', () => {
-    var file = new ParseFile('parse.txt', { base64: 'ParseA==' });
+    const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('');
   });
 
   it('can extract data type from base64', () => {
-    var file = new ParseFile('parse.txt', {
+    const file = new ParseFile('parse.txt', {
       base64: 'data:image/png;base64,ParseA=='
     });
     expect(file._source.base64).toBe('ParseA==');
@@ -47,7 +46,7 @@ describe('ParseFile', () => {
   });
 
   it('can extract data type from base64 with data type containing a number', () => {
-    var file = new ParseFile('parse.m4a', {
+    const file = new ParseFile('parse.m4a', {
       base64: 'data:audio/m4a;base64,ParseA=='
     });
     expect(file._source.base64).toBe('ParseA==');
@@ -55,35 +54,35 @@ describe('ParseFile', () => {
   });
 
   it('can extract data type from base64 with a complex mime type', () => {
-    var file = new ParseFile('parse.kml', {
-        base64: 'data:application/vnd.google-earth.kml+xml;base64,ParseA=='
+    const file = new ParseFile('parse.kml', {
+      base64: 'data:application/vnd.google-earth.kml+xml;base64,ParseA=='
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('application/vnd.google-earth.kml+xml');
   });
 
   it('can extract data type from base64 with a charset param', () => {
-    var file = new ParseFile('parse.kml', {
-        base64: 'data:application/vnd.3gpp.pic-bw-var;charset=utf-8;base64,ParseA=='
+    const file = new ParseFile('parse.kml', {
+      base64: 'data:application/vnd.3gpp.pic-bw-var;charset=utf-8;base64,ParseA=='
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('application/vnd.3gpp.pic-bw-var');
   });
 
   it('can create files with byte arrays', () => {
-    var file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('');
   });
 
   it('can create files with all types of characters', () => {
-    var file = new ParseFile('parse.txt', [11, 239, 191, 215, 80, 52]);
+    const file = new ParseFile('parse.txt', [11, 239, 191, 215, 80, 52]);
     expect(file._source.base64).toBe('C++/11A0');
     expect(file._source.type).toBe('');
   });
 
   it('can create an empty file', () => {
-    var file = new ParseFile('parse.txt');
+    const file = new ParseFile('parse.txt');
     expect(file.name()).toBe('parse.txt');
     expect(file.url()).toBe(undefined);
   });
@@ -103,7 +102,7 @@ describe('ParseFile', () => {
   });
 
   it('returns secure url when specified', () => {
-    var file = new ParseFile('parse.txt', { base64: 'ParseA==' });
+    const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     return file.save().then(function(result) {
       expect(result).toBe(file);
       expect(result.url({ forceSecure: true }))
@@ -112,12 +111,12 @@ describe('ParseFile', () => {
   });
 
   it('returns undefined when there is no url', () => {
-    var file = new ParseFile('parse.txt', { base64: 'ParseA==' });
+    const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     expect(file.url({ forceSecure: true })).toBeUndefined();
   });
 
   it('updates fields when saved', () => {
-    var file = new ParseFile('parse.txt', { base64: 'ParseA==' });
+    const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     expect(file.name()).toBe('parse.txt');
     expect(file.url()).toBe(undefined);
     return file.save().then(function(result) {
@@ -128,7 +127,7 @@ describe('ParseFile', () => {
   });
 
   it('generates a JSON representation', () => {
-    var file = new ParseFile('parse.txt', { base64: 'ParseA==' });
+    const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     return file.save().then(function(result) {
       expect(result.toJSON()).toEqual({
         __type: 'File',
@@ -139,7 +138,7 @@ describe('ParseFile', () => {
   });
 
   it('can construct a file from a JSON object', () => {
-    var f = ParseFile.fromJSON({
+    const f = ParseFile.fromJSON({
       __type: 'File',
       name: 'parse.txt',
       url: 'http://files.parsetfss.com/a/parse.txt'
@@ -153,8 +152,8 @@ describe('ParseFile', () => {
   });
 
   it('can test equality against another ParseFile', () => {
-    var a = new ParseFile('parse.txt', [61, 170, 236, 120]);
-    var b = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    let a = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    let b = new ParseFile('parse.txt', [61, 170, 236, 120]);
 
     expect(a.equals(a)).toBe(true);
     // unsaved files are never equal
@@ -189,29 +188,42 @@ describe('ParseFile', () => {
 describe('FileController', () => {
   beforeEach(() => {
     CoreManager.setFileController(defaultController);
-    var request = function(method, path, data) {
-      var name = path.substr(path.indexOf('/') + 1);
-      return ParsePromise.as({
+    const request = function(method, path) {
+      const name = path.substr(path.indexOf('/') + 1);
+      return Promise.resolve({
         name: name,
         url: 'https://files.parsetfss.com/a/' + name
       });
     };
-    var ajax = function(method, path, data, headers) {
-      var name = path.substr(path.indexOf('/') + 1);
-      return ParsePromise.as({
-        name: name,
-        url: 'https://files.parsetfss.com/a/' + name
+    const ajax = function(method, path) {
+      const name = path.substr(path.indexOf('/') + 1);
+      return Promise.resolve({
+        response: {
+          name: name,
+          url: 'https://files.parsetfss.com/a/' + name
+        }
       });
     };
     CoreManager.setRESTController({ request: request, ajax: ajax });
   });
 
   it('saves files created with bytes', () => {
-    var file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     return file.save().then(function(f) {
       expect(f).toBe(file);
       expect(f.name()).toBe('parse.txt');
       expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
+    });
+  });
+
+  it('saves files via ajax', () => {
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file._source.format = 'file';
+
+    return file.save().then(function(f) {
+      expect(f).toBe(file);
+      expect(f.name()).toBe('/api.parse.com/1/files/parse.txt');
+      expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
     });
   });
 });

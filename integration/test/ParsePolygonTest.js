@@ -5,7 +5,7 @@ const Parse = require('../../node');
 const TestObject = Parse.Object.extend('TestObject');
 
 describe('Polygon', () => {
-  before(() => {
+  beforeAll(() => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
@@ -68,7 +68,7 @@ describe('Polygon', () => {
 
   it('fail save with 3 point minumum', (done) => {
     try {
-      const polygon = new Parse.Polygon([[0, 0]]);
+      new Parse.Polygon([[0, 0]]);
     } catch (e) {
       done();
     }
@@ -76,7 +76,7 @@ describe('Polygon', () => {
 
   it('fail save with non array', (done) => {
     try {
-      const polygon = new Parse.Polygon(123);
+      new Parse.Polygon(123);
     } catch (e) {
       done();
     }
@@ -84,7 +84,7 @@ describe('Polygon', () => {
 
   it('fail save with invalid array', (done) => {
     try {
-      const polygon = new Parse.Polygon([['str1'], ['str2'], ['str3']]);
+      new Parse.Polygon([['str1'], ['str2'], ['str3']]);
     } catch (e) {
       done();
     }

@@ -16,7 +16,6 @@ jest.dontMock('../parseDate');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../ParseSession');
 jest.dontMock('../RESTController');
 jest.dontMock('../Storage');
@@ -27,7 +26,7 @@ jest.dontMock('../UniqueInstanceStateController');
 
 jest.dontMock('./test_helpers/mockXHR');
 
-var mockUser = function(token) {
+const mockUser = function(token) {
   this.token = token;
 };
 mockUser.prototype.getSessionToken = function() {
@@ -38,18 +37,16 @@ mockUser.current = function() {
 };
 jest.setMock('../ParseUser', mockUser);
 
-var CoreManager = require('../CoreManager');
-var ParseObject = require('../ParseObject').default;
-var ParsePromise = require('../ParsePromise').default;
-var ParseSession = require('../ParseSession').default;
-var ParseUser = require('../ParseUser');
+const CoreManager = require('../CoreManager');
+const ParseObject = require('../ParseObject').default;
+const ParseSession = require('../ParseSession').default;
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 
 describe('ParseSession', () => {
   it('can be initialized', () => {
-    var session = new ParseSession();
+    let session = new ParseSession();
     session.set('someField', 'someValue');
     expect(session.get('someField')).toBe('someValue');
 
@@ -60,7 +57,7 @@ describe('ParseSession', () => {
   });
 
   it('cannot write to readonly fields', () => {
-    var session = new ParseSession();
+    const session = new ParseSession();
     expect(session.set.bind(session, 'createdWith', 'facebook')).toThrow(
       'Cannot modify readonly attribute: createdWith'
     );
@@ -82,7 +79,7 @@ describe('ParseSession', () => {
   });
 
   it('exposes the token through a getter', () => {
-    var session = new ParseSession();
+    const session = new ParseSession();
     session._finishFetch({
       id: 'session1',
       sessionToken: 'abc123'
@@ -106,7 +103,7 @@ describe('ParseSession', () => {
         expect(options).toEqual({
           sessionToken: 'abc123'
         });
-        return ParsePromise.as({
+        return Promise.resolve({
           objectId: 'session1',
           sessionToken: 'abc123'
         });
@@ -115,7 +112,7 @@ describe('ParseSession', () => {
     });
 
     mockUser.currentAsync = function() {
-      return ParsePromise.as(new mockUser('abc123'));
+      return Promise.resolve(new mockUser('abc123'));
     };
     ParseSession.current().then((session) => {
       expect(session instanceof ParseSession).toBe(true);
@@ -126,13 +123,13 @@ describe('ParseSession', () => {
   });
 
   it('can be cloned', () => {
-    var s = ParseObject.fromJSON({
+    const s = ParseObject.fromJSON({
       className: '_Session',
       sessionToken: '123abc',
       foo: 12
     });
 
-    var clone = s.clone();
+    const clone = s.clone();
     expect(clone.className).toBe('_Session');
     expect(clone.get('foo')).toBe(12);
     expect(clone.get('sessionToken')).toBe(undefined);

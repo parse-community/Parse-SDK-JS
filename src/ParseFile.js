@@ -8,9 +8,8 @@
  *
  * @flow
  */
-
+/* global File */
 import CoreManager from './CoreManager';
-import ParsePromise from './ParsePromise';
 
 type Base64 = { base64: string };
 type FileData = Array<number> | Base64 | File;
@@ -55,7 +54,7 @@ class ParseFile {
   _name: string;
   _url: ?string;
   _source: FileSource;
-  _previousSave: ?ParsePromise;
+  _previousSave: ?Promise;
 
   /**
    * @param name {String} The file's name. This will be prefixed by a unique
@@ -67,7 +66,8 @@ class ParseFile {
    *     2. an Object like { base64: "..." } with a base64-encoded String.
    *     3. a File object selected with a file upload control. (3) only works
    *        in Firefox 3.6+, Safari 6.0.2+, Chrome 7+, and IE 10+.
-   *        For example:<pre>
+   *        For example:
+   * <pre>
    * var fileUploadControl = $("#profilePhotoFileUpload")[0];
    * if (fileUploadControl.files.length > 0) {
    *   var file = fileUploadControl.files[0];
@@ -156,8 +156,8 @@ class ParseFile {
 
   /**
    * Saves the file to the Parse cloud.
-   * @param {Object} options A Backbone-style options object.
-   * @return {Parse.Promise} Promise that is resolved when the save finishes.
+   * @param {Object} options
+   * @return {Promise} Promise that is resolved when the save finishes.
    */
   save(options?: { useMasterKey?: boolean, success?: any, error?: any }) {
     options = options || {};
@@ -178,7 +178,7 @@ class ParseFile {
       }
     }
     if (this._previousSave) {
-      return this._previousSave._thenRunCallbacks(options);
+      return this._previousSave;
     }
   }
 
@@ -243,7 +243,7 @@ var DefaultController = {
     // To directly upload a File, we use a REST-style AJAX request
     var headers = {
       'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
-      'Content-Type': source.type || (source.file? source.file.type : null)
+      'Content-Type': source.type || (source.file ? source.file.type : null)
     };
     var jsKey = CoreManager.get('JAVASCRIPT_KEY');
     if (jsKey) {
@@ -254,7 +254,7 @@ var DefaultController = {
       url += '/';
     }
     url += 'files/' + name;
-    return CoreManager.getRESTController().ajax('POST', url, source.file, headers);
+    return CoreManager.getRESTController().ajax('POST', url, source.file, headers).then(res=>res.response)
   },
 
   saveBase64: function(name: string, source: FileSource, options?: { useMasterKey?: boolean, success?: any, error?: any }) {

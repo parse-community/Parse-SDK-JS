@@ -16,8 +16,8 @@
  * alongside it.
  */
 function mockXHR(results) {
-  var XHR = function() { };
-  var attempts = 0;
+  const XHR = function() { };
+  let attempts = 0;
   XHR.prototype = {
     open: function() { },
     setRequestHeader: function() { },
