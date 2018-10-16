@@ -1,5 +1,9 @@
 # Parse-SDK-JS
 
+## 2.1.0
+
+- Parse.Error now inherits from Error
+
 ## 2.0.2
 
 - Fixes issue affecting unsubscribing from liveQueries (#640)

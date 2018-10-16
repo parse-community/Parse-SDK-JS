@@ -1392,12 +1392,12 @@ describe('Parse Query', () => {
       const q2 = new Parse.Query('Parent');
       q2.equalTo('complexor', true);
       q2.lessThan('y', 2);
-      const orQuery = new Parse.Query.or(q1, q2);
+      const orQuery = Parse.Query.or(q1, q2);
       return orQuery.find();
     }).then((results) => {
       assert.equal(results.length, 3);
       done();
-    });
+    }).catch(done.fail);
   });
 
   it('can build AND queries', (done) => {
@@ -1446,12 +1446,12 @@ describe('Parse Query', () => {
       const q2 = new Parse.Query('Parent');
       q2.equalTo('and', true);
       q2.equalTo('y', 4);
-      const andQuery = new Parse.Query.and(q1, q2);
+      const andQuery = Parse.Query.and(q1, q2);
       return andQuery.find();
     }).then((results) => {
       assert.equal(results.length, 1);
       done();
-    }).catch(e => console.log(e));
+    }).catch(done.fail);
   });
 
   it('can build NOR queries', async () => {
@@ -1494,7 +1494,7 @@ describe('Parse Query', () => {
     q1.matchesQuery('child', subQuery);
     const q2 = new Parse.Query('Parent');
     q2.equalTo('y', 5);
-    const norQuery = new Parse.Query.nor(q1, q2);
+    const norQuery = Parse.Query.nor(q1, q2);
     const results = await norQuery.find();
 
     assert.equal(results.length, 8);

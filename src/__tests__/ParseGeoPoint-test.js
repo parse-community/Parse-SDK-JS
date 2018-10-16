@@ -30,14 +30,27 @@ describe('GeoPoint', () => {
     expect(point.longitude).toBe(88);
   });
 
-  it('throws when created with NaN values', () => {
-    expect(function() {
-      new ParseGeoPoint(NaN, NaN);
-    }).toThrow('GeoPoint latitude and longitude must be valid numbers');
+  it('throws when created with non numbers values', () => {
+    [
+      [NaN, NaN],
+      [false, true],
+      ["29", "10"],
+      [29, "10"],
+      ["29", 10],
+      [["29", "10"]],
+      [{ latitude: "29", longitude: "10" }],
+    ].forEach(case_test => {
+      expect(function() {
+        new ParseGeoPoint(...case_test);
+      }).toThrow('GeoPoint latitude and longitude must be valid numbers');
+    });
   });
 
   it('can set latitude and longitude', () => {
     const point = new ParseGeoPoint();
+    expect(point.latitude).toBe(0);
+    expect(point.longitude).toBe(0);
+
     point.latitude = 5.5;
     expect(point.latitude).toBe(5.5);
 
