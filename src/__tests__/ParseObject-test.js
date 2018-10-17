@@ -877,7 +877,7 @@ describe('ParseObject', () => {
     expect(o.get('count')).toBe(6);
     expect(o.get('age')).toBe(19);
     expect(o.get('gender')).toBe('male');
-    o.revert('age', 'count', ['gender']);
+    o.revert('age', 'count', 'gender');
     expect(o.get('cool')).toBe(true);
     expect(o.op('cool')).not.toBe(undefined);
     expect(o.get('count')).toBe(5);
@@ -886,6 +886,31 @@ describe('ParseObject', () => {
     expect(o.op('age')).toBe(undefined);
     expect(o.get('gender')).toBe('female');
     expect(o.op('gender')).toBe(undefined);
+  });
+
+  it('throws if an array is provided', () => {
+    var o = ParseObject.fromJSON({
+      className: 'Item',
+      objectId: 'throwforarray',
+      count: 5,
+      age: 18,
+      gender: 'female'
+    });
+    o.set({ cool: true, gender: 'male' });
+
+    const err = "Parse.Object#revert expects either no, or a list of string, arguments.";
+
+    expect(function() {
+      o.revert(['age'])
+    }).toThrow(err);
+
+    expect(function() {
+      o.revert([])
+    }).toThrow(err);
+
+    expect(function() {
+      o.revert('gender', ['age'])
+    }).toThrow(err);
   });
 
   it('can save the object', (done) => {
