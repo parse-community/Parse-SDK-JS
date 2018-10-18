@@ -421,6 +421,33 @@ class ParseUser extends ParseObject {
   }
 
   /**
+   * Requires email change for user. It save new email into field
+   * <code>emailNew</code>.
+   *
+   * <p>Calls options.success or options.error on completion.</p>
+   *
+
+   * @param {string} email
+   * @param {Object} options
+   * @return {Promise} A promise that is fulfilled when
+   *     the operation is complete.
+   */
+  requestEmailChange(email: string, options: FullOptions): Promise {
+    options = options || {};
+
+    var requestOptions = {};
+    if (options.hasOwnProperty('useMasterKey')) {
+      requestOptions.useMasterKey = options.useMasterKey;
+    }
+    if (options.hasOwnProperty('installationId')) {
+      requestOptions.installationId = options.installationId;
+    }
+
+    var controller = CoreManager.getUserController();
+    return controller.requestEmailChange(this, email, requestOptions);
+  }
+
+  /**
    * Wrap the default save behavior with functionality to save to local
    * storage if this is current user.
    */
@@ -1025,6 +1052,28 @@ var DefaultController = {
       }
       return user;
     });
+  },
+
+  requestEmailChange(user: ParseUser, email: string, options: RequestOptions) {
+    var token = user.getSessionToken();
+    if (!token) {
+      return Promise.reject(
+        new ParseError(
+          ParseError.SESSION_MISSING,
+          'Cannot upgrade a user with no session token'
+        )
+      );
+    }
+
+    options.sessionToken = token;
+
+    var RESTController = CoreManager.getRESTController();
+    return RESTController.request(
+      'POST',
+      'requestEmailChange',
+      { email: email },
+      options
+    );
   }
 };
 
