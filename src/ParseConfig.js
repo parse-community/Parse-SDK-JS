@@ -158,6 +158,40 @@ var DefaultController = {
         return config;
       });
     });
+  },
+
+  save(attrs,params) {
+    if(!params || !params.useMasterKey){
+      return Promise.reject('Master Key needed for update Parse.Config')
+    }
+    const encodedAttrs = {};
+    for(let key in attrs){
+      encodedParams[key] = Parse._encode(attrs[key])
+    }
+    return Parse._request(
+      'PUT',
+      'config',
+      { params: encodedAttrs },
+      { useMasterKey: true }
+    ).then(response => {
+      if(response && response.result){
+        for(let key in encodedParams){
+          currentConfig.attributes[key] = decode(encodedParams[key]);
+        }
+        const encodedConfig = {}
+        for(let key in currentConfig.attributes){
+          encodedConfig[key] = Parse._encode(currentConfig.attributes[key])
+        }
+        return Storage.setItemAsync(
+          Storage.generatePath(CURRENT_CONFIG_KEY),
+          JSON.stringify(encodedConfig)
+        ).then(() => {
+          return currentConfig;
+        });
+      } else {
+        return Promise.reject('Error occured updating Config')
+      }
+    })
   }
 };
 
