@@ -72,7 +72,7 @@ describe('Parse Cloud', () => {
 
   it('run function with undefined', (done) => {
     Parse.Cloud.run('CloudFunctionUndefined', {}).then((result) => {
-      assert.equal(result, null);
+      assert.strictEqual(result, undefined);
       done();
     });
   });

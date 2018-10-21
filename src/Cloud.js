@@ -12,6 +12,7 @@
 import CoreManager from './CoreManager';
 import decode from './decode';
 import encode from './encode';
+import ParseError from './ParseError';
 import ParseQuery from './ParseQuery';
 
 /**
@@ -121,11 +122,19 @@ const DefaultController = {
     );
 
     return request.then((res) => {
+      if (typeof res === 'object' &&
+          Object.keys(res).length > 0 &&
+          !res.hasOwnProperty('result')) {
+        throw new ParseError(
+          ParseError.INVALID_JSON,
+          'The server returned an invalid response.'
+        );
+      }
       const decoded = decode(res);
       if (decoded && decoded.hasOwnProperty('result')) {
         return Promise.resolve(decoded.result);
       }
-      return Promise.resolve(null);
+      return Promise.resolve(undefined);
     });
   },
 
