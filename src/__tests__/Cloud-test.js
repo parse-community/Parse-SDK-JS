@@ -151,13 +151,12 @@ describe('CloudController', () => {
 
   it('run invalid response', (done) => {
     const request = jest.fn();
-    request.mockReturnValue(Promise.resolve({
-      success: false
-    }));
+    request.mockReturnValue(Promise.resolve(undefined));
+
     const ajax = jest.fn();
     CoreManager.setRESTController({ request: request, ajax: ajax });
 
-    Cloud.run('myfunction').then(null).catch(() => {
+    Cloud.run('myfunction').then(() => {
       done();
     });
   });

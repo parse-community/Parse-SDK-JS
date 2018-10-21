@@ -12,7 +12,6 @@
 import CoreManager from './CoreManager';
 import decode from './decode';
 import encode from './encode';
-import ParseError from './ParseError';
 import ParseQuery from './ParseQuery';
 
 /**
@@ -126,10 +125,7 @@ const DefaultController = {
       if (decoded && decoded.hasOwnProperty('result')) {
         return Promise.resolve(decoded.result);
       }
-      throw new ParseError(
-        ParseError.INVALID_JSON,
-        'The server returned an invalid response.'
-      );
+      return Promise.resolve(null);
     });
   },
 
