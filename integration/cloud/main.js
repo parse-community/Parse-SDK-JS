@@ -7,6 +7,10 @@ Parse.Cloud.define("bar", function(request) {
   }
 });
 
+Parse.Cloud.define('CloudFunctionUndefined', function() {
+  return undefined;
+});
+
 Parse.Cloud.job('CloudJob1', function() {
   return {
     status: 'cloud job completed'

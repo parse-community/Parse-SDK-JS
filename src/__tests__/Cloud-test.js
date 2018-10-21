@@ -162,6 +162,18 @@ describe('CloudController', () => {
     });
   });
 
+  it('run undefined response', (done) => {
+    const request = jest.fn();
+    request.mockReturnValue(Promise.resolve(undefined));
+
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request: request, ajax: ajax });
+
+    Cloud.run('myfunction').then(() => {
+      done();
+    });
+  });
+
   it('startJob passes encoded requests', () => {
     Cloud.startJob('myJob', { value: 12, when: new Date(Date.UTC(2015,0,1)) });
 
