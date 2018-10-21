@@ -70,6 +70,13 @@ describe('Parse Cloud', () => {
     }
   });
 
+  it('run function with undefined', (done) => {
+    Parse.Cloud.run('CloudFunctionUndefined', {}).then((result) => {
+      assert.strictEqual(result, undefined);
+      done();
+    });
+  });
+
   it('run job', (done) => {
     const params = { startedBy: 'Monty Python' };
     Parse.Cloud.startJob('CloudJob1', params).then((jobStatusId) => {
