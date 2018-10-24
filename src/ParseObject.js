@@ -1403,8 +1403,8 @@ class ParseObject {
    * @param {Object} json The JSON map of the Object's data
    * @param {boolean} override In single instance mode, all old server data
    *   is overwritten if this is set to true
-   * @param {ignoreClassMap} ignores current classMap, object will be returned as instance
-   *   of Parse.Object
+   * @param {boolean} ignoreClassMap ignores current classMap. Object will be
+   *   returned as an instance of Parse.Object
    * @static
    * @return {Parse.Object} A Parse.Object reference
    */
