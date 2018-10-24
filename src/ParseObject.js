@@ -1403,14 +1403,16 @@ class ParseObject {
    * @param {Object} json The JSON map of the Object's data
    * @param {boolean} override In single instance mode, all old server data
    *   is overwritten if this is set to true
+   * @param {ignoreClassMap} ignores current classMap, object will be returned as instance
+   *   of Parse.Object
    * @static
    * @return {Parse.Object} A Parse.Object reference
    */
-  static fromJSON(json, override) {
+  static fromJSON(json, override, ignoreClassMap = false) {
     if (!json.className) {
       throw new Error('Cannot create an object without a className');
     }
-    var constructor = classMap[json.className];
+    var constructor = ignoreClassMap ? undefined : classMap[json.className];
     var o = constructor ? new constructor() : new ParseObject(json.className);
     var otherAttributes = {};
     for (var attr in json) {
