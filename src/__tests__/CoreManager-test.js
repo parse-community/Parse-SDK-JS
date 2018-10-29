@@ -87,14 +87,16 @@ describe('CoreManager', () => {
 
     expect(CoreManager.setConfigController.bind(null, {
       current: function() {},
-      get: function() {}
+      get: function() {},
+      save : function() {}
     })).not.toThrow();
   });
 
   it('can set and get ConfigController', () => {
     const controller = {
       current: function() {},
-      get: function() {}
+      get: function() {},
+      save : function() {}
     };
 
     CoreManager.setConfigController(controller);
