@@ -166,6 +166,12 @@
  * @property {function} message If message is called with a string argument, will update the current message to be stored in the job status.
  */
 
+ /**
+  * @typedef Parse.Cloud.JobStatus
+  * @property {function} error If error is called, will end the job unsuccessfully with an optional completion message to be stored in the job status.
+  * @property {function} success If success is called, will end the job successfullly with the optional completion message to be stored in the job status.
+  */
+
 /**
  * @typedef Parse.Cloud.BeforeSaveResponse
  * @property {function} success If called, will allow the save to happen. If a Parse.Object is passed in, then the passed in object will be saved instead.
