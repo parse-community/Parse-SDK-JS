@@ -135,7 +135,7 @@
  * @method job
  * @name Parse.Cloud.job
  * @param {String} name The name of the Background Job
- * @param {Function} func The Background Job to register. This function should take two parameters a {@link Parse.Cloud.JobRequest} and a {@link Parse.Cloud.JobStatus}
+ * @param {Function} func The Background Job to register. This function should take one parameter, a {@link Parse.Cloud.JobRequest}.
  *
  */
 
@@ -163,13 +163,7 @@
 /**
  * @typedef Parse.Cloud.JobRequest
  * @property {Object} params The params passed to the background job.
- */
-
-/**
- * @typedef Parse.Cloud.JobStatus
- * @property {function} error If error is called, will end the job unsuccessfully with an optional completion message to be stored in the job status.
  * @property {function} message If message is called with a string argument, will update the current message to be stored in the job status.
- * @property {function} success If success is called, will end the job successfullly with the optional completion message to be stored in the job status.
  */
 
 /**
