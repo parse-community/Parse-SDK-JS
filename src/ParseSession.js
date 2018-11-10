@@ -12,7 +12,6 @@
 import CoreManager from './CoreManager';
 import isRevocableSession from './isRevocableSession';
 import ParseObject from './ParseObject';
-import ParsePromise from './ParsePromise';
 import ParseUser from './ParseUser';
 
 import type { AttributeMap } from './ObjectStateMutations';
@@ -27,7 +26,7 @@ import type { RequestOptions, FullOptions } from './RESTController';
  */
 class ParseSession extends ParseObject {
   /**
-   * 
+   *
    * @param {Object} attributes The initial set of data to store in the user.
    */
   constructor(attributes: ?AttributeMap) {
@@ -67,7 +66,7 @@ class ParseSession extends ParseObject {
    * Retrieves the Session object for the currently logged in session.
 
    * @static
-   * @return {Parse.Promise} A promise that is resolved with the Parse.Session
+   * @return {Promise} A promise that is resolved with the Parse.Session
    *   object after it has been fetched. If there is no current user, the
    *   promise will be rejected.
    */
@@ -81,9 +80,8 @@ class ParseSession extends ParseObject {
     }
     return ParseUser.currentAsync().then((user) => {
       if (!user) {
-        return ParsePromise.error('There is no current user.');
+        return Promise.reject('There is no current user.');
       }
-      var token = user.getSessionToken();
       sessionOptions.sessionToken = user.getSessionToken();
       return controller.getSession(sessionOptions);
     });
@@ -111,7 +109,7 @@ class ParseSession extends ParseObject {
 ParseObject.registerSubclass('_Session', ParseSession);
 
 var DefaultController = {
-  getSession(options: RequestOptions): ParsePromise {
+  getSession(options: RequestOptions): Promise {
     var RESTController = CoreManager.getRESTController();
     var session = new ParseSession();
 

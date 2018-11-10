@@ -10,8 +10,6 @@
  */
 
 import CoreManager from './CoreManager';
-import ParsePromise from './ParsePromise';
-
 import type { RequestOptions, FullOptions } from './RESTController';
 
 const FIELD_TYPES = ['String', 'Number', 'Boolean', 'Date', 'File', 'GeoPoint', 'Polygon', 'Array', 'Object', 'Pointer', 'Relation'];
@@ -53,17 +51,15 @@ class ParseSchema {
   /**
    * Static method to get all schemas
    *
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the result when
+   * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
   static all(options: FullOptions) {
@@ -76,23 +72,21 @@ class ParseSchema {
           throw new Error('Schema not found.');
         }
         return response.results;
-      })._thenRunCallbacks(options);
+      });
   }
 
   /**
    * Get the Schema from Parse
    *
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the result when
+   * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
   get(options: FullOptions) {
@@ -107,23 +101,21 @@ class ParseSchema {
           throw new Error('Schema not found.');
         }
         return response;
-      })._thenRunCallbacks(options);
+      });
   }
 
   /**
    * Create a new Schema on Parse
    *
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the result when
+   * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
   save(options: FullOptions) {
@@ -140,23 +132,21 @@ class ParseSchema {
     return controller.create(this.className, params, options)
       .then((response) => {
         return response;
-      })._thenRunCallbacks(options);
+      });
   }
 
   /**
    * Update a Schema on Parse
    *
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the result when
+   * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
   update(options: FullOptions) {
@@ -176,24 +166,22 @@ class ParseSchema {
     return controller.update(this.className, params, options)
       .then((response) => {
         return response;
-      })._thenRunCallbacks(options);
+      });
   }
 
   /**
    * Removing a Schema from Parse
    * Can only be used on Schema without objects
    *
-   * @param {Object} options A Backbone-style options object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Parse.Promise} A promise that is resolved with the result when
+   * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
   delete(options: FullOptions) {
@@ -205,27 +193,16 @@ class ParseSchema {
     return controller.delete(this.className, options)
       .then((response) => {
         return response;
-      })._thenRunCallbacks(options);
+      });
   }
 
   /**
    * Removes all objects from a Schema (class) in Parse.
    * EXERCISE CAUTION, running this will delete all objects for this schema and cannot be reversed
-   *
-   * @param {Object} options A Backbone-style options object.
-   * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback
-   *   <li>error: An Backbone-style error callback.
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
-   *
-   * @return {Parse.Promise} A promise that is resolved with the result when
+   * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  purge(options: FullOptions) {
+  purge() {
     this.assertClassName();
 
     const controller = CoreManager.getSchemaController();
@@ -233,7 +210,7 @@ class ParseSchema {
     return controller.purge(this.className)
       .then((response) => {
         return response;
-      })._thenRunCallbacks(options);
+      });
   }
 
   /**
@@ -435,7 +412,7 @@ class ParseSchema {
     this._fields[name] = { __op: 'Delete'};
   }
 
-   /**
+  /**
    * Deleting an Index to Update on a Schema
    *
    * @param {String} name Name of the field that will be created on Parse
@@ -448,7 +425,7 @@ class ParseSchema {
 }
 
 const DefaultController = {
-  send(className: string, method: string, params: any, options: RequestOptions): ParsePromise {
+  send(className: string, method: string, params: any, options: RequestOptions): Promise {
     const RESTController = CoreManager.getRESTController();
     const requestOptions = { useMasterKey: true };
     if (options.hasOwnProperty('sessionToken')) {
@@ -462,23 +439,23 @@ const DefaultController = {
     );
   },
 
-  get(className: string, options: RequestOptions): ParsePromise {
+  get(className: string, options: RequestOptions): Promise {
     return this.send(className, 'GET', {}, options);
   },
 
-  create(className: string, params: any, options: RequestOptions): ParsePromise {
+  create(className: string, params: any, options: RequestOptions): Promise {
     return this.send(className, 'POST', params, options);
   },
 
-  update(className: string, params: any, options: RequestOptions): ParsePromise {
+  update(className: string, params: any, options: RequestOptions): Promise {
     return this.send(className, 'PUT', params, options);
   },
 
-  delete(className: string, options: RequestOptions): ParsePromise {
+  delete(className: string, options: RequestOptions): Promise {
     return this.send(className, 'DELETE', {}, options);
   },
 
-  purge(className: string): ParsePromise {
+  purge(className: string): Promise {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request(
       'DELETE',

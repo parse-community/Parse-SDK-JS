@@ -24,9 +24,9 @@ mockFile.prototype.url = function() {
 };
 jest.setMock('../ParseFile', mockFile);
 
-var canBeSerialized = require('../canBeSerialized').default;
-var ParseFile = require('../ParseFile');
-var ParseObject = require('../ParseObject');
+const canBeSerialized = require('../canBeSerialized').default;
+const ParseFile = require('../ParseFile');
+const ParseObject = require('../ParseObject');
 
 describe('canBeSerialized', () => {
   it('returns true for anything that is not a ParseObject', () => {
@@ -38,7 +38,7 @@ describe('canBeSerialized', () => {
   });
 
   it('validates primitives', () => {
-    var o = new ParseObject('oid', {
+    const o = new ParseObject('oid', {
       a: 12,
       b: 'string',
       c: false
@@ -47,7 +47,7 @@ describe('canBeSerialized', () => {
   });
 
   it('returns false when a child is an unsaved object or file', () => {
-    var o = new ParseObject('oid', {
+    let o = new ParseObject('oid', {
       a: new ParseObject()
     });
     expect(canBeSerialized(o)).toBe(false);
@@ -69,8 +69,8 @@ describe('canBeSerialized', () => {
   });
 
   it('returns true when all children have an id', () => {
-    var child = new ParseObject('child', {});
-    var parent = new ParseObject(undefined, {
+    const child = new ParseObject('child', {});
+    const parent = new ParseObject(undefined, {
       child: child
     });
     child.attributes.parent = parent;
@@ -79,7 +79,7 @@ describe('canBeSerialized', () => {
   });
 
   it('traverses nested arrays and objects', () => {
-    var o = new ParseObject('oid', {
+    let o = new ParseObject('oid', {
       a: {
         a: {
           a: {

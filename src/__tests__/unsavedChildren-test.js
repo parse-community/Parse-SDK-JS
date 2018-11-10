@@ -28,19 +28,19 @@ mockObject.prototype = {
 };
 jest.setMock('../ParseObject', mockObject);
 
-var ParseFile = require('../ParseFile').default;
-var ParseObject = require('../ParseObject');
-var unsavedChildren = require('../unsavedChildren').default;
+const ParseFile = require('../ParseFile').default;
+const ParseObject = require('../ParseObject');
+const unsavedChildren = require('../unsavedChildren').default;
 
 describe('unsavedChildren', () => {
   it('finds unsaved files', () => {
-    var files = [
+    const files = [
       new ParseFile('parse1.txt', [61, 170, 236, 120]),
       new ParseFile('parse2.txt', [61, 170, 236, 120]),
       new ParseFile('parse3.txt', [61, 170, 236, 120])
     ];
 
-    var f = new ParseObject({
+    const f = new ParseObject({
       className: 'Folder',
       id: '121',
       attributes: {
@@ -73,8 +73,8 @@ describe('unsavedChildren', () => {
   });
 
   it('only returns unique files', () => {
-    var file = new ParseFile('parse1.txt', [61, 170, 236, 120]);
-    var f = new ParseObject({
+    const file = new ParseFile('parse1.txt', [61, 170, 236, 120]);
+    const f = new ParseObject({
       className: 'Folder',
       id: '121',
       attributes: {
@@ -87,19 +87,19 @@ describe('unsavedChildren', () => {
   });
 
   it('finds unsaved child objects', () => {
-    var a = new ParseObject({
+    const a = new ParseObject({
       className: 'File',
       localId: 'local0',
       attributes: {},
       dirty: true
     });
-    var b = new ParseObject({
+    const b = new ParseObject({
       className: 'File',
       localId: 'local1',
       attributes: {},
       dirty: true
     });
-    var f = new ParseObject({
+    const f = new ParseObject({
       className: 'Folder',
       id: '121',
       attributes: {
@@ -127,13 +127,13 @@ describe('unsavedChildren', () => {
   });
 
   it('throws on nested objects without ids', () => {
-    var a = new ParseObject({
+    const a = new ParseObject({
       className: 'File',
       localId: 'local0',
       attributes: {},
       dirty: true
     });
-    var b = new ParseObject({
+    const b = new ParseObject({
       className: 'File',
       localId: 'local1',
       attributes: {
@@ -141,7 +141,7 @@ describe('unsavedChildren', () => {
       },
       dirty: true
     });
-    var f = new ParseObject({
+    const f = new ParseObject({
       className: 'Folder',
       id: '121',
       attributes: {
@@ -155,19 +155,19 @@ describe('unsavedChildren', () => {
   });
 
   it('can explicitly allow nested objects without ids', () => {
-    var a = new ParseObject({
+    const a = new ParseObject({
       className: 'Folder',
       localId: 'local0',
       dirty: true,
       attributes: {}
     });
-    var b = new ParseObject({
+    const b = new ParseObject({
       className: 'Folder',
       localId: 'local1',
       dirty: true,
       attributes: {}
     });
-    var c = new ParseObject({
+    const c = new ParseObject({
       className: 'File',
       localId: 'local2',
       dirty: true,
@@ -181,7 +181,7 @@ describe('unsavedChildren', () => {
   });
 
   it('does not revisit objects', () => {
-    var a = new ParseObject({
+    const a = new ParseObject({
       className: 'File',
       id: '130',
       attributes: {

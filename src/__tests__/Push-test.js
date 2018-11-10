@@ -8,11 +8,10 @@
  */
 
 jest.dontMock('../CoreManager');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../Push');
 jest.dontMock('./test_helpers/asyncHelper');
 
-var mockQuery = function() {
+const mockQuery = function() {
   this.where = {};
 };
 mockQuery.prototype = {
@@ -24,25 +23,24 @@ mockQuery.prototype = {
 };
 jest.setMock('../ParseQuery', mockQuery);
 
-var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise').default;
-var ParseQuery = require('../ParseQuery');
-var Push = require('../Push');
+const CoreManager = require('../CoreManager');
+const ParseQuery = require('../ParseQuery');
+const Push = require('../Push');
 
-var defaultController = CoreManager.getPushController();
+const defaultController = CoreManager.getPushController();
 
 describe('Push', () => {
   beforeEach(() => {
     CoreManager.setPushController({
-      send(data, options) {
+      send(data) {
         // Pipe data through so we can test it
-        return ParsePromise.as(data);
+        return Promise.resolve(data);
       }
     });
   });
 
   it('can be sent with a where clause', (done) => {
-    var q = new ParseQuery();
+    const q = new ParseQuery();
     q.where = {
       installationId: '123'
     };
@@ -96,7 +94,7 @@ describe('Push', () => {
 describe('PushController', () => {
   it('forwards data along', () => {
     CoreManager.setPushController(defaultController);
-    var request = jest.genMockFunction().mockReturnValue({
+    const request = jest.fn().mockReturnValue({
       _thenRunCallbacks() {
         return {
           _thenRunCallbacks() {}

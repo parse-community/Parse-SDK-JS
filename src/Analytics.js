@@ -11,8 +11,6 @@
 
 import CoreManager from './CoreManager';
 
-import type ParsePromise from './ParsePromise';
-
 /**
  * Parse.Analytics provides an interface to Parse's logging and analytics
  * backend.
@@ -22,7 +20,7 @@ import type ParsePromise from './ParsePromise';
  * @hideconstructor
  */
 
- /**
+/**
   * Tracks the occurrence of a custom event with additional dimensions.
   * Parse will store a data point at the time of invocation with the given
   * event name.
@@ -50,15 +48,13 @@ import type ParsePromise from './ParsePromise';
   * having happened.
   * @param {Object} dimensions The dictionary of information by which to
   * segment this event.
-  * @param {Object} options A Backbone-style callback object.
-  * @return {Parse.Promise} A promise that is resolved when the round-trip
+  * @return {Promise} A promise that is resolved when the round-trip
   * to the server completes.
   */
 export function track(
-    name: string,
-    dimensions: { [key: string]: string },
-    options?: mixed
-  ): ParsePromise {
+  name: string,
+  dimensions: { [key: string]: string }
+): Promise {
   name = name || '';
   name = name.replace(/^\s*/, '');
   name = name.replace(/\s*$/, '');
@@ -74,12 +70,8 @@ export function track(
     }
   }
 
-  options = options || {};
-  return (
-    CoreManager.getAnalyticsController()
-      .track(name, dimensions)
-      ._thenRunCallbacks(options)
-  );
+  return CoreManager.getAnalyticsController()
+    .track(name, dimensions);
 }
 
 var DefaultController = {

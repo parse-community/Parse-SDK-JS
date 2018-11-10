@@ -13,12 +13,13 @@ import CoreManager from './CoreManager';
 import canBeSerialized from './canBeSerialized';
 import decode from './decode';
 import encode from './encode';
-import equals from './equals';
 import escape from './escape';
 import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
 import ParseFile from './ParseFile';
+import { when, continueWhile } from './promiseUtils';
+
 import {
   opFromJSON,
   Op,
@@ -30,7 +31,6 @@ import {
   RemoveOp,
   RelationOp
 } from './ParseOp';
-import ParsePromise from './ParsePromise';
 import ParseQuery from './ParseQuery';
 import ParseRelation from './ParseRelation';
 import * as SingleInstanceStateController from './SingleInstanceStateController';
@@ -147,7 +147,7 @@ class ParseObject {
   /** Prototype getters / setters **/
 
   get attributes(): AttributeMap {
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     return Object.freeze(stateController.estimateAttributes(this._getStateIdentifier()));
   }
 
@@ -205,7 +205,7 @@ class ParseObject {
   }
 
   _getServerData(): AttributeMap {
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     return stateController.getServerData(this._getStateIdentifier());
   }
 
@@ -215,12 +215,12 @@ class ParseObject {
     for (var attr in serverData) {
       unset[attr] = undefined;
     }
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     stateController.setServerData(this._getStateIdentifier(), unset);
   }
 
   _getPendingOps(): Array<OpsMap> {
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     return stateController.getPendingOps(this._getStateIdentifier());
   }
 
@@ -309,7 +309,7 @@ class ParseObject {
     if (!this.id && serverData.objectId) {
       this.id = serverData.objectId;
     }
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     stateController.initializeState(this._getStateIdentifier());
     var decoded = {};
     for (var attr in serverData) {
@@ -335,8 +335,8 @@ class ParseObject {
   }
 
   _setExisted(existed: boolean) {
-    let stateController = CoreManager.getObjectStateController();
-    let state = stateController.getState(this._getStateIdentifier());
+    const stateController = CoreManager.getObjectStateController();
+    const state = stateController.getState(this._getStateIdentifier());
     if (state) {
       state.existed = existed;
     }
@@ -345,8 +345,8 @@ class ParseObject {
   _migrateId(serverId: string) {
     if (this._localId && serverId) {
       if (singleInstance) {
-        let stateController = CoreManager.getObjectStateController();
-        let oldState = stateController.removeState(this._getStateIdentifier());
+        const stateController = CoreManager.getObjectStateController();
+        const oldState = stateController.removeState(this._getStateIdentifier());
         this.id = serverId;
         delete this._localId;
         if (oldState) {
@@ -399,8 +399,7 @@ class ParseObject {
   }
 
   _handleSaveError() {
-    var pending = this._getPendingOps();
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     stateController.mergeFirstPendingState(this._getStateIdentifier());
   }
 
@@ -415,19 +414,19 @@ class ParseObject {
    * @return {Object}
    */
   toJSON(seen: Array<any> | void): AttributeMap {
-    var seenEntry = this.id ? this.className + ':' + this.id : this;
-    var seen = seen || [seenEntry];
-    var json = {};
-    var attrs = this.attributes;
-    for (var attr in attrs) {
+    const seenEntry = this.id ? this.className + ':' + this.id : this;
+    seen = seen || [seenEntry];
+    const json = {};
+    const attrs = this.attributes;
+    for (const attr in attrs) {
       if ((attr === 'createdAt' || attr === 'updatedAt') && attrs[attr].toJSON) {
         json[attr] = attrs[attr].toJSON();
       } else {
         json[attr] = encode(attrs[attr], false, false, seen);
       }
     }
-    var pending = this._getPendingOps();
-    for (var attr in pending[0]) {
+    const pending = this._getPendingOps();
+    for (const attr in pending[0]) {
       json[attr] = pending[0][attr].toJSON();
     }
 
@@ -500,7 +499,7 @@ class ParseObject {
       }
     }
     var dirtyObjects = this._getDirtyObjectAttributes();
-    for (var attr in dirtyObjects) {
+    for (const attr in dirtyObjects) {
       keys[attr] = true;
     }
     return Object.keys(keys);
@@ -551,11 +550,10 @@ class ParseObject {
    * @param {String} attr The string name of an attribute.
    */
   escape(attr: string): string {
-    var val = this.attributes[attr];
+    let val = this.attributes[attr];
     if (val == null) {
       return '';
     }
-    var str = val;
     if (typeof val !== 'string') {
       if (typeof val.toString !== 'function') {
         return '';
@@ -683,7 +681,7 @@ class ParseObject {
     var pendingOps = this._getPendingOps();
     var last = pendingOps.length - 1;
     var stateController = CoreManager.getObjectStateController();
-    for (var attr in newOps) {
+    for (const attr in newOps) {
       var nextOp = newOps[attr].mergeWith(pendingOps[last][attr]);
       stateController.setPendingOp(this._getStateIdentifier(), attr, nextOp);
     }
@@ -805,21 +803,21 @@ class ParseObject {
   }
 
   /**
-   * Creates a new model with identical attributes to this one, similar to Backbone.Model's clone()
+   * Creates a new model with identical attributes to this one.
    * @return {Parse.Object}
    */
   clone(): any {
-    let clone = new this.constructor();
+    const clone = new this.constructor();
     if (!clone.className) {
       clone.className = this.className;
     }
     let attributes = this.attributes;
     if (typeof this.constructor.readOnlyAttributes === 'function') {
-      let readonly = this.constructor.readOnlyAttributes() || [];
+      const readonly = this.constructor.readOnlyAttributes() || [];
       // Attributes are frozen, so we have to rebuild an object,
       // rather than delete readonly keys
-      let copy = {};
-      for (let a in attributes) {
+      const copy = {};
+      for (const a in attributes) {
         if (readonly.indexOf(a) < 0) {
           copy[a] = attributes[a];
         }
@@ -837,7 +835,7 @@ class ParseObject {
    * @return {Parse.Object}
    */
   newInstance(): any {
-    let clone = new this.constructor();
+    const clone = new this.constructor();
     if (!clone.className) {
       clone.className = this.className;
     }
@@ -847,7 +845,7 @@ class ParseObject {
       return clone;
     }
 
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     if (stateController) {
       stateController.duplicateState(this._getStateIdentifier(), clone._getStateIdentifier());
     }
@@ -872,8 +870,8 @@ class ParseObject {
     if (!this.id) {
       return false;
     }
-    let stateController = CoreManager.getObjectStateController();
-    let state = stateController.getState(this._getStateIdentifier());
+    const stateController = CoreManager.getObjectStateController();
+    const state = stateController.getState(this._getStateIdentifier());
     if (state) {
       return state.existed;
     }
@@ -929,8 +927,7 @@ class ParseObject {
   /**
    * Sets the ACL to be used for this object.
    * @param {Parse.ACL} acl An instance of Parse.ACL.
-   * @param {Object} options Optional Backbone-like options object to be
-   *     passed in to set.
+   * @param {Object} options
    * @return {Boolean} Whether the set passed validation.
    * @see Parse.Object#set
    */
@@ -980,19 +977,19 @@ class ParseObject {
    * Fetch the model from the server. If the server's representation of the
    * model differs from its current attributes, they will be overriden.
    *
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback.
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>include: The name(s) of the key(s) to include. Can be a string, an array of strings,
+   *       or an array of array of strings.
    * </ul>
-   * @return {Parse.Promise} A promise that is fulfilled when the fetch
+   * @return {Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetch(options: RequestOptions): ParsePromise {
+  fetch(options: RequestOptions): Promise {
     options = options || {};
     var fetchOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
@@ -1001,8 +998,46 @@ class ParseObject {
     if (options.hasOwnProperty('sessionToken')) {
       fetchOptions.sessionToken = options.sessionToken;
     }
+    if (options.hasOwnProperty('include')) {
+      fetchOptions.include = [];
+      if (Array.isArray(options.include)) {
+        options.include.forEach((key) => {
+          if (Array.isArray(key)) {
+            fetchOptions.include = fetchOptions.include.concat(key);
+          } else {
+            fetchOptions.include.push(key);
+          }
+        });
+      } else {
+        fetchOptions.include.push(options.include);
+      }
+    }
     var controller = CoreManager.getObjectController();
-    return controller.fetch(this, true, fetchOptions)._thenRunCallbacks(options);
+    return controller.fetch(this, true, fetchOptions);
+  }
+
+  /**
+   * Fetch the model from the server. If the server's representation of the
+   * model differs from its current attributes, they will be overriden.
+   *
+   * Includes nested Parse.Objects for the provided key. You can use dot
+   * notation to specify which fields in the included object are also fetched.
+   *
+   * @param {String|Array<string|Array<string>>} keys The name(s) of the key(s) to include.
+   * @param {Object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @return {Promise} A promise that is fulfilled when the fetch
+   *     completes.
+   */
+  fetchWithInclude(keys: String|Array<string|Array<string>>, options: RequestOptions): Promise {
+    options = options || {};
+    options.include = keys;
+    return this.fetch(options);
   }
 
   /**
@@ -1021,41 +1056,27 @@ class ParseObject {
    *   gameTurn.save({
    *     player: "Jake Cutter",
    *     diceRoll: 2
-   *   }, {
-   *     success: function(gameTurnAgain) {
-   *       // The save was successful.
-   *     },
-   *     error: function(gameTurnAgain, error) {
-   *       // The save failed.  Error is an instance of Parse.Error.
-   *     }
-   *   });</pre>
-   * or with promises:<pre>
-   *   gameTurn.save({
-   *     player: "Jake Cutter",
-   *     diceRoll: 2
    *   }).then(function(gameTurnAgain) {
    *     // The save was successful.
    *   }, function(error) {
    *     // The save failed.  Error is an instance of Parse.Error.
    *   });</pre>
    *
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback.
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Parse.Promise} A promise that is fulfilled when the save
+   * @return {Promise} A promise that is fulfilled when the save
    *     completes.
    */
   save(
     arg1: ?string | { [attr: string]: mixed },
     arg2: FullOptions | mixed,
     arg3?: FullOptions
-  ): ParsePromise {
+  ): Promise {
     var attrs;
     var options;
     if (typeof arg1 === 'object' || typeof arg1 === 'undefined') {
@@ -1069,6 +1090,7 @@ class ParseObject {
       options = arg3;
     }
 
+    // TODO: safely remove me
     // Support save({ success: function() {}, error: function() {} })
     if (!options && attrs) {
       options = {};
@@ -1088,7 +1110,7 @@ class ParseObject {
         if (options && typeof options.error === 'function') {
           options.error(this, validation);
         }
-        return ParsePromise.error(validation);
+        return Promise.reject(validation);
       }
       this.set(attrs, options);
     }
@@ -1106,27 +1128,23 @@ class ParseObject {
     var unsaved = unsavedChildren(this);
     return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
-    })._thenRunCallbacks(options, this);
+    });
   }
 
   /**
    * Destroy this model on the server if it was already persisted.
-   * If `wait: true` is passed, waits for the server to respond
-   * before removal.
    *
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback
-   *   <li>error: An Backbone-style error callback.
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Parse.Promise} A promise that is fulfilled when the destroy
+   * @return {Promise} A promise that is fulfilled when the destroy
    *     completes.
    */
-  destroy(options: RequestOptions): ParsePromise {
+  destroy(options: RequestOptions): Promise {
     options = options || {};
     var destroyOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
@@ -1136,18 +1154,18 @@ class ParseObject {
       destroyOptions.sessionToken = options.sessionToken;
     }
     if (!this.id) {
-      return ParsePromise.as()._thenRunCallbacks(options);
+      return Promise.resolve();
     }
     return CoreManager.getObjectController().destroy(
       this,
       destroyOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /** Static methods **/
 
   static _clearAllState() {
-    let stateController = CoreManager.getObjectStateController();
+    const stateController = CoreManager.getObjectStateController();
     stateController.clearAllState();
   }
 
@@ -1156,27 +1174,27 @@ class ParseObject {
    * If any error is encountered, stops and calls the error handler.
    *
    * <pre>
-   *   Parse.Object.fetchAll([object1, object2, ...], {
-   *     success: function(list) {
-   *       // All the objects were fetched.
-   *     },
-   *     error: function(error) {
-   *       // An error occurred while fetching one of the objects.
-   *     },
-   *   });
+   *   Parse.Object.fetchAll([object1, object2, ...])
+   *    .then((list) => {
+   *      // All the objects were fetched.
+   *    }, (error) => {
+   *      // An error occurred while fetching one of the objects.
+   *    });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {Object} options A Backbone-style callback object.
-   * @static
+   * @param {Object} options
    * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback.
-   *   <li>error: An Backbone-style error callback.
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   *   <li>include: The name(s) of the key(s) to include. Can be a string, an array of strings,
+   *       or an array of array of strings.
    * </ul>
+   * @static
    */
-  static fetchAll(list: Array<ParseObject>, options) {
-    var options = options || {};
-
+  static fetchAll(list: Array<ParseObject>, options: RequestOptions = {}) {
     var queryOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       queryOptions.useMasterKey = options.useMasterKey;
@@ -1184,11 +1202,59 @@ class ParseObject {
     if (options.hasOwnProperty('sessionToken')) {
       queryOptions.sessionToken = options.sessionToken;
     }
+    if (options.hasOwnProperty('include')) {
+      queryOptions.include = [];
+      if (Array.isArray(options.include)) {
+        options.include.forEach((key) => {
+          if (Array.isArray(key)) {
+            queryOptions.include = queryOptions.include.concat(key);
+          } else {
+            queryOptions.include.push(key);
+          }
+        });
+      } else {
+        queryOptions.include.push(options.include);
+      }
+    }
     return CoreManager.getObjectController().fetch(
       list,
       true,
       queryOptions
-    )._thenRunCallbacks(options);
+    );
+  }
+
+  /**
+   * Fetches the given list of Parse.Object.
+   *
+   * Includes nested Parse.Objects for the provided key. You can use dot
+   * notation to specify which fields in the included object are also fetched.
+   *
+   * If any error is encountered, stops and calls the error handler.
+   *
+   * <pre>
+   *   Parse.Object.fetchAllWithInclude([object1, object2, ...], [pointer1, pointer2, ...])
+   *    .then((list) => {
+   *      // All the objects were fetched.
+   *    }, (error) => {
+   *      // An error occurred while fetching one of the objects.
+   *    });
+   * </pre>
+   *
+   * @param {Array} list A list of <code>Parse.Object</code>.
+   * @param {String|Array<string|Array<string>>} keys The name(s) of the key(s) to include.
+   * @param {Object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @static
+   */
+  static fetchAllWithInclude(list: Array<ParseObject>, keys: String|Array<string|Array<string>>, options: RequestOptions) {
+    options = options || {};
+    options.include = keys;
+    return ParseObject.fetchAll(list, options);
   }
 
   /**
@@ -1196,26 +1262,20 @@ class ParseObject {
    * If any error is encountered, stops and calls the error handler.
    *
    * <pre>
-   *   Parse.Object.fetchAllIfNeeded([object1, ...], {
-   *     success: function(list) {
-   *       // Objects were fetched and updated.
-   *     },
-   *     error: function(error) {
-   *       // An error occurred while fetching one of the objects.
-   *     },
-   *   });
+   *   Parse.Object.fetchAllIfNeeded([object1, ...])
+   *    .then((list) => {
+   *      // Objects were fetched and updated.
+   *    }, (error) => {
+   *      // An error occurred while fetching one of the objects.
+   *    });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * @static
-   * Valid options are:<ul>
-   *   <li>success: A Backbone-style success callback.
-   *   <li>error: An Backbone-style error callback.
-   * </ul>
    */
   static fetchAllIfNeeded(list: Array<ParseObject>, options) {
-    var options = options || {};
+    options = options || {};
 
     var queryOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
@@ -1228,7 +1288,7 @@ class ParseObject {
       list,
       false,
       queryOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
@@ -1252,29 +1312,27 @@ class ParseObject {
    * </ul>
    *
    * <pre>
-   *   Parse.Object.destroyAll([object1, object2, ...], {
-   *     success: function() {
-   *       // All the objects were deleted.
-   *     },
-   *     error: function(error) {
-   *       // An error occurred while deleting one or more of the objects.
-   *       // If this is an aggregate error, then we can inspect each error
-   *       // object individually to determine the reason why a particular
-   *       // object was not deleted.
-   *       if (error.code === Parse.Error.AGGREGATE_ERROR) {
-   *         for (var i = 0; i < error.errors.length; i++) {
-   *           console.log("Couldn't delete " + error.errors[i].object.id +
-   *             "due to " + error.errors[i].message);
-   *         }
-   *       } else {
-   *         console.log("Delete aborted because of " + error.message);
-   *       }
-   *     },
+   *   Parse.Object.destroyAll([object1, object2, ...])
+   *    .then((list) => {
+   *      // All the objects were deleted.
+   *    }, (error) => {
+   *      // An error occurred while deleting one or more of the objects.
+   *      // If this is an aggregate error, then we can inspect each error
+   *      // object individually to determine the reason why a particular
+   *      // object was not deleted.
+   *      if (error.code === Parse.Error.AGGREGATE_ERROR) {
+   *        for (var i = 0; i < error.errors.length; i++) {
+   *          console.log("Couldn't delete " + error.errors[i].object.id +
+   *            "due to " + error.errors[i].message);
+   *        }
+   *      } else {
+   *        console.log("Delete aborted because of " + error.message);
+   *      }
    *   });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * @static
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
@@ -1282,12 +1340,10 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Parse.Promise} A promise that is fulfilled when the destroyAll
+   * @return {Promise} A promise that is fulfilled when the destroyAll
    *     completes.
    */
-  static destroyAll(list: Array<ParseObject>, options) {
-    var options = options || {};
-
+  static destroyAll(list: Array<ParseObject>, options = {}) {
     var destroyOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       destroyOptions.useMasterKey = options.useMasterKey;
@@ -1298,7 +1354,7 @@ class ParseObject {
     return CoreManager.getObjectController().destroy(
       list,
       destroyOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
@@ -1306,18 +1362,16 @@ class ParseObject {
    * If any error is encountered, stops and calls the error handler.
    *
    * <pre>
-   *   Parse.Object.saveAll([object1, object2, ...], {
-   *     success: function(list) {
+   *   Parse.Object.saveAll([object1, object2, ...])
+   *    .then((list) => {
    *       // All the objects were saved.
-   *     },
-   *     error: function(error) {
+   *    }, (error) => {
    *       // An error occurred while saving one of the objects.
-   *     },
-   *   });
+   *    });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {Object} options A Backbone-style callback object.
+   * @param {Object} options
    * @static
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
@@ -1326,9 +1380,7 @@ class ParseObject {
    *       behalf of a specific user.
    * </ul>
    */
-  static saveAll(list: Array<ParseObject>, options) {
-    var options = options || {};
-
+  static saveAll(list: Array<ParseObject>, options = {}) {
     var saveOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       saveOptions.useMasterKey = options.useMasterKey;
@@ -1339,7 +1391,7 @@ class ParseObject {
     return CoreManager.getObjectController().save(
       list,
       saveOptions
-    )._thenRunCallbacks(options);
+    );
   }
 
   /**
@@ -1529,7 +1581,7 @@ class ParseObject {
     }
 
     if (classProps) {
-      for (var prop in classProps) {
+      for (const prop in classProps) {
         if (prop !== 'className') {
           Object.defineProperty(ParseObjectSubclass, prop, {
             value: classProps[prop],
@@ -1579,17 +1631,17 @@ class ParseObject {
 }
 
 var DefaultController = {
-  fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): ParsePromise {
+  fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): Promise {
     if (Array.isArray(target)) {
       if (target.length < 1) {
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       }
       var objs = [];
       var ids = [];
       var className = null;
       var results = [];
       var error = null;
-      target.forEach((el, i) => {
+      target.forEach((el) => {
         if (error) {
           return;
         }
@@ -1615,10 +1667,13 @@ var DefaultController = {
         results.push(el);
       });
       if (error) {
-        return ParsePromise.error(error);
+        return Promise.reject(error);
       }
       var query = new ParseQuery(className);
       query.containedIn('objectId', ids);
+      if (options && options.include) {
+        query.include(options.include);
+      }
       query._limit = ids.length;
       return query.find(options).then((objects) => {
         var idMap = {};
@@ -1629,7 +1684,7 @@ var DefaultController = {
           var obj = objs[i];
           if (!obj || !obj.id || !idMap[obj.id]) {
             if (forceFetch) {
-              return ParsePromise.error(
+              return Promise.reject(
                 new ParseError(
                   ParseError.OBJECT_NOT_FOUND,
                   'All objects must exist on the server.'
@@ -1640,8 +1695,8 @@ var DefaultController = {
         }
         if (!singleInstance) {
           // If single instance objects are disabled, we need to replace the
-          for (var i = 0; i < results.length; i++) {
-            var obj = results[i];
+          for (let i = 0; i < results.length; i++) {
+            const obj = results[i];
             if (obj && obj.id && idMap[obj.id]) {
               var id = obj.id;
               obj._finishFetch(idMap[id].toJSON());
@@ -1649,16 +1704,20 @@ var DefaultController = {
             }
           }
         }
-        return ParsePromise.as(results);
+        return Promise.resolve(results);
       });
     } else {
       var RESTController = CoreManager.getRESTController();
+      const params = {};
+      if (options && options.include) {
+        params.include = options.include.join();
+      }
       return RESTController.request(
         'GET',
         'classes/' + target.className + '/' + target._getId(),
-        {},
+        params,
         options
-      ).then((response, status, xhr) => {
+      ).then((response) => {
         if (target instanceof ParseObject) {
           target._clearPendingOps();
           target._clearServerData();
@@ -1669,11 +1728,11 @@ var DefaultController = {
     }
   },
 
-  destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): ParsePromise {
+  destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
     var RESTController = CoreManager.getRESTController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       }
       var batches = [[]];
       target.forEach((obj) => {
@@ -1689,7 +1748,7 @@ var DefaultController = {
         // If the last batch is empty, remove it
         batches.pop();
       }
-      var deleteCompleted = ParsePromise.as();
+      var deleteCompleted = Promise.resolve();
       var errors = [];
       batches.forEach((batch) => {
         deleteCompleted = deleteCompleted.then(() => {
@@ -1702,7 +1761,6 @@ var DefaultController = {
               };
             })
           }, options).then((results) => {
-            var error = null;
             for (var i = 0; i < results.length; i++) {
               if (results[i] && results[i].hasOwnProperty('error')) {
                 var err = new ParseError(
@@ -1720,9 +1778,9 @@ var DefaultController = {
         if (errors.length) {
           var aggregate = new ParseError(ParseError.AGGREGATE_ERROR);
           aggregate.errors = errors;
-          return ParsePromise.error(aggregate);
+          return Promise.reject(aggregate);
         }
-        return ParsePromise.as(target);
+        return Promise.resolve(target);
       });
     } else if (target instanceof ParseObject) {
       return RESTController.request(
@@ -1731,10 +1789,10 @@ var DefaultController = {
         {},
         options
       ).then(() => {
-        return ParsePromise.as(target);
+        return Promise.resolve(target);
       });
     }
-    return ParsePromise.as(target);
+    return Promise.resolve(target);
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
@@ -1742,7 +1800,7 @@ var DefaultController = {
     var stateController = CoreManager.getObjectStateController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
-        return ParsePromise.as([]);
+        return Promise.resolve([]);
       }
 
       var unsaved = target.concat();
@@ -1753,7 +1811,7 @@ var DefaultController = {
       }
       unsaved = unique(unsaved);
 
-      var filesSaved = ParsePromise.as();
+      var filesSaved = Promise.resolve();
       var pending: Array<ParseObject> = [];
       unsaved.forEach((el) => {
         if (el instanceof ParseFile) {
@@ -1767,7 +1825,7 @@ var DefaultController = {
 
       return filesSaved.then(() => {
         var objectError = null;
-        return ParsePromise._continueWhile(() => {
+        return continueWhile(() => {
           return pending.length > 0;
         }, () => {
           var batch = [];
@@ -1781,7 +1839,7 @@ var DefaultController = {
           });
           pending = nextPending;
           if (batch.length < 1) {
-            return ParsePromise.error(
+            return Promise.reject(
               new ParseError(
                 ParseError.OTHER_CAUSE,
                 'Tried to save a batch with a cycle.'
@@ -1791,11 +1849,17 @@ var DefaultController = {
 
           // Queue up tasks for each object in the batch.
           // When every task is ready, the API request will execute
-          var batchReturned = new ParsePromise();
+          var res, rej;
+          var batchReturned = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+          batchReturned.resolve = res;
+          batchReturned.reject = rej;
           var batchReady = [];
           var batchTasks = [];
           batch.forEach((obj, index) => {
-            var ready = new ParsePromise();
+            var res, rej;
+            var ready = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+            ready.resolve = res;
+            ready.reject = rej;
             batchReady.push(ready);
             var task = function() {
               ready.resolve();
@@ -1817,7 +1881,7 @@ var DefaultController = {
             batchTasks.push(stateController.enqueueTask(obj._getStateIdentifier(), task));
           });
 
-          ParsePromise.when(batchReady).then(() => {
+          when(batchReady).then(() => {
             // Kick off the batch request
             return RESTController.request('POST', 'batch', {
               requests: batch.map((obj) => {
@@ -1826,16 +1890,18 @@ var DefaultController = {
                 return params;
               })
             }, options);
-          }).then((response, status, xhr) => {
+          }).then((response, status) => {
             batchReturned.resolve(response, status);
+          }, (error) => {
+            batchReturned.reject(new ParseError(ParseError.INCORRECT_TYPE, error.message));
           });
 
-          return ParsePromise.when(batchTasks);
+          return when(batchTasks);
         }).then(() => {
           if (objectError) {
-            return ParsePromise.error(objectError);
+            return Promise.reject(objectError);
           }
-          return ParsePromise.as(target);
+          return Promise.resolve(target);
         });
       });
 
@@ -1853,7 +1919,7 @@ var DefaultController = {
           targetCopy._handleSaveResponse(response, status);
         }, (error) => {
           targetCopy._handleSaveError();
-          return ParsePromise.error(error);
+          return Promise.reject(error);
         });
       }
 
@@ -1861,10 +1927,10 @@ var DefaultController = {
       return stateController.enqueueTask(target._getStateIdentifier(), task).then(() => {
         return target;
       }, (error) => {
-        return ParsePromise.error(error);
+        return Promise.reject(error);
       });
     }
-    return ParsePromise.as();
+    return Promise.resolve();
   }
 }
 
