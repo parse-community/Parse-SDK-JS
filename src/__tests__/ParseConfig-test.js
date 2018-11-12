@@ -114,7 +114,7 @@ describe('ParseConfig', () => {
       },
       ajax() {}
     });
-    ParseConfig.save({str: 'hello2','num':46},{useMasterKey:true}).then((config) => {
+    ParseConfig.save({str: 'hello2','num':46}).then((config) => {
       expect(config.get('str')).toBe('hello2');
       expect(config.get('num')).toBe(46);
       const path = Storage.generatePath('currentConfig');
@@ -133,21 +133,11 @@ describe('ParseConfig', () => {
       },
       ajax() {}
     });
-    ParseConfig.save({str: 'hello2','num':46},{useMasterKey:true}).then((config) => {
+    ParseConfig.save({str: 'hello2','num':46}).then((config) => {
       expect(config).toBe(1)
       done();
     },(error) => {
       expect(error.code).toBe(1)
-      done();
-    });
-  });
-
-  it('cant save a config object without masterkey', (done) => {
-    ParseConfig.save({str: 'hello2','num':46}).then((config) => {
-      expect(config).toBe(-1)
-      done();
-    },(error) => {
-      expect(error.code).toBe(-1)
       done();
     });
   });

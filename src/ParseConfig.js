@@ -88,10 +88,10 @@ class ParseConfig {
    * @return {Promise} A promise that is resolved with a newly-created
    *     configuration object or with the current with the update.
    */
-  static save(attrs,params) {
+  static save(attrs) {
     const controller = CoreManager.getConfigController();
     //To avoid a mismatch with the local and the cloud config we get a new version
-    return controller.save(attrs,params).then(() => {
+    return controller.save(attrs).then(() => {
       return controller.get();
     },(error) => {
       return Promise.reject(error);
@@ -177,15 +177,8 @@ var DefaultController = {
     });
   },
 
-  save(attrs,params) {
+  save(attrs) {
     var RESTController = CoreManager.getRESTController();
-    if(!params || !params.useMasterKey){
-      const error = new ParseError(
-        ParseError.OTHER_CAUSE,
-        'Master Key needed for update Parse.Config.'
-      );
-      return Promise.reject(error);
-    }
     const encodedAttrs = {};
     for(const key in attrs){
       encodedAttrs[key] = encode(attrs[key])
