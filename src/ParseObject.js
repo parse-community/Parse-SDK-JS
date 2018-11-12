@@ -943,7 +943,7 @@ class ParseObject {
     let keysToRevert;
     if(keys.length) {
       keysToRevert = [];
-      for(let key of keys) {
+      for(const key of keys) {
         if(typeof(key) === "string") {
           keysToRevert.push(key);
         } else {
