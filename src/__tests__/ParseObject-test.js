@@ -852,7 +852,7 @@ describe('ParseObject', () => {
   });
 
   it('can revert a specific field in unsaved ops', () => {
-    var o = ParseObject.fromJSON({
+    const o = ParseObject.fromJSON({
       className: 'Item',
       objectId: 'canrevertspecific',
       count: 5
@@ -869,7 +869,7 @@ describe('ParseObject', () => {
   });
 
   it('can revert multiple fields in unsaved ops', () => {
-    var o = ParseObject.fromJSON({
+    const o = ParseObject.fromJSON({
       className: 'Item',
       objectId: 'canrevertmultiple',
       count: 5,
@@ -895,7 +895,7 @@ describe('ParseObject', () => {
   });
 
   it('throws if an array is provided', () => {
-    var o = ParseObject.fromJSON({
+    const o = ParseObject.fromJSON({
       className: 'Item',
       objectId: 'throwforarray',
       count: 5,
