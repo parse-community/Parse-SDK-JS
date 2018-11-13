@@ -851,6 +851,74 @@ describe('ParseObject', () => {
     expect(o.op('count')).toBe(undefined);
   });
 
+  it('can revert a specific field in unsaved ops', () => {
+    const o = ParseObject.fromJSON({
+      className: 'Item',
+      objectId: 'canrevertspecific',
+      count: 5
+    });
+    o.set({ cool: true });
+    o.increment('count');
+    expect(o.get('cool')).toBe(true);
+    expect(o.get('count')).toBe(6);
+    o.revert('cool');
+    expect(o.get('cool')).toBe(undefined);
+    expect(o.op('cool')).toBe(undefined);
+    expect(o.get('count')).toBe(6);
+    expect(o.op('count')).not.toBe(undefined);
+  });
+
+  it('can revert multiple fields in unsaved ops', () => {
+    const o = ParseObject.fromJSON({
+      className: 'Item',
+      objectId: 'canrevertmultiple',
+      count: 5,
+      age: 18,
+      gender: 'female'
+    });
+    o.set({ cool: true, gender: 'male' });
+    o.increment('count');
+    o.increment('age');
+    expect(o.get('cool')).toBe(true);
+    expect(o.get('count')).toBe(6);
+    expect(o.get('age')).toBe(19);
+    expect(o.get('gender')).toBe('male');
+    o.revert('age', 'count', 'gender');
+    expect(o.get('cool')).toBe(true);
+    expect(o.op('cool')).not.toBe(undefined);
+    expect(o.get('count')).toBe(5);
+    expect(o.op('count')).toBe(undefined);
+    expect(o.get('age')).toBe(18);
+    expect(o.op('age')).toBe(undefined);
+    expect(o.get('gender')).toBe('female');
+    expect(o.op('gender')).toBe(undefined);
+  });
+
+  it('throws if an array is provided', () => {
+    const o = ParseObject.fromJSON({
+      className: 'Item',
+      objectId: 'throwforarray',
+      count: 5,
+      age: 18,
+      gender: 'female'
+    });
+    o.set({ cool: true, gender: 'male' });
+
+    const err = "Parse.Object#revert expects either no, or a list of string, arguments.";
+
+    expect(function() {
+      o.revert(['age'])
+    }).toThrow(err);
+
+    expect(function() {
+      o.revert([])
+    }).toThrow(err);
+
+    expect(function() {
+      o.revert('gender', ['age'])
+    }).toThrow(err);
+  });
+
   it('can fetchWithInclude', async () => {
     const objectController = CoreManager.getObjectController();
     const spy = jest.spyOn(

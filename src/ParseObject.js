@@ -224,10 +224,14 @@ class ParseObject {
     return stateController.getPendingOps(this._getStateIdentifier());
   }
 
-  _clearPendingOps() {
+  /**
+   * @param {Array<string>} [keysToClear] - if specified, only ops matching
+   * these fields will be cleared
+   */
+  _clearPendingOps(keysToClear?: Array<string>) {
     var pending = this._getPendingOps();
     var latest = pending[pending.length - 1];
-    var keys = Object.keys(latest);
+    var keys = keysToClear || Object.keys(latest);
     keys.forEach((key) => {
       delete latest[key];
     });
@@ -932,10 +936,22 @@ class ParseObject {
   }
 
   /**
-   * Clears any changes to this object made since the last call to save()
+   * Clears any (or specific) changes to this object made since the last call to save()
+   * @param {string} [keys] - specify which fields to revert
    */
-  revert(): void {
-    this._clearPendingOps();
+  revert(...keys: Array<string>): void {
+    let keysToRevert;
+    if(keys.length) {
+      keysToRevert = [];
+      for(const key of keys) {
+        if(typeof(key) === "string") {
+          keysToRevert.push(key);
+        } else {
+          throw new Error("Parse.Object#revert expects either no, or a list of string, arguments.");
+        }
+      }
+    }
+    this._clearPendingOps(keysToRevert);
   }
 
   /**
