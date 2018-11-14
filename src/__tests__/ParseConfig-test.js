@@ -100,6 +100,48 @@ describe('ParseConfig', () => {
     });
   });
 
+  it('can save a config object with masterkey', (done) => {
+    //Load a request that match the get() & save() request
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          params : {
+            str : 'hello2',
+            num : 46
+          },
+          result: true
+        });
+      },
+      ajax() {}
+    });
+    ParseConfig.save({str: 'hello2','num':46}).then((config) => {
+      expect(config.get('str')).toBe('hello2');
+      expect(config.get('num')).toBe(46);
+      const path = Storage.generatePath('currentConfig');
+      expect(JSON.parse(Storage.getItem(path))).toEqual({
+        str: 'hello2',
+        num: 46
+      });
+      done();
+    });
+  });
+
+  it('rejects save on invalid response', (done) => {
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({result: false});
+      },
+      ajax() {}
+    });
+    ParseConfig.save({str: 'hello2','num':46}).then((config) => {
+      expect(config).toBe(1)
+      done();
+    },(error) => {
+      expect(error.code).toBe(1)
+      done();
+    });
+  });
+
   it('rejects the promise when an invalid payload comes back', (done) => {
     CoreManager.setRESTController({
       request() {
@@ -110,7 +152,6 @@ describe('ParseConfig', () => {
     ParseConfig.get().then(null, (error) => {
       expect(error.code).toBe(107);
       expect(error.message).toBe('Config JSON response invalid.');
-
       done();
     });
   });
