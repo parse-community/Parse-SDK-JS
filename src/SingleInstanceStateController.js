@@ -25,6 +25,8 @@ let objectState: {
   }
 } = {};
 
+export const state = objectState;
+
 export function getState(obj: ObjectIdentifier): ?State {
   const classData = objectState[obj.className];
   if (classData) {
