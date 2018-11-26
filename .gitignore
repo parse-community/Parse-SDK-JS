@@ -1,5 +1,5 @@
 coverage
-dist
+#dist
 lib
 logs
 node_modules
