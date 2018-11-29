@@ -53,6 +53,8 @@ type SaveParams = {
   body: AttributeMap;
 };
 
+const DEFAULT_BATCH_SIZE = 20;
+
 // Mapping of class names to constructors, so we can populate objects from the
 // server with appropriate subclasses of ParseObject
 var classMap = {};
@@ -1378,6 +1380,7 @@ class ParseObject {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>batchSize: Number of objects to process per request
    * </ul>
    */
   static saveAll(list: Array<ParseObject>, options = {}) {
@@ -1387,6 +1390,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('sessionToken')) {
       saveOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
+      saveOptions.batchSize = options.batchSize;
     }
     return CoreManager.getObjectController().save(
       list,
@@ -1796,6 +1802,8 @@ var DefaultController = {
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
+    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
+
     var RESTController = CoreManager.getRESTController();
     var stateController = CoreManager.getObjectStateController();
     if (Array.isArray(target)) {
@@ -1831,7 +1839,7 @@ var DefaultController = {
           var batch = [];
           var nextPending = [];
           pending.forEach((el) => {
-            if (batch.length < 20 && canBeSerialized(el)) {
+            if (batch.length < batchSize && canBeSerialized(el)) {
               batch.push(el);
             } else {
               nextPending.push(el);
