@@ -1341,6 +1341,7 @@ class ParseObject {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>batchSize: Number of objects to process per request
    * </ul>
    * @return {Promise} A promise that is fulfilled when the destroyAll
    *     completes.
@@ -1352,6 +1353,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('sessionToken')) {
       destroyOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
+      destroyOptions.batchSize = options.batchSize;
     }
     return CoreManager.getObjectController().destroy(
       list,
@@ -1735,6 +1739,8 @@ var DefaultController = {
   },
 
   destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
+    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
+
     var RESTController = CoreManager.getRESTController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
@@ -1746,7 +1752,7 @@ var DefaultController = {
           return;
         }
         batches[batches.length - 1].push(obj);
-        if (batches[batches.length - 1].length >= 20) {
+        if (batches[batches.length - 1].length >= batchSize) {
           batches.push([]);
         }
       });
