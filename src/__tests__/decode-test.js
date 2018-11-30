@@ -11,11 +11,11 @@ jest.dontMock('../decode');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 
-var decode = require('../decode').default;
+const decode = require('../decode').default;
 
-var ParseFile = require('../ParseFile').default;
-var ParseGeoPoint = require('../ParseGeoPoint').default;
-var ParseObject = require('../ParseObject').default;
+const ParseFile = require('../ParseFile').default;
+const ParseGeoPoint = require('../ParseGeoPoint').default;
+const ParseObject = require('../ParseObject').default;
 
 describe('decode', () => {
   it('ignores primitives', () => {
@@ -34,7 +34,7 @@ describe('decode', () => {
   });
 
   it('decodes GeoPoints', () => {
-    var point = decode({
+    const point = decode({
       __type: 'GeoPoint',
       latitude: 40.5,
       longitude: 50.4
@@ -45,7 +45,7 @@ describe('decode', () => {
   });
 
   it('decodes Files', () => {
-    var file = decode({
+    const file = decode({
       __type: 'File',
       name: 'parse.txt',
       url: 'https://files.parsetfss.com/a/parse.txt'
@@ -56,7 +56,7 @@ describe('decode', () => {
   });
 
   it('decodes Relations', () => {
-    var obj = decode({
+    const obj = decode({
       __type: 'Relation',
       className: 'Delivery'
     });
@@ -68,7 +68,7 @@ describe('decode', () => {
   });
 
   it('decodes Pointers', () => {
-    var data = {
+    const data = {
       __type: 'Pointer',
       className: 'Item',
       objectId: '1001'
@@ -78,7 +78,7 @@ describe('decode', () => {
   });
 
   it('decodes ParseObjects', () => {
-    var data = {
+    const data = {
       __type: 'Object',
       className: 'Item',
       objectId: '1001'

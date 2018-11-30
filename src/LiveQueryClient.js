@@ -7,11 +7,12 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+/* global WebSocket */
 
 import EventEmitter from './EventEmitter';
-import ParsePromise from './ParsePromise';
 import ParseObject from './ParseObject';
 import LiveQuerySubscription from './LiveQuerySubscription';
+import { resolvingPromise } from './promiseUtils';
 
 // The LiveQuery client inner state
 const CLIENT_STATE = {
@@ -64,7 +65,7 @@ const SUBSCRIPTION_EMMITER_TYPES = {
 };
 
 
-let generateInterval = (k) => {
+const generateInterval = (k) => {
   return Math.random() * Math.min(30, (Math.pow(2, k) - 1)) * 1000;
 }
 
@@ -72,22 +73,12 @@ let generateInterval = (k) => {
  * Creates a new LiveQueryClient.
  * Extends events.EventEmitter
  * <a href="https://nodejs.org/api/events.html#events_class_eventemitter">cloud functions</a>.
- * 
- * A wrapper of a standard WebSocket client. We add several useful methods to 
+ *
+ * A wrapper of a standard WebSocket client. We add several useful methods to
  * help you connect/disconnect to LiveQueryServer, subscribe/unsubscribe a ParseQuery easily.
  *
  * javascriptKey and masterKey are used for verifying the LiveQueryClient when it tries
  * to connect to the LiveQuery server
- * 
- * @class Parse.LiveQueryClient
- * @constructor
- * @param {Object} options
- * @param {string} options.applicationId - applicationId of your Parse app
- * @param {string} options.serverURL - <b>the URL of your LiveQuery server</b>
- * @param {string} options.javascriptKey (optional)
- * @param {string} options.masterKey (optional) Your Parse Master Key. (Node.js only!)
- * @param {string} options.sessionToken (optional)
- *
  *
  * We expose three events to help you monitor the status of the LiveQueryClient.
  *
@@ -101,28 +92,27 @@ let generateInterval = (k) => {
  *   masterKey: ''
  *  });
  * </pre>
- * 
+ *
  * Open - When we establish the WebSocket connection to the LiveQuery server, you'll get this event.
  * <pre>
  * client.on('open', () => {
- * 
+ *
  * });</pre>
  *
  * Close - When we lose the WebSocket connection to the LiveQuery server, you'll get this event.
  * <pre>
  * client.on('close', () => {
- * 
+ *
  * });</pre>
  *
  * Error - When some network error or LiveQuery server error happens, you'll get this event.
  * <pre>
  * client.on('error', (error) => {
- * 
+ *
  * });</pre>
- * 
- * 
+ * @alias Parse.LiveQueryClient
  */
-export default class LiveQueryClient extends EventEmitter {
+class LiveQueryClient extends EventEmitter {
   attempts: number;
   id: number;
   requestId: number;
@@ -131,18 +121,26 @@ export default class LiveQueryClient extends EventEmitter {
   javascriptKey: ?string;
   masterKey: ?string;
   sessionToken: ?string;
-  connectPromise: Object;
+  connectPromise: Promise;
   subscriptions: Map;
   socket: any;
   state: string;
 
+  /**
+   * @param {Object} options
+   * @param {string} options.applicationId - applicationId of your Parse app
+   * @param {string} options.serverURL - <b>the URL of your LiveQuery server</b>
+   * @param {string} options.javascriptKey (optional)
+   * @param {string} options.masterKey (optional) Your Parse Master Key. (Node.js only!)
+   * @param {string} options.sessionToken (optional)
+   */
   constructor({
     applicationId,
     serverURL,
     javascriptKey,
     masterKey,
     sessionToken
-  }: LiveQueryConstructorArg) {
+  }) {
     super();
 
     if (!serverURL || serverURL.indexOf('ws') !== 0) {
@@ -150,7 +148,7 @@ export default class LiveQueryClient extends EventEmitter {
     }
 
     this.reconnectHandle = null;
-    this.attempts = 1;;
+    this.attempts = 1;
     this.id = 0;
     this.requestId = 1;
     this.serverURL = serverURL;
@@ -158,7 +156,7 @@ export default class LiveQueryClient extends EventEmitter {
     this.javascriptKey = javascriptKey;
     this.masterKey = masterKey;
     this.sessionToken = sessionToken;
-    this.connectPromise = new ParsePromise();
+    this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
     this.state = CLIENT_STATE.INITIALIZED;
   }
@@ -169,31 +167,33 @@ export default class LiveQueryClient extends EventEmitter {
 
   /**
    * Subscribes to a ParseQuery
-   * 
-   * If you provide the sessionToken, when the LiveQuery server gets ParseObject's 
-   * updates from parse server, it'll try to check whether the sessionToken fulfills 
-   * the ParseObject's ACL. The LiveQuery server will only send updates to clients whose 
+   *
+   * If you provide the sessionToken, when the LiveQuery server gets ParseObject's
+   * updates from parse server, it'll try to check whether the sessionToken fulfills
+   * the ParseObject's ACL. The LiveQuery server will only send updates to clients whose
    * sessionToken is fit for the ParseObject's ACL. You can check the LiveQuery protocol
-   * <a href="https://github.com/ParsePlatform/parse-server/wiki/Parse-LiveQuery-Protocol-Specification">here</a> for more details. The subscription you get is the same subscription you get 
+   * <a href="https://github.com/parse-community/parse-server/wiki/Parse-LiveQuery-Protocol-Specification">here</a> for more details. The subscription you get is the same subscription you get
    * from our Standard API.
-   * 
-   * @method subscribe
+   *
    * @param {Object} query - the ParseQuery you want to subscribe to
-   * @param {string} sessionToken (optional) 
+   * @param {string} sessionToken (optional)
    * @return {Object} subscription
-   */ 
+   */
   subscribe(query: Object, sessionToken: ?string): Object {
     if (!query) {
       return;
     }
-    let where = query.toJSON().where;
-    let className = query.className;
-    let subscribeRequest = {
+    const className = query.className;
+    const queryJSON = query.toJSON();
+    const where = queryJSON.where;
+    const fields = queryJSON.keys ? queryJSON.keys.split(',') : undefined;
+    const subscribeRequest = {
       op: OP_TYPES.SUBSCRIBE,
       requestId: this.requestId,
       query: {
         className,
-        where
+        where,
+        fields
       }
     };
 
@@ -201,7 +201,7 @@ export default class LiveQueryClient extends EventEmitter {
       subscribeRequest.sessionToken = sessionToken;
     }
 
-    let subscription = new LiveQuerySubscription(this.requestId, query, sessionToken);
+    const subscription = new LiveQuerySubscription(this.requestId, query, sessionToken);
     this.subscriptions.set(this.requestId, subscription);
     this.requestId += 1;
     this.connectPromise.then(() => {
@@ -217,17 +217,16 @@ export default class LiveQueryClient extends EventEmitter {
 
   /**
    * After calling unsubscribe you'll stop receiving events from the subscription object.
-   * 
-   * @method unsubscribe
+   *
    * @param {Object} subscription - subscription you would like to unsubscribe from.
-   */ 
+   */
   unsubscribe(subscription: Object) {
     if (!subscription) {
       return;
     }
 
     this.subscriptions.delete(subscription.id);
-    let unsubscribeRequest = {
+    const unsubscribeRequest = {
       op: OP_TYPES.UNSUBSCRIBE,
       requestId: subscription.id
     }
@@ -239,11 +238,10 @@ export default class LiveQueryClient extends EventEmitter {
   /**
    * After open is called, the LiveQueryClient will try to send a connect request
    * to the LiveQuery server.
-   * 
-   * @method open
-   */ 
+   *
+   */
   open() {
-    let WebSocketImplementation = this._getWebSocketImplementation();
+    const WebSocketImplementation = this._getWebSocketImplementation();
     if (!WebSocketImplementation) {
       this.emit(CLIENT_EMMITER_TYPES.ERROR, 'Can not find WebSocket implementation');
       return;
@@ -276,16 +274,19 @@ export default class LiveQueryClient extends EventEmitter {
 
   resubscribe() {
     this.subscriptions.forEach((subscription, requestId) => {
-      let query = subscription.query;
-      let where = query.toJSON().where;
-      let className = query.className;
-      let sessionToken = subscription.sessionToken;
-      let subscribeRequest = {
+      const query = subscription.query;
+      const queryJSON = query.toJSON();
+      const where = queryJSON.where;
+      const fields = queryJSON.keys ? queryJSON.keys.split(',') : undefined;
+      const className = query.className;
+      const sessionToken = subscription.sessionToken;
+      const subscribeRequest = {
         op: OP_TYPES.SUBSCRIBE,
         requestId,
         query: {
           className,
-          where
+          where,
+          fields
         }
       };
 
@@ -300,11 +301,10 @@ export default class LiveQueryClient extends EventEmitter {
   }
 
   /**
-   * This method will close the WebSocket connection to this LiveQueryClient, 
+   * This method will close the WebSocket connection to this LiveQueryClient,
    * cancel the auto reconnect and unsubscribe all subscriptions based on it.
-   * 
-   * @method close
-   */ 
+   *
+   */
   close() {
     if (this.state === CLIENT_STATE.INITIALIZED || this.state === CLIENT_STATE.DISCONNECTED) {
       return;
@@ -312,7 +312,7 @@ export default class LiveQueryClient extends EventEmitter {
     this.state = CLIENT_STATE.DISCONNECTED;
     this.socket.close();
     // Notify each subscription about the close
-    for (let subscription of this.subscriptions.values()) {
+    for (const subscription of this.subscriptions.values()) {
       subscription.emit(SUBSCRIPTION_EMMITER_TYPES.CLOSE);
     }
     this._handleReset();
@@ -331,16 +331,16 @@ export default class LiveQueryClient extends EventEmitter {
 
   // ensure we start with valid state if connect is called again after close
   _handleReset() {
-    this.attempts = 1;;
+    this.attempts = 1;
     this.id = 0;
     this.requestId = 1;
-    this.connectPromise = new ParsePromise();
+    this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
   }
 
   _handleWebSocketOpen() {
     this.attempts = 1;
-    let connectRequest = {
+    const connectRequest = {
       op: OP_TYPES.CONNECT,
       applicationId: this.applicationId,
       javascriptKey: this.javascriptKey,
@@ -361,44 +361,43 @@ export default class LiveQueryClient extends EventEmitter {
        this.subscriptions.get(data.requestId);
     }
     switch(data.op) {
-      case OP_EVENTS.CONNECTED:
-        if (this.state === CLIENT_STATE.RECONNECTING) {
-          this.resubscribe();
-        }
-        this.emit(CLIENT_EMMITER_TYPES.OPEN);
-        this.id = data.clientId;
-        this.connectPromise.resolve();
-        this.state = CLIENT_STATE.CONNECTED;
-        break;
-      case OP_EVENTS.SUBSCRIBED:
+    case OP_EVENTS.CONNECTED:
+      if (this.state === CLIENT_STATE.RECONNECTING) {
+        this.resubscribe();
+      }
+      this.emit(CLIENT_EMMITER_TYPES.OPEN);
+      this.id = data.clientId;
+      this.connectPromise.resolve();
+      this.state = CLIENT_STATE.CONNECTED;
+      break;
+    case OP_EVENTS.SUBSCRIBED:
+      if (subscription) {
+        subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN);
+      }
+      break;
+    case OP_EVENTS.ERROR:
+      if (data.requestId) {
         if (subscription) {
-          subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN);
+          subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, data.error);
         }
+      } else {
+        this.emit(CLIENT_EMMITER_TYPES.ERROR, data.error);
+      }
+      break;
+    case OP_EVENTS.UNSUBSCRIBED:
+      // We have already deleted subscription in unsubscribe(), do nothing here
+      break;
+    default: {
+      // create, update, enter, leave, delete cases
+
+      // Does not override / clear server data
+      delete data.object.__type;
+      const parseObject = ParseObject.fromJSON(data.object, false);
+      if (!subscription) {
         break;
-      case OP_EVENTS.ERROR:
-        if (data.requestId) {
-          if (subscription) {
-            subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, data.error);
-          }
-        } else {
-          this.emit(CLIENT_EMMITER_TYPES.ERROR, data.error);
-        }
-        break;
-      case OP_EVENTS.UNSUBSCRIBED:
-        // We have already deleted subscription in unsubscribe(), do nothing here
-        break;
-      default:
-        // create, update, enter, leave, delete cases
-        let className = data.object.className;
-        // Delete the extrea __type and className fields during transfer to full JSON
-        delete data.object.__type;
-        delete data.object.className;
-        let parseObject = new ParseObject(className);
-        parseObject._finishFetch(data.object);
-        if (!subscription) {
-          break;
-        }
-        subscription.emit(data.op, parseObject);
+      }
+      subscription.emit(data.op, parseObject);
+    }
     }
   }
 
@@ -409,7 +408,7 @@ export default class LiveQueryClient extends EventEmitter {
     this.state = CLIENT_STATE.CLOSED;
     this.emit(CLIENT_EMMITER_TYPES.CLOSE);
     // Notify each subscription about the close
-    for (let subscription of this.subscriptions.values()) {
+    for (const subscription of this.subscriptions.values()) {
       subscription.emit(SUBSCRIPTION_EMMITER_TYPES.CLOSE);
     }
     this._handleReconnect();
@@ -417,7 +416,7 @@ export default class LiveQueryClient extends EventEmitter {
 
   _handleWebSocketError(error: any) {
     this.emit(CLIENT_EMMITER_TYPES.ERROR, error);
-    for (let subscription of this.subscriptions.values()) {
+    for (const subscription of this.subscriptions.values()) {
       subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR);
     }
     this._handleReconnect();
@@ -430,21 +429,23 @@ export default class LiveQueryClient extends EventEmitter {
     }
 
     this.state = CLIENT_STATE.RECONNECTING;
-    let time = generateInterval(this.attempts);
+    const time = generateInterval(this.attempts);
 
     // handle case when both close/error occur at frequent rates we ensure we do not reconnect unnecessarily.
     // we're unable to distinguish different between close/error when we're unable to reconnect therefore
     // we try to reonnect in both cases
     // server side ws and browser WebSocket behave differently in when close/error get triggered
-     
+
     if (this.reconnectHandle) {
       clearTimeout(this.reconnectHandle);
     }
 
     this.reconnectHandle = setTimeout((() => {
       this.attempts++;
-      this.connectPromise = new ParsePromise();
+      this.connectPromise = resolvingPromise();
       this.open();
     }).bind(this), time);
   }
 }
+
+export default LiveQueryClient;

@@ -11,187 +11,193 @@ jest.dontMock('../ParseHooks');
 jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
-jest.dontMock('../ParsePromise');
 
-var Hooks = require('../ParseHooks');
-var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise').default;
+const Hooks = require('../ParseHooks');
+const CoreManager = require('../CoreManager');
 
-var defaultController = CoreManager.getHooksController();
+const defaultController = CoreManager.getHooksController();
 
 describe('Hooks', () => {
   beforeEach(() => {
-    var run = jest.genMockFunction();
-    run.mockReturnValue(ParsePromise.as({
+    const run = jest.fn();
+    run.mockReturnValue(Promise.resolve({
       result: {}
     }));
     defaultController.sendRequest = run;
     CoreManager.setHooksController(defaultController);
   });
 
-  it('shoud properly build GET functions', () => {
+  it('shoud properly build GET functions', () => {
     Hooks.getFunctions();
 
     expect(CoreManager.getHooksController().sendRequest.mock.calls[0])
-    .toEqual(['GET', '/hooks/functions']);
+      .toEqual(['GET', '/hooks/functions']);
   });
 
-  it('shoud properly build GET triggers', () => {
+  it('shoud properly build GET triggers', () => {
     Hooks.getTriggers();
 
     expect(CoreManager.getHooksController().sendRequest.mock.calls[0])
-    .toEqual(['GET', '/hooks/triggers']);
+      .toEqual(['GET', '/hooks/triggers']);
   })
 
-  it('shoud properly build GET function', () => {
+  it('shoud properly build GET function', () => {
     Hooks.getFunction('functionName');
 
     expect(CoreManager.getHooksController().sendRequest.mock.calls[0])
-    .toEqual(['GET', '/hooks/functions/functionName']);
+      .toEqual(['GET', '/hooks/functions/functionName']);
   })
 
-  it('shoud properly build GET trigger', () => {
+  it('shoud properly build GET trigger', () => {
     Hooks.getTrigger('MyClass', 'beforeSave');
 
     expect(CoreManager.getHooksController().sendRequest.mock.calls[0])
-    .toEqual(['GET', '/hooks/triggers/MyClass/beforeSave']);
+      .toEqual(['GET', '/hooks/triggers/MyClass/beforeSave']);
   })
 
-  it('shoud properly build POST function', () => {
+  it('shoud properly build POST function', () => {
     Hooks.createFunction('myFunction', 'https://dummy.com');
 
     expect(CoreManager.getHooksController().sendRequest.mock.calls[0])
-    .toEqual(['POST', '/hooks/functions', {
-      functionName: 'myFunction',
-      url: 'https://dummy.com'
-    }]);
+      .toEqual(['POST', '/hooks/functions', {
+        functionName: 'myFunction',
+        url: 'https://dummy.com'
+      }]);
   })
 
-  it('shoud properly build POST trigger', () => {
+  it('shoud properly build POST trigger', () => {
     Hooks.createTrigger('MyClass', 'beforeSave', 'https://dummy.com');
 
     expect(CoreManager.getHooksController().sendRequest.mock.calls[0])
-    .toEqual(['POST', '/hooks/triggers', {
-      className: 'MyClass',
-      triggerName: 'beforeSave',
-      url: 'https://dummy.com'
-    }]);
+      .toEqual(['POST', '/hooks/triggers', {
+        className: 'MyClass',
+        triggerName: 'beforeSave',
+        url: 'https://dummy.com'
+      }]);
   })
 
-  it('shoud properly build PUT function', () => {
+  it('shoud properly build PUT function', () => {
     Hooks.updateFunction('myFunction', 'https://dummy.com');
 
     expect(CoreManager.getHooksController().sendRequest.mock.calls[0])
-    .toEqual(['PUT', '/hooks/functions/myFunction', {
-      url: 'https://dummy.com'
-    }]);
+      .toEqual(['PUT', '/hooks/functions/myFunction', {
+        url: 'https://dummy.com'
+      }]);
   })
 
-  it('shoud properly build PUT trigger', () => {
+  it('shoud properly build PUT trigger', () => {
     Hooks.updateTrigger('MyClass', 'beforeSave', 'https://dummy.com');
 
     expect(CoreManager.getHooksController().sendRequest.mock.calls[0])
-    .toEqual(['PUT', '/hooks/triggers/MyClass/beforeSave', {
-      url: 'https://dummy.com'
-    }]);
+      .toEqual(['PUT', '/hooks/triggers/MyClass/beforeSave', {
+        url: 'https://dummy.com'
+      }]);
   })
 
 
-  it('shoud properly build removeFunction', () => {
+  it('shoud properly build removeFunction', () => {
     Hooks.removeFunction('myFunction');
 
     expect(CoreManager.getHooksController().sendRequest.mock.calls[0])
-    .toEqual(['PUT', '/hooks/functions/myFunction', { "__op": "Delete" }]);
+      .toEqual(['PUT', '/hooks/functions/myFunction', { "__op": "Delete" }]);
   })
 
-  it('shoud properly build removeTrigger', () => {
+  it('shoud properly build removeTrigger', () => {
     Hooks.removeTrigger('MyClass', 'beforeSave');
 
     expect(CoreManager.getHooksController().sendRequest.mock.calls[0])
-    .toEqual(['PUT', '/hooks/triggers/MyClass/beforeSave', { "__op": "Delete" }]);
+      .toEqual(['PUT', '/hooks/triggers/MyClass/beforeSave', { "__op": "Delete" }]);
   })
 
-  it('shoud throw invalid create', () => {
-    Hooks.create({functionName: 'myFunction'}).then(() => {
-      fail('should not succeed')
-    }).catch((err) => {
+  it('shoud throw invalid create', async (done) => {
+    const p1 = Hooks.create({functionName: 'myFunction'}).then(() => {
+      done.fail('should not succeed')
+    }).catch((err) => {
       expect(err.code).toBe(143);
       expect(err.error).toBe('invalid hook declaration');
     });
 
-    Hooks.create({url: 'http://dummy.com'}).then(() => {
-      fail('should not succeed')
-    }).catch((err) => {
+    const p2 = Hooks.create({url: 'http://dummy.com'}).then(() => {
+      done.fail('should not succeed')
+    }).catch((err) => {
       expect(err.code).toBe(143);
       expect(err.error).toBe('invalid hook declaration');
     });
 
-    Hooks.create({className: 'MyClass'}).then(() => {
-      fail('should not succeed')
-    }).catch((err) => {
+    const p3 = Hooks.create({className: 'MyClass'}).then(() => {
+      done.fail('should not succeed')
+    }).catch((err) => {
       expect(err.code).toBe(143);
       expect(err.error).toBe('invalid hook declaration');
     });
 
-    Hooks.create({className: 'MyClass', url: 'http://dummy.com'}).then(() => {
-      fail('should not succeed')
-    }).catch((err) => {
+    const p4 = Hooks.create({className: 'MyClass', url: 'http://dummy.com'}).then(() => {
+      done.fail('should not succeed')
+    }).catch((err) => {
       expect(err.code).toBe(143);
       expect(err.error).toBe('invalid hook declaration');
     });
 
-    Hooks.create({className: 'MyClass', triggerName: 'beforeSave'}).then(() => {
-      fail('should not succeed')
-    }).catch((err) => {
+    const p5 = Hooks.create({className: 'MyClass', triggerName: 'beforeSave'}).then(() => {
+      done.fail('should not succeed')
+    }).catch((err) => {
       expect(err.code).toBe(143);
       expect(err.error).toBe('invalid hook declaration');
     });
+
+    await Promise.all([p1, p2, p3, p4, p5]);
+    done();
   })
 
-  it('shoud throw invalid update', () => {
-    Hooks.update({functionssName: 'myFunction'}).then(() => {
-      fail('should not succeed')
-    }).catch((err) => {
+  it('shoud throw invalid update', async (done) => {
+    const p1 = Hooks.update({functionssName: 'myFunction'}).then(() => {
+      done.fail('should not succeed')
+    }).catch((err) => {
       expect(err.code).toBe(143);
       expect(err.error).toBe('invalid hook declaration');
     });
 
-    Hooks.update({className: 'MyClass'}).then(() => {
-      fail('should not succeed')
-    }).catch((err) => {
+    const p2 = Hooks.update({className: 'MyClass'}).then(() => {
+      done.fail('should not succeed')
+    }).catch((err) => {
       expect(err.code).toBe(143);
       expect(err.error).toBe('invalid hook declaration');
     });
 
-    Hooks.update({className: 'MyClass', url: 'http://dummy.com'}).then(() => {
-      fail('should not succeed')
-    }).catch((err) => {
+    const p3 = Hooks.update({className: 'MyClass', url: 'http://dummy.com'}).then(() => {
+      done.fail('should not succeed')
+    }).catch((err) => {
       expect(err.code).toBe(143);
       expect(err.error).toBe('invalid hook declaration');
     });
+    await Promise.all([p1,p2,p3]);
+    done();
   })
 
-  it('shoud throw invalid remove', () => {
-    Hooks.remove({functionssName: 'myFunction'}).then(() => {
-      fail('should not succeed')
-    }).catch((err) => {
+  it('shoud throw invalid remove', async (done) => {
+    const p1 = Hooks.remove({functionssName: 'myFunction'}).then(() => {
+      done.fail('should not succeed')
+    }).catch((err) => {
       expect(err.code).toBe(143);
       expect(err.error).toBe('invalid hook declaration');
     });
 
-    Hooks.remove({className: 'MyClass'}).then(() => {
-      fail('should not succeed')
-    }).catch((err) => {
+    const p2 = Hooks.remove({className: 'MyClass'}).then(() => {
+      done.fail('should not succeed')
+    }).catch((err) => {
       expect(err.code).toBe(143);
       expect(err.error).toBe('invalid hook declaration');
     });
 
-    Hooks.remove({className: 'MyClass', url: 'http://dummy.com'}).then(() => {
-      fail('should not succeed')
-    }).catch((err) => {
+    const p3 = Hooks.remove({className: 'MyClass', url: 'http://dummy.com'}).then(() => {
+      done.fail('should not succeed')
+    }).catch((err) => {
       expect(err.code).toBe(143);
       expect(err.error).toBe('invalid hook declaration');
     });
+
+    await Promise.all([p1, p2, p3]);
+    done();
   })
 
 

@@ -12,21 +12,23 @@
 import CoreManager from './CoreManager';
 import isRevocableSession from './isRevocableSession';
 import ParseObject from './ParseObject';
-import ParsePromise from './ParsePromise';
 import ParseUser from './ParseUser';
 
 import type { AttributeMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
 
 /**
- * @class Parse.Session
- * @constructor
- *
  * <p>A Parse.Session object is a local representation of a revocable session.
  * This class is a subclass of a Parse.Object, and retains the same
  * functionality of a Parse.Object.</p>
+ * @alias Parse.Session
+ * @extends Parse.Object
  */
-export default class ParseSession extends ParseObject {
+class ParseSession extends ParseObject {
+  /**
+   *
+   * @param {Object} attributes The initial set of data to store in the user.
+   */
   constructor(attributes: ?AttributeMap) {
     super('_Session');
     if (attributes && typeof attributes === 'object'){
@@ -38,7 +40,7 @@ export default class ParseSession extends ParseObject {
 
   /**
    * Returns the session token string.
-   * @method getSessionToken
+
    * @return {String}
    */
   getSessionToken(): string {
@@ -62,9 +64,9 @@ export default class ParseSession extends ParseObject {
 
   /**
    * Retrieves the Session object for the currently logged in session.
-   * @method current
+
    * @static
-   * @return {Parse.Promise} A promise that is resolved with the Parse.Session
+   * @return {Promise} A promise that is resolved with the Parse.Session
    *   object after it has been fetched. If there is no current user, the
    *   promise will be rejected.
    */
@@ -78,9 +80,8 @@ export default class ParseSession extends ParseObject {
     }
     return ParseUser.currentAsync().then((user) => {
       if (!user) {
-        return ParsePromise.error('There is no current user.');
+        return Promise.reject('There is no current user.');
       }
-      var token = user.getSessionToken();
       sessionOptions.sessionToken = user.getSessionToken();
       return controller.getSession(sessionOptions);
     });
@@ -92,7 +93,7 @@ export default class ParseSession extends ParseObject {
    * use revocable sessions. If you are migrating an app that uses the Parse
    * SDK in the browser only, please use Parse.User.enableRevocableSession()
    * instead, so that sessions can be automatically upgraded.
-   * @method isCurrentSessionRevocable
+
    * @static
    * @return {Boolean}
    */
@@ -108,7 +109,7 @@ export default class ParseSession extends ParseObject {
 ParseObject.registerSubclass('_Session', ParseSession);
 
 var DefaultController = {
-  getSession(options: RequestOptions): ParsePromise {
+  getSession(options: RequestOptions): Promise {
     var RESTController = CoreManager.getRESTController();
     var session = new ParseSession();
 
@@ -123,3 +124,5 @@ var DefaultController = {
 };
 
 CoreManager.setSessionController(DefaultController);
+
+export default ParseSession;

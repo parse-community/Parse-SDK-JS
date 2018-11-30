@@ -13,7 +13,7 @@ import CoreManager from './CoreManager';
 import decode from './decode';
 import encode from './encode';
 import ParseError from './ParseError';
-import ParsePromise from './ParsePromise';
+import ParseQuery from './ParseQuery';
 
 /**
  * Contains functions for calling and declaring
@@ -24,26 +24,24 @@ import ParsePromise from './ParsePromise';
  *
  * @class Parse.Cloud
  * @static
+ * @hideconstructor
  */
 
- /**
+/**
   * Makes a call to a cloud function.
   * @method run
+  * @name Parse.Cloud.run
   * @param {String} name The function name.
   * @param {Object} data The parameters to send to the cloud function.
-  * @param {Object} options A Backbone-style options object
-  * options.success, if set, should be a function to handle a successful
-  * call to a cloud function.  options.error should be a function that
-  * handles an error running the cloud function.  Both functions are
-  * optional.  Both functions take a single argument.
-  * @return {Parse.Promise} A promise that will be resolved with the result
+  * @param {Object} options
+  * @return {Promise} A promise that will be resolved with the result
   * of the function.
   */
 export function run(
   name: string,
   data: mixed,
   options: { [key: string]: mixed }
-): ParsePromise {
+): Promise {
   options = options || {};
 
   if (typeof name !== 'string' || name.length === 0) {
@@ -58,44 +56,110 @@ export function run(
     requestOptions.sessionToken = options.sessionToken;
   }
 
-  return (
-    CoreManager.getCloudController().run(name, data, requestOptions)._thenRunCallbacks(options)
-  );
+  return CoreManager.getCloudController().run(name, data, requestOptions);
 }
 
-var DefaultController = {
+/**
+  * Gets data for the current set of cloud jobs.
+  * @method getJobsData
+  * @name Parse.Cloud.getJobsData
+  * @return {Promise} A promise that will be resolved with the result
+  * of the function.
+  */
+export function getJobsData(): Promise {
+  const requestOptions = {
+    useMasterKey: true
+  };
+  return CoreManager.getCloudController().getJobsData(requestOptions);
+}
+
+/**
+  * Starts a given cloud job, which will process asynchronously.
+  * @method startJob
+  * @name Parse.Cloud.startJob
+  * @param {String} name The function name.
+  * @param {Object} data The parameters to send to the cloud function.
+  * @return {Promise} A promise that will be resolved with the result
+  * of the function.
+  */
+export function startJob(
+  name: string,
+  data: mixed,
+): Promise {
+
+  if (typeof name !== 'string' || name.length === 0) {
+    throw new TypeError('Cloud job name must be a string.');
+  }
+  const requestOptions = {
+    useMasterKey: true
+  };
+  return CoreManager.getCloudController().startJob(name, data, requestOptions);
+}
+
+/**
+  * Gets job status by Id
+  * @method getJobStatus
+  * @name Parse.Cloud.getJobStatus
+  * @param {String} jobStatusId The Id of Job Status.
+  * @return {Parse.Object} Status of Job.
+  */
+export function getJobStatus(jobStatusId: string): Promise {
+  var query = new ParseQuery('_JobStatus');
+  return query.get(jobStatusId, { useMasterKey: true });
+}
+
+const DefaultController = {
   run(name, data, options) {
     var RESTController = CoreManager.getRESTController();
 
     var payload = encode(data, true);
 
-    var requestOptions = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      requestOptions.useMasterKey = options.useMasterKey;
-    }
-    if (options.hasOwnProperty('sessionToken')) {
-      requestOptions.sessionToken = options.sessionToken;
-    }
-
-    var request = RESTController.request(
+    const request = RESTController.request(
       'POST',
       'functions/' + name,
       payload,
-      requestOptions
+      options
     );
 
-    return request.then(function(res) {
-      var decoded = decode(res);
-      if (decoded && decoded.hasOwnProperty('result')) {
-        return ParsePromise.as(decoded.result);
-      }
-      return ParsePromise.error(
-        new ParseError(
+    return request.then((res) => {
+      if (typeof res === 'object' &&
+          Object.keys(res).length > 0 &&
+          !res.hasOwnProperty('result')) {
+        throw new ParseError(
           ParseError.INVALID_JSON,
           'The server returned an invalid response.'
-        )
-      );
-    })._thenRunCallbacks(options);
+        );
+      }
+      const decoded = decode(res);
+      if (decoded && decoded.hasOwnProperty('result')) {
+        return Promise.resolve(decoded.result);
+      }
+      return Promise.resolve(undefined);
+    });
+  },
+
+  getJobsData(options) {
+    var RESTController = CoreManager.getRESTController();
+
+    return RESTController.request(
+      'GET',
+      'cloud_code/jobs/data',
+      null,
+      options
+    );
+  },
+
+  startJob(name, data, options) {
+    var RESTController = CoreManager.getRESTController();
+
+    var payload = encode(data, true);
+
+    return RESTController.request(
+      'POST',
+      'jobs/' + name,
+      payload,
+      options,
+    );
   }
 };
 

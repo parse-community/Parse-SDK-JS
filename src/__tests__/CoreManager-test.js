@@ -9,7 +9,7 @@
 
 jest.dontMock('../CoreManager');
 
-var CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager');
 
 describe('CoreManager', () => {
   it('is initialized with default values', () => {
@@ -43,7 +43,7 @@ describe('CoreManager', () => {
   });
 
   it('can set and get AnalyticsController', () => {
-    var controller = {
+    const controller = {
       track: function() {}
     };
 
@@ -57,13 +57,19 @@ describe('CoreManager', () => {
     );
 
     expect(CoreManager.setCloudController.bind(null, {
-      run: function() {}
+      run: function() {},
+      getJobsData: function() {},
+      startJob: function() {},
+      getJobStatus: function() {}
     })).not.toThrow();
   });
 
   it('can set and get CloudController', () => {
-    var controller = {
-      run: function() {}
+    const controller = {
+      run: function() {},
+      getJobsData: function() {},
+      startJob: function() {},
+      getJobStatus: function() {}
     };
 
     CoreManager.setCloudController(controller);
@@ -81,14 +87,16 @@ describe('CoreManager', () => {
 
     expect(CoreManager.setConfigController.bind(null, {
       current: function() {},
-      get: function() {}
+      get: function() {},
+      save : function() {}
     })).not.toThrow();
   });
 
   it('can set and get ConfigController', () => {
-    var controller = {
+    const controller = {
       current: function() {},
-      get: function() {}
+      get: function() {},
+      save : function() {}
     };
 
     CoreManager.setConfigController(controller);
@@ -111,7 +119,7 @@ describe('CoreManager', () => {
   });
 
   it('can set and get FileController', () => {
-    var controller = {
+    const controller = {
       saveFile: function() {},
       saveBase64: function() {}
     };
@@ -131,7 +139,7 @@ describe('CoreManager', () => {
   });
 
   it('can set and get InstallationController', () => {
-    var controller = {
+    const controller = {
       currentInstallationId: function() {}
     };
 
@@ -150,7 +158,7 @@ describe('CoreManager', () => {
   });
 
   it('can set and get PushController', () => {
-    var controller = {
+    const controller = {
       send: function() {}
     };
 
@@ -180,7 +188,7 @@ describe('CoreManager', () => {
   });
 
   it('can set and get ObjectController', () => {
-    var controller = {
+    const controller = {
       save: function() {},
       fetch: function() {},
       destroy: function() {}
@@ -191,7 +199,7 @@ describe('CoreManager', () => {
   });
 
   it('can set and get ObjectStateController', () => {
-    var controller = {
+    const controller = {
       getState: function() {},
       initializeState: function() {},
       removeState: function() {},
@@ -220,13 +228,15 @@ describe('CoreManager', () => {
     );
 
     expect(CoreManager.setQueryController.bind(null, {
-      find: function() {}
+      find: function() {},
+      aggregate: function() {}
     })).not.toThrow();
   });
 
   it('can set and get QueryController', () => {
-    var controller = {
-      find: function() {}
+    const controller = {
+      find: function() {},
+      aggregate: function() {}
     };
 
     CoreManager.setQueryController(controller);
@@ -249,7 +259,7 @@ describe('CoreManager', () => {
   });
 
   it('can set and get RESTController', () => {
-    var controller = {
+    const controller = {
       request: function() {},
       ajax: function() {}
     };
@@ -305,7 +315,7 @@ describe('CoreManager', () => {
   });
 
   it('can set and get StorageController', () => {
-    var controller = {
+    const controller = {
       async: 0,
       getItem: function() {},
       setItem: function() {},
@@ -314,5 +324,34 @@ describe('CoreManager', () => {
 
     CoreManager.setStorageController(controller);
     expect(CoreManager.getStorageController()).toBe(controller);
+  });
+
+  it('requires SchemaController to implement certain functionality', () => {
+    expect(CoreManager.setSchemaController.bind(null, {})).toThrow(
+      'SchemaController must implement get()'
+    );
+
+    expect(CoreManager.setSchemaController.bind(null, {
+      send: function() {},
+      get: function() {},
+      create: function() {},
+      update: function() {},
+      delete: function() {},
+      purge: function() {},
+    })).not.toThrow();
+  });
+
+  it('can set and get SchemaController', () => {
+    const controller = {
+      send: function() {},
+      get: function() {},
+      create: function() {},
+      update: function() {},
+      delete: function() {},
+      purge: function() {},
+    };
+
+    CoreManager.setSchemaController(controller);
+    expect(CoreManager.getSchemaController()).toBe(controller);
   });
 });

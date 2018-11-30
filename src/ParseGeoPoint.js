@@ -9,8 +9,6 @@
  * @flow
  */
 
-import ParsePromise from './ParsePromise';
-
 /**
  * Creates a new GeoPoint with any of the following forms:<br>
  *   <pre>
@@ -20,9 +18,6 @@ import ParsePromise from './ParsePromise';
  *   new GeoPoint({latitude: 30, longitude: 30})
  *   new GeoPoint()  // defaults to (0, 0)
  *   </pre>
- * @class Parse.GeoPoint
- * @constructor
- *
  * <p>Represents a latitude / longitude point that may be associated
  * with a key in a ParseObject or used as a reference point for geo queries.
  * This allows proximity-based queries on the key.</p>
@@ -34,11 +29,17 @@ import ParsePromise from './ParsePromise';
  *   var object = new Parse.Object("PlaceObject");
  *   object.set("location", point);
  *   object.save();</pre></p>
+ * @alias Parse.GeoPoint
  */
-export default class ParseGeoPoint {
+/* global navigator */
+class ParseGeoPoint {
   _latitude: number;
   _longitude: number;
 
+  /**
+   * @param {(Number[]|Object|Number)} options Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point.
+   * @param {Number} longitude The longitude of the GeoPoint
+   */
   constructor(
     arg1: Array<number> |
     { latitude: number; longitude: number } |
@@ -52,7 +53,7 @@ export default class ParseGeoPoint {
       ParseGeoPoint._validate(arg1.latitude, arg1.longitude);
       this._latitude = arg1.latitude;
       this._longitude = arg1.longitude;
-    } else if (typeof arg1 === 'number' && typeof arg2 === 'number') {
+    } else if (arg1 !== undefined && arg2 !== undefined) {
       ParseGeoPoint._validate(arg1, arg2);
       this._latitude = arg1;
       this._longitude = arg2;
@@ -94,7 +95,7 @@ export default class ParseGeoPoint {
 
   /**
    * Returns a JSON representation of the GeoPoint, suitable for Parse.
-   * @method toJSON
+
    * @return {Object}
    */
   toJSON(): { __type: string; latitude: number; longitude: number } {
@@ -116,7 +117,7 @@ export default class ParseGeoPoint {
 
   /**
    * Returns the distance from this GeoPoint to another in radians.
-   * @method radiansTo
+
    * @param {Parse.GeoPoint} point the other Parse.GeoPoint.
    * @return {Number}
    */
@@ -140,7 +141,7 @@ export default class ParseGeoPoint {
 
   /**
    * Returns the distance from this GeoPoint to another in kilometers.
-   * @method kilometersTo
+
    * @param {Parse.GeoPoint} point the other Parse.GeoPoint.
    * @return {Number}
    */
@@ -150,7 +151,7 @@ export default class ParseGeoPoint {
 
   /**
    * Returns the distance from this GeoPoint to another in miles.
-   * @method milesTo
+
    * @param {Parse.GeoPoint} point the other Parse.GeoPoint.
    * @return {Number}
    */
@@ -158,11 +159,14 @@ export default class ParseGeoPoint {
     return this.radiansTo(point) * 3958.8;
   }
 
-  /**
+  /*
    * Throws an exception if the given lat-long is out of bounds.
    */
   static _validate(latitude: number, longitude: number) {
-    if (latitude !== latitude || longitude !== longitude) {
+    if (
+      isNaN(latitude) || isNaN(longitude) ||
+      typeof latitude !== 'number' || typeof longitude !== 'number'
+    ) {
       throw new TypeError(
         'GeoPoint latitude and longitude must be valid numbers'
       );
@@ -192,20 +196,13 @@ export default class ParseGeoPoint {
   /**
    * Creates a GeoPoint with the user's current location, if available.
    * Calls options.success with a new GeoPoint instance or calls options.error.
-   * @method current
-   * @param {Object} options An object with success and error callbacks.
    * @static
    */
-  static current(options) {
-    var promise = new ParsePromise();
-    navigator.geolocation.getCurrentPosition(function(location) {
-      promise.resolve(
-        new ParseGeoPoint(location.coords.latitude, location.coords.longitude)
-      );
-    }, function(error) {
-      promise.reject(error);
+  static current() {
+    return navigator.geolocation.getCurrentPosition((location) => {
+      return new ParseGeoPoint(location.coords.latitude, location.coords.longitude);
     });
-
-    return promise._thenRunCallbacks(options);
   }
 }
+
+export default ParseGeoPoint;

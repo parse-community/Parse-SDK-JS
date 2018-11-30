@@ -8,9 +8,8 @@
  *
  * @flow
  */
-
+/* global File */
 import CoreManager from './CoreManager';
-import ParsePromise from './ParsePromise';
 
 type Base64 = { base64: string };
 type FileData = Array<number> | Base64 | File;
@@ -25,7 +24,7 @@ export type FileSource = {
 };
 
 var dataUriRegexp =
-  /^data:([a-zA-Z]*\/[a-zA-Z+.-]*);(charset=[a-zA-Z0-9\-\/\s]*,)?base64,/;
+  /^data:([a-zA-Z]+\/[-a-zA-Z0-9+.]+)(;charset=[a-zA-Z0-9\-\/]*)?;base64,/;
 
 function b64Digit(number: number): string {
   if (number < 26) {
@@ -49,39 +48,41 @@ function b64Digit(number: number): string {
 /**
  * A Parse.File is a local representation of a file that is saved to the Parse
  * cloud.
- * @class Parse.File
- * @constructor
- * @param name {String} The file's name. This will be prefixed by a unique
- *     value once the file has finished saving. The file name must begin with
- *     an alphanumeric character, and consist of alphanumeric characters,
- *     periods, spaces, underscores, or dashes.
- * @param data {Array} The data for the file, as either:
- *     1. an Array of byte value Numbers, or
- *     2. an Object like { base64: "..." } with a base64-encoded String.
- *     3. a File object selected with a file upload control. (3) only works
- *        in Firefox 3.6+, Safari 6.0.2+, Chrome 7+, and IE 10+.
- *        For example:<pre>
- * var fileUploadControl = $("#profilePhotoFileUpload")[0];
- * if (fileUploadControl.files.length > 0) {
- *   var file = fileUploadControl.files[0];
- *   var name = "photo.jpg";
- *   var parseFile = new Parse.File(name, file);
- *   parseFile.save().then(function() {
- *     // The file has been saved to Parse.
- *   }, function(error) {
- *     // The file either could not be read, or could not be saved to Parse.
- *   });
- * }</pre>
- * @param type {String} Optional Content-Type header to use for the file. If
- *     this is omitted, the content type will be inferred from the name's
- *     extension.
+ * @alias Parse.File
  */
-export default class ParseFile {
+class ParseFile {
   _name: string;
   _url: ?string;
   _source: FileSource;
-  _previousSave: ?ParsePromise;
+  _previousSave: ?Promise;
 
+  /**
+   * @param name {String} The file's name. This will be prefixed by a unique
+   *     value once the file has finished saving. The file name must begin with
+   *     an alphanumeric character, and consist of alphanumeric characters,
+   *     periods, spaces, underscores, or dashes.
+   * @param data {Array} The data for the file, as either:
+   *     1. an Array of byte value Numbers, or
+   *     2. an Object like { base64: "..." } with a base64-encoded String.
+   *     3. a File object selected with a file upload control. (3) only works
+   *        in Firefox 3.6+, Safari 6.0.2+, Chrome 7+, and IE 10+.
+   *        For example:
+   * <pre>
+   * var fileUploadControl = $("#profilePhotoFileUpload")[0];
+   * if (fileUploadControl.files.length > 0) {
+   *   var file = fileUploadControl.files[0];
+   *   var name = "photo.jpg";
+   *   var parseFile = new Parse.File(name, file);
+   *   parseFile.save().then(function() {
+   *     // The file has been saved to Parse.
+   *   }, function(error) {
+   *     // The file either could not be read, or could not be saved to Parse.
+   *   });
+   * }</pre>
+   * @param type {String} Optional Content-Type header to use for the file. If
+   *     this is omitted, the content type will be inferred from the name's
+   *     extension.
+   */
   constructor(name: string, data?: FileData, type?: string) {
     var specifiedType = type || '';
 
@@ -129,7 +130,6 @@ export default class ParseFile {
    * Gets the name of the file. Before save is called, this is the filename
    * given by the user. After save is called, that name gets prefixed with a
    * unique identifier.
-   * @method name
    * @return {String}
    */
   name(): string {
@@ -139,7 +139,6 @@ export default class ParseFile {
   /**
    * Gets the url of the file. It is only available after you save the file or
    * after you get the file from a Parse.Object.
-   * @method url
    * @param {Object} options An object to specify url options
    * @return {String}
    */
@@ -157,22 +156,21 @@ export default class ParseFile {
 
   /**
    * Saves the file to the Parse cloud.
-   * @method save
-   * @param {Object} options A Backbone-style options object.
-   * @return {Parse.Promise} Promise that is resolved when the save finishes.
+   * @param {Object} options
+   * @return {Promise} Promise that is resolved when the save finishes.
    */
-  save(options?: { success?: any, error?: any, progress?: any }) {
+  save(options?: { useMasterKey?: boolean, success?: any, error?: any, progress?: any }) {
     options = options || {};
     var controller = CoreManager.getFileController();
     if (!this._previousSave) {
       if (this._source.format === 'file') {
-        this._previousSave = controller.saveFile(this._name, this._source, options.progress).then((res) => {
+        this._previousSave = controller.saveFile(this._name, this._source, options).then((res) => {
           this._name = res.name;
           this._url = res.url;
           return this;
         });
       } else {
-        this._previousSave = controller.saveBase64(this._name, this._source, options.progress).then((res) => {
+        this._previousSave = controller.saveBase64(this._name, this._source, options).then((res) => {
           this._name = res.name;
           this._url = res.url;
           return this;
@@ -180,7 +178,7 @@ export default class ParseFile {
       }
     }
     if (this._previousSave) {
-      return this._previousSave._thenRunCallbacks(options);
+      return this._previousSave;
     }
   }
 
@@ -245,18 +243,21 @@ var DefaultController = {
     // To directly upload a File, we use a REST-style AJAX request
     var headers = {
       'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
-      'X-Parse-JavaScript-Key': CoreManager.get('JAVASCRIPT_KEY'),
-      'Content-Type': source.type || (source.file? source.file.type : null)
+      'Content-Type': source.type || (source.file ? source.file.type : null)
     };
+    var jsKey = CoreManager.get('JAVASCRIPT_KEY');
+    if (jsKey) {
+      headers['X-Parse-JavaScript-Key'] = jsKey;
+    }
     var url = CoreManager.get('SERVER_URL');
     if (url[url.length - 1] !== '/') {
       url += '/';
     }
     url += 'files/' + name;
-    return CoreManager.getRESTController().ajax('POST', url, source.file, headers, progress);
+    return CoreManager.getRESTController().ajax('POST', url, source.file, headers, progress).then(res=>res.response)
   },
 
-  saveBase64: function(name: string, source: FileSource) {
+  saveBase64: function(name: string, source: FileSource, options?: { useMasterKey?: boolean, success?: any, error?: any }) {
     if (source.format !== 'base64') {
       throw new Error('saveBase64 can only be used with Base64-type sources.');
     }
@@ -267,8 +268,10 @@ var DefaultController = {
       data._ContentType = source.type;
     }
     var path = 'files/' + name;
-    return CoreManager.getRESTController().request('POST', path, data);
+    return CoreManager.getRESTController().request('POST', path, data, options);
   }
 };
 
 CoreManager.setFileController(DefaultController);
+
+export default ParseFile;
