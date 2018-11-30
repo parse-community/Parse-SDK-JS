@@ -10,6 +10,7 @@
  */
 /* global File */
 import CoreManager from './CoreManager';
+import type { FullOptions } from './RESTController';
 
 type Base64 = { base64: string };
 type FileData = Array<number> | Base64 | File;
@@ -157,9 +158,14 @@ class ParseFile {
   /**
    * Saves the file to the Parse cloud.
    * @param {Object} options
+   *  * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>progress: Callback for upload progress
+   * </ul>
    * @return {Promise} Promise that is resolved when the save finishes.
    */
-  save(options?: { useMasterKey?: boolean, success?: any, error?: any, progress?: any }) {
+  save(options?: FullOptions) {
     options = options || {};
     var controller = CoreManager.getFileController();
     if (!this._previousSave) {
@@ -236,7 +242,7 @@ class ParseFile {
 }
 
 var DefaultController = {
-  saveFile: function(name: string, source: FileSource, progress?: any) {
+  saveFile: function(name: string, source: FileSource, options?: FullOptions) {
     if (source.format !== 'file') {
       throw new Error('saveFile can only be used with File-type sources.');
     }
@@ -254,10 +260,10 @@ var DefaultController = {
       url += '/';
     }
     url += 'files/' + name;
-    return CoreManager.getRESTController().ajax('POST', url, source.file, headers, progress).then(res=>res.response)
+    return CoreManager.getRESTController().ajax('POST', url, source.file, headers, options).then(res=>res.response)
   },
 
-  saveBase64: function(name: string, source: FileSource, options?: { useMasterKey?: boolean, success?: any, error?: any }) {
+  saveBase64: function(name: string, source: FileSource, options?: FullOptions) {
     if (source.format !== 'base64') {
       throw new Error('saveBase64 can only be used with Base64-type sources.');
     }

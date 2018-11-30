@@ -6,21 +6,20 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
-
+/* global File */
 jest.autoMockOff();
 
 const ParseFile = require('../ParseFile').default;
 const CoreManager = require('../CoreManager');
 
 function generateSaveMock(prefix) {
-  return function(name, payload, progress) {
-    // When save is called with a progress callback, call it with 0.5
-    if (typeof progress === "function") {
-      progress(0.5);
+  return function(name, payload, options) {
+    if (options && typeof options.progress === 'function') {
+      options.progress(0.5);
     }
-    return ParsePromise.as({
+    return Promise.resolve({
       name: name,
-      url: prefix + name
+      url: prefix + name,
     });
   };
 }
@@ -189,12 +188,12 @@ describe('ParseFile', () => {
   });
 
   it('reports progress during save when source is a File', () => {
-    var file = new ParseFile('progress.txt', new File(["Parse"], "progress.txt"));
+    const file = new ParseFile('progress.txt', new File(["Parse"], "progress.txt"));
 
-    var options = {
+    const options = {
       progress: function(){}
     };
-    spyOn(options, 'progress');
+    jest.spyOn(options, 'progress');
 
     return file.save(options).then(function(f) {
       expect(options.progress).toHaveBeenCalledWith(0.5);
