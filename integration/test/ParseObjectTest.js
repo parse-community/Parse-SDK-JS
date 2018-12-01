@@ -1455,4 +1455,18 @@ describe('Parse Object', () => {
       done();
     }
   });
+
+  it('can clone with relation', (done) => {
+    const o = Parse.Object.fromJSON({
+      objectId: '7777777777',
+      className: 'Foo',
+      aRelation: { __type: 'Relation', className: 'Foo' },
+    });
+    const o2 = o.clone();
+    assert.equal(
+      o.relation('aRelation').targetClassName,
+      o2.relation('aRelation').targetClassName
+    );
+    done();
+  });
 });
