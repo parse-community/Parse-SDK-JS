@@ -165,7 +165,7 @@
  * @property {Object} params The params passed to the background job.
  */
 
- /**
+/**
  * @typedef Parse.Cloud.JobStatus
  * @property {function} error If error is called, will end the job unsuccessfully with an optional completion message to be stored in the job status.
  * @property {function} message If message is called with a string argument, will update the current message to be stored in the job status.

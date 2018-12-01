@@ -45,6 +45,12 @@ var AsyncStorage = require('react-native').AsyncStorage;
 Parse.setAsyncStorage(AsyncStorage);
 ```
 
+## Upgrading to Parse SDK 2.0.0
+
+With Parse SDK 2.0.0, gone are the backbone style callbacks and Parse.Promises.
+
+We have curated a [migration guide](2.0.0.md) that should help you migrate your code.
+
 ## License
 
 ```

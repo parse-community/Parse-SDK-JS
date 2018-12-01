@@ -31,12 +31,13 @@
  *   object.save();</pre></p>
  * @alias Parse.GeoPoint
  */
+/* global navigator */
 class ParseGeoPoint {
   _latitude: number;
   _longitude: number;
 
   /**
-   * @param {(Number[]|Object|Number)} options Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point. 
+   * @param {(Number[]|Object|Number)} options Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point.
    * @param {Number} longitude The longitude of the GeoPoint
    */
   constructor(
@@ -52,7 +53,7 @@ class ParseGeoPoint {
       ParseGeoPoint._validate(arg1.latitude, arg1.longitude);
       this._latitude = arg1.latitude;
       this._longitude = arg1.longitude;
-    } else if (typeof arg1 === 'number' && typeof arg2 === 'number') {
+    } else if (arg1 !== undefined && arg2 !== undefined) {
       ParseGeoPoint._validate(arg1, arg2);
       this._latitude = arg1;
       this._longitude = arg2;
@@ -162,7 +163,10 @@ class ParseGeoPoint {
    * Throws an exception if the given lat-long is out of bounds.
    */
   static _validate(latitude: number, longitude: number) {
-    if (latitude !== latitude || longitude !== longitude) {
+    if (
+      isNaN(latitude) || isNaN(longitude) ||
+      typeof latitude !== 'number' || typeof longitude !== 'number'
+    ) {
       throw new TypeError(
         'GeoPoint latitude and longitude must be valid numbers'
       );
@@ -192,11 +196,9 @@ class ParseGeoPoint {
   /**
    * Creates a GeoPoint with the user's current location, if available.
    * Calls options.success with a new GeoPoint instance or calls options.error.
-
-   * @param {Object} options An object with success and error callbacks.
    * @static
    */
-  static current(options) {
+  static current() {
     return navigator.geolocation.getCurrentPosition((location) => {
       return new ParseGeoPoint(location.coords.latitude, location.coords.longitude);
     });

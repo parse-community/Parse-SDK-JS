@@ -9,22 +9,22 @@
 
 jest.autoMockOff();
 
-var TaskQueue = require('../TaskQueue');
+const TaskQueue = require('../TaskQueue');
 const { resolvingPromise } = require('../promiseUtils');
 
 describe('TaskQueue', () => {
   it('is initialized with an empty queue', () => {
-    var q = new TaskQueue();
+    const q = new TaskQueue();
     expect(q.queue).toEqual([]);
   });
 
   it('runs a single task immediately', async () => {
-    var q = new TaskQueue();
-    var resolve;
-    var p = new Promise((res) => resolve = res);
-    var called = false;
-    var completed = false;
-    var t = q.enqueue(() => {
+    const q = new TaskQueue();
+    let resolve;
+    const p = new Promise((res) => resolve = res);
+    let called = false;
+    let completed = false;
+    q.enqueue(() => {
       called = true;
       return p.then(() => {
         completed = true;
@@ -38,12 +38,11 @@ describe('TaskQueue', () => {
   });
 
   it('rejects the enqueue promise when the task errors', async (done) => {
-    var q = new TaskQueue();
-    var reject;
-    var p = new Promise((res, rej) => reject = rej);
-    var called = false;
-    var completed = false;
-    var t = q.enqueue(() => {
+    const q = new TaskQueue();
+    let reject;
+    const p = new Promise((res, rej) => reject = rej);
+    let called = false;
+    const t = q.enqueue(() => {
       called = true;
       return p;
     });
@@ -58,10 +57,10 @@ describe('TaskQueue', () => {
   })
 
   it('can execute a chain of tasks', async () => {
-    var q = new TaskQueue();
-    var called = [false, false, false];
-    var completed = [false, false, false];
-    var promises = [resolvingPromise(), resolvingPromise(), resolvingPromise()];
+    const q = new TaskQueue();
+    const called = [false, false, false];
+    const completed = [false, false, false];
+    const promises = [resolvingPromise(), resolvingPromise(), resolvingPromise()];
     q.enqueue(() => {
       called[0] = true;
       return promises[0].then(() => {
@@ -99,13 +98,13 @@ describe('TaskQueue', () => {
   });
 
   it('continues the chain when a task errors', async () => {
-    var q = new TaskQueue();
-    var called = [false, false, false];
-    var promises = [resolvingPromise(), resolvingPromise(), resolvingPromise()];
+    const q = new TaskQueue();
+    const called = [false, false, false];
+    const promises = [resolvingPromise(), resolvingPromise(), resolvingPromise()];
     q.enqueue(() => {
       called[0] = true;
       return promises[0];
-    }).catch(() => {}); // need to catch here as we're using async/await and it fails the test
+    }).catch(() => {}); // need to catch here as we're using async/await and it fails the test
     q.enqueue(() => {
       called[1] = true;
       return promises[1];
@@ -115,7 +114,7 @@ describe('TaskQueue', () => {
       return promises[2];
     });
     expect(called).toEqual([true, false, false]);
-    promises[0].catch(() => {});
+    promises[0].catch(() => {});
     promises[0].reject('oops');
     await new Promise(r => setImmediate(r));
     expect(called).toEqual([true, true, false]);

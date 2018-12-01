@@ -97,7 +97,7 @@ class ParseUser extends ParseObject {
         authData
       );
     } else {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         provider.authenticate({
           success: (provider, result) => {
             var opts = {};
@@ -182,13 +182,9 @@ class ParseUser extends ParseObject {
    * Unlinks a user from a service.
 
    */
-  _unlinkFrom(provider: any, options?: FullOptions) {
-    var authType;
+  _unlinkFrom(provider: any) {
     if (typeof provider === 'string') {
-      authType = provider;
       provider = authProviders[provider];
-    } else {
-      authType = provider.getAuthType();
     }
     return this._linkWith(provider, { authData: null }).then(() => {
       this._synchronizeAuthData(provider);
@@ -463,6 +459,19 @@ class ParseUser extends ParseObject {
     });
   }
 
+  /**
+   * Wrap the default fetchWithInclude behavior with functionality to save to local
+   * storage if this is current user.
+   */
+  fetchWithInclude(...args: Array<any>): Promise {
+    return super.fetchWithInclude.apply(this, args).then(() => {
+      if (this.isCurrent()) {
+        return CoreManager.getUserController().updateUserOnDisk(this);
+      }
+      return this;
+    });
+  }
+
   static readOnlyAttributes() {
     return ['sessionToken'];
   }
@@ -490,7 +499,7 @@ class ParseUser extends ParseObject {
     }
 
     if (classProps) {
-      for (var prop in classProps) {
+      for (const prop in classProps) {
         if (prop !== 'className') {
           Object.defineProperty(ParseUser, prop, {
             value: classProps[prop],
@@ -783,7 +792,7 @@ var DefaultController = {
   },
 
   removeUserFromDisk() {
-    let path = Storage.generatePath(CURRENT_USER_KEY);
+    const path = Storage.generatePath(CURRENT_USER_KEY);
     currentUserCacheMatchesDisk = true;
     currentUserCache = null;
     return Storage.removeItemAsync(path);
@@ -914,7 +923,7 @@ var DefaultController = {
     };
     return RESTController.request(
       'GET', 'login', auth, options
-    ).then((response, status) => {
+    ).then((response) => {
       user._migrateId(response.objectId);
       user._setExisted(true);
       stateController.setPendingOp(
@@ -938,7 +947,7 @@ var DefaultController = {
     var RESTController = CoreManager.getRESTController();
     return RESTController.request(
       'GET', 'users/me', {}, options
-    ).then((response, status) => {
+    ).then((response) => {
       user._finishFetch(response);
       user._setExisted(true);
       return DefaultController.setCurrentUser(user);

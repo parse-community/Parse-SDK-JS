@@ -9,7 +9,6 @@
  * @flow
  */
 
-import CoreManager from './CoreManager';
 import Storage from './Storage';
 
 var iidCache = null;

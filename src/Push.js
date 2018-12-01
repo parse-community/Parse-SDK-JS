@@ -29,7 +29,7 @@ export type PushData = {
  * @hideconstructor
  */
 
- /**
+/**
   * Sends a push notification.
   * @method send
   * @name Parse.Push.send

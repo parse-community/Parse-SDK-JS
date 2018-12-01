@@ -16,9 +16,11 @@ jest.dontMock('../ParseQuery');
 jest.dontMock('../EventEmitter');
 jest.dontMock('../promiseUtils');
 
-const ParseLiveQuery = require('../ParseLiveQuery');
+// Forces the loading
+require('../ParseLiveQuery');
 const CoreManager = require('../CoreManager');
 const ParseQuery = require('../ParseQuery').default;
+const LiveQuerySubscription = require('../LiveQuerySubscription').default;
 
 describe('ParseLiveQuery', () => {
   beforeEach(() => {
@@ -126,26 +128,26 @@ describe('ParseLiveQuery', () => {
       query.equalTo("test", "value");
       const ourSubscription = controller.subscribe(query, "close");
 
-      var isCalled = {};
-      ["open", 
+      const isCalled = {};
+      ["open",
         "close",
         "error",
         "create",
-        "update", 
-        "enter", 
-        "leave", 
+        "update",
+        "enter",
+        "leave",
         "delete"].forEach((key) =>{
         ourSubscription.on(key, () => {
           isCalled[key] = true;
         });
       });
-      
-      // controller.subscribe() completes asynchronously, 
+
+      // controller.subscribe() completes asynchronously,
       // so we need to give it a chance to complete before finishing
-      setTimeout(() => { 
+      setTimeout(() => {
         try {
           client.connectPromise.resolve();
-          var actualSubscription = client.subscriptions.get(1);
+          const actualSubscription = client.subscriptions.get(1);
 
           expect(actualSubscription).toBeDefined();
 
@@ -177,8 +179,15 @@ describe('ParseLiveQuery', () => {
         } catch(e){
           done.fail(e);
         }
-      }, 1); 
+      }, 1);
     });
 
+  });
+
+  it('should not throw on usubscribe', (done) => {
+    const query = new ParseQuery("ObjectType");
+    query.equalTo("test", "value");
+    const subscription = new LiveQuerySubscription('0', query, 'token');
+    subscription.unsubscribe().then(done).catch(done.fail);
   });
 });

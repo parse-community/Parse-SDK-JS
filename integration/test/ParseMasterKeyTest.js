@@ -17,9 +17,9 @@ describe('Master Key', () => {
   });
 
   it('can perform a simple save', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.set('color', 'purple');
-    object.save(null, { useMasterKey: true }).then((obj) => {
+    object.save(null, { useMasterKey: true }).then(() => {
       assert(object.id);
       done();
     });
@@ -41,7 +41,7 @@ describe('Master Key', () => {
 
   it('throws when no master key is provided', (done) => {
     Parse.CoreManager.set('MASTER_KEY', null);
-    let object = new TestObject();
+    const object = new TestObject();
     object.save(null, { useMasterKey: true }).catch(() => {
       // should fail
       done();

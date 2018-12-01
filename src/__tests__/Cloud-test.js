@@ -12,16 +12,16 @@ jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 
-var Cloud = require('../Cloud');
-var CoreManager = require('../CoreManager');
+const Cloud = require('../Cloud');
+const CoreManager = require('../CoreManager');
 
-var defaultController = CoreManager.getCloudController();
+const defaultController = CoreManager.getCloudController();
 
 describe('Cloud', () => {
   beforeEach(() => {
-    var run = jest.fn();
-    var getJobsData = jest.fn();
-    var startJob = jest.fn();
+    const run = jest.fn();
+    const getJobsData = jest.fn();
+    const startJob = jest.fn();
     run.mockReturnValue(Promise.resolve({
       result: {}
     }));
@@ -115,12 +115,12 @@ describe('Cloud', () => {
 describe('CloudController', () => {
   beforeEach(() => {
     CoreManager.setCloudController(defaultController);
-    var request = jest.fn();
+    const request = jest.fn();
     request.mockReturnValue(Promise.resolve({
       success: true,
       result: {}
     }));
-    var ajax = jest.fn();
+    const ajax = jest.fn();
     CoreManager.setRESTController({ request: request, ajax: ajax });
   });
 
@@ -149,15 +149,27 @@ describe('CloudController', () => {
       }, { sessionToken: 'asdf1234' }]);
   });
 
-  it('run invalid response', () => {
-    var request = jest.fn();
+  it('run invalid response', (done) => {
+    const request = jest.fn();
     request.mockReturnValue(Promise.resolve({
       success: false
     }));
-    var ajax = jest.fn();
+    const ajax = jest.fn();
     CoreManager.setRESTController({ request: request, ajax: ajax });
 
     Cloud.run('myfunction').then(null).catch(() => {
+      done();
+    });
+  });
+
+  it('run undefined response', (done) => {
+    const request = jest.fn();
+    request.mockReturnValue(Promise.resolve(undefined));
+
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request: request, ajax: ajax });
+
+    Cloud.run('myfunction').then(() => {
       done();
     });
   });

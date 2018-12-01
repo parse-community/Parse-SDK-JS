@@ -12,7 +12,7 @@ jest.dontMock('../ParseACL');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 
-var mockObject = function(className) {
+const mockObject = function(className) {
   this.className = className;
 };
 mockObject.registerSubclass = function() {};
@@ -28,11 +28,11 @@ mockObject.prototype = {
     return this.attributes;
   },
   _toFullJSON(seen) {
-    var json = {
+    const json = {
       __type: 'Object',
       className: this.className
     };
-    for (var attr in this.attributes) {
+    for (const attr in this.attributes) {
       json[attr] = encode(this.attributes[attr], false, false, seen.concat(this));
     }
     return json;
@@ -40,12 +40,12 @@ mockObject.prototype = {
 };
 jest.setMock('../ParseObject', mockObject);
 
-var encode = require('../encode').default;
-var ParseACL = require('../ParseACL').default;
-var ParseFile = require('../ParseFile').default;
-var ParseGeoPoint = require('../ParseGeoPoint').default;
-var ParseObject = require('../ParseObject');
-var ParseRelation = require('../ParseRelation').default;
+const encode = require('../encode').default;
+const ParseACL = require('../ParseACL').default;
+const ParseFile = require('../ParseFile').default;
+const ParseGeoPoint = require('../ParseGeoPoint').default;
+const ParseObject = require('../ParseObject');
+const ParseRelation = require('../ParseRelation').default;
 
 describe('encode', () => {
   it('ignores primitives', () => {
@@ -72,7 +72,7 @@ describe('encode', () => {
   });
 
   it('encodes GeoPoints', () => {
-    var point = new ParseGeoPoint(40.5, 50.4);
+    const point = new ParseGeoPoint(40.5, 50.4);
     expect(encode(point)).toEqual({
       __type: 'GeoPoint',
       latitude: 40.5,
@@ -81,7 +81,7 @@ describe('encode', () => {
   });
 
   it('encodes Files', () => {
-    var file = new ParseFile('parse.txt');
+    const file = new ParseFile('parse.txt');
     expect(encode.bind(null, file)).toThrow('Tried to encode an unsaved file.');
     file._url = 'https://files.parsetfss.com/a/parse.txt';
     expect(encode(file)).toEqual({
@@ -92,13 +92,13 @@ describe('encode', () => {
   });
 
   it('encodes Relations', () => {
-    var rel = new ParseRelation();
-    var json = encode(rel);
+    const rel = new ParseRelation();
+    encode(rel);
     expect(rel.toJSON.mock.calls.length).toBe(1);
   });
 
   it('encodes ACLs', () => {
-    var acl = new ParseACL({ aUserId: { read: true, write: false } });
+    const acl = new ParseACL({ aUserId: { read: true, write: false } });
     expect(encode(acl)).toEqual({
       aUserId: {
         read: true,
@@ -108,7 +108,7 @@ describe('encode', () => {
   });
 
   it('encodes ParseObjects', () => {
-    var obj = new ParseObject('Item');
+    const obj = new ParseObject('Item');
     obj._serverData = {};
     expect(encode(obj)).toEqual('POINTER');
 
@@ -140,14 +140,14 @@ describe('encode', () => {
   });
 
   it('does not encode ParseObjects when they are disallowed', () => {
-    var obj = new ParseObject('Item');
+    const obj = new ParseObject('Item');
     expect(encode.bind(null, obj, true)).toThrow(
       'Parse Objects not allowed here'
     );
   });
 
   it('iterates over arrays', () => {
-    var arr = [12, new Date(Date.UTC(2015, 1)), 'str'];
+    let arr = [12, new Date(Date.UTC(2015, 1)), 'str'];
     expect(encode(arr)).toEqual([
       12,
       { __type: 'Date', iso: '2015-02-01T00:00:00.000Z' },
@@ -163,7 +163,7 @@ describe('encode', () => {
   });
 
   it('iterates over objects', () => {
-    var obj = {
+    const obj = {
       num: 12,
       date: new Date(Date.UTC(2015, 1)),
       str: 'abc'

@@ -19,7 +19,7 @@ var StorageController = {
   },
 
   getItemAsync(path: string): Promise {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.getAsyncStorage().getItem(path, function(err, value) {
         if (err) {
           reject(err);
@@ -31,7 +31,7 @@ var StorageController = {
   },
 
   setItemAsync(path: string, value: string): Promise {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.getAsyncStorage().setItem(path, value, function(err, value) {
         if (err) {
           reject(err);
@@ -43,7 +43,7 @@ var StorageController = {
   },
 
   removeItemAsync(path: string): Promise {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.getAsyncStorage().removeItem(path, function(err) {
         if (err) {
           reject(err);

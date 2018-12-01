@@ -27,11 +27,11 @@ jest.dontMock('../UniqueInstanceStateController');
 
 jest.dontMock('./test_helpers/mockXHR');
 
-var CoreManager = require('../CoreManager');
-var ParseObject = require('../ParseObject').default;
-var ParseUser = require('../ParseUser').default;
-var Storage = require('../Storage');
-var ParseError = require('../ParseError').default;
+const CoreManager = require('../CoreManager');
+const ParseObject = require('../ParseObject').default;
+const ParseUser = require('../ParseUser').default;
+const Storage = require('../Storage');
+const ParseError = require('../ParseError').default;
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
@@ -42,7 +42,7 @@ describe('ParseUser', () => {
   });
 
   it('can be constructed with initial attributes', () => {
-    var u = new ParseUser();
+    let u = new ParseUser();
     expect(u.isCurrent()).toBe(false);
     expect(u.className).toBe('_User');
     expect(u instanceof ParseObject).toBe(true);
@@ -55,14 +55,14 @@ describe('ParseUser', () => {
     expect(u.get('password')).toBe('secret');
 
     expect(function() {
-      var u = new ParseUser({
+      new ParseUser({
         $$$: 'invalid'
       });
     }).toThrow('Can\'t create an invalid Parse User');
   });
 
   it('exposes certain attributes through special setters and getters', () => {
-    var u = ParseObject.fromJSON({
+    const u = ParseObject.fromJSON({
       className: '_User',
       username: 'user12',
       email: 'user12@parse.com',
@@ -73,7 +73,7 @@ describe('ParseUser', () => {
     expect(u.getEmail()).toBe('user12@parse.com');
     expect(u.getSessionToken()).toBe('123abc');
 
-    var u2 = new ParseUser();
+    const u2 = new ParseUser();
     u2.setUsername('bono');
     u2.setEmail('bono@u2.com');
     expect(u2.getUsername()).toBe('bono');
@@ -81,14 +81,14 @@ describe('ParseUser', () => {
   });
 
   it('can clone User objects', () => {
-    var u = ParseObject.fromJSON({
+    const u = ParseObject.fromJSON({
       className: '_User',
       username: 'user12',
       email: 'user12@parse.com',
       sessionToken: '123abc'
     });
 
-    var clone = u.clone();
+    const clone = u.clone();
     expect(clone.className).toBe('_User');
     expect(clone.get('username')).toBe('user12');
     expect(clone.get('email')).toBe('user12@parse.com');
@@ -97,7 +97,7 @@ describe('ParseUser', () => {
 
   it('can create a new instance of a User', () => {
     ParseObject.disableSingleInstance();
-    let o = ParseObject.fromJSON({
+    const o = ParseObject.fromJSON({
       className: '_User',
       objectId: 'U111',
       username: 'u111',
@@ -118,7 +118,7 @@ describe('ParseUser', () => {
   });
 
   it('makes session tokens readonly', () => {
-    var u = new ParseUser();
+    const u = new ParseUser();
     expect(u.set.bind(u, 'sessionToken', 'token')).toThrow(
       'Cannot modify readonly attribute: sessionToken'
     );
@@ -137,7 +137,7 @@ describe('ParseUser', () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, body) {
         expect(method).toBe('POST');
         expect(path).toBe('users');
         expect(body.username).toBe('username');
@@ -169,7 +169,7 @@ describe('ParseUser', () => {
 
       expect(ParseUser.current()).toBe(u);
       ParseUser._clearCache();
-      var current = ParseUser.current();
+      const current = ParseUser.current();
       expect(current instanceof ParseUser).toBe(true);
       expect(current.id).toBe('uid');
       expect(current.getUsername()).toBe('username');
@@ -182,7 +182,7 @@ describe('ParseUser', () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, body) {
         expect(method).toBe('GET');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
@@ -203,7 +203,7 @@ describe('ParseUser', () => {
       expect(u.authenticated()).toBe(true);
       expect(ParseUser.current()).toBe(u);
       ParseUser._clearCache();
-      var current = ParseUser.current();
+      const current = ParseUser.current();
       expect(current instanceof ParseUser).toBe(true);
       expect(current.id).toBe('uid2');
       expect(current.authenticated()).toBe(true);
@@ -217,12 +217,12 @@ describe('ParseUser', () => {
     ParseUser.logIn({}, 'password').then(null, (err) => {
       expect(err.code).toBe(ParseError.OTHER_CAUSE);
       expect(err.message).toBe('Username must be a string.');
-      
+
       return ParseUser.logIn('username', {});
     }).then(null, (err) => {
       expect(err.code).toBe(ParseError.OTHER_CAUSE);
       expect(err.message).toBe('Password must be a string.');
-      
+
       done();
     });
   });
@@ -231,7 +231,7 @@ describe('ParseUser', () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, body) {
         expect(method).toBe('GET');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
@@ -245,7 +245,7 @@ describe('ParseUser', () => {
       },
       ajax() {}
     });
-    var u = new ParseUser({
+    const u = new ParseUser({
       username: 'username',
       password: 'password'
     });
@@ -286,7 +286,7 @@ describe('ParseUser', () => {
 
   it('can send a password reset request', () => {
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, body) {
         expect(method).toBe('POST');
         expect(path).toBe('requestPasswordReset');
         expect(body).toEqual({ email: 'me@parse.com' });
@@ -303,7 +303,7 @@ describe('ParseUser', () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request() {
         return Promise.resolve({
           objectId: 'uid5',
           username: 'username',
@@ -315,7 +315,7 @@ describe('ParseUser', () => {
     ParseUser.logIn('username', 'password').then((u) => {
       expect(ParseUser.current()).toBe(u);
       CoreManager.setRESTController({
-        request(method, path, body, options) {
+        request() {
           // Shouldn't be called
           expect(true).toBe(false);
           return Promise.resolve({}, 200);
@@ -333,7 +333,7 @@ describe('ParseUser', () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request() {
         return Promise.resolve({
           objectId: 'uid6',
           username: 'username',
@@ -367,7 +367,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     Storage._clear();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request() {
         return Promise.resolve({
           objectId: 'uid6',
           username: 'username',
@@ -395,7 +395,7 @@ describe('ParseUser', () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     Storage._clear();
-    var path = Storage.generatePath('currentUser');
+    const path = Storage.generatePath('currentUser');
     Storage.setItem(path, JSON.stringify({
       _id: 'abc',
       _sessionToken: '12345',
@@ -470,7 +470,7 @@ describe('ParseUser', () => {
         ajax() {}
       });
       return u.destroy();
-    }).then((u) => {
+    }).then(() => {
       expect(ParseUser.current()).toBe(null);
       return ParseUser.currentAsync();
     }).then((current) => {
@@ -517,6 +517,83 @@ describe('ParseUser', () => {
     });
   });
 
+  it('updates the current user on disk when fetched with include', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid6',
+        }, 200);
+      },
+      ajax() {},
+    });
+    const child = new ParseObject('TestObject');
+    child.set('foo', 'bar');
+    await child.save();
+
+    let u = await ParseUser.signUp('spot', 'fetchWithInclude');
+    expect(u.isCurrent()).toBe(true);
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          child: child.toJSON(),
+          count: 15,
+        }, 200);
+      },
+      ajax() {},
+    });
+    u = await u.fetchWithInclude('child');
+
+    ParseUser._clearCache();
+    ParseObject._clearAllState();
+    expect(u.attributes).toEqual({});
+    expect(u.get('count')).toBe(undefined);
+    const current = await ParseUser.currentAsync();
+    expect(current.id).toBe('uid6');
+    expect(current.get('count')).toBe(15);
+    expect(current.get('child').foo).toBe('bar');
+  });
+
+  it('does not update non-auth user when fetched with include', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid6',
+        }, 200);
+      },
+      ajax() {},
+    });
+    const child = new ParseObject('TestObject');
+    child.set('foo', 'bar');
+    await child.save();
+
+    const u = await ParseUser.signUp('spot', 'fetchWithInclude');
+    await ParseUser.logOut();
+    expect(u.isCurrent()).toBe(false);
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          child: child.toJSON(),
+          count: 15,
+        }, 200);
+      },
+      ajax() {},
+    });
+    const fetchedUser = await u.fetchWithInclude('child');
+
+    const current = await ParseUser.currentAsync();
+    expect(current).toBe(null);
+    expect(fetchedUser.get('count')).toBe(15);
+    expect(fetchedUser.get('child').foo).toBe('bar');
+  });
+
   it('clears the current user on disk when logged out', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
@@ -530,7 +607,7 @@ describe('ParseUser', () => {
       ajax() {}
     });
 
-    var path = Storage.generatePath('currentUser');
+    const path = Storage.generatePath('currentUser');
     ParseUser.signUp('temporary', 'password').then((u) => {
       expect(u.isCurrent()).toBe(true);
       expect(Storage.getItem(path)).not.toBe(null);
@@ -552,14 +629,14 @@ describe('ParseUser', () => {
 
   it('can get error when recursive _linkWith call fails', (done) => {
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, body) {
         expect(method).toBe('POST');
         expect(path).toBe('users');
         expect(body.authData.test).toEqual({
           id : 'id',
           access_token : 'access_token'
         });
-        var error = new ParseError(
+        const error = new ParseError(
           ParseError.ACCOUNT_ALREADY_LINKED,
           'Another user is already linked to this facebook id.'
         );
@@ -567,7 +644,7 @@ describe('ParseUser', () => {
       },
       ajax() {}
     });
-    var provider = {
+    const provider = {
       authenticate(options) {
         if (options.success) {
           options.success(this, {
@@ -577,7 +654,7 @@ describe('ParseUser', () => {
         }
       },
 
-      restoreAuthentication(authData) {},
+      restoreAuthentication() {},
 
       getAuthType() {
         return 'test';
@@ -596,8 +673,8 @@ describe('ParseUser', () => {
   });
 
   it('strip anonymity when we set username', () => {
-    var user = new ParseUser();
-    var authData = {
+    const user = new ParseUser();
+    const authData = {
       anonymous : {
         id : 'anonymousId'
       }
@@ -632,7 +709,7 @@ describe('ParseUser', () => {
       expect(u.get('number')).toBe(123);
       ParseUser._clearCache();
 
-      let u2 = ParseObject.fromJSON({
+      const u2 = ParseObject.fromJSON({
         objectId: 'uidfetch',
         className: '_User',
         username: 'temporary',

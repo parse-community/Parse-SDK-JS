@@ -8,15 +8,16 @@
  *
  * @flow
  */
-
+/* global XMLHttpRequest, XDomainRequest */
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
-import Storage from './Storage';
 
 export type RequestOptions = {
   useMasterKey?: boolean;
   sessionToken?: string;
   installationId?: string;
+  batchSize?: number;
+  include?: any;
 };
 
 export type FullOptions = {
@@ -103,9 +104,8 @@ const RESTController = {
             response = JSON.parse(xhr.responseText);
 
             if (typeof xhr.getResponseHeader === 'function') {
-              var jobStatusId = xhr.getResponseHeader('x-parse-job-status-id');
-              if (jobStatusId) {
-                response = jobStatusId;
+              if ((xhr.getAllResponseHeaders() || '').includes('x-parse-job-status-id: ')) {
+                response = xhr.getResponseHeader('x-parse-job-status-id');
               }
             }
           } catch (e) {
@@ -173,7 +173,7 @@ const RESTController = {
     }
 
     payload._ApplicationId = CoreManager.get('APPLICATION_ID');
-    let jsKey = CoreManager.get('JAVASCRIPT_KEY');
+    const jsKey = CoreManager.get('JAVASCRIPT_KEY');
     if (jsKey) {
       payload._JavaScriptKey = jsKey;
     }
@@ -226,7 +226,7 @@ const RESTController = {
 
       var payloadString = JSON.stringify(payload);
 
-      return RESTController.ajax(method, url, payloadString).then(({ response }) => {
+      return RESTController.ajax(method, url, payloadString).then(({ response }) => {
         return response;
       });
     }).catch(function(response: { responseText: string }) {

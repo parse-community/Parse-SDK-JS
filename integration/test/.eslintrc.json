@@ -1,0 +1,10 @@
+{
+  "env": {
+      "jasmine": true
+  },
+  "globals": {},
+  "rules": {
+    "no-console": [0],
+    "no-var": "error"
+  }
+}

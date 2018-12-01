@@ -10,9 +10,9 @@
 jest.autoMockOff();
 jest.useFakeTimers();
 
-var CoreManager = require('../CoreManager');
-var RESTController = require('../RESTController');
-var mockXHR = require('./test_helpers/mockXHR');
+const CoreManager = require('../CoreManager');
+const RESTController = require('../RESTController');
+const mockXHR = require('./test_helpers/mockXHR');
 
 CoreManager.setInstallationController({
   currentInstallationId() {
@@ -36,7 +36,7 @@ describe('RESTController', () => {
   });
 
   it('opens a XHR with the correct verb and headers', () => {
-    var xhr = {
+    const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
       send: jest.fn()
@@ -52,7 +52,7 @@ describe('RESTController', () => {
 
   it('resolves with the result of the AJAX request', (done) => {
     RESTController._setXHR(mockXHR([{ status: 200, response: { success: true }}]));
-    RESTController.ajax('POST', 'users', {}).then(({ response, status, xhr }) => {
+    RESTController.ajax('POST', 'users', {}).then(({ response, status }) => {
       expect(response).toEqual({ success: true });
       expect(status).toBe(200);
       done();
@@ -65,7 +65,7 @@ describe('RESTController', () => {
       { status: 500 },
       { status: 200, response: { success: true }}
     ]));
-    RESTController.ajax('POST', 'users', {}).then(({ response, status, xhr }) => {
+    RESTController.ajax('POST', 'users', {}).then(({ response, status }) => {
       expect(response).toEqual({ success: true });
       expect(status).toBe(200);
       done();
@@ -132,7 +132,7 @@ describe('RESTController', () => {
   });
 
   it('can make formal JSON requests', async () => {
-    var xhr = {
+    const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
       send: jest.fn()
@@ -169,7 +169,7 @@ describe('RESTController', () => {
   });
 
   it('handles invalid responses', (done) => {
-    var XHR = function() { };
+    const XHR = function() { };
     XHR.prototype = {
       open: function() { },
       setRequestHeader: function() { },
@@ -190,7 +190,7 @@ describe('RESTController', () => {
   });
 
   it('handles invalid errors', (done) => {
-    var XHR = function() { };
+    const XHR = function() { };
     XHR.prototype = {
       open: function() { },
       setRequestHeader: function() { },
@@ -211,16 +211,19 @@ describe('RESTController', () => {
   });
 
   it('handles x-parse-job-status-id header', async () => {
-    var XHR = function() { };
+    const XHR = function() { };
     XHR.prototype = {
       open: function() { },
       setRequestHeader: function() { },
-      getResponseHeader: function(name) { return 1234; },
+      getResponseHeader: function() { return 1234; },
       send: function() {
         this.status = 200;
         this.responseText = '{}';
         this.readyState = 4;
         this.onreadystatechange();
+      },
+      getAllResponseHeaders: function() {
+        return 'x-parse-job-status-id: 1234';
       }
     };
     RESTController._setXHR(XHR);
@@ -229,16 +232,19 @@ describe('RESTController', () => {
   });
 
   it('handles invalid header', async () => {
-    var XHR = function() { };
+    const XHR = function() { };
     XHR.prototype = {
       open: function() { },
       setRequestHeader: function() { },
-      getResponseHeader: function(name) { return null; },
+      getResponseHeader: function() { return null; },
       send: function() {
         this.status = 200;
         this.responseText = '{"result":"hello"}';
         this.readyState = 4;
         this.onreadystatechange();
+      },
+      getAllResponseHeaders: function() {
+        return null;
       }
     };
     RESTController._setXHR(XHR);
@@ -262,7 +268,7 @@ describe('RESTController', () => {
       linkWith() {},
     });
 
-    var xhr = {
+    const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
       send: jest.fn()
@@ -297,7 +303,7 @@ describe('RESTController', () => {
       linkWith() {},
     });
 
-    var xhr = {
+    const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
       send: jest.fn()
@@ -317,7 +323,7 @@ describe('RESTController', () => {
 
   it('sends the revocable session upgrade header when the config flag is set', async () => {
     CoreManager.set('FORCE_REVOCABLE_SESSION', true);
-    var xhr = {
+    const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
       send: jest.fn()
@@ -339,7 +345,7 @@ describe('RESTController', () => {
 
   it('sends the master key when requested', async () => {
     CoreManager.set('MASTER_KEY', 'M');
-    var xhr = {
+    const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
       send: jest.fn()
@@ -358,7 +364,7 @@ describe('RESTController', () => {
 
   it('throws when attempted to use an unprovided master key', () => {
     CoreManager.set('MASTER_KEY', undefined);
-    var xhr = {
+    const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
       send: jest.fn()

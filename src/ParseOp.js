@@ -21,47 +21,50 @@ export function opFromJSON(json: { [key: string]: any }): ?Op {
     return null;
   }
   switch (json.__op) {
-    case 'Delete':
-      return new UnsetOp();
-    case 'Increment':
-      return new IncrementOp(json.amount);
-    case 'Add':
-      return new AddOp(decode(json.objects));
-    case 'AddUnique':
-      return new AddUniqueOp(decode(json.objects));
-    case 'Remove':
-      return new RemoveOp(decode(json.objects));
-    case 'AddRelation':
-      var toAdd = decode(json.objects);
-      if (!Array.isArray(toAdd)) {
-        return new RelationOp([], []);
+  case 'Delete':
+    return new UnsetOp();
+  case 'Increment':
+    return new IncrementOp(json.amount);
+  case 'Add':
+    return new AddOp(decode(json.objects));
+  case 'AddUnique':
+    return new AddUniqueOp(decode(json.objects));
+  case 'Remove':
+    return new RemoveOp(decode(json.objects));
+  case 'AddRelation': {
+    const toAdd = decode(json.objects);
+    if (!Array.isArray(toAdd)) {
+      return new RelationOp([], []);
+    }
+    return new RelationOp(toAdd, []);
+  }
+  case 'RemoveRelation': {
+    const toRemove = decode(json.objects);
+    if (!Array.isArray(toRemove)) {
+      return new RelationOp([], []);
+    }
+    return new RelationOp([], toRemove);
+  }
+  case 'Batch': {
+    let toAdd = [];
+    let toRemove = [];
+    for (var i = 0; i < json.ops.length; i++) {
+      if (json.ops[i].__op === 'AddRelation') {
+        toAdd = toAdd.concat(decode(json.ops[i].objects));
+      } else if (json.ops[i].__op === 'RemoveRelation') {
+        toRemove = toRemove.concat(decode(json.ops[i].objects));
       }
-      return new RelationOp(toAdd, []);
-    case 'RemoveRelation':
-      var toRemove = decode(json.objects);
-      if (!Array.isArray(toRemove)) {
-        return new RelationOp([], []);
-      }
-      return new RelationOp([], toRemove);
-    case 'Batch':
-      var toAdd = [];
-      var toRemove = [];
-      for (var i = 0; i < json.ops.length; i++) {
-        if (json.ops[i].__op === 'AddRelation') {
-          toAdd = toAdd.concat(decode(json.ops[i].objects));
-        } else if (json.ops[i].__op === 'RemoveRelation') {
-          toRemove = toRemove.concat(decode(json.ops[i].objects));
-        }
-      }
-      return new RelationOp(toAdd, toRemove);
+    }
+    return new RelationOp(toAdd, toRemove);
+  }
   }
   return null;
 }
 
 export class Op {
   // Empty parent class
-  applyTo(value: mixed): mixed {}
-  mergeWith(previous: Op): ?Op {}
+  applyTo(value: mixed): mixed {} /* eslint-disable-line no-unused-vars */
+  mergeWith(previous: Op): ?Op {} /* eslint-disable-line no-unused-vars */
   toJSON(): mixed {}
 }
 
@@ -73,11 +76,11 @@ export class SetOp extends Op {
     this._value = value;
   }
 
-  applyTo(value: mixed): mixed {
+  applyTo(): mixed {
     return this._value;
   }
 
-  mergeWith(previous: Op): SetOp {
+  mergeWith(): SetOp {
     return new SetOp(this._value);
   }
 
@@ -87,11 +90,11 @@ export class SetOp extends Op {
 }
 
 export class UnsetOp extends Op {
-  applyTo(value: mixed) {
+  applyTo() {
     return undefined;
   }
 
-  mergeWith(previous: Op): UnsetOp {
+  mergeWith(): UnsetOp {
     return new UnsetOp();
   }
 
@@ -249,9 +252,9 @@ export class RemoveOp extends Op {
       return [];
     }
     if (Array.isArray(value)) {
-      var i = value.indexOf(this._value);
+      // var i = value.indexOf(this._value);
       var removed = value.concat([]);
-      for (var i = 0; i < this._value.length; i++) {
+      for (let i = 0; i < this._value.length; i++) {
         var index = removed.indexOf(this._value[i]);
         while (index > -1) {
           removed.splice(index, 1);
