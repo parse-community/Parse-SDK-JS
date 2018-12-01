@@ -672,6 +672,24 @@ describe('ParseUser', () => {
     });
   });
 
+  it('can login anonymous', (done) => {
+    CoreManager.setRESTController({
+      request(method, path, body) {
+        expect(body.authData.anonymous).toBeDefined();
+        return Promise.resolve({
+          objectId: 'id1',
+          username: 'username',
+          sessionToken: '1234',
+          authData: body.authData,
+        });
+      },
+      ajax() {}
+    });
+    ParseUser.loginWithAnonymous().then(() => {
+      done();
+    });
+  });
+
   it('strip anonymity when we set username', () => {
     const user = new ParseUser();
     const authData = {

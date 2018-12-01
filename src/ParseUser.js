@@ -638,6 +638,30 @@ class ParseUser extends ParseObject {
     return controller.become(becomeOptions);
   }
 
+  /**
+   * Login as an anonymous User with <a href="http://parseplatform.org/docs/rest/guide/#anonymous-user-authdata">REST API</a>
+   *
+   * @static
+   * @return {Promise} A promise that is fulfilled with the user when
+   *     the login completes.
+   */
+  static loginWithAnonymous() {
+    function uuid() {
+      function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+          .toString(16)
+          .substring(1);
+      }
+      return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    }
+    const authData = {
+      authData: {
+        id: uuid()
+      }
+    };
+    return ParseUser.logInWith('anonymous', authData);
+  }
+
   static logInWith(provider, options) {
     return ParseUser._logInWith(provider, options);
   }

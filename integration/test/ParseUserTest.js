@@ -439,4 +439,13 @@ describe('Parse User', () => {
       done();
     });
   });
+
+  it('can login anonymous', (done) => {
+    Parse.User.enableUnsafeCurrentUser();
+    Parse.User.loginWithAnonymous().then((user) => {
+      assert(user.get('authData').anonymous.id);
+      assert.equal(user, Parse.User.current());
+      done();
+    });
+  });
 });
