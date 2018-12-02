@@ -652,6 +652,10 @@ class ParseObject {
         !(changes[k] instanceof ParseACL)
       ) {
         newOps[k] = new SetOp(new ParseACL(changes[k]));
+      } else if (changes[k] instanceof ParseRelation) {
+        var relation = new ParseRelation(this, k);
+        relation.targetClassName = changes[k].targetClassName;
+        newOps[k] = new SetOp(relation);
       } else {
         newOps[k] = new SetOp(changes[k]);
       }

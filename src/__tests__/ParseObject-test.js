@@ -22,6 +22,7 @@ jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
+jest.dontMock('../ParseRelation');
 jest.dontMock('../RESTController');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../TaskQueue');
@@ -35,12 +36,47 @@ jest.dontMock('./test_helpers/mockXHR');
 jest.useFakeTimers();
 
 const mockRelation = function(parent, key) {
-  this.parentClass = parent.className;
-  this.parentId = parent.id;
+  // The parent and key fields will be populated by the parent
+  if (parent) {
+    this.parentClass = parent.className;
+    this.parentId = parent.id;
+  }
   this.key = key;
 };
 mockRelation.prototype.add = function(obj) {
   this.targetClassName = obj.className;
+};
+mockRelation.prototype.toJSON = function() {
+  return {
+    __type: 'Relation',
+    className: this.targetClassName
+  };
+};
+mockRelation.prototype._ensureParentAndKey = function(parent, key) {
+  this.key = this.key || key;
+  if (this.key !== key) {
+    throw new Error(
+      'Internal Error. Relation retrieved from two different keys.'
+    );
+  }
+  if (this.parent) {
+    if (this.parent.className !== parent.className) {
+      throw new Error(
+        'Internal Error. Relation retrieved from two different Objects.'
+      );
+    }
+    if (this.parent.id) {
+      if (this.parent.id !== parent.id) {
+        throw new Error(
+          'Internal Error. Relation retrieved from two different Objects.'
+        );
+      }
+    } else if (parent.id) {
+      this.parent = parent;
+    }
+  } else {
+    this.parent = parent;
+  }
 };
 jest.setMock('../ParseRelation', mockRelation);
 
@@ -512,6 +548,17 @@ describe('ParseObject', () => {
     friend.id = 'BB';
     rel.add(friend);
     expect(rel.targetClassName).toBe('Person');
+  });
+
+  it('can be cloned with relation (#381)', () => {
+    const relationJSON = {__type: 'Relation', className: 'Bar'};
+    const o = ParseObject.fromJSON({
+      objectId: '7777777777',
+      className: 'Foo',
+      aRelation: relationJSON,
+    });
+    const o2 = o.clone();
+    expect(o2._getSaveJSON().aRelation).toEqual(relationJSON);
   });
 
   it('can detect dirty object children', () => {
