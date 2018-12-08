@@ -22,6 +22,7 @@ jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
+jest.dontMock('../ParseRelation');
 jest.dontMock('../RESTController');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../TaskQueue');
@@ -35,12 +36,47 @@ jest.dontMock('./test_helpers/mockXHR');
 jest.useFakeTimers();
 
 const mockRelation = function(parent, key) {
-  this.parentClass = parent.className;
-  this.parentId = parent.id;
+  // The parent and key fields will be populated by the parent
+  if (parent) {
+    this.parentClass = parent.className;
+    this.parentId = parent.id;
+  }
   this.key = key;
 };
 mockRelation.prototype.add = function(obj) {
   this.targetClassName = obj.className;
+};
+mockRelation.prototype.toJSON = function() {
+  return {
+    __type: 'Relation',
+    className: this.targetClassName
+  };
+};
+mockRelation.prototype._ensureParentAndKey = function(parent, key) {
+  this.key = this.key || key;
+  if (this.key !== key) {
+    throw new Error(
+      'Internal Error. Relation retrieved from two different keys.'
+    );
+  }
+  if (this.parent) {
+    if (this.parent.className !== parent.className) {
+      throw new Error(
+        'Internal Error. Relation retrieved from two different Objects.'
+      );
+    }
+    if (this.parent.id) {
+      if (this.parent.id !== parent.id) {
+        throw new Error(
+          'Internal Error. Relation retrieved from two different Objects.'
+        );
+      }
+    } else if (parent.id) {
+      this.parent = parent;
+    }
+  } else {
+    this.parent = parent;
+  }
 };
 jest.setMock('../ParseRelation', mockRelation);
 
@@ -512,6 +548,17 @@ describe('ParseObject', () => {
     friend.id = 'BB';
     rel.add(friend);
     expect(rel.targetClassName).toBe('Person');
+  });
+
+  it('can be cloned with relation (#381)', () => {
+    const relationJSON = {__type: 'Relation', className: 'Bar'};
+    const o = ParseObject.fromJSON({
+      objectId: '7777777777',
+      className: 'Foo',
+      aRelation: relationJSON,
+    });
+    const o2 = o.clone();
+    expect(o2._getSaveJSON().aRelation).toEqual(relationJSON);
   });
 
   it('can detect dirty object children', () => {
@@ -1531,6 +1578,69 @@ describe('ParseObject', () => {
     jest.runAllTicks();
   });
 
+  it('can saveAll with batchSize', async (done) => {
+    const xhrs = [];
+    for (let i = 0; i < 2; i++) {
+      xhrs[i] = {
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn(),
+        status: 200,
+        readyState: 4
+      };
+    }
+    let current = 0;
+    RESTController._setXHR(function() { return xhrs[current++]; });
+    const objects = [];
+    for (let i = 0; i < 22; i++) {
+      objects[i] = new ParseObject('Person');
+    }
+    ParseObject.saveAll(objects, { batchSize: 20 }).then(() => {
+      expect(xhrs[0].open.mock.calls[0]).toEqual(
+        ['POST', 'https://api.parse.com/1/batch', true]
+      );
+      expect(xhrs[1].open.mock.calls[0]).toEqual(
+        ['POST', 'https://api.parse.com/1/batch', true]
+      );
+      done();
+    });
+    jest.runAllTicks();
+    await flushPromises();
+
+    xhrs[0].responseText = JSON.stringify([
+      { success: { objectId: 'pid0' } },
+      { success: { objectId: 'pid1' } },
+      { success: { objectId: 'pid2' } },
+      { success: { objectId: 'pid3' } },
+      { success: { objectId: 'pid4' } },
+      { success: { objectId: 'pid5' } },
+      { success: { objectId: 'pid6' } },
+      { success: { objectId: 'pid7' } },
+      { success: { objectId: 'pid8' } },
+      { success: { objectId: 'pid9' } },
+      { success: { objectId: 'pid10' } },
+      { success: { objectId: 'pid11' } },
+      { success: { objectId: 'pid12' } },
+      { success: { objectId: 'pid13' } },
+      { success: { objectId: 'pid14' } },
+      { success: { objectId: 'pid15' } },
+      { success: { objectId: 'pid16' } },
+      { success: { objectId: 'pid17' } },
+      { success: { objectId: 'pid18' } },
+      { success: { objectId: 'pid19' } },
+    ]);
+    xhrs[0].onreadystatechange();
+    jest.runAllTicks();
+    await flushPromises();
+
+    xhrs[1].responseText = JSON.stringify([
+      { success: { objectId: 'pid20' } },
+      { success: { objectId: 'pid21' } },
+    ]);
+    xhrs[1].onreadystatechange();
+    jest.runAllTicks();
+  });
+
   it('returns the first error when saving an array of objects', async (done) => {
     const xhrs = [];
     for (let i = 0; i < 2; i++) {
@@ -1710,6 +1820,81 @@ describe('ObjectController', () => {
     xhr.responseText = JSON.stringify({});
     xhr.readyState = 4;
     xhr.onreadystatechange();
+    jest.runAllTicks();
+    await result;
+  });
+
+  it('can destroy an array of objects with batchSize', async () => {
+    const objectController = CoreManager.getObjectController();
+    const xhrs = [];
+    for (let i = 0; i < 3; i++) {
+      xhrs[i] = {
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn()
+      };
+      xhrs[i].status = 200;
+      xhrs[i].responseText = JSON.stringify({});
+      xhrs[i].readyState = 4;
+    }
+    let current = 0;
+    RESTController._setXHR(function() { return xhrs[current++]; });
+    let objects = [];
+    for (let i = 0; i < 5; i++) {
+      objects[i] = new ParseObject('Person');
+      objects[i].id = 'pid' + i;
+    }
+    const result = objectController.destroy(objects, { batchSize: 20}).then(async () => {
+      expect(xhrs[0].open.mock.calls[0]).toEqual(
+        ['POST', 'https://api.parse.com/1/batch', true]
+      );
+      expect(JSON.parse(xhrs[0].send.mock.calls[0]).requests).toEqual([
+        {
+          method: 'DELETE',
+          path: '/1/classes/Person/pid0',
+          body: {}
+        }, {
+          method: 'DELETE',
+          path: '/1/classes/Person/pid1',
+          body: {}
+        }, {
+          method: 'DELETE',
+          path: '/1/classes/Person/pid2',
+          body: {}
+        }, {
+          method: 'DELETE',
+          path: '/1/classes/Person/pid3',
+          body: {}
+        }, {
+          method: 'DELETE',
+          path: '/1/classes/Person/pid4',
+          body: {}
+        }
+      ]);
+
+      objects = [];
+      for (let i = 0; i < 22; i++) {
+        objects[i] = new ParseObject('Person');
+        objects[i].id = 'pid' + i;
+      }
+      const destroy = objectController.destroy(objects, { batchSize: 20 });
+      jest.runAllTicks();
+      await flushPromises();
+      xhrs[1].onreadystatechange();
+      jest.runAllTicks();
+      await flushPromises();
+      expect(xhrs[1].open.mock.calls.length).toBe(1);
+      xhrs[2].onreadystatechange();
+      jest.runAllTicks();
+      return destroy;
+    }).then(() => {
+      expect(JSON.parse(xhrs[1].send.mock.calls[0]).requests.length).toBe(20);
+      expect(JSON.parse(xhrs[2].send.mock.calls[0]).requests.length).toBe(2);
+    });
+    jest.runAllTicks();
+    await flushPromises();
+
+    xhrs[0].onreadystatechange();
     jest.runAllTicks();
     await result;
   });
