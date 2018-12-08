@@ -612,7 +612,9 @@ class ParseObject {
       changes = key;
       options = value;
     } else if (typeof key === 'string') {
-      changes[key] = value;
+      if (this.get(key) !== value) {
+        changes[key] = value;
+      }
     } else {
       return this;
     }
