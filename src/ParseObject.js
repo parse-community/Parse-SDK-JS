@@ -53,6 +53,8 @@ type SaveParams = {
   body: AttributeMap;
 };
 
+const DEFAULT_BATCH_SIZE = 20;
+
 // Mapping of class names to constructors, so we can populate objects from the
 // server with appropriate subclasses of ParseObject
 var classMap = {};
@@ -224,10 +226,14 @@ class ParseObject {
     return stateController.getPendingOps(this._getStateIdentifier());
   }
 
-  _clearPendingOps() {
+  /**
+   * @param {Array<string>} [keysToClear] - if specified, only ops matching
+   * these fields will be cleared
+   */
+  _clearPendingOps(keysToClear?: Array<string>) {
     var pending = this._getPendingOps();
     var latest = pending[pending.length - 1];
-    var keys = Object.keys(latest);
+    var keys = keysToClear || Object.keys(latest);
     keys.forEach((key) => {
       delete latest[key];
     });
@@ -646,6 +652,10 @@ class ParseObject {
         !(changes[k] instanceof ParseACL)
       ) {
         newOps[k] = new SetOp(new ParseACL(changes[k]));
+      } else if (changes[k] instanceof ParseRelation) {
+        var relation = new ParseRelation(this, k);
+        relation.targetClassName = changes[k].targetClassName;
+        newOps[k] = new SetOp(relation);
       } else {
         newOps[k] = new SetOp(changes[k]);
       }
@@ -932,10 +942,22 @@ class ParseObject {
   }
 
   /**
-   * Clears any changes to this object made since the last call to save()
+   * Clears any (or specific) changes to this object made since the last call to save()
+   * @param {string} [keys] - specify which fields to revert
    */
-  revert(): void {
-    this._clearPendingOps();
+  revert(...keys: Array<string>): void {
+    let keysToRevert;
+    if(keys.length) {
+      keysToRevert = [];
+      for(const key of keys) {
+        if(typeof(key) === "string") {
+          keysToRevert.push(key);
+        } else {
+          throw new Error("Parse.Object#revert expects either no, or a list of string, arguments.");
+        }
+      }
+    }
+    this._clearPendingOps(keysToRevert);
   }
 
   /**
@@ -1410,6 +1432,7 @@ class ParseObject {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>batchSize: Number of objects to process per request
    * </ul>
    * @return {Promise} A promise that is fulfilled when the destroyAll
    *     completes.
@@ -1421,6 +1444,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('sessionToken')) {
       destroyOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
+      destroyOptions.batchSize = options.batchSize;
     }
     return CoreManager.getObjectController().destroy(
       list,
@@ -1449,6 +1475,7 @@ class ParseObject {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>batchSize: Number of objects to process per request
    * </ul>
    */
   static saveAll(list: Array<ParseObject>, options = {}) {
@@ -1458,6 +1485,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('sessionToken')) {
       saveOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
+      saveOptions.batchSize = options.batchSize;
     }
     return CoreManager.getObjectController().save(
       list,
@@ -1927,7 +1957,9 @@ var DefaultController = {
   },
 
   async destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
+    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
     const localDatastore = CoreManager.getLocalDatastore();
+
     var RESTController = CoreManager.getRESTController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
@@ -1939,7 +1971,7 @@ var DefaultController = {
           return;
         }
         batches[batches.length - 1].push(obj);
-        if (batches[batches.length - 1].length >= 20) {
+        if (batches[batches.length - 1].length >= batchSize) {
           batches.push([]);
         }
       });
@@ -2000,8 +2032,10 @@ var DefaultController = {
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
+    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
     const localDatastore = CoreManager.getLocalDatastore();
     const mapIdForPin = {};
+
     var RESTController = CoreManager.getRESTController();
     var stateController = CoreManager.getObjectStateController();
     if (Array.isArray(target)) {
@@ -2037,7 +2071,7 @@ var DefaultController = {
           var batch = [];
           var nextPending = [];
           pending.forEach((el) => {
-            if (batch.length < 20 && canBeSerialized(el)) {
+            if (batch.length < batchSize && canBeSerialized(el)) {
               batch.push(el);
             } else {
               nextPending.push(el);

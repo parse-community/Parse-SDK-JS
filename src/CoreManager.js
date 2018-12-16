@@ -215,7 +215,7 @@ module.exports = {
   },
 
   setConfigController(controller: ConfigController) {
-    requireMethods('ConfigController', ['current', 'get'], controller);
+    requireMethods('ConfigController', ['current', 'get', 'save'], controller);
     config['ConfigController'] = controller;
   },
 

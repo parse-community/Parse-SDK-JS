@@ -16,6 +16,7 @@ export type RequestOptions = {
   useMasterKey?: boolean;
   sessionToken?: string;
   installationId?: string;
+  batchSize?: number;
   include?: any;
 };
 
