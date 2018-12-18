@@ -6,17 +6,20 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
-
+/* global File */
 jest.autoMockOff();
 
 const ParseFile = require('../ParseFile').default;
 const CoreManager = require('../CoreManager');
 
 function generateSaveMock(prefix) {
-  return function(name) {
+  return function(name, payload, options) {
+    if (options && typeof options.progress === 'function') {
+      options.progress(0.5);
+    }
     return Promise.resolve({
       name: name,
-      url: prefix + name
+      url: prefix + name,
     });
   };
 }
@@ -182,6 +185,22 @@ describe('ParseFile', () => {
 
     expect(a.equals(b)).toBe(false);
     expect(b.equals(a)).toBe(false);
+  });
+
+  it('reports progress during save when source is a File', () => {
+    const file = new ParseFile('progress.txt', new File(["Parse"], "progress.txt"));
+
+    const options = {
+      progress: function(){}
+    };
+    jest.spyOn(options, 'progress');
+
+    return file.save(options).then(function(f) {
+      expect(options.progress).toHaveBeenCalledWith(0.5);
+      expect(f).toBe(file);
+      expect(f.name()).toBe('progress.txt');
+      expect(f.url()).toBe('http://files.parsetfss.com/a/progress.txt');
+    });
   });
 });
 

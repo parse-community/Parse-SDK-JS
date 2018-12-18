@@ -18,6 +18,7 @@ export type RequestOptions = {
   installationId?: string;
   batchSize?: number;
   include?: any;
+  progress?: any;
 };
 
 export type FullOptions = {
@@ -26,6 +27,7 @@ export type FullOptions = {
   useMasterKey?: boolean;
   sessionToken?: string;
   installationId?: string;
+  progress?: any;
 };
 
 var XHR = null;
@@ -42,7 +44,7 @@ if (typeof XDomainRequest !== 'undefined' &&
   useXDomainRequest = true;
 }
 
-function ajaxIE9(method: string, url: string, data: any) {
+function ajaxIE9(method: string, url: string, data: any, options?: FullOptions) {
   return new Promise((resolve, reject) => {
     var xdr = new XDomainRequest();
     xdr.onload = function() {
@@ -66,16 +68,20 @@ function ajaxIE9(method: string, url: string, data: any) {
       };
       reject(fakeResponse);
     };
-    xdr.onprogress = function() { };
+    xdr.onprogress = function() {
+      if(options && typeof options.progress === 'function') {
+        options.progress(xdr.responseText);
+      }
+    };
     xdr.open(method, url);
     xdr.send(data);
   });
 }
 
 const RESTController = {
-  ajax(method: string, url: string, data: any, headers?: any) {
+  ajax(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
     if (useXDomainRequest) {
-      return ajaxIE9(method, url, data, headers);
+      return ajaxIE9(method, url, data, headers, options);
     }
 
     var res, rej;
@@ -141,7 +147,28 @@ const RESTController = {
           ' (NodeJS ' + process.versions.node + ')';
       }
 
+      if(options && typeof options.progress === 'function') {
+        if (xhr.upload) {
+          xhr.upload.addEventListener('progress', (oEvent) => {
+            if (oEvent.lengthComputable) {
+              options.progress(oEvent.loaded / oEvent.total);
+            } else {
+              options.progress(null);
+            }
+          });
+        } else if (xhr.addEventListener) {
+          xhr.addEventListener('progress', (oEvent) => {
+            if (oEvent.lengthComputable) {
+              options.progress(oEvent.loaded / oEvent.total);
+            } else {
+              options.progress(null);
+            }
+          });
+        }
+      }
+
       xhr.open(method, url, true);
+
       for (var h in headers) {
         xhr.setRequestHeader(h, headers[h]);
       }
@@ -225,8 +252,7 @@ const RESTController = {
       }
 
       var payloadString = JSON.stringify(payload);
-
-      return RESTController.ajax(method, url, payloadString).then(({ response }) => {
+      return RESTController.ajax(method, url, payloadString, {}, options).then(({ response }) => {
         return response;
       });
     }).catch(function(response: { responseText: string }) {
