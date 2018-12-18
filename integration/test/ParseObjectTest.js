@@ -1455,4 +1455,37 @@ describe('Parse Object', () => {
       done();
     }
   });
+
+  it('can clone with relation', async (done) => {
+    const testObject = new TestObject();
+    const o = new TestObject();
+    await o.save();
+    await testObject.save();
+    let relation = o.relation('aRelation');
+    relation.add(testObject);
+    await o.save();
+
+    const o2 = o.clone();
+    assert.equal(
+      o.relation('aRelation').targetClassName,
+      o2.relation('aRelation').targetClassName
+    );
+    let relations = await o.relation('aRelation').query().find();
+    assert.equal(relations.length, 1);
+
+    relations = await o2.relation('aRelation').query().find();
+    assert.equal(relations.length, 0);
+
+    relation = o2.relation('aRelation');
+    relation.add(testObject);
+    await o2.save();
+
+    relations = await o.relation('aRelation').query().find();
+    assert.equal(relations.length, 1);
+
+    relations = await o2.relation('aRelation').query().find();
+    assert.equal(relations.length, 1);
+
+    done();
+  });
 });
