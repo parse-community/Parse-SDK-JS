@@ -161,7 +161,7 @@ class ParseFile {
    *  * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
-   *   <li>progress: Callback for upload progress
+   *   <li>progress: In Browser only, callback for upload progress
    * </ul>
    * @return {Promise} Promise that is resolved when the save finishes.
    */
