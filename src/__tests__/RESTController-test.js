@@ -376,4 +376,31 @@ describe('RESTController', () => {
       'Cannot use the Master Key, it has not been provided.'
     );
   });
+
+  it('reports upload progress of the AJAX request when callback is provided', (done) => {
+    const xhr = mockXHR([{ status: 200, response: { success: true }}], {
+      addEventListener: (name, callback) => {
+        if(name === "progress") {
+          callback({
+            lengthComputable: true,
+            loaded: 5,
+            total: 10
+          });
+        }
+      }
+    });
+    RESTController._setXHR(xhr);
+
+    const options = {
+      progress: function(){}
+    };
+    jest.spyOn(options, 'progress');
+
+    RESTController.ajax('POST', 'files/upload.txt', {}, {}, options).then(({ response, status }) => {
+      expect(options.progress).toHaveBeenCalledWith(0.5);
+      expect(response).toEqual({ success: true });
+      expect(status).toBe(200);
+      done();
+    });
+  });
 });
