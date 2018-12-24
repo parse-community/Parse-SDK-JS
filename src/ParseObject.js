@@ -1168,6 +1168,93 @@ class ParseObject {
     );
   }
 
+  /**
+   * Asynchronously stores the object and every object it points to in the local datastore,
+   * recursively, using a default pin name: _default.
+   *
+   * If those other objects have not been fetched from Parse, they will not be stored.
+   * However, if they have changed data, all the changes will be retained.
+   *
+   * <pre>
+   * await object.pin();
+   * </pre>
+   *
+   * To retrieve object:
+   * <code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code>
+   */
+  pin(): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    return ParseObject.pinAllWithName(localDatastore.DEFAULT_PIN, [this]);
+  }
+
+  /**
+   * Asynchronously removes the object and every object it points to in the local datastore,
+   * recursively, using a default pin name: _default.
+   *
+   * <pre>
+   * await object.unPin();
+   * </pre>
+   */
+  unPin(): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    return ParseObject.unPinAllWithName(localDatastore.DEFAULT_PIN, [this]);
+  }
+
+  /**
+   * Asynchronously stores the objects and every object they point to in the local datastore, recursively.
+   *
+   * If those other objects have not been fetched from Parse, they will not be stored.
+   * However, if they have changed data, all the changes will be retained.
+   *
+   * <pre>
+   * await object.pinWithName(name);
+   * </pre>
+   *
+   * To retrieve object:
+   * <code>query.fromLocalDatastore()</code> or <code>query.fromPinWithName(name)</code>
+   *
+   * @param {String} name Name of Pin.
+   */
+  pinWithName(name: string): Promise {
+    return ParseObject.pinAllWithName(name, [this]);
+  }
+
+  /**
+   * Asynchronously removes the object and every object it points to in the local datastore, recursively.
+   *
+   * <pre>
+   * await object.unPinWithName(name);
+   * </pre>
+   */
+  unPinWithName(name: string): Promise {
+    return ParseObject.unPinAllWithName(name, [this]);
+  }
+
+  /**
+   * Asynchronously loads data from the local datastore into this object.
+   *
+   * <pre>
+   * await object.fetchFromLocalDatastore();
+   * </pre>
+   *
+   * You can create an unfetched pointer with <code>Parse.Object.createWithoutData()</code>
+   * and then call <code>fetchFromLocalDatastore()</code> on it.
+   */
+  async fetchFromLocalDatastore(): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (localDatastore.checkIfEnabled()) {
+      const objectKey = localDatastore.getKeyForObject(this);
+      const pinned = await localDatastore._serializeObject(objectKey);
+      if (!pinned) {
+        throw new Error('Cannot fetch an unsaved ParseObject');
+      }
+      const result = ParseObject.fromJSON(pinned);
+      this._finishFetch(result.toJSON());
+
+      return Promise.resolve(this);
+    }
+  }
+
   /** Static methods **/
 
   static _clearAllState() {
@@ -1642,10 +1729,133 @@ class ParseObject {
     singleInstance = false;
     CoreManager.setObjectStateController(UniqueInstanceStateController);
   }
+
+  /**
+   * Asynchronously stores the objects and every object they point to in the local datastore,
+   * recursively, using a default pin name: _default.
+   *
+   * If those other objects have not been fetched from Parse, they will not be stored.
+   * However, if they have changed data, all the changes will be retained.
+   *
+   * <pre>
+   * await Parse.Object.pinAll([...]);
+   * </pre>
+   *
+   * To retrieve object:
+   * <code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code>
+   *
+   * @param {Array} objects A list of <code>Parse.Object</code>.
+   * @static
+   */
+  static pinAll(objects: Array<ParseObject>): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (localDatastore.checkIfEnabled()) {
+      return ParseObject.pinAllWithName(localDatastore.DEFAULT_PIN, objects);
+    }
+  }
+
+  /**
+   * Asynchronously stores the objects and every object they point to in the local datastore, recursively.
+   *
+   * If those other objects have not been fetched from Parse, they will not be stored.
+   * However, if they have changed data, all the changes will be retained.
+   *
+   * <pre>
+   * await Parse.Object.pinAllWithName(name, [obj1, obj2, ...]);
+   * </pre>
+   *
+   * To retrieve object:
+   * <code>query.fromLocalDatastore()</code> or <code>query.fromPinWithName(name)</code>
+   *
+   * @param {String} name Name of Pin.
+   * @param {Array} objects A list of <code>Parse.Object</code>.
+   * @static
+   */
+  static async pinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (localDatastore.checkIfEnabled()) {
+      for (const object of objects) {
+        await localDatastore._handlePinWithName(name, object);
+      }
+    }
+  }
+
+  /**
+   * Asynchronously removes the objects and every object they point to in the local datastore,
+   * recursively, using a default pin name: _default.
+   *
+   * <pre>
+   * await Parse.Object.unPinAll([...]);
+   * </pre>
+   *
+   * @param {Array} objects A list of <code>Parse.Object</code>.
+   * @static
+   */
+  static unPinAll(objects: Array<ParseObject>): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (localDatastore.checkIfEnabled()) {
+      return ParseObject.unPinAllWithName(localDatastore.DEFAULT_PIN, objects);
+    }
+  }
+
+  /**
+   * Asynchronously removes the objects and every object they point to in the local datastore, recursively.
+   *
+   * <pre>
+   * await Parse.Object.unPinAllWithName(name, [obj1, obj2, ...]);
+   * </pre>
+   *
+   * @param {String} name Name of Pin.
+   * @param {Array} objects A list of <code>Parse.Object</code>.
+   * @static
+   */
+  static async unPinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (localDatastore.checkIfEnabled()) {
+      for (const object of objects) {
+        await localDatastore._handleUnPinWithName(name, object);
+      }
+    }
+  }
+
+  /**
+   * Asynchronously removes all objects in the local datastore using a default pin name: _default.
+   *
+   * <pre>
+   * await Parse.Object.unPinAllObjects();
+   * </pre>
+   *
+   * @static
+   */
+  static unPinAllObjects(): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (localDatastore.checkIfEnabled()) {
+      return localDatastore.unPinWithName(localDatastore.DEFAULT_PIN);
+    }
+  }
+
+  /**
+   * Asynchronously removes all objects with the specified pin name.
+   * Deletes the pin name also.
+   *
+   * <pre>
+   * await Parse.Object.unPinAllObjectsWithName(name);
+   * </pre>
+   *
+   * @param {String} name Name of Pin.
+   * @static
+   */
+  static unPinAllObjectsWithName(name: string): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (localDatastore.checkIfEnabled()) {
+      return localDatastore.unPinWithName(localDatastore.PIN_PREFIX + name);
+    }
+  }
 }
 
 var DefaultController = {
   fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
     if (Array.isArray(target)) {
       if (target.length < 1) {
         return Promise.resolve([]);
@@ -1689,7 +1899,7 @@ var DefaultController = {
         query.include(options.include);
       }
       query._limit = ids.length;
-      return query.find(options).then((objects) => {
+      return query.find(options).then(async (objects) => {
         var idMap = {};
         objects.forEach((o) => {
           idMap[o.id] = o;
@@ -1718,6 +1928,9 @@ var DefaultController = {
             }
           }
         }
+        for (const object of results) {
+          await localDatastore._updateObjectIfPinned(object);
+        }
         return Promise.resolve(results);
       });
     } else {
@@ -1731,19 +1944,21 @@ var DefaultController = {
         'classes/' + target.className + '/' + target._getId(),
         params,
         options
-      ).then((response) => {
+      ).then(async (response) => {
         if (target instanceof ParseObject) {
           target._clearPendingOps();
           target._clearServerData();
           target._finishFetch(response);
         }
+        await localDatastore._updateObjectIfPinned(target);
         return target;
       });
     }
   },
 
-  destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
+  async destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
     const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
+    const localDatastore = CoreManager.getLocalDatastore();
 
     var RESTController = CoreManager.getRESTController();
     if (Array.isArray(target)) {
@@ -1790,11 +2005,14 @@ var DefaultController = {
           });
         });
       });
-      return deleteCompleted.then(() => {
+      return deleteCompleted.then(async () => {
         if (errors.length) {
           var aggregate = new ParseError(ParseError.AGGREGATE_ERROR);
           aggregate.errors = errors;
           return Promise.reject(aggregate);
+        }
+        for (const object of target) {
+          await localDatastore._destroyObjectIfPinned(object);
         }
         return Promise.resolve(target);
       });
@@ -1804,15 +2022,19 @@ var DefaultController = {
         'classes/' + target.className + '/' + target._getId(),
         {},
         options
-      ).then(() => {
+      ).then(async () => {
+        await localDatastore._destroyObjectIfPinned(target);
         return Promise.resolve(target);
       });
     }
+    await localDatastore._destroyObjectIfPinned(target);
     return Promise.resolve(target);
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
     const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
+    const localDatastore = CoreManager.getLocalDatastore();
+    const mapIdForPin = {};
 
     var RESTController = CoreManager.getRESTController();
     var stateController = CoreManager.getObjectStateController();
@@ -1883,6 +2105,8 @@ var DefaultController = {
               ready.resolve();
               return batchReturned.then((responses, status) => {
                 if (responses[index].hasOwnProperty('success')) {
+                  const objectId = responses[index].success.objectId;
+                  mapIdForPin[objectId] = obj._localId;
                   obj._handleSaveResponse(responses[index].success, status);
                 } else {
                   if (!objectError && responses[index].hasOwnProperty('error')) {
@@ -1915,9 +2139,13 @@ var DefaultController = {
           });
 
           return when(batchTasks);
-        }).then(() => {
+        }).then(async () => {
           if (objectError) {
             return Promise.reject(objectError);
+          }
+          for (const object of target) {
+            await localDatastore._updateLocalIdForObject(mapIdForPin[object.id], object);
+            await localDatastore._updateObjectIfPinned(object);
           }
           return Promise.resolve(target);
         });
@@ -1925,6 +2153,7 @@ var DefaultController = {
 
     } else if (target instanceof ParseObject) {
       // copying target lets Flow guarantee the pointer isn't modified elsewhere
+      const localId = target._localId;
       var targetCopy = target;
       var task = function() {
         var params = targetCopy._getSaveParams();
@@ -1942,7 +2171,9 @@ var DefaultController = {
       }
 
       stateController.pushPendingState(target._getStateIdentifier());
-      return stateController.enqueueTask(target._getStateIdentifier(), task).then(() => {
+      return stateController.enqueueTask(target._getStateIdentifier(), task).then(async () => {
+        await localDatastore._updateLocalIdForObject(localId, target);
+        await localDatastore._updateObjectIfPinned(target);
         return target;
       }, (error) => {
         return Promise.reject(error);

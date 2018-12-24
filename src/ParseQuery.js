@@ -15,6 +15,7 @@ import { continueWhile } from './promiseUtils';
 import ParseError from './ParseError';
 import ParseGeoPoint from './ParseGeoPoint';
 import ParseObject from './ParseObject';
+import OfflineQuery from './OfflineQuery';
 
 import type { RequestOptions, FullOptions } from './RESTController';
 
@@ -132,6 +133,37 @@ function copyMissingDataWithMask(src, dest, mask, copyThisLevel){
   }
 }
 
+function handleOfflineSort(a, b, sorts) {
+  let order = sorts[0];
+  const operator = order.slice(0, 1);
+  const isDescending = operator === '-';
+  if (isDescending) {
+    order = order.substring(1);
+  }
+  if (order === '_created_at') {
+    order = 'createdAt';
+  }
+  if (order === '_updated_at') {
+    order = 'updatedAt';
+  }
+  if (!(/^[A-Za-z][0-9A-Za-z_]*$/).test(order) || order === 'password') {
+    throw new ParseError(ParseError.INVALID_KEY_NAME, `Invalid Key: ${order}`);
+  }
+  const field1 = a.get(order);
+  const field2 = b.get(order);
+
+  if (field1 < field2) {
+    return isDescending ? 1 : -1;
+  }
+  if (field1 > field2) {
+    return isDescending ? -1 : 1;
+  }
+  if (sorts.length > 1) {
+    const remainingSorts = sorts.slice(1);
+    return handleOfflineSort(a, b, remainingSorts);
+  }
+  return 0;
+}
 /**
  * Creates a new parse Parse.Query for the given Parse.Object subclass.
  *
@@ -186,6 +218,8 @@ class ParseQuery {
   _limit: number;
   _skip: number;
   _order: Array<string>;
+  _queriesLocalDatastore: boolean;
+  _localDatastorePinName: any;
   _extraOptions: { [key: string]: mixed };
 
   /**
@@ -217,6 +251,8 @@ class ParseQuery {
     this._include = [];
     this._limit = -1; // negative limit is not sent in the server request
     this._skip = 0;
+    this._queriesLocalDatastore = false;
+    this._localDatastorePinName = null;
     this._extraOptions = {};
   }
 
@@ -278,6 +314,53 @@ class ParseQuery {
    */
   _regexStartWith(string: string): String {
     return '^' + quote(string);
+  }
+
+  async _handleOfflineQuery(params: any) {
+    OfflineQuery.validateQuery(this);
+    const localDatastore = CoreManager.getLocalDatastore();
+    const objects = await localDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
+    let results = objects.map((json, index, arr) => {
+      const object = ParseObject.fromJSON(json, false);
+
+      if (!OfflineQuery.matchesQuery(this.className, object, arr, this)) {
+        return null;
+      }
+      return object;
+    }).filter((object) => object !== null);
+    if (params.keys) {
+      let keys = params.keys.split(',');
+      const alwaysSelectedKeys = ['className', 'objectId', 'createdAt', 'updatedAt', 'ACL'];
+      keys = keys.concat(alwaysSelectedKeys);
+      results = results.map((object) => {
+        const json = object._toFullJSON();
+        Object.keys(json).forEach((key) => {
+          if (!keys.includes(key)) {
+            delete json[key];
+          }
+        });
+        return ParseObject.fromJSON(json, false);
+      });
+    }
+    if (params.order) {
+      const sorts = params.order.split(',');
+      results.sort((a, b) => {
+        return handleOfflineSort(a, b, sorts);
+      });
+    }
+    if (params.skip) {
+      if (params.skip >= results.length) {
+        results = [];
+      } else {
+        results = results.splice(params.skip, results.length);
+      }
+    }
+    let limit = results.length;
+    if (params.limit !== 0 && params.limit < results.length) {
+      limit = params.limit;
+    }
+    results = results.splice(0, limit);
+    return results;
   }
 
   /**
@@ -453,6 +536,9 @@ class ParseQuery {
 
     const select = this._select;
 
+    if (this._queriesLocalDatastore) {
+      return this._handleOfflineQuery(this.toJSON());
+    }
     return controller.find(
       this.className,
       this.toJSON(),
@@ -626,6 +712,15 @@ class ParseQuery {
     params.limit = 1;
 
     var select = this._select;
+
+    if (this._queriesLocalDatastore) {
+      return this._handleOfflineQuery(params).then((objects) => {
+        if (!objects[0]) {
+          return undefined;
+        }
+        return objects[0];
+      });
+    }
 
     return controller.find(
       this.className,
@@ -1443,6 +1538,32 @@ class ParseQuery {
     const query = new ParseQuery(className);
     query._norQuery(queries);
     return query;
+  }
+
+  /**
+   * Changes the source of this query to all pinned objects.
+   */
+  fromLocalDatastore() {
+    this.fromPinWithName(null);
+  }
+
+  /**
+   * Changes the source of this query to the default group of pinned objects.
+   */
+  fromPin() {
+    const localDatastore = CoreManager.getLocalDatastore();
+    this.fromPinWithName(localDatastore.DEFAULT_PIN);
+  }
+
+  /**
+   * Changes the source of this query to a specific group of pinned objects.
+   */
+  fromPinWithName(name: string) {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (localDatastore.checkIfEnabled()) {
+      this._queriesLocalDatastore = true;
+      this._localDatastorePinName = name;
+    }
   }
 }
 

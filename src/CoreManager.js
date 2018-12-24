@@ -108,6 +108,13 @@ type StorageController = {
   removeItemAsync: (path: string) => Promise;
   clear: () => void;
 };
+type LocalDatastoreController = {
+  fromPinWithName: (name: string) => ?any;
+  pinWithName: (name: string, objects: any) => void;
+  unPinWithName: (name: string) => void;
+  getAllContents: () => ?any;
+  clear: () => void;
+};
 type UserController = {
   setCurrentUser: (user: ParseUser) => Promise;
   currentUser: () => ?ParseUser;
@@ -144,6 +151,7 @@ type Config = {
   SchemaController?: SchemaController,
   SessionController?: SessionController,
   StorageController?: StorageController,
+  LocalDatastoreController?: LocalDatastoreController,
   UserController?: UserController,
   HooksController?: HooksController,
 };
@@ -329,6 +337,23 @@ module.exports = {
       ], controller);
     }
     config['StorageController'] = controller;
+  },
+
+  setLocalDatastoreController(controller: LocalDatastoreController) {
+    requireMethods('LocalDatastoreController', ['pinWithName', 'fromPinWithName', 'unPinWithName', 'getAllContents', 'clear'], controller);
+    config['LocalDatastoreController'] = controller;
+  },
+
+  getLocalDatastoreController(): LocalDatastoreController {
+    return config['LocalDatastoreController'];
+  },
+
+  setLocalDatastore(store: any) {
+    config['LocalDatastore'] = store;
+  },
+
+  getLocalDatastore() {
+    return config['LocalDatastore'];
   },
 
   getStorageController(): StorageController {
