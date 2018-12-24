@@ -11,7 +11,8 @@ jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../isRevocableSession');
-jest.dontMock('../ObjectStateMutations')
+jest.dontMock('../LocalDatastore');
+jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../parseDate');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
@@ -28,6 +29,7 @@ jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('./test_helpers/mockXHR');
 
 const CoreManager = require('../CoreManager');
+const LocalDatastore = require('../LocalDatastore');
 const ParseObject = require('../ParseObject').default;
 const ParseUser = require('../ParseUser').default;
 const Storage = require('../Storage');
@@ -39,6 +41,7 @@ CoreManager.set('JAVASCRIPT_KEY', 'B');
 describe('ParseUser', () => {
   beforeEach(() => {
     ParseObject.enableSingleInstance();
+    LocalDatastore._clear();
   });
 
   it('can be constructed with initial attributes', () => {

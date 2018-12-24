@@ -58,6 +58,16 @@ var Parse = {
    */
   setAsyncStorage(storage: any) {
     CoreManager.setAsyncStorage(storage);
+  },
+
+  /**
+   * Call this method to set your LocalDatastoreStorage engine
+   * If using React-Native use {@link Parse.setAsyncStorage Parse.setAsyncStorage()}
+   * @param {LocalDatastoreController} controller a data storage.
+   * @static
+   */
+  setLocalDatastoreController(controller: any) {
+    CoreManager.setLocalDatastoreController(controller);
   }
 };
 
@@ -143,6 +153,7 @@ Parse.File = require('./ParseFile').default;
 Parse.GeoPoint = require('./ParseGeoPoint').default;
 Parse.Polygon = require('./ParsePolygon').default;
 Parse.Installation = require('./ParseInstallation').default;
+Parse.LocalDatastore = require('./LocalDatastore');
 Parse.Object = require('./ParseObject').default;
 Parse.Op = {
   Set: ParseOp.SetOp,
@@ -180,7 +191,40 @@ Parse._encode = function(value, _, disallowObjects) {
 Parse._getInstallationId = function() {
   return CoreManager.getInstallationController().currentInstallationId();
 }
-
+/**
+ * Enable pinning in your application.
+ * This must be called before your application can use pinning.
+ *
+ * @static
+ */
+Parse.enableLocalDatastore = function() {
+  Parse.LocalDatastore.isEnabled = true;
+}
+/**
+ * Flag that indicates whether Local Datastore is enabled.
+ *
+ * @static
+ */
+Parse.isLocalDatastoreEnabled = function() {
+  return Parse.LocalDatastore.isEnabled;
+}
+/**
+ * Gets all contents from Local Datastore
+ *
+ * <pre>
+ * await Parse.dumpLocalDatastore();
+ * </pre>
+ *
+ * @static
+ */
+Parse.dumpLocalDatastore = function() {
+  if (!Parse.LocalDatastore.isEnabled) {
+    console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
+    return Promise.resolve({});
+  } else {
+    return Parse.LocalDatastore._getAllContents();
+  }
+}
 CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);
 
