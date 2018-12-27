@@ -111,13 +111,13 @@ class ParseRole extends ParseObject {
   }
 
   validate(attrs: AttributeMap, options?: mixed): ParseError | boolean {
-    var isInvalid = super.validate(attrs, options);
+    const isInvalid = super.validate(attrs, options);
     if (isInvalid) {
       return isInvalid;
     }
 
     if ('name' in attrs && attrs.name !== this.getName()) {
-      var newName = attrs.name;
+      const newName = attrs.name;
       if (this.id && this.id !== attrs.objectId) {
         // Check to see if the objectId being set matches this.id
         // This happens during a fetch -- the id is set before calling fetch

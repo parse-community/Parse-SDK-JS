@@ -9,7 +9,7 @@
  * @flow
  */
 
-var encoded = {
+const encoded = {
   '&': '&amp;',
   '<': '&lt;',
   '>': '&gt;',

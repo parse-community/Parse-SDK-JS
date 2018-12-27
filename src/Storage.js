@@ -11,14 +11,14 @@
 
 import CoreManager from './CoreManager';
 
-var Storage = {
+const Storage = {
   async(): boolean {
-    var controller = CoreManager.getStorageController();
+    const controller = CoreManager.getStorageController();
     return !!controller.async;
   },
 
   getItem(path: string): ?string {
-    var controller = CoreManager.getStorageController();
+    const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       throw new Error(
         'Synchronous storage is not supported by the current storage controller'
@@ -28,7 +28,7 @@ var Storage = {
   },
 
   getItemAsync(path: string): Promise {
-    var controller = CoreManager.getStorageController();
+    const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.getItemAsync(path);
     }
@@ -36,7 +36,7 @@ var Storage = {
   },
 
   setItem(path: string, value: string): void {
-    var controller = CoreManager.getStorageController();
+    const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       throw new Error(
         'Synchronous storage is not supported by the current storage controller'
@@ -46,7 +46,7 @@ var Storage = {
   },
 
   setItemAsync(path: string, value: string): Promise {
-    var controller = CoreManager.getStorageController();
+    const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.setItemAsync(path, value);
     }
@@ -54,7 +54,7 @@ var Storage = {
   },
 
   removeItem(path: string): void {
-    var controller = CoreManager.getStorageController();
+    const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       throw new Error(
         'Synchronous storage is not supported by the current storage controller'
@@ -64,7 +64,7 @@ var Storage = {
   },
 
   removeItemAsync(path: string): Promise {
-    var controller = CoreManager.getStorageController();
+    const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.removeItemAsync(path);
     }
@@ -85,7 +85,7 @@ var Storage = {
   },
 
   _clear() {
-    var controller = CoreManager.getStorageController();
+    const controller = CoreManager.getStorageController();
     if (controller.hasOwnProperty('clear')) {
       controller.clear();
     }

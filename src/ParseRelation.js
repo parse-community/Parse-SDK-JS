@@ -80,8 +80,8 @@ class ParseRelation {
       objects = [objects];
     }
 
-    var change = new RelationOp(objects, []);
-    var parent = this.parent;
+    const change = new RelationOp(objects, []);
+    const parent = this.parent;
     if (!parent) {
       throw new Error('Cannot add to a Relation without a parent');
     }
@@ -100,7 +100,7 @@ class ParseRelation {
       objects = [objects];
     }
 
-    var change = new RelationOp([], objects);
+    const change = new RelationOp([], objects);
     if (!this.parent) {
       throw new Error('Cannot remove from a Relation without a parent');
     }
@@ -127,8 +127,8 @@ class ParseRelation {
    * @return {Parse.Query}
    */
   query(): ParseQuery {
-    var query;
-    var parent = this.parent;
+    let query;
+    const parent = this.parent;
     if (!parent) {
       throw new Error('Cannot construct a query for a Relation without a parent');
     }
