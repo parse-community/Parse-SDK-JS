@@ -45,12 +45,12 @@ class ParseConfig {
    * @param {String} attr The name of an attribute.
    */
   escape(attr: string): string {
-    var html = this._escapedAttributes[attr];
+    const html = this._escapedAttributes[attr];
     if (html) {
       return html;
     }
-    var val = this.attributes[attr];
-    var escaped = '';
+    const val = this.attributes[attr];
+    let escaped = '';
     if (val != null) {
       escaped = escape(val.toString());
     }
@@ -99,9 +99,9 @@ class ParseConfig {
   }
 }
 
-var currentConfig = null;
+let currentConfig = null;
 
-var CURRENT_CONFIG_KEY = 'currentConfig';
+const CURRENT_CONFIG_KEY = 'currentConfig';
 
 function decodePayload(data) {
   try {
@@ -114,7 +114,7 @@ function decodePayload(data) {
   }
 }
 
-var DefaultController = {
+const DefaultController = {
   current() {
     if (currentConfig) {
       return currentConfig;
@@ -178,7 +178,7 @@ var DefaultController = {
   },
 
   save(attrs) {
-    var RESTController = CoreManager.getRESTController();
+    const RESTController = CoreManager.getRESTController();
     const encodedAttrs = {};
     for(const key in attrs){
       encodedAttrs[key] = encode(attrs[key])

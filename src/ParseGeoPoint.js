@@ -122,17 +122,17 @@ class ParseGeoPoint {
    * @return {Number}
    */
   radiansTo(point: ParseGeoPoint): number {
-    var d2r = Math.PI / 180.0;
-    var lat1rad = this.latitude * d2r;
-    var long1rad = this.longitude * d2r;
-    var lat2rad = point.latitude * d2r;
-    var long2rad = point.longitude * d2r;
-    var deltaLat = lat1rad - lat2rad;
-    var deltaLong = long1rad - long2rad;
-    var sinDeltaLatDiv2 = Math.sin(deltaLat / 2);
-    var sinDeltaLongDiv2 = Math.sin(deltaLong / 2);
+    const d2r = Math.PI / 180.0;
+    const lat1rad = this.latitude * d2r;
+    const long1rad = this.longitude * d2r;
+    const lat2rad = point.latitude * d2r;
+    const long2rad = point.longitude * d2r;
+    const deltaLat = lat1rad - lat2rad;
+    const deltaLong = long1rad - long2rad;
+    const sinDeltaLatDiv2 = Math.sin(deltaLat / 2);
+    const sinDeltaLongDiv2 = Math.sin(deltaLong / 2);
     // Square of half the straight line chord distance between both points.
-    var a = ((sinDeltaLatDiv2 * sinDeltaLatDiv2) +
+    let a = ((sinDeltaLatDiv2 * sinDeltaLatDiv2) +
              (Math.cos(lat1rad) * Math.cos(lat2rad) *
               sinDeltaLongDiv2 * sinDeltaLongDiv2));
     a = Math.min(1.0, a);

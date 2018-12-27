@@ -156,7 +156,7 @@ type Config = {
   HooksController?: HooksController,
 };
 
-var config: Config & { [key: string]: mixed } = {
+const config: Config & { [key: string]: mixed } = {
   // Defaults
   IS_NODE: (typeof process !== 'undefined' &&
             !!process.versions &&

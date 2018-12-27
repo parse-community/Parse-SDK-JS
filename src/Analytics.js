@@ -62,7 +62,7 @@ export function track(
     throw new TypeError('A name for the custom event must be provided');
   }
 
-  for (var key in dimensions) {
+  for (const key in dimensions) {
     if (typeof key !== 'string' || typeof dimensions[key] !== 'string') {
       throw new TypeError(
         'track() dimensions expects keys and values of type "string".'
@@ -74,10 +74,10 @@ export function track(
     .track(name, dimensions);
 }
 
-var DefaultController = {
+const DefaultController = {
   track(name, dimensions) {
-    var path = 'events/' + name;
-    var RESTController = CoreManager.getRESTController();
+    const path = 'events/' + name;
+    const RESTController = CoreManager.getRESTController();
     return RESTController.request('POST', path, { dimensions: dimensions });
   }
 };

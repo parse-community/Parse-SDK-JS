@@ -54,10 +54,10 @@ export function remove(hook) {
   return CoreManager.getHooksController().remove(hook);
 }
 
-var DefaultController = {
+const DefaultController = {
 
   get(type, functionName, triggerName) {
-    var url = "/hooks/" + type;
+    let url = "/hooks/" + type;
     if(functionName) {
       url += "/" + functionName;
       if (triggerName) {
@@ -68,7 +68,7 @@ var DefaultController = {
   },
 
   create(hook) {
-    var url;
+    let url;
     if (hook.functionName && hook.url) {
       url = "/hooks/functions";
     } else if (hook.className && hook.triggerName && hook.url) {
@@ -80,7 +80,7 @@ var DefaultController = {
   },
 
   remove(hook) {
-    var url;
+    let url;
     if (hook.functionName) {
       url = "/hooks/functions/" + hook.functionName;
       delete hook.functionName;
@@ -95,7 +95,7 @@ var DefaultController = {
   },
 
   update(hook) {
-    var url;
+    let url;
     if (hook.functionName && hook.url) {
       url = "/hooks/functions/" + hook.functionName;
       delete hook.functionName;
@@ -111,7 +111,7 @@ var DefaultController = {
 
   sendRequest(method, url, body) {
     return CoreManager.getRESTController().request(method, url, body, {useMasterKey: true}).then((res) => {
-      var decoded = decode(res);
+      const decoded = decode(res);
       if (decoded) {
         return Promise.resolve(decoded);
       }

@@ -31,7 +31,7 @@ const LocalDatastoreController = {
   },
 
   clear() {
-    for (var key in memMap) {
+    for (const key in memMap) {
       if (memMap.hasOwnProperty(key)) {
         delete memMap[key];
       }
