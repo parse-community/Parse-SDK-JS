@@ -221,6 +221,49 @@ describe('LiveQueryClient', () => {
     expect(isChecked).toBe(true);
   });
 
+  it('can handle WebSocket response with original', () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken'
+    });
+    // Add mock subscription
+    const subscription = new events.EventEmitter();
+    liveQueryClient.subscriptions.set(1, subscription);
+    const object = new ParseObject('Test');
+    const original = new ParseObject('Test');
+    object.set('key', 'value');
+    original.set('key', 'old');
+    const data = {
+      op: 'update',
+      clientId: 1,
+      requestId: 1,
+      object: object._toFullJSON(),
+      original: original._toFullJSON(),
+    };
+    const event = {
+      data: JSON.stringify(data)
+    }
+    // Register checked in advance
+    let isChecked = false;
+    subscription.on('update', (parseObject, parseOriginalObject) => {
+      isChecked = true;
+      expect(parseObject.get('key')).toEqual('value');
+      expect(parseObject.get('className')).toBeUndefined();
+      expect(parseObject.get('__type')).toBeUndefined();
+
+      expect(parseOriginalObject.get('key')).toEqual('old');
+      expect(parseOriginalObject.get('className')).toBeUndefined();
+      expect(parseOriginalObject.get('__type')).toBeUndefined();
+    });
+
+    liveQueryClient._handleWebSocketMessage(event);
+
+    expect(isChecked).toBe(true);
+  });
+
   it('can handle WebSocket close message', () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',

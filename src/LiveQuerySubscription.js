@@ -37,22 +37,22 @@ import CoreManager from './CoreManager';
  *
  * });</pre></p>
  *
- * <p>Update Event - When an existing ParseObject which fulfills the ParseQuery you subscribe
+ * <p>Update Event - When an existing ParseObject (original) which fulfills the ParseQuery you subscribe
  * is updated (The ParseObject fulfills the ParseQuery before and after changes),
  * you'll get this event. The object is the ParseObject which is updated.
  * Its content is the latest value of the ParseObject.
  *
  * <pre>
- * subscription.on('update', (object) => {
+ * subscription.on('update', (object, original) => {
  *
  * });</pre></p>
  *
- * <p>Enter Event - When an existing ParseObject's old value doesn't fulfill the ParseQuery
+ * <p>Enter Event - When an existing ParseObject's (original) old value doesn't fulfill the ParseQuery
  * but its new value fulfills the ParseQuery, you'll get this event. The object is the
  * ParseObject which enters the ParseQuery. Its content is the latest value of the ParseObject.
  *
  * <pre>
- * subscription.on('enter', (object) => {
+ * subscription.on('enter', (object, original) => {
  *
  * });</pre></p>
  *
