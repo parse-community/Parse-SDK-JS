@@ -42,6 +42,8 @@ import CoreManager from './CoreManager';
  * you'll get this event. The object is the ParseObject which is updated.
  * Its content is the latest value of the ParseObject.
  *
+ * Parse-Server 3.1.3+ Required for original object parameter
+ *
  * <pre>
  * subscription.on('update', (object, original) => {
  *
@@ -50,6 +52,8 @@ import CoreManager from './CoreManager';
  * <p>Enter Event - When an existing ParseObject's (original) old value doesn't fulfill the ParseQuery
  * but its new value fulfills the ParseQuery, you'll get this event. The object is the
  * ParseObject which enters the ParseQuery. Its content is the latest value of the ParseObject.
+ *
+ * Parse-Server 3.1.3+ Required for original object parameter
  *
  * <pre>
  * subscription.on('enter', (object, original) => {
