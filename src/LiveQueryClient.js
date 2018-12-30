@@ -396,7 +396,11 @@ class LiveQueryClient extends EventEmitter {
       if (!subscription) {
         break;
       }
-      subscription.emit(data.op, parseObject);
+      if (data.original) {
+        delete data.original.__type;
+        data.original = ParseObject.fromJSON(data.original, false);
+      }
+      subscription.emit(data.op, parseObject, data.original);
     }
     }
   }
