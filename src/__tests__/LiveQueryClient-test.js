@@ -264,6 +264,55 @@ describe('LiveQueryClient', () => {
     expect(isChecked).toBe(true);
   });
 
+  it('can handle WebSocket response unset pointer', async () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken'
+    });
+    // Add mock subscription
+    const subscription = new events.EventEmitter();
+    liveQueryClient.subscriptions.set(1, subscription);
+
+    const object = new ParseObject('Test');
+    const original = new ParseObject('Test');
+    const pointer = new ParseObject('PointerTest');
+    pointer.id = '1234';
+
+    object.set('pointer', pointer);
+    object.unset('pointer');
+    original.set('pointer', pointer);
+
+    const data = {
+      op: 'update',
+      clientId: 1,
+      requestId: 1,
+      object: object._toFullJSON(),
+      original: original._toFullJSON(),
+    };
+    expect(data.object.pointer.__op).toEqual('Delete');
+    const event = {
+      data: JSON.stringify(data)
+    }
+    let isChecked = false;
+    subscription.on('update', (parseObject, parseOriginalObject) => {
+      isChecked = true;
+      expect(parseObject.get('pointer')).toBeUndefined();
+      expect(parseObject.get('className')).toBeUndefined();
+      expect(parseObject.get('__type')).toBeUndefined();
+
+      expect(parseOriginalObject.get('pointer').toJSON()).toEqual(pointer.toJSON());
+      expect(parseOriginalObject.get('className')).toBeUndefined();
+      expect(parseOriginalObject.get('__type')).toBeUndefined();
+    });
+
+    liveQueryClient._handleWebSocketMessage(event);
+
+    expect(isChecked).toBe(true);
+  });
+
   it('can handle WebSocket close message', () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
