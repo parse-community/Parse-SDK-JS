@@ -264,7 +264,7 @@ describe('LiveQueryClient', () => {
     expect(isChecked).toBe(true);
   });
 
-  it('can handle WebSocket response unset pointer', async () => {
+  fit('can handle WebSocket response unset field', async () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
       serverURL: 'ws://test',
@@ -280,11 +280,7 @@ describe('LiveQueryClient', () => {
     const original = new ParseObject('Test');
     const pointer = new ParseObject('PointerTest');
     pointer.id = '1234';
-
-    object.set('pointer', pointer);
-    object.unset('pointer');
     original.set('pointer', pointer);
-
     const data = {
       op: 'update',
       clientId: 1,
@@ -292,20 +288,14 @@ describe('LiveQueryClient', () => {
       object: object._toFullJSON(),
       original: original._toFullJSON(),
     };
-    expect(data.object.pointer.__op).toEqual('Delete');
     const event = {
       data: JSON.stringify(data)
     }
     let isChecked = false;
     subscription.on('update', (parseObject, parseOriginalObject) => {
       isChecked = true;
-      expect(parseObject.get('pointer')).toBeUndefined();
-      expect(parseObject.get('className')).toBeUndefined();
-      expect(parseObject.get('__type')).toBeUndefined();
-
-      expect(parseOriginalObject.get('pointer').toJSON()).toEqual(pointer.toJSON());
-      expect(parseOriginalObject.get('className')).toBeUndefined();
-      expect(parseOriginalObject.get('__type')).toBeUndefined();
+      expect(parseObject.toJSON().pointer).toBeUndefined();
+      expect(parseOriginalObject.toJSON().pointer.objectId).toEqual(pointer.id);
     });
 
     liveQueryClient._handleWebSocketMessage(event);
