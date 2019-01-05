@@ -264,7 +264,7 @@ describe('LiveQueryClient', () => {
     expect(isChecked).toBe(true);
   });
 
-  fit('can handle WebSocket response unset field', async () => {
+  it('can handle WebSocket response unset field', async () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
       serverURL: 'ws://test',
