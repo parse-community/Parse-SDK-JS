@@ -389,17 +389,22 @@ class LiveQueryClient extends EventEmitter {
       break;
     default: {
       // create, update, enter, leave, delete cases
-
-      // Does not override / clear server data
-      delete data.object.__type;
-      const parseObject = ParseObject.fromJSON(data.object, false);
       if (!subscription) {
         break;
       }
       if (data.original) {
         delete data.original.__type;
+        // Check for removed fields
+        for (const field in data.original) {
+          if (!(field in data.object)) {
+            data.object[field] = undefined;
+          }
+        }
         data.original = ParseObject.fromJSON(data.original, false);
       }
+      delete data.object.__type;
+      const parseObject = ParseObject.fromJSON(data.object, false);
+
       subscription.emit(data.op, parseObject, data.original);
     }
     }
