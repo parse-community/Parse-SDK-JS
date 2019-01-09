@@ -691,6 +691,34 @@ class ParseUser extends ParseObject {
   }
 
   /**
+   * Sets new password for specified user that already requested password reset,
+   * using his token
+   *
+   * <p>Calls options.success or options.error on completion.</p>
+   *
+
+   * @param {String} username Username associated with the user that forgot
+   *     their password.
+   * @param {String} token Verification token for password reset
+   * @param {String} new_password New password, chosen by user
+   * @param {Object} options
+   * @static
+   * @returns {Promise}
+   */
+  static resetPasswordSetNew(username, token, new_password, options) {
+    options = options || {};
+    var requestOptions = {};
+    if (options.hasOwnProperty('useMasterKey')) {
+      requestOptions.useMasterKey = options.useMasterKey;
+    }
+
+    var controller = CoreManager.getUserController();
+    return controller.resetPasswordSetNew(
+      username, token, new_password
+    );
+  }
+
+    /**
    * Allow someone to define a custom User class without className
    * being rewritten to _User. The default behavior is to rewrite
    * User to _User for legacy reasons. This allows developers to
@@ -984,6 +1012,16 @@ const DefaultController = {
       'POST',
       'requestPasswordReset',
       { email: email },
+      options
+    );
+  },
+
+  resetPasswordSetNew(username: string, token: string, new_password: string, options: RequestOptions) {
+    var RESTController = CoreManager.getRESTController();
+    return RESTController.request(
+      'POST',
+      'resetPasswordSetNew',
+      {username: username, token: token, new_password: new_password},
       options
     );
   },

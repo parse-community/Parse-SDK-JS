@@ -124,6 +124,7 @@ type UserController = {
   become: (options: RequestOptions) => Promise;
   logOut: () => Promise;
   requestPasswordReset: (email: string, options: RequestOptions) => Promise;
+  resetPasswordSetNew: (username: string, token: string, new_password: string, options: RequestOptions) => Promise;
   updateUserOnDisk: (user: ParseUser) => Promise;
   upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => Promise;
   linkWith: (user: ParseUser, authData: AuthData) => Promise;
@@ -378,6 +379,7 @@ module.exports = {
       'become',
       'logOut',
       'requestPasswordReset',
+      'resetPasswordSetNew',
       'upgradeToRevocableSession',
       'linkWith',
     ], controller);
