@@ -707,18 +707,18 @@ class ParseUser extends ParseObject {
    */
   static resetPasswordSetNew(username, token, new_password, options) {
     options = options || {};
-    var requestOptions = {};
+    let requestOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       requestOptions.useMasterKey = options.useMasterKey;
     }
 
-    var controller = CoreManager.getUserController();
+    const controller = CoreManager.getUserController();
     return controller.resetPasswordSetNew(
       username, token, new_password
     );
   }
 
-    /**
+  /**
    * Allow someone to define a custom User class without className
    * being rewritten to _User. The default behavior is to rewrite
    * User to _User for legacy reasons. This allows developers to
@@ -1017,7 +1017,7 @@ const DefaultController = {
   },
 
   resetPasswordSetNew(username: string, token: string, new_password: string, options: RequestOptions) {
-    var RESTController = CoreManager.getRESTController();
+    const RESTController = CoreManager.getRESTController();
     return RESTController.request(
       'POST',
       'resetPasswordSetNew',
