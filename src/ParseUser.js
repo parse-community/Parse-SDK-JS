@@ -707,7 +707,7 @@ class ParseUser extends ParseObject {
    */
   static resetPasswordSetNew(username, token, new_password, options) {
     options = options || {};
-    let requestOptions = {};
+    const requestOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       requestOptions.useMasterKey = options.useMasterKey;
     }
