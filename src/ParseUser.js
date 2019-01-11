@@ -15,7 +15,6 @@ import ParseError from './ParseError';
 import ParseObject from './ParseObject';
 import ParseSession from './ParseSession';
 import Storage from './Storage';
-import AnonymousUtils from './AnonymousUtils';
 
 import type { AttributeMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
@@ -120,7 +119,6 @@ class ParseUser extends ParseObject {
   /**
    * Synchronizes auth data for a provider (e.g. puts the access token in the
    * right place to be used by the Facebook SDK).
-
    */
   _synchronizeAuthData(provider: string) {
     if (!this.isCurrent() || !provider) {
@@ -607,24 +605,6 @@ class ParseUser extends ParseObject {
   }
 
   /**
-   * Anonymous users can also be automatically created for you without requiring a network request,
-   * so that you can begin working with your user immediately when your application starts.
-   *
-   * When you enable automatic anonymous user creation at application startup,
-   * currentUser will always exist
-   * <pre>
-   * Parse.initialize(...);
-   * Parse.User.enableAutomaticUser();
-   * </pre>
-   *
-   * @static
-   */
-  static enableAutomaticUser() {
-    const controller = CoreManager.getUserController();
-    controller.automaticUsersEnabled = true;
-  }
-
-  /**
    * Logs in a user with a session token. On success, this saves the session
    * to disk, so you can retrieve the currently logged in user using
    * <code>current</code>.
@@ -799,8 +779,6 @@ class ParseUser extends ParseObject {
 ParseObject.registerSubclass('_User', ParseUser);
 
 const DefaultController = {
-  automaticUsersEnabled: false,
-
   updateUserOnDisk(user) {
     const path = Storage.generatePath(CURRENT_USER_KEY);
     const json = user.toJSON();
@@ -831,9 +809,6 @@ const DefaultController = {
       return currentUserCache;
     }
     if (currentUserCacheMatchesDisk) {
-      if (this.automaticUsersEnabled) {
-        return this._lazyLogInUser();
-      }
       return null;
     }
     if (Storage.async()) {
@@ -874,9 +849,6 @@ const DefaultController = {
       return Promise.resolve(currentUserCache)
     }
     if (currentUserCacheMatchesDisk) {
-      if (this.automaticUsersEnabled) {
-        return this._lazyLogInUser();
-      }
       return Promise.resolve(null);
     }
     const path = Storage.generatePath(CURRENT_USER_KEY);
@@ -886,9 +858,6 @@ const DefaultController = {
       currentUserCacheMatchesDisk = true;
       if (!userData) {
         currentUserCache = null;
-        if (this.automaticUsersEnabled) {
-          return this._lazyLogInUser();
-        }
         return Promise.resolve(null);
       }
       userData = JSON.parse(userData);
@@ -1055,14 +1024,7 @@ const DefaultController = {
       }
       return user;
     });
-  },
-
-  _lazyLogInUser() {
-    const user = AnonymousUtils._lazyLogIn();
-    currentUserCache = user;
-    currentUserCacheMatchesDisk = true;
-    return user;
-  },
+  }
 };
 
 CoreManager.setUserController(DefaultController);

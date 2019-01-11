@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+jest.dontMock('../AnonymousUtils');
 jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
@@ -34,9 +35,14 @@ const ParseObject = require('../ParseObject').default;
 const ParseUser = require('../ParseUser').default;
 const Storage = require('../Storage');
 const ParseError = require('../ParseError').default;
+const AnonymousUtils = require('../AnonymousUtils').default;
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
+
+function flushPromises() {
+  return new Promise(resolve => setImmediate(resolve));
+}
 
 describe('ParseUser', () => {
   beforeEach(() => {
@@ -673,6 +679,34 @@ describe('ParseUser', () => {
       expect(error.message).toBe('Another user is already linked to this facebook id.');
       done();
     });
+  });
+
+  fit('can sync anonymous user with current user', async () => {
+    const provider = AnonymousUtils._getAuthProvider();
+    jest.spyOn(provider, 'restoreAuthentication');
+
+    const object = new ParseUser();
+    object.set('authData', provider.authData);
+
+    jest.spyOn(
+      object,
+      'isCurrent'
+    )
+      .mockImplementationOnce(() => true);
+
+    const spy = jest.spyOn(
+      ParseUser,
+      'currentAsync'
+    )
+      .mockImplementationOnce(() => Promise.resolve(object));
+
+    ParseUser._registerAuthenticationProvider(provider);
+
+    await flushPromises();
+
+    expect(ParseUser.currentAsync).toHaveBeenCalledTimes(1);
+    expect(provider.restoreAuthentication).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
   });
 
   it('strip anonymity when we set username', () => {
