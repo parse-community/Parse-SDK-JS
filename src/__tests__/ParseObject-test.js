@@ -2596,6 +2596,22 @@ describe('ParseObject pin', () => {
     expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledWith('test_pin', object);
   });
 
+  it('can check if pinned', async () => {
+    const object = new ParseObject('Item');
+    object.id = '1234';
+    mockLocalDatastore
+      .fromPinWithName
+      .mockImplementationOnce(() => {
+        return { 'Item_1234': object._toFullJSON() }
+      })
+      .mockImplementationOnce(() => null);
+
+    let isPinned = await object.isPinned();
+    expect(isPinned).toEqual(true);
+    isPinned = await object.isPinned();
+    expect(isPinned).toEqual(false);
+  });
+
   it('can fetchFromLocalDatastore', async () => {
     const object = new ParseObject('Item');
     object.id = '123';
@@ -2661,6 +2677,7 @@ describe('ParseObject pin', () => {
     const obj = new ParseObject('Item');
     await obj.pin();
     await obj.unPin();
+    await obj.isPinned();
     await obj.pinWithName(name);
     await obj.unPinWithName(name);
     await obj.fetchFromLocalDatastore();
@@ -2672,7 +2689,7 @@ describe('ParseObject pin', () => {
     await ParseObject.unPinAllObjects();
     await ParseObject.unPinAllObjectsWithName(name);
 
-    expect(spy).toHaveBeenCalledTimes(11);
+    expect(spy).toHaveBeenCalledTimes(12);
     expect(spy).toHaveBeenCalledWith('Parse.enableLocalDatastore() must be called first');
     spy.mockRestore();
   });

@@ -1201,6 +1201,25 @@ class ParseObject {
   }
 
   /**
+   * Asynchronously returns if the object is pinned
+   *
+   * <pre>
+   * const isPinned = await object.isPinned();
+   * </pre>
+   */
+  async isPinned(): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (localDatastore.checkIfEnabled()) {
+      const objectKey = localDatastore.getKeyForObject(this);
+      const pin = await localDatastore.fromPinWithName(objectKey);
+      if (pin) {
+        return Promise.resolve(true);
+      }
+    }
+    return Promise.resolve(false);
+  }
+
+  /**
    * Asynchronously stores the objects and every object they point to in the local datastore, recursively.
    *
    * If those other objects have not been fetched from Parse, they will not be stored.
