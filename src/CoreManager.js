@@ -116,6 +116,7 @@ type LocalDatastoreController = {
   clear: () => void;
 };
 type UserController = {
+  automaticUsersEnabled: false,
   setCurrentUser: (user: ParseUser) => Promise;
   currentUser: () => ?ParseUser;
   currentUserAsync: () => Promise;
