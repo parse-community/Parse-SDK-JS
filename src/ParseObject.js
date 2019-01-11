@@ -1244,6 +1244,8 @@ class ParseObject {
    * <pre>
    * await object.unPinWithName(name);
    * </pre>
+   * 
+   * @param {String} name Name of Pin.
    */
   unPinWithName(name: string): Promise {
     return ParseObject.unPinAllWithName(name, [this]);
