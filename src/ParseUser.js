@@ -15,6 +15,7 @@ import ParseError from './ParseError';
 import ParseObject from './ParseObject';
 import ParseSession from './ParseSession';
 import Storage from './Storage';
+import AnonymousUtils from './AnonymousUtils';
 
 import type { AttributeMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
@@ -25,6 +26,7 @@ const CURRENT_USER_KEY = 'currentUser';
 let canUseCurrentUser = !CoreManager.get('IS_NODE');
 let currentUserCacheMatchesDisk = false;
 let currentUserCache = null;
+let autoUserEnabled = false;
 
 const authProviders = {};
 
@@ -279,7 +281,6 @@ class ParseUser extends ParseObject {
    * Calls set("username", username, options) and returns the result.
 
    * @param {String} username
-   * @param {Object} options
    * @return {Boolean}
    */
   setUsername(username: string) {
@@ -297,7 +298,6 @@ class ParseUser extends ParseObject {
    * Calls set("password", password, options) and returns the result.
 
    * @param {String} password
-   * @param {Object} options
    * @return {Boolean}
    */
   setPassword(password: string) {
@@ -775,6 +775,25 @@ class ParseUser extends ParseObject {
   static _setCurrentUserCache(user) {
     currentUserCache = user;
   }
+
+  /**
+   * Enables automatic creation of anonymous users. After calling this method,
+   * {@link #current()} will always have a value. The user will only be created on the server
+   * once the user has been saved, or once an object with a relation to that user or an ACL that
+   * refers to the user has been saved.
+   * <p/>
+   */
+  static enableAutomaticUser(): void {
+    autoUserEnabled = true;
+  }
+
+  static disableAutomaticUser(): void {
+    autoUserEnabled = false;
+  }
+
+  static isAutomaticUserEnabled(): boolean {
+    return autoUserEnabled;
+  }
 }
 
 ParseObject.registerSubclass('_User', ParseUser);
@@ -901,6 +920,23 @@ const DefaultController = {
           'Cannot sign up user with an empty password.'
         )
       );
+    }
+
+    if (user.id != null) {
+      // For anonymous users, there may be an objectId. Setting the
+      // userName will have removed the anonymous link and set the
+      // value in the authData object to JSONObject.NULL, so we can
+      // just treat it like a save operation.
+      const authData = user.get('authData');
+      if (!authData.hasOwnProperty(AnonymousUtils.AUTH_TYPE)
+        || authData[AnonymousUtils.AUTH_TYPE] != null) {
+        return Promise.reject(
+          new ParseError(
+            ParseError.OTHER_CAUSE,
+            'Cannot sign up a user that has already signed up.'
+          )
+        );
+      }
     }
 
     return user.save(attrs, options).then(() => {
