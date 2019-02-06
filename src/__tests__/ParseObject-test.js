@@ -650,6 +650,10 @@ describe('ParseObject', () => {
     expect(o.validate({
       noProblem: 'here'
     })).toBe(false);
+
+    expect(o.validate({
+      'dot.field': 'here'
+    })).toBe(false);
   });
 
   it('validates attributes on set()', () => {

@@ -910,7 +910,7 @@ class ParseObject {
       );
     }
     for (const key in attrs) {
-      if (!(/^[A-Za-z][0-9A-Za-z_]*$/).test(key)) {
+      if (!(/^[A-Za-z][0-9A-Za-z_.]*$/).test(key)) {
         return new ParseError(ParseError.INVALID_KEY_NAME);
       }
     }

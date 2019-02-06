@@ -229,6 +229,21 @@ describe('Parse Object', () => {
     });
   });
 
+  it('can set nested fields', async () => {
+    const obj = new TestObject();
+    obj.set('objectField', { number: 5 });
+    await obj.save();
+
+    obj.increment('objectField.number', 15);
+    await obj.save();
+
+    assert.equal(obj.get('objectField').number, 20);
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, 20);
+  });
+
   it('can set keys to null', (done) => {
     const obj = new TestObject();
     obj.set('foo', null);
