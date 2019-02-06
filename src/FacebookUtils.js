@@ -47,11 +47,6 @@ const provider = {
         (expiration.getTime() - new Date().getTime()) / 1000 :
         0;
 
-      const authResponse = {
-        userID: authData.id,
-        accessToken: authData.access_token,
-        expiresIn: expiresIn
-      };
       const newOptions = {};
       if (initOptions) {
         for (const key in initOptions) {
@@ -67,7 +62,7 @@ const provider = {
       // from a Parse User that logged in with username/password.
       const existingResponse = FB.getAuthResponse();
       if (existingResponse &&
-          existingResponse.userID !== authResponse.userID) {
+          existingResponse.userID !== authData.id) {
         FB.logout();
       }
 
