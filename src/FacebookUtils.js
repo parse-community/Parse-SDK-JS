@@ -58,8 +58,6 @@ const provider = {
           newOptions[key] = initOptions[key];
         }
       }
-      newOptions.authResponse = authResponse;
-
       // Suppress checks for login status from the browser.
       newOptions.status = false;
 
