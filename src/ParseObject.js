@@ -283,7 +283,20 @@ class ParseObject {
     const json = {};
     let attr;
     for (attr in dirtyObjects) {
-      json[attr] = new SetOp(dirtyObjects[attr]).toJSON();
+      let isNested = false;
+      for (const field in pending[0]) {
+        // Nested documents aren't dirty
+        if (field.includes('.')) {
+          const fieldName = field.split('.')[0];
+          if (fieldName === attr) {
+            isNested = true;
+            break;
+          }
+        }
+      }
+      if (!isNested) {
+        json[attr] = new SetOp(dirtyObjects[attr]).toJSON();
+      }
     }
     for (attr in pending[0]) {
       json[attr] = pending[0][attr].toJSON();
@@ -661,8 +674,18 @@ class ParseObject {
       }
     }
 
-    // Calculate new values
     const currentAttributes = this.attributes;
+
+    // Only set nested fields if exists
+    const serverData = this._getServerData();
+    if (typeof key === 'string' && key.includes('.')) {
+      const field = key.split('.')[0];
+      if (!serverData[field]) {
+        return this;
+      }
+    }
+
+    // Calculate new values
     const newValues = {};
     for (const attr in newOps) {
       if (newOps[attr] instanceof RelationOp) {
