@@ -229,7 +229,7 @@ describe('Parse Object', () => {
     });
   });
 
-  it('can set nested fields', async () => {
+  it('can increment nested fields', async () => {
     const obj = new TestObject();
     obj.set('objectField', { number: 5 });
     await obj.save();
@@ -242,6 +242,53 @@ describe('Parse Object', () => {
     const query = new Parse.Query(TestObject);
     const result = await query.get(obj.id);
     assert.equal(result.get('objectField').number, 20);
+  });
+
+  it('can increment nested fields without object', async () => {
+    const obj = new TestObject();
+    obj.set('hello', 'world');
+    await obj.save();
+
+    obj.increment('hello.dot', 15);
+    try  {
+      await obj.save();
+      assert.equal(false, true);
+    } catch(error) {
+      assert.equal(error.message, 'schema mismatch for TestObject.hello; expected String but got Object');
+    }
+  });
+
+  it('can set nested fields', async () => {
+    const obj = new TestObject({ objectField: { number: 5 } });
+    await obj.save();
+
+    assert.equal(obj.get('objectField').number, 5);
+
+    obj.set('objectField.number', 20);
+
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, 20);
+  });
+
+  it('can unset nested fields', async () => {
+    const obj = new TestObject({
+      objectField: {
+        number: 5,
+        string: 'hello',
+      }
+    });
+    await obj.save();
+
+    obj.unset('objectField.number');
+
+    await obj.save();
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, undefined);
+    assert.equal(result.get('objectField').string, 'hello');
   });
 
   it('can set keys to null', (done) => {
