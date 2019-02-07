@@ -282,19 +282,22 @@ class ParseObject {
     const dirtyObjects = this._getDirtyObjectAttributes();
     const json = {};
     let attr;
+
     for (attr in dirtyObjects) {
-      let isNested = false;
-      for (const field in pending[0]) {
-        // Nested documents aren't dirty
-        if (field.includes('.')) {
-          const fieldName = field.split('.')[0];
-          if (fieldName === attr) {
-            isNested = true;
-            break;
+      let isDotNotation = false;
+      for (let i = 0; i < pending.length; i += 1) {
+        for (const field in pending[i]) {
+          // Dot notation operations are handled later
+          if (field.includes('.')) {
+            const fieldName = field.split('.')[0];
+            if (fieldName === attr) {
+              isDotNotation = true;
+              break;
+            }
           }
         }
       }
-      if (!isNested) {
+      if (!isDotNotation) {
         json[attr] = new SetOp(dirtyObjects[attr]).toJSON();
       }
     }
@@ -595,8 +598,8 @@ class ParseObject {
   /**
    * Sets a hash of model attributes on the object.
    *
-   * <p>You can call it with an object containing keys and values, or with one
-   * key and value.  For example:<pre>
+   * <p>You can call it with an object containing keys and values, with one
+   * key and value, or dot notation.  For example:<pre>
    *   gameTurn.set({
    *     player: player1,
    *     diceRoll: 2
@@ -613,6 +616,8 @@ class ParseObject {
    *   });
    *
    *   game.set("finished", true);</pre></p>
+   *
+   *   game.set("player.score", 10);</pre></p>
    *
    * @param {String} key The key to set.
    * @param {} value The value to give it.

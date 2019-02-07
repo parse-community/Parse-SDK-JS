@@ -474,6 +474,45 @@ describe('ParseObject', () => {
     expect(o2.attributes).toEqual({ age: 41 });
   });
 
+  it('can set nested field', () => {
+    const o = new ParseObject('Person');
+    o._finishFetch({
+      objectId: 'setNested',
+      objectField: {
+        number: 5
+      },
+      otherField: {},
+    });
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 5 },
+      otherField: {},
+    });
+    o.set('otherField', { hello: 'world' });
+    o.set('objectField.number', 20);
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 20 },
+      otherField: { hello: 'world' },
+    });
+    expect(o.op('objectField.number') instanceof SetOp).toBe(true);
+    expect(o.dirtyKeys()).toEqual(['otherField', 'objectField.number', 'objectField']);
+    expect(o._getSaveJSON()).toEqual({
+      'objectField.number': 20,
+      otherField: { hello: 'world' },
+    });
+  });
+
+  it('ignore set nested field on new object', () => {
+    const o = new ParseObject('Person');
+    o.set('objectField.number', 20);
+
+    expect(o.attributes).toEqual({});
+    expect(o.op('objectField.number') instanceof SetOp).toBe(false);
+    expect(o.dirtyKeys()).toEqual([]);
+    expect(o._getSaveJSON()).toEqual({});
+  });
+
   it('can add elements to an array field', () => {
     const o = new ParseObject('Schedule');
     o.add('available', 'Monday');

@@ -310,6 +310,19 @@ describe('Parse Object', () => {
     assert.equal(result.get('objectField').number, 20);
   });
 
+  it('can set non existing fields', async () => {
+    const obj = new TestObject();
+    obj.set('objectField', { number: 5 });
+    await obj.save();
+
+    obj.set('objectField.unknown', 20);
+    await obj.save();
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, 5);
+    assert.equal(result.get('objectField').unknown, 20);
+  });
+
   it('ignore set nested fields on new object', async () => {
     const obj = new TestObject();
     obj.set('objectField.number', 5);
@@ -375,6 +388,20 @@ describe('Parse Object', () => {
     const result = await query.get(obj.id);
     assert.equal(result.get('objectField').foo.bar, undefined);
     assert.equal(result.get('objectField').string, 'hello');
+  });
+
+  it('can unset non existing fields', async () => {
+    const obj = new TestObject();
+    obj.set('objectField', { number: 5 });
+    await obj.save();
+
+    obj.unset('objectField.unknown');
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, 5);
+    assert.equal(result.get('objectField').unknown, undefined);
   });
 
   it('can set keys to null', (done) => {
