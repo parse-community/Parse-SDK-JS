@@ -287,6 +287,45 @@ describe('ParseUser', () => {
     });
   });
 
+  it('can hydrate a user with sessionToken in server environment', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    const user = await ParseUser.hydrate({
+      objectId: 'uid3',
+      username: 'username',
+      sessionToken: '123abc',
+    });
+    expect(user.id).toBe('uid3');
+    expect(user.isCurrent()).toBe(true);
+    expect(user.existed()).toBe(true);
+  });
+
+  it('can hydrate a user with sessionToken in non server environment', async () => {
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    const user = await ParseUser.hydrate({
+      objectId: 'uid3',
+      username: 'username',
+      sessionToken: '123abc',
+    });
+    expect(user.id).toBe('uid3');
+    expect(user.isCurrent()).toBe(false);
+    expect(user.existed()).toBe(true);
+  });
+
+  it('can hydrate a user without sessionToken', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    await ParseUser.logOut();
+    const user = await ParseUser.hydrate({
+      objectId: 'uid3',
+      username: 'username',
+    });
+    expect(user.id).toBe('uid3');
+    expect(user.isCurrent()).toBe(false);
+    expect(user.existed()).toBe(true);
+  });
+
   it('can send a password reset request', () => {
     CoreManager.setRESTController({
       request(method, path, body) {
