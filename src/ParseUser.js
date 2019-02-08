@@ -648,7 +648,7 @@ class ParseUser extends ParseObject {
    * @return {Promise} A promise that is fulfilled with the user when
    *     the login completes.
    */
-  static hydrate(userJSON) {
+  static hydrate(userJSON: AttributeMap) {
     const controller = CoreManager.getUserController();
     return controller.hydrate(userJSON);
   }
@@ -969,7 +969,7 @@ const DefaultController = {
     });
   },
 
-  hydrate(userJSON) {
+  hydrate(userJSON: AttributeMap) {
     const user = new ParseUser();
     user._finishFetch(userJSON);
     user._setExisted(true);
