@@ -122,6 +122,7 @@ type UserController = {
   signUp: (user: ParseUser, attrs: AttributeMap, options: RequestOptions) => Promise;
   logIn: (user: ParseUser, options: RequestOptions) => Promise;
   become: (options: RequestOptions) => Promise;
+  hydrate: (userJSON: AttributeMap) => Promise;
   logOut: () => Promise;
   requestPasswordReset: (email: string, options: RequestOptions) => Promise;
   updateUserOnDisk: (user: ParseUser) => Promise;
