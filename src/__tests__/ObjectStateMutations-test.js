@@ -119,6 +119,22 @@ describe('ObjectStateMutations', () => {
     expect(attributes.likes.key).toBe('likes');
   });
 
+  it('can estimate attributes for nested documents', () => {
+    const serverData = { objectField: { counter: 10 } };
+    let pendingOps = [{ 'objectField.counter': new ParseOps.IncrementOp(2) }];
+    expect(ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId')).toEqual({
+      objectField: {
+        counter: 12
+      },
+    });
+    pendingOps = [{ 'objectField.counter': new ParseOps.SetOp(20) }];
+    expect(ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId')).toEqual({
+      objectField: {
+        counter: 20
+      },
+    });
+  });
+
   it('can commit changes from the server', () => {
     const serverData = {};
     const objectCache = {};
