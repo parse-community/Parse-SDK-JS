@@ -377,23 +377,22 @@ describe('RESTController', () => {
     );
   });
 
-  it('sends auth header when the auth type and token flags are set', () => {
+  it('sends auth header when the auth type and token flags are set', async () => {
     CoreManager.set('SERVER_AUTH_TYPE', 'Bearer');
     CoreManager.set('SERVER_AUTH_TOKEN', 'some_random_token');
-    var credentialsHeader = function(header){ return "Authorization" === header[0] }
-    var xhr = {
-      setRequestHeader: jest.genMockFn(),
-      open: jest.genMockFn(),
-      send: jest.genMockFn()
+    const credentialsHeader = (header) => "Authorization" === header[0];
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
     RESTController.request('GET', 'classes/MyObject', {}, {});
-    jest.runAllTicks();
+    await flushPromises();
     expect(xhr.setRequestHeader.mock.calls.filter(credentialsHeader)).toEqual(
-        [["Authorization", "Bearer some_random_token"]]
+      [["Authorization", "Bearer some_random_token"]]
     );
-
-    CoreManager.set('SERVER_AUTH_TYPE', null); // Clean up
+    CoreManager.set('SERVER_AUTH_TYPE', null);
     CoreManager.set('SERVER_AUTH_TOKEN', null);
   });
 

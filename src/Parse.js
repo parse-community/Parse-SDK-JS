@@ -128,7 +128,7 @@ Object.defineProperty(Parse, 'serverURL', {
   }
 });
 
-/** 
+/**
  * @member Parse.serverAuthToken
  * @type string
  * @static
@@ -142,7 +142,7 @@ Object.defineProperty(Parse, 'serverAuthToken', {
   }
 });
 
-/** 
+/**
  * @member Parse.serverAuthType
  * @type string
  * @static
@@ -156,12 +156,11 @@ Object.defineProperty(Parse, 'serverAuthType', {
   }
 });
 
-/** 
+/**
  * @member Parse.liveQueryServerURL
  * @type string
  * @static
  */
-
 Object.defineProperty(Parse, 'liveQueryServerURL', {
   get() {
     return CoreManager.get('LIVEQUERY_SERVER_URL');
