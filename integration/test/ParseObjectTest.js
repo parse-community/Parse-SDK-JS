@@ -1663,4 +1663,103 @@ describe('Parse Object', () => {
 
     done();
   });
+
+  it('can subscribe on save', async (done) => {
+    const object = new TestObject({ test: 'test' });
+    await object.save();
+    const subscription = object.subscribe();
+    subscription.on('update', (updated) => {
+      assert.equal(object.id, updated.id);
+      done();
+    });
+    await object.save();
+  });
+
+  it('can subscribe on set', async (done) => {
+    const object = new TestObject({ test: 'test' });
+    await object.save();
+    const subscription = object.subscribe();
+    subscription.on('update', (updated) => {
+      assert.equal(updated.get('foo'), 'bar');
+      done();
+    });
+    object.set('foo', 'bar');
+  });
+
+  it('can subscribe on delete', async (done) => {
+    const object = new TestObject({ test: 'test' });
+    await object.save();
+    const subscription = object.subscribe();
+    let count = 0;
+    subscription.on('delete', () => {
+      count++;
+    });
+    subscription.on('close', () => {
+      count++;
+    });
+    await object.destroy();
+    assert.equal(count, 2);
+    done();
+  });
+
+  it('can subscribe new objects', async (done) => {
+    const object = new TestObject({ test: 'test' });
+    const subscription = object.subscribe();
+    subscription.on('update', (updated) => {
+      assert.equal(object.id, updated.id);
+      done();
+    });
+    await object.save();
+  });
+
+  it('can subscribe multiple objects', async (done) => {
+    const obj1 = new TestObject();
+    const obj2 = new TestObject();
+    const obj3 = new TestObject();
+    const subscription1 = obj1.subscribe();
+    const subscription2 = obj2.subscribe();
+    const subscription3 = obj3.subscribe();
+    subscription1.on('update', (updated) => {
+      assert.equal(obj1.id, updated.id);
+    });
+    subscription2.on('update', (updated) => {
+      assert.equal(obj2.id, updated.id);
+    });
+    subscription3.on('update', (updated) => {
+      assert.equal(obj3.id, updated.id);
+    });
+    await Parse.Object.saveAll([obj1, obj2, obj3]);
+    done();
+  });
+
+  it('can unsubscribe object', async (done) => {
+    const object = new TestObject();
+    const subscription = object.subscribe();
+    subscription.on('close', () => {
+      done();
+    });
+    object.unsubscribe();
+  });
+
+  it('can unsubscribe multiple objects', async (done) => {
+    const obj1 = new TestObject();
+    const obj2 = new TestObject();
+    const obj3 = new TestObject();
+    const subscription1 = obj1.subscribe();
+    const subscription2 = obj2.subscribe();
+    const subscription3 = obj3.subscribe();
+    let count = 0;
+    subscription1.on('close', () => {
+      count++;
+    });
+    subscription2.on('close', () => {
+      count++;
+    });
+    subscription3.on('close', () => {
+      count++;
+    });
+    Parse.Object.clearSubscriptions();
+    assert.equal(count, 3);
+    done();
+  });
 });

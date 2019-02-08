@@ -19,6 +19,7 @@ import parseDate from './parseDate';
 import ParseError from './ParseError';
 import ParseFile from './ParseFile';
 import { when, continueWhile } from './promiseUtils';
+import EventEmitter from './EventEmitter';
 
 import {
   opFromJSON,
@@ -54,6 +55,13 @@ type SaveParams = {
 };
 
 const DEFAULT_BATCH_SIZE = 20;
+
+// The event the ParseObject subscription should emit
+const SUBSCRIPTION_EMITTER_TYPES = {
+  UPDATE: 'update',
+  DELETE: 'delete',
+  CLOSE: 'close',
+};
 
 // Mapping of class names to constructors, so we can populate objects from the
 // server with appropriate subclasses of ParseObject
@@ -362,6 +370,7 @@ class ParseObject {
 
   _migrateId(serverId: string) {
     if (this._localId && serverId) {
+      CoreManager.getObjectController().updateSubscription(this._localId, serverId);
       if (singleInstance) {
         const stateController = CoreManager.getObjectStateController();
         const oldState = stateController.removeState(this._getStateIdentifier());
@@ -1879,9 +1888,87 @@ class ParseObject {
       return localDatastore.unPinWithName(localDatastore.PIN_PREFIX + name);
     }
   }
+
+  static clearSubscriptions() {
+    return CoreManager.getObjectController().clearSubscriptions();
+  }
+
+  subscribe() {
+    return CoreManager.getObjectController().subscribe(this);
+  }
+
+  unsubscribe() {
+    return CoreManager.getObjectController().unsubscribe(this);
+  }
+
+  dispatch(type: string) {
+    return CoreManager.getObjectController().dispatch(type, this);
+  }
+}
+
+/** Object Tracking **/
+
+const save = ParseObject.prototype.save;
+const set = ParseObject.prototype.set;
+const destroy = ParseObject.prototype.destroy;
+
+ParseObject.prototype.save = async function(...args) {
+  const result = await save.apply(this, args);
+  this.dispatch(SUBSCRIPTION_EMITTER_TYPES.UPDATE);
+  return result;
+}
+
+ParseObject.prototype.set = function(...args) {
+  const result = set.apply(this, args);
+  this.dispatch(SUBSCRIPTION_EMITTER_TYPES.UPDATE);
+  return result;
+}
+
+ParseObject.prototype.destroy = async function(...args) {
+  const result = await destroy.apply(this, args);
+  this.dispatch(SUBSCRIPTION_EMITTER_TYPES.DELETE);
+  this.unsubscribe();
+  return result;
 }
 
 const DefaultController = {
+  subscriptions: new Map(),
+  subscribe(target: ParseObject) {
+    const subscription = new EventEmitter();
+    this.subscriptions.set(target._getId(), subscription);
+    return subscription;
+  },
+
+  unsubscribe(target: ParseObject) {
+    const subscription = this.subscriptions.get(target._getId());
+    if (subscription) {
+      subscription.emit(SUBSCRIPTION_EMITTER_TYPES.CLOSE);
+      this.subscriptions.delete(target._getId());
+    }
+  },
+
+  updateSubscription(localId, serverId) {
+    const subscription = this.subscriptions.get(localId);
+    if (subscription) {
+      this.subscriptions.delete(localId);
+      this.subscriptions.set(serverId, subscription);
+    }
+  },
+
+  clearSubscriptions() {
+    for (const subscription of this.subscriptions.values()) {
+      subscription.emit(SUBSCRIPTION_EMITTER_TYPES.CLOSE);
+    }
+    this.subscriptions.clear();
+  },
+
+  dispatch(type: string, target: ParseObject) {
+    const subscription = this.subscriptions.get(target._getId());
+    if (subscription) {
+      subscription.emit(type, target);
+    }
+  },
+
   fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): Promise {
     const localDatastore = CoreManager.getLocalDatastore();
     if (Array.isArray(target)) {
