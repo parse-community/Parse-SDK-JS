@@ -1,8 +1,6 @@
 import CoreManager from './CoreManager';
 import decode from './decode';
-import encode from './encode';
 import ParseError from './ParseError';
-import ParsePromise from './ParsePromise';
 
 export function getFunctions() {
   return CoreManager.getHooksController().get("functions");
@@ -56,25 +54,25 @@ export function remove(hook) {
   return CoreManager.getHooksController().remove(hook);
 }
 
-var DefaultController = {
+const DefaultController = {
 
   get(type, functionName, triggerName) {
-    var url = "/hooks/"+type;
+    let url = "/hooks/" + type;
     if(functionName) {
-      url += "/"+functionName;
+      url += "/" + functionName;
       if (triggerName) {
-        url += "/"+triggerName;
+        url += "/" + triggerName;
       }
     }
     return this.sendRequest("GET", url);
   },
 
   create(hook) {
-    var url;
+    let url;
     if (hook.functionName && hook.url) {
-        url = "/hooks/functions";
+      url = "/hooks/functions";
     } else if (hook.className && hook.triggerName && hook.url) {
-        url = "/hooks/triggers";
+      url = "/hooks/triggers";
     } else {
       return Promise.reject({error: 'invalid hook declaration', code: 143});
     }
@@ -82,14 +80,14 @@ var DefaultController = {
   },
 
   remove(hook) {
-    var url;
+    let url;
     if (hook.functionName) {
-        url = "/hooks/functions/"+hook.functionName;
-        delete hook.functionName;
+      url = "/hooks/functions/" + hook.functionName;
+      delete hook.functionName;
     } else if (hook.className && hook.triggerName) {
-        url = "/hooks/triggers/"+hook.className+"/"+hook.triggerName;
-        delete hook.className;
-        delete hook.triggerName;
+      url = "/hooks/triggers/" + hook.className + "/" + hook.triggerName;
+      delete hook.className;
+      delete hook.triggerName;
     } else {
       return Promise.reject({error: 'invalid hook declaration', code: 143});
     }
@@ -97,14 +95,14 @@ var DefaultController = {
   },
 
   update(hook) {
-    var url;
+    let url;
     if (hook.functionName && hook.url) {
-        url = "/hooks/functions/"+hook.functionName;
-        delete hook.functionName;
+      url = "/hooks/functions/" + hook.functionName;
+      delete hook.functionName;
     } else if (hook.className && hook.triggerName && hook.url) {
-        url = "/hooks/triggers/"+hook.className+"/"+hook.triggerName;
-        delete hook.className;
-        delete hook.triggerName;
+      url = "/hooks/triggers/" + hook.className + "/" + hook.triggerName;
+      delete hook.className;
+      delete hook.triggerName;
     } else {
       return Promise.reject({error: 'invalid hook declaration', code: 143});
     }
@@ -113,11 +111,11 @@ var DefaultController = {
 
   sendRequest(method, url, body) {
     return CoreManager.getRESTController().request(method, url, body, {useMasterKey: true}).then((res) => {
-      var decoded = decode(res);
+      const decoded = decode(res);
       if (decoded) {
-        return ParsePromise.as(decoded);
+        return Promise.resolve(decoded);
       }
-      return ParsePromise.error(
+      return Promise.reject(
         new ParseError(
           ParseError.INVALID_JSON,
           'The server returned an invalid response.'

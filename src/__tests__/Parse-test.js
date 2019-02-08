@@ -9,9 +9,10 @@
 
 jest.dontMock('../CoreManager');
 jest.dontMock('../Parse');
+jest.dontMock('../LocalDatastore');
 
-var CoreManager = require('../CoreManager');
-var Parse = require('../Parse');
+const CoreManager = require('../CoreManager');
+const Parse = require('../Parse');
 
 describe('Parse module', () => {
   it('can be initialized with keys', () => {
@@ -43,5 +44,58 @@ describe('Parse module', () => {
     Parse.masterKey = '789';
     expect(CoreManager.get('MASTER_KEY')).toBe('789');
     expect(Parse.masterKey).toBe('789');
+  });
+
+  it('can set LocalDatastoreController', () => {
+    const controller = {
+      fromPinWithName: function() {},
+      pinWithName: function() {},
+      unPinWithName: function() {},
+      getAllContents: function() {},
+      clear: function() {}
+    };
+    Parse.setLocalDatastoreController(controller);
+    expect(CoreManager.getLocalDatastoreController()).toBe(controller);
+  });
+
+  it('can set AsyncStorage', () => {
+    const controller = {
+      getItem: function() {},
+      setItem: function() {},
+      removeItem: function() {},
+      getItemAsync: function() {},
+      setItemAsync: function() {},
+      removeItemAsync: function() {},
+      clear: function() {},
+    };
+
+    Parse.setAsyncStorage(controller);
+    expect(CoreManager.getAsyncStorage()).toBe(controller);
+  });
+
+  it('can enable LocalDatastore', () => {
+    Parse.LocalDatastore.isEnabled = false;
+    Parse.enableLocalDatastore();
+    expect(Parse.LocalDatastore.isEnabled).toBe(true);
+    expect(Parse.isLocalDatastoreEnabled()).toBe(true);
+  });
+
+  it('can dump LocalDatastore', async () => {
+    Parse.LocalDatastore.isEnabled = false;
+    let LDS = await Parse.dumpLocalDatastore();
+    expect(LDS).toEqual({});
+    Parse.LocalDatastore.isEnabled = true;
+    const controller = {
+      fromPinWithName: function() {},
+      pinWithName: function() {},
+      unPinWithName: function() {},
+      getAllContents: function() {
+        return Promise.resolve({ key: 'value' });
+      },
+      clear: function() {}
+    };
+    Parse.setLocalDatastoreController(controller);
+    LDS = await Parse.dumpLocalDatastore();
+    expect(LDS).toEqual({ key: 'value' });
   });
 });

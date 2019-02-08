@@ -10,16 +10,15 @@
  */
 
 import CoreManager from './CoreManager';
-import ParsePromise from './ParsePromise';
 
-var Storage = {
+const Storage = {
   async(): boolean {
-    var controller = CoreManager.getStorageController();
+    const controller = CoreManager.getStorageController();
     return !!controller.async;
   },
 
   getItem(path: string): ?string {
-    var controller = CoreManager.getStorageController();
+    const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       throw new Error(
         'Synchronous storage is not supported by the current storage controller'
@@ -28,16 +27,16 @@ var Storage = {
     return controller.getItem(path);
   },
 
-  getItemAsync(path: string): ParsePromise {
-    var controller = CoreManager.getStorageController();
+  getItemAsync(path: string): Promise {
+    const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.getItemAsync(path);
     }
-    return ParsePromise.as(controller.getItem(path));
+    return Promise.resolve(controller.getItem(path));
   },
 
   setItem(path: string, value: string): void {
-    var controller = CoreManager.getStorageController();
+    const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       throw new Error(
         'Synchronous storage is not supported by the current storage controller'
@@ -46,16 +45,16 @@ var Storage = {
     return controller.setItem(path, value);
   },
 
-  setItemAsync(path: string, value: string): ParsePromise {
-    var controller = CoreManager.getStorageController();
+  setItemAsync(path: string, value: string): Promise {
+    const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.setItemAsync(path, value);
     }
-    return ParsePromise.as(controller.setItem(path, value));
+    return Promise.resolve(controller.setItem(path, value));
   },
 
   removeItem(path: string): void {
-    var controller = CoreManager.getStorageController();
+    const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       throw new Error(
         'Synchronous storage is not supported by the current storage controller'
@@ -64,12 +63,12 @@ var Storage = {
     return controller.removeItem(path);
   },
 
-  removeItemAsync(path: string): ParsePromise {
-    var controller = CoreManager.getStorageController();
+  removeItemAsync(path: string): Promise {
+    const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.removeItemAsync(path);
     }
-    return ParsePromise.as(controller.removeItem(path));
+    return Promise.resolve(controller.removeItem(path));
   },
 
   generatePath(path: string): string {
@@ -86,7 +85,7 @@ var Storage = {
   },
 
   _clear() {
-    var controller = CoreManager.getStorageController();
+    const controller = CoreManager.getStorageController();
     if (controller.hasOwnProperty('clear')) {
       controller.clear();
     }

@@ -14,13 +14,12 @@ import TaskQueue from './TaskQueue';
 
 import type { Op } from './ParseOp';
 import type ParseObject from './ParseObject';
-import type ParsePromise from './ParsePromise';
 import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
 
 let objectState = new WeakMap();
 
 export function getState(obj: ParseObject): ?State {
-  let classData = objectState.get(obj);
+  const classData = objectState.get(obj);
   return classData || null;
 }
 
@@ -44,7 +43,7 @@ export function initializeState(obj: ParseObject, initial?: State): State {
 }
 
 export function removeState(obj: ParseObject): ?State {
-  let state = getState(obj);
+  const state = getState(obj);
   if (state === null) {
     return null;
   }
@@ -53,7 +52,7 @@ export function removeState(obj: ParseObject): ?State {
 }
 
 export function getServerData(obj: ParseObject): AttributeMap {
-  let state = getState(obj);
+  const state = getState(obj);
   if (state) {
     return state.serverData;
   }
@@ -61,12 +60,12 @@ export function getServerData(obj: ParseObject): AttributeMap {
 }
 
 export function setServerData(obj: ParseObject, attributes: AttributeMap) {
-  let serverData = initializeState(obj).serverData;
+  const serverData = initializeState(obj).serverData;
   ObjectStateMutations.setServerData(serverData, attributes);
 }
 
 export function getPendingOps(obj: ParseObject): Array<OpsMap> {
-  let state = getState(obj);
+  const state = getState(obj);
   if (state) {
     return state.pendingOps;
   }
@@ -74,27 +73,27 @@ export function getPendingOps(obj: ParseObject): Array<OpsMap> {
 }
 
 export function setPendingOp(obj: ParseObject, attr: string, op: ?Op) {
-  let pendingOps = initializeState(obj).pendingOps;
+  const pendingOps = initializeState(obj).pendingOps;
   ObjectStateMutations.setPendingOp(pendingOps, attr, op);
 }
 
 export function pushPendingState(obj: ParseObject) {
-  let pendingOps = initializeState(obj).pendingOps;
+  const pendingOps = initializeState(obj).pendingOps;
   ObjectStateMutations.pushPendingState(pendingOps);
 }
 
 export function popPendingState(obj: ParseObject): OpsMap {
-  let pendingOps = initializeState(obj).pendingOps;
+  const pendingOps = initializeState(obj).pendingOps;
   return ObjectStateMutations.popPendingState(pendingOps);
 }
 
 export function mergeFirstPendingState(obj: ParseObject) {
-  let pendingOps = getPendingOps(obj);
+  const pendingOps = getPendingOps(obj);
   ObjectStateMutations.mergeFirstPendingState(pendingOps);
 }
 
 export function getObjectCache(obj: ParseObject): ObjectCache {
-  let state = getState(obj);
+  const state = getState(obj);
   if (state) {
     return state.objectCache;
   }
@@ -102,39 +101,39 @@ export function getObjectCache(obj: ParseObject): ObjectCache {
 }
 
 export function estimateAttribute(obj: ParseObject, attr: string): mixed {
-  let serverData = getServerData(obj);
-  let pendingOps = getPendingOps(obj);
+  const serverData = getServerData(obj);
+  const pendingOps = getPendingOps(obj);
   return ObjectStateMutations.estimateAttribute(serverData, pendingOps, obj.className, obj.id, attr);
 }
 
 export function estimateAttributes(obj: ParseObject): AttributeMap {
-  let serverData = getServerData(obj);
-  let pendingOps = getPendingOps(obj);
+  const serverData = getServerData(obj);
+  const pendingOps = getPendingOps(obj);
   return ObjectStateMutations.estimateAttributes(serverData, pendingOps, obj.className, obj.id);
 }
 
 export function commitServerChanges(obj: ParseObject, changes: AttributeMap) {
-  let state = initializeState(obj);
+  const state = initializeState(obj);
   ObjectStateMutations.commitServerChanges(state.serverData, state.objectCache, changes);
 }
 
-export function enqueueTask(obj: ParseObject, task: () => ParsePromise): ParsePromise {
-  let state = initializeState(obj);
+export function enqueueTask(obj: ParseObject, task: () => Promise): Promise {
+  const state = initializeState(obj);
   return state.tasks.enqueue(task);
 }
 
 export function duplicateState(source: ParseObject, dest: ParseObject): void {
-  let oldState = initializeState(source);
-  let newState = initializeState(dest);
-  for (let key in oldState.serverData) {
+  const oldState = initializeState(source);
+  const newState = initializeState(dest);
+  for (const key in oldState.serverData) {
     newState.serverData[key] = oldState.serverData[key];
   }
   for (let index = 0; index < oldState.pendingOps.length; index++) {
-    for (let key in oldState.pendingOps[index]) {
+    for (const key in oldState.pendingOps[index]) {
       newState.pendingOps[index][key] = oldState.pendingOps[index][key];
     }
   }
-  for (let key in oldState.objectCache) {
+  for (const key in oldState.objectCache) {
     newState.objectCache[key] = oldState.objectCache[key];
   }
   newState.existed = oldState.existed;

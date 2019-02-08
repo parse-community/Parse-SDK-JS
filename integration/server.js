@@ -1,10 +1,10 @@
-var express = require('express');
-var ParseServer = require('parse-server').ParseServer;
-var app = express();
+const express = require('express');
+const ParseServer = require('parse-server').ParseServer;
+const app = express();
 
 // Specify the connection string for your mongodb database
 // and the location to your Parse cloud code
-var api = new ParseServer({
+const api = new ParseServer({
   databaseURI: 'mongodb://localhost:27017/integration',
   appId: 'integration',
   masterKey: 'notsosecret',
@@ -23,6 +23,6 @@ app.get('/clear', (req, res) => {
   });
 });
 
-app.listen(1337, () => {
-  console.log('parse-server running on port 1337.');
-});
+module.exports = {
+  app
+};

@@ -13,7 +13,6 @@ jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseOp');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../ParseRelation');
 jest.dontMock('../TaskQueue');
 
@@ -29,7 +28,7 @@ const TaskQueue = require('../TaskQueue');
 
 describe('ObjectStateMutations', () => {
   it('can apply server data', () => {
-    let serverData = {};
+    const serverData = {};
     ObjectStateMutations.setServerData(serverData, { counter: 12 });
     expect(serverData).toEqual({ counter: 12 });
     ObjectStateMutations.setServerData(serverData, { counter: undefined });
@@ -38,7 +37,7 @@ describe('ObjectStateMutations', () => {
 
   it('can set a pending op', () => {
     let pendingOps = [{}];
-    let op = new ParseOps.IncrementOp(1);
+    const op = new ParseOps.IncrementOp(1);
     ObjectStateMutations.setPendingOp(pendingOps, 'counter', op);
     expect(pendingOps).toEqual([{ counter: op }]);
 
@@ -51,7 +50,7 @@ describe('ObjectStateMutations', () => {
   });
 
   it('can push a new pending state', () => {
-    let pendingOps = [{}];
+    const pendingOps = [{}];
     ObjectStateMutations.pushPendingState(pendingOps);
     expect(pendingOps).toEqual([{}, {}]);
 
@@ -65,7 +64,7 @@ describe('ObjectStateMutations', () => {
     expect(ObjectStateMutations.popPendingState(pendingOps)).toBe(first);
     expect(pendingOps).toEqual([{}]);
 
-    let op = new ParseOps.IncrementOp(1);
+    const op = new ParseOps.IncrementOp(1);
     pendingOps = [{ counter: op }, {}, {}];
     first = pendingOps[0];
     expect(ObjectStateMutations.popPendingState(pendingOps)).toBe(first);
@@ -83,8 +82,8 @@ describe('ObjectStateMutations', () => {
   });
 
   it('can estimate an attribute value', () => {
-    let serverData = { counter: 12 };
-    let pendingOps = [{ counter: new ParseOps.IncrementOp(2), name: new ParseOps.SetOp('foo') }];
+    const serverData = { counter: 12 };
+    const pendingOps = [{ counter: new ParseOps.IncrementOp(2), name: new ParseOps.SetOp('foo') }];
     expect(ObjectStateMutations.estimateAttribute(serverData, pendingOps, 'someClass', 'someId', 'counter')).toBe(14);
     expect(ObjectStateMutations.estimateAttribute(serverData, pendingOps, 'someClass', 'someId', 'name')).toBe('foo');
 
@@ -93,15 +92,15 @@ describe('ObjectStateMutations', () => {
     expect(ObjectStateMutations.estimateAttribute(serverData, pendingOps, 'someClass', 'someId', 'name')).toBe('override');
 
     pendingOps.push({ likes: new ParseOps.RelationOp([], []) });
-    let relation = ObjectStateMutations.estimateAttribute(serverData, pendingOps, 'someClass', 'someId', 'likes');
+    const relation = ObjectStateMutations.estimateAttribute(serverData, pendingOps, 'someClass', 'someId', 'likes');
     expect(relation.parent.id).toBe('someId');
     expect(relation.parent.className).toBe('someClass');
     expect(relation.key).toBe('likes');
   });
 
   it('can estimate all attributes', () => {
-    let serverData = { counter: 12 };
-    let pendingOps = [{ counter: new ParseOps.IncrementOp(2), name: new ParseOps.SetOp('foo') }];
+    const serverData = { counter: 12 };
+    const pendingOps = [{ counter: new ParseOps.IncrementOp(2), name: new ParseOps.SetOp('foo') }];
     expect(ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId')).toEqual({
       counter: 14,
       name: 'foo'
@@ -114,15 +113,31 @@ describe('ObjectStateMutations', () => {
     });
 
     pendingOps.push({ likes: new ParseOps.RelationOp([], []) });
-    let attributes = ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId');
+    const attributes = ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId');
     expect(attributes.likes.parent.id).toBe('someId');
     expect(attributes.likes.parent.className).toBe('someClass');
     expect(attributes.likes.key).toBe('likes');
   });
 
+  it('can estimate attributes for nested documents', () => {
+    const serverData = { objectField: { counter: 10 } };
+    let pendingOps = [{ 'objectField.counter': new ParseOps.IncrementOp(2) }];
+    expect(ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId')).toEqual({
+      objectField: {
+        counter: 12
+      },
+    });
+    pendingOps = [{ 'objectField.counter': new ParseOps.SetOp(20) }];
+    expect(ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId')).toEqual({
+      objectField: {
+        counter: 20
+      },
+    });
+  });
+
   it('can commit changes from the server', () => {
-    let serverData = {};
-    let objectCache = {};
+    const serverData = {};
+    const objectCache = {};
     ObjectStateMutations.commitServerChanges(serverData, objectCache, { name: 'foo', data: { count: 5 } });
     expect(serverData).toEqual({ name: 'foo', data: { count: 5 } });
     expect(objectCache).toEqual({ data: '{"count":5}' });

@@ -9,11 +9,11 @@
 
 jest.autoMockOff();
 
-var ParseGeoPoint = require('../ParseGeoPoint').default;
+const ParseGeoPoint = require('../ParseGeoPoint').default;
 
 describe('GeoPoint', () => {
   it('can be constructed from various inputs', () => {
-    var point = new ParseGeoPoint();
+    let point = new ParseGeoPoint();
     expect(point.latitude).toBe(0);
     expect(point.longitude).toBe(0);
 
@@ -30,14 +30,27 @@ describe('GeoPoint', () => {
     expect(point.longitude).toBe(88);
   });
 
-  it('throws when created with NaN values', () => {
-    expect(function() {
-      new ParseGeoPoint(NaN, NaN);
-    }).toThrow('GeoPoint latitude and longitude must be valid numbers');
+  it('throws when created with non numbers values', () => {
+    [
+      [NaN, NaN],
+      [false, true],
+      ["29", "10"],
+      [29, "10"],
+      ["29", 10],
+      [["29", "10"]],
+      [{ latitude: "29", longitude: "10" }],
+    ].forEach(case_test => {
+      expect(function() {
+        new ParseGeoPoint(...case_test);
+      }).toThrow('GeoPoint latitude and longitude must be valid numbers');
+    });
   });
 
   it('can set latitude and longitude', () => {
-    var point = new ParseGeoPoint();
+    const point = new ParseGeoPoint();
+    expect(point.latitude).toBe(0);
+    expect(point.longitude).toBe(0);
+
     point.latitude = 5.5;
     expect(point.latitude).toBe(5.5);
 
@@ -52,28 +65,27 @@ describe('GeoPoint', () => {
   });
 
   it('throws for points out of bounds', () => {
-    var point;
     expect(() => {
-      point = new ParseGeoPoint(90.01, 0.0);
+      new ParseGeoPoint(90.01, 0.0);
     }).toThrow();
 
     expect(() => {
-      point = new ParseGeoPoint(-90.01, 0.0);
+      new ParseGeoPoint(-90.01, 0.0);
     }).toThrow();
 
     expect(() => {
-      point = new ParseGeoPoint(0.0, 180.01);
+      new ParseGeoPoint(0.0, 180.01);
     }).toThrow();
 
     expect(() => {
-      point = new ParseGeoPoint(0.0, -180.01);
+      new ParseGeoPoint(0.0, -180.01);
     }).toThrow();
   });
 
   it('can calculate distance in radians', () => {
-    var d2r = Math.PI / 180.0;
-    var pointA = new ParseGeoPoint();
-    var pointB = new ParseGeoPoint();
+    const d2r = Math.PI / 180.0;
+    const pointA = new ParseGeoPoint();
+    const pointB = new ParseGeoPoint();
 
     // Zero
     expect(pointA.radiansTo(pointB)).toBe(0);
@@ -129,28 +141,28 @@ describe('GeoPoint', () => {
 
   it('can calculate distances in mi and km', () => {
     // [SAC]  38.52  -121.50  Sacramento,CA
-    var sacramento = new ParseGeoPoint(38.52, -121.50);
+    const sacramento = new ParseGeoPoint(38.52, -121.50);
 
     // [HNL]  21.35  -157.93  Honolulu Int,HI
-    var honolulu = new ParseGeoPoint(21.35, -157.93);
+    const honolulu = new ParseGeoPoint(21.35, -157.93);
 
     // [51Q]  37.75  -122.68  San Francisco,CA
-    var sanfran = new ParseGeoPoint(37.75, -122.68);
+    const sanfran = new ParseGeoPoint(37.75, -122.68);
 
     // Vorkuta 67.509619,64.085999
-    var vorkuta = new ParseGeoPoint(67.509619, 64.085999);
+    const vorkuta = new ParseGeoPoint(67.509619, 64.085999);
 
     // London
-    var london = new ParseGeoPoint(51.501904,-0.115356);
+    const london = new ParseGeoPoint(51.501904,-0.115356);
 
     // Northampton
-    var northampton = new ParseGeoPoint(52.241256,-0.895386);
+    const northampton = new ParseGeoPoint(52.241256,-0.895386);
 
     // Powell St BART station
-    var powell = new ParseGeoPoint(37.785071,-122.407007);
+    const powell = new ParseGeoPoint(37.785071,-122.407007);
 
     // Apple store
-    var astore = new ParseGeoPoint(37.785809,-122.406363);
+    const astore = new ParseGeoPoint(37.785809,-122.406363);
 
     // Self
     expect(honolulu.kilometersTo(honolulu)).toBeCloseTo(0.0, 3);
@@ -178,10 +190,10 @@ describe('GeoPoint', () => {
   });
 
   it('can test equality against another GeoPoint', () => {
-    var a = new ParseGeoPoint(40, 40);
+    let a = new ParseGeoPoint(40, 40);
     expect(a.equals(a)).toBe(true);
 
-    var b = new ParseGeoPoint(40, 40);
+    let b = new ParseGeoPoint(40, 40);
     expect(a.equals(b)).toBe(true);
     expect(b.equals(a)).toBe(true);
 
