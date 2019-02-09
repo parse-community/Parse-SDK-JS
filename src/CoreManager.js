@@ -18,6 +18,7 @@ import type { QueryJSON } from './ParseQuery';
 import type ParseUser from './ParseUser';
 import type { AuthData } from './ParseUser';
 import type { PushData } from './Push';
+import EventEmitter from './EventEmitter';
 
 type RequestOptions = {
   useMasterKey?: boolean;
@@ -47,6 +48,11 @@ type ObjectController = {
   fetch: (object: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions) => Promise;
   save: (object: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) => Promise;
   destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => Promise;
+  subscribe: (target: ParseObject) => EventEmitter;
+  unsubscribe: (target: ParseObject) => void;
+  updateSubscription: (localId: string, serverId: string) => void;
+  clearSubscriptions: () => void;
+  dispatch: (type: string, target: ParseObject) => void;
 };
 type ObjectStateController = {
   getState: (obj: any) => ?State;

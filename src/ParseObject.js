@@ -1910,20 +1910,69 @@ class ParseObject {
     }
   }
 
+  /**
+   * Removes and closes all subscriptions
+   *
+   * <pre>
+   * Parse.Object.clearSubscriptions();
+   * </pre>
+   *
+   * @static
+   */
   static clearSubscriptions() {
-    return CoreManager.getObjectController().clearSubscriptions();
+    CoreManager.getObjectController().clearSubscriptions();
   }
 
+  /**
+   * Subscribes to a ParseObject
+   *
+   * <pre>
+   * const subscription = object.subscribe();
+   * </pre>
+   *
+   * <p>Update Event - When an existing ParseObject is updated you'll get this event
+   *
+   * <pre>
+   * subscription.on('update', (object) => {
+   *
+   * });</pre></p>
+   *
+   * <p>Delete Event - When an existing ParseObject is deleted you'll get this event.
+   *
+   * <pre>
+   * subscription.on('delete', (object) => {
+   *
+   * });</pre></p>
+   *
+   * <p>Close Event - When you stop receiving events you'll get this event.
+   *
+   * <pre>
+   * subscription.on('close', () => {
+   *
+   * });</pre></p>
+   *
+   * @return {EventEmitter} Parse.Object event subscription
+   */
   subscribe() {
     return CoreManager.getObjectController().subscribe(this);
   }
 
+  /**
+   * After calling unsubscribe you'll stop receiving events from the subscription object.
+   *
+   * <pre>
+   * object.unsubscribe();
+   * </pre>
+   */
   unsubscribe() {
-    return CoreManager.getObjectController().unsubscribe(this);
+    CoreManager.getObjectController().unsubscribe(this);
   }
 
-  dispatch(type: string) {
-    return CoreManager.getObjectController().dispatch(type, this);
+  /**
+   * Handle subscription events
+   */
+  _dispatch(type: string) {
+    CoreManager.getObjectController().dispatch(type, this);
   }
 }
 
@@ -1935,26 +1984,26 @@ const destroy = ParseObject.prototype.destroy;
 
 ParseObject.prototype.save = async function(...args) {
   const result = await save.apply(this, args);
-  this.dispatch(SUBSCRIPTION_EMITTER_TYPES.UPDATE);
+  this._dispatch(SUBSCRIPTION_EMITTER_TYPES.UPDATE);
   return result;
 }
 
 ParseObject.prototype.set = function(...args) {
   const result = set.apply(this, args);
-  this.dispatch(SUBSCRIPTION_EMITTER_TYPES.UPDATE);
+  this._dispatch(SUBSCRIPTION_EMITTER_TYPES.UPDATE);
   return result;
 }
 
 ParseObject.prototype.destroy = async function(...args) {
   const result = await destroy.apply(this, args);
-  this.dispatch(SUBSCRIPTION_EMITTER_TYPES.DELETE);
+  this._dispatch(SUBSCRIPTION_EMITTER_TYPES.DELETE);
   this.unsubscribe();
   return result;
 }
 
 const DefaultController = {
   subscriptions: new Map(),
-  subscribe(target: ParseObject) {
+  subscribe(target: ParseObject): EventEmitter {
     const subscription = new EventEmitter();
     this.subscriptions.set(target._getId(), subscription);
     return subscription;
@@ -1968,7 +2017,7 @@ const DefaultController = {
     }
   },
 
-  updateSubscription(localId, serverId) {
+  updateSubscription(localId: string, serverId: string) {
     const subscription = this.subscriptions.get(localId);
     if (subscription) {
       this.subscriptions.delete(localId);

@@ -2739,4 +2739,164 @@ describe('ParseObject pin', () => {
     expect(spy).toHaveBeenCalledWith('Parse.enableLocalDatastore() must be called first');
     spy.mockRestore();
   });
+
+  it('can subscribe', () => {
+    const objectController = CoreManager.getObjectController();
+    objectController.clearSubscriptions();
+
+    const spy = jest.spyOn(objectController, 'subscribe');
+
+    const parent = new ParseObject('Person');
+    const subscription = parent.subscribe();
+    expect(subscription).toBeDefined();
+
+    expect(objectController.subscribe).toHaveBeenCalledTimes(1);
+    expect(objectController.subscribe.mock.calls[0]).toEqual([parent]);
+    expect(objectController.subscriptions.size).toBe(1);
+    expect(objectController.subscriptions.get(parent._getId())).toEqual(subscription);
+    spy.mockRestore();
+  });
+
+  it('can unsubscribe', () => {
+    const objectController = CoreManager.getObjectController();
+    objectController.clearSubscriptions();
+
+    const spy = jest.spyOn(objectController, 'unsubscribe');
+
+    const parent = new ParseObject('Person');
+    const localId = parent._getId();
+    const subscription = parent.subscribe();
+
+    jest.spyOn(subscription, 'emit');
+    jest.spyOn(objectController.subscriptions, 'delete');
+
+    expect(objectController.subscriptions.size).toBe(1);
+    parent.unsubscribe();
+
+    expect(subscription.emit.mock.calls[0]).toEqual(['close']);
+    expect(objectController.unsubscribe).toHaveBeenCalledTimes(1);
+    expect(objectController.subscriptions.size).toBe(0);
+    expect(objectController.subscriptions.delete.mock.calls[0]).toEqual([localId]);
+    expect(objectController.subscriptions.delete).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
+  });
+
+  it('can unsubscribe if not subscribed', () => {
+    const objectController = CoreManager.getObjectController();
+    objectController.clearSubscriptions();
+
+    const spy = jest.spyOn(objectController, 'unsubscribe');
+    jest.spyOn(objectController.subscriptions, 'delete');
+
+    const parent = new ParseObject('Person');
+    parent.unsubscribe();
+
+    expect(objectController.unsubscribe).toHaveBeenCalledTimes(1);
+    expect(objectController.subscriptions.size).toBe(0);
+    expect(objectController.subscriptions.delete).toHaveBeenCalledTimes(0);
+
+    spy.mockRestore();
+  });
+
+  it('can update subscription', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: {
+          objectId: 'P5',
+        }
+      }])
+    );
+    const objectController = CoreManager.getObjectController();
+    objectController.clearSubscriptions();
+
+    const spy = jest.spyOn(objectController, 'updateSubscription');
+
+    const parent = new ParseObject('Person');
+    const localId = parent._getId();
+    const subscription = parent.subscribe();
+    jest.spyOn(objectController.subscriptions, 'delete');
+    jest.spyOn(objectController.subscriptions, 'set');
+    await parent.save();
+
+    expect(objectController.updateSubscription.mock.calls[0]).toEqual([localId, 'P5']);
+    expect(objectController.subscriptions.delete.mock.calls[0]).toEqual([localId]);
+    expect(objectController.subscriptions.set.mock.calls[0]).toEqual(['P5', subscription]);
+    expect(objectController.subscriptions.delete).toHaveBeenCalledTimes(1);
+    expect(objectController.subscriptions.set).toHaveBeenCalledTimes(1);
+    expect(objectController.updateSubscription).toHaveBeenCalledTimes(1);
+    expect(objectController.subscriptions.size).toBe(1);
+
+    spy.mockRestore();
+  });
+
+  it('can update subscription if not subscribed', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: {
+          objectId: 'P5',
+        }
+      }])
+    );
+    const objectController = CoreManager.getObjectController();
+    objectController.clearSubscriptions();
+    expect(objectController.subscriptions.size).toBe(0);
+    const spy = jest.spyOn(objectController, 'updateSubscription');
+
+    const parent = new ParseObject('Person');
+    const localId = parent._getId();
+    jest.spyOn(objectController.subscriptions, 'delete');
+    jest.spyOn(objectController.subscriptions, 'set');
+    await parent.save();
+
+    expect(objectController.updateSubscription.mock.calls[0]).toEqual([localId, 'P5']);
+    expect(objectController.subscriptions.delete).toHaveBeenCalledTimes(0);
+    expect(objectController.subscriptions.set).toHaveBeenCalledTimes(0);
+    expect(objectController.updateSubscription).toHaveBeenCalledTimes(1);
+    expect(objectController.subscriptions.size).toBe(0);
+
+    spy.mockRestore();
+  });
+
+  it('can clear all subscriptions', () => {
+    const objectController = CoreManager.getObjectController();
+
+    const spy = jest.spyOn(objectController, 'clearSubscriptions');
+
+    const parent = new ParseObject('Person');
+    const subscription = parent.subscribe();
+
+    jest.spyOn(subscription, 'emit');
+    jest.spyOn(objectController.subscriptions, 'clear');
+
+    expect(objectController.subscriptions.size).toBe(1);
+
+    ParseObject.clearSubscriptions();
+
+    expect(subscription.emit.mock.calls[0]).toEqual(['close']);
+    expect(objectController.clearSubscriptions).toHaveBeenCalledTimes(1);
+    expect(objectController.subscriptions.size).toBe(0);
+    expect(objectController.subscriptions.clear).toHaveBeenCalledTimes(1);
+
+    spy.mockRestore();
+  });
+
+  it('can dispatch subscription events', () => {
+    const objectController = CoreManager.getObjectController();
+
+    const spy = jest.spyOn(objectController, 'dispatch');
+
+    const parent = new ParseObject('Person');
+    const subscription = parent.subscribe();
+
+    jest.spyOn(subscription, 'emit');
+
+    parent._dispatch('update');
+
+    expect(subscription.emit.mock.calls[0]).toEqual(['update', parent]);
+    expect(objectController.dispatch).toHaveBeenCalledTimes(1);
+
+    spy.mockRestore();
+  });
 });
