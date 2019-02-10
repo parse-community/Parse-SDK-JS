@@ -1702,6 +1702,16 @@ describe('Parse Object', () => {
     done();
   });
 
+  it('can subscribe error', async (done) => {
+    const object = new TestObject({ test: 'test' });
+    const subscription = object.subscribe();
+    subscription.on('error', (error) => {
+      assert.equal(error.message, 'whoops!');
+      done();
+    });
+    subscription.emit('error', new Error('whoops!'));
+  });
+
   it('can subscribe new objects', async (done) => {
     const object = new TestObject({ test: 'test' });
     const subscription = object.subscribe();

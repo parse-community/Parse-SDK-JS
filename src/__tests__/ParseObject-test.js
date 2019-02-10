@@ -2757,6 +2757,22 @@ describe('ParseObject pin', () => {
     spy.mockRestore();
   });
 
+  it('can handle subscribe error', () => {
+    const objectController = CoreManager.getObjectController();
+    objectController.clearSubscriptions();
+
+    const spy = jest.spyOn(objectController, 'subscribe');
+
+    const parent = new ParseObject('Person');
+    const subscription = parent.subscribe();
+    jest.spyOn(subscription, 'on');
+    subscription.emit('error');
+
+    expect(subscription.on).toHaveBeenCalledTimes(1);
+    expect(subscription.on.mock.calls[0][0]).toBe('error');
+    spy.mockRestore();
+  });
+
   it('can unsubscribe', () => {
     const objectController = CoreManager.getObjectController();
     objectController.clearSubscriptions();

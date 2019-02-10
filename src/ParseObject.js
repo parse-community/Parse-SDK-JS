@@ -61,6 +61,7 @@ const SUBSCRIPTION_EMITTER_TYPES = {
   UPDATE: 'update',
   DELETE: 'delete',
   CLOSE: 'close',
+  ERROR: 'error',
 };
 
 // Mapping of class names to constructors, so we can populate objects from the
@@ -1951,6 +1952,13 @@ class ParseObject {
    *
    * });</pre></p>
    *
+   * <p>Error Event - When an error happens you'll get this event.
+   *
+   * <pre>
+   * subscription.on('error', (error) => {
+   *
+   * });</pre></p>
+   *
    * @return {EventEmitter} Parse.Object event subscription
    */
   subscribe() {
@@ -2005,6 +2013,9 @@ const DefaultController = {
   subscriptions: new Map(),
   subscribe(target: ParseObject): EventEmitter {
     const subscription = new EventEmitter();
+    // adding listener so process does not crash
+    // best practice is for developer to register their own listener
+    subscription.on(SUBSCRIPTION_EMITTER_TYPES.ERROR, () => {});
     this.subscriptions.set(target._getId(), subscription);
     return subscription;
   },
