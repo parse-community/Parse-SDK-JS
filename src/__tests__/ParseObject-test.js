@@ -119,7 +119,7 @@ const mockLocalDatastore = {
   _updateObjectIfPinned: jest.fn(),
   _destroyObjectIfPinned: jest.fn(),
   _updateLocalIdForObject: jest.fn(),
-  _syncIfNeeded: jest.fn(() => Promise.resolve()),
+  _syncIfNeeded: jest.fn(),
   _clear: jest.fn(),
   getKeyForObject: jest.fn(),
   checkIfEnabled: jest.fn(() => {

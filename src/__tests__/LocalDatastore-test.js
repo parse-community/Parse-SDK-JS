@@ -594,31 +594,20 @@ describe('LocalDatastore', () => {
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(0);
   });
 
-  it('do not sync if synced', async () => {
+  it('do not sync if syncing', async () => {
     LocalDatastore.isEnabled = true;
-    LocalDatastore.isSynced = true;
+    LocalDatastore.isSyncing = true;
 
     jest.spyOn(mockLocalStorageController, 'getAllContents');
     await LocalDatastore._syncIfNeeded();
 
-    expect(LocalDatastore.isSyncing).toBe(false);
-    expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(0);
-  });
-
-  it('do not sync if synced', async () => {
-    LocalDatastore.isEnabled = true;
-    LocalDatastore.isSynced = true;
-
-    jest.spyOn(mockLocalStorageController, 'getAllContents');
-    await LocalDatastore._syncIfNeeded();
-
-    expect(LocalDatastore.isSyncing).toBe(false);
+    expect(LocalDatastore.isSyncing).toBe(true);
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(0);
   });
 
   it('_syncIfNeeded empty LDS', async () => {
     LocalDatastore.isEnabled = true;
-    LocalDatastore.isSynced = false;
+    LocalDatastore.isSyncing = false;
     const LDS = {};
 
     mockLocalStorageController
@@ -628,13 +617,12 @@ describe('LocalDatastore', () => {
     jest.spyOn(mockLocalStorageController, 'pinWithName');
     await LocalDatastore._syncIfNeeded();
 
-    expect(LocalDatastore.isSyncing).toBe(false);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(0);
   });
 
   it('_syncIfNeeded on one object', async () => {
     LocalDatastore.isEnabled = true;
-    LocalDatastore.isSynced = false;
+    LocalDatastore.isSyncing = false;
     const object = new ParseObject('Item');
     const LDS = {
       [`Item_${object.id}`]: object._toFullJSON(),
@@ -662,7 +650,7 @@ describe('LocalDatastore', () => {
 
   it('_syncIfNeeded handle error', async () => {
     LocalDatastore.isEnabled = true;
-    LocalDatastore.isSynced = false;
+    LocalDatastore.isSyncing = false;
     const object = new ParseObject('Item');
     const LDS = {
       [`Item_${object.id}`]: object._toFullJSON(),
@@ -696,7 +684,7 @@ describe('LocalDatastore', () => {
 
   it('_syncIfNeeded on mixed object', async () => {
     LocalDatastore.isEnabled = true;
-    LocalDatastore.isSynced = false;
+    LocalDatastore.isSyncing = false;
     const obj1 = new ParseObject('Item');
     const obj2 = new ParseObject('Item');
     const obj3 = new ParseObject('TestObject');

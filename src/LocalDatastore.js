@@ -260,9 +260,9 @@ const LocalDatastore = {
     }
   },
 
-  // If network is reconnected sync LDS with network
+  // sync LDS with network
   async _syncIfNeeded() {
-    if (!this.isEnabled || this.isSynced || this.isSyncing) {
+    if (!this.isEnabled || this.isSyncing) {
       return;
     }
     const localDatastore = await this._getAllContents();
@@ -302,7 +302,6 @@ const LocalDatastore = {
       });
       await Promise.all(pinPromises);
       this.isSyncing = false;
-      this.isSynced = true;
     } catch(error) {
       console.log('Error syncing LocalDatastore'); // eslint-disable-line
       console.log(error); // eslint-disable-line
@@ -333,7 +332,6 @@ const LocalDatastore = {
 LocalDatastore.DEFAULT_PIN = DEFAULT_PIN;
 LocalDatastore.PIN_PREFIX = PIN_PREFIX;
 LocalDatastore.isEnabled = false;
-LocalDatastore.isSynced = true;
 LocalDatastore.isSyncing = false;
 
 module.exports = LocalDatastore;

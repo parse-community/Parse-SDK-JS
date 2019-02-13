@@ -225,6 +225,23 @@ Parse.dumpLocalDatastore = function() {
     return Parse.LocalDatastore._getAllContents();
   }
 }
+/**
+ * Updates Local Datastore from Server
+ *
+ * <pre>
+ * await Parse.syncLocalDatastore();
+ * </pre>
+ *
+ * @static
+ */
+Parse.syncLocalDatastore = function() {
+  if (!Parse.LocalDatastore.isEnabled) {
+    console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
+    return Promise.resolve();
+  } else {
+    return Parse.LocalDatastore._syncIfNeeded();
+  }
+}
 CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);
 
