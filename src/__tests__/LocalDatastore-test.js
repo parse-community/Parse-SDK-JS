@@ -82,9 +82,21 @@ const mockLocalStorageController = {
   clear: jest.fn(),
 };
 jest.setMock('../ParseObject', MockObject);
+
+const mockQueryFind = jest.fn();
+jest.mock('../ParseQuery', () => {
+  return jest.fn().mockImplementation(function () {
+    this.equalTo = jest.fn();
+    this.containedIn = jest.fn();
+    this.limit = jest.fn();
+    this.find = mockQueryFind;
+  });
+});
+
 const CoreManager = require('../CoreManager');
 const LocalDatastore = require('../LocalDatastore');
 const ParseObject = require('../ParseObject');
+const ParseQuery = require('../ParseQuery');
 const RNDatastoreController = require('../LocalDatastoreController.react-native');
 const BrowserDatastoreController = require('../LocalDatastoreController.browser');
 const DefaultDatastoreController = require('../LocalDatastoreController.default');
@@ -571,6 +583,151 @@ describe('LocalDatastore', () => {
     encountered = {};
     LocalDatastore._traverse(object, encountered);
     expect(encountered).toEqual({ 'Item_1234': object });
+  });
+
+  it('do not sync if disabled', async () => {
+    LocalDatastore.isEnabled = false;
+    jest.spyOn(mockLocalStorageController, 'getAllContents');
+
+    await LocalDatastore._syncIfNeeded();
+    expect(LocalDatastore.isSyncing).toBe(false);
+    expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(0);
+  });
+
+  it('do not sync if synced', async () => {
+    LocalDatastore.isEnabled = true;
+    LocalDatastore.isSynced = true;
+
+    jest.spyOn(mockLocalStorageController, 'getAllContents');
+    await LocalDatastore._syncIfNeeded();
+
+    expect(LocalDatastore.isSyncing).toBe(false);
+    expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(0);
+  });
+
+  it('do not sync if synced', async () => {
+    LocalDatastore.isEnabled = true;
+    LocalDatastore.isSynced = true;
+
+    jest.spyOn(mockLocalStorageController, 'getAllContents');
+    await LocalDatastore._syncIfNeeded();
+
+    expect(LocalDatastore.isSyncing).toBe(false);
+    expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(0);
+  });
+
+  it('_syncIfNeeded empty LDS', async () => {
+    LocalDatastore.isEnabled = true;
+    LocalDatastore.isSynced = false;
+    const LDS = {};
+
+    mockLocalStorageController
+      .getAllContents
+      .mockImplementationOnce(() => LDS);
+
+    jest.spyOn(mockLocalStorageController, 'pinWithName');
+    await LocalDatastore._syncIfNeeded();
+
+    expect(LocalDatastore.isSyncing).toBe(false);
+    expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(0);
+  });
+
+  it('_syncIfNeeded on one object', async () => {
+    LocalDatastore.isEnabled = true;
+    LocalDatastore.isSynced = false;
+    const object = new ParseObject('Item');
+    const LDS = {
+      [`Item_${object.id}`]: object._toFullJSON(),
+      [`${LocalDatastore.PIN_PREFIX}_testPinName`]: [`Item_${object.id}`],
+      [LocalDatastore.DEFAULT_PIN]: [`Item_${object.id}`],
+    };
+
+    mockLocalStorageController
+      .getAllContents
+      .mockImplementationOnce(() => LDS);
+
+    object.set('updatedField', 'foo');
+    mockQueryFind.mockImplementationOnce(() => Promise.resolve([object]));
+
+    await LocalDatastore._syncIfNeeded();
+
+    expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
+    expect(ParseQuery).toHaveBeenCalledTimes(1);
+    const mockQueryInstance = ParseQuery.mock.instances[0];
+
+    expect(mockQueryInstance.equalTo.mock.calls.length).toBe(1);
+    expect(mockQueryFind).toHaveBeenCalledTimes(1);
+    expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(1);
+  });
+
+  it('_syncIfNeeded handle error', async () => {
+    LocalDatastore.isEnabled = true;
+    LocalDatastore.isSynced = false;
+    const object = new ParseObject('Item');
+    const LDS = {
+      [`Item_${object.id}`]: object._toFullJSON(),
+      [`${LocalDatastore.PIN_PREFIX}_testPinName`]: [`Item_${object.id}`],
+      [LocalDatastore.DEFAULT_PIN]: [`Item_${object.id}`],
+    };
+
+    mockLocalStorageController
+      .getAllContents
+      .mockImplementationOnce(() => LDS);
+
+    object.set('updatedField', 'foo');
+    mockQueryFind.mockImplementationOnce(() => {
+      expect(LocalDatastore.isSyncing).toBe(true);
+      return Promise.reject('Unable to connect to the Parse API')
+    });
+
+    jest.spyOn(console, 'log');
+    await LocalDatastore._syncIfNeeded();
+
+    expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
+    expect(ParseQuery).toHaveBeenCalledTimes(1);
+    const mockQueryInstance = ParseQuery.mock.instances[0];
+
+    expect(mockQueryInstance.equalTo.mock.calls.length).toBe(1);
+    expect(mockQueryFind).toHaveBeenCalledTimes(1);
+    expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(0);
+    expect(console.log).toHaveBeenCalledTimes(2);
+    expect(LocalDatastore.isSyncing).toBe(false);
+  });
+
+  it('_syncIfNeeded on mixed object', async () => {
+    LocalDatastore.isEnabled = true;
+    LocalDatastore.isSynced = false;
+    const obj1 = new ParseObject('Item');
+    const obj2 = new ParseObject('Item');
+    const obj3 = new ParseObject('TestObject');
+    const LDS = {
+      [`Item_${obj1.id}`]: obj1._toFullJSON(),
+      [`Item_${obj2.id}`]: obj2._toFullJSON(),
+      [`TestObject_${obj3.id}`]: obj3._toFullJSON(),
+      [`${LocalDatastore.PIN_PREFIX}_testPinName`]: [`Item_${obj1.id}`],
+      [LocalDatastore.DEFAULT_PIN]: [`Item_${obj1.id}`],
+    };
+
+    mockLocalStorageController
+      .getAllContents
+      .mockImplementationOnce(() => LDS);
+
+    mockQueryFind
+      .mockImplementationOnce(() => Promise.resolve([obj1, obj2]))
+      .mockImplementationOnce(() => Promise.resolve([obj3]));
+
+    await LocalDatastore._syncIfNeeded();
+
+    expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
+    expect(ParseQuery).toHaveBeenCalledTimes(2);
+
+    const mockQueryInstance1 = ParseQuery.mock.instances[0];
+    const mockQueryInstance2 = ParseQuery.mock.instances[1];
+
+    expect(mockQueryInstance1.containedIn.mock.calls.length).toBe(1);
+    expect(mockQueryInstance2.equalTo.mock.calls.length).toBe(1);
+    expect(mockQueryFind).toHaveBeenCalledTimes(2);
+    expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(3);
   });
 });
 

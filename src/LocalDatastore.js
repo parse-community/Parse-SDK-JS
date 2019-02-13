@@ -12,6 +12,7 @@
 import CoreManager from './CoreManager';
 
 import type ParseObject from './ParseObject';
+import ParseQuery from './ParseQuery';
 
 const DEFAULT_PIN = '_default';
 const PIN_PREFIX = 'parsePin_';
@@ -259,6 +260,56 @@ const LocalDatastore = {
     }
   },
 
+  // If network is reconnected sync LDS with network
+  async _syncIfNeeded() {
+    if (!this.isEnabled || this.isSynced || this.isSyncing) {
+      return;
+    }
+    const localDatastore = await this._getAllContents();
+    const keys = [];
+    for (const key in localDatastore) {
+      if (key !== DEFAULT_PIN && !key.startsWith(PIN_PREFIX)) {
+        keys.push(key);
+      }
+    }
+    if (keys.length === 0) {
+      return;
+    }
+    this.isSyncing = true;
+    const pointersHash = {};
+    for (const key of keys) {
+      const [className, objectId] = key.split('_');
+      pointersHash[className] = pointersHash[className] || new Set();
+      pointersHash[className].add(objectId);
+    }
+    const queryPromises = Object.keys(pointersHash).map(className => {
+      const objectIds = Array.from(pointersHash[className]);
+      const query = new ParseQuery(className);
+      query.limit(objectIds.length);
+      if (objectIds.length === 1) {
+        query.equalTo('objectId', objectIds[0]);
+      } else {
+        query.containedIn('objectId', objectIds);
+      }
+      return query.find();
+    });
+    try {
+      const responses = await Promise.all(queryPromises);
+      const objects = [].concat.apply([], responses);
+      const pinPromises = objects.map((object) => {
+        const objectKey = this.getKeyForObject(object);
+        return this.pinWithName(objectKey, object._toFullJSON());
+      });
+      await Promise.all(pinPromises);
+      this.isSyncing = false;
+      this.isSynced = true;
+    } catch(error) {
+      console.log('Error syncing LocalDatastore'); // eslint-disable-line
+      console.log(error); // eslint-disable-line
+      this.isSyncing = false;
+    }
+  },
+
   getKeyForObject(object: any) {
     const objectId = object.objectId || object._getId();
     return `${object.className}_${objectId}`;
@@ -282,6 +333,8 @@ const LocalDatastore = {
 LocalDatastore.DEFAULT_PIN = DEFAULT_PIN;
 LocalDatastore.PIN_PREFIX = PIN_PREFIX;
 LocalDatastore.isEnabled = false;
+LocalDatastore.isSynced = true;
+LocalDatastore.isSyncing = false;
 
 module.exports = LocalDatastore;
 

@@ -802,6 +802,35 @@ function runTest(controller) {
       assert.equal(localDatastore[`Item_${fetchedItems[0].id}`].foo, 'changed');
       assert.equal(localDatastore[`Item_${fetchedItems[1].id}`].foo, 'changed');
     });
+
+    it(`${controller.name} can sync from network`, async (done) => {
+      const parent = new TestObject();
+      const child = new Item();
+      const grandchild = new Item();
+      child.set('grandchild', grandchild);
+      parent.set('field', 'test');
+      parent.set('child', child);
+      await Parse.Object.saveAll([parent, child, grandchild]);
+      await parent.pin();
+
+      // Updates child with { foo: 'changed' }
+      const params = { id: child.id };
+      await Parse.Cloud.run('TestFetchFromLocalDatastore', params);
+
+      Parse.LocalDatastore.isSynced = false;
+
+      // Force network request
+      const query = new Parse.Query('Item');
+      await query.get(grandchild.id);
+
+      // Wait for LDS update in background
+      setTimeout(async () => {
+        const updatedLDS = await Parse.LocalDatastore._getAllContents();
+        const childJSON = updatedLDS[`${child.className}_${child.id}`];
+        assert.equal(childJSON.foo, 'changed');
+        done();
+      }, 1000);
+    });
   });
 
   describe(`Parse Query Pinning (${controller.name})`, () => {
@@ -2344,7 +2373,7 @@ function runTest(controller) {
       });
     });
 
-    it('supports withinPolygon', async () => {
+    it(`${controller.name} supports withinPolygon`, async () => {
       const sacramento = new TestObject();
       sacramento.set('location', new Parse.GeoPoint(38.52, -121.50));
       sacramento.set('name', 'Sacramento');
@@ -2373,7 +2402,7 @@ function runTest(controller) {
       assert.equal(results.length, 1);
     });
 
-    it('supports polygonContains', async () => {
+    it(`${controller.name} supports polygonContains`, async () => {
       const p1 = [[0,0], [0,1], [1,1], [1,0]];
       const p2 = [[0,0], [0,2], [2,2], [2,0]];
       const p3 = [[10,10], [10,15], [15,15], [15,10], [10,10]];

@@ -10,9 +10,19 @@
 jest.autoMockOff();
 jest.useFakeTimers();
 
+jest.dontMock('../LocalDatastore');
+
+const mockLocalDatastore = {
+  isSynced: true,
+  _syncIfNeeded: jest.fn(() => Promise.resolve()),
+};
+jest.setMock('../LocalDatastore', mockLocalDatastore);
+
 const CoreManager = require('../CoreManager');
 const RESTController = require('../RESTController');
 const mockXHR = require('./test_helpers/mockXHR');
+
+CoreManager.setLocalDatastore(mockLocalDatastore);
 
 CoreManager.setInstallationController({
   currentInstallationId() {
@@ -74,6 +84,8 @@ describe('RESTController', () => {
   });
 
   it('retries on connection failure', (done) => {
+    const LDS = CoreManager.getLocalDatastore();
+    LDS.isSynced = true;
     RESTController._setXHR(mockXHR([
       { status: 0 },
       { status: 0 },
@@ -82,6 +94,7 @@ describe('RESTController', () => {
       { status: 0 },
     ]));
     RESTController.ajax('POST', 'users', {}).then(null, (err) => {
+      expect(LDS.isSynced).toBe(false);
       expect(err).toBe('Unable to connect to the Parse API');
       done();
     });
@@ -89,6 +102,8 @@ describe('RESTController', () => {
   });
 
   it('returns a connection error on network failure', async (done) => {
+    const LDS = CoreManager.getLocalDatastore();
+    LDS.isSynced = true;
     RESTController._setXHR(mockXHR([
       { status: 0 },
       { status: 0 },
@@ -97,6 +112,7 @@ describe('RESTController', () => {
       { status: 0 },
     ]));
     RESTController.request('GET', 'classes/MyObject', {}, { sessionToken: '1234' }).then(null, (err) => {
+      expect(LDS.isSynced).toBe(false);
       expect(err.code).toBe(100);
       expect(err.message).toBe('XMLHttpRequest failed: "Unable to connect to the Parse API"');
       done();
@@ -106,6 +122,8 @@ describe('RESTController', () => {
   });
 
   it('aborts after too many failures', async (done) => {
+    const LDS = CoreManager.getLocalDatastore();
+    LDS.isSynced = true;
     RESTController._setXHR(mockXHR([
       { status: 500 },
       { status: 500 },
@@ -115,6 +133,7 @@ describe('RESTController', () => {
       { status: 200, response: { success: true }}
     ]));
     RESTController.ajax('POST', 'users', {}).then(null, (xhr) => {
+      expect(LDS.isSynced).toBe(false);
       expect(xhr).not.toBe(undefined);
       done();
     });

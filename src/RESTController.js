@@ -48,10 +48,13 @@ function ajaxIE9(method: string, url: string, data: any, options?: FullOptions) 
   return new Promise((resolve, reject) => {
     const xdr = new XDomainRequest();
     xdr.onload = function() {
+      const LDS = CoreManager.getLocalDatastore();
       let response;
       try {
         response = JSON.parse(xdr.responseText);
+        LDS._syncIfNeeded().then(() => {});
       } catch (e) {
+        LDS.isSynced = false;
         reject(e);
       }
       if (response) {
@@ -90,6 +93,8 @@ const RESTController = {
     promise.reject = rej;
     let attempts = 0;
 
+    const LDS = CoreManager.getLocalDatastore();
+
     const dispatch = function() {
       if (XHR == null) {
         throw new Error(
@@ -118,6 +123,7 @@ const RESTController = {
             promise.reject(e.toString());
           }
           if (response) {
+            LDS._syncIfNeeded().then(() => {});
             promise.resolve({ response, status: xhr.status, xhr });
           }
         } else if (xhr.status >= 500 || xhr.status === 0) { // retry on 5XX or node-xmlhttprequest error
@@ -128,9 +134,11 @@ const RESTController = {
             );
             setTimeout(dispatch, delay);
           } else if (xhr.status === 0) {
+            LDS.isSynced = false;
             promise.reject('Unable to connect to the Parse API');
           } else {
             // After the retry limit is reached, fail
+            LDS.isSynced = false;
             promise.reject(xhr);
           }
         } else {
