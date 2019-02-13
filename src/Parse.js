@@ -229,17 +229,17 @@ Parse.dumpLocalDatastore = function() {
  * Updates Local Datastore from Server
  *
  * <pre>
- * await Parse.syncLocalDatastore();
+ * await Parse.updateLocalDatastoreFromServer();
  * </pre>
  *
  * @static
  */
-Parse.syncLocalDatastore = function() {
+Parse.updateLocalDatastoreFromServer = function() {
   if (!Parse.LocalDatastore.isEnabled) {
     console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
     return Promise.resolve();
   } else {
-    return Parse.LocalDatastore._syncIfNeeded();
+    return Parse.LocalDatastore._updateFromServer();
   }
 }
 CoreManager.setInstallationController(InstallationController);

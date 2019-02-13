@@ -803,7 +803,7 @@ function runTest(controller) {
       assert.equal(localDatastore[`Item_${fetchedItems[1].id}`].foo, 'changed');
     });
 
-    it(`${controller.name} can sync from network`, async () => {
+    it(`${controller.name} can update Local Datastore from network`, async () => {
       const parent = new TestObject();
       const child = new Item();
       const grandchild = new Item();
@@ -819,7 +819,7 @@ function runTest(controller) {
 
       Parse.LocalDatastore.isSyncing = false;
 
-      await Parse.syncLocalDatastore();
+      await Parse.updateLocalDatastoreFromServer();
 
       const updatedLDS = await Parse.LocalDatastore._getAllContents();
       const childJSON = updatedLDS[`${child.className}_${child.id}`];

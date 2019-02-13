@@ -589,7 +589,7 @@ describe('LocalDatastore', () => {
     LocalDatastore.isEnabled = false;
     jest.spyOn(mockLocalStorageController, 'getAllContents');
 
-    await LocalDatastore._syncIfNeeded();
+    await LocalDatastore._updateFromServer();
     expect(LocalDatastore.isSyncing).toBe(false);
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(0);
   });
@@ -599,7 +599,7 @@ describe('LocalDatastore', () => {
     LocalDatastore.isSyncing = true;
 
     jest.spyOn(mockLocalStorageController, 'getAllContents');
-    await LocalDatastore._syncIfNeeded();
+    await LocalDatastore._updateFromServer();
 
     expect(LocalDatastore.isSyncing).toBe(true);
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(0);
@@ -615,7 +615,7 @@ describe('LocalDatastore', () => {
       .mockImplementationOnce(() => LDS);
 
     jest.spyOn(mockLocalStorageController, 'pinWithName');
-    await LocalDatastore._syncIfNeeded();
+    await LocalDatastore._updateFromServer();
 
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(0);
   });
@@ -637,7 +637,7 @@ describe('LocalDatastore', () => {
     object.set('updatedField', 'foo');
     mockQueryFind.mockImplementationOnce(() => Promise.resolve([object]));
 
-    await LocalDatastore._syncIfNeeded();
+    await LocalDatastore._updateFromServer();
 
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
     expect(ParseQuery).toHaveBeenCalledTimes(1);
@@ -669,7 +669,7 @@ describe('LocalDatastore', () => {
     });
 
     jest.spyOn(console, 'log');
-    await LocalDatastore._syncIfNeeded();
+    await LocalDatastore._updateFromServer();
 
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
     expect(ParseQuery).toHaveBeenCalledTimes(1);
@@ -704,7 +704,7 @@ describe('LocalDatastore', () => {
       .mockImplementationOnce(() => Promise.resolve([obj1, obj2]))
       .mockImplementationOnce(() => Promise.resolve([obj3]));
 
-    await LocalDatastore._syncIfNeeded();
+    await LocalDatastore._updateFromServer();
 
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
     expect(ParseQuery).toHaveBeenCalledTimes(2);

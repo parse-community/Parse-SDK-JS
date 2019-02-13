@@ -260,8 +260,7 @@ const LocalDatastore = {
     }
   },
 
-  // sync LDS with network
-  async _syncIfNeeded() {
+  async _updateFromServer() {
     if (!this.isEnabled || this.isSyncing) {
       return;
     }
