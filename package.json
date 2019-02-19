@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://www.parse.com",
   "keywords": [
@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.3.1",
-    "ws": "6.1.2",
+    "ws": "6.1.4",
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
@@ -74,7 +74,6 @@
     "test": "PARSE_BUILD=node jest",
     "lint": "eslint --cache src/ integration/",
     "lint:fix": "eslint --fix --cache src/ integration/",
-    "preintegration": "npm run build",
     "watch": "PARSE_BUILD=${PARSE_BUILD:=node} gulp watch",
     "integration": "TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",

@@ -474,6 +474,45 @@ describe('ParseObject', () => {
     expect(o2.attributes).toEqual({ age: 41 });
   });
 
+  it('can set nested field', () => {
+    const o = new ParseObject('Person');
+    o._finishFetch({
+      objectId: 'setNested',
+      objectField: {
+        number: 5
+      },
+      otherField: {},
+    });
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 5 },
+      otherField: {},
+    });
+    o.set('otherField', { hello: 'world' });
+    o.set('objectField.number', 20);
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 20 },
+      otherField: { hello: 'world' },
+    });
+    expect(o.op('objectField.number') instanceof SetOp).toBe(true);
+    expect(o.dirtyKeys()).toEqual(['otherField', 'objectField.number', 'objectField']);
+    expect(o._getSaveJSON()).toEqual({
+      'objectField.number': 20,
+      otherField: { hello: 'world' },
+    });
+  });
+
+  it('ignore set nested field on new object', () => {
+    const o = new ParseObject('Person');
+    o.set('objectField.number', 20);
+
+    expect(o.attributes).toEqual({});
+    expect(o.op('objectField.number') instanceof SetOp).toBe(false);
+    expect(o.dirtyKeys()).toEqual([]);
+    expect(o._getSaveJSON()).toEqual({});
+  });
+
   it('can add elements to an array field', () => {
     const o = new ParseObject('Schedule');
     o.add('available', 'Monday');
@@ -649,6 +688,10 @@ describe('ParseObject', () => {
 
     expect(o.validate({
       noProblem: 'here'
+    })).toBe(false);
+
+    expect(o.validate({
+      'dot.field': 'here'
     })).toBe(false);
   });
 
@@ -2596,6 +2639,22 @@ describe('ParseObject pin', () => {
     expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledWith('test_pin', object);
   });
 
+  it('can check if pinned', async () => {
+    const object = new ParseObject('Item');
+    object.id = '1234';
+    mockLocalDatastore
+      .fromPinWithName
+      .mockImplementationOnce(() => {
+        return { 'Item_1234': object._toFullJSON() }
+      })
+      .mockImplementationOnce(() => null);
+
+    let isPinned = await object.isPinned();
+    expect(isPinned).toEqual(true);
+    isPinned = await object.isPinned();
+    expect(isPinned).toEqual(false);
+  });
+
   it('can fetchFromLocalDatastore', async () => {
     const object = new ParseObject('Item');
     object.id = '123';
@@ -2661,6 +2720,7 @@ describe('ParseObject pin', () => {
     const obj = new ParseObject('Item');
     await obj.pin();
     await obj.unPin();
+    await obj.isPinned();
     await obj.pinWithName(name);
     await obj.unPinWithName(name);
     await obj.fetchFromLocalDatastore();
@@ -2672,7 +2732,7 @@ describe('ParseObject pin', () => {
     await ParseObject.unPinAllObjects();
     await ParseObject.unPinAllObjectsWithName(name);
 
-    expect(spy).toHaveBeenCalledTimes(11);
+    expect(spy).toHaveBeenCalledTimes(12);
     expect(spy).toHaveBeenCalledWith('Parse.enableLocalDatastore() must be called first');
     spy.mockRestore();
   });

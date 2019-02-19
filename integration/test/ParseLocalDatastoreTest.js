@@ -81,6 +81,23 @@ function runTest(controller) {
       assert.equal(cachedObject.field, 'new info');
     });
 
+    it(`${controller.name} can check if pinned`, async () => {
+      const object = new TestObject();
+      object.set('field', 'test');
+      await object.save();
+
+      let isPinned = await object.isPinned();
+      assert.equal(isPinned, false);
+
+      await object.pin();
+      isPinned = await object.isPinned();
+      assert.equal(isPinned, true);
+
+      await object.unPin();
+      isPinned = await object.isPinned();
+      assert.equal(isPinned, false);
+    });
+
     it(`${controller.name} can pin (recursive)`, async () => {
       const parent = new TestObject();
       const child = new Item();
