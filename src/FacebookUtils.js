@@ -42,11 +42,6 @@ const provider = {
 
   restoreAuthentication(authData) {
     if (authData) {
-      const expiration = parseDate(authData.expiration_date);
-      const expiresIn = expiration ?
-        (expiration.getTime() - new Date().getTime()) / 1000 :
-        0;
-
       const newOptions = {};
       if (initOptions) {
         for (const key in initOptions) {
