@@ -9,7 +9,6 @@
  * @flow-weak
  */
 /* global FB */
-import parseDate from './parseDate';
 import ParseUser from './ParseUser';
 
 let initialized = false;
