@@ -1,5 +1,9 @@
 # Parse-SDK-JS
 
+## 2.2.1
+
+- Addresses issue with babel runtime regenerator ([#740](https://github.com/parse-community/Parse-SDK-JS/pull/740))
+
 ## 2.2.0
 
 - Support for Local Datastore ([#612](https://github.com/parse-community/parse-server/pull/612))
