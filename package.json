@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.3.4",
-    "ws": "6.1.4",
+    "ws": "6.2.0",
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
