@@ -260,8 +260,17 @@ const LocalDatastore = {
     }
   },
 
-  async _updateFromServer() {
-    if (!this.isEnabled || this.isSyncing) {
+  /**
+   * Updates Local Datastore from Server
+   *
+   * <pre>
+   * await Parse.LocalDatastore.updateFromServer();
+   * </pre>
+   *
+   * @static
+   */
+  async updateFromServer() {
+    if (!this.checkIfEnabled() || this.isSyncing) {
       return;
     }
     const localDatastore = await this._getAllContents();
@@ -278,7 +287,9 @@ const LocalDatastore = {
     const pointersHash = {};
     for (const key of keys) {
       const [className, objectId] = key.split('_');
-      pointersHash[className] = pointersHash[className] || new Set();
+      if (!(className in pointersHash)) {
+        pointersHash[className] = new Set();
+      }
       pointersHash[className].add(objectId);
     }
     const queryPromises = Object.keys(pointersHash).map(className => {

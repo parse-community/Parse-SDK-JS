@@ -98,17 +98,4 @@ describe('Parse module', () => {
     LDS = await Parse.dumpLocalDatastore();
     expect(LDS).toEqual({ key: 'value' });
   });
-
-  it('can update LocalDatastore from server', async () => {
-    Parse.LocalDatastore.isEnabled = false;
-    jest.spyOn(console, 'log');
-    await Parse.updateLocalDatastoreFromServer();
-    expect(console.log).toHaveBeenCalledTimes(1);
-
-    Parse.LocalDatastore.isEnabled = true;
-    jest.spyOn(Parse.LocalDatastore, '_updateFromServer')
-      .mockImplementationOnce(() => Promise.resolve());
-    await Parse.updateLocalDatastoreFromServer();
-    expect(Parse.LocalDatastore._updateFromServer).toHaveBeenCalledTimes(1);
-  });
 });

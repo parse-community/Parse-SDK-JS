@@ -819,7 +819,7 @@ function runTest(controller) {
 
       Parse.LocalDatastore.isSyncing = false;
 
-      await Parse.updateLocalDatastoreFromServer();
+      await Parse.LocalDatastore.updateFromServer();
 
       const updatedLDS = await Parse.LocalDatastore._getAllContents();
       const childJSON = updatedLDS[`${child.className}_${child.id}`];

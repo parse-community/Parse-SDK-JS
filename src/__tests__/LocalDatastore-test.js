@@ -589,7 +589,7 @@ describe('LocalDatastore', () => {
     LocalDatastore.isEnabled = false;
     jest.spyOn(mockLocalStorageController, 'getAllContents');
 
-    await LocalDatastore._updateFromServer();
+    await LocalDatastore.updateFromServer();
     expect(LocalDatastore.isSyncing).toBe(false);
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(0);
   });
@@ -599,13 +599,13 @@ describe('LocalDatastore', () => {
     LocalDatastore.isSyncing = true;
 
     jest.spyOn(mockLocalStorageController, 'getAllContents');
-    await LocalDatastore._updateFromServer();
+    await LocalDatastore.updateFromServer();
 
     expect(LocalDatastore.isSyncing).toBe(true);
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(0);
   });
 
-  it('_syncIfNeeded empty LDS', async () => {
+  it('updateFromServer empty LDS', async () => {
     LocalDatastore.isEnabled = true;
     LocalDatastore.isSyncing = false;
     const LDS = {};
@@ -615,12 +615,12 @@ describe('LocalDatastore', () => {
       .mockImplementationOnce(() => LDS);
 
     jest.spyOn(mockLocalStorageController, 'pinWithName');
-    await LocalDatastore._updateFromServer();
+    await LocalDatastore.updateFromServer();
 
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(0);
   });
 
-  it('_syncIfNeeded on one object', async () => {
+  it('updateFromServer on one object', async () => {
     LocalDatastore.isEnabled = true;
     LocalDatastore.isSyncing = false;
     const object = new ParseObject('Item');
@@ -637,7 +637,7 @@ describe('LocalDatastore', () => {
     object.set('updatedField', 'foo');
     mockQueryFind.mockImplementationOnce(() => Promise.resolve([object]));
 
-    await LocalDatastore._updateFromServer();
+    await LocalDatastore.updateFromServer();
 
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
     expect(ParseQuery).toHaveBeenCalledTimes(1);
@@ -648,7 +648,7 @@ describe('LocalDatastore', () => {
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(1);
   });
 
-  it('_syncIfNeeded handle error', async () => {
+  it('updateFromServer handle error', async () => {
     LocalDatastore.isEnabled = true;
     LocalDatastore.isSyncing = false;
     const object = new ParseObject('Item');
@@ -669,7 +669,7 @@ describe('LocalDatastore', () => {
     });
 
     jest.spyOn(console, 'log');
-    await LocalDatastore._updateFromServer();
+    await LocalDatastore.updateFromServer();
 
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
     expect(ParseQuery).toHaveBeenCalledTimes(1);
@@ -682,7 +682,7 @@ describe('LocalDatastore', () => {
     expect(LocalDatastore.isSyncing).toBe(false);
   });
 
-  it('_syncIfNeeded on mixed object', async () => {
+  it('updateFromServer on mixed object', async () => {
     LocalDatastore.isEnabled = true;
     LocalDatastore.isSyncing = false;
     const obj1 = new ParseObject('Item');
@@ -704,7 +704,7 @@ describe('LocalDatastore', () => {
       .mockImplementationOnce(() => Promise.resolve([obj1, obj2]))
       .mockImplementationOnce(() => Promise.resolve([obj3]));
 
-    await LocalDatastore._updateFromServer();
+    await LocalDatastore.updateFromServer();
 
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
     expect(ParseQuery).toHaveBeenCalledTimes(2);
