@@ -46,6 +46,16 @@ describe('Parse module', () => {
     expect(Parse.masterKey).toBe('789');
   });
 
+  it('can set auth type and token', () => {
+    Parse.serverAuthType = 'bearer';
+    expect(CoreManager.get('SERVER_AUTH_TYPE')).toBe('bearer');
+    expect(Parse.serverAuthType).toBe('bearer');
+
+    Parse.serverAuthToken = 'some_token';
+    expect(CoreManager.get('SERVER_AUTH_TOKEN')).toBe('some_token');
+    expect(Parse.serverAuthToken).toBe('some_token');
+  });
+
   it('can set LocalDatastoreController', () => {
     const controller = {
       fromPinWithName: function() {},

@@ -15,7 +15,7 @@ var VERSION = require('./package.json').version;
 var transformRuntime = ["@babel/plugin-transform-runtime", {
   "corejs": false,
   "helpers": true,
-  "regenerator": false,
+  "regenerator": true,
   "useESModules": false
 }];
 
