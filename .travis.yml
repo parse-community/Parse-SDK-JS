@@ -1,7 +1,7 @@
 language: node_js
 dist: trusty
 node_js:
-- '6.11.4'
+- '8.10'
 
 branches:
   only:
@@ -22,14 +22,19 @@ jobs:
       before_script:
       - npm install -g mongodb-runner
       - mongodb-runner start
-      script: npm test -- --maxWorkers=4 && ./run_integration.sh
-      after_script: cat ./coverage/coverage-final.json | ./node_modules/codecov.io/bin/codecov.io.js && rm -rf ./coverage
+      script:
+      - npm run lint
+      - npm test -- --maxWorkers=4
+      - npm run build
+      - npm run integration
+      after_script: ./node_modules/codecov/bin/codecov -f ./coverage/coverage-final.json && rm -rf ./coverage
     # release on github latest branch
     - stage: release
-      env: 
+      env:
+      -
       before_script: skip
       after_script: skip
-      script: 
+      script:
       - npm run release_docs
       - npm run build
       deploy:
@@ -41,10 +46,7 @@ jobs:
             all_branches: true
         - provider: npm
           skip_cleanup: true
-          email:
-            secure: "YweTGc22uqFWpzbfiUa5ptBLRAy6tt6d9TZLwEkPtmnsWzN9dguGyKWmXiw0qL+848FWQ5PWzUgBn5XdigV9tF3rJY6RGs8i38WulNjwSoGuRZa3AChsQHAb1KenANcJybzhnwgEj9gRsrGZPEsyI2whfake/xLDtG91kHjpJANsd4gseOh6fdS4FIYCbyXvSbC7S0yZzIJkgSkMqJO7RJ8r0HYQ7srYIw31dM3ZXSmUYu+GaMDUUu3RLAGYoKaROxhDRnzkjdeLLiwZH8hQ/6CaqwqX54iJ6OS+MOQU3fi5ZXalA7RZvtC4RmrcCkaTf3i0f+5xejYIFgzXdYGMVm8DUc82tDw1s4b6Pb19bgi1xXOQ0IKzRmZuGxnvkRN61dnYdnpnnNuG97HXgVjiOigZXVLZkWazUdnf9zXqmkC+KxPfa4Ldqg0TMjQ9J14n6TXxRti8Tt0xMa1Uzho7VdsxdJy35Bghy398O6X8VdX6parfzEkX7c/JzcA3TIMJ9+S1dy3J4Tb2URB5367W6h7cDeXtGmwLTFu75Q1CNqRJkUGbSrX2NyMqG5tc8oaTM+OWvLxcbKPRy9T6qN7x2JmCHHaapf8/8VR9wCy2PwE5j+KWhmctEHqqOgrtG5gsjC0eCPJsposxZWyM7M6aUpXe3w+olBfKq9apUGStUSU="
-          api_key:
-            secure: "BI+JcD4Ly3OtyHZ+K/qxJ5B+iHZPgfTHjZLVZz0K7jGVBFPtElDXdvCosjUA518uDIQX2yM8l4qg3EMoHW1LKHqGkcN57bT5fAQ/W5OSD49qJPAqZ4Nxa2BKup+jshjNq6jzLNG/IzyQ+UXB1eRQBiWeCz95d80LEdFpIW33avo1G4lLBCCm3IxSExV5D1fjH2/vSuNnDDfgBImSBqWxiv/oojp4O0dfgS3yoqoxiRXMOayTXP9FmQ0Bu6xZXaCiVfaVjQ2M2JQixMNq9pOIwXkYbI7SCMLcU9zutwfSVnOGOHc5rwe+7FJSwnQvZGzjJztYbxk7IykHMIv9qiSTiMtHfSSn7933V666PW+NOl/Cp6qESOI7KBZpI+45vyeBCQDP0vYdIIMg9xFLKPdiCltBxLOcCpZTGlWi5kkYA7DpzferPIybn6uiLqLHgEN891blevYZgr4sGFnHU29rZF17hDvWlZiRi4IFKbDl10RH7voSot71xf/47Iiq/J0MnlndUqqS6Ufj0QWLshoUlQxNH7TREwnw/Fo3Kz0ADY7sVeWjwzlZX2t+qkd1Xt8U73bLVjitY87EDIGRo5bMu5FMlJCUff5QAVYXE98hNkDDogqFJyvK6vuZteFMw3ouU1RwJyyYJqQP2/anZ4JysrFVguGdxObOV5Meq7+Wa/w="
+          api_key: $NPM_TOKEN
           on:
             tags: true
             all_branches: true

@@ -9,7 +9,7 @@
 
 jest.autoMockOff();
 
-var parseDate = require('../parseDate').default;
+const parseDate = require('../parseDate').default;
 
 describe('parseDate', () => {
   it('returns a Date for valid strings', () => {

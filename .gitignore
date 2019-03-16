@@ -9,6 +9,8 @@ integration/test_logs
 .DS_Store
 .idea/
 integration/test_logs
+test_logs
 out/
 docs/
+.eslintcache
 

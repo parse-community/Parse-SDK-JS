@@ -12,7 +12,6 @@
 import * as ObjectStateMutations from './ObjectStateMutations';
 
 import type { Op } from './ParseOp';
-import type ParsePromise from './ParsePromise';
 import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
 
 type ObjectIdentifier = {
@@ -27,7 +26,7 @@ let objectState: {
 } = {};
 
 export function getState(obj: ObjectIdentifier): ?State {
-  let classData = objectState[obj.className];
+  const classData = objectState[obj.className];
   if (classData) {
     return classData[obj.id] || null;
   }
@@ -50,7 +49,7 @@ export function initializeState(obj: ObjectIdentifier, initial?: State): State {
 }
 
 export function removeState(obj: ObjectIdentifier): ?State {
-  let state = getState(obj);
+  const state = getState(obj);
   if (state === null) {
     return null;
   }
@@ -59,7 +58,7 @@ export function removeState(obj: ObjectIdentifier): ?State {
 }
 
 export function getServerData(obj: ObjectIdentifier): AttributeMap {
-  let state = getState(obj);
+  const state = getState(obj);
   if (state) {
     return state.serverData;
   }
@@ -67,12 +66,12 @@ export function getServerData(obj: ObjectIdentifier): AttributeMap {
 }
 
 export function setServerData(obj: ObjectIdentifier, attributes: AttributeMap) {
-  let serverData = initializeState(obj).serverData;
+  const serverData = initializeState(obj).serverData;
   ObjectStateMutations.setServerData(serverData, attributes);
 }
 
 export function getPendingOps(obj: ObjectIdentifier): Array<OpsMap> {
-  let state = getState(obj);
+  const state = getState(obj);
   if (state) {
     return state.pendingOps;
   }
@@ -80,27 +79,27 @@ export function getPendingOps(obj: ObjectIdentifier): Array<OpsMap> {
 }
 
 export function setPendingOp(obj: ObjectIdentifier, attr: string, op: ?Op) {
-  let pendingOps = initializeState(obj).pendingOps;
+  const pendingOps = initializeState(obj).pendingOps;
   ObjectStateMutations.setPendingOp(pendingOps, attr, op);
 }
 
 export function pushPendingState(obj: ObjectIdentifier) {
-  let pendingOps = initializeState(obj).pendingOps;
+  const pendingOps = initializeState(obj).pendingOps;
   ObjectStateMutations.pushPendingState(pendingOps);
 }
 
 export function popPendingState(obj: ObjectIdentifier): OpsMap {
-  let pendingOps = initializeState(obj).pendingOps;
+  const pendingOps = initializeState(obj).pendingOps;
   return ObjectStateMutations.popPendingState(pendingOps);
 }
 
 export function mergeFirstPendingState(obj: ObjectIdentifier) {
-  let pendingOps = getPendingOps(obj);
+  const pendingOps = getPendingOps(obj);
   ObjectStateMutations.mergeFirstPendingState(pendingOps);
 }
 
 export function getObjectCache(obj: ObjectIdentifier): ObjectCache {
-  let state = getState(obj);
+  const state = getState(obj);
   if (state) {
     return state.objectCache;
   }
@@ -108,24 +107,24 @@ export function getObjectCache(obj: ObjectIdentifier): ObjectCache {
 }
 
 export function estimateAttribute(obj: ObjectIdentifier, attr: string): mixed {
-  let serverData = getServerData(obj);
-  let pendingOps = getPendingOps(obj);
+  const serverData = getServerData(obj);
+  const pendingOps = getPendingOps(obj);
   return ObjectStateMutations.estimateAttribute(serverData, pendingOps, obj.className, obj.id, attr);
 }
 
 export function estimateAttributes(obj: ObjectIdentifier): AttributeMap {
-  let serverData = getServerData(obj);
-  let pendingOps = getPendingOps(obj);
+  const serverData = getServerData(obj);
+  const pendingOps = getPendingOps(obj);
   return ObjectStateMutations.estimateAttributes(serverData, pendingOps, obj.className, obj.id);
 }
 
 export function commitServerChanges(obj: ObjectIdentifier, changes: AttributeMap) {
-  let state = initializeState(obj);
+  const state = initializeState(obj);
   ObjectStateMutations.commitServerChanges(state.serverData, state.objectCache, changes);
 }
 
-export function enqueueTask(obj: ObjectIdentifier, task: () => ParsePromise): ParsePromise {
-  let state = initializeState(obj);
+export function enqueueTask(obj: ObjectIdentifier, task: () => Promise): Promise {
+  const state = initializeState(obj);
   return state.tasks.enqueue(task);
 }
 

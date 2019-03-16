@@ -1,25 +1,39 @@
-Parse.Cloud.define("bar", function(request, response) {
+/* global Parse */
+Parse.Cloud.define("bar", function(request) {
   if (request.params.key2 === "value1") {
-    response.success('Foo');
+    return 'Foo';
   } else {
-    response.error("bad stuff happened");
+    throw "bad stuff happened";
   }
 });
 
-Parse.Cloud.job('CloudJob1', function(request, response) {
-  response.success({
+Parse.Cloud.define('TestFetchFromLocalDatastore', function (request) {
+  const object = new Parse.Object('Item');
+  object.id = request.params.id;
+  object.set('foo', 'changed');
+  return object.save();
+});
+
+Parse.Cloud.define('CloudFunctionUndefined', function() {
+  return undefined;
+});
+
+Parse.Cloud.job('CloudJob1', function() {
+  return {
     status: 'cloud job completed'
+  };
+});
+
+Parse.Cloud.job('CloudJob2', function() {
+  return new Promise((resolve) => {
+    setTimeout(function() {
+      resolve({
+        status: 'cloud job completed'
+      })
+    }, 3000);
   });
 });
 
-Parse.Cloud.job('CloudJob2', function(request, response) {
-  setTimeout(function() {
-    response.success({
-      status: 'cloud job completed'
-    })
-  }, 3000);
-});
-
-Parse.Cloud.job('CloudJobFailing', function(request, response) {
-  response.error('cloud job failed');
+Parse.Cloud.job('CloudJobFailing', function() {
+  throw 'cloud job failed';
 });

@@ -15,7 +15,7 @@ import ParseUser from './ParseUser';
 type PermissionsMap = { [permission: string]: boolean };
 type ByIdMap = { [userId: string]: PermissionsMap };
 
-var PUBLIC_KEY = '*';
+const PUBLIC_KEY = '*';
 
 /**
  * Creates a new ACL.
@@ -24,7 +24,7 @@ var PUBLIC_KEY = '*';
  *   permission for only that user.
  * If the argument is any other JSON object, that object will be interpretted
  *   as a serialized ACL created with toJSON().
- * 
+ *
  * <p>An ACL, or Access Control List can be added to any
  * <code>Parse.Object</code> to restrict access to only a subset of users
  * of your application.</p>
@@ -43,16 +43,16 @@ class ParseACL {
         this.setReadAccess(arg1, true);
         this.setWriteAccess(arg1, true);
       } else {
-        for (var userId in arg1) {
-          var accessList = arg1[userId];
+        for (const userId in arg1) {
+          const accessList = arg1[userId];
           if (typeof userId !== 'string') {
             throw new TypeError(
               'Tried to create an ACL with an invalid user id.'
             );
           }
           this.permissionsById[userId] = {};
-          for (var permission in accessList) {
-            var allowed = accessList[permission];
+          for (const permission in accessList) {
+            const allowed = accessList[permission];
             if (permission !== 'read' && permission !== 'write') {
               throw new TypeError(
                 'Tried to create an ACL with an invalid permission type.'
@@ -79,8 +79,8 @@ class ParseACL {
    * @return {Object}
    */
   toJSON(): ByIdMap {
-    var permissions = {};
-    for (var p in this.permissionsById) {
+    const permissions = {};
+    for (const p in this.permissionsById) {
       permissions[p] = this.permissionsById[p];
     }
     return permissions;
@@ -95,12 +95,12 @@ class ParseACL {
     if (!(other instanceof ParseACL)) {
       return false;
     }
-    var users = Object.keys(this.permissionsById);
-    var otherUsers = Object.keys(other.permissionsById);
+    const users = Object.keys(this.permissionsById);
+    const otherUsers = Object.keys(other.permissionsById);
     if (users.length !== otherUsers.length) {
       return false;
     }
-    for (var u in this.permissionsById) {
+    for (const u in this.permissionsById) {
       if (!other.permissionsById[u]) {
         return false;
       }
@@ -130,7 +130,7 @@ class ParseACL {
     if (typeof allowed !== 'boolean') {
       throw new TypeError('allowed must be either true or false.');
     }
-    var permissions = this.permissionsById[userId];
+    let permissions = this.permissionsById[userId];
     if (!permissions) {
       if (!allowed) {
         // The user already doesn't have this permission, so no action is needed
@@ -167,7 +167,7 @@ class ParseACL {
       }
       userId = 'role:' + name;
     }
-    var permissions = this.permissionsById[userId];
+    const permissions = this.permissionsById[userId];
     if (!permissions) {
       return false;
     }
