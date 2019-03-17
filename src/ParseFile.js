@@ -11,7 +11,8 @@
 /* global File */
 import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
-const request = require('request').defaults({ encoding: null });
+const http = require('http');
+const https = require('https');
 
 type Base64 = { base64: string };
 type FileData = Array<number> | Base64 | File;
@@ -311,16 +312,21 @@ const DefaultController = {
 
   download: function(uri) {
     return new Promise((resolve, reject) => {
-      request.get(uri, (error, response, body) => {
-        if (!error && response.statusCode == 200) {
+      let protocol = http;
+      if (uri.indexOf('https') === 0) {
+        protocol = https;
+      }
+      protocol.get(uri, (resp) => {
+        resp.setEncoding('base64');
+        let base64 = '';
+        resp.on('data', (data) => base64 += data);
+        resp.on('end', () => {
           resolve({
-            base64: new Buffer(body).toString('base64'),
-            contentType: response.headers['content-type'],
+            base64,
+            contentType: resp.headers["content-type"],
           });
-        } else {
-          reject(error);
-        }
-      });
+        });
+      }).on('error', reject);
     });
   }
 };
