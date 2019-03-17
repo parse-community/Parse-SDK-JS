@@ -9,7 +9,6 @@
  * @flow-weak
  */
 /* global FB */
-import parseDate from './parseDate';
 import ParseUser from './ParseUser';
 
 let initialized = false;
@@ -42,24 +41,12 @@ const provider = {
 
   restoreAuthentication(authData) {
     if (authData) {
-      const expiration = parseDate(authData.expiration_date);
-      const expiresIn = expiration ?
-        (expiration.getTime() - new Date().getTime()) / 1000 :
-        0;
-
-      const authResponse = {
-        userID: authData.id,
-        accessToken: authData.access_token,
-        expiresIn: expiresIn
-      };
       const newOptions = {};
       if (initOptions) {
         for (const key in initOptions) {
           newOptions[key] = initOptions[key];
         }
       }
-      newOptions.authResponse = authResponse;
-
       // Suppress checks for login status from the browser.
       newOptions.status = false;
 
@@ -69,7 +56,7 @@ const provider = {
       // from a Parse User that logged in with username/password.
       const existingResponse = FB.getAuthResponse();
       if (existingResponse &&
-          existingResponse.userID !== authResponse.userID) {
+          existingResponse.userID !== authData.id) {
         FB.logout();
       }
 

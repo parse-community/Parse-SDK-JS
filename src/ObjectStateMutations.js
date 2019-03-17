@@ -123,7 +123,18 @@ export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<O
           );
         }
       } else {
-        data[attr] = pendingOps[i][attr].applyTo(data[attr]);
+        if (attr.includes('.')) {
+          // convert a.b.c into { a: { b: { c: value } } }
+          const fields = attr.split('.');
+          const last = fields[fields.length - 1];
+          let object = Object.assign({}, data);
+          for (let i = 0; i < fields.length - 1; i++) {
+            object = object[fields[i]];
+          }
+          object[last] = pendingOps[i][attr].applyTo(object[last]);
+        } else {
+          data[attr] = pendingOps[i][attr].applyTo(data[attr]);
+        }
       }
     }
   }

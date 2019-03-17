@@ -146,6 +146,9 @@ const RESTController = {
         headers['User-Agent'] = 'Parse/' + CoreManager.get('VERSION') +
           ' (NodeJS ' + process.versions.node + ')';
       }
+      if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
+        headers['Authorization'] = CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
+      }
 
       if(options && typeof options.progress === 'function') {
         if (xhr.upload) {

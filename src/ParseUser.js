@@ -637,6 +637,21 @@ class ParseUser extends ParseObject {
     return controller.become(becomeOptions);
   }
 
+  /**
+   * Logs in a user with a session token. On success, this saves the session
+   * to disk, so you can retrieve the currently logged in user using
+   * <code>current</code>. If there is no session token the user will not logged in.
+   *
+   * @param {Object} userJSON The JSON map of the User's data
+   * @static
+   * @return {Promise} A promise that is fulfilled with the user when
+   *     the login completes.
+   */
+  static hydrate(userJSON: AttributeMap) {
+    const controller = CoreManager.getUserController();
+    return controller.hydrate(userJSON);
+  }
+
   static logInWith(provider, options) {
     return ParseUser._logInWith(provider, options);
   }
@@ -951,6 +966,17 @@ const DefaultController = {
       user._setExisted(true);
       return DefaultController.setCurrentUser(user);
     });
+  },
+
+  hydrate(userJSON: AttributeMap) {
+    const user = new ParseUser();
+    user._finishFetch(userJSON);
+    user._setExisted(true);
+    if (userJSON.sessionToken && canUseCurrentUser) {
+      return DefaultController.setCurrentUser(user);
+    } else {
+      return Promise.resolve(user);
+    }
   },
 
   logOut(): Promise {

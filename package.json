@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "2.1.0",
+  "version": "2.2.1",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://www.parse.com",
   "keywords": [
@@ -28,18 +28,18 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime": "^7.2.0",
-    "ws": "6.1.2",
+    "@babel/runtime": "^7.3.4",
+    "ws": "6.2.0",
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.2.2",
-    "@babel/plugin-proposal-class-properties": "^7.2.3",
+    "@babel/core": "^7.3.4",
+    "@babel/plugin-proposal-class-properties": "^7.3.4",
     "@babel/plugin-transform-flow-comments": "^7.2.0",
-    "@babel/plugin-transform-flow-strip-types": "7.2.3",
-    "@babel/plugin-transform-runtime": "7.2.0",
+    "@babel/plugin-transform-flow-strip-types": "7.3.4",
+    "@babel/plugin-transform-runtime": "7.3.4",
     "@babel/polyfill": "7.2.5",
-    "@babel/preset-env": "7.2.3",
+    "@babel/preset-env": "7.3.4",
     "@babel/preset-react": "7.0.0",
     "@parse/minami": "^1.0.0",
     "babel-core": "^7.0.0-bridge.0",
@@ -58,7 +58,7 @@
     "gulp-derequire": "2.1.0",
     "gulp-insert": "0.5.0",
     "gulp-rename": "1.4.0",
-    "gulp-uglify": "3.0.1",
+    "gulp-uglify": "3.0.2",
     "gulp-watch": "5.0.1",
     "jasmine": "^3.1.0",
     "jasmine-reporters": "2.3.2",
@@ -74,7 +74,6 @@
     "test": "PARSE_BUILD=node jest",
     "lint": "eslint --cache src/ integration/",
     "lint:fix": "eslint --fix --cache src/ integration/",
-    "preintegration": "npm run build",
     "watch": "PARSE_BUILD=${PARSE_BUILD:=node} gulp watch",
     "integration": "TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
