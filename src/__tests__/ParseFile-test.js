@@ -8,9 +8,15 @@
  */
 /* global File */
 jest.autoMockOff();
+jest.mock('http');
+jest.mock('https');
 
 const ParseFile = require('../ParseFile').default;
 const CoreManager = require('../CoreManager');
+const EventEmitter = require('../EventEmitter');
+
+const mockHttp = require('http');
+const mockHttps = require('https');
 
 function generateSaveMock(prefix) {
   return function(name, payload, options) {
@@ -294,5 +300,55 @@ describe('FileController', () => {
       { format: 'base64', base64: 'ParseA==', type: 'image/png' },
       {}
     ]);
+  });
+
+  it('download with base64 http', async () => {
+    const mockResponse = Object.create(EventEmitter.prototype);
+    EventEmitter.call(mockResponse);
+    mockResponse.setEncoding = function() {}
+    mockResponse.headers = {
+      'content-type': 'image/png'
+    };
+    const spy = jest.spyOn(mockHttp, 'get')
+      .mockImplementationOnce((uri, cb) => {
+        cb(mockResponse);
+        mockResponse.emit('data', 'base64String');
+        mockResponse.emit('end');
+        return {
+          on: function() {}
+        };
+      });
+
+    const data = await defaultController.download('http://example.com/image.png');
+    expect(data.base64).toBe('base64String');
+    expect(data.contentType).toBe('image/png');
+    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+    expect(mockHttps.get).toHaveBeenCalledTimes(0);
+    spy.mockRestore();
+  });
+
+  it('download with base64 https', async () => {
+    const mockResponse = Object.create(EventEmitter.prototype);
+    EventEmitter.call(mockResponse);
+    mockResponse.setEncoding = function() {}
+    mockResponse.headers = {
+      'content-type': 'image/png'
+    };
+    const spy = jest.spyOn(mockHttps, 'get')
+      .mockImplementationOnce((uri, cb) => {
+        cb(mockResponse);
+        mockResponse.emit('data', 'base64String');
+        mockResponse.emit('end');
+        return {
+          on: function() {}
+        };
+      });
+
+    const data = await defaultController.download('https://example.com/image.png');
+    expect(data.base64).toBe('base64String');
+    expect(data.contentType).toBe('image/png');
+    expect(mockHttp.get).toHaveBeenCalledTimes(0);
+    expect(mockHttps.get).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
   });
 });

@@ -323,7 +323,7 @@ const DefaultController = {
         resp.on('end', () => {
           resolve({
             base64,
-            contentType: resp.headers["content-type"],
+            contentType: resp.headers['content-type'],
           });
         });
       }).on('error', reject);
