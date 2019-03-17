@@ -9,22 +9,14 @@
  * @flow-weak
  */
 import ParseUser from './ParseUser';
+const uuidv4 = require('uuid/v4');
 
 let registered = false;
-
-const uuid = () => {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-  }
-  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-};
 
 const authenticationProvider = {
   authData: {
     authData: {
-      id: uuid()
+      id: uuidv4(),
     }
   },
 
