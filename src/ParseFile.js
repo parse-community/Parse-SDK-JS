@@ -11,6 +11,7 @@
 /* global File */
 import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
+const request = require('request').defaults({ encoding: null });
 
 type Base64 = { base64: string };
 type FileData = Array<number> | Base64 | File;
@@ -21,6 +22,10 @@ export type FileSource = {
 } | {
   format: 'base64';
   base64: string;
+  type: string
+} | {
+  format: 'uri';
+  uri: string;
   type: string
 };
 
@@ -65,7 +70,8 @@ class ParseFile {
    * @param data {Array} The data for the file, as either:
    *     1. an Array of byte value Numbers, or
    *     2. an Object like { base64: "..." } with a base64-encoded String.
-   *     3. a File object selected with a file upload control. (3) only works
+   *     3. an Object like { url: "..." } with a uri String.
+   *     4. a File object selected with a file upload control. (3) only works
    *        in Firefox 3.6+, Safari 6.0.2+, Chrome 7+, and IE 10+.
    *        For example:
    * <pre>
@@ -100,6 +106,12 @@ class ParseFile {
         this._source = {
           format: 'file',
           file: data,
+          type: specifiedType
+        };
+      } else if (data && typeof data.uri === 'string' && data.uri !== undefined) {
+        this._source = {
+          format: 'uri',
+          uri: data.uri,
           type: specifiedType
         };
       } else if (data && typeof data.base64 === 'string') {
@@ -171,6 +183,12 @@ class ParseFile {
     if (!this._previousSave) {
       if (this._source.format === 'file') {
         this._previousSave = controller.saveFile(this._name, this._source, options).then((res) => {
+          this._name = res.name;
+          this._url = res.url;
+          return this;
+        });
+      } else if (this._source.format === 'uri') {
+        this._previousSave = controller.saveUri(this._name, this._source, options).then((res) => {
           this._name = res.name;
           this._url = res.url;
           return this;
@@ -275,6 +293,35 @@ const DefaultController = {
     }
     const path = 'files/' + name;
     return CoreManager.getRESTController().request('POST', path, data, options);
+  },
+
+  saveUri: function(name: string, source: FileSource, options?: FullOptions) {
+    if (source.format !== 'uri') {
+      throw new Error('saveUri can only be used with Uri-type sources.');
+    }
+    return this.download(source.uri).then((result) => {
+      const newSource = {
+        format: 'base64',
+        base64: result.base64,
+        type: result.contentType,
+      };
+      return this.saveBase64(name, newSource, options);
+    });
+  },
+
+  download: function(uri) {
+    return new Promise((resolve, reject) => {
+      request.get(uri, (error, response, body) => {
+        if (!error && response.statusCode == 200) {
+          resolve({
+            base64: new Buffer(body).toString('base64'),
+            contentType: response.headers['content-type'],
+          });
+        } else {
+          reject(error);
+        }
+      });
+    });
   }
 };
 

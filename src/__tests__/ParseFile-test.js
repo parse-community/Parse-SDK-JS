@@ -48,6 +48,12 @@ describe('ParseFile', () => {
     expect(file._source.type).toBe('image/png');
   });
 
+  it('can create files with file uri', () => {
+    const file = new ParseFile('parse-image', { uri:'http://example.com/image.png' });
+    expect(file._source.format).toBe('uri');
+    expect(file._source.uri).toBe('http://example.com/image.png');
+  });
+
   it('can extract data type from base64 with data type containing a number', () => {
     const file = new ParseFile('parse.m4a', {
       base64: 'data:audio/m4a;base64,ParseA=='
@@ -244,5 +250,37 @@ describe('FileController', () => {
       expect(f.name()).toBe('/api.parse.com/1/files/parse.txt');
       expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
     });
+  });
+
+  it('saveUri without uri type', () => {
+    try {
+      defaultController.saveUri('name', { format: 'unknown' });
+    } catch (error) {
+      expect(error.message).toBe('saveUri can only be used with Uri-type sources.');
+    }
+  });
+
+  it('saveUri with uri type', async () => {
+    const source = { format: 'uri', uri: 'https://example.com/image.png' };
+    jest.spyOn(
+      defaultController,
+      'download'
+    )
+      .mockImplementationOnce(() => {
+        return Promise.resolve({
+          base64: 'ParseA==',
+          contentType: 'image/png',
+        });
+      });
+
+    jest.spyOn(defaultController, 'saveBase64');
+    await defaultController.saveUri('fileName', source, {});
+    expect(defaultController.download).toHaveBeenCalledTimes(1);
+    expect(defaultController.saveBase64).toHaveBeenCalledTimes(1);
+    expect(defaultController.saveBase64.mock.calls[0]).toEqual([
+      'fileName',
+      { format: 'base64', base64: 'ParseA==', type: 'image/png' },
+      {}
+    ]);
   });
 });
