@@ -9,6 +9,7 @@
  * @flow
  */
 
+import AnonymousUtils from './AnonymousUtils';
 import CoreManager from './CoreManager';
 import isRevocableSession from './isRevocableSession';
 import ParseError from './ParseError';
@@ -813,10 +814,15 @@ const DefaultController = {
   },
 
   setCurrentUser(user) {
+    const currentUser = this.currentUser();
+    let promise = Promise.resolve();
+    if (currentUser && AnonymousUtils.isLinked(currentUser)) {
+      promise = currentUser.destroy({ sessionToken: currentUser.getSessionToken() })
+    }
     currentUserCache = user;
     user._cleanupAuthData();
     user._synchronizeAllAuthData();
-    return DefaultController.updateUserOnDisk(user);
+    return promise.then(() => DefaultController.updateUserOnDisk(user));
   },
 
   currentUser(): ?ParseUser {
@@ -985,9 +991,14 @@ const DefaultController = {
       let promise = Storage.removeItemAsync(path);
       const RESTController = CoreManager.getRESTController();
       if (currentUser !== null) {
+        const isAnonymous = AnonymousUtils.isLinked(currentUser);
         const currentSession = currentUser.getSessionToken();
         if (currentSession && isRevocableSession(currentSession)) {
           promise = promise.then(() => {
+            if (isAnonymous) {
+              return currentUser.destroy({ sessionToken: currentSession });
+            }
+          }).then(() => {
             return RESTController.request(
               'POST', 'logout', {}, { sessionToken: currentSession }
             );

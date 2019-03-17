@@ -58,6 +58,7 @@ const AnonymousUtils = {
    *     The user must be logged in on this device.
    * @return {Boolean} <code>true</code> if the user has their account
    *     linked to an anonymous user.
+   * @static
    */
   isLinked(user) {
     const provider = this._getAuthProvider();
@@ -70,6 +71,7 @@ const AnonymousUtils = {
    * @method logIn
    * @name Parse.AnonymousUtils.logIn
    * @returns {Promise}
+   * @static
    */
   logIn() {
     const provider = this._getAuthProvider();
@@ -83,6 +85,7 @@ const AnonymousUtils = {
    * @name Parse.AnonymousUtils.link
    * @param {Parse.User} user User to link. This must be the current user.
    * @returns {Promise}
+   * @static
    */
   link(user) {
     const provider = this._getAuthProvider();

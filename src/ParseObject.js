@@ -1157,7 +1157,10 @@ class ParseObject {
     if (options.hasOwnProperty('sessionToken') && typeof options.sessionToken === 'string') {
       saveOptions.sessionToken = options.sessionToken;
     }
-
+    // Pass sessionToken if saving currentUser
+    if (typeof this.getSessionToken === 'function' && this.getSessionToken()) {
+      saveOptions.sessionToken = this.getSessionToken();
+    }
     const controller = CoreManager.getObjectController();
     const unsaved = unsavedChildren(this);
     return controller.save(unsaved, saveOptions).then(() => {
