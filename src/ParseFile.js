@@ -312,11 +312,11 @@ const DefaultController = {
 
   download: function(uri) {
     return new Promise((resolve, reject) => {
-      let protocol = http;
+      let client = http;
       if (uri.indexOf('https') === 0) {
-        protocol = https;
+        client = https;
       }
-      protocol.get(uri, (resp) => {
+      client.get(uri, (resp) => {
         resp.setEncoding('base64');
         let base64 = '';
         resp.on('data', (data) => base64 += data);

@@ -30,7 +30,8 @@ describe('ParseFile', () => {
   beforeEach(() => {
     CoreManager.setFileController({
       saveFile: generateSaveMock('http://files.parsetfss.com/a/'),
-      saveBase64: generateSaveMock('http://files.parsetfss.com/a/')
+      saveBase64: generateSaveMock('http://files.parsetfss.com/a/'),
+      saveUri: generateSaveMock('http://files.parsetfss.com/a/'),
     });
   });
 
@@ -132,6 +133,17 @@ describe('ParseFile', () => {
       expect(result).toBe(file);
       expect(result.name()).toBe('parse.txt');
       expect(result.url()).toBe('http://files.parsetfss.com/a/parse.txt');
+    });
+  });
+
+  it('updates fields when saved with uri', () => {
+    const file = new ParseFile('parse.png', { uri: 'https://example.com/image.png' });
+    expect(file.name()).toBe('parse.png');
+    expect(file.url()).toBe(undefined);
+    return file.save().then(function(result) {
+      expect(result).toBe(file);
+      expect(result.name()).toBe('parse.png');
+      expect(result.url()).toBe('http://files.parsetfss.com/a/parse.png');
     });
   });
 
