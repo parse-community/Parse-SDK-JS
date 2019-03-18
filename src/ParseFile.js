@@ -10,6 +10,9 @@
  */
 /* global File */
 import CoreManager from './CoreManager';
+import type { FullOptions } from './RESTController';
+const http = require('http');
+const https = require('https');
 
 type Base64 = { base64: string };
 type FileData = Array<number> | Base64 | File;
@@ -21,9 +24,13 @@ export type FileSource = {
   format: 'base64';
   base64: string;
   type: string
+} | {
+  format: 'uri';
+  uri: string;
+  type: string
 };
 
-var dataUriRegexp =
+const dataUriRegexp =
   /^data:([a-zA-Z]+\/[-a-zA-Z0-9+.]+)(;charset=[a-zA-Z0-9\-\/]*)?;base64,/;
 
 function b64Digit(number: number): string {
@@ -64,7 +71,8 @@ class ParseFile {
    * @param data {Array} The data for the file, as either:
    *     1. an Array of byte value Numbers, or
    *     2. an Object like { base64: "..." } with a base64-encoded String.
-   *     3. a File object selected with a file upload control. (3) only works
+   *     3. an Object like { uri: "..." } with a uri String.
+   *     4. a File object selected with a file upload control. (3) only works
    *        in Firefox 3.6+, Safari 6.0.2+, Chrome 7+, and IE 10+.
    *        For example:
    * <pre>
@@ -84,7 +92,7 @@ class ParseFile {
    *     extension.
    */
   constructor(name: string, data?: FileData, type?: string) {
-    var specifiedType = type || '';
+    const specifiedType = type || '';
 
     this._name = name;
 
@@ -101,12 +109,18 @@ class ParseFile {
           file: data,
           type: specifiedType
         };
+      } else if (data && typeof data.uri === 'string' && data.uri !== undefined) {
+        this._source = {
+          format: 'uri',
+          uri: data.uri,
+          type: specifiedType
+        };
       } else if (data && typeof data.base64 === 'string') {
         const base64 = data.base64;
-        var commaIndex = base64.indexOf(',');
+        const commaIndex = base64.indexOf(',');
 
         if (commaIndex !== -1) {
-          var matches = dataUriRegexp.exec(base64.slice(0, commaIndex + 1));
+          const matches = dataUriRegexp.exec(base64.slice(0, commaIndex + 1));
           // if data URI with type and charset, there will be 4 matches.
           this._source = {
             format: 'base64',
@@ -157,14 +171,25 @@ class ParseFile {
   /**
    * Saves the file to the Parse cloud.
    * @param {Object} options
+   *  * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>progress: In Browser only, callback for upload progress
+   * </ul>
    * @return {Promise} Promise that is resolved when the save finishes.
    */
-  save(options?: { useMasterKey?: boolean, success?: any, error?: any }) {
+  save(options?: FullOptions) {
     options = options || {};
-    var controller = CoreManager.getFileController();
+    const controller = CoreManager.getFileController();
     if (!this._previousSave) {
       if (this._source.format === 'file') {
         this._previousSave = controller.saveFile(this._name, this._source, options).then((res) => {
+          this._name = res.name;
+          this._url = res.url;
+          return this;
+        });
+      } else if (this._source.format === 'uri') {
+        this._previousSave = controller.saveUri(this._name, this._source, options).then((res) => {
           this._name = res.name;
           this._url = res.url;
           return this;
@@ -207,21 +232,21 @@ class ParseFile {
     if (obj.__type !== 'File') {
       throw new TypeError('JSON object does not represent a ParseFile');
     }
-    var file = new ParseFile(obj.name);
+    const file = new ParseFile(obj.name);
     file._url = obj.url;
     return file;
   }
 
   static encodeBase64(bytes: Array<number>): string {
-    var chunks = [];
+    const chunks = [];
     chunks.length = Math.ceil(bytes.length / 3);
-    for (var i = 0; i < chunks.length; i++) {
-      var b1 = bytes[i * 3];
-      var b2 = bytes[i * 3 + 1] || 0;
-      var b3 = bytes[i * 3 + 2] || 0;
+    for (let i = 0; i < chunks.length; i++) {
+      const b1 = bytes[i * 3];
+      const b2 = bytes[i * 3 + 1] || 0;
+      const b3 = bytes[i * 3 + 2] || 0;
 
-      var has2 = (i * 3 + 1) < bytes.length;
-      var has3 = (i * 3 + 2) < bytes.length;
+      const has2 = (i * 3 + 1) < bytes.length;
+      const has3 = (i * 3 + 2) < bytes.length;
 
       chunks[i] = [
         b64Digit((b1 >> 2) & 0x3F),
@@ -235,40 +260,74 @@ class ParseFile {
   }
 }
 
-var DefaultController = {
-  saveFile: function(name: string, source: FileSource) {
+const DefaultController = {
+  saveFile: function(name: string, source: FileSource, options?: FullOptions) {
     if (source.format !== 'file') {
       throw new Error('saveFile can only be used with File-type sources.');
     }
     // To directly upload a File, we use a REST-style AJAX request
-    var headers = {
+    const headers = {
       'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
       'Content-Type': source.type || (source.file ? source.file.type : null)
     };
-    var jsKey = CoreManager.get('JAVASCRIPT_KEY');
+    const jsKey = CoreManager.get('JAVASCRIPT_KEY');
     if (jsKey) {
       headers['X-Parse-JavaScript-Key'] = jsKey;
     }
-    var url = CoreManager.get('SERVER_URL');
+    let url = CoreManager.get('SERVER_URL');
     if (url[url.length - 1] !== '/') {
       url += '/';
     }
     url += 'files/' + name;
-    return CoreManager.getRESTController().ajax('POST', url, source.file, headers).then(res=>res.response)
+    return CoreManager.getRESTController().ajax('POST', url, source.file, headers, options).then(res=>res.response)
   },
 
-  saveBase64: function(name: string, source: FileSource, options?: { useMasterKey?: boolean, success?: any, error?: any }) {
+  saveBase64: function(name: string, source: FileSource, options?: FullOptions) {
     if (source.format !== 'base64') {
       throw new Error('saveBase64 can only be used with Base64-type sources.');
     }
-    var data: { base64: any; _ContentType?: any } = {
+    const data: { base64: any; _ContentType?: any } = {
       base64: source.base64
     };
     if (source.type) {
       data._ContentType = source.type;
     }
-    var path = 'files/' + name;
+    const path = 'files/' + name;
     return CoreManager.getRESTController().request('POST', path, data, options);
+  },
+
+  saveUri: function(name: string, source: FileSource, options?: FullOptions) {
+    if (source.format !== 'uri') {
+      throw new Error('saveUri can only be used with Uri-type sources.');
+    }
+    return this.download(source.uri).then((result) => {
+      const newSource = {
+        format: 'base64',
+        base64: result.base64,
+        type: result.contentType,
+      };
+      return this.saveBase64(name, newSource, options);
+    });
+  },
+
+  download: function(uri) {
+    return new Promise((resolve, reject) => {
+      let client = http;
+      if (uri.indexOf('https') === 0) {
+        client = https;
+      }
+      client.get(uri, (resp) => {
+        resp.setEncoding('base64');
+        let base64 = '';
+        resp.on('data', (data) => base64 += data);
+        resp.on('end', () => {
+          resolve({
+            base64,
+            contentType: resp.headers['content-type'],
+          });
+        });
+      }).on('error', reject);
+    });
   }
 };
 

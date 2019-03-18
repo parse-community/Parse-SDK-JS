@@ -9,24 +9,25 @@
  * @flow
  */
 
-// When there is no native storage interface, we default to an in-memory map
 const memMap = {};
-const StorageController = {
-  async: 0,
-
-  getItem(path: string): ?string {
-    if (memMap.hasOwnProperty(path)) {
-      return memMap[path];
+const LocalDatastoreController = {
+  fromPinWithName(name: string): ?any {
+    if (memMap.hasOwnProperty(name)) {
+      return memMap[name];
     }
     return null;
   },
 
-  setItem(path: string, value: string) {
-    memMap[path] = String(value);
+  pinWithName(name: string, value: any) {
+    memMap[name] = value;
   },
 
-  removeItem(path: string) {
-    delete memMap[path];
+  unPinWithName(name: string) {
+    delete memMap[name];
+  },
+
+  getAllContents() {
+    return memMap;
   },
 
   clear() {
@@ -38,4 +39,4 @@ const StorageController = {
   }
 };
 
-module.exports = StorageController;
+module.exports = LocalDatastoreController;

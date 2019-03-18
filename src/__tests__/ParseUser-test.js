@@ -11,7 +11,8 @@ jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../isRevocableSession');
-jest.dontMock('../ObjectStateMutations')
+jest.dontMock('../LocalDatastore');
+jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../parseDate');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
@@ -28,6 +29,7 @@ jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('./test_helpers/mockXHR');
 
 const CoreManager = require('../CoreManager');
+const LocalDatastore = require('../LocalDatastore');
 const ParseObject = require('../ParseObject').default;
 const ParseUser = require('../ParseUser').default;
 const Storage = require('../Storage');
@@ -39,6 +41,7 @@ CoreManager.set('JAVASCRIPT_KEY', 'B');
 describe('ParseUser', () => {
   beforeEach(() => {
     ParseObject.enableSingleInstance();
+    LocalDatastore._clear();
   });
 
   it('can be constructed with initial attributes', () => {
@@ -282,6 +285,45 @@ describe('ParseUser', () => {
       expect(u.existed()).toBe(true);
       done();
     });
+  });
+
+  it('can hydrate a user with sessionToken in server environment', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    const user = await ParseUser.hydrate({
+      objectId: 'uid3',
+      username: 'username',
+      sessionToken: '123abc',
+    });
+    expect(user.id).toBe('uid3');
+    expect(user.isCurrent()).toBe(true);
+    expect(user.existed()).toBe(true);
+  });
+
+  it('can hydrate a user with sessionToken in non server environment', async () => {
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    const user = await ParseUser.hydrate({
+      objectId: 'uid3',
+      username: 'username',
+      sessionToken: '123abc',
+    });
+    expect(user.id).toBe('uid3');
+    expect(user.isCurrent()).toBe(false);
+    expect(user.existed()).toBe(true);
+  });
+
+  it('can hydrate a user without sessionToken', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    await ParseUser.logOut();
+    const user = await ParseUser.hydrate({
+      objectId: 'uid3',
+      username: 'username',
+    });
+    expect(user.id).toBe('uid3');
+    expect(user.isCurrent()).toBe(false);
+    expect(user.existed()).toBe(true);
   });
 
   it('can send a password reset request', () => {

@@ -22,6 +22,7 @@ jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
+jest.dontMock('../ParseRelation');
 jest.dontMock('../RESTController');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../TaskQueue');
@@ -29,18 +30,54 @@ jest.dontMock('../unique');
 jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
+jest.dontMock('../LocalDatastore');
 
 jest.dontMock('./test_helpers/mockXHR');
 
 jest.useFakeTimers();
 
 const mockRelation = function(parent, key) {
-  this.parentClass = parent.className;
-  this.parentId = parent.id;
+  // The parent and key fields will be populated by the parent
+  if (parent) {
+    this.parentClass = parent.className;
+    this.parentId = parent.id;
+  }
   this.key = key;
 };
 mockRelation.prototype.add = function(obj) {
   this.targetClassName = obj.className;
+};
+mockRelation.prototype.toJSON = function() {
+  return {
+    __type: 'Relation',
+    className: this.targetClassName
+  };
+};
+mockRelation.prototype._ensureParentAndKey = function(parent, key) {
+  this.key = this.key || key;
+  if (this.key !== key) {
+    throw new Error(
+      'Internal Error. Relation retrieved from two different keys.'
+    );
+  }
+  if (this.parent) {
+    if (this.parent.className !== parent.className) {
+      throw new Error(
+        'Internal Error. Relation retrieved from two different Objects.'
+      );
+    }
+    if (this.parent.id) {
+      if (this.parent.id !== parent.id) {
+        throw new Error(
+          'Internal Error. Relation retrieved from two different Objects.'
+        );
+      }
+    } else if (parent.id) {
+      this.parent = parent;
+    }
+  } else {
+    this.parent = parent;
+  }
 };
 jest.setMock('../ParseRelation', mockRelation);
 
@@ -66,6 +103,34 @@ mockQuery.prototype.find = function() {
 };
 jest.setMock('../ParseQuery', mockQuery);
 
+const mockLocalDatastore = {
+  DEFAULT_PIN: '_default',
+  PIN_PREFIX: 'parsePin_',
+  isEnabled: false,
+  fromPinWithName: jest.fn(),
+  pinWithName: jest.fn(),
+  unPinWithName: jest.fn(),
+  _handlePinWithName: jest.fn(),
+  _handleUnPinWithName: jest.fn(),
+  _getAllContent: jest.fn(),
+  _serializeObjectsFromPinName: jest.fn(),
+  _serializeObject: jest.fn(),
+  _transverseSerializeObject: jest.fn(),
+  _updateObjectIfPinned: jest.fn(),
+  _destroyObjectIfPinned: jest.fn(),
+  _updateLocalIdForObject: jest.fn(),
+  updateFromServer: jest.fn(),
+  _clear: jest.fn(),
+  getKeyForObject: jest.fn(),
+  checkIfEnabled: jest.fn(() => {
+    if (!mockLocalDatastore.isEnabled) {
+      console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
+    }
+    return mockLocalDatastore.isEnabled;
+  }),
+};
+jest.setMock('../LocalDatastore', mockLocalDatastore);
+
 const CoreManager = require('../CoreManager');
 const ParseACL = require('../ParseACL').default;
 const ParseError = require('../ParseError').default;
@@ -76,9 +141,11 @@ const ParseOp = require('../ParseOp');
 const RESTController = require('../RESTController');
 const SingleInstanceStateController = require('../SingleInstanceStateController');
 const unsavedChildren = require('../unsavedChildren').default;
+const LocalDatastore = require('../LocalDatastore');
 
 const mockXHR = require('./test_helpers/mockXHR');
 
+CoreManager.setLocalDatastore(mockLocalDatastore);
 CoreManager.setRESTController(RESTController);
 CoreManager.setInstallationController({
   currentInstallationId() {
@@ -408,6 +475,45 @@ describe('ParseObject', () => {
     expect(o2.attributes).toEqual({ age: 41 });
   });
 
+  it('can set nested field', () => {
+    const o = new ParseObject('Person');
+    o._finishFetch({
+      objectId: 'setNested',
+      objectField: {
+        number: 5
+      },
+      otherField: {},
+    });
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 5 },
+      otherField: {},
+    });
+    o.set('otherField', { hello: 'world' });
+    o.set('objectField.number', 20);
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 20 },
+      otherField: { hello: 'world' },
+    });
+    expect(o.op('objectField.number') instanceof SetOp).toBe(true);
+    expect(o.dirtyKeys()).toEqual(['otherField', 'objectField.number', 'objectField']);
+    expect(o._getSaveJSON()).toEqual({
+      'objectField.number': 20,
+      otherField: { hello: 'world' },
+    });
+  });
+
+  it('ignore set nested field on new object', () => {
+    const o = new ParseObject('Person');
+    o.set('objectField.number', 20);
+
+    expect(o.attributes).toEqual({});
+    expect(o.op('objectField.number') instanceof SetOp).toBe(false);
+    expect(o.dirtyKeys()).toEqual([]);
+    expect(o._getSaveJSON()).toEqual({});
+  });
+
   it('can add elements to an array field', () => {
     const o = new ParseObject('Schedule');
     o.add('available', 'Monday');
@@ -514,6 +620,17 @@ describe('ParseObject', () => {
     expect(rel.targetClassName).toBe('Person');
   });
 
+  it('can be cloned with relation (#381)', () => {
+    const relationJSON = {__type: 'Relation', className: 'Bar'};
+    const o = ParseObject.fromJSON({
+      objectId: '7777777777',
+      className: 'Foo',
+      aRelation: relationJSON,
+    });
+    const o2 = o.clone();
+    expect(o2._getSaveJSON().aRelation).toEqual(relationJSON);
+  });
+
   it('can detect dirty object children', () => {
     const o = new ParseObject('Person');
     o._finishFetch({
@@ -572,6 +689,10 @@ describe('ParseObject', () => {
 
     expect(o.validate({
       noProblem: 'here'
+    })).toBe(false);
+
+    expect(o.validate({
+      'dot.field': 'here'
     })).toBe(false);
   });
 
@@ -1531,6 +1652,69 @@ describe('ParseObject', () => {
     jest.runAllTicks();
   });
 
+  it('can saveAll with batchSize', async (done) => {
+    const xhrs = [];
+    for (let i = 0; i < 2; i++) {
+      xhrs[i] = {
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn(),
+        status: 200,
+        readyState: 4
+      };
+    }
+    let current = 0;
+    RESTController._setXHR(function() { return xhrs[current++]; });
+    const objects = [];
+    for (let i = 0; i < 22; i++) {
+      objects[i] = new ParseObject('Person');
+    }
+    ParseObject.saveAll(objects, { batchSize: 20 }).then(() => {
+      expect(xhrs[0].open.mock.calls[0]).toEqual(
+        ['POST', 'https://api.parse.com/1/batch', true]
+      );
+      expect(xhrs[1].open.mock.calls[0]).toEqual(
+        ['POST', 'https://api.parse.com/1/batch', true]
+      );
+      done();
+    });
+    jest.runAllTicks();
+    await flushPromises();
+
+    xhrs[0].responseText = JSON.stringify([
+      { success: { objectId: 'pid0' } },
+      { success: { objectId: 'pid1' } },
+      { success: { objectId: 'pid2' } },
+      { success: { objectId: 'pid3' } },
+      { success: { objectId: 'pid4' } },
+      { success: { objectId: 'pid5' } },
+      { success: { objectId: 'pid6' } },
+      { success: { objectId: 'pid7' } },
+      { success: { objectId: 'pid8' } },
+      { success: { objectId: 'pid9' } },
+      { success: { objectId: 'pid10' } },
+      { success: { objectId: 'pid11' } },
+      { success: { objectId: 'pid12' } },
+      { success: { objectId: 'pid13' } },
+      { success: { objectId: 'pid14' } },
+      { success: { objectId: 'pid15' } },
+      { success: { objectId: 'pid16' } },
+      { success: { objectId: 'pid17' } },
+      { success: { objectId: 'pid18' } },
+      { success: { objectId: 'pid19' } },
+    ]);
+    xhrs[0].onreadystatechange();
+    jest.runAllTicks();
+    await flushPromises();
+
+    xhrs[1].responseText = JSON.stringify([
+      { success: { objectId: 'pid20' } },
+      { success: { objectId: 'pid21' } },
+    ]);
+    xhrs[1].onreadystatechange();
+    jest.runAllTicks();
+  });
+
   it('returns the first error when saving an array of objects', async (done) => {
     const xhrs = [];
     for (let i = 0; i < 2; i++) {
@@ -1710,6 +1894,81 @@ describe('ObjectController', () => {
     xhr.responseText = JSON.stringify({});
     xhr.readyState = 4;
     xhr.onreadystatechange();
+    jest.runAllTicks();
+    await result;
+  });
+
+  it('can destroy an array of objects with batchSize', async () => {
+    const objectController = CoreManager.getObjectController();
+    const xhrs = [];
+    for (let i = 0; i < 3; i++) {
+      xhrs[i] = {
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn()
+      };
+      xhrs[i].status = 200;
+      xhrs[i].responseText = JSON.stringify({});
+      xhrs[i].readyState = 4;
+    }
+    let current = 0;
+    RESTController._setXHR(function() { return xhrs[current++]; });
+    let objects = [];
+    for (let i = 0; i < 5; i++) {
+      objects[i] = new ParseObject('Person');
+      objects[i].id = 'pid' + i;
+    }
+    const result = objectController.destroy(objects, { batchSize: 20}).then(async () => {
+      expect(xhrs[0].open.mock.calls[0]).toEqual(
+        ['POST', 'https://api.parse.com/1/batch', true]
+      );
+      expect(JSON.parse(xhrs[0].send.mock.calls[0]).requests).toEqual([
+        {
+          method: 'DELETE',
+          path: '/1/classes/Person/pid0',
+          body: {}
+        }, {
+          method: 'DELETE',
+          path: '/1/classes/Person/pid1',
+          body: {}
+        }, {
+          method: 'DELETE',
+          path: '/1/classes/Person/pid2',
+          body: {}
+        }, {
+          method: 'DELETE',
+          path: '/1/classes/Person/pid3',
+          body: {}
+        }, {
+          method: 'DELETE',
+          path: '/1/classes/Person/pid4',
+          body: {}
+        }
+      ]);
+
+      objects = [];
+      for (let i = 0; i < 22; i++) {
+        objects[i] = new ParseObject('Person');
+        objects[i].id = 'pid' + i;
+      }
+      const destroy = objectController.destroy(objects, { batchSize: 20 });
+      jest.runAllTicks();
+      await flushPromises();
+      xhrs[1].onreadystatechange();
+      jest.runAllTicks();
+      await flushPromises();
+      expect(xhrs[1].open.mock.calls.length).toBe(1);
+      xhrs[2].onreadystatechange();
+      jest.runAllTicks();
+      return destroy;
+    }).then(() => {
+      expect(JSON.parse(xhrs[1].send.mock.calls[0]).requests.length).toBe(20);
+      expect(JSON.parse(xhrs[2].send.mock.calls[0]).requests.length).toBe(2);
+    });
+    jest.runAllTicks();
+    await flushPromises();
+
+    xhrs[0].onreadystatechange();
     jest.runAllTicks();
     await result;
   });
@@ -2343,5 +2602,139 @@ describe('ParseObject extensions', () => {
 
     const i = new InitObject()
     expect(i.get('field')).toBe(12);
+  });
+});
+
+describe('ParseObject pin', () => {
+  beforeEach(() => {
+    ParseObject.enableSingleInstance();
+    jest.clearAllMocks();
+    mockLocalDatastore.isEnabled = true;
+  });
+
+  it('can pin to default', async () => {
+    const object = new ParseObject('Item');
+    await object.pin();
+    expect(mockLocalDatastore._handlePinWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalDatastore._handlePinWithName).toHaveBeenCalledWith(LocalDatastore.DEFAULT_PIN, object);
+  });
+
+  it('can unPin to default', async () => {
+    const object = new ParseObject('Item');
+    await object.unPin();
+    expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledWith(LocalDatastore.DEFAULT_PIN, object);
+  });
+
+  it('can pin to specific pin', async () => {
+    const object = new ParseObject('Item');
+    await object.pinWithName('test_pin');
+    expect(mockLocalDatastore._handlePinWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalDatastore._handlePinWithName).toHaveBeenCalledWith('test_pin', object);
+  });
+
+  it('can unPin to specific', async () => {
+    const object = new ParseObject('Item');
+    await object.unPinWithName('test_pin');
+    expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledWith('test_pin', object);
+  });
+
+  it('can check if pinned', async () => {
+    const object = new ParseObject('Item');
+    object.id = '1234';
+    mockLocalDatastore
+      .fromPinWithName
+      .mockImplementationOnce(() => {
+        return { 'Item_1234': object._toFullJSON() }
+      })
+      .mockImplementationOnce(() => null);
+
+    let isPinned = await object.isPinned();
+    expect(isPinned).toEqual(true);
+    isPinned = await object.isPinned();
+    expect(isPinned).toEqual(false);
+  });
+
+  it('can fetchFromLocalDatastore', async () => {
+    const object = new ParseObject('Item');
+    object.id = '123';
+    mockLocalDatastore
+      .getKeyForObject
+      .mockImplementationOnce(() => 'Item_123');
+
+    mockLocalDatastore
+      ._serializeObject
+      .mockImplementationOnce(() => object._toFullJSON());
+
+    await object.fetchFromLocalDatastore();
+    expect(mockLocalDatastore._serializeObject).toHaveBeenCalledTimes(1);
+    expect(mockLocalDatastore._serializeObject).toHaveBeenCalledWith('Item_123');
+  });
+
+  it('cannot fetchFromLocalDatastore if unsaved', async () => {
+    try {
+      const object = new ParseObject('Item');
+      await object.fetchFromLocalDatastore();
+    } catch (e) {
+      expect(e.message).toBe('Cannot fetch an unsaved ParseObject');
+    }
+  });
+
+  it('can pinAll', async () => {
+    const obj1 = new ParseObject('Item');
+    const obj2 = new ParseObject('Item');
+    await ParseObject.pinAll([obj1, obj2]);
+    expect(mockLocalDatastore._handlePinWithName).toHaveBeenCalledTimes(2);
+    expect(mockLocalDatastore._handlePinWithName.mock.calls[0]).toEqual([LocalDatastore.DEFAULT_PIN, obj1]);
+    expect(mockLocalDatastore._handlePinWithName.mock.calls[1]).toEqual([LocalDatastore.DEFAULT_PIN, obj2]);
+  });
+
+  it('can unPinAll', async () => {
+    const obj1 = new ParseObject('Item');
+    const obj2 = new ParseObject('Item');
+    await ParseObject.unPinAll([obj1, obj2]);
+    expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledTimes(2);
+    expect(mockLocalDatastore._handleUnPinWithName.mock.calls[0]).toEqual([LocalDatastore.DEFAULT_PIN, obj1]);
+    expect(mockLocalDatastore._handleUnPinWithName.mock.calls[1]).toEqual([LocalDatastore.DEFAULT_PIN, obj2]);
+  });
+
+  it('can unPinAllObjects', async () => {
+    await ParseObject.unPinAllObjects();
+    expect(mockLocalDatastore.unPinWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalDatastore.unPinWithName.mock.calls[0]).toEqual([LocalDatastore.DEFAULT_PIN]);
+  });
+
+  it('can unPinAllObjectsWithName', async () => {
+    await ParseObject.unPinAllObjectsWithName('123');
+    expect(mockLocalDatastore.unPinWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalDatastore.unPinWithName.mock.calls[0]).toEqual([LocalDatastore.PIN_PREFIX + '123']);
+  });
+
+  it('cannot pin when localDatastore disabled', async () => {
+    mockLocalDatastore.isEnabled = false;
+    const spy = jest.spyOn(
+      console,
+      'log'
+    );
+    const name = 'test_pin';
+    const obj = new ParseObject('Item');
+    await obj.pin();
+    await obj.unPin();
+    await obj.isPinned();
+    await obj.pinWithName(name);
+    await obj.unPinWithName(name);
+    await obj.fetchFromLocalDatastore();
+
+    await ParseObject.pinAll([obj]);
+    await ParseObject.unPinAll([obj]);
+    await ParseObject.pinAllWithName(name, [obj]);
+    await ParseObject.unPinAllWithName(name, [obj]);
+    await ParseObject.unPinAllObjects();
+    await ParseObject.unPinAllObjectsWithName(name);
+
+    expect(spy).toHaveBeenCalledTimes(12);
+    expect(spy).toHaveBeenCalledWith('Parse.enableLocalDatastore() must be called first');
+    spy.mockRestore();
   });
 });

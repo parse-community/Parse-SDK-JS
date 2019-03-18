@@ -33,14 +33,29 @@ jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 jest.dontMock('../ParseQuery');
 jest.dontMock('../LiveQuerySubscription');
+jest.dontMock('../LocalDatastore');
+
 jest.useFakeTimers();
 
+const mockLocalDatastore = {
+  isEnabled: false,
+  _updateObjectIfPinned: jest.fn(),
+};
+jest.setMock('../LocalDatastore', mockLocalDatastore);
+
+const CoreManager = require('../CoreManager');
 const LiveQueryClient = require('../LiveQueryClient').default;
 const ParseObject = require('../ParseObject').default;
 const ParseQuery = require('../ParseQuery').default;
 const events = require('events');
 
+CoreManager.setLocalDatastore(mockLocalDatastore);
+
 describe('LiveQueryClient', () => {
+  beforeEach(() => {
+    mockLocalDatastore.isEnabled = false;
+  });
+
   it('can connect to server', () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
@@ -214,6 +229,145 @@ describe('LiveQueryClient', () => {
       expect(parseObject.get('key')).toEqual('value');
       expect(parseObject.get('className')).toBeUndefined();
       expect(parseObject.get('__type')).toBeUndefined();
+    });
+
+    liveQueryClient._handleWebSocketMessage(event);
+
+    expect(isChecked).toBe(true);
+  });
+
+  it('can handle WebSocket response with original', () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken'
+    });
+    // Add mock subscription
+    const subscription = new events.EventEmitter();
+    liveQueryClient.subscriptions.set(1, subscription);
+    const object = new ParseObject('Test');
+    const original = new ParseObject('Test');
+    object.set('key', 'value');
+    original.set('key', 'old');
+    const data = {
+      op: 'update',
+      clientId: 1,
+      requestId: 1,
+      object: object._toFullJSON(),
+      original: original._toFullJSON(),
+    };
+    const event = {
+      data: JSON.stringify(data)
+    }
+    // Register checked in advance
+    let isChecked = false;
+    subscription.on('update', (parseObject, parseOriginalObject) => {
+      isChecked = true;
+      expect(parseObject.get('key')).toEqual('value');
+      expect(parseObject.get('className')).toBeUndefined();
+      expect(parseObject.get('__type')).toBeUndefined();
+
+      expect(parseOriginalObject.get('key')).toEqual('old');
+      expect(parseOriginalObject.get('className')).toBeUndefined();
+      expect(parseOriginalObject.get('__type')).toBeUndefined();
+    });
+
+    liveQueryClient._handleWebSocketMessage(event);
+
+    expect(isChecked).toBe(true);
+  });
+
+  it('can handle WebSocket response override data on update', () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken'
+    });
+    // Add mock subscription
+    const subscription = new events.EventEmitter();
+    liveQueryClient.subscriptions.set(1, subscription);
+    const object = new ParseObject('Test');
+    const original = new ParseObject('Test');
+    object.set('key', 'value');
+    original.set('key', 'old');
+    const data = {
+      op: 'update',
+      clientId: 1,
+      requestId: 1,
+      object: object._toFullJSON(),
+      original: original._toFullJSON(),
+    };
+    const event = {
+      data: JSON.stringify(data)
+    }
+
+    jest.spyOn(
+      mockLocalDatastore,
+      '_updateObjectIfPinned'
+    )
+      .mockImplementationOnce(() => Promise.resolve());
+
+    const spy = jest.spyOn(
+      ParseObject,
+      'fromJSON'
+    )
+      .mockImplementationOnce(() => original)
+      .mockImplementationOnce(() => object);
+
+
+    mockLocalDatastore.isEnabled = true;
+
+    let isChecked = false;
+    subscription.on('update', () => {
+      isChecked = true;
+    });
+
+    liveQueryClient._handleWebSocketMessage(event);
+    const override = true;
+
+    expect(ParseObject.fromJSON.mock.calls[1][1]).toEqual(override);
+    expect(mockLocalDatastore._updateObjectIfPinned).toHaveBeenCalledTimes(1);
+
+    expect(isChecked).toBe(true);
+    spy.mockRestore();
+  });
+
+  it('can handle WebSocket response unset field', async () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken'
+    });
+    // Add mock subscription
+    const subscription = new events.EventEmitter();
+    liveQueryClient.subscriptions.set(1, subscription);
+
+    const object = new ParseObject('Test');
+    const original = new ParseObject('Test');
+    const pointer = new ParseObject('PointerTest');
+    pointer.id = '1234';
+    original.set('pointer', pointer);
+    const data = {
+      op: 'update',
+      clientId: 1,
+      requestId: 1,
+      object: object._toFullJSON(),
+      original: original._toFullJSON(),
+    };
+    const event = {
+      data: JSON.stringify(data)
+    }
+    let isChecked = false;
+    subscription.on('update', (parseObject, parseOriginalObject) => {
+      isChecked = true;
+      expect(parseObject.toJSON().pointer).toBeUndefined();
+      expect(parseOriginalObject.toJSON().pointer.objectId).toEqual(pointer.id);
     });
 
     liveQueryClient._handleWebSocketMessage(event);

@@ -6,17 +6,26 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
-
+/* global File */
 jest.autoMockOff();
+jest.mock('http');
+jest.mock('https');
 
 const ParseFile = require('../ParseFile').default;
 const CoreManager = require('../CoreManager');
+const EventEmitter = require('../EventEmitter');
+
+const mockHttp = require('http');
+const mockHttps = require('https');
 
 function generateSaveMock(prefix) {
-  return function(name) {
+  return function(name, payload, options) {
+    if (options && typeof options.progress === 'function') {
+      options.progress(0.5);
+    }
     return Promise.resolve({
       name: name,
-      url: prefix + name
+      url: prefix + name,
     });
   };
 }
@@ -27,7 +36,8 @@ describe('ParseFile', () => {
   beforeEach(() => {
     CoreManager.setFileController({
       saveFile: generateSaveMock('http://files.parsetfss.com/a/'),
-      saveBase64: generateSaveMock('http://files.parsetfss.com/a/')
+      saveBase64: generateSaveMock('http://files.parsetfss.com/a/'),
+      saveUri: generateSaveMock('http://files.parsetfss.com/a/'),
     });
   });
 
@@ -43,6 +53,12 @@ describe('ParseFile', () => {
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('image/png');
+  });
+
+  it('can create files with file uri', () => {
+    const file = new ParseFile('parse-image', { uri:'http://example.com/image.png' });
+    expect(file._source.format).toBe('uri');
+    expect(file._source.uri).toBe('http://example.com/image.png');
   });
 
   it('can extract data type from base64 with data type containing a number', () => {
@@ -126,6 +142,17 @@ describe('ParseFile', () => {
     });
   });
 
+  it('updates fields when saved with uri', () => {
+    const file = new ParseFile('parse.png', { uri: 'https://example.com/image.png' });
+    expect(file.name()).toBe('parse.png');
+    expect(file.url()).toBe(undefined);
+    return file.save().then(function(result) {
+      expect(result).toBe(file);
+      expect(result.name()).toBe('parse.png');
+      expect(result.url()).toBe('http://files.parsetfss.com/a/parse.png');
+    });
+  });
+
   it('generates a JSON representation', () => {
     const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     return file.save().then(function(result) {
@@ -183,6 +210,22 @@ describe('ParseFile', () => {
     expect(a.equals(b)).toBe(false);
     expect(b.equals(a)).toBe(false);
   });
+
+  it('reports progress during save when source is a File', () => {
+    const file = new ParseFile('progress.txt', new File(["Parse"], "progress.txt"));
+
+    const options = {
+      progress: function(){}
+    };
+    jest.spyOn(options, 'progress');
+
+    return file.save(options).then(function(f) {
+      expect(options.progress).toHaveBeenCalledWith(0.5);
+      expect(f).toBe(file);
+      expect(f.name()).toBe('progress.txt');
+      expect(f.url()).toBe('http://files.parsetfss.com/a/progress.txt');
+    });
+  });
 });
 
 describe('FileController', () => {
@@ -225,5 +268,87 @@ describe('FileController', () => {
       expect(f.name()).toBe('/api.parse.com/1/files/parse.txt');
       expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
     });
+  });
+
+  it('saveUri without uri type', () => {
+    try {
+      defaultController.saveUri('name', { format: 'unknown' });
+    } catch (error) {
+      expect(error.message).toBe('saveUri can only be used with Uri-type sources.');
+    }
+  });
+
+  it('saveUri with uri type', async () => {
+    const source = { format: 'uri', uri: 'https://example.com/image.png' };
+    jest.spyOn(
+      defaultController,
+      'download'
+    )
+      .mockImplementationOnce(() => {
+        return Promise.resolve({
+          base64: 'ParseA==',
+          contentType: 'image/png',
+        });
+      });
+
+    jest.spyOn(defaultController, 'saveBase64');
+    await defaultController.saveUri('fileName', source, {});
+    expect(defaultController.download).toHaveBeenCalledTimes(1);
+    expect(defaultController.saveBase64).toHaveBeenCalledTimes(1);
+    expect(defaultController.saveBase64.mock.calls[0]).toEqual([
+      'fileName',
+      { format: 'base64', base64: 'ParseA==', type: 'image/png' },
+      {}
+    ]);
+  });
+
+  it('download with base64 http', async () => {
+    const mockResponse = Object.create(EventEmitter.prototype);
+    EventEmitter.call(mockResponse);
+    mockResponse.setEncoding = function() {}
+    mockResponse.headers = {
+      'content-type': 'image/png'
+    };
+    const spy = jest.spyOn(mockHttp, 'get')
+      .mockImplementationOnce((uri, cb) => {
+        cb(mockResponse);
+        mockResponse.emit('data', 'base64String');
+        mockResponse.emit('end');
+        return {
+          on: function() {}
+        };
+      });
+
+    const data = await defaultController.download('http://example.com/image.png');
+    expect(data.base64).toBe('base64String');
+    expect(data.contentType).toBe('image/png');
+    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+    expect(mockHttps.get).toHaveBeenCalledTimes(0);
+    spy.mockRestore();
+  });
+
+  it('download with base64 https', async () => {
+    const mockResponse = Object.create(EventEmitter.prototype);
+    EventEmitter.call(mockResponse);
+    mockResponse.setEncoding = function() {}
+    mockResponse.headers = {
+      'content-type': 'image/png'
+    };
+    const spy = jest.spyOn(mockHttps, 'get')
+      .mockImplementationOnce((uri, cb) => {
+        cb(mockResponse);
+        mockResponse.emit('data', 'base64String');
+        mockResponse.emit('end');
+        return {
+          on: function() {}
+        };
+      });
+
+    const data = await defaultController.download('https://example.com/image.png');
+    expect(data.base64).toBe('base64String');
+    expect(data.contentType).toBe('image/png');
+    expect(mockHttp.get).toHaveBeenCalledTimes(0);
+    expect(mockHttps.get).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
   });
 });

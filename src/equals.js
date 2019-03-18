@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
+const toString = Object.prototype.toString;
 
 import ParseACL from './ParseACL';
 import ParseFile from './ParseFile';
@@ -13,6 +14,12 @@ import ParseGeoPoint from './ParseGeoPoint';
 import ParseObject from './ParseObject';
 
 export default function equals(a, b) {
+  if (toString.call(a) === '[object Date]' || toString.call(b) === '[object Date]') {
+    const dateA = new Date(a);
+    const dateB = new Date(b);
+    return (+dateA === +dateB);
+  }
+
   if (typeof a !== typeof b) {
     return false;
   }
@@ -29,7 +36,7 @@ export default function equals(a, b) {
     if (a.length !== b.length) {
       return false;
     }
-    for (var i = a.length; i--;) {
+    for (let i = a.length; i--;) {
       if (!equals(a[i], b[i])) {
         return false;
       }
@@ -43,11 +50,15 @@ export default function equals(a, b) {
       (a instanceof ParseObject)) {
     return a.equals(b);
   }
-
+  if (b instanceof ParseObject) {
+    if (a.__type === 'Object' || a.__type === 'Pointer') {
+      return a.objectId === b.id && a.className === b.className;
+    }
+  }
   if (Object.keys(a).length !== Object.keys(b).length) {
     return false;
   }
-  for (var k in a) {
+  for (const k in a) {
     if (!equals(a[k], b[k])) {
       return false;
     }

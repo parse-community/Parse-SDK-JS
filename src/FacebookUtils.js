@@ -9,13 +9,12 @@
  * @flow-weak
  */
 /* global FB */
-import parseDate from './parseDate';
 import ParseUser from './ParseUser';
 
-var initialized = false;
-var requestedPermissions;
-var initOptions;
-var provider = {
+let initialized = false;
+let requestedPermissions;
+let initOptions;
+const provider = {
   authenticate(options) {
     if (typeof FB === 'undefined') {
       options.error(this, 'Facebook SDK not found.');
@@ -42,24 +41,12 @@ var provider = {
 
   restoreAuthentication(authData) {
     if (authData) {
-      var expiration = parseDate(authData.expiration_date);
-      var expiresIn = expiration ?
-        (expiration.getTime() - new Date().getTime()) / 1000 :
-        0;
-
-      var authResponse = {
-        userID: authData.id,
-        accessToken: authData.access_token,
-        expiresIn: expiresIn
-      };
-      var newOptions = {};
+      const newOptions = {};
       if (initOptions) {
-        for (var key in initOptions) {
+        for (const key in initOptions) {
           newOptions[key] = initOptions[key];
         }
       }
-      newOptions.authResponse = authResponse;
-
       // Suppress checks for login status from the browser.
       newOptions.status = false;
 
@@ -67,9 +54,9 @@ var provider = {
       // Most of the time, the users will match -- it's only in cases where
       // the FB SDK knows of a different user than the one being restored
       // from a Parse User that logged in with username/password.
-      var existingResponse = FB.getAuthResponse();
+      const existingResponse = FB.getAuthResponse();
       if (existingResponse &&
-          existingResponse.userID !== authResponse.userID) {
+          existingResponse.userID !== authData.id) {
         FB.logout();
       }
 
@@ -93,7 +80,7 @@ var provider = {
  * @static
  * @hideconstructor
  */
-var FacebookUtils = {
+const FacebookUtils = {
   /**
    * Initializes Parse Facebook integration.  Call this function after you
    * have loaded the Facebook Javascript SDK with the same parameters
@@ -120,12 +107,12 @@ var FacebookUtils = {
     }
     initOptions = {};
     if (options) {
-      for (var key in options) {
+      for (const key in options) {
         initOptions[key] = options[key];
       }
     }
     if (initOptions.status && typeof console !== 'undefined') {
-      var warn = console.warn || console.log || function() {}; // eslint-disable-line no-console
+      const warn = console.warn || console.log || function() {}; // eslint-disable-line no-console
       warn.call(console, 'The "status" flag passed into' +
         ' FB.init, when set to true, can interfere with Parse Facebook' +
         ' integration, so it has been suppressed. Please call' +
@@ -177,9 +164,9 @@ var FacebookUtils = {
       requestedPermissions = permissions;
       return ParseUser._logInWith('facebook', options);
     } else {
-      var newOptions = {};
+      const newOptions = {};
       if (options) {
-        for (var key in options) {
+        for (const key in options) {
           newOptions[key] = options[key];
         }
       }
@@ -216,9 +203,9 @@ var FacebookUtils = {
       requestedPermissions = permissions;
       return user._linkWith('facebook', options);
     } else {
-      var newOptions = {};
+      const newOptions = {};
       if (options) {
-        for (var key in options) {
+        for (const key in options) {
           newOptions[key] = options[key];
         }
       }
