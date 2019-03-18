@@ -23,12 +23,6 @@ class MockUser {
 jest.setMock('../ParseUser', MockUser);
 
 const mockProvider = {
-  authData: {
-    authData: {
-      id: '1234'
-    }
-  },
-
   restoreAuthentication() {
     return true;
   },
@@ -37,9 +31,13 @@ const mockProvider = {
     return 'anonymous';
   },
 
-  deauthenticate() {
-    return true;
-  }
+  getAuthData() {
+    return {
+      authData: {
+        id: '1234',
+      },
+    };
+  },
 };
 
 const AnonymousUtils = require('../AnonymousUtils').default;
@@ -76,7 +74,7 @@ describe('AnonymousUtils', () => {
     jest.spyOn(user, '_linkWith');
     AnonymousUtils.link(user);
     expect(user._linkWith).toHaveBeenCalledTimes(1);
-    expect(user._linkWith).toHaveBeenCalledWith('anonymous', mockProvider.authData);
+    expect(user._linkWith).toHaveBeenCalledWith('anonymous', mockProvider.getAuthData());
     expect(AnonymousUtils._getAuthProvider).toHaveBeenCalledTimes(1);
   });
 
@@ -84,7 +82,7 @@ describe('AnonymousUtils', () => {
     jest.spyOn(MockUser, '_logInWith');
     AnonymousUtils.logIn();
     expect(MockUser._logInWith).toHaveBeenCalledTimes(1);
-    expect(MockUser._logInWith).toHaveBeenCalledWith('anonymous', mockProvider.authData);
+    expect(MockUser._logInWith).toHaveBeenCalledWith('anonymous', mockProvider.getAuthData());
     expect(AnonymousUtils._getAuthProvider).toHaveBeenCalledTimes(1);
   });
 });

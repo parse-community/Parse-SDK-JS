@@ -13,22 +13,6 @@ const uuidv4 = require('uuid/v4');
 
 let registered = false;
 
-const authenticationProvider = {
-  authData: {
-    authData: {
-      id: uuidv4(),
-    }
-  },
-
-  restoreAuthentication() {
-    return true;
-  },
-
-  getAuthType() {
-    return 'anonymous';
-  },
-};
-
 /**
  * Provides utility functions for working with Anonymously logged-in users. <br />
  * Anonymous users have some unique characteristics:
@@ -68,7 +52,7 @@ const AnonymousUtils = {
    *     linked to an anonymous user.
    * @static
    */
-  isLinked(user) {
+  isLinked(user: ParseUser) {
     const provider = this._getAuthProvider();
     return user._isLinked(provider.getAuthType());
   },
@@ -83,7 +67,7 @@ const AnonymousUtils = {
    */
   logIn() {
     const provider = this._getAuthProvider();
-    return ParseUser._logInWith(provider.getAuthType(), provider.authData);
+    return ParseUser._logInWith(provider.getAuthType(), provider.getAuthData());
   },
 
   /**
@@ -95,13 +79,29 @@ const AnonymousUtils = {
    * @returns {Promise}
    * @static
    */
-  link(user) {
+  link(user: ParseUser) {
     const provider = this._getAuthProvider();
-    return user._linkWith(provider.getAuthType(), provider.authData);
+    return user._linkWith(provider.getAuthType(), provider.getAuthData());
   },
 
   _getAuthProvider() {
-    const provider = authenticationProvider;
+    const provider = {
+      restoreAuthentication() {
+        return true;
+      },
+
+      getAuthType() {
+        return 'anonymous';
+      },
+
+      getAuthData() {
+        return {
+          authData: {
+            id: uuidv4(),
+          },
+        };
+      },
+    };
     if (!registered) {
       ParseUser._registerAuthenticationProvider(provider);
       registered = true;

@@ -725,7 +725,7 @@ describe('ParseUser', () => {
     jest.spyOn(provider, 'restoreAuthentication');
 
     const object = new ParseUser();
-    object.set('authData', provider.authData);
+    object.set('authData', provider.getAuthData());
 
     jest.spyOn(object, 'isCurrent')
       .mockImplementationOnce(() => true);
