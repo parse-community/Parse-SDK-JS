@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+jest.dontMock('../AnonymousUtils');
 jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
@@ -34,9 +35,14 @@ const ParseObject = require('../ParseObject').default;
 const ParseUser = require('../ParseUser').default;
 const Storage = require('../Storage');
 const ParseError = require('../ParseError').default;
+const AnonymousUtils = require('../AnonymousUtils').default;
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
+
+function flushPromises() {
+  return new Promise(resolve => setImmediate(resolve));
+}
 
 describe('ParseUser', () => {
   beforeEach(() => {
@@ -712,6 +718,113 @@ describe('ParseUser', () => {
       expect(error.message).toBe('Another user is already linked to this facebook id.');
       done();
     });
+  });
+
+  it('can sync anonymous user with current user', async () => {
+    const provider = AnonymousUtils._getAuthProvider();
+    jest.spyOn(provider, 'restoreAuthentication');
+
+    const object = new ParseUser();
+    object.set('authData', provider.getAuthData());
+
+    jest.spyOn(object, 'isCurrent')
+      .mockImplementationOnce(() => true);
+
+    const spy = jest.spyOn(ParseUser, 'currentAsync')
+      .mockImplementationOnce(() => Promise.resolve(object));
+
+    ParseUser._registerAuthenticationProvider(provider);
+
+    await flushPromises();
+
+    expect(ParseUser.currentAsync).toHaveBeenCalledTimes(1);
+    expect(provider.restoreAuthentication).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
+  });
+
+  it('can pass sessionToken on save', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid5',
+          sessionToken: 'r:123abc',
+          authData: {
+            anonymous: {
+              id: 'anonymousId',
+            }
+          }
+        }, 200);
+      },
+      ajax() {}
+    });
+    const user = await AnonymousUtils.logIn();
+    user.set('field', 'hello');
+    jest.spyOn(user, 'getSessionToken');
+
+    await user.save();
+    expect(user.getSessionToken).toHaveBeenCalledTimes(2);
+  });
+
+  it('can destroy anonymous user on logout', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid5',
+          sessionToken: 'r:123abc',
+          authData: {
+            anonymous: {
+              id: 'anonymousId',
+            }
+          }
+        }, 200);
+      },
+      ajax() {}
+    });
+    const user = await AnonymousUtils.logIn();
+    jest.spyOn(user, 'destroy');
+    ParseUser._setCurrentUserCache(user);
+
+    await ParseUser.logOut();
+    expect(user.destroy).toHaveBeenCalledTimes(1);
+  });
+
+  it('can destroy anonymous user when login new user', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid5',
+          sessionToken: 'r:123abc',
+          authData: {
+            anonymous: {
+              id: 'anonymousId',
+            }
+          }
+        }, 200);
+      },
+      ajax() {}
+    });
+    const user = await AnonymousUtils.logIn();
+    jest.spyOn(user, 'destroy');
+    ParseUser._setCurrentUserCache(user);
+
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid2',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+    await ParseUser.logIn('username', 'password')
+    expect(user.destroy).toHaveBeenCalledTimes(1);
   });
 
   it('strip anonymity when we set username', () => {

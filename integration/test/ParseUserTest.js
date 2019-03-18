@@ -439,4 +439,74 @@ describe('Parse User', () => {
       done();
     });
   });
+
+  it('can save anonymous user', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const user = await Parse.AnonymousUtils.logIn();
+    user.set('field', 'hello');
+    await user.save();
+
+    const query = new Parse.Query(Parse.User);
+    const result = await query.get(user.id);
+    expect(result.get('field')).toBe('hello');
+  });
+
+  it('can not recover anonymous user if logged out', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const user = await Parse.AnonymousUtils.logIn();
+    user.set('field', 'hello');
+    await user.save();
+
+    await Parse.User.logOut();
+
+    const query = new Parse.Query(Parse.User);
+    try {
+      await query.get(user.id);
+    } catch (error) {
+      expect(error.message).toBe('Object not found.');
+    }
+  });
+
+  it('can signUp anonymous user and retain data', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const user = await Parse.AnonymousUtils.logIn();
+    user.set('field', 'hello world');
+    await user.save();
+
+    expect(user.get('authData').anonymous).toBeDefined();
+
+    user.setUsername('foo');
+    user.setPassword('baz');
+
+    await user.signUp();
+
+    const query = new Parse.Query(Parse.User);
+    const result = await query.get(user.id);
+    expect(result.get('username')).toBe('foo');
+    expect(result.get('authData')).toBeUndefined();
+    expect(result.get('field')).toBe('hello world');
+    expect(user.get('authData').anonymous).toBeUndefined();
+  });
+
+  it('can logIn user without converting anonymous user', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    await Parse.User.signUp('foobaz', '1234');
+
+    const user = await Parse.AnonymousUtils.logIn();
+    user.set('field', 'hello world');
+    await user.save();
+
+    await Parse.User.logIn('foobaz', '1234');
+
+    const query = new Parse.Query(Parse.User);
+    try {
+      await query.get(user.id);
+    } catch (error) {
+      expect(error.message).toBe('Object not found.');
+    }
+  });
 });

@@ -173,6 +173,7 @@ Object.defineProperty(Parse, 'liveQueryServerURL', {
 
 Parse.ACL = require('./ParseACL').default;
 Parse.Analytics = require('./Analytics');
+Parse.AnonymousUtils = require('./AnonymousUtils').default;
 Parse.Cloud = require('./Cloud');
 Parse.CoreManager = require('./CoreManager');
 Parse.Config = require('./ParseConfig').default;
