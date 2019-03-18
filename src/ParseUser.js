@@ -816,7 +816,7 @@ const DefaultController = {
   setCurrentUser(user) {
     const currentUser = this.currentUser();
     let promise = Promise.resolve();
-    if (currentUser && AnonymousUtils.isLinked(currentUser)) {
+    if (currentUser && !user.equals(currentUser) && AnonymousUtils.isLinked(currentUser)) {
       promise = currentUser.destroy({ sessionToken: currentUser.getSessionToken() })
     }
     currentUserCache = user;

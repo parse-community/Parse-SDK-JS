@@ -720,23 +720,17 @@ describe('ParseUser', () => {
     });
   });
 
-  fit('can sync anonymous user with current user', async () => {
+  it('can sync anonymous user with current user', async () => {
     const provider = AnonymousUtils._getAuthProvider();
     jest.spyOn(provider, 'restoreAuthentication');
 
     const object = new ParseUser();
     object.set('authData', provider.authData);
 
-    jest.spyOn(
-      object,
-      'isCurrent'
-    )
+    jest.spyOn(object, 'isCurrent')
       .mockImplementationOnce(() => true);
 
-    const spy = jest.spyOn(
-      ParseUser,
-      'currentAsync'
-    )
+    const spy = jest.spyOn(ParseUser, 'currentAsync')
       .mockImplementationOnce(() => Promise.resolve(object));
 
     ParseUser._registerAuthenticationProvider(provider);
@@ -746,6 +740,91 @@ describe('ParseUser', () => {
     expect(ParseUser.currentAsync).toHaveBeenCalledTimes(1);
     expect(provider.restoreAuthentication).toHaveBeenCalledTimes(1);
     spy.mockRestore();
+  });
+
+  it('can pass sessionToken on save', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid5',
+          sessionToken: 'r:123abc',
+          authData: {
+            anonymous: {
+              id: 'anonymousId',
+            }
+          }
+        }, 200);
+      },
+      ajax() {}
+    });
+    const user = await AnonymousUtils.logIn();
+    user.set('field', 'hello');
+    jest.spyOn(user, 'getSessionToken');
+
+    await user.save();
+    expect(user.getSessionToken).toHaveBeenCalledTimes(2);
+  });
+
+  it('can destroy anonymous user on logout', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid5',
+          sessionToken: 'r:123abc',
+          authData: {
+            anonymous: {
+              id: 'anonymousId',
+            }
+          }
+        }, 200);
+      },
+      ajax() {}
+    });
+    const user = await AnonymousUtils.logIn();
+    jest.spyOn(user, 'destroy');
+    ParseUser._setCurrentUserCache(user);
+
+    await ParseUser.logOut();
+    expect(user.destroy).toHaveBeenCalledTimes(1);
+  });
+
+  it('can destroy anonymous user when login new user', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid5',
+          sessionToken: 'r:123abc',
+          authData: {
+            anonymous: {
+              id: 'anonymousId',
+            }
+          }
+        }, 200);
+      },
+      ajax() {}
+    });
+    const user = await AnonymousUtils.logIn();
+    jest.spyOn(user, 'destroy');
+    ParseUser._setCurrentUserCache(user);
+
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid2',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+    await ParseUser.logIn('username', 'password')
+    expect(user.destroy).toHaveBeenCalledTimes(1);
   });
 
   it('strip anonymity when we set username', () => {
