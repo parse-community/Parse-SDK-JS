@@ -16,7 +16,30 @@ import ParseQuery from './ParseQuery';
 
 const DEFAULT_PIN = '_default';
 const PIN_PREFIX = 'parsePin_';
+const OBJECT_PREFIX = 'Parse_LDS_';
 
+/**
+ * Provides a local datastore which can be used to store and retrieve <code>Parse.Object</code>. <br />
+ * To enable this functionality, call <code>Parse.enableLocalDatastore()</code>.
+ *
+ * To store objects you can pin them.
+ *
+ * <pre>await object.pin();</pre>
+ * <pre>await object.pinWithName('pinName');</pre>
+ *
+ * You can query your objects by changing the source of your query.
+ *
+ * <pre>query.fromLocalDatastore();</pre>
+ * <pre>query.fromPin();</pre>
+ * <pre>query.fromPinWithName();</pre>
+ *
+ * Once your source is changed, you can query your objects from LocalDatastore
+ *
+ * <pre>const localObjects = await query.find();</pre>
+ *
+ * @class Parse.LocalDatastore
+ * @static
+ */
 const LocalDatastore = {
   fromPinWithName(name: string): Promise {
     const controller = CoreManager.getLocalDatastoreController();
@@ -130,7 +153,7 @@ const LocalDatastore = {
     const localDatastore = await this._getAllContents();
     const allObjects = [];
     for (const key in localDatastore) {
-      if (key !== DEFAULT_PIN && !key.startsWith(PIN_PREFIX)) {
+      if (key.startsWith(OBJECT_PREFIX)) {
         allObjects.push(localDatastore[key]);
       }
     }
@@ -236,7 +259,7 @@ const LocalDatastore = {
     if (!this.isEnabled) {
       return;
     }
-    const localKey = `${object.className}_${localId}`;
+    const localKey = `${OBJECT_PREFIX}${object.className}_${localId}`;
     const objectKey = this.getKeyForObject(object);
 
     const unsaved = await this.fromPinWithName(localKey);
@@ -247,6 +270,7 @@ const LocalDatastore = {
     await this.pinWithName(objectKey, unsaved);
 
     const localDatastore = await this._getAllContents();
+    console
     for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
         let pinned = localDatastore[key] || [];
@@ -266,7 +290,8 @@ const LocalDatastore = {
    * <pre>
    * await Parse.LocalDatastore.updateFromServer();
    * </pre>
-   *
+   * @method updateFromServer
+   * @name Parse.LocalDatastore.updateFromServer
    * @static
    */
   async updateFromServer() {
@@ -276,7 +301,7 @@ const LocalDatastore = {
     const localDatastore = await this._getAllContents();
     const keys = [];
     for (const key in localDatastore) {
-      if (key !== DEFAULT_PIN && !key.startsWith(PIN_PREFIX)) {
+      if (key.startsWith(OBJECT_PREFIX)) {
         keys.push(key);
       }
     }
@@ -286,7 +311,8 @@ const LocalDatastore = {
     this.isSyncing = true;
     const pointersHash = {};
     for (const key of keys) {
-      const [className, objectId] = key.split('_');
+      // Ignore the OBJECT_PREFIX
+      const [ , , className, objectId] = key.split('_');
       if (!(className in pointersHash)) {
         pointersHash[className] = new Set();
       }
@@ -313,15 +339,18 @@ const LocalDatastore = {
       await Promise.all(pinPromises);
       this.isSyncing = false;
     } catch(error) {
-      console.log('Error syncing LocalDatastore'); // eslint-disable-line
-      console.log(error); // eslint-disable-line
+      console.log('Error syncing LocalDatastore: ', error); // eslint-disable-line
       this.isSyncing = false;
     }
   },
 
+  isLocalDatastoreKey(key: string) {
+    return !!(key && (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX) || key.startsWith(OBJECT_PREFIX)));
+  },
+
   getKeyForObject(object: any) {
     const objectId = object.objectId || object._getId();
-    return `${object.className}_${objectId}`;
+    return `${OBJECT_PREFIX}${object.className}_${objectId}`;
   },
 
   getPinName(pinName: ?string) {
@@ -341,6 +370,7 @@ const LocalDatastore = {
 
 LocalDatastore.DEFAULT_PIN = DEFAULT_PIN;
 LocalDatastore.PIN_PREFIX = PIN_PREFIX;
+LocalDatastore.OBJECT_PREFIX = OBJECT_PREFIX;
 LocalDatastore.isEnabled = false;
 LocalDatastore.isSyncing = false;
 
