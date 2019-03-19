@@ -641,7 +641,6 @@ describe('LocalDatastore', () => {
   it('updateFromServer handle error', async () => {
     LocalDatastore.isEnabled = true;
     LocalDatastore.isSyncing = false;
-    const object = new ParseObject('Item');
     const LDS = {
       [KEY1]: item1._toFullJSON(),
       [`${PIN_PREFIX}_testPinName`]: [KEY1],

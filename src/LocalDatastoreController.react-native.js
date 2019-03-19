@@ -10,6 +10,7 @@
  */
 
 const RNStorage = require('./StorageController.react-native');
+const LocalDatastore = require('./LocalDatastore');
 
 const LocalDatastoreController = {
   async fromPinWithName(name: string): Promise {
@@ -38,18 +39,52 @@ const LocalDatastoreController = {
   },
 
   async getAllContents(): Promise {
-    const LDS = {};
     const keys = await RNStorage.getAllKeys();
+    const batch = [];
     for (let i = 0; i < keys.length; i += 1) {
       const key = keys[i];
-      const value = await RNStorage.getItemAsync(key);
-      LDS[key] = JSON.parse(value);
+      if (LocalDatastore.isLocalDatastoreKey(key)) {
+        batch.push(key);
+      }
     }
+    const LDS = {};
+    const results = await RNStorage.multiGet(batch);
+    results.map((pair) => {
+      const [key, value] = pair;
+      try {
+        LDS[key] = JSON.parse(value);
+      } catch (error) {
+        LDS[key] = null;
+      }
+    });
     return Promise.resolve(LDS);
   },
 
-  clear(): Promise {
-    return RNStorage.clear();
+  async getRawStorage(): Promise {
+    const keys = await RNStorage.getAllKeys();
+    const storage = {};
+    const results = await RNStorage.multiGet(keys);
+    results.map((pair) => {
+      const [key, value] = pair;
+      storage[key] = value;
+    });
+    return Promise.resolve(storage);
+  },
+
+  async clear(): void {
+    try {
+      const keys = await RNStorage.getAllKeys();
+      const batch = [];
+      for (let i = 0; i < keys.length; i += 1) {
+        const key = keys[i];
+        if (LocalDatastore.isLocalDatastoreKey(key)) {
+          batch.push(key);
+        }
+      }
+      await RNStorage.multiRemove(batch);
+    } catch (error) {
+      console.log(error); // eslint-disable-line
+    }
   }
 };
 

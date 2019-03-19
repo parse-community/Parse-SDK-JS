@@ -61,6 +61,12 @@ const LocalDatastore = {
     return controller.getAllContents();
   },
 
+  // Use for testing
+  _getRawStorage(): Promise {
+    const controller = CoreManager.getLocalDatastoreController();
+    return controller.getRawStorage();
+  },
+
   _clear(): Promise {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.clear();
