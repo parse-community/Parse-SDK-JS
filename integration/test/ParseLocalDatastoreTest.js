@@ -45,6 +45,26 @@ function runTest(controller) {
       storage = await Parse.LocalDatastore._getRawStorage();
       assert.equal(Object.keys(storage).length, 1);
       assert.equal(storage['DO_NOT_CLEAR'], '{}');
+      await Parse.LocalDatastore.unPinWithName('DO_NOT_CLEAR');
+    });
+
+    it(`${controller.name} can getAllContents localDatastore`, async () => {
+      const obj1 = new TestObject();
+      const obj2 = new TestObject();
+      const obj3 = new TestObject();
+      const objects = [obj1, obj2, obj3];
+      await Parse.Object.pinAll(objects);
+      await Parse.Object.pinAllWithName('test_pin', objects);
+      await Parse.Object.saveAll(objects);
+
+      await Parse.LocalDatastore.pinWithName('DO_NOT_FETCH', {});
+
+      const storage = await Parse.LocalDatastore._getRawStorage();
+      assert.equal(Object.keys(storage).length, 6);
+
+      const LDS = await Parse.LocalDatastore._getAllContents();
+      assert.equal(Object.keys(LDS).length, 5);
+      assert.equal(LDS['DO_NOT_FETCH'], null);
     });
 
     it(`${controller.name} can pin (unsaved)`, async () => {
@@ -2459,8 +2479,8 @@ describe('Parse LocalDatastore', () => {
   });
 
   const controllers = [
-    // { name: 'Default', file: '../../lib/node/LocalDatastoreController.default' },
-    // { name: 'Browser', file: '../../lib/node/LocalDatastoreController.browser' },
+    { name: 'Default', file: '../../lib/node/LocalDatastoreController.default' },
+    { name: 'Browser', file: '../../lib/node/LocalDatastoreController.browser' },
     { name: 'React-Native', file: '../../lib/node/LocalDatastoreController.react-native' },
   ];
 

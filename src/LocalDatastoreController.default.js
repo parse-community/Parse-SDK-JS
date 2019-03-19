@@ -8,34 +8,50 @@
  *
  * @flow
  */
+const LocalDatastore = require('./LocalDatastore');
 
 const memMap = {};
 const LocalDatastoreController = {
-  fromPinWithName(name: string): ?any {
-    if (memMap.hasOwnProperty(name)) {
-      return memMap[name];
+  fromPinWithName(name: string): Promise {
+    if (!memMap.hasOwnProperty(name)) {
+      return Promise.resolve(null);
     }
-    return null;
+    const objects = JSON.parse(memMap[name]);
+    return Promise.resolve(objects);
   },
 
   pinWithName(name: string, value: any) {
-    memMap[name] = value;
+    const values = JSON.stringify(value);
+    memMap[name] = values;
+    return Promise.resolve();
   },
 
-  unPinWithName(name: string) {
+  unPinWithName(name: string): Promise {
     delete memMap[name];
+    return Promise.resolve();
   },
 
-  getAllContents() {
-    return memMap;
-  },
-
-  clear() {
+  getAllContents(): Promise {
+    const LDS = {};
     for (const key in memMap) {
-      if (memMap.hasOwnProperty(key)) {
+      if (memMap.hasOwnProperty(key) && LocalDatastore.isLocalDatastoreKey(key)) {
+        LDS[key] = JSON.parse(memMap[key]);
+      }
+    }
+    return Promise.resolve(LDS);
+  },
+
+  getRawStorage(): Promise {
+    return Promise.resolve(memMap);
+  },
+
+  clear(): Promise {
+    for (const key in memMap) {
+      if (memMap.hasOwnProperty(key) && LocalDatastore.isLocalDatastoreKey(key)) {
         delete memMap[key];
       }
     }
+    return Promise.resolve();
   }
 };
 

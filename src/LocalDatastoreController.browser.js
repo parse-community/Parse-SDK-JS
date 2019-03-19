@@ -10,6 +10,7 @@
  */
 
 /* global localStorage */
+const LocalDatastore = require('./LocalDatastore');
 
 const LocalDatastoreController = {
   fromPinWithName(name: string): Promise {
@@ -40,14 +41,36 @@ const LocalDatastoreController = {
     const LDS = {};
     for (let i = 0; i < localStorage.length; i += 1) {
       const key = localStorage.key(i);
-      const value = localStorage.getItem(key);
-      LDS[key] = JSON.parse(value);
+      if (LocalDatastore.isLocalDatastoreKey(key)) {
+        const value = localStorage.getItem(key);
+        LDS[key] = JSON.parse(value);
+      }
     }
     return Promise.resolve(LDS);
   },
 
+  getRawStorage(): Promise {
+    const storage = {};
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      const value = localStorage.getItem(key);
+      storage[key] = value;
+    }
+    return Promise.resolve(storage);
+  },
+
   clear(): Promise {
-    return Promise.resolve(localStorage.clear());
+    const toRemove = [];
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      if (LocalDatastore.isLocalDatastoreKey(key)) {
+        toRemove.push(key);
+      }
+    }
+    for (const key of toRemove) {
+      localStorage.removeItem(key);
+    }
+    return Promise.resolve();
   }
 };
 

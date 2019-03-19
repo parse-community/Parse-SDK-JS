@@ -387,6 +387,7 @@ if (process.env.PARSE_BUILD === 'react-native') {
 } else if (process.env.PARSE_BUILD === 'browser') {
   CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.browser'));
 } else {
+  console.log(require('./LocalDatastoreController.default'));
   CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.default'));
 }
 CoreManager.setLocalDatastore(LocalDatastore);
