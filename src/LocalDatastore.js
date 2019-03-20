@@ -69,16 +69,25 @@ const LocalDatastore = {
 
   // Pin the object and children recursively
   // Saves the object and children key to Pin Name
-  async _handlePinWithName(name: string, object: ParseObject): Promise {
-    const pinName = this.getPinName(name);
-    const objects = this._getChildren(object);
-    objects[this.getKeyForObject(object)] = object._toFullJSON();
-    for (const objectKey in objects) {
-      await this.pinWithName(objectKey, objects[objectKey]);
+  async _handlePinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+    if (!objects || objects.length === 0) {
+      return;
     }
+    const pinName = this.getPinName(name);
+    const promises = [];
+    const objectKeys = [];
+    for (const parent of objects) {
+      const children = this._getChildren(parent);
+      const parentKey = this.getKeyForObject(parent);
+      children[parentKey] = parent._toFullJSON();
+      for (const objectKey in children) {
+        objectKeys.push(objectKey);
+        promises.push(this.pinWithName(objectKey, children[objectKey]));
+      }
+    }
+    await Promise.all(promises);
     const pinned = await this.fromPinWithName(pinName) || [];
-    const objectIds = Object.keys(objects);
-    const toPin = [...new Set([...pinned, ...objectIds])];
+    const toPin = [...new Set([...pinned, ...objectKeys])];
     await this.pinWithName(pinName, toPin);
   },
 

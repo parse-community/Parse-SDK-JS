@@ -1842,9 +1842,7 @@ class ParseObject {
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
     }
-    for (const object of objects) {
-      await localDatastore._handlePinWithName(name, object);
-    }
+    await localDatastore._handlePinAllWithName(name, objects);
   }
 
   /**
