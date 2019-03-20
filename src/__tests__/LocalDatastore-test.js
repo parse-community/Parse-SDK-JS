@@ -185,31 +185,31 @@ describe('LocalDatastore', () => {
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(4);
   });
 
-  it('_handleUnPinWithName default pin', async () => {
+  it('_handleUnPinAllWithName default pin', async () => {
     const LDS = {
       [DEFAULT_PIN]: [KEY1, KEY2],
     };
     mockLocalStorageController
       .getAllContents
       .mockImplementationOnce(() => LDS);
-    await LocalDatastore._handleUnPinWithName(DEFAULT_PIN, item1);
+    await LocalDatastore._handleUnPinAllWithName(DEFAULT_PIN, [item1]);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledWith(DEFAULT_PIN, [KEY2]);
   });
 
-  it('_handleUnPinWithName specific pin', async () => {
+  it('_handleUnPinAllWithName specific pin', async () => {
     const LDS = {
       parsePin_test_pin: [KEY1, KEY2],
     };
     mockLocalStorageController
       .getAllContents
       .mockImplementationOnce(() => LDS);
-    await LocalDatastore._handleUnPinWithName('test_pin', item1);
+    await LocalDatastore._handleUnPinAllWithName('test_pin', [item1]);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledWith(PIN_PREFIX + 'test_pin', [KEY2]);
   });
 
-  it('_handleUnPinWithName default pin remove pinName', async () => {
+  it('_handleUnPinAllWithName default pin remove pinName', async () => {
     const object = new ParseObject('Item');
     const LDS = {
       [DEFAULT_PIN]: [],
@@ -217,12 +217,12 @@ describe('LocalDatastore', () => {
     mockLocalStorageController
       .getAllContents
       .mockImplementationOnce(() => LDS);
-    await LocalDatastore._handleUnPinWithName(DEFAULT_PIN, object);
+    await LocalDatastore._handleUnPinAllWithName(DEFAULT_PIN, [object]);
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(2);
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledWith(DEFAULT_PIN);
   });
 
-  it('_handleUnPinWithName specific pin remove pinName', async () => {
+  it('_handleUnPinAllWithName specific pin remove pinName', async () => {
     const object = new ParseObject('Item');
     const LDS = {
       [PIN_PREFIX + 'test_pin']: [],
@@ -230,12 +230,12 @@ describe('LocalDatastore', () => {
     mockLocalStorageController
       .getAllContents
       .mockImplementationOnce(() => LDS);
-    await LocalDatastore._handleUnPinWithName('test_pin', object);
+    await LocalDatastore._handleUnPinAllWithName('test_pin', [object]);
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledTimes(2);
     expect(mockLocalStorageController.unPinWithName).toHaveBeenCalledWith(PIN_PREFIX + 'test_pin');
   });
 
-  it('_handleUnPinWithName remove if exist', async () => {
+  it('_handleUnPinAllWithName remove if exist', async () => {
     const objects = [KEY1, KEY2, KEY3];
     const LDS = {
       [PIN_PREFIX + 'test_pin']: objects,
@@ -247,7 +247,7 @@ describe('LocalDatastore', () => {
       .getAllContents
       .mockImplementationOnce(() => LDS);
 
-    await LocalDatastore._handleUnPinWithName('test_pin', item1);
+    await LocalDatastore._handleUnPinAllWithName('test_pin', [item1]);
 
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(1);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledWith(PIN_PREFIX + 'test_pin', [KEY2, KEY3]);

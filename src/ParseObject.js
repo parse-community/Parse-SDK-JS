@@ -1837,12 +1837,12 @@ class ParseObject {
    * @return {Promise} A promise that is fulfilled when the pin completes.
    * @static
    */
-  static async pinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+  static pinAllWithName(name: string, objects: Array<ParseObject>): Promise {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
     }
-    await localDatastore._handlePinAllWithName(name, objects);
+    return localDatastore._handlePinAllWithName(name, objects);
   }
 
   /**
@@ -1877,14 +1877,12 @@ class ParseObject {
    * @return {Promise} A promise that is fulfilled when the unPin completes.
    * @static
    */
-  static async unPinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+  static unPinAllWithName(name: string, objects: Array<ParseObject>): Promise {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
     }
-    for (const object of objects) {
-      await localDatastore._handleUnPinWithName(name, object);
-    }
+    return localDatastore._handleUnPinAllWithName(name, objects);
   }
 
   /**

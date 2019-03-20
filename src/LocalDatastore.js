@@ -93,22 +93,32 @@ const LocalDatastore = {
 
   // Removes object and children keys from pin name
   // Keeps the object and children pinned
-  async _handleUnPinWithName(name: string, object: ParseObject) {
+  async _handleUnPinAllWithName(name: string, objects: Array<ParseObject>) {
+    if (!objects || objects.length === 0) {
+      return;
+    }
     const localDatastore = await this._getAllContents();
     const pinName = this.getPinName(name);
-    const objects = this._getChildren(object);
-    const objectIds = Object.keys(objects);
-    objectIds.push(this.getKeyForObject(object));
+    const promises = [];
+    let objectKeys = [];
+    for (const parent of objects) {
+      const children = this._getChildren(parent);
+      const parentKey = this.getKeyForObject(parent);
+      objectKeys.push(parentKey);
+      objectKeys.push(...Object.keys(children));
+    }
+    objectKeys = [...new Set(objectKeys)];
+
     let pinned = localDatastore[pinName] || [];
-    pinned = pinned.filter(item => !objectIds.includes(item));
+    pinned = pinned.filter(item => !objectKeys.includes(item));
     if (pinned.length == 0) {
-      await this.unPinWithName(pinName);
+      promises.push(this.unPinWithName(pinName));
       delete localDatastore[pinName];
     } else {
-      await this.pinWithName(pinName, pinned);
+      promises.push(this.pinWithName(pinName, pinned));
       localDatastore[pinName] = pinned;
     }
-    for (const objectKey of objectIds) {
+    for (const objectKey of objectKeys) {
       let hasReference = false;
       for (const key in localDatastore) {
         if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
@@ -120,9 +130,10 @@ const LocalDatastore = {
         }
       }
       if (!hasReference) {
-        await this.unPinWithName(objectKey);
+        promises.push(this.unPinWithName(objectKey));
       }
     }
+    return Promise.all(promises);
   },
 
   // Retrieve all pointer fields from object recursively

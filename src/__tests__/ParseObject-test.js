@@ -111,7 +111,7 @@ const mockLocalDatastore = {
   pinWithName: jest.fn(),
   unPinWithName: jest.fn(),
   _handlePinAllWithName: jest.fn(),
-  _handleUnPinWithName: jest.fn(),
+  _handleUnPinAllWithName: jest.fn(),
   _getAllContent: jest.fn(),
   _serializeObjectsFromPinName: jest.fn(),
   _serializeObject: jest.fn(),
@@ -2621,8 +2621,8 @@ describe('ParseObject pin', () => {
   it('can unPin to default', async () => {
     const object = new ParseObject('Item');
     await object.unPin();
-    expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledTimes(1);
-    expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledWith(DEFAULT_PIN, object);
+    expect(mockLocalDatastore._handleUnPinAllWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalDatastore._handleUnPinAllWithName).toHaveBeenCalledWith(DEFAULT_PIN, [object]);
   });
 
   it('can pin to specific pin', async () => {
@@ -2635,8 +2635,8 @@ describe('ParseObject pin', () => {
   it('can unPin to specific', async () => {
     const object = new ParseObject('Item');
     await object.unPinWithName('test_pin');
-    expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledTimes(1);
-    expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledWith('test_pin', object);
+    expect(mockLocalDatastore._handleUnPinAllWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalDatastore._handleUnPinAllWithName).toHaveBeenCalledWith('test_pin', [object]);
   });
 
   it('can check if pinned', async () => {
@@ -2692,9 +2692,8 @@ describe('ParseObject pin', () => {
     const obj1 = new ParseObject('Item');
     const obj2 = new ParseObject('Item');
     await ParseObject.unPinAll([obj1, obj2]);
-    expect(mockLocalDatastore._handleUnPinWithName).toHaveBeenCalledTimes(2);
-    expect(mockLocalDatastore._handleUnPinWithName.mock.calls[0]).toEqual([DEFAULT_PIN, obj1]);
-    expect(mockLocalDatastore._handleUnPinWithName.mock.calls[1]).toEqual([DEFAULT_PIN, obj2]);
+    expect(mockLocalDatastore._handleUnPinAllWithName).toHaveBeenCalledTimes(1);
+    expect(mockLocalDatastore._handleUnPinAllWithName.mock.calls[0]).toEqual([DEFAULT_PIN, [obj1, obj2]]);
   });
 
   it('can unPinAllObjects', async () => {
