@@ -24,7 +24,7 @@ import { DEFAULT_PIN, PIN_PREFIX, OBJECT_PREFIX } from './LocalDatastoreUtils';
  * <pre>await object.pin();</pre>
  * <pre>await object.pinWithName('pinName');</pre>
  *
- * Query objects by changing query source
+ * Query pinned objects
  *
  * <pre>query.fromLocalDatastore();</pre>
  * <pre>query.fromPin();</pre>
@@ -88,7 +88,7 @@ const LocalDatastore = {
     await Promise.all(promises);
     const pinned = await this.fromPinWithName(pinName) || [];
     const toPin = [...new Set([...pinned, ...objectKeys])];
-    await this.pinWithName(pinName, toPin);
+    return this.pinWithName(pinName, toPin);
   },
 
   // Removes object and children keys from pin name
@@ -104,8 +104,7 @@ const LocalDatastore = {
     for (const parent of objects) {
       const children = this._getChildren(parent);
       const parentKey = this.getKeyForObject(parent);
-      objectKeys.push(parentKey);
-      objectKeys.push(...Object.keys(children));
+      objectKeys.push(parentKey, ...Object.keys(children));
     }
     objectKeys = [...new Set(objectKeys)];
 
@@ -179,12 +178,12 @@ const LocalDatastore = {
       }
     }
     if (!name) {
-      return Promise.resolve(allObjects);
+      return allObjects;
     }
     const pinName = await this.getPinName(name);
     const pinned = await this.fromPinWithName(pinName);
     if (!Array.isArray(pinned)) {
-      return Promise.resolve([]);
+      return [];
     }
     const objects = pinned.map(async (objectKey) => await this.fromPinWithName(objectKey));
     return Promise.all(objects);
@@ -233,12 +232,12 @@ const LocalDatastore = {
   // Update object pin value
   async _updateObjectIfPinned(object: ParseObject): Promise {
     if (!this.isEnabled) {
-      return Promise.resolve();
+      return;
     }
     const objectKey = this.getKeyForObject(object);
     const pinned = await this.fromPinWithName(objectKey);
     if (!pinned) {
-      return Promise.resolve();
+      return;
     }
     return this.pinWithName(objectKey, object._toFullJSON());
   },
