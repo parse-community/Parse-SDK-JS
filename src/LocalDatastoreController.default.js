@@ -20,7 +20,7 @@ const LocalDatastoreController = {
     return Promise.resolve(objects);
   },
 
-  pinWithName(name: string, value: any) {
+  pinWithName(name: string, value: any): Promise {
     const values = JSON.stringify(value);
     memMap[name] = values;
     return Promise.resolve();

@@ -274,7 +274,6 @@ const LocalDatastore = {
     await this.pinWithName(objectKey, unsaved);
 
     const localDatastore = await this._getAllContents();
-    console
     for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
         let pinned = localDatastore[key] || [];
