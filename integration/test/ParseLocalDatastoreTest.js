@@ -8,9 +8,10 @@ const Item = Parse.Object.extend('Item');
 
 global.localStorage = require('./mockLocalStorage');
 const mockRNStorage = require('./mockRNStorage');
+const LocalDatastoreUtils = require('../../lib/node/LocalDatastoreUtils');
 
-const DEFAULT_PIN = Parse.LocalDatastore.DEFAULT_PIN;
-const PIN_PREFIX = Parse.LocalDatastore.PIN_PREFIX;
+const DEFAULT_PIN = LocalDatastoreUtils.DEFAULT_PIN;
+const PIN_PREFIX = LocalDatastoreUtils.PIN_PREFIX;
 
 function LDS_KEY(object) {
   return Parse.LocalDatastore.getKeyForObject(object);
@@ -926,10 +927,14 @@ function runTest(controller) {
       const obj1 = new TestObject({ field: 1 });
       const obj2 = new TestObject({ field: 2 });
       const obj3 = new TestObject({ field: 3 });
+      const obj4 = new TestObject({ field: 4 });
       const objects = [obj1, obj2, obj3];
-      await Parse.Object.saveAll(objects);
 
+      await Parse.Object.saveAll(objects);
       await Parse.Object.pinAll(objects);
+      await obj4.save();
+      await obj4.pinWithName('DO_NOT_QUERY');
+
       const query = new Parse.Query(TestObject);
       query.fromPin();
       const results = await query.find();

@@ -8,7 +8,7 @@
  *
  * @flow
  */
-const LocalDatastore = require('./LocalDatastore');
+import { isLocalDatastoreKey } from './LocalDatastoreUtils';
 
 const memMap = {};
 const LocalDatastoreController = {
@@ -34,7 +34,7 @@ const LocalDatastoreController = {
   getAllContents(): Promise {
     const LDS = {};
     for (const key in memMap) {
-      if (memMap.hasOwnProperty(key) && LocalDatastore.isLocalDatastoreKey(key)) {
+      if (memMap.hasOwnProperty(key) && isLocalDatastoreKey(key)) {
         LDS[key] = JSON.parse(memMap[key]);
       }
     }
@@ -47,7 +47,7 @@ const LocalDatastoreController = {
 
   clear(): Promise {
     for (const key in memMap) {
-      if (memMap.hasOwnProperty(key) && LocalDatastore.isLocalDatastoreKey(key)) {
+      if (memMap.hasOwnProperty(key) && isLocalDatastoreKey(key)) {
         delete memMap[key];
       }
     }

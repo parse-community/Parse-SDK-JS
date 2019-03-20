@@ -16,6 +16,7 @@ import ParseError from './ParseError';
 import ParseGeoPoint from './ParseGeoPoint';
 import ParseObject from './ParseObject';
 import OfflineQuery from './OfflineQuery';
+import { DEFAULT_PIN } from './LocalDatastoreUtils';
 
 import type { RequestOptions, FullOptions } from './RESTController';
 
@@ -1542,28 +1543,35 @@ class ParseQuery {
 
   /**
    * Changes the source of this query to all pinned objects.
+   *
+   * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  fromLocalDatastore() {
-    this.fromPinWithName(null);
+  fromLocalDatastore(): ParseQuery {
+    return this.fromPinWithName(null);
   }
 
   /**
    * Changes the source of this query to the default group of pinned objects.
+   *
+   * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  fromPin() {
-    const localDatastore = CoreManager.getLocalDatastore();
-    this.fromPinWithName(localDatastore.DEFAULT_PIN);
+  fromPin(): ParseQuery {
+    return this.fromPinWithName(DEFAULT_PIN);
   }
 
   /**
    * Changes the source of this query to a specific group of pinned objects.
+   *
+   * @param {String} name The name of query source.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  fromPinWithName(name: string) {
+  fromPinWithName(name: string): ParseQuery {
     const localDatastore = CoreManager.getLocalDatastore();
     if (localDatastore.checkIfEnabled()) {
       this._queriesLocalDatastore = true;
       this._localDatastorePinName = name;
     }
+    return this;
   }
 }
 

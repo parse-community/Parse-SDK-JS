@@ -2713,28 +2713,67 @@ describe('ParseObject pin', () => {
 
   it('cannot pin when localDatastore disabled', async () => {
     mockLocalDatastore.isEnabled = false;
-    const spy = jest.spyOn(
-      console,
-      'log'
-    );
     const name = 'test_pin';
     const obj = new ParseObject('Item');
-    await obj.pin();
-    await obj.unPin();
-    await obj.isPinned();
-    await obj.pinWithName(name);
-    await obj.unPinWithName(name);
-    await obj.fetchFromLocalDatastore();
-
-    await ParseObject.pinAll([obj]);
-    await ParseObject.unPinAll([obj]);
-    await ParseObject.pinAllWithName(name, [obj]);
-    await ParseObject.unPinAllWithName(name, [obj]);
-    await ParseObject.unPinAllObjects();
-    await ParseObject.unPinAllObjectsWithName(name);
-
-    expect(spy).toHaveBeenCalledTimes(12);
-    expect(spy).toHaveBeenCalledWith('Parse.enableLocalDatastore() must be called first');
-    spy.mockRestore();
+    try {
+      await obj.pin();
+    } catch (error) {
+      expect(error).toBe('Parse.enableLocalDatastore() must be called first');
+    }
+    try {
+      await obj.unPin();
+    } catch (error) {
+      expect(error).toBe('Parse.enableLocalDatastore() must be called first');
+    }
+    try {
+      await obj.isPinned();
+    } catch (error) {
+      expect(error).toBe('Parse.enableLocalDatastore() must be called first');
+    }
+    try {
+      await obj.pinWithName();
+    } catch (error) {
+      expect(error).toBe('Parse.enableLocalDatastore() must be called first');
+    }
+    try {
+      await obj.unPinWithName();
+    } catch (error) {
+      expect(error).toBe('Parse.enableLocalDatastore() must be called first');
+    }
+    try {
+      await obj.fetchFromLocalDatastore();
+    } catch (error) {
+      expect(error).toBe('Parse.enableLocalDatastore() must be called first');
+    }
+    try {
+      await ParseObject.pinAll([obj]);
+    } catch (error) {
+      expect(error).toBe('Parse.enableLocalDatastore() must be called first');
+    }
+    try {
+      await ParseObject.unPinAll([obj]);
+    } catch (error) {
+      expect(error).toBe('Parse.enableLocalDatastore() must be called first');
+    }
+    try {
+      await ParseObject.pinAllWithName(name, [obj]);
+    } catch (error) {
+      expect(error).toBe('Parse.enableLocalDatastore() must be called first');
+    }
+    try {
+      await ParseObject.unPinAllWithName(name, [obj]);
+    } catch (error) {
+      expect(error).toBe('Parse.enableLocalDatastore() must be called first');
+    }
+    try {
+      await ParseObject.unPinAllObjects();
+    } catch (error) {
+      expect(error).toBe('Parse.enableLocalDatastore() must be called first');
+    }
+    try {
+      await ParseObject.unPinAllObjectsWithName(name);
+    } catch (error) {
+      expect(error).toBe('Parse.enableLocalDatastore() must be called first');
+    }
   });
 });

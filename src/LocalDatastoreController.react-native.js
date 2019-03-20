@@ -10,7 +10,7 @@
  */
 
 const RNStorage = require('./StorageController.react-native');
-const LocalDatastore = require('./LocalDatastore');
+import { isLocalDatastoreKey } from './LocalDatastoreUtils';
 
 const LocalDatastoreController = {
   async fromPinWithName(name: string): Promise {
@@ -43,7 +43,7 @@ const LocalDatastoreController = {
     const batch = [];
     for (let i = 0; i < keys.length; i += 1) {
       const key = keys[i];
-      if (LocalDatastore.isLocalDatastoreKey(key)) {
+      if (isLocalDatastoreKey(key)) {
         batch.push(key);
       }
     }
@@ -77,7 +77,7 @@ const LocalDatastoreController = {
       const batch = [];
       for (let i = 0; i < keys.length; i += 1) {
         const key = keys[i];
-        if (LocalDatastore.isLocalDatastoreKey(key)) {
+        if (isLocalDatastoreKey(key)) {
           batch.push(key);
         }
       }

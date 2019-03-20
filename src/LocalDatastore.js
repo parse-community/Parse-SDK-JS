@@ -13,10 +13,7 @@ import CoreManager from './CoreManager';
 
 import type ParseObject from './ParseObject';
 import ParseQuery from './ParseQuery';
-
-const DEFAULT_PIN = '_default';
-const PIN_PREFIX = 'parsePin_';
-const OBJECT_PREFIX = 'Parse_LDS_';
+import { DEFAULT_PIN, PIN_PREFIX, OBJECT_PREFIX } from './LocalDatastoreUtils';
 
 /**
  * Provides a local datastore which can be used to store and retrieve <code>Parse.Object</code>. <br />
@@ -216,15 +213,16 @@ const LocalDatastore = {
 
   // Called when an object is save / fetched
   // Update object pin value
-  async _updateObjectIfPinned(object: ParseObject) {
+  async _updateObjectIfPinned(object: ParseObject): Promise {
     if (!this.isEnabled) {
-      return;
+      return Promise.resolve();
     }
     const objectKey = this.getKeyForObject(object);
     const pinned = await this.fromPinWithName(objectKey);
-    if (pinned) {
-      await this.pinWithName(objectKey, object._toFullJSON());
+    if (!pinned) {
+      return Promise.resolve();
     }
+    return this.pinWithName(objectKey, object._toFullJSON());
   },
 
   // Called when object is destroyed
@@ -350,10 +348,6 @@ const LocalDatastore = {
     }
   },
 
-  isLocalDatastoreKey(key: string) {
-    return !!(key && (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX) || key.startsWith(OBJECT_PREFIX)));
-  },
-
   getKeyForObject(object: any) {
     const objectId = object.objectId || object._getId();
     return `${OBJECT_PREFIX}${object.className}_${objectId}`;
@@ -374,9 +368,6 @@ const LocalDatastore = {
   }
 };
 
-LocalDatastore.DEFAULT_PIN = DEFAULT_PIN;
-LocalDatastore.PIN_PREFIX = PIN_PREFIX;
-LocalDatastore.OBJECT_PREFIX = OBJECT_PREFIX;
 LocalDatastore.isEnabled = false;
 LocalDatastore.isSyncing = false;
 
@@ -387,7 +378,6 @@ if (process.env.PARSE_BUILD === 'react-native') {
 } else if (process.env.PARSE_BUILD === 'browser') {
   CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.browser'));
 } else {
-  console.log(require('./LocalDatastoreController.default'));
   CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.default'));
 }
 CoreManager.setLocalDatastore(LocalDatastore);
