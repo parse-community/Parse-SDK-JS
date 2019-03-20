@@ -12,46 +12,43 @@ import { isLocalDatastoreKey } from './LocalDatastoreUtils';
 
 const memMap = {};
 const LocalDatastoreController = {
-  fromPinWithName(name: string): Promise {
+  fromPinWithName(name: string) {
     if (!memMap.hasOwnProperty(name)) {
-      return Promise.resolve(null);
+      return null;
     }
     const objects = JSON.parse(memMap[name]);
-    return Promise.resolve(objects);
+    return objects;
   },
 
-  pinWithName(name: string, value: any): Promise {
+  pinWithName(name: string, value: any) {
     const values = JSON.stringify(value);
     memMap[name] = values;
-    return Promise.resolve();
   },
 
-  unPinWithName(name: string): Promise {
+  unPinWithName(name: string) {
     delete memMap[name];
-    return Promise.resolve();
   },
 
-  getAllContents(): Promise {
+  getAllContents() {
     const LDS = {};
     for (const key in memMap) {
       if (memMap.hasOwnProperty(key) && isLocalDatastoreKey(key)) {
         LDS[key] = JSON.parse(memMap[key]);
       }
     }
-    return Promise.resolve(LDS);
+    return LDS;
   },
 
-  getRawStorage(): Promise {
-    return Promise.resolve(memMap);
+  getRawStorage() {
+    return memMap;
   },
 
-  clear(): Promise {
+  clear() {
     for (const key in memMap) {
       if (memMap.hasOwnProperty(key) && isLocalDatastoreKey(key)) {
         delete memMap[key];
       }
     }
-    return Promise.resolve();
   }
 };
 

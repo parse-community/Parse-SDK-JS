@@ -19,18 +19,16 @@ import { DEFAULT_PIN, PIN_PREFIX, OBJECT_PREFIX } from './LocalDatastoreUtils';
  * Provides a local datastore which can be used to store and retrieve <code>Parse.Object</code>. <br />
  * To enable this functionality, call <code>Parse.enableLocalDatastore()</code>.
  *
- * To store objects you can pin them.
+ * Pin object to add to local datastore
  *
  * <pre>await object.pin();</pre>
  * <pre>await object.pinWithName('pinName');</pre>
  *
- * You can query your objects by changing the source of your query.
+ * Query objects by changing query source
  *
  * <pre>query.fromLocalDatastore();</pre>
  * <pre>query.fromPin();</pre>
  * <pre>query.fromPinWithName();</pre>
- *
- * Once your source is changed, you can query your objects from LocalDatastore
  *
  * <pre>const localObjects = await query.find();</pre>
  *
@@ -342,7 +340,7 @@ const LocalDatastore = {
       await Promise.all(pinPromises);
       this.isSyncing = false;
     } catch(error) {
-      console.log('Error syncing LocalDatastore: ', error); // eslint-disable-line
+      console.error('Error syncing LocalDatastore: ', error);
       this.isSyncing = false;
     }
   },
@@ -361,7 +359,7 @@ const LocalDatastore = {
 
   checkIfEnabled() {
     if (!this.isEnabled) {
-      console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
+      console.error('Parse.enableLocalDatastore() must be called first');
     }
     return this.isEnabled;
   }

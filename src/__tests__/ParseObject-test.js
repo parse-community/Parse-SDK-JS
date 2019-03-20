@@ -124,7 +124,7 @@ const mockLocalDatastore = {
   getKeyForObject: jest.fn(),
   checkIfEnabled: jest.fn(() => {
     if (!mockLocalDatastore.isEnabled) {
-      console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
+      console.error('Parse.enableLocalDatastore() must be called first');
     }
     return mockLocalDatastore.isEnabled;
   }),
@@ -2743,7 +2743,7 @@ describe('ParseObject pin', () => {
     try {
       await obj.fetchFromLocalDatastore();
     } catch (error) {
-      expect(error).toBe('Parse.enableLocalDatastore() must be called first');
+      expect(error.message).toBe('Parse.enableLocalDatastore() must be called first');
     }
     try {
       await ParseObject.pinAll([obj]);

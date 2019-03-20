@@ -16,10 +16,10 @@ const LocalDatastoreController = {
   async fromPinWithName(name: string): Promise {
     const values = await RNStorage.getItemAsync(name);
     if (!values) {
-      return Promise.resolve(null);
+      return null;
     }
     const objects = JSON.parse(values);
-    return Promise.resolve(objects);
+    return objects;
   },
 
   async pinWithName(name: string, value: any): Promise {
@@ -28,14 +28,12 @@ const LocalDatastoreController = {
       await RNStorage.setItemAsync(name, values);
     } catch (e) {
       // Quota exceeded, possibly due to Safari Private Browsing mode
-      console.log(e.message); // eslint-disable-line no-console
+      console.error(e.message);
     }
-    return Promise.resolve();
   },
 
-  async unPinWithName(name: string): Promise {
-    await RNStorage.removeItemAsync(name);
-    return Promise.resolve();
+  unPinWithName(name: string): Promise {
+    return RNStorage.removeItemAsync(name);
   },
 
   async getAllContents(): Promise {
@@ -48,7 +46,13 @@ const LocalDatastoreController = {
       }
     }
     const LDS = {};
-    const results = await RNStorage.multiGet(batch);
+    let results = [];
+    try {
+      results = await RNStorage.multiGet(batch);
+    } catch (error) {
+      console.error('Error getAllContents: ', error);
+      return {};
+    }
     results.map((pair) => {
       const [key, value] = pair;
       try {
@@ -57,7 +61,7 @@ const LocalDatastoreController = {
         LDS[key] = null;
       }
     });
-    return Promise.resolve(LDS);
+    return LDS;
   },
 
   async getRawStorage(): Promise {
@@ -68,7 +72,7 @@ const LocalDatastoreController = {
       const [key, value] = pair;
       storage[key] = value;
     });
-    return Promise.resolve(storage);
+    return storage;
   },
 
   async clear(): void {
@@ -83,7 +87,7 @@ const LocalDatastoreController = {
       }
       await RNStorage.multiRemove(batch);
     } catch (error) {
-      console.log(error); // eslint-disable-line
+      console.error('Error clearing local datastore', error);
     }
   }
 };

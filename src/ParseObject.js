@@ -1251,9 +1251,9 @@ class ParseObject {
     const objectKey = localDatastore.getKeyForObject(this);
     const pin = await localDatastore.fromPinWithName(objectKey);
     if (pin) {
-      return Promise.resolve(true);
+      return true;
     }
-    return Promise.resolve(false);
+    return false;
   }
 
   /**
@@ -1305,7 +1305,7 @@ class ParseObject {
   async fetchFromLocalDatastore(): Promise {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
-      return Promise.reject('Parse.enableLocalDatastore() must be called first');
+      throw new Error('Parse.enableLocalDatastore() must be called first');
     }
     const objectKey = localDatastore.getKeyForObject(this);
     const pinned = await localDatastore._serializeObject(objectKey);
@@ -1315,7 +1315,7 @@ class ParseObject {
     const result = ParseObject.fromJSON(pinned);
     this._finishFetch(result.toJSON());
 
-    return Promise.resolve(this);
+    return this;
   }
 
   /** Static methods **/
@@ -1837,16 +1837,14 @@ class ParseObject {
    * @return {Promise} A promise that is fulfilled when the pin completes.
    * @static
    */
-  static pinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+  static async pinAllWithName(name: string, objects: Array<ParseObject>): Promise {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
     }
-    let promise = Promise.resolve();
     for (const object of objects) {
-      promise = promise.then(() => localDatastore._handlePinWithName(name, object));
+      await localDatastore._handlePinWithName(name, object);
     }
-    return promise;
   }
 
   /**
@@ -1881,16 +1879,14 @@ class ParseObject {
    * @return {Promise} A promise that is fulfilled when the unPin completes.
    * @static
    */
-  static unPinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+  static async unPinAllWithName(name: string, objects: Array<ParseObject>): Promise {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
     }
-    let promise = Promise.resolve();
     for (const object of objects) {
-      promise = promise.then(() => localDatastore._handleUnPinWithName(name, object));
+      await localDatastore._handleUnPinWithName(name, object);
     }
-    return promise;
   }
 
   /**

@@ -84,7 +84,7 @@ const StorageController = {
         if (err) {
           reject(err);
         } else {
-          resolve();
+          resolve(keys);
         }
       });
     });
