@@ -550,4 +550,16 @@ describe('Parse User', () => {
     expect(user.doSomething()).toBe(5);
     expect(user.get('foo')).toBe('bar');
   });
+
+  it('can signUp / logIn user with subclass static', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    let user = await CustomUser.signUp('username', 'password');
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+
+    user = await CustomUser.logIn('username', 'password');
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+  });
 });
