@@ -6,6 +6,17 @@ const Parse = require('../../node');
 
 const TestObject = Parse.Object.extend('TestObject');
 
+class CustomUser extends Parse.User {
+  constructor(attributes) {
+    super(attributes);
+  }
+
+  doSomething() {
+    return 5;
+  }
+}
+Parse.Object.registerSubclass('CustomUser', CustomUser);
+
 describe('Parse User', () => {
   beforeAll(() => {
     Parse.initialize('integration', null, 'notsosecret');
@@ -508,5 +519,35 @@ describe('Parse User', () => {
     } catch (error) {
       expect(error.message).toBe('Object not found.');
     }
+  });
+
+  it('can signUp user with subclass', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const customUser = new CustomUser({ foo: 'bar' });
+    customUser.setUsername('username');
+    customUser.setPassword('password');
+
+    const user = await customUser.signUp();
+
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+    expect(user.get('foo')).toBe('bar');
+  });
+
+  it('can logIn user with subclass', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    await Parse.User.signUp('username', 'password');
+
+    const customUser = new CustomUser({ foo: 'bar' });
+    customUser.setUsername('username');
+    customUser.setPassword('password');
+
+    const user = await customUser.logIn();
+
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+    expect(user.get('foo')).toBe('bar');
   });
 });
