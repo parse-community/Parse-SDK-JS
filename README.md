@@ -51,7 +51,7 @@ For TypeScript applications, install `'@types/parse'`:
 $ npm install @types/parse
 ```
 
-Types are updated manually after every release. If no definition exists, please submit pull request to [@types/parse][types-parse]
+Types are updated manually after every release. If a definition doesn't exist, please submit a pull request to [@types/parse][types-parse]
 
 ## Upgrading to Parse SDK 2.0.0
 
