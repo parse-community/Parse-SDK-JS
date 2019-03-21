@@ -565,7 +565,7 @@ class ParseUser extends ParseObject {
     attrs = attrs || {};
     attrs.username = username;
     attrs.password = password;
-    const user = new ParseUser(attrs);
+    const user = new this(attrs);
     return user.signUp({}, options);
   }
 
@@ -600,7 +600,7 @@ class ParseUser extends ParseObject {
         )
       );
     }
-    const user = new ParseUser();
+    const user = new this();
     user._finishFetch({ username: username, password: password });
     return user.logIn(options);
   }
