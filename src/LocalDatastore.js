@@ -70,11 +70,8 @@ const LocalDatastore = {
   // Pin the object and children recursively
   // Saves the object and children key to Pin Name
   async _handlePinAllWithName(name: string, objects: Array<ParseObject>): Promise {
-    if (!objects || objects.length === 0) {
-      return;
-    }
     const pinName = this.getPinName(name);
-    const promises = [];
+    const toPinPromises = [];
     const objectKeys = [];
     for (const parent of objects) {
       const children = this._getChildren(parent);
@@ -82,21 +79,18 @@ const LocalDatastore = {
       children[parentKey] = parent._toFullJSON();
       for (const objectKey in children) {
         objectKeys.push(objectKey);
-        promises.push(this.pinWithName(objectKey, children[objectKey]));
+        toPinPromises.push(this.pinWithName(objectKey, children[objectKey]));
       }
     }
-    await Promise.all(promises);
-    const pinned = await this.fromPinWithName(pinName) || [];
-    const toPin = [...new Set([...pinned, ...objectKeys])];
+    const fromPinPromise = this.fromPinWithName(pinName);
+    const [pinned] = await Promise.all([fromPinPromise, toPinPromises]);
+    const toPin = [...new Set([...(pinned || []), ...objectKeys])];
     return this.pinWithName(pinName, toPin);
   },
 
   // Removes object and children keys from pin name
   // Keeps the object and children pinned
   async _handleUnPinAllWithName(name: string, objects: Array<ParseObject>) {
-    if (!objects || objects.length === 0) {
-      return;
-    }
     const localDatastore = await this._getAllContents();
     const pinName = this.getPinName(name);
     const promises = [];
@@ -180,13 +174,14 @@ const LocalDatastore = {
     if (!name) {
       return allObjects;
     }
-    const pinName = await this.getPinName(name);
-    const pinned = await this.fromPinWithName(pinName);
+    const pinName = this.getPinName(name);
+    const pinned = localDatastore[pinName];
     if (!Array.isArray(pinned)) {
       return [];
     }
-    const objects = pinned.map(async (objectKey) => await this.fromPinWithName(objectKey));
-    return Promise.all(objects);
+    const promises = pinned.map((objectKey) => this.fromPinWithName(objectKey));
+    const objects = await Promise.all(promises);
+    return objects.filter(object => object != null);
   },
 
   // Replaces object pointers with pinned pointers
@@ -255,7 +250,9 @@ const LocalDatastore = {
     if (!pin) {
       return;
     }
-    await this.unPinWithName(objectKey);
+    const promises = [
+      this.unPinWithName(objectKey)
+    ];
     delete localDatastore[objectKey];
 
     for (const key in localDatastore) {
@@ -264,15 +261,16 @@ const LocalDatastore = {
         if (pinned.includes(objectKey)) {
           pinned = pinned.filter(item => item !== objectKey);
           if (pinned.length == 0) {
-            await this.unPinWithName(key);
+            promises.push(this.unPinWithName(key));
             delete localDatastore[key];
           } else {
-            await this.pinWithName(key, pinned);
+            promises.push(this.pinWithName(key, pinned));
             localDatastore[key] = pinned;
           }
         }
       }
     }
+    return Promise.all(promises);
   },
 
   // Update pin and references of the unsaved object
@@ -287,8 +285,10 @@ const LocalDatastore = {
     if (!unsaved) {
       return;
     }
-    await this.unPinWithName(localKey);
-    await this.pinWithName(objectKey, unsaved);
+    const promises = [
+      this.unPinWithName(localKey),
+      this.pinWithName(objectKey, unsaved),
+    ];
 
     const localDatastore = await this._getAllContents();
     for (const key in localDatastore) {
@@ -297,11 +297,12 @@ const LocalDatastore = {
         if (pinned.includes(localKey)) {
           pinned = pinned.filter(item => item !== localKey);
           pinned.push(objectKey);
-          await this.pinWithName(key, pinned);
+          promises.push(this.pinWithName(key, pinned));
           localDatastore[key] = pinned;
         }
       }
     }
+    return Promise.all(promises);
   },
 
   /**

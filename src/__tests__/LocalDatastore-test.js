@@ -397,12 +397,11 @@ describe('LocalDatastore', () => {
       [obj1.id]: obj1._toFullJSON(),
       [obj2.id]: obj2._toFullJSON(),
       [obj3.id]: obj3._toFullJSON(),
-      testPin: [obj1.id, obj2.id, obj3.id],
+      [PIN_PREFIX + 'testPin']: [obj1.id, obj2.id, obj3.id],
     };
 
     mockLocalStorageController
       .fromPinWithName
-      .mockImplementationOnce(() => LDS.testPin)
       .mockImplementationOnce(() => LDS[obj1.id])
       .mockImplementationOnce(() => LDS[obj2.id])
       .mockImplementationOnce(() => LDS[obj3.id]);
@@ -415,7 +414,7 @@ describe('LocalDatastore', () => {
     expect(results).toEqual([obj1._toFullJSON(), obj2._toFullJSON(), obj3._toFullJSON()]);
 
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
-    expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(4);
+    expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(3);
   });
 
   it('_serializeObject no children', async () => {

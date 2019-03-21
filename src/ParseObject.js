@@ -1241,9 +1241,9 @@ class ParseObject {
    * const isPinned = await object.isPinned();
    * </pre>
    *
-   * @return {Promise} A boolean promise that is fulfilled if object is pinned.
+   * @return {Promise<boolean>} A boolean promise that is fulfilled if object is pinned.
    */
-  async isPinned(): Promise {
+  async isPinned(): Promise<boolean> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
