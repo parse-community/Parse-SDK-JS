@@ -81,7 +81,7 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  [cdn-svg]: https://img.shields.io/cdnjs/v/parse.svg
  [cdn-link]: https://cdnjs.com/libraries/parse
  [discourse-svg]: https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg
- [discourse-link]: https://community.parseplatform.org/c/parse-server
+ [discourse-link]: https://community.parseplatform.org/c/sdk/js
  [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
  [license-link]: https://github.com/parse-community/Parse-SDK-JS/blob/master/LICENSE
  [greenkeeper-svg]: https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg
