@@ -155,19 +155,19 @@ describe('LocalDatastore', () => {
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
   });
 
-  it('_handlePinWithName no children', async () => {
+  it('_handleUnPinAllWithName no children', async () => {
     const object = new ParseObject('Item');
     await LocalDatastore._handlePinAllWithName('test_pin', [object]);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(2);
   });
 
-  it('_handlePinWithName default pin', async () => {
+  it('_handleUnPinAllWithName default pin', async () => {
     const object = new ParseObject('Item');
     await LocalDatastore._handlePinAllWithName(DEFAULT_PIN, [object]);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(2);
   });
 
-  it('_handlePinWithName unsaved children', async () => {
+  it('_handleUnPinAllWithName unsaved children', async () => {
     const parent = new ParseObject('Item');
     const unsaved = { className: 'Item', __type: 'Object' };
     parent.set('child', unsaved);
@@ -175,7 +175,7 @@ describe('LocalDatastore', () => {
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(2);
   });
 
-  it('_handlePinWithName with children', async () => {
+  it('_handleUnPinAllWithName with children', async () => {
     const parent = new ParseObject('Item');
     const child = new ParseObject('Item');
     const grandchild = new ParseObject('Item');
@@ -240,8 +240,8 @@ describe('LocalDatastore', () => {
     const LDS = {
       [PIN_PREFIX + 'test_pin']: objects,
       [PIN_PREFIX + 'test_pin_2']: objects,
-      [KEY1]: item1._toFullJSON(),
-      [KEY2]: item2._toFullJSON(),
+      [KEY1]: [item1._toFullJSON()],
+      [KEY2]: [item2._toFullJSON()],
     }
     mockLocalStorageController
       .getAllContents
@@ -272,7 +272,7 @@ describe('LocalDatastore', () => {
     expect(mockLocalStorageController.fromPinWithName.mock.results[0].value).toEqual([item1]);
 
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(1);
-    expect(mockLocalStorageController.pinWithName).toHaveBeenCalledWith(KEY1, item1._toFullJSON());
+    expect(mockLocalStorageController.pinWithName).toHaveBeenCalledWith(KEY1, [item1._toFullJSON()]);
   });
 
   it('_updateLocalIdForObject not pinned', async () => {
@@ -287,7 +287,7 @@ describe('LocalDatastore', () => {
     const localKey = `${OBJECT_PREFIX}Item_${localId}`;
     const LDS = {
       [DEFAULT_PIN]: [localKey],
-      [localKey]: json,
+      [localKey]: [json],
     };
     mockLocalStorageController
       .fromPinWithName
@@ -308,7 +308,7 @@ describe('LocalDatastore', () => {
     const localKey = `${OBJECT_PREFIX}Item_${localId}`;
     const LDS = {
       [PIN_PREFIX + 'test_pin']: [localKey],
-      [localKey]: json,
+      [localKey]: [json],
     };
     mockLocalStorageController
       .fromPinWithName
@@ -328,7 +328,7 @@ describe('LocalDatastore', () => {
     const localId = 'local' + object.id;
     const LDS = {
       [DEFAULT_PIN]: [object.id],
-      [object.id]: json,
+      [object.id]: [json],
     };
     mockLocalStorageController
       .fromPinWithName
@@ -356,7 +356,7 @@ describe('LocalDatastore', () => {
     const json = item1._toFullJSON();
     const LDS = {
       [DEFAULT_PIN]: [KEY1],
-      [KEY1]: json,
+      [KEY1]: [json],
     };
 
     mockLocalStorageController
@@ -374,7 +374,7 @@ describe('LocalDatastore', () => {
     const json = object._toFullJSON();
     const LDS = {
       [DEFAULT_PIN]: [object.id, 'local10', 'local11'],
-      [object.id]: json,
+      [object.id]: [json],
       randomName: [object.id],
     };
 
@@ -394,9 +394,9 @@ describe('LocalDatastore', () => {
     const obj3 = new ParseObject('Item');
 
     const LDS = {
-      [obj1.id]: obj1._toFullJSON(),
-      [obj2.id]: obj2._toFullJSON(),
-      [obj3.id]: obj3._toFullJSON(),
+      [obj1.id]: [obj1._toFullJSON()],
+      [obj2.id]: [obj2._toFullJSON()],
+      [obj3.id]: [obj3._toFullJSON()],
       [PIN_PREFIX + 'testPin']: [obj1.id, obj2.id, obj3.id],
     };
 
@@ -424,7 +424,7 @@ describe('LocalDatastore', () => {
     const objectKey = `Item_1234`;
     const LDS = {
       [DEFAULT_PIN]: [objectKey],
-      [objectKey]: json,
+      [objectKey]: [json],
     };
 
     mockLocalStorageController
@@ -462,8 +462,8 @@ describe('LocalDatastore', () => {
     const childKey = LocalDatastore.getKeyForObject(child);
     const LDS = {
       [DEFAULT_PIN]: [parentKey, childKey],
-      [parentKey]: parent._toFullJSON(),
-      [childKey]: childJSON,
+      [parentKey]: [parent._toFullJSON()],
+      [childKey]: [childJSON],
     };
 
     mockLocalStorageController
@@ -490,8 +490,8 @@ describe('LocalDatastore', () => {
     jest.clearAllMocks();
 
     LDS = {
-      [KEY1]: item1._toFullJSON(),
-      [KEY2]: item2._toFullJSON(),
+      [KEY1]: [item1._toFullJSON()],
+      [KEY2]: [item2._toFullJSON()],
       [DEFAULT_PIN]: [],
     };
 
@@ -510,8 +510,8 @@ describe('LocalDatastore', () => {
 
   it('_destroyObjectIfPinned no objects found in pinName remove pinName', async () => {
     const LDS = {
-      [KEY1]: item1._toFullJSON(),
-      [KEY2]: item2._toFullJSON(),
+      [KEY1]: [item1._toFullJSON()],
+      [KEY2]: [item2._toFullJSON()],
       [PIN_PREFIX + 'Custom_Pin']: [KEY2],
       [DEFAULT_PIN]: [KEY2],
     };
@@ -531,8 +531,8 @@ describe('LocalDatastore', () => {
 
   it('_destroyObjectIfPinned', async () => {
     const LDS = {
-      [KEY1]: item1._toFullJSON(),
-      [KEY2]: item2._toFullJSON(),
+      [KEY1]: [item1._toFullJSON()],
+      [KEY2]: [item2._toFullJSON()],
       [DEFAULT_PIN]: [KEY1, KEY2],
     };
 
@@ -613,7 +613,7 @@ describe('LocalDatastore', () => {
     LocalDatastore.isEnabled = true;
     LocalDatastore.isSyncing = false;
     const LDS = {
-      [KEY1]: item1._toFullJSON(),
+      [KEY1]: [item1._toFullJSON()],
       [`${PIN_PREFIX}_testPinName`]: [KEY1],
       [DEFAULT_PIN]: [KEY1],
     };
@@ -640,7 +640,7 @@ describe('LocalDatastore', () => {
     LocalDatastore.isEnabled = true;
     LocalDatastore.isSyncing = false;
     const LDS = {
-      [KEY1]: item1._toFullJSON(),
+      [KEY1]: [item1._toFullJSON()],
       [`${PIN_PREFIX}_testPinName`]: [KEY1],
       [DEFAULT_PIN]: [KEY1],
     };
@@ -673,9 +673,9 @@ describe('LocalDatastore', () => {
     LocalDatastore.isSyncing = false;
     const testObject = new ParseObject('TestObject');
     const LDS = {
-      [KEY1]: item1._toFullJSON(),
-      [KEY2]: item2._toFullJSON(),
-      [LocalDatastore.getKeyForObject(testObject)]: testObject._toFullJSON(),
+      [KEY1]: [item1._toFullJSON()],
+      [KEY2]: [item2._toFullJSON()],
+      [LocalDatastore.getKeyForObject(testObject)]: [testObject._toFullJSON()],
       [`${PIN_PREFIX}_testPinName`]: [KEY1],
       [DEFAULT_PIN]: [KEY1],
     };
@@ -725,7 +725,7 @@ describe('BrowserDatastoreController', () => {
   });
 
   it('can store and retrieve values', async () => {
-    expect(await BrowserDatastoreController.fromPinWithName(KEY1)).toEqual(null);
+    expect(await BrowserDatastoreController.fromPinWithName(KEY1)).toEqual([]);
     await BrowserDatastoreController.pinWithName(KEY1, [item1._toFullJSON()]);
     expect(await BrowserDatastoreController.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
     expect(await BrowserDatastoreController.getAllContents()).toEqual({ [KEY1]: [item1._toFullJSON()] });
@@ -735,7 +735,7 @@ describe('BrowserDatastoreController', () => {
     await BrowserDatastoreController.pinWithName(KEY1, [item1._toFullJSON()]);
     expect(await BrowserDatastoreController.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
     await BrowserDatastoreController.unPinWithName(KEY1);
-    expect(await BrowserDatastoreController.fromPinWithName(KEY1)).toEqual(null);
+    expect(await BrowserDatastoreController.fromPinWithName(KEY1)).toEqual([]);
     expect(await BrowserDatastoreController.getAllContents()).toEqual({});
   });
 });
@@ -754,7 +754,7 @@ describe('DefaultDatastoreController', () => {
   });
 
   it('can store and retrieve values', async () => {
-    expect(await DefaultDatastoreController.fromPinWithName(KEY1)).toEqual(null);
+    expect(await DefaultDatastoreController.fromPinWithName(KEY1)).toEqual([]);
     await DefaultDatastoreController.pinWithName(KEY1, [item1._toFullJSON()]);
     expect(await DefaultDatastoreController.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
     expect(await DefaultDatastoreController.getAllContents()).toEqual({ [KEY1]: [item1._toFullJSON()] });
@@ -764,7 +764,7 @@ describe('DefaultDatastoreController', () => {
     await DefaultDatastoreController.pinWithName(KEY1, [item1._toFullJSON()]);
     expect(await DefaultDatastoreController.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
     await DefaultDatastoreController.unPinWithName(KEY1);
-    expect(await DefaultDatastoreController.fromPinWithName(KEY1)).toEqual(null);
+    expect(await DefaultDatastoreController.fromPinWithName(KEY1)).toEqual([]);
     expect(await DefaultDatastoreController.getAllContents()).toEqual({});
   });
 });
@@ -776,7 +776,7 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
   });
 
   it('can store and retrieve values', async () => {
-    expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual(null);
+    expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([]);
     await LocalDatastore.pinWithName(KEY1, [item1._toFullJSON()]);
     expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
     expect(await LocalDatastore._getAllContents()).toEqual({ [KEY1]: [item1._toFullJSON()] });
@@ -787,7 +787,7 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
     await LocalDatastore.pinWithName(KEY1, [item1._toFullJSON()]);
     expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
     await LocalDatastore.unPinWithName(KEY1);
-    expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual(null);
+    expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([]);
     expect(await LocalDatastore._getAllContents()).toEqual({});
     expect(await LocalDatastore._getRawStorage()).toEqual({});
   });
@@ -816,7 +816,7 @@ describe('LocalDatastore (DefaultDatastoreController)', () => {
   });
 
   it('can store and retrieve values', async () => {
-    expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual(null);
+    expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([]);
     await LocalDatastore.pinWithName(KEY1, [item1._toFullJSON()]);
     expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
     expect(await LocalDatastore._getAllContents()).toEqual({ [KEY1]: [item1._toFullJSON()] });
@@ -827,7 +827,7 @@ describe('LocalDatastore (DefaultDatastoreController)', () => {
     await LocalDatastore.pinWithName(KEY1, [item1._toFullJSON()]);
     expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
     await LocalDatastore.unPinWithName(KEY1);
-    expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual(null);
+    expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([]);
     expect(await LocalDatastore._getAllContents()).toEqual({});
     expect(await LocalDatastore._getRawStorage()).toEqual({});
   });
@@ -841,7 +841,7 @@ describe('LocalDatastore (RNDatastoreController)', () => {
   });
 
   it('can store and retrieve values', async () => {
-    expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual(null);
+    expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([]);
     await LocalDatastore.pinWithName(KEY1, [item1._toFullJSON()]);
     expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
     expect(await LocalDatastore._getAllContents()).toEqual({ [KEY1]: [item1._toFullJSON()] });
@@ -852,7 +852,7 @@ describe('LocalDatastore (RNDatastoreController)', () => {
     await LocalDatastore.pinWithName(KEY1, [item1._toFullJSON()]);
     expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
     await LocalDatastore.unPinWithName(KEY1);
-    expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual(null);
+    expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([]);
     expect(await LocalDatastore._getAllContents()).toEqual({});
     expect(await LocalDatastore._getRawStorage()).toEqual({});
   });

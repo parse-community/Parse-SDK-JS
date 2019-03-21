@@ -12,9 +12,9 @@ import { isLocalDatastoreKey } from './LocalDatastoreUtils';
 
 const memMap = {};
 const LocalDatastoreController = {
-  fromPinWithName(name: string) {
+  fromPinWithName(name: string): Array<Object> {
     if (!memMap.hasOwnProperty(name)) {
-      return null;
+      return [];
     }
     const objects = JSON.parse(memMap[name]);
     return objects;

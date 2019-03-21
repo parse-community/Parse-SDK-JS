@@ -79,7 +79,7 @@ const LocalDatastore = {
       children[parentKey] = parent._toFullJSON();
       for (const objectKey in children) {
         objectKeys.push(objectKey);
-        toPinPromises.push(this.pinWithName(objectKey, children[objectKey]));
+        toPinPromises.push(this.pinWithName(objectKey, [children[objectKey]]));
       }
     }
     const fromPinPromise = this.fromPinWithName(pinName);
@@ -168,7 +168,7 @@ const LocalDatastore = {
     const allObjects = [];
     for (const key in localDatastore) {
       if (key.startsWith(OBJECT_PREFIX)) {
-        allObjects.push(localDatastore[key]);
+        allObjects.push(localDatastore[key][0]);
       }
     }
     if (!name) {
@@ -180,7 +180,8 @@ const LocalDatastore = {
       return [];
     }
     const promises = pinned.map((objectKey) => this.fromPinWithName(objectKey));
-    const objects = await Promise.all(promises);
+    let objects = await Promise.all(promises);
+    objects = [].concat(...objects);
     return objects.filter(object => object != null);
   },
 
@@ -192,10 +193,10 @@ const LocalDatastore = {
     if (!LDS) {
       LDS = await this._getAllContents();
     }
-    const root = LDS[objectKey];
-    if (!root) {
+    if (!LDS[objectKey] || LDS[objectKey].length === 0) {
       return null;
     }
+    const root = LDS[objectKey][0];
 
     const queue = [];
     const meta = {};
@@ -210,8 +211,8 @@ const LocalDatastore = {
         const value = subTreeRoot[field];
         if (value.__type && value.__type === 'Object') {
           const key = this.getKeyForObject(value);
-          const pointer = LDS[key];
-          if (pointer) {
+          if (LDS[key] && LDS[key].length > 0) {
+            const pointer = LDS[key][0];
             uniqueId++;
             meta[uniqueId] = pointer;
             subTreeRoot[field] = pointer;
@@ -231,10 +232,10 @@ const LocalDatastore = {
     }
     const objectKey = this.getKeyForObject(object);
     const pinned = await this.fromPinWithName(objectKey);
-    if (!pinned) {
+    if (pinned && pinned.length === 0) {
       return;
     }
-    return this.pinWithName(objectKey, object._toFullJSON());
+    return this.pinWithName(objectKey, [object._toFullJSON()]);
   },
 
   // Called when object is destroyed
@@ -282,7 +283,7 @@ const LocalDatastore = {
     const objectKey = this.getKeyForObject(object);
 
     const unsaved = await this.fromPinWithName(localKey);
-    if (!unsaved) {
+    if (unsaved && unsaved.length === 0) {
       return;
     }
     const promises = [

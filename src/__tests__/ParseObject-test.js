@@ -2645,9 +2645,9 @@ describe('ParseObject pin', () => {
     mockLocalDatastore
       .fromPinWithName
       .mockImplementationOnce(() => {
-        return { 'Item_1234': object._toFullJSON() }
+        return [object._toFullJSON()];
       })
-      .mockImplementationOnce(() => null);
+      .mockImplementationOnce(() => []);
 
     let isPinned = await object.isPinned();
     expect(isPinned).toEqual(true);

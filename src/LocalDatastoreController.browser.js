@@ -13,10 +13,10 @@
 import { isLocalDatastoreKey } from './LocalDatastoreUtils';
 
 const LocalDatastoreController = {
-  fromPinWithName(name: string): Object | Array<Object> {
+  fromPinWithName(name: string): Array<Object> {
     const values = localStorage.getItem(name);
     if (!values) {
-      return null;
+      return [];
     }
     const objects = JSON.parse(values);
     return objects;
@@ -28,7 +28,7 @@ const LocalDatastoreController = {
       localStorage.setItem(name, values);
     } catch (e) {
       // Quota exceeded, possibly due to Safari Private Browsing mode
-      console.log(e.message); // eslint-disable-line no-console
+      console.log(e.message);
     }
   },
 

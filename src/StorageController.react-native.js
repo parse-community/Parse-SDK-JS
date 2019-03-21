@@ -66,7 +66,7 @@ const StorageController = {
     });
   },
 
-  multiGet(keys: Array<string>): Promise {
+  multiGet(keys: Array<string>): Promise<Array<Array<string>>> {
     return new Promise((resolve, reject) => {
       this.getAsyncStorage().multiGet(keys, function(err, result) {
         if (err) {

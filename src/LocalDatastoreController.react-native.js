@@ -13,10 +13,10 @@ const RNStorage = require('./StorageController.react-native');
 import { isLocalDatastoreKey } from './LocalDatastoreUtils';
 
 const LocalDatastoreController = {
-  async fromPinWithName(name: string): Promise {
+  async fromPinWithName(name: string): Promise<Array<Object>> {
     const values = await RNStorage.getItemAsync(name);
     if (!values) {
-      return null;
+      return [];
     }
     const objects = JSON.parse(values);
     return objects;
@@ -75,20 +75,16 @@ const LocalDatastoreController = {
     return storage;
   },
 
-  async clear(): void {
-    try {
-      const keys = await RNStorage.getAllKeys();
-      const batch = [];
-      for (let i = 0; i < keys.length; i += 1) {
-        const key = keys[i];
-        if (isLocalDatastoreKey(key)) {
-          batch.push(key);
-        }
+  async clear(): Promise {
+    const keys = await RNStorage.getAllKeys();
+    const batch = [];
+    for (let i = 0; i < keys.length; i += 1) {
+      const key = keys[i];
+      if (isLocalDatastoreKey(key)) {
+        batch.push(key);
       }
-      await RNStorage.multiRemove(batch);
-    } catch (error) {
-      console.error('Error clearing local datastore', error);
     }
+    return RNStorage.multiRemove(batch).catch(error => console.error('Error clearing local datastore: ', error));
   }
 };
 

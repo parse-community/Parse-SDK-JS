@@ -75,13 +75,13 @@ function runTest(controller) {
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 2);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(object)]);
-      assert.deepEqual(localDatastore[LDS_KEY(object)], object._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(object)], [object._toFullJSON()]);
       await object.save();
       // Check if localDatastore updated localId to objectId
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 2);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(object)]);
-      assert.deepEqual(localDatastore[LDS_KEY(object)], object._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(object)], [object._toFullJSON()]);
     });
 
     it(`${controller.name} cannot pin unsaved pointer`, async () => {
@@ -101,10 +101,10 @@ function runTest(controller) {
       await object.save();
       await object.pin();
       const localDatastore = await Parse.LocalDatastore._getAllContents();
-      const cachedObject = localDatastore[LDS_KEY(object)];
+      const cachedObject = localDatastore[LDS_KEY(object)][0];
       assert.equal(Object.keys(localDatastore).length, 2);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(object)]);
-      assert.deepEqual(localDatastore[LDS_KEY(object)], object._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(object)], [object._toFullJSON()]);
       assert.equal(cachedObject.objectId, object.id);
       assert.equal(cachedObject.field, 'test');
     });
@@ -119,10 +119,10 @@ function runTest(controller) {
       await object.save();
 
       const localDatastore = await Parse.LocalDatastore._getAllContents();
-      const cachedObject = localDatastore[LDS_KEY(object)];
+      const cachedObject = localDatastore[LDS_KEY(object)][0];
       assert.equal(Object.keys(localDatastore).length, 2);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(object)]);
-      assert.deepEqual(localDatastore[LDS_KEY(object)], object._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(object)], [object._toFullJSON()]);
       assert.equal(cachedObject.objectId, object.id);
       assert.equal(cachedObject.field, 'new info');
     });
@@ -158,9 +158,9 @@ function runTest(controller) {
       assert.equal(localDatastore[DEFAULT_PIN].includes(LDS_KEY(parent)), true);
       assert.equal(localDatastore[DEFAULT_PIN].includes(LDS_KEY(child)), true);
       assert.equal(localDatastore[DEFAULT_PIN].includes(LDS_KEY(grandchild)), true);
-      assert.deepEqual(localDatastore[LDS_KEY(parent)], parent._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(child)], child._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(grandchild)], grandchild._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(parent)], [parent._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(child)], [child._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(grandchild)], [grandchild._toFullJSON()]);
     });
 
     it(`${controller.name} can pinAll (unsaved)`, async () => {
@@ -174,18 +174,18 @@ function runTest(controller) {
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.saveAll(objects);
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can pinAll (saved)`, async () => {
@@ -200,9 +200,9 @@ function runTest(controller) {
       const localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can pinAllWithName (unsaved)`, async () => {
@@ -216,18 +216,18 @@ function runTest(controller) {
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
       assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.saveAll(objects);
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
       assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can pinAllWithName (saved)`, async () => {
@@ -241,9 +241,9 @@ function runTest(controller) {
       const localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
       assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can unPin on destroy`, async () => {
@@ -315,25 +315,25 @@ function runTest(controller) {
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await obj2.unPin();
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 3);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj1), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.saveAll(objects);
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 3);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj1), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can unPin with pinAll (saved)`, async () => {
@@ -347,9 +347,9 @@ function runTest(controller) {
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.saveAll(objects);
 
@@ -358,8 +358,8 @@ function runTest(controller) {
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 3);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj1), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can unPin / unPinAll without pin (unsaved)`, async () => {
@@ -407,23 +407,23 @@ function runTest(controller) {
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert(Object.keys(localDatastore).length === 4);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.unPinAll([obj1, obj2]);
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 2);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.saveAll(objects);
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 2);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can unPinAll (saved)`, async () => {
@@ -437,9 +437,9 @@ function runTest(controller) {
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.saveAll(objects);
 
@@ -447,7 +447,7 @@ function runTest(controller) {
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 2);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can unPinAllObjects (unsaved)`, async () => {
@@ -461,25 +461,25 @@ function runTest(controller) {
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert(Object.keys(localDatastore).length === 4);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.unPinAllObjects();
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 3);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.saveAll(objects);
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 3);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can unPinAllObjects (saved)`, async () => {
@@ -493,18 +493,18 @@ function runTest(controller) {
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
       assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.saveAll(objects);
 
       Parse.Object.unPinAllObjects();
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 3);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can unPinAllWithName (unsaved)`, async () => {
@@ -518,23 +518,23 @@ function runTest(controller) {
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert(Object.keys(localDatastore).length === 4);
       assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.unPinAllWithName('test_unpin', [obj1, obj2]);
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 2);
       assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.saveAll(objects);
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 2);
       assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can unPinAllWithName (saved)`, async () => {
@@ -548,9 +548,9 @@ function runTest(controller) {
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
       assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.saveAll(objects);
 
@@ -558,7 +558,7 @@ function runTest(controller) {
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 2);
       assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can unPinAllObjectsWithName (unsaved)`, async () => {
@@ -572,25 +572,25 @@ function runTest(controller) {
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert(Object.keys(localDatastore).length === 4);
       assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.unPinAllObjectsWithName('test_unpin');
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 3);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.saveAll(objects);
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 3);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can unPinAllObjectsWithName (saved)`, async () => {
@@ -604,18 +604,18 @@ function runTest(controller) {
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
       assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
 
       await Parse.Object.saveAll(objects);
 
       await Parse.Object.unPinAllObjectsWithName('test_unpin');
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 3);
-      assert.deepEqual(localDatastore[LDS_KEY(obj1)], obj1._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj2)], obj2._toFullJSON());
-      assert.deepEqual(localDatastore[LDS_KEY(obj3)], obj3._toFullJSON());
+      assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
+      assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
     });
 
     it(`${controller.name} can unPin and save reference`, async () => {
@@ -802,7 +802,7 @@ function runTest(controller) {
 
       let localDatastore = await Parse.LocalDatastore._getAllContents();
 
-      assert.equal(localDatastore[LDS_KEY(item)].foo, 'bar');
+      assert.equal(localDatastore[LDS_KEY(item)][0].foo, 'bar');
 
       const itemAgain = new Item();
       itemAgain.id = item.id;
@@ -812,7 +812,7 @@ function runTest(controller) {
 
       assert.equal(itemAgain.get('foo'), 'changed');
       assert.equal(fetchedItem.get('foo'), 'changed');
-      assert.equal(localDatastore[LDS_KEY(item)].foo, 'changed');
+      assert.equal(localDatastore[LDS_KEY(item)][0].foo, 'changed');
     });
 
     it('fetchAll updates LocalDatastore', async () => {
@@ -829,8 +829,8 @@ function runTest(controller) {
 
       let localDatastore = await Parse.LocalDatastore._getAllContents();
 
-      assert.equal(localDatastore[LDS_KEY(item1)].foo, 'bar');
-      assert.equal(localDatastore[LDS_KEY(item2)].foo, 'baz');
+      assert.equal(localDatastore[LDS_KEY(item1)][0].foo, 'bar');
+      assert.equal(localDatastore[LDS_KEY(item2)][0].foo, 'baz');
 
       const item1Again = new Item();
       item1Again.id = item1.id;
@@ -845,8 +845,8 @@ function runTest(controller) {
       assert.equal(item2Again.get('foo'), 'changed');
       assert.equal(fetchedItems[0].get('foo'), 'changed');
       assert.equal(fetchedItems[1].get('foo'), 'changed');
-      assert.equal(localDatastore[LDS_KEY(fetchedItems[0])].foo, 'changed');
-      assert.equal(localDatastore[LDS_KEY(fetchedItems[1])].foo, 'changed');
+      assert.equal(localDatastore[LDS_KEY(fetchedItems[0])][0].foo, 'changed');
+      assert.equal(localDatastore[LDS_KEY(fetchedItems[1])][0].foo, 'changed');
     });
 
     it(`${controller.name} can update Local Datastore from network`, async () => {

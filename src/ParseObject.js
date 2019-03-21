@@ -1250,10 +1250,7 @@ class ParseObject {
     }
     const objectKey = localDatastore.getKeyForObject(this);
     const pin = await localDatastore.fromPinWithName(objectKey);
-    if (pin) {
-      return true;
-    }
-    return false;
+    return pin.length > 0;
   }
 
   /**
