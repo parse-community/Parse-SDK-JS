@@ -232,7 +232,7 @@ const LocalDatastore = {
     }
     const objectKey = this.getKeyForObject(object);
     const pinned = await this.fromPinWithName(objectKey);
-    if (pinned && pinned.length === 0) {
+    if (!pinned || pinned.length === 0) {
       return;
     }
     return this.pinWithName(objectKey, [object._toFullJSON()]);
@@ -283,7 +283,7 @@ const LocalDatastore = {
     const objectKey = this.getKeyForObject(object);
 
     const unsaved = await this.fromPinWithName(localKey);
-    if (unsaved && unsaved.length === 0) {
+    if (!unsaved || unsaved.length === 0) {
       return;
     }
     const promises = [
