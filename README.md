@@ -46,6 +46,13 @@ const AsyncStorage = require('react-native').AsyncStorage;
 Parse.setAsyncStorage(AsyncStorage);
 ```
 
+For TypeScript applications, install `'@types/parse'`:
+```
+$ npm install @types/parse
+```
+
+Types are updated manually after every release. If no definition exists, please submit pull request to [@types/parse][types-parse]
+
 ## Upgrading to Parse SDK 2.0.0
 
 With Parse SDK 2.0.0, gone are the backbone style callbacks and Parse.Promises.
@@ -79,3 +86,4 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  [license-link]: https://github.com/parse-community/Parse-SDK-JS/blob/master/LICENSE
  [greenkeeper-svg]: https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg
  [greenkeeper-link]: https://greenkeeper.io/
+ [types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse
