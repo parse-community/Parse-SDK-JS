@@ -719,7 +719,7 @@ describe('LocalDatastore', () => {
   });
 });
 
-describe('BrowserDatastoreController', async () => {
+describe('BrowserDatastoreController', () => {
   beforeEach(async () => {
     await BrowserDatastoreController.clear();
   });

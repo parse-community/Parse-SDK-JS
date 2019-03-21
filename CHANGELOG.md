@@ -1,5 +1,14 @@
 # Parse-SDK-JS
 
+## 2.3.0
+
+- LocalDatastore fixes for React-Native ([#753](https://github.com/parse-community/Parse-SDK-JS/pull/753))
+- LocalDatastore update from Server ([#734](https://github.com/parse-community/Parse-SDK-JS/pull/734))
+- Support for Anonymous Users ([#750](https://github.com/parse-community/Parse-SDK-JS/pull/750))
+- File upload via uri ([#749](https://github.com/parse-community/Parse-SDK-JS/pull/749))
+- Add support to secured endpoints throught Authorization header ([#358](https://github.com/parse-community/Parse-SDK-JS/pull/358))
+- Remove authResponse in FacebookUtils ([#728](https://github.com/parse-community/Parse-SDK-JS/pull/728))
+
 ## 2.2.1
 
 - Addresses issue with babel runtime regenerator ([#740](https://github.com/parse-community/Parse-SDK-JS/pull/740))

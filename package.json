@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://www.parse.com",
   "keywords": [
@@ -28,31 +28,31 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime": "^7.4.2",
+    "@babel/runtime": "7.4.2",
     "ws": "6.2.0",
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.0",
-    "@babel/plugin-proposal-class-properties": "^7.4.0",
-    "@babel/plugin-transform-flow-comments": "^7.4.0",
+    "@babel/core": "7.4.0",
+    "@babel/plugin-proposal-class-properties": "7.4.0",
+    "@babel/plugin-transform-flow-comments": "7.4.0",
     "@babel/plugin-transform-flow-strip-types": "7.4.0",
     "@babel/plugin-transform-runtime": "7.4.0",
     "@babel/polyfill": "7.4.0",
     "@babel/preset-env": "7.4.2",
     "@babel/preset-react": "7.0.0",
-    "@parse/minami": "^1.0.0",
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-eslint": "^10.0.0",
-    "babel-jest": "^23.2.0",
+    "@parse/minami": "1.0.0",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-eslint": "10.0.0",
+    "babel-jest": "24.5.0",
     "babel-plugin-inline-package-json": "2.0.0",
     "babel-plugin-minify-dead-code-elimination": "0.5.0",
     "babel-plugin-transform-inline-environment-variables": "0.4.3",
     "browserify": "16.2.3",
-    "codecov": "3.1.0",
-    "eslint": "^5.3.0",
-    "eslint-plugin-flowtype": "^3.1.4",
-    "express": "^4.16.3",
+    "codecov": "3.2.0",
+    "eslint": "5.3.0",
+    "eslint-plugin-flowtype": "3.1.4",
+    "express": "4.16.3",
     "gulp": "4.0.0",
     "gulp-babel": "8.0.0",
     "gulp-derequire": "2.1.0",
@@ -60,9 +60,9 @@
     "gulp-rename": "1.4.0",
     "gulp-uglify": "3.0.2",
     "gulp-watch": "5.0.1",
-    "jasmine": "^3.1.0",
+    "jasmine": "3.1.0",
     "jasmine-reporters": "2.3.2",
-    "jest": "^23.5.0",
+    "jest": "24.5.0",
     "jsdoc": "3.5.5",
     "jsdoc-babel": "0.5.0",
     "parse-server": "github:parseplatform/parse-server#master",
@@ -83,6 +83,10 @@
   "jest": {
     "automock": true,
     "collectCoverage": true,
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "test_helpers/(.*).js"
+    ],
     "roots": [
       "src/"
     ],
@@ -93,6 +97,6 @@
     "transform": {
       ".*": "./babel-jest.js"
     },
-    "setupTestFrameworkScriptFile": "./setup-jest.js"
+    "setupFilesAfterEnv": ["./setup-jest.js"]
   }
 }
