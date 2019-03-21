@@ -8,6 +8,7 @@
 - File upload via uri ([#749](https://github.com/parse-community/Parse-SDK-JS/pull/749))
 - Add support to secured endpoints throught Authorization header ([#358](https://github.com/parse-community/Parse-SDK-JS/pull/358))
 - Remove authResponse in FacebookUtils ([#728](https://github.com/parse-community/Parse-SDK-JS/pull/728))
+- UserSubclass.logIn and UserSubclass.signUp returns subclass ([#756](https://github.com/parse-community/Parse-SDK-JS/pull/756))
 
 ## 2.2.1
 
