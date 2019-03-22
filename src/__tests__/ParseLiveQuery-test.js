@@ -126,7 +126,7 @@ describe('ParseLiveQuery', () => {
 
       const query = new ParseQuery("ObjectType");
       query.equalTo("test", "value");
-      const ourSubscription = await controller.subscribe(query, "close");
+      const ourSubscription = await client.subscribe(query, "close");
 
       const isCalled = {};
       ["open",

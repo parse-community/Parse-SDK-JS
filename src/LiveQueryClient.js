@@ -209,10 +209,6 @@ class LiveQueryClient extends EventEmitter {
       this.socket.send(JSON.stringify(subscribeRequest));
     });
 
-    // adding listener so process does not crash
-    // best practice is for developer to register their own listener
-    subscription.on('error', () => {});
-
     return subscription;
   }
 
