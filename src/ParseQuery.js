@@ -17,6 +17,7 @@ import ParseGeoPoint from './ParseGeoPoint';
 import ParseObject from './ParseObject';
 import OfflineQuery from './OfflineQuery';
 
+import type LiveQuerySubscription from './LiveQuerySubscription';
 import type { RequestOptions, FullOptions } from './RESTController';
 
 type BatchOptions = FullOptions & { batchSize?: number };
@@ -1478,12 +1479,20 @@ class ParseQuery {
 
   /**
    * Subscribe this query to get liveQuery updates
-   * @return {LiveQuerySubscription} Returns the liveQuerySubscription, it's an event emitter
+   *
+   * @return {Promise<LiveQuerySubscription>} Returns the liveQuerySubscription, it's an event emitter
    * which can be used to get liveQuery updates.
    */
-  subscribe(): any {
-    const controller = CoreManager.getLiveQueryController();
-    return controller.subscribe(this);
+  async subscribe(): Promise<LiveQuerySubscription> {
+    const currentUser = await CoreManager.getUserController().currentUserAsync();
+    const sessionToken =  currentUser ? currentUser.getSessionToken() : undefined;
+
+    const liveQueryClient = await CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
+    if (liveQueryClient.shouldOpen()) {
+      liveQueryClient.open();
+    }
+    const subscription = liveQueryClient.subscribe(this, sessionToken);
+    return subscription;
   }
 
   /**
