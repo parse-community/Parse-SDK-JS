@@ -393,10 +393,9 @@ module.exports = {
 
   setLiveQueryController(controller: any) {
     requireMethods('LiveQueryController', [
-      'subscribe',
-      'unsubscribe',
-      'open',
-      'close',
+      'setDefaultLiveQueryClient',
+      'getDefaultLiveQueryClient',
+      '_clearCachedDefaultClient',
     ], controller);
     config['LiveQueryController'] = controller;
   },
