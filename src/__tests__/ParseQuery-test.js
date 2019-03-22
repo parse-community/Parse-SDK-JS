@@ -19,6 +19,7 @@ jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('../OfflineQuery');
+jest.dontMock('../LiveQuerySubscription');
 
 const mockObject = function(className) {
   this.className = className;
@@ -49,6 +50,7 @@ const ParseError = require('../ParseError').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
 let ParseObject = require('../ParseObject');
 let ParseQuery = require('../ParseQuery').default;
+const LiveQuerySubscription = require('../LiveQuerySubscription').default;
 
 describe('ParseQuery', () => {
   it('can be constructed from a class name', () => {
@@ -2626,5 +2628,92 @@ describe('ParseQuery LocalDatastore', () => {
     q.fromLocalDatastore();
     const results = await q.find();
     expect(results[0].get('foo')).toEqual('baz');
+  });
+
+  it ('can subscribe to query if client is already open', async () => {
+    const mockLiveQueryClient = {
+      shouldOpen: function() {
+        return false;
+      },
+      subscribe: function(query, sessionToken) {
+        return new LiveQuerySubscription('0', query, sessionToken);
+      },
+    };
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve({
+          getSessionToken() {
+            return 'token';
+          }
+        });
+      }
+    });
+    CoreManager.set('LiveQueryController', {
+      getDefaultLiveQueryClient() {
+        return Promise.resolve(mockLiveQueryClient);
+      }
+    });
+    const query = new ParseQuery('TestObject');
+    const subscription = await query.subscribe();
+    expect(subscription.id).toBe('0');
+    expect(subscription.sessionToken).toBe('token');
+    expect(subscription.query).toEqual(query);
+  });
+
+  it ('can subscribe to query if client is not open', async () => {
+    const mockLiveQueryClient = {
+      shouldOpen: function() {
+        return true;
+      },
+      open: function() {},
+      subscribe: function(query, sessionToken) {
+        return new LiveQuerySubscription('0', query, sessionToken);
+      },
+    };
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve({
+          getSessionToken() {
+            return 'token';
+          }
+        });
+      }
+    });
+    CoreManager.set('LiveQueryController', {
+      getDefaultLiveQueryClient() {
+        return Promise.resolve(mockLiveQueryClient);
+      }
+    });
+    const query = new ParseQuery('TestObject');
+    const subscription = await query.subscribe();
+    expect(subscription.id).toBe('0');
+    expect(subscription.sessionToken).toBe('token');
+    expect(subscription.query).toEqual(query);
+  });
+  it ('can subscribe to query without sessionToken', async () => {
+    const mockLiveQueryClient = {
+      shouldOpen: function() {
+        return true;
+      },
+      open: function() {},
+      subscribe: function(query, sessionToken) {
+        return new LiveQuerySubscription('0', query, sessionToken);
+      },
+    };
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve(null);
+      }
+    });
+    CoreManager.set('LiveQueryController', {
+      getDefaultLiveQueryClient() {
+        return Promise.resolve(mockLiveQueryClient);
+      }
+    });
+    const query = new ParseQuery('TestObject');
+    const subscription = await query.subscribe();
+    expect(subscription.id).toBe('0');
+    expect(subscription.sessionToken).toBeUndefined();
+    expect(subscription.query).toEqual(query);
   });
 });
