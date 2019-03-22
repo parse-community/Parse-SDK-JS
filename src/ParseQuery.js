@@ -1481,7 +1481,7 @@ class ParseQuery {
    * @return {LiveQuerySubscription} Returns the liveQuerySubscription, it's an event emitter
    * which can be used to get liveQuery updates.
    */
-  subscribe(): any {
+  subscribe(): Promise {
     const controller = CoreManager.getLiveQueryController();
     return controller.subscribe(this);
   }

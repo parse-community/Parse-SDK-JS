@@ -122,11 +122,11 @@ describe('ParseLiveQuery', () => {
 
     const controller = CoreManager.getLiveQueryController();
 
-    controller.getDefaultLiveQueryClient().then((client) => {
+    controller.getDefaultLiveQueryClient().then(async (client) => {
 
       const query = new ParseQuery("ObjectType");
       query.equalTo("test", "value");
-      const ourSubscription = controller.subscribe(query, "close");
+      const ourSubscription = await controller.subscribe(query, "close");
 
       const isCalled = {};
       ["open",

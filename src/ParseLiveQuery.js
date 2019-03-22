@@ -150,19 +150,15 @@ const DefaultLiveQueryController = {
   },
   open() {
     return getLiveQueryClient().then((liveQueryClient) => {
-      return Promise.resolve(
-        liveQueryClient.open()
-      );
+      return liveQueryClient.open();
     });
   },
   close() {
     return getLiveQueryClient().then((liveQueryClient) => {
-      return Promise.resolve(
-        liveQueryClient.close()
-      );
+      return liveQueryClient.close();
     });
   },
-  subscribe(query: any): EventEmitter {
+  subscribe(query: any): Promise<EventEmitter> {
     const subscriptionWrap = new EventEmitter();
 
     return getLiveQueryClient().then((liveQueryClient) => {
@@ -180,7 +176,7 @@ const DefaultLiveQueryController = {
         subscriptionWrap.query = subscription.query;
         subscriptionWrap.sessionToken = subscription.sessionToken;
         subscriptionWrap.unsubscribe = subscription.unsubscribe;
-        // Cannot create these events on a nested way because of EventEmiiter from React Native
+        // Cannot create these events on a nested way because of EventEmitter from React Native
         subscription.on('open', () => {
           subscriptionWrap.emit('open');
         });
@@ -206,15 +202,13 @@ const DefaultLiveQueryController = {
           subscriptionWrap.emit('error', object);
         });
 
-        return Promise.resolve(subscriptionWrap);
+        return subscriptionWrap;
       });
     });
   },
   unsubscribe(subscription: any) {
     return getLiveQueryClient().then((liveQueryClient) => {
-      return Promise.resolve(
-        liveQueryClient.unsubscribe(subscription)
-      );
+      return liveQueryClient.unsubscribe(subscription);
     });
   },
   _clearCachedDefaultClient() {
