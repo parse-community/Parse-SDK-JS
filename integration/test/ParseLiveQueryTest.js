@@ -116,4 +116,33 @@ describe('Parse LiveQuery', () => {
       done();
     }, 1000);
   });
+
+  it('can unsubscribe with await to multiple queries different class', async (done) => {
+    const objectA = new TestObject();
+    const objectB = new DiffObject();
+    await Parse.Object.saveAll([objectA, objectB]);
+
+    const queryA = new Parse.Query(TestObject);
+    const queryB = new Parse.Query(DiffObject);
+    queryA.equalTo('objectId', objectA.id);
+    queryB.equalTo('objectId', objectB.id);
+    const subscriptionA = await queryA.subscribe();
+    const subscriptionB = await queryB.subscribe();
+    let count = 0;
+    subscriptionA.on('update', () => {
+      count++;
+    })
+    subscriptionB.on('update', object => {
+      count++;
+      assert.equal(object.get('foo'), 'baz');
+    })
+    await subscriptionA.unsubscribe();
+    await objectA.save({ foo: 'bar' });
+    await objectB.save({ foo: 'baz' });
+
+    setTimeout(() => {
+      assert.equal(count, 1);
+      done();
+    }, 1000);
+  });
 });

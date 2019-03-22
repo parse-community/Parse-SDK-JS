@@ -12,6 +12,7 @@
 import EventEmitter from './EventEmitter';
 import LiveQueryClient from './LiveQueryClient';
 import CoreManager from './CoreManager';
+const url = require('url');
 
 function getLiveQueryClient(): LiveQueryClient {
   return CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
@@ -98,13 +99,9 @@ const DefaultLiveQueryController = {
 
     // If we can not find Parse.liveQueryServerURL, we try to extract it from Parse.serverURL
     if (!liveQueryServerURL) {
-      const tempServerURL = CoreManager.get('SERVER_URL');
-      let protocol = 'ws://';
-      if (tempServerURL.indexOf('https') === 0) {
-        protocol = 'wss://'
-      }
-      const host = tempServerURL.replace(/^https?:\/\//, '');
-      liveQueryServerURL = protocol + host;
+      const serverURL = url.parse(CoreManager.get('SERVER_URL'));
+      const protocol = serverURL.protocol === 'http:' ? 'ws://' : 'wss://';
+      liveQueryServerURL = protocol + serverURL.host + serverURL.pathname;
       CoreManager.set('LIVEQUERY_SERVER_URL', liveQueryServerURL);
     }
 

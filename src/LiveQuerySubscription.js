@@ -108,12 +108,13 @@ class Subscription extends EventEmitter {
   }
 
   /**
-   * Closes the subscription
+   * Close the subscription
    */
-  async unsubscribe(): Promise {
-    const liveQueryClient = await CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
-    liveQueryClient.unsubscribe(this);
-    this.emit('close');
+  unsubscribe(): Promise {
+    return CoreManager.getLiveQueryController().getDefaultLiveQueryClient().then((liveQueryClient) => {
+      liveQueryClient.unsubscribe(this);
+      this.emit('close');
+    });
   }
 }
 

@@ -2630,7 +2630,7 @@ describe('ParseQuery LocalDatastore', () => {
     expect(results[0].get('foo')).toEqual('baz');
   });
 
-  it ('can subscribe to query if client is already open', async () => {
+  it('can subscribe to query if client is already open', async () => {
     const mockLiveQueryClient = {
       shouldOpen: function() {
         return false;
@@ -2660,7 +2660,7 @@ describe('ParseQuery LocalDatastore', () => {
     expect(subscription.query).toEqual(query);
   });
 
-  it ('can subscribe to query if client is not open', async () => {
+  it('can subscribe to query if client is not open', async () => {
     const mockLiveQueryClient = {
       shouldOpen: function() {
         return true;
@@ -2690,7 +2690,8 @@ describe('ParseQuery LocalDatastore', () => {
     expect(subscription.sessionToken).toBe('token');
     expect(subscription.query).toEqual(query);
   });
-  it ('can subscribe to query without sessionToken', async () => {
+
+  it('can subscribe to query without sessionToken', async () => {
     const mockLiveQueryClient = {
       shouldOpen: function() {
         return true;

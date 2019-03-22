@@ -193,7 +193,7 @@ describe('ParseLiveQuery', () => {
         });
       });
 
-      // controller.subscribe() completes asynchronously,
+      // client.subscribe() completes asynchronously,
       // so we need to give it a chance to complete before finishing
       setTimeout(() => {
         try {
