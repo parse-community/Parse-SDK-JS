@@ -110,6 +110,7 @@ class Subscription extends EventEmitter {
     return CoreManager.getLiveQueryController().getDefaultLiveQueryClient().then((liveQueryClient) => {
       liveQueryClient.unsubscribe(this);
       this.emit('close');
+      return Promise.resolve(this);
     });
   }
 }

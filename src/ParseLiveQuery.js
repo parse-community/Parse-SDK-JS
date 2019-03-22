@@ -15,12 +15,12 @@ import CoreManager from './CoreManager';
 
 function open() {
   const LiveQueryController = CoreManager.getLiveQueryController();
-  LiveQueryController.open();
+  return LiveQueryController.open();
 }
 
 function close() {
   const LiveQueryController = CoreManager.getLiveQueryController();
-  LiveQueryController.close();
+  return LiveQueryController.close();
 }
 
 /**
@@ -149,19 +149,23 @@ const DefaultLiveQueryController = {
     });
   },
   open() {
-    getLiveQueryClient().then((liveQueryClient) => {
-      return liveQueryClient.open();
+    return getLiveQueryClient().then((liveQueryClient) => {
+      return Promise.resolve(
+        liveQueryClient.open()
+      );
     });
   },
   close() {
-    getLiveQueryClient().then((liveQueryClient) => {
-      return liveQueryClient.close();
+    return getLiveQueryClient().then((liveQueryClient) => {
+      return Promise.resolve(
+        liveQueryClient.close()
+      );
     });
   },
   subscribe(query: any): EventEmitter {
     const subscriptionWrap = new EventEmitter();
 
-    getLiveQueryClient().then((liveQueryClient) => {
+    return getLiveQueryClient().then((liveQueryClient) => {
       if (liveQueryClient.shouldOpen()) {
         liveQueryClient.open();
       }
@@ -201,13 +205,16 @@ const DefaultLiveQueryController = {
         subscription.on('error', (object) => {
           subscriptionWrap.emit('error', object);
         });
+
+        return Promise.resolve(subscriptionWrap);
       });
     });
-    return subscriptionWrap;
   },
   unsubscribe(subscription: any) {
-    getLiveQueryClient().then((liveQueryClient) => {
-      return liveQueryClient.unsubscribe(subscription);
+    return getLiveQueryClient().then((liveQueryClient) => {
+      return Promise.resolve(
+        liveQueryClient.unsubscribe(subscription)
+      );
     });
   },
   _clearCachedDefaultClient() {
