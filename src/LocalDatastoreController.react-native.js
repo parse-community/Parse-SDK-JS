@@ -53,7 +53,7 @@ const LocalDatastoreController = {
       console.error('Error getAllContents: ', error);
       return {};
     }
-    results.map((pair) => {
+    results.forEach((pair) => {
       const [key, value] = pair;
       try {
         LDS[key] = JSON.parse(value);
@@ -64,7 +64,7 @@ const LocalDatastoreController = {
     return LDS;
   },
 
-  async getRawStorage(): Promise {
+  async getRawStorage(): Promise<Object> {
     const keys = await RNStorage.getAllKeys();
     const storage = {};
     const results = await RNStorage.multiGet(keys);

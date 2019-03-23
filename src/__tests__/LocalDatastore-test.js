@@ -155,19 +155,19 @@ describe('LocalDatastore', () => {
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
   });
 
-  it('_handleUnPinAllWithName no children', async () => {
+  it('_handlePinAllWithName no children', async () => {
     const object = new ParseObject('Item');
     await LocalDatastore._handlePinAllWithName('test_pin', [object]);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(2);
   });
 
-  it('_handleUnPinAllWithName default pin', async () => {
+  it('_handlePinAllWithName default pin', async () => {
     const object = new ParseObject('Item');
     await LocalDatastore._handlePinAllWithName(DEFAULT_PIN, [object]);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(2);
   });
 
-  it('_handleUnPinAllWithName unsaved children', async () => {
+  it('_handlePinAllWithName unsaved children', async () => {
     const parent = new ParseObject('Item');
     const unsaved = { className: 'Item', __type: 'Object' };
     parent.set('child', unsaved);
@@ -175,7 +175,7 @@ describe('LocalDatastore', () => {
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(2);
   });
 
-  it('_handleUnPinAllWithName with children', async () => {
+  it('_handlePinAllWithName with children', async () => {
     const parent = new ParseObject('Item');
     const child = new ParseObject('Item');
     const grandchild = new ParseObject('Item');
