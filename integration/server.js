@@ -9,7 +9,11 @@ const api = new ParseServer({
   appId: 'integration',
   masterKey: 'notsosecret',
   serverURL: 'http://localhost:1337/parse', // Don't forget to change to https if needed
-  cloud: `${__dirname}/cloud/main.js`
+  cloud: `${__dirname}/cloud/main.js`,
+  liveQuery: {
+    classNames: ['TestObject', 'DiffObject'],
+  },
+  startLiveQueryServer: true,
 });
 
 // Serve the Parse API on the /parse URL prefix

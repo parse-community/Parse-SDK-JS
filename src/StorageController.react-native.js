@@ -66,6 +66,30 @@ const StorageController = {
     });
   },
 
+  multiGet(keys: Array<string>): Promise<Array<Array<string>>> {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().multiGet(keys, function(err, result) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  },
+
+  multiRemove(keys: Array<string>): Promise {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().multiRemove(keys, function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(keys);
+        }
+      });
+    });
+  },
+
   clear() {
     return this.getAsyncStorage().clear();
   }

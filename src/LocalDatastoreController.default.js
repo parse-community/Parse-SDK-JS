@@ -8,18 +8,21 @@
  *
  * @flow
  */
+import { isLocalDatastoreKey } from './LocalDatastoreUtils';
 
 const memMap = {};
 const LocalDatastoreController = {
-  fromPinWithName(name: string): ?any {
-    if (memMap.hasOwnProperty(name)) {
-      return memMap[name];
+  fromPinWithName(name: string): Array<Object> {
+    if (!memMap.hasOwnProperty(name)) {
+      return [];
     }
-    return null;
+    const objects = JSON.parse(memMap[name]);
+    return objects;
   },
 
   pinWithName(name: string, value: any) {
-    memMap[name] = value;
+    const values = JSON.stringify(value);
+    memMap[name] = values;
   },
 
   unPinWithName(name: string) {
@@ -27,12 +30,22 @@ const LocalDatastoreController = {
   },
 
   getAllContents() {
+    const LDS = {};
+    for (const key in memMap) {
+      if (memMap.hasOwnProperty(key) && isLocalDatastoreKey(key)) {
+        LDS[key] = JSON.parse(memMap[key]);
+      }
+    }
+    return LDS;
+  },
+
+  getRawStorage() {
     return memMap;
   },
 
   clear() {
     for (const key in memMap) {
-      if (memMap.hasOwnProperty(key)) {
+      if (memMap.hasOwnProperty(key) && isLocalDatastoreKey(key)) {
         delete memMap[key];
       }
     }

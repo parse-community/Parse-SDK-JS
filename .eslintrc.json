@@ -23,6 +23,7 @@
         "prefer-const": "error",
         "space-infix-ops": "error",
         "no-useless-escape": "off",
-        "no-var": "error"
+        "no-var": "error",
+        "no-console": 0
     }
 }

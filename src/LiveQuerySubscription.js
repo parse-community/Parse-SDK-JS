@@ -101,12 +101,16 @@ class Subscription extends EventEmitter {
     this.id = id;
     this.query = query;
     this.sessionToken = sessionToken;
+
+    // adding listener so process does not crash
+    // best practice is for developer to register their own listener
+    this.on('error', () => {});
   }
 
   /**
-   * closes the subscription
+   * Close the subscription
    */
-  unsubscribe() {
+  unsubscribe(): Promise {
     return CoreManager.getLiveQueryController().getDefaultLiveQueryClient().then((liveQueryClient) => {
       liveQueryClient.unsubscribe(this);
       this.emit('close');
