@@ -45,12 +45,13 @@ const mockLocalDatastore = {
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
 let CoreManager = require('../CoreManager');
-const LocalDatastore = require('../LocalDatastore');
 const ParseError = require('../ParseError').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
 let ParseObject = require('../ParseObject');
 let ParseQuery = require('../ParseQuery').default;
 const LiveQuerySubscription = require('../LiveQuerySubscription').default;
+
+import { DEFAULT_PIN } from '../LocalDatastoreUtils';
 
 describe('ParseQuery', () => {
   it('can be constructed from a class name', () => {
@@ -2192,7 +2193,7 @@ describe('ParseQuery LocalDatastore', () => {
     expect(q._localDatastorePinName).toBe(null);
     q.fromPin();
     expect(q._queriesLocalDatastore).toBe(true);
-    expect(q._localDatastorePinName).toBe(LocalDatastore.DEFAULT_PIN);
+    expect(q._localDatastorePinName).toBe(DEFAULT_PIN);
   });
 
   it('can query from pin with name', () => {

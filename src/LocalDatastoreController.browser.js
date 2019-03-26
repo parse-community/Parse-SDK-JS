@@ -10,44 +10,64 @@
  */
 
 /* global localStorage */
+import { isLocalDatastoreKey } from './LocalDatastoreUtils';
 
 const LocalDatastoreController = {
-  fromPinWithName(name: string): Promise {
+  fromPinWithName(name: string): Array<Object> {
     const values = localStorage.getItem(name);
     if (!values) {
-      return Promise.resolve(null);
+      return [];
     }
     const objects = JSON.parse(values);
-    return Promise.resolve(objects);
+    return objects;
   },
 
-  pinWithName(name: string, value: any): Promise {
+  pinWithName(name: string, value: any) {
     try {
       const values = JSON.stringify(value);
       localStorage.setItem(name, values);
     } catch (e) {
       // Quota exceeded, possibly due to Safari Private Browsing mode
-      console.log(e.message); // eslint-disable-line no-console
+      console.log(e.message);
     }
-    return Promise.resolve();
   },
 
-  unPinWithName(name: string): Promise {
-    return Promise.resolve(localStorage.removeItem(name));
+  unPinWithName(name: string) {
+    localStorage.removeItem(name);
   },
 
-  getAllContents(): Promise {
+  getAllContents(): Object {
     const LDS = {};
     for (let i = 0; i < localStorage.length; i += 1) {
       const key = localStorage.key(i);
-      const value = localStorage.getItem(key);
-      LDS[key] = JSON.parse(value);
+      if (isLocalDatastoreKey(key)) {
+        const value = localStorage.getItem(key);
+        LDS[key] = JSON.parse(value);
+      }
     }
-    return Promise.resolve(LDS);
+    return LDS;
+  },
+
+  getRawStorage(): Object {
+    const storage = {};
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      const value = localStorage.getItem(key);
+      storage[key] = value;
+    }
+    return storage;
   },
 
   clear(): Promise {
-    return Promise.resolve(localStorage.clear());
+    const toRemove = [];
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      if (isLocalDatastoreKey(key)) {
+        toRemove.push(key);
+      }
+    }
+    const promises = toRemove.map(localStorage.removeItem);
+    return Promise.all(promises);
   }
 };
 
