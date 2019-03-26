@@ -66,7 +66,7 @@ const LocalDatastoreController = {
         toRemove.push(key);
       }
     }
-    const promises = toRemove.map(localStorage.removeItem);
+    const promises = toRemove.map(this.unPinWithName);
     return Promise.all(promises);
   }
 };

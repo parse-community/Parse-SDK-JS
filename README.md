@@ -3,9 +3,10 @@
 [![Build Status][build-status-svg]][build-status-link]
 [![Test Coverage][coverage-status-svg]][coverage-status-link]
 [![Npm Version][npm-svg]][npm-link]
-[![CDNJS version](https://img.shields.io/cdnjs/v/parse.svg)](https://cdnjs.com/libraries/parse) [![Greenkeeper badge](https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg)](https://greenkeeper.io/)
-[![License][license-svg]][license-link]
+[![CDNJS version][cdn-svg]][cdn-link]
+[![Join The Conversation][discourse-svg]][discourse-link]
 [![Greenkeeper badge][greenkeeper-svg]][greenkeeper-link]
+[![License][license-svg]][license-link]
 
 [![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)](#sponsors)
@@ -45,6 +46,13 @@ const AsyncStorage = require('react-native').AsyncStorage;
 Parse.setAsyncStorage(AsyncStorage);
 ```
 
+For TypeScript applications, install `'@types/parse'`:
+```
+$ npm install @types/parse
+```
+
+Types are updated manually after every release. If a definition doesn't exist, please submit a pull request to [@types/parse][types-parse]
+
 ## Upgrading to Parse SDK 2.0.0
 
 With Parse SDK 2.0.0, gone are the backbone style callbacks and Parse.Promises.
@@ -70,7 +78,12 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  [coverage-status-link]: http://codecov.io/github/parse-community/Parse-SDK-JS?branch=master
  [npm-svg]: https://badge.fury.io/js/parse.svg
  [npm-link]: https://npmjs.org/parse
+ [cdn-svg]: https://img.shields.io/cdnjs/v/parse.svg
+ [cdn-link]: https://cdnjs.com/libraries/parse
+ [discourse-svg]: https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg
+ [discourse-link]: https://community.parseplatform.org/c/sdk/js
  [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
  [license-link]: https://github.com/parse-community/Parse-SDK-JS/blob/master/LICENSE
- [greenkeeper-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
- [greenkeeper-link]: https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg
+ [greenkeeper-svg]: https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg
+ [greenkeeper-link]: https://greenkeeper.io/
+ [types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse

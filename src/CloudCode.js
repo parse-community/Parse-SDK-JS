@@ -6,7 +6,7 @@
  * @method define
  * @name Parse.Cloud.define
  * @param {String} name The name of the Cloud Function
- * @param {Function} data The Cloud Function to register. This function should take two parameters a {@link Parse.Cloud.FunctionRequest} and a {@link Parse.Cloud.FunctionResponse}
+ * @param {Function} data The Cloud Function to register. This function should take one parameter {@link Parse.Cloud.FunctionRequest}
  */
 
 /**
