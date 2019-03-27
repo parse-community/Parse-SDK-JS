@@ -3,6 +3,8 @@
 ## 2.3.1
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.0...2.3.1)
 - Correct homepage in package.json (#9e198b3)
+- Add Issues template for opening GitHub Issue (#df1d570)
+- Add Public email address to satisfy an npmjs requirement (#43bf3b6)
 
 ## 2.3.0
 
