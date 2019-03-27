@@ -1,10 +1,15 @@
 # Parse-SDK-JS
 
+### master
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.1...master)
+
 ## 2.3.1
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.0...2.3.1)
-- Correct homepage in package.json (#9e198b3)
+
+- Correct homepage in package.json ([#9e198b3](https://github.com/parse-community/Parse-SDK-JS/commit/9e198b368862925025737aa725e9a2e8b3d4205a))
 
 ## 2.3.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.2.1...2.3.0)
 
 - LocalDatastore fixes for React-Native ([#753](https://github.com/parse-community/Parse-SDK-JS/pull/753))
 - LocalDatastore update from Server ([#734](https://github.com/parse-community/Parse-SDK-JS/pull/734))
@@ -16,10 +21,12 @@
 - Subscribe to multiple LiveQuery subscriptions ([#758](https://github.com/parse-community/Parse-SDK-JS/pull/758))
 
 ## 2.2.1
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.2.0...2.2.1)
 
 - Addresses issue with babel runtime regenerator ([#740](https://github.com/parse-community/Parse-SDK-JS/pull/740))
 
 ## 2.2.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.1.0...2.2.0)
 
 - Support for Local Datastore ([#612](https://github.com/parse-community/Parse-SDK-JS/pull/612))
 - LiveQuery override data on update ([#718](https://github.com/parse-community/Parse-SDK-JS/pull/718)) (Requires Parse-Server 3.1.3+)
@@ -37,10 +44,12 @@
 - LiveQuery Support for Subclasses ([#662](https://github.com/parse-community/Parse-SDK-JS/pull/662))
 
 ## 2.1.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/v2.0.2...2.1.0)
 
 - Parse.Error now inherits from Error ([#658](https://github.com/parse-community/Parse-SDK-JS/pull/658))
 
 ## 2.0.2
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/v2.0.1...v2.0.2)
 
 - Fixes issue affecting unsubscribing from liveQueries ([#640](https://github.com/parse-community/Parse-SDK-JS/pull/640))
 - Adds support for aggregate stages with identical names ([#637](https://github.com/parse-community/Parse-SDK-JS/pull/637))
