@@ -47,6 +47,7 @@ jobs:
         - provider: npm
           skip_cleanup: true
           api_key: $NPM_TOKEN
+          email: npm@parseplatform.org
           on:
             tags: true
             all_branches: true
