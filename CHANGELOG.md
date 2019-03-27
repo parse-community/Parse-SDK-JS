@@ -1,5 +1,9 @@
 # Parse-SDK-JS
 
+## 2.3.1
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.0...2.3.1)
+- Correct homepage in package.json (#9e198b3)
+
 ## 2.3.0
 
 - LocalDatastore fixes for React-Native ([#753](https://github.com/parse-community/Parse-SDK-JS/pull/753))
