@@ -8,11 +8,16 @@
  *
  * @flow
  */
-/* global File */
+/* global XMLHttpRequest, File */
 import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
 const http = require('http');
 const https = require('https');
+
+let XHR = null;
+if (typeof XMLHttpRequest !== 'undefined') {
+  XHR = XMLHttpRequest;
+}
 
 type Base64 = { base64: string };
 type FileData = Array<number> | Base64 | File;
@@ -311,6 +316,9 @@ const DefaultController = {
   },
 
   download: function(uri) {
+    if (XHR) {
+      return this.downloadAjax(uri);
+    }
     return new Promise((resolve, reject) => {
       let client = http;
       if (uri.indexOf('https') === 0) {
@@ -328,6 +336,27 @@ const DefaultController = {
         });
       }).on('error', reject);
     });
+  },
+
+  downloadAjax: function(uri) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XHR();
+      xhr.open('GET', uri, true);
+      xhr.responseType = 'arraybuffer';
+      xhr.onerror = function(e) { reject(e); };
+      xhr.onload = function(e) {
+        const bytes = new Uint8Array(e.currentTarget.response);
+        resolve({
+          base64: ParseFile.encodeBase64(bytes),
+          contentType: xhr.getResponseHeader('content-type'),
+        });
+      };
+      xhr.send();
+    });
+  },
+
+  _setXHR(xhr: any) {
+    XHR = xhr;
   }
 };
 

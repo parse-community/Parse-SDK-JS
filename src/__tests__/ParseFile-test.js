@@ -303,6 +303,7 @@ describe('FileController', () => {
   });
 
   it('download with base64 http', async () => {
+    defaultController._setXHR(null);
     const mockResponse = Object.create(EventEmitter.prototype);
     EventEmitter.call(mockResponse);
     mockResponse.setEncoding = function() {}
@@ -328,6 +329,7 @@ describe('FileController', () => {
   });
 
   it('download with base64 https', async () => {
+    defaultController._setXHR(null);
     const mockResponse = Object.create(EventEmitter.prototype);
     EventEmitter.call(mockResponse);
     mockResponse.setEncoding = function() {}
@@ -350,5 +352,42 @@ describe('FileController', () => {
     expect(mockHttp.get).toHaveBeenCalledTimes(0);
     expect(mockHttps.get).toHaveBeenCalledTimes(1);
     spy.mockRestore();
+  });
+
+  it('download with ajax', async () => {
+    const mockXHR = function () {
+      return {
+        open: jest.fn(),
+        send: jest.fn().mockImplementation(function() {
+          this.onload({ currentTarget: { response: [61, 170, 236, 120] } });
+        }),
+        getResponseHeader: function() {
+          return 'image/png';
+        }
+      };
+    };
+    defaultController._setXHR(mockXHR);
+
+    const data = await defaultController.download('https://example.com/image.png');
+    expect(data.base64).toBe('ParseA==');
+    expect(data.contentType).toBe('image/png');
+  });
+
+  it('download with ajax error', async () => {
+    const mockXHR = function () {
+      return {
+        open: jest.fn(),
+        send: jest.fn().mockImplementation(function() {
+          this.onerror('error thrown');
+        })
+      };
+    };
+    defaultController._setXHR(mockXHR);
+
+    try {
+      await defaultController.download('https://example.com/image.png');
+    } catch (e) {
+      expect(e).toBe('error thrown');
+    }
   });
 });
