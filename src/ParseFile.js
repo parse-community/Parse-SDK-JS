@@ -314,11 +314,11 @@ const DefaultController = {
   },
 
   download: function(uri) {
-    if (process.env.PARSE_BUILD === 'browser') {
-      if (!XHR) {
-        return Promise.reject('Cannot make a request: No definition of XMLHttpRequest was found.');
-      }
+    if (XHR) {
       return this.downloadAjax(uri);
+    }
+    if (process.env.PARSE_BUILD === 'browser') {
+      return Promise.reject('Cannot make a request: No definition of XMLHttpRequest was found.');
     }
     return new Promise((resolve, reject) => {
       const client = uri.indexOf('https') === 0

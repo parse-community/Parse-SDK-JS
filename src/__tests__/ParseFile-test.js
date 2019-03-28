@@ -359,7 +359,6 @@ describe('FileController', () => {
   });
 
   it('download with ajax', async () => {
-    process.env.PARSE_BUILD = 'browser';
     const mockXHR = function () {
       return {
         open: jest.fn(),
@@ -383,7 +382,6 @@ describe('FileController', () => {
   });
 
   it('download with ajax error', async () => {
-    process.env.PARSE_BUILD = 'browser';
     const mockXHR = function () {
       return {
         open: jest.fn(),
