@@ -11,8 +11,6 @@
 /* global XMLHttpRequest, File */
 import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
-const http = require('http');
-const https = require('https');
 
 let XHR = null;
 if (typeof XMLHttpRequest !== 'undefined') {
@@ -320,9 +318,9 @@ const DefaultController = {
       return this.downloadAjax(uri);
     }
     return new Promise((resolve, reject) => {
-      let client = http;
+      let client = require('http');
       if (uri.indexOf('https') === 0) {
-        client = https;
+        client = require('https');
       }
       client.get(uri, (resp) => {
         resp.setEncoding('base64');
@@ -344,8 +342,8 @@ const DefaultController = {
       xhr.open('GET', uri, true);
       xhr.responseType = 'arraybuffer';
       xhr.onerror = function(e) { reject(e); };
-      xhr.onload = function(e) {
-        const bytes = new Uint8Array(e.currentTarget.response);
+      xhr.onload = function() {
+        const bytes = new Uint8Array(this.response);
         resolve({
           base64: ParseFile.encodeBase64(bytes),
           contentType: xhr.getResponseHeader('content-type'),

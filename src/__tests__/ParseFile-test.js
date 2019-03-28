@@ -359,7 +359,8 @@ describe('FileController', () => {
       return {
         open: jest.fn(),
         send: jest.fn().mockImplementation(function() {
-          this.onload({ currentTarget: { response: [61, 170, 236, 120] } });
+          this.response = [61, 170, 236, 120]
+          this.onload();
         }),
         getResponseHeader: function() {
           return 'image/png';
