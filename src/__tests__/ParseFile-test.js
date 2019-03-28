@@ -41,6 +41,10 @@ describe('ParseFile', () => {
     });
   });
 
+  afterEach(() => {
+    process.env.PARSE_BUILD = 'node';
+  });
+
   it('can create files with base64 encoding', () => {
     const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     expect(file._source.base64).toBe('ParseA==');
@@ -355,6 +359,7 @@ describe('FileController', () => {
   });
 
   it('download with ajax', async () => {
+    process.env.PARSE_BUILD = 'browser';
     const mockXHR = function () {
       return {
         open: jest.fn(),
@@ -378,6 +383,7 @@ describe('FileController', () => {
   });
 
   it('download with ajax error', async () => {
+    process.env.PARSE_BUILD = 'browser';
     const mockXHR = function () {
       return {
         open: jest.fn(),
@@ -403,6 +409,5 @@ describe('FileController', () => {
     } catch (e) {
       expect(e).toBe('Cannot make a request: No definition of XMLHttpRequest was found.');
     }
-    process.env.PARSE_BUILD = 'node';
   });
 });
