@@ -41,6 +41,10 @@ describe('ParseFile', () => {
     });
   });
 
+  afterEach(() => {
+    process.env.PARSE_BUILD = 'node';
+  });
+
   it('can create files with base64 encoding', () => {
     const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     expect(file._source.base64).toBe('ParseA==');
@@ -303,6 +307,7 @@ describe('FileController', () => {
   });
 
   it('download with base64 http', async () => {
+    defaultController._setXHR(null);
     const mockResponse = Object.create(EventEmitter.prototype);
     EventEmitter.call(mockResponse);
     mockResponse.setEncoding = function() {}
@@ -328,6 +333,7 @@ describe('FileController', () => {
   });
 
   it('download with base64 https', async () => {
+    defaultController._setXHR(null);
     const mockResponse = Object.create(EventEmitter.prototype);
     EventEmitter.call(mockResponse);
     mockResponse.setEncoding = function() {}
@@ -350,5 +356,56 @@ describe('FileController', () => {
     expect(mockHttp.get).toHaveBeenCalledTimes(0);
     expect(mockHttps.get).toHaveBeenCalledTimes(1);
     spy.mockRestore();
+  });
+
+  it('download with ajax', async () => {
+    const mockXHR = function () {
+      return {
+        open: jest.fn(),
+        send: jest.fn().mockImplementation(function() {
+          this.response = [61, 170, 236, 120];
+          this.readyState = 2;
+          this.onreadystatechange();
+          this.readyState = 4;
+          this.onreadystatechange();
+        }),
+        getResponseHeader: function() {
+          return 'image/png';
+        }
+      };
+    };
+    defaultController._setXHR(mockXHR);
+
+    const data = await defaultController.download('https://example.com/image.png');
+    expect(data.base64).toBe('ParseA==');
+    expect(data.contentType).toBe('image/png');
+  });
+
+  it('download with ajax error', async () => {
+    const mockXHR = function () {
+      return {
+        open: jest.fn(),
+        send: jest.fn().mockImplementation(function() {
+          this.onerror('error thrown');
+        })
+      };
+    };
+    defaultController._setXHR(mockXHR);
+
+    try {
+      await defaultController.download('https://example.com/image.png');
+    } catch (e) {
+      expect(e).toBe('error thrown');
+    }
+  });
+
+  it('download with xmlhttprequest unsupported', async () => {
+    defaultController._setXHR(null);
+    process.env.PARSE_BUILD = 'browser';
+    try {
+      await defaultController.download('https://example.com/image.png');
+    } catch (e) {
+      expect(e).toBe('Cannot make a request: No definition of XMLHttpRequest was found.');
+    }
   });
 });
