@@ -9,6 +9,7 @@
 - Correct homepage in package.json ([#9e198b3](https://github.com/parse-community/Parse-SDK-JS/commit/9e198b368862925025737aa725e9a2e8b3d4205a))
 - Add Issues template for opening GitHub Issue ([#760](https://github.com/parse-community/Parse-SDK-JS/pull/760))
 - Add Public email address to satisfy an npmjs requirement ([#764](https://github.com/parse-community/Parse-SDK-JS/pull/764))
+- File uri upload for Browser / React-Native ([#765](https://github.com/parse-community/Parse-SDK-JS/pull/765))
 
 ## 2.3.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.2.1...2.3.0)
