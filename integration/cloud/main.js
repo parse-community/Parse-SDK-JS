@@ -30,7 +30,7 @@ Parse.Cloud.job('CloudJob2', function() {
       resolve({
         status: 'cloud job completed'
       })
-    }, 3000);
+    }, 1000);
   });
 });
 

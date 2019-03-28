@@ -3,6 +3,7 @@
 const assert = require('assert');
 const clear = require('./clear');
 const Parse = require('../../node');
+const sleep = require('./sleep');
 
 describe('Parse Cloud', () => {
   beforeAll((done) => {
@@ -88,13 +89,16 @@ describe('Parse Cloud', () => {
     });
   });
 
-  it('run long job', (done) => {
-    Parse.Cloud.startJob('CloudJob2').then((jobStatusId) => {
-      return Parse.Cloud.getJobStatus(jobStatusId);
-    }).then((jobStatus) => {
-      assert.equal(jobStatus.get('status'), 'running');
-      done();
-    });
+  it('run long job', async () => {
+    const jobStatusId = await Parse.Cloud.startJob('CloudJob2');
+
+    let jobStatus = await Parse.Cloud.getJobStatus(jobStatusId);
+    assert.equal(jobStatus.get('status'), 'running');
+
+    await sleep(2000);
+
+    jobStatus = await Parse.Cloud.getJobStatus(jobStatusId);
+    assert.equal(jobStatus.get('status'), 'succeeded');
   });
 
   it('run bad job', (done) => {
