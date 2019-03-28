@@ -317,7 +317,7 @@ const DefaultController = {
     if (XHR) {
       return this.downloadAjax(uri);
     }
-    if (process.env.PARSE_BUILD !== 'node') {
+    if (process.env.PARSE_BUILD === 'browser') {
       return Promise.reject('Cannot make a request: No definition of XMLHttpRequest was found.');
     }
     return new Promise((resolve, reject) => {
