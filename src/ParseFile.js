@@ -65,6 +65,7 @@ class ParseFile {
   _url: ?string;
   _source: FileSource;
   _previousSave: ?Promise;
+  _data: string;
 
   /**
    * @param name {String} The file's name. This will be prefixed by a unique
@@ -101,9 +102,10 @@ class ParseFile {
 
     if (data !== undefined) {
       if (Array.isArray(data)) {
+        this._data = ParseFile.encodeBase64(data);
         this._source = {
           format: 'base64',
-          base64: ParseFile.encodeBase64(data),
+          base64: this._data,
           type: specifiedType
         };
       } else if (typeof File !== 'undefined' && data instanceof File) {
@@ -125,12 +127,14 @@ class ParseFile {
         if (commaIndex !== -1) {
           const matches = dataUriRegexp.exec(base64.slice(0, commaIndex + 1));
           // if data URI with type and charset, there will be 4 matches.
+          this._data = base64.slice(commaIndex + 1);
           this._source = {
             format: 'base64',
-            base64: base64.slice(commaIndex + 1),
+            base64: this._data,
             type: matches[1]
           };
         } else {
+          this._data = base64;
           this._source = {
             format: 'base64',
             base64: base64,
@@ -143,6 +147,25 @@ class ParseFile {
     }
   }
 
+  /**
+   * Return the data for the file, downloading it if not already present.
+   * Data is present if initialized with Byte Array, Base64 or Saved with Uri.
+   * Data is cleared if saved with File object selected with a file upload control
+   *
+   * @return {Promise} Promise that is resolve with base64 data
+   */
+  async getData(): Promise<String> {
+    if (this._data) {
+      return this._data;
+    }
+    if (!this._url) {
+      throw new Error('Cannot retrieve data for unsaved ParseFile.');
+    }
+    const controller = CoreManager.getFileController();
+    const result = await controller.download(this._url);
+    this._data = result.base64;
+    return this._data;
+  }
   /**
    * Gets the name of the file. Before save is called, this is the filename
    * given by the user. After save is called, that name gets prefixed with a
@@ -189,10 +212,19 @@ class ParseFile {
         this._previousSave = controller.saveFile(this._name, this._source, options).then((res) => {
           this._name = res.name;
           this._url = res.url;
+          this._data = null;
           return this;
         });
       } else if (this._source.format === 'uri') {
-        this._previousSave = controller.saveUri(this._name, this._source, options).then((res) => {
+        this._previousSave = controller.download(this._source.uri).then((result) => {
+          const newSource = {
+            format: 'base64',
+            base64: result.base64,
+            type: result.contentType,
+          };
+          this._data = result.base64;
+          return controller.saveBase64(this._name, newSource, options);
+        }).then((res) => {
           this._name = res.name;
           this._url = res.url;
           return this;
@@ -297,20 +329,6 @@ const DefaultController = {
     }
     const path = 'files/' + name;
     return CoreManager.getRESTController().request('POST', path, data, options);
-  },
-
-  saveUri: function(name: string, source: FileSource, options?: FullOptions) {
-    if (source.format !== 'uri') {
-      throw new Error('saveUri can only be used with Uri-type sources.');
-    }
-    return this.download(source.uri).then((result) => {
-      const newSource = {
-        format: 'base64',
-        base64: result.base64,
-        type: result.contentType,
-      };
-      return this.saveBase64(name, newSource, options);
-    });
   },
 
   download: function(uri) {
