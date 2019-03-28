@@ -359,8 +359,11 @@ describe('FileController', () => {
       return {
         open: jest.fn(),
         send: jest.fn().mockImplementation(function() {
-          this.response = [61, 170, 236, 120]
-          this.onload();
+          this.response = [61, 170, 236, 120];
+          this.readyState = 2;
+          this.onreadystatechange();
+          this.readyState = 4;
+          this.onreadystatechange();
         }),
         getResponseHeader: function() {
           return 'image/png';
@@ -390,5 +393,16 @@ describe('FileController', () => {
     } catch (e) {
       expect(e).toBe('error thrown');
     }
+  });
+
+  it('download with xmlhttprequest unsupported', async () => {
+    defaultController._setXHR(null);
+    process.env.PARSE_BUILD = 'browser';
+    try {
+      await defaultController.download('https://example.com/image.png');
+    } catch (e) {
+      expect(e).toBe('Cannot make a request: No definition of XMLHttpRequest was found.');
+    }
+    process.env.PARSE_BUILD = 'node';
   });
 });

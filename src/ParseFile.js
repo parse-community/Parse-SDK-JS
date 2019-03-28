@@ -317,6 +317,9 @@ const DefaultController = {
     if (XHR) {
       return this.downloadAjax(uri);
     }
+    if (process.env.PARSE_BUILD !== 'node') {
+      return Promise.reject('Cannot make a request: No definition of XMLHttpRequest was found.');
+    }
     return new Promise((resolve, reject) => {
       let client = require('http');
       if (uri.indexOf('https') === 0) {
@@ -342,7 +345,10 @@ const DefaultController = {
       xhr.open('GET', uri, true);
       xhr.responseType = 'arraybuffer';
       xhr.onerror = function(e) { reject(e); };
-      xhr.onload = function() {
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) {
+          return;
+        }
         const bytes = new Uint8Array(this.response);
         resolve({
           base64: ParseFile.encodeBase64(bytes),
