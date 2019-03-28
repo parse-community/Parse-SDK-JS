@@ -8,11 +8,14 @@
  *
  * @flow
  */
-/* global File */
+/* global XMLHttpRequest, File */
 import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
-const http = require('http');
-const https = require('https');
+
+let XHR = null;
+if (typeof XMLHttpRequest !== 'undefined') {
+  XHR = XMLHttpRequest;
+}
 
 type Base64 = { base64: string };
 type FileData = Array<number> | Base64 | File;
@@ -311,11 +314,16 @@ const DefaultController = {
   },
 
   download: function(uri) {
+    if (XHR) {
+      return this.downloadAjax(uri);
+    }
+    if (process.env.PARSE_BUILD === 'browser') {
+      return Promise.reject('Cannot make a request: No definition of XMLHttpRequest was found.');
+    }
     return new Promise((resolve, reject) => {
-      let client = http;
-      if (uri.indexOf('https') === 0) {
-        client = https;
-      }
+      const client = uri.indexOf('https') === 0
+        ? require('https')
+        : require('http');
       client.get(uri, (resp) => {
         resp.setEncoding('base64');
         let base64 = '';
@@ -328,6 +336,30 @@ const DefaultController = {
         });
       }).on('error', reject);
     });
+  },
+
+  downloadAjax: function(uri) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XHR();
+      xhr.open('GET', uri, true);
+      xhr.responseType = 'arraybuffer';
+      xhr.onerror = function(e) { reject(e); };
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) {
+          return;
+        }
+        const bytes = new Uint8Array(this.response);
+        resolve({
+          base64: ParseFile.encodeBase64(bytes),
+          contentType: xhr.getResponseHeader('content-type'),
+        });
+      };
+      xhr.send();
+    });
+  },
+
+  _setXHR(xhr: any) {
+    XHR = xhr;
   }
 };
 
