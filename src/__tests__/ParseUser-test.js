@@ -742,31 +742,6 @@ describe('ParseUser', () => {
     spy.mockRestore();
   });
 
-  it('can pass sessionToken on save', async () => {
-    ParseUser.enableUnsafeCurrentUser();
-    ParseUser._clearCache();
-    CoreManager.setRESTController({
-      request() {
-        return Promise.resolve({
-          objectId: 'uid5',
-          sessionToken: 'r:123abc',
-          authData: {
-            anonymous: {
-              id: 'anonymousId',
-            }
-          }
-        }, 200);
-      },
-      ajax() {}
-    });
-    const user = await AnonymousUtils.logIn();
-    user.set('field', 'hello');
-    jest.spyOn(user, 'getSessionToken');
-
-    await user.save();
-    expect(user.getSessionToken).toHaveBeenCalledTimes(2);
-  });
-
   it('can destroy anonymous user on logout', async () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
