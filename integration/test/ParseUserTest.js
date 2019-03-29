@@ -562,4 +562,34 @@ describe('Parse User', () => {
     expect(user instanceof CustomUser).toBe(true);
     expect(user.doSomething()).toBe(5);
   });
+
+  it('can link with master key', async () => {
+    const provider = {
+      authenticate: () => Promise.resolve(),
+      restoreAuthentication() {
+        return true;
+      },
+
+      getAuthType() {
+        return 'test';
+      },
+
+      getAuthData() {
+        return {
+          authData: {
+            id: 1234,
+          },
+        };
+      },
+    };
+    Parse.User._registerAuthenticationProvider(provider);
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.save();
+    // times out.  getting stuck somewhere?
+    await user._linkWith(provider, {})
+    // const f = async () => user._linkWith(provider, null);
+    // expect(await f).not.toThrow();
+  });
 });
