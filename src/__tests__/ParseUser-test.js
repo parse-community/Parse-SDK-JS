@@ -767,6 +767,31 @@ describe('ParseUser', () => {
     expect(user.destroy).toHaveBeenCalledTimes(1);
   });
 
+  it('can unlink', async () => {
+    const provider = AnonymousUtils._getAuthProvider();
+    ParseUser._registerAuthenticationProvider(provider);
+    const user = new ParseUser();
+    jest.spyOn(user, '_linkWith');
+    user._unlinkFrom(provider);
+    expect(user._linkWith).toHaveBeenCalledTimes(1);
+    expect(user._linkWith).toHaveBeenCalledWith(provider, { authData: null }, undefined);
+  });
+
+  it('can unlink with options', async () => {
+    const provider = AnonymousUtils._getAuthProvider();
+    ParseUser._registerAuthenticationProvider(provider);
+    const user = new ParseUser();
+    jest.spyOn(user, '_linkWith')
+      .mockImplementationOnce((authProvider, authData, saveOptions) => {
+        expect(authProvider).toEqual(provider);
+        expect(authData).toEqual({ authData: null});
+        expect(saveOptions).toEqual({ useMasterKey: true });
+        return Promise.resolve();
+      });
+    user._unlinkFrom(provider.getAuthType(), { useMasterKey: true });
+    expect(user._linkWith).toHaveBeenCalledTimes(1);
+  });
+
   it('can destroy anonymous user when login new user', async () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
@@ -850,5 +875,45 @@ describe('ParseUser', () => {
       expect(u2.get('number')).toBe(undefined);
       done();
     });
+  });
+
+  it('can linkWith options', async () => {
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(options).toEqual({ useMasterKey: true });
+        return Promise.resolve({
+          objectId: 'uid5',
+          sessionToken: 'r:123abc',
+          authData: {
+            test: {
+              id: 'id',
+              access_token: 'access_token'
+            }
+          }
+        }, 200);
+      },
+      ajax() {}
+    });
+    const provider = {
+      authenticate(options) {
+        if (options.success) {
+          options.success(this, {
+            id: 'id',
+            access_token: 'access_token'
+          });
+        }
+      },
+      restoreAuthentication() {},
+      getAuthType() {
+        return 'test';
+      },
+      deauthenticate() {}
+    };
+
+    const user = new ParseUser();
+    await user._linkWith(provider, null, { useMasterKey: true });
+
+    expect(user.get('authData')).toEqual({ test: { id: 'id', access_token: 'access_token' } });
   });
 });
