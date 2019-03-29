@@ -618,4 +618,35 @@ describe('Parse User', () => {
     await user._unlinkFrom(provider, { sessionToken });
     expect(user._isLinked(provider)).toBe(false);
   });
+
+  it('can link with custom auth', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    const provider = {
+      authenticate: () => Promise.resolve(),
+      restoreAuthentication() {
+        return true;
+      },
+
+      getAuthType() {
+        return 'myAuth';
+      },
+
+      getAuthData() {
+        return {
+          authData: {
+            id: 1234,
+          },
+        };
+      },
+    };
+    Parse.User._registerAuthenticationProvider(provider);
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.signUp();
+    await user._linkWith(provider.getAuthType(), provider.getAuthData());
+    expect(user._isLinked(provider)).toBe(true);
+    await user._unlinkFrom(provider);
+    expect(user._isLinked(provider)).toBe(false);
+  });
 });
