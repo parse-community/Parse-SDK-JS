@@ -3,6 +3,7 @@
 const assert = require('assert');
 const clear = require('./clear');
 const Parse = require('../../node');
+const sleep = require('./sleep');
 
 const TestObject = Parse.Object.extend('TestObject');
 const DiffObject = Parse.Object.extend('DiffObject');
@@ -15,7 +16,7 @@ describe('Parse LiveQuery', () => {
     clear().then(done).catch(done.fail);
   });
 
-  it('can subscribe to query', async () => {
+  it('can subscribe to query', async (done) => {
     const object = new TestObject();
     await object.save();
 
@@ -25,12 +26,13 @@ describe('Parse LiveQuery', () => {
 
     subscription.on('update', object => {
       assert.equal(object.get('foo'), 'bar');
+      done();
     })
     object.set({ foo: 'bar' });
     await object.save();
   });
 
-  it('can subscribe to multiple queries', async (done) => {
+  it('can subscribe to multiple queries', async () => {
     const objectA = new TestObject();
     const objectB = new TestObject();
     await Parse.Object.saveAll([objectA, objectB]);
@@ -52,14 +54,11 @@ describe('Parse LiveQuery', () => {
     })
     await objectA.save({ foo: 'bar' });
     await objectB.save({ foo: 'baz' });
-
-    setTimeout(() => {
-      assert.equal(count, 2);
-      done();
-    }, 100);
+    await sleep(1000);
+    assert.equal(count, 2);
   });
 
-  it('can subscribe to multiple queries different class', async (done) => {
+  it('can subscribe to multiple queries different class', async () => {
     const objectA = new TestObject();
     const objectB = new DiffObject();
     await Parse.Object.saveAll([objectA, objectB]);
@@ -81,14 +80,11 @@ describe('Parse LiveQuery', () => {
     })
     await objectA.save({ foo: 'bar' });
     await objectB.save({ foo: 'baz' });
-
-    setTimeout(() => {
-      expect(count).toBe(2);
-      done();
-    }, 1000);
+    await sleep(1000);
+    assert.equal(count, 2);
   });
 
-  it('can unsubscribe to multiple queries different class', async (done) => {
+  it('can unsubscribe to multiple queries different class', async () => {
     const objectA = new TestObject();
     const objectB = new DiffObject();
     await Parse.Object.saveAll([objectA, objectB]);
@@ -110,14 +106,11 @@ describe('Parse LiveQuery', () => {
     subscriptionA.unsubscribe();
     await objectA.save({ foo: 'bar' });
     await objectB.save({ foo: 'baz' });
-
-    setTimeout(() => {
-      assert.equal(count, 1);
-      done();
-    }, 1000);
+    await sleep(1000);
+    assert.equal(count, 1);
   });
 
-  it('can unsubscribe with await to multiple queries different class', async (done) => {
+  it('can unsubscribe with await to multiple queries different class', async () => {
     const objectA = new TestObject();
     const objectB = new DiffObject();
     await Parse.Object.saveAll([objectA, objectB]);
@@ -139,10 +132,7 @@ describe('Parse LiveQuery', () => {
     await subscriptionA.unsubscribe();
     await objectA.save({ foo: 'bar' });
     await objectB.save({ foo: 'baz' });
-
-    setTimeout(() => {
-      assert.equal(count, 1);
-      done();
-    }, 1000);
+    await sleep(1000);
+    assert.equal(count, 1);
   });
 });
