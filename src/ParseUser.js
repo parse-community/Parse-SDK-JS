@@ -77,7 +77,7 @@ class ParseUser extends ParseObject {
    * Unlike in the Android/iOS SDKs, logInWith is unnecessary, since you can
    * call linkWith on the user (even if it doesn't exist yet on the server).
    */
-  _linkWith(provider: any, options: { authData?: AuthData }, saveOpts: object): Promise {
+  _linkWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions): Promise {
     let authType;
     if (typeof provider === 'string') {
       authType = provider;
@@ -179,16 +179,14 @@ class ParseUser extends ParseObject {
     }
   }
 
-  // FIXME: add master key option to unlink.
   /**
    * Unlinks a user from a service.
-
    */
-  _unlinkFrom(provider: any) {
+  _unlinkFrom(provider: any, options?: FullOptions) {
     if (typeof provider === 'string') {
       provider = authProviders[provider];
     }
-    return this._linkWith(provider, { authData: null }).then(() => {
+    return this._linkWith(provider, { authData: null }, options).then(() => {
       this._synchronizeAuthData(provider);
       return Promise.resolve(this);
     });
@@ -1056,7 +1054,7 @@ const DefaultController = {
     });
   },
 
-  linkWith(user: ParseUser, authData: AuthData, options: object) {
+  linkWith(user: ParseUser, authData: AuthData, options: FullOptions) {
     return user.save({ authData }, options).then(() => {
       if (canUseCurrentUser) {
         return DefaultController.setCurrentUser(user);
