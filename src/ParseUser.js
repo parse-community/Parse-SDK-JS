@@ -77,7 +77,7 @@ class ParseUser extends ParseObject {
    * Unlike in the Android/iOS SDKs, logInWith is unnecessary, since you can
    * call linkWith on the user (even if it doesn't exist yet on the server).
    */
-  _linkWith(provider: any, options: { authData?: AuthData }): Promise {
+  _linkWith(provider: any, options: { authData?: AuthData }, saveOpts: object): Promise {
     let authType;
     if (typeof provider === 'string') {
       authType = provider;
@@ -95,7 +95,8 @@ class ParseUser extends ParseObject {
       const controller = CoreManager.getUserController();
       return controller.linkWith(
         this,
-        authData
+        authData,
+        saveOpts
       );
     } else {
       return new Promise((resolve, reject) => {
@@ -1054,8 +1055,8 @@ const DefaultController = {
     });
   },
 
-  linkWith(user: ParseUser, authData: AuthData) {
-    return user.save({ authData }).then(() => {
+  linkWith(user: ParseUser, authData: AuthData, options: object) {
+    return user.save({ authData }, options).then(() => {
       if (canUseCurrentUser) {
         return DefaultController.setCurrentUser(user);
       }
