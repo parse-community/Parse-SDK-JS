@@ -17,6 +17,20 @@ class CustomUser extends Parse.User {
 }
 Parse.Object.registerSubclass('CustomUser', CustomUser);
 
+const provider = {
+  authenticate: () => Promise.resolve(),
+  restoreAuthentication: () => true,
+  getAuthType: () => 'anonymous',
+  getAuthData() {
+    return {
+      authData: {
+        id: '1234',
+      },
+    };
+  },
+};
+Parse.User._registerAuthenticationProvider(provider);
+
 describe('Parse User', () => {
   beforeAll(() => {
     Parse.initialize('integration', null, 'notsosecret');
@@ -561,5 +575,78 @@ describe('Parse User', () => {
     user = await CustomUser.logIn('username', 'password');
     expect(user instanceof CustomUser).toBe(true);
     expect(user.doSomething()).toBe(5);
+  });
+
+  it('can link without master key', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.signUp();
+    await user._linkWith(provider.getAuthType(), provider.getAuthData());
+    expect(user._isLinked(provider)).toBe(true);
+    await user._unlinkFrom(provider);
+    expect(user._isLinked(provider)).toBe(false);
+  });
+
+  it('can link with master key', async () => {
+    Parse.User.disableUnsafeCurrentUser();
+
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.save(null, { useMasterKey: true });
+    await user._linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
+    expect(user._isLinked(provider)).toBe(true);
+    await user._unlinkFrom(provider, { useMasterKey: true });
+    expect(user._isLinked(provider)).toBe(false);
+  });
+
+  it('can link with session token', async () => {
+    Parse.User.disableUnsafeCurrentUser();
+
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.signUp();
+    expect(user.isCurrent()).toBe(false);
+
+    const sessionToken = user.getSessionToken();
+    await user._linkWith(provider.getAuthType(), provider.getAuthData(), { sessionToken });
+    expect(user._isLinked(provider)).toBe(true);
+    await user._unlinkFrom(provider, { sessionToken });
+    expect(user._isLinked(provider)).toBe(false);
+  });
+
+  it('can link with custom auth', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    const provider = {
+      authenticate: () => Promise.resolve(),
+      restoreAuthentication() {
+        return true;
+      },
+
+      getAuthType() {
+        return 'myAuth';
+      },
+
+      getAuthData() {
+        return {
+          authData: {
+            id: 1234,
+          },
+        };
+      },
+    };
+    Parse.User._registerAuthenticationProvider(provider);
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.signUp();
+    await user._linkWith(provider.getAuthType(), provider.getAuthData());
+    expect(user._isLinked(provider)).toBe(true);
+    await user._unlinkFrom(provider);
+    expect(user._isLinked(provider)).toBe(false);
   });
 });
