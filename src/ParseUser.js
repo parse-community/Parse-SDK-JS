@@ -104,7 +104,7 @@ class ParseUser extends ParseObject {
           success: (provider, result) => {
             const opts = {};
             opts.authData = result;
-            this._linkWith(provider, opts).then(() => {
+            this._linkWith(provider, opts, saveOpts).then(() => {
               resolve(this);
             }, (error) => {
               reject(error);
@@ -179,6 +179,7 @@ class ParseUser extends ParseObject {
     }
   }
 
+  // FIXME: add master key option to unlink.
   /**
    * Unlinks a user from a service.
 
