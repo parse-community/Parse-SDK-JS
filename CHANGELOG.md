@@ -6,6 +6,7 @@
 ## 2.3.1
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.0...2.3.1)
 
+- `_linkWith` and `_unlinkFrom` support MasterKey and SessionToken options ([#767](https://github.com/parse-community/Parse-SDK-JS/pull/767))
 - Correct homepage in package.json ([#9e198b3](https://github.com/parse-community/Parse-SDK-JS/commit/9e198b368862925025737aa725e9a2e8b3d4205a))
 - Add Issues template for opening GitHub Issue ([#760](https://github.com/parse-community/Parse-SDK-JS/pull/760))
 - Add Public email address to satisfy an npmjs requirement ([#764](https://github.com/parse-community/Parse-SDK-JS/pull/764))

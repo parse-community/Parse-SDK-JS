@@ -1,7 +1,0 @@
-{
-  "name": "babel-plugin-dead-code-elimination",
-  "private": true,
-  "version": "1.0.3",
-  "description": "Eliminate dead code. Temporary patch until the export fix makes it into master",
-  "license": "MIT"
-}
