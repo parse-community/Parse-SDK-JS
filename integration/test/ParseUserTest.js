@@ -32,9 +32,9 @@ const provider = {
 Parse.User._registerAuthenticationProvider(provider);
 
 const authResponse = {
-  userID: '109522690227231',
-  accessToken: 'EAAMXZCA1ZAPoUBAInEDZCFHFvaUQbFTHvQ52OjVEQdNXyT5iIRejYIAGxNlZCaWH2oufjnkZBSvSgqj5iqnxUYI4MeSfadYTQr2hJpzvYSxuXUkaAqwFHZBmuUv1INGAPZBlZC4wY08h8R4g5pTnOqf4dSkfQGp9ZANJibKh215W8Le8d7zDG2rfN6L0ZAEGFeGPkISx78EUvd5Pi6PcCjqkzT',
-  expiresIn: '2999-01-01', // Should be unix timestamp
+  userID: 'test',
+  accessToken: 'test',
+  expiresIn: 'test', // Should be unix timestamp
 };
 global.FB = {
   init: () => {},
@@ -663,7 +663,7 @@ describe('Parse User', () => {
     expect(user._isLinked(provider)).toBe(false);
   });
 
-  it('can login with facebook', async () => {
+  fit('can login with facebook', async () => {
     Parse.User.enableUnsafeCurrentUser();
     Parse.FacebookUtils.init();
     const user = await Parse.FacebookUtils.logIn();

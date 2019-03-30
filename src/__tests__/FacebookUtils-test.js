@@ -29,9 +29,9 @@ describe('FacebookUtils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     const authResponse = {
-      userID: '1234',
-      accessToken: 'access_token',
-      expiresIn: '2999-01-01', // Should be unix timestamp
+      userID: 'test',
+      accessToken: 'test',
+      expiresIn: 'test', // Should be unix timestamp
     };
     global.FB = {
       init: () => {},
