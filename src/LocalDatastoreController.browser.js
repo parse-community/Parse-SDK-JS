@@ -42,7 +42,11 @@ const LocalDatastoreController = {
       const key = localStorage.key(i);
       if (isLocalDatastoreKey(key)) {
         const value = localStorage.getItem(key);
-        LDS[key] = JSON.parse(value);
+        try{
+          LDS[key] = JSON.parse(value);
+        }catch(e){
+          console.warn(`Parse localdatastore warn: key==> ${key}, value==> ${value}, error ==> ${e}`);
+        }
       }
     }
     return LDS;
