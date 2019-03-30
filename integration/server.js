@@ -18,6 +18,9 @@ const api = new ParseServer({
       module: CustomAuth,
       option1: 'hello',
       option2: 'world',
+    },
+    facebook: {
+      appIds: "870796253281925"
     }
   }
 });
