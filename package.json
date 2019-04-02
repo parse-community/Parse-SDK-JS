@@ -50,7 +50,7 @@
     "babel-plugin-transform-inline-environment-variables": "0.4.3",
     "browserify": "16.2.3",
     "codecov": "3.2.0",
-    "eslint": "5.15.3",
+    "eslint": "5.16.0",
     "eslint-plugin-flowtype": "3.4.2",
     "express": "4.16.4",
     "gulp": "4.0.0",
