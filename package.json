@@ -33,7 +33,7 @@
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
-    "@babel/core": "7.4.0",
+    "@babel/core": "7.4.3",
     "@babel/plugin-proposal-class-properties": "7.4.0",
     "@babel/plugin-transform-flow-comments": "7.4.0",
     "@babel/plugin-transform-flow-strip-types": "7.4.0",
