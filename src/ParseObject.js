@@ -1081,6 +1081,8 @@ class ParseObject {
    * You can either call it as:<pre>
    *   object.save();</pre>
    * or<pre>
+   *   object.save(attrs);</pre>
+   * or<pre>
    *   object.save(null, options);</pre>
    * or<pre>
    *   object.save(attrs, options);</pre>
@@ -1097,13 +1099,36 @@ class ParseObject {
    *     // The save failed.  Error is an instance of Parse.Error.
    *   });</pre>
    *
-   * @param {Object} options
+   * @param {String|Object|null} [attrs]
    * Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *   <li>`Object` - Key/value pairs to update on the object.</li>
+   *   <li>`String` Key - Key of attribute to update (requires arg2 to also be string)</li>
+   *   <li>`null` - Passing null for arg1 allows you to save the object with options passed in arg2.</li>
+   * </ul>
+   *
+   * @param {String|Object} [options]
+   * <ul>
+   *   <li>`String` Value - If arg1 was passed as a key, arg2 is the value that should be set on that key.</li>
+   *   <li>`Object` Options - Valid options are:
+   *     <ul>
+   *       <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
+   *       <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   *     </ul>
+   *   </li>
+   * </ul>
+   *
+   * @param {Object} [options]
+   * Used to pass option parameters to method if arg1 and arg2 were both passed as strings.
+   * Valid options are:
+   * <ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *       be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
+   *
    * @return {Promise} A promise that is fulfilled when the save
    *     completes.
    */
