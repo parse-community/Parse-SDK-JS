@@ -143,6 +143,15 @@ const FacebookUtils = {
    * SDK to authenticate the user, and then automatically logs in (or
    * creates, in the case where it is a new user) a Parse.User.
    *
+   * Standard API:
+   *
+   * <code>logIn(permission: string, authData: Object);</code>
+   *
+   * Advanced API: Used for handling your own oAuth tokens
+   * {@link https://docs.parseplatform.org/rest/guide/#linking-users}
+   *
+   * <code>logIn(authData: Object, options?: Object);</code>
+   *
    * @method logIn
    * @name Parse.FacebookUtils.logIn
    * @param {(String|Object)} permissions The permissions required for Facebook
@@ -150,8 +159,7 @@ const FacebookUtils = {
    *    Alternatively, supply a Facebook authData object as described in our
    *    REST API docs if you want to handle getting facebook auth tokens
    *    yourself.
-   * @param {Object} options Standard options object with success and error
-   *    callbacks.
+   * @param {Object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
    * @returns {Promise}
    */
   logIn(permissions, options) {
@@ -163,22 +171,24 @@ const FacebookUtils = {
       }
       requestedPermissions = permissions;
       return ParseUser._logInWith('facebook', options);
-    } else {
-      const newOptions = {};
-      if (options) {
-        for (const key in options) {
-          newOptions[key] = options[key];
-        }
-      }
-      newOptions.authData = permissions;
-      return ParseUser._logInWith('facebook', newOptions);
     }
+    const authData = { authData: permissions };
+    return ParseUser._logInWith('facebook', authData, options);
   },
 
   /**
    * Links Facebook to an existing PFUser. This method delegates to the
    * Facebook SDK to authenticate the user, and then automatically links
    * the account to the Parse.User.
+   *
+   * Standard API:
+   *
+   * <code>link(user: Parse.User, permission: string, authData?: Object);</code>
+   *
+   * Advanced API: Used for handling your own oAuth tokens
+   * {@link https://docs.parseplatform.org/rest/guide/#linking-users}
+   *
+   * <code>link(user: Parse.User, authData: Object, options?: FullOptions);</code>
    *
    * @method link
    * @name Parse.FacebookUtils.link
@@ -189,8 +199,7 @@ const FacebookUtils = {
    *    Alternatively, supply a Facebook authData object as described in our
    *    REST API docs if you want to handle getting facebook auth tokens
    *    yourself.
-   * @param {Object} options Standard options object with success and error
-   *    callbacks.
+   * @param {Object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
    * @returns {Promise}
    */
   link(user, permissions, options) {
@@ -202,16 +211,9 @@ const FacebookUtils = {
       }
       requestedPermissions = permissions;
       return user._linkWith('facebook', options);
-    } else {
-      const newOptions = {};
-      if (options) {
-        for (const key in options) {
-          newOptions[key] = options[key];
-        }
-      }
-      newOptions.authData = permissions;
-      return user._linkWith('facebook', newOptions);
     }
+    const authData = { authData: permissions };
+    return user._linkWith('facebook', authData, options);
   },
 
   /**
@@ -232,6 +234,11 @@ const FacebookUtils = {
       );
     }
     return user._unlinkFrom('facebook', options);
+  },
+
+  // Used for testing purposes
+  _getAuthProvider() {
+    return provider;
   }
 };
 
