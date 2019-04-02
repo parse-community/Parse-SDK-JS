@@ -316,11 +316,7 @@ const DefaultController = {
   download: function(uri) {
     if (XHR) {
       return this.downloadAjax(uri);
-    }
-    if (process.env.PARSE_BUILD === 'browser' && !XHR) {
-      return Promise.reject('Cannot make a request: No definition of XMLHttpRequest was found.');
-    }
-    if (process.env.PARSE_BUILD === 'node') {
+    } else if (process.env.PARSE_BUILD === 'node') {
       return new Promise((resolve, reject) => {
         const client = uri.indexOf('https') === 0
           ? require('https')
@@ -337,6 +333,8 @@ const DefaultController = {
           });
         }).on('error', reject);
       });
+    } else {
+      return Promise.reject('Cannot make a request: No definition of XMLHttpRequest was found.');
     }
   },
 
