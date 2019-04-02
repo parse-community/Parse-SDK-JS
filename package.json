@@ -39,7 +39,7 @@
     "@babel/plugin-transform-flow-strip-types": "7.4.0",
     "@babel/plugin-transform-runtime": "7.4.3",
     "@babel/polyfill": "7.4.3",
-    "@babel/preset-env": "7.4.2",
+    "@babel/preset-env": "7.4.3",
     "@babel/preset-react": "7.0.0",
     "@parse/minami": "1.0.0",
     "babel-core": "7.0.0-bridge.0",
