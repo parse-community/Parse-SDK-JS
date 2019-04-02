@@ -145,12 +145,12 @@ const FacebookUtils = {
    *
    * Standard API:
    *
-   * <code>logIn(permission: string, options?: FullOptions);</code>
+   * <code>logIn(permission: string, authData: Object);</code>
    *
    * Advanced API: Used for handling your own oAuth tokens
    * {@link https://docs.parseplatform.org/rest/guide/#linking-users}
    *
-   * <code>logIn(authData: Object, options?: FullOptions);</code>
+   * <code>logIn(authData: Object, options?: Object);</code>
    *
    * @method logIn
    * @name Parse.FacebookUtils.logIn
@@ -159,7 +159,7 @@ const FacebookUtils = {
    *    Alternatively, supply a Facebook authData object as described in our
    *    REST API docs if you want to handle getting facebook auth tokens
    *    yourself.
-   * @param {Object} options Master Key / SessionToken. Alternatively can be used for authData if permissions is a string
+   * @param {Object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
    * @returns {Promise}
    */
   logIn(permissions, options) {
@@ -199,7 +199,7 @@ const FacebookUtils = {
    *    Alternatively, supply a Facebook authData object as described in our
    *    REST API docs if you want to handle getting facebook auth tokens
    *    yourself.
-   * @param {Object} options Master Key / SessionToken. Alternatively can be used for authData if permissions is a string
+   * @param {Object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
    * @returns {Promise}
    */
   link(user, permissions, options) {
