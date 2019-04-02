@@ -7,10 +7,9 @@
 [![Join The Conversation][discourse-svg]][discourse-link]
 [![Greenkeeper badge][greenkeeper-svg]][greenkeeper-link]
 [![License][license-svg]][license-link]
-
-[![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)](#backers)
-[![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)](#sponsors)
-
+[![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)][open-collective-link]
+[![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)][open-collective-link]
+[![Twitter Follow](https://img.shields.io/twitter/follow/ParsePlatform.svg?label=Follow%20us%20on%20Twitter&style=social)](https://twitter.com/intent/follow?screen_name=ParsePlatform)
 
 A library that gives you access to the powerful Parse cloud platform from your JavaScript app. For more information on Parse and its features, see [the website](http://parseplatform.org), [the JavaScript guide](http://docs.parseplatform.org/js/guide/) or [API Reference](http://parseplatform.org/Parse-SDK-JS/api/).
 
@@ -70,6 +69,7 @@ LICENSE file in the root directory of this source tree. An additional grant
 of patent rights can be found in the PATENTS file in the same directory.
 ```
 
+-----
 As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code.
 
  [build-status-svg]: https://travis-ci.org/parse-community/Parse-SDK-JS.svg?branch=master
@@ -87,3 +87,4 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  [greenkeeper-svg]: https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg
  [greenkeeper-link]: https://greenkeeper.io/
  [types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse
+ [open-collective-link]: https://opencollective.com/parse-server
