@@ -663,7 +663,7 @@ describe('Parse User', () => {
     expect(user._isLinked(provider)).toBe(false);
   });
 
-  fit('can login with facebook', async () => {
+  it('can login with facebook', async () => {
     Parse.User.enableUnsafeCurrentUser();
     Parse.FacebookUtils.init();
     const user = await Parse.FacebookUtils.logIn();

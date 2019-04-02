@@ -20,7 +20,7 @@ const api = new ParseServer({
       option2: 'world',
     },
     facebook: {
-      appIds: "870796253281925"
+      appIds: "test"
     }
   }
 });
