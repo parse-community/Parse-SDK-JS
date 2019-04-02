@@ -108,6 +108,13 @@ type StorageController = {
   removeItemAsync: (path: string) => Promise;
   clear: () => void;
 };
+type LocalDatastoreController = {
+  fromPinWithName: (name: string) => ?any;
+  pinWithName: (name: string, objects: any) => void;
+  unPinWithName: (name: string) => void;
+  getAllContents: () => ?any;
+  clear: () => void;
+};
 type UserController = {
   setCurrentUser: (user: ParseUser) => Promise;
   currentUser: () => ?ParseUser;
@@ -115,6 +122,7 @@ type UserController = {
   signUp: (user: ParseUser, attrs: AttributeMap, options: RequestOptions) => Promise;
   logIn: (user: ParseUser, options: RequestOptions) => Promise;
   become: (options: RequestOptions) => Promise;
+  hydrate: (userJSON: AttributeMap) => Promise;
   logOut: () => Promise;
   requestPasswordReset: (email: string, options: RequestOptions) => Promise;
   updateUserOnDisk: (user: ParseUser) => Promise;
@@ -144,11 +152,12 @@ type Config = {
   SchemaController?: SchemaController,
   SessionController?: SessionController,
   StorageController?: StorageController,
+  LocalDatastoreController?: LocalDatastoreController,
   UserController?: UserController,
   HooksController?: HooksController,
 };
 
-var config: Config & { [key: string]: mixed } = {
+const config: Config & { [key: string]: mixed } = {
   // Defaults
   IS_NODE: (typeof process !== 'undefined' &&
             !!process.versions &&
@@ -156,6 +165,8 @@ var config: Config & { [key: string]: mixed } = {
             !process.versions.electron),
   REQUEST_ATTEMPT_LIMIT: 5,
   SERVER_URL: 'https://api.parse.com/1',
+  SERVER_AUTH_TYPE: null,
+  SERVER_AUTH_TOKEN: null,
   LIVEQUERY_SERVER_URL: null,
   VERSION: 'js' + require('../package.json').version,
   APPLICATION_ID: null,
@@ -207,7 +218,7 @@ module.exports = {
   },
 
   setConfigController(controller: ConfigController) {
-    requireMethods('ConfigController', ['current', 'get'], controller);
+    requireMethods('ConfigController', ['current', 'get', 'save'], controller);
     config['ConfigController'] = controller;
   },
 
@@ -331,6 +342,23 @@ module.exports = {
     config['StorageController'] = controller;
   },
 
+  setLocalDatastoreController(controller: LocalDatastoreController) {
+    requireMethods('LocalDatastoreController', ['pinWithName', 'fromPinWithName', 'unPinWithName', 'getAllContents', 'clear'], controller);
+    config['LocalDatastoreController'] = controller;
+  },
+
+  getLocalDatastoreController(): LocalDatastoreController {
+    return config['LocalDatastoreController'];
+  },
+
+  setLocalDatastore(store: any) {
+    config['LocalDatastore'] = store;
+  },
+
+  getLocalDatastore() {
+    return config['LocalDatastore'];
+  },
+
   getStorageController(): StorageController {
     return config['StorageController'];
   },
@@ -365,10 +393,9 @@ module.exports = {
 
   setLiveQueryController(controller: any) {
     requireMethods('LiveQueryController', [
-      'subscribe',
-      'unsubscribe',
-      'open',
-      'close',
+      'setDefaultLiveQueryClient',
+      'getDefaultLiveQueryClient',
+      '_clearCachedDefaultClient',
     ], controller);
     config['LiveQueryController'] = controller;
   },

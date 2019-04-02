@@ -3,8 +3,7 @@
     "default": {
       "packages": [
         "integration/package.json",
-        "package.json",
-        "vendor/babel-plugin-dead-code-elimination/package.json"
+        "package.json"
       ]
     }
   }

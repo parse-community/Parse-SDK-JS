@@ -87,14 +87,16 @@ describe('CoreManager', () => {
 
     expect(CoreManager.setConfigController.bind(null, {
       current: function() {},
-      get: function() {}
+      get: function() {},
+      save : function() {}
     })).not.toThrow();
   });
 
   it('can set and get ConfigController', () => {
     const controller = {
       current: function() {},
-      get: function() {}
+      get: function() {},
+      save : function() {}
     };
 
     CoreManager.setConfigController(controller);
@@ -351,5 +353,32 @@ describe('CoreManager', () => {
 
     CoreManager.setSchemaController(controller);
     expect(CoreManager.getSchemaController()).toBe(controller);
+  });
+
+  it('requires LocalDatastoreController to implement certain functionality', () => {
+    expect(CoreManager.setLocalDatastoreController.bind(null, {})).toThrow(
+      'LocalDatastoreController must implement pinWithName()'
+    );
+
+    expect(CoreManager.setLocalDatastoreController.bind(null, {
+      fromPinWithName: function() {},
+      pinWithName: function() {},
+      unPinWithName: function() {},
+      getAllContents: function() {},
+      clear: function() {}
+    })).not.toThrow();
+  });
+
+  it('can set and get setLocalDatastoreController', () => {
+    const controller = {
+      fromPinWithName: function() {},
+      pinWithName: function() {},
+      unPinWithName: function() {},
+      getAllContents: function() {},
+      clear: function() {}
+    };
+
+    CoreManager.setLocalDatastoreController(controller);
+    expect(CoreManager.getLocalDatastoreController()).toBe(controller);
   });
 });

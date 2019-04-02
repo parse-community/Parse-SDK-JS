@@ -15,6 +15,7 @@ declare module "react-native" {
     static getItem(path: string, cb: (err: string, value: string) => void): void;
     static setItem(path: string, value: string, cb: (err: string, value: string) => void): void;
     static removeItem(path: string, cb: (err: string, value: string) => void): void;
+    static getAllKeys(cb: (err: string, keys: Array<string>) => void): void;
     static clear(): void;
   }
 }

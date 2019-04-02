@@ -6,6 +6,31 @@ const Parse = require('../../node');
 
 const TestObject = Parse.Object.extend('TestObject');
 
+class CustomUser extends Parse.User {
+  constructor(attributes) {
+    super(attributes);
+  }
+
+  doSomething() {
+    return 5;
+  }
+}
+Parse.Object.registerSubclass('CustomUser', CustomUser);
+
+const provider = {
+  authenticate: () => Promise.resolve(),
+  restoreAuthentication: () => true,
+  getAuthType: () => 'anonymous',
+  getAuthData() {
+    return {
+      authData: {
+        id: '1234',
+      },
+    };
+  },
+};
+Parse.User._registerAuthenticationProvider(provider);
+
 describe('Parse User', () => {
   beforeAll(() => {
     Parse.initialize('integration', null, 'notsosecret');
@@ -438,5 +463,214 @@ describe('Parse User', () => {
       assert.equal(user.secret(), 1337);
       done();
     });
+  });
+
+  it('can save anonymous user', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const user = await Parse.AnonymousUtils.logIn();
+    user.set('field', 'hello');
+    await user.save();
+
+    const query = new Parse.Query(Parse.User);
+    const result = await query.get(user.id);
+    expect(result.get('field')).toBe('hello');
+  });
+
+  it('can not recover anonymous user if logged out', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const user = await Parse.AnonymousUtils.logIn();
+    user.set('field', 'hello');
+    await user.save();
+
+    await Parse.User.logOut();
+
+    const query = new Parse.Query(Parse.User);
+    try {
+      await query.get(user.id);
+    } catch (error) {
+      expect(error.message).toBe('Object not found.');
+    }
+  });
+
+  it('can signUp anonymous user and retain data', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const user = await Parse.AnonymousUtils.logIn();
+    user.set('field', 'hello world');
+    await user.save();
+
+    expect(user.get('authData').anonymous).toBeDefined();
+
+    user.setUsername('foo');
+    user.setPassword('baz');
+
+    await user.signUp();
+
+    const query = new Parse.Query(Parse.User);
+    const result = await query.get(user.id);
+    expect(result.get('username')).toBe('foo');
+    expect(result.get('authData')).toBeUndefined();
+    expect(result.get('field')).toBe('hello world');
+    expect(user.get('authData').anonymous).toBeUndefined();
+  });
+
+  it('can logIn user without converting anonymous user', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    await Parse.User.signUp('foobaz', '1234');
+
+    const user = await Parse.AnonymousUtils.logIn();
+    user.set('field', 'hello world');
+    await user.save();
+
+    await Parse.User.logIn('foobaz', '1234');
+
+    const query = new Parse.Query(Parse.User);
+    try {
+      await query.get(user.id);
+    } catch (error) {
+      expect(error.message).toBe('Object not found.');
+    }
+  });
+
+  it('can signUp user with subclass', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const customUser = new CustomUser({ foo: 'bar' });
+    customUser.setUsername('username');
+    customUser.setPassword('password');
+
+    const user = await customUser.signUp();
+
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+    expect(user.get('foo')).toBe('bar');
+  });
+
+  it('can logIn user with subclass', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    await Parse.User.signUp('username', 'password');
+
+    const customUser = new CustomUser({ foo: 'bar' });
+    customUser.setUsername('username');
+    customUser.setPassword('password');
+
+    const user = await customUser.logIn();
+
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+    expect(user.get('foo')).toBe('bar');
+  });
+
+  it('can signUp / logIn user with subclass static', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    let user = await CustomUser.signUp('username', 'password');
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+
+    user = await CustomUser.logIn('username', 'password');
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+  });
+
+  it('can link without master key', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.signUp();
+    await user._linkWith(provider.getAuthType(), provider.getAuthData());
+    expect(user._isLinked(provider)).toBe(true);
+    await user._unlinkFrom(provider);
+    expect(user._isLinked(provider)).toBe(false);
+  });
+
+  it('can link with master key', async () => {
+    Parse.User.disableUnsafeCurrentUser();
+
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.save(null, { useMasterKey: true });
+    await user._linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
+    expect(user._isLinked(provider)).toBe(true);
+    await user._unlinkFrom(provider, { useMasterKey: true });
+    expect(user._isLinked(provider)).toBe(false);
+  });
+
+  it('can link with session token', async () => {
+    Parse.User.disableUnsafeCurrentUser();
+
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.signUp();
+    expect(user.isCurrent()).toBe(false);
+
+    const sessionToken = user.getSessionToken();
+    await user._linkWith(provider.getAuthType(), provider.getAuthData(), { sessionToken });
+    expect(user._isLinked(provider)).toBe(true);
+    await user._unlinkFrom(provider, { sessionToken });
+    expect(user._isLinked(provider)).toBe(false);
+  });
+
+  it('linked account can login with authData', async () => {
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.save(null, { useMasterKey: true });
+    await user._linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
+    expect(user._isLinked(provider)).toBe(true);
+    expect(user.authenticated()).toBeFalsy();
+    Parse.User.enableUnsafeCurrentUser();
+    const loggedIn = await Parse.User.logInWith(provider.getAuthType(), provider.getAuthData());
+    expect(loggedIn.authenticated()).toBeTruthy();
+  });
+
+  it('linking un-authenticated user without master key will throw', async (done) => {
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.save(null, { useMasterKey: true });
+    user._linkWith(provider.getAuthType(), provider.getAuthData())
+      .then(() => done.fail('should fail'))
+      .catch(e => expect(e.message).toBe(`Cannot modify user ${user.id}.`))
+      .then(done);
+  });
+
+  it('can link with custom auth', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    const provider = {
+      authenticate: () => Promise.resolve(),
+      restoreAuthentication() {
+        return true;
+      },
+
+      getAuthType() {
+        return 'myAuth';
+      },
+
+      getAuthData() {
+        return {
+          authData: {
+            id: 1234,
+          },
+        };
+      },
+    };
+    Parse.User._registerAuthenticationProvider(provider);
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.signUp();
+    await user._linkWith(provider.getAuthType(), provider.getAuthData());
+    expect(user._isLinked(provider)).toBe(true);
+    await user._unlinkFrom(provider);
+    expect(user._isLinked(provider)).toBe(false);
   });
 });

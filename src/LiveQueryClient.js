@@ -9,6 +9,7 @@
  */
 /* global WebSocket */
 
+import CoreManager from './CoreManager';
 import EventEmitter from './EventEmitter';
 import ParseObject from './ParseObject';
 import LiveQuerySubscription from './LiveQuerySubscription';
@@ -208,10 +209,6 @@ class LiveQueryClient extends EventEmitter {
       this.socket.send(JSON.stringify(subscribeRequest));
     });
 
-    // adding listener so process does not crash
-    // best practice is for developer to register their own listener
-    subscription.on('error', () => {});
-
     return subscription;
   }
 
@@ -389,14 +386,30 @@ class LiveQueryClient extends EventEmitter {
       break;
     default: {
       // create, update, enter, leave, delete cases
-
-      // Does not override / clear server data
-      delete data.object.__type;
-      const parseObject = ParseObject.fromJSON(data.object, false);
       if (!subscription) {
         break;
       }
-      subscription.emit(data.op, parseObject);
+      let override = false;
+      if (data.original) {
+        override = true;
+        delete data.original.__type;
+        // Check for removed fields
+        for (const field in data.original) {
+          if (!(field in data.object)) {
+            data.object[field] = undefined;
+          }
+        }
+        data.original = ParseObject.fromJSON(data.original, false);
+      }
+      delete data.object.__type;
+      const parseObject = ParseObject.fromJSON(data.object, override);
+
+      subscription.emit(data.op, parseObject, data.original);
+
+      const localDatastore = CoreManager.getLocalDatastore();
+      if (override && localDatastore.isEnabled) {
+        localDatastore._updateObjectIfPinned(parseObject).then(() => {});
+      }
     }
     }
   }

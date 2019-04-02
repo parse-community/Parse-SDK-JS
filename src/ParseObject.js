@@ -19,6 +19,7 @@ import parseDate from './parseDate';
 import ParseError from './ParseError';
 import ParseFile from './ParseFile';
 import { when, continueWhile } from './promiseUtils';
+import { DEFAULT_PIN, PIN_PREFIX } from './LocalDatastoreUtils';
 
 import {
   opFromJSON,
@@ -53,18 +54,20 @@ type SaveParams = {
   body: AttributeMap;
 };
 
+const DEFAULT_BATCH_SIZE = 20;
+
 // Mapping of class names to constructors, so we can populate objects from the
 // server with appropriate subclasses of ParseObject
-var classMap = {};
+const classMap = {};
 
 // Global counter for generating unique local Ids
-var localCount = 0;
+let localCount = 0;
 // Global counter for generating unique Ids for non-single-instance objects
-var objectCount = 0;
+let objectCount = 0;
 // On web clients, objects are single-instance: any two objects with the same Id
 // will have the same attributes. However, this may be dangerous default
 // behavior in a server scenario
-var singleInstance = (!CoreManager.get('IS_NODE'));
+let singleInstance = (!CoreManager.get('IS_NODE'));
 if (singleInstance) {
   CoreManager.setObjectStateController(SingleInstanceStateController);
 } else {
@@ -72,11 +75,11 @@ if (singleInstance) {
 }
 
 function getServerUrlPath() {
-  var serverUrl = CoreManager.get('SERVER_URL');
+  let serverUrl = CoreManager.get('SERVER_URL');
   if (serverUrl[serverUrl.length - 1] !== '/') {
     serverUrl += '/';
   }
-  var url = serverUrl.replace(/https?:\/\//, '');
+  const url = serverUrl.replace(/https?:\/\//, '');
   return url.substr(url.indexOf('/'));
 }
 
@@ -110,7 +113,7 @@ class ParseObject {
       this.initialize.apply(this, arguments);
     }
 
-    var toSet = null;
+    let toSet = null;
     this._objCount = objectCount++;
     if (typeof className === 'string') {
       this.className = className;
@@ -120,7 +123,7 @@ class ParseObject {
     } else if (className && typeof className === 'object') {
       this.className = className.className;
       toSet = {};
-      for (var attr in className) {
+      for (const attr in className) {
         if (attr !== 'className') {
           toSet[attr] = className[attr];
         }
@@ -181,7 +184,7 @@ class ParseObject {
     if (typeof this._localId === 'string') {
       return this._localId;
     }
-    var localId = 'local' + String(localCount++);
+    const localId = 'local' + String(localCount++);
     this._localId = localId;
     return localId;
   }
@@ -210,9 +213,9 @@ class ParseObject {
   }
 
   _clearServerData() {
-    var serverData = this._getServerData();
-    var unset = {};
-    for (var attr in serverData) {
+    const serverData = this._getServerData();
+    const unset = {};
+    for (const attr in serverData) {
       unset[attr] = undefined;
     }
     const stateController = CoreManager.getObjectStateController();
@@ -224,22 +227,26 @@ class ParseObject {
     return stateController.getPendingOps(this._getStateIdentifier());
   }
 
-  _clearPendingOps() {
-    var pending = this._getPendingOps();
-    var latest = pending[pending.length - 1];
-    var keys = Object.keys(latest);
+  /**
+   * @param {Array<string>} [keysToClear] - if specified, only ops matching
+   * these fields will be cleared
+   */
+  _clearPendingOps(keysToClear?: Array<string>) {
+    const pending = this._getPendingOps();
+    const latest = pending[pending.length - 1];
+    const keys = keysToClear || Object.keys(latest);
     keys.forEach((key) => {
       delete latest[key];
     });
   }
 
   _getDirtyObjectAttributes(): AttributeMap {
-    var attributes = this.attributes;
-    var stateController = CoreManager.getObjectStateController();
-    var objectCache = stateController.getObjectCache(this._getStateIdentifier());
-    var dirty = {};
-    for (var attr in attributes) {
-      var val = attributes[attr];
+    const attributes = this.attributes;
+    const stateController = CoreManager.getObjectStateController();
+    const objectCache = stateController.getObjectCache(this._getStateIdentifier());
+    const dirty = {};
+    for (const attr in attributes) {
+      const val = attributes[attr];
       if (val &&
         typeof val === 'object' &&
         !(val instanceof ParseObject) &&
@@ -249,8 +256,8 @@ class ParseObject {
         // Due to the way browsers construct maps, the key order will not change
         // unless the object is changed
         try {
-          var json = encode(val, false, true);
-          var stringified = JSON.stringify(json);
+          const json = encode(val, false, true);
+          const stringified = JSON.stringify(json);
           if (objectCache[attr] !== stringified) {
             dirty[attr] = val;
           }
@@ -265,19 +272,35 @@ class ParseObject {
   }
 
   _toFullJSON(seen: Array<any>): AttributeMap {
-    var json: { [key: string]: mixed } = this.toJSON(seen);
+    const json: { [key: string]: mixed } = this.toJSON(seen);
     json.__type = 'Object';
     json.className = this.className;
     return json;
   }
 
   _getSaveJSON(): AttributeMap {
-    var pending = this._getPendingOps();
-    var dirtyObjects = this._getDirtyObjectAttributes();
-    var json = {};
-    var attr;
+    const pending = this._getPendingOps();
+    const dirtyObjects = this._getDirtyObjectAttributes();
+    const json = {};
+    let attr;
+
     for (attr in dirtyObjects) {
-      json[attr] = new SetOp(dirtyObjects[attr]).toJSON();
+      let isDotNotation = false;
+      for (let i = 0; i < pending.length; i += 1) {
+        for (const field in pending[i]) {
+          // Dot notation operations are handled later
+          if (field.includes('.')) {
+            const fieldName = field.split('.')[0];
+            if (fieldName === attr) {
+              isDotNotation = true;
+              break;
+            }
+          }
+        }
+      }
+      if (!isDotNotation) {
+        json[attr] = new SetOp(dirtyObjects[attr]).toJSON();
+      }
     }
     for (attr in pending[0]) {
       json[attr] = pending[0][attr].toJSON();
@@ -286,9 +309,9 @@ class ParseObject {
   }
 
   _getSaveParams(): SaveParams {
-    var method = this.id ? 'PUT' : 'POST';
-    var body = this._getSaveJSON();
-    var path = 'classes/' + this.className;
+    const method = this.id ? 'PUT' : 'POST';
+    const body = this._getSaveJSON();
+    let path = 'classes/' + this.className;
     if (this.id) {
       path += '/' + this.id;
     } else if (this.className === '_User') {
@@ -307,8 +330,8 @@ class ParseObject {
     }
     const stateController = CoreManager.getObjectStateController();
     stateController.initializeState(this._getStateIdentifier());
-    var decoded = {};
-    for (var attr in serverData) {
+    const decoded = {};
+    for (const attr in serverData) {
       if (attr === 'ACL') {
         decoded[attr] = new ParseACL(serverData[attr]);
       } else if (attr !== 'objectId') {
@@ -356,10 +379,10 @@ class ParseObject {
   }
 
   _handleSaveResponse(response: AttributeMap, status: number) {
-    var changes = {};
-    var attr;
-    var stateController = CoreManager.getObjectStateController();
-    var pending = stateController.popPendingState(this._getStateIdentifier());
+    const changes = {};
+    let attr;
+    const stateController = CoreManager.getObjectStateController();
+    const pending = stateController.popPendingState(this._getStateIdentifier());
     for (attr in pending) {
       if (pending[attr] instanceof RelationOp) {
         changes[attr] = pending[attr].applyTo(undefined, this, attr);
@@ -460,13 +483,13 @@ class ParseObject {
     if (!this.id) {
       return true;
     }
-    var pendingOps = this._getPendingOps();
-    var dirtyObjects = this._getDirtyObjectAttributes();
+    const pendingOps = this._getPendingOps();
+    const dirtyObjects = this._getDirtyObjectAttributes();
     if (attr) {
       if (dirtyObjects.hasOwnProperty(attr)) {
         return true;
       }
-      for (var i = 0; i < pendingOps.length; i++) {
+      for (let i = 0; i < pendingOps.length; i++) {
         if (pendingOps[i].hasOwnProperty(attr)) {
           return true;
         }
@@ -487,14 +510,14 @@ class ParseObject {
    * @return {String[]}
    */
   dirtyKeys(): Array<string> {
-    var pendingOps = this._getPendingOps();
-    var keys = {};
-    for (var i = 0; i < pendingOps.length; i++) {
-      for (var attr in pendingOps[i]) {
+    const pendingOps = this._getPendingOps();
+    const keys = {};
+    for (let i = 0; i < pendingOps.length; i++) {
+      for (const attr in pendingOps[i]) {
         keys[attr] = true;
       }
     }
-    var dirtyObjects = this._getDirtyObjectAttributes();
+    const dirtyObjects = this._getDirtyObjectAttributes();
     for (const attr in dirtyObjects) {
       keys[attr] = true;
     }
@@ -530,7 +553,7 @@ class ParseObject {
    * @return {Parse.Relation}
    */
   relation(attr: string): ParseRelation {
-    var value = this.get(attr);
+    const value = this.get(attr);
     if (value) {
       if (!(value instanceof ParseRelation)) {
         throw new Error('Called relation() on non-relation field ' + attr);
@@ -566,7 +589,7 @@ class ParseObject {
    * @return {Boolean}
    */
   has(attr: string): boolean {
-    var attributes = this.attributes;
+    const attributes = this.attributes;
     if (attributes.hasOwnProperty(attr)) {
       return attributes[attr] != null;
     }
@@ -576,8 +599,8 @@ class ParseObject {
   /**
    * Sets a hash of model attributes on the object.
    *
-   * <p>You can call it with an object containing keys and values, or with one
-   * key and value.  For example:<pre>
+   * <p>You can call it with an object containing keys and values, with one
+   * key and value, or dot notation.  For example:<pre>
    *   gameTurn.set({
    *     player: player1,
    *     diceRoll: 2
@@ -595,6 +618,8 @@ class ParseObject {
    *
    *   game.set("finished", true);</pre></p>
    *
+   *   game.set("player.score", 10);</pre></p>
+   *
    * @param {String} key The key to set.
    * @param {} value The value to give it.
    * @param {Object} options A set of options for the set.
@@ -602,8 +627,8 @@ class ParseObject {
    * @return {Boolean} true if the set succeeded.
    */
   set(key: mixed, value: mixed, options?: mixed): ParseObject | boolean {
-    var changes = {};
-    var newOps = {};
+    let changes = {};
+    const newOps = {};
     if (key && typeof key === 'object') {
       changes = key;
       options = value;
@@ -614,11 +639,11 @@ class ParseObject {
     }
 
     options = options || {};
-    var readonly = [];
+    let readonly = [];
     if (typeof this.constructor.readOnlyAttributes === 'function') {
       readonly = readonly.concat(this.constructor.readOnlyAttributes());
     }
-    for (var k in changes) {
+    for (const k in changes) {
       if (k === 'createdAt' || k === 'updatedAt') {
         // This property is read-only, but for legacy reasons we silently
         // ignore it
@@ -646,15 +671,29 @@ class ParseObject {
         !(changes[k] instanceof ParseACL)
       ) {
         newOps[k] = new SetOp(new ParseACL(changes[k]));
+      } else if (changes[k] instanceof ParseRelation) {
+        const relation = new ParseRelation(this, k);
+        relation.targetClassName = changes[k].targetClassName;
+        newOps[k] = new SetOp(relation);
       } else {
         newOps[k] = new SetOp(changes[k]);
       }
     }
 
+    const currentAttributes = this.attributes;
+
+    // Only set nested fields if exists
+    const serverData = this._getServerData();
+    if (typeof key === 'string' && key.includes('.')) {
+      const field = key.split('.')[0];
+      if (!serverData[field]) {
+        return this;
+      }
+    }
+
     // Calculate new values
-    var currentAttributes = this.attributes;
-    var newValues = {};
-    for (var attr in newOps) {
+    const newValues = {};
+    for (const attr in newOps) {
       if (newOps[attr] instanceof RelationOp) {
         newValues[attr] = newOps[attr].applyTo(currentAttributes[attr], this, attr);
       } else if (!(newOps[attr] instanceof UnsetOp)) {
@@ -664,7 +703,7 @@ class ParseObject {
 
     // Validate changes
     if (!options.ignoreValidation) {
-      var validation = this.validate(newValues);
+      const validation = this.validate(newValues);
       if (validation) {
         if (typeof options.error === 'function') {
           options.error(this, validation);
@@ -674,11 +713,11 @@ class ParseObject {
     }
 
     // Consolidate Ops
-    var pendingOps = this._getPendingOps();
-    var last = pendingOps.length - 1;
-    var stateController = CoreManager.getObjectStateController();
+    const pendingOps = this._getPendingOps();
+    const last = pendingOps.length - 1;
+    const stateController = CoreManager.getObjectStateController();
     for (const attr in newOps) {
-      var nextOp = newOps[attr].mergeWith(pendingOps[last][attr]);
+      const nextOp = newOps[attr].mergeWith(pendingOps[last][attr]);
       stateController.setPendingOp(this._getStateIdentifier(), attr, nextOp);
     }
 
@@ -790,8 +829,8 @@ class ParseObject {
    * @returns {Parse.Op} The operation, or undefined if none.
    */
   op(attr: string): ?Op {
-    var pending = this._getPendingOps();
-    for (var i = pending.length; i--;) {
+    const pending = this._getPendingOps();
+    for (let i = pending.length; i--;) {
       if (pending[i][attr]) {
         return pending[i][attr];
       }
@@ -899,8 +938,8 @@ class ParseObject {
         'ACL must be a Parse ACL.'
       );
     }
-    for (var key in attrs) {
-      if (!(/^[A-Za-z][0-9A-Za-z_]*$/).test(key)) {
+    for (const key in attrs) {
+      if (!(/^[A-Za-z][0-9A-Za-z_.]*$/).test(key)) {
         return new ParseError(ParseError.INVALID_KEY_NAME);
       }
     }
@@ -913,7 +952,7 @@ class ParseObject {
    * @see Parse.Object#get
    */
   getACL(): ?ParseACL {
-    var acl = this.get('ACL');
+    const acl = this.get('ACL');
     if (acl instanceof ParseACL) {
       return acl;
     }
@@ -932,10 +971,22 @@ class ParseObject {
   }
 
   /**
-   * Clears any changes to this object made since the last call to save()
+   * Clears any (or specific) changes to this object made since the last call to save()
+   * @param {string} [keys] - specify which fields to revert
    */
-  revert(): void {
-    this._clearPendingOps();
+  revert(...keys: Array<string>): void {
+    let keysToRevert;
+    if(keys.length) {
+      keysToRevert = [];
+      for(const key of keys) {
+        if(typeof(key) === "string") {
+          keysToRevert.push(key);
+        } else {
+          throw new Error("Parse.Object#revert expects either no, or a list of string, arguments.");
+        }
+      }
+    }
+    this._clearPendingOps(keysToRevert);
   }
 
   /**
@@ -943,13 +994,13 @@ class ParseObject {
    * @return {(ParseObject | boolean)}
    */
   clear(): ParseObject | boolean {
-    var attributes = this.attributes;
-    var erasable = {};
-    var readonly = ['createdAt', 'updatedAt'];
+    const attributes = this.attributes;
+    const erasable = {};
+    let readonly = ['createdAt', 'updatedAt'];
     if (typeof this.constructor.readOnlyAttributes === 'function') {
       readonly = readonly.concat(this.constructor.readOnlyAttributes());
     }
-    for (var attr in attributes) {
+    for (const attr in attributes) {
       if (readonly.indexOf(attr) < 0) {
         erasable[attr] = true;
       }
@@ -975,7 +1026,7 @@ class ParseObject {
    */
   fetch(options: RequestOptions): Promise {
     options = options || {};
-    var fetchOptions = {};
+    const fetchOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       fetchOptions.useMasterKey = options.useMasterKey;
     }
@@ -996,7 +1047,7 @@ class ParseObject {
         fetchOptions.include.push(options.include);
       }
     }
-    var controller = CoreManager.getObjectController();
+    const controller = CoreManager.getObjectController();
     return controller.fetch(this, true, fetchOptions);
   }
 
@@ -1030,6 +1081,8 @@ class ParseObject {
    * You can either call it as:<pre>
    *   object.save();</pre>
    * or<pre>
+   *   object.save(attrs);</pre>
+   * or<pre>
    *   object.save(null, options);</pre>
    * or<pre>
    *   object.save(attrs, options);</pre>
@@ -1046,13 +1099,36 @@ class ParseObject {
    *     // The save failed.  Error is an instance of Parse.Error.
    *   });</pre>
    *
-   * @param {Object} options
+   * @param {String|Object|null} [attrs]
    * Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *   <li>`Object` - Key/value pairs to update on the object.</li>
+   *   <li>`String` Key - Key of attribute to update (requires arg2 to also be string)</li>
+   *   <li>`null` - Passing null for arg1 allows you to save the object with options passed in arg2.</li>
+   * </ul>
+   *
+   * @param {String|Object} [options]
+   * <ul>
+   *   <li>`String` Value - If arg1 was passed as a key, arg2 is the value that should be set on that key.</li>
+   *   <li>`Object` Options - Valid options are:
+   *     <ul>
+   *       <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
+   *       <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   *     </ul>
+   *   </li>
+   * </ul>
+   *
+   * @param {Object} [options]
+   * Used to pass option parameters to method if arg1 and arg2 were both passed as strings.
+   * Valid options are:
+   * <ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *       be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
+   *
    * @return {Promise} A promise that is fulfilled when the save
    *     completes.
    */
@@ -1061,8 +1137,8 @@ class ParseObject {
     arg2: FullOptions | mixed,
     arg3?: FullOptions
   ): Promise {
-    var attrs;
-    var options;
+    let attrs;
+    let options;
     if (typeof arg1 === 'object' || typeof arg1 === 'undefined') {
       attrs = arg1;
       if (typeof arg2 === 'object') {
@@ -1089,7 +1165,7 @@ class ParseObject {
     }
 
     if (attrs) {
-      var validation = this.validate(attrs);
+      const validation = this.validate(attrs);
       if (validation) {
         if (options && typeof options.error === 'function') {
           options.error(this, validation);
@@ -1100,16 +1176,15 @@ class ParseObject {
     }
 
     options = options || {};
-    var saveOptions = {};
+    const saveOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       saveOptions.useMasterKey = !!options.useMasterKey;
     }
     if (options.hasOwnProperty('sessionToken') && typeof options.sessionToken === 'string') {
       saveOptions.sessionToken = options.sessionToken;
     }
-
-    var controller = CoreManager.getObjectController();
-    var unsaved = unsavedChildren(this);
+    const controller = CoreManager.getObjectController();
+    const unsaved = unsavedChildren(this);
     return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
     });
@@ -1130,7 +1205,7 @@ class ParseObject {
    */
   destroy(options: RequestOptions): Promise {
     options = options || {};
-    var destroyOptions = {};
+    const destroyOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       destroyOptions.useMasterKey = options.useMasterKey;
     }
@@ -1144,6 +1219,121 @@ class ParseObject {
       this,
       destroyOptions
     );
+  }
+
+  /**
+   * Asynchronously stores the object and every object it points to in the local datastore,
+   * recursively, using a default pin name: _default.
+   *
+   * If those other objects have not been fetched from Parse, they will not be stored.
+   * However, if they have changed data, all the changes will be retained.
+   *
+   * <pre>
+   * await object.pin();
+   * </pre>
+   *
+   * To retrieve object:
+   * <code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code>
+   *
+   * @return {Promise} A promise that is fulfilled when the pin completes.
+   */
+  pin(): Promise {
+    return ParseObject.pinAllWithName(DEFAULT_PIN, [this]);
+  }
+
+  /**
+   * Asynchronously removes the object and every object it points to in the local datastore,
+   * recursively, using a default pin name: _default.
+   *
+   * <pre>
+   * await object.unPin();
+   * </pre>
+   *
+   * @return {Promise} A promise that is fulfilled when the unPin completes.
+   */
+  unPin(): Promise {
+    return ParseObject.unPinAllWithName(DEFAULT_PIN, [this]);
+  }
+
+  /**
+   * Asynchronously returns if the object is pinned
+   *
+   * <pre>
+   * const isPinned = await object.isPinned();
+   * </pre>
+   *
+   * @return {Promise<boolean>} A boolean promise that is fulfilled if object is pinned.
+   */
+  async isPinned(): Promise<boolean> {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (!localDatastore.isEnabled) {
+      return Promise.reject('Parse.enableLocalDatastore() must be called first');
+    }
+    const objectKey = localDatastore.getKeyForObject(this);
+    const pin = await localDatastore.fromPinWithName(objectKey);
+    return pin.length > 0;
+  }
+
+  /**
+   * Asynchronously stores the objects and every object they point to in the local datastore, recursively.
+   *
+   * If those other objects have not been fetched from Parse, they will not be stored.
+   * However, if they have changed data, all the changes will be retained.
+   *
+   * <pre>
+   * await object.pinWithName(name);
+   * </pre>
+   *
+   * To retrieve object:
+   * <code>query.fromLocalDatastore()</code> or <code>query.fromPinWithName(name)</code>
+   *
+   * @param {String} name Name of Pin.
+   * @return {Promise} A promise that is fulfilled when the pin completes.
+   */
+  pinWithName(name: string): Promise {
+    return ParseObject.pinAllWithName(name, [this]);
+  }
+
+  /**
+   * Asynchronously removes the object and every object it points to in the local datastore, recursively.
+   *
+   * <pre>
+   * await object.unPinWithName(name);
+   * </pre>
+   *
+   * @param {String} name Name of Pin.
+   * @return {Promise} A promise that is fulfilled when the unPin completes.
+   */
+  unPinWithName(name: string): Promise {
+    return ParseObject.unPinAllWithName(name, [this]);
+  }
+
+  /**
+   * Asynchronously loads data from the local datastore into this object.
+   *
+   * <pre>
+   * await object.fetchFromLocalDatastore();
+   * </pre>
+   *
+   * You can create an unfetched pointer with <code>Parse.Object.createWithoutData()</code>
+   * and then call <code>fetchFromLocalDatastore()</code> on it.
+   *
+   * @return {Promise} A promise that is fulfilled when the fetch completes.
+   */
+  async fetchFromLocalDatastore(): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (!localDatastore.isEnabled) {
+      throw new Error('Parse.enableLocalDatastore() must be called first');
+    }
+    const objectKey = localDatastore.getKeyForObject(this);
+    const pinned = await localDatastore._serializeObject(objectKey);
+    if (!pinned) {
+      throw new Error('Cannot fetch an unsaved ParseObject');
+    }
+    const result = ParseObject.fromJSON(pinned);
+    this._finishFetch(result.toJSON());
+
+    return this;
   }
 
   /** Static methods **/
@@ -1179,7 +1369,7 @@ class ParseObject {
    * @static
    */
   static fetchAll(list: Array<ParseObject>, options: RequestOptions = {}) {
-    var queryOptions = {};
+    const queryOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       queryOptions.useMasterKey = options.useMasterKey;
     }
@@ -1261,7 +1451,7 @@ class ParseObject {
   static fetchAllIfNeeded(list: Array<ParseObject>, options) {
     options = options || {};
 
-    var queryOptions = {};
+    const queryOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       queryOptions.useMasterKey = options.useMasterKey;
     }
@@ -1323,17 +1513,21 @@ class ParseObject {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>batchSize: Number of objects to process per request
    * </ul>
    * @return {Promise} A promise that is fulfilled when the destroyAll
    *     completes.
    */
   static destroyAll(list: Array<ParseObject>, options = {}) {
-    var destroyOptions = {};
+    const destroyOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       destroyOptions.useMasterKey = options.useMasterKey;
     }
     if (options.hasOwnProperty('sessionToken')) {
       destroyOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
+      destroyOptions.batchSize = options.batchSize;
     }
     return CoreManager.getObjectController().destroy(
       list,
@@ -1362,15 +1556,19 @@ class ParseObject {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>batchSize: Number of objects to process per request
    * </ul>
    */
   static saveAll(list: Array<ParseObject>, options = {}) {
-    var saveOptions = {};
+    const saveOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       saveOptions.useMasterKey = options.useMasterKey;
     }
     if (options.hasOwnProperty('sessionToken')) {
       saveOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
+      saveOptions.batchSize = options.batchSize;
     }
     return CoreManager.getObjectController().save(
       list,
@@ -1393,7 +1591,7 @@ class ParseObject {
    * @return {Parse.Object} A Parse.Object reference.
    */
   static createWithoutData(id) {
-    var obj = new this();
+    const obj = new this();
     obj.id = id;
     return obj;
   }
@@ -1410,10 +1608,10 @@ class ParseObject {
     if (!json.className) {
       throw new Error('Cannot create an object without a className');
     }
-    var constructor = classMap[json.className];
-    var o = constructor ? new constructor() : new ParseObject(json.className);
-    var otherAttributes = {};
-    for (var attr in json) {
+    const constructor = classMap[json.className];
+    const o = constructor ? new constructor() : new ParseObject(json.className);
+    const otherAttributes = {};
+    for (const attr in json) {
       if (attr !== 'className' && attr !== '__type') {
         otherAttributes[attr] = json[attr];
       }
@@ -1513,19 +1711,19 @@ class ParseObject {
         );
       }
     }
-    var adjustedClassName = className;
+    let adjustedClassName = className;
 
     if (adjustedClassName === 'User' && CoreManager.get('PERFORM_USER_REWRITE')) {
       adjustedClassName = '_User';
     }
 
-    var parentProto = ParseObject.prototype;
+    let parentProto = ParseObject.prototype;
     if (this.hasOwnProperty('__super__') && this.__super__) {
       parentProto = this.prototype;
     } else if (classMap[adjustedClassName]) {
       parentProto = classMap[adjustedClassName].prototype;
     }
-    var ParseObjectSubclass = function(attributes, options) {
+    const ParseObjectSubclass = function(attributes, options) {
       this.className = adjustedClassName;
       this._objCount = objectCount++;
       // Enable legacy initializers
@@ -1552,7 +1750,7 @@ class ParseObject {
     });
 
     if (protoProps) {
-      for (var prop in protoProps) {
+      for (const prop in protoProps) {
         if (prop !== 'className') {
           Object.defineProperty(ParseObjectSubclass.prototype, prop, {
             value: protoProps[prop],
@@ -1612,19 +1810,150 @@ class ParseObject {
     singleInstance = false;
     CoreManager.setObjectStateController(UniqueInstanceStateController);
   }
+
+  /**
+   * Asynchronously stores the objects and every object they point to in the local datastore,
+   * recursively, using a default pin name: _default.
+   *
+   * If those other objects have not been fetched from Parse, they will not be stored.
+   * However, if they have changed data, all the changes will be retained.
+   *
+   * <pre>
+   * await Parse.Object.pinAll([...]);
+   * </pre>
+   *
+   * To retrieve object:
+   * <code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code>
+   *
+   * @param {Array} objects A list of <code>Parse.Object</code>.
+   * @return {Promise} A promise that is fulfilled when the pin completes.
+   * @static
+   */
+  static pinAll(objects: Array<ParseObject>): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (!localDatastore.isEnabled) {
+      return Promise.reject('Parse.enableLocalDatastore() must be called first');
+    }
+    return ParseObject.pinAllWithName(DEFAULT_PIN, objects);
+  }
+
+  /**
+   * Asynchronously stores the objects and every object they point to in the local datastore, recursively.
+   *
+   * If those other objects have not been fetched from Parse, they will not be stored.
+   * However, if they have changed data, all the changes will be retained.
+   *
+   * <pre>
+   * await Parse.Object.pinAllWithName(name, [obj1, obj2, ...]);
+   * </pre>
+   *
+   * To retrieve object:
+   * <code>query.fromLocalDatastore()</code> or <code>query.fromPinWithName(name)</code>
+   *
+   * @param {String} name Name of Pin.
+   * @param {Array} objects A list of <code>Parse.Object</code>.
+   * @return {Promise} A promise that is fulfilled when the pin completes.
+   * @static
+   */
+  static pinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (!localDatastore.isEnabled) {
+      return Promise.reject('Parse.enableLocalDatastore() must be called first');
+    }
+    return localDatastore._handlePinAllWithName(name, objects);
+  }
+
+  /**
+   * Asynchronously removes the objects and every object they point to in the local datastore,
+   * recursively, using a default pin name: _default.
+   *
+   * <pre>
+   * await Parse.Object.unPinAll([...]);
+   * </pre>
+   *
+   * @param {Array} objects A list of <code>Parse.Object</code>.
+   * @return {Promise} A promise that is fulfilled when the unPin completes.
+   * @static
+   */
+  static unPinAll(objects: Array<ParseObject>): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (!localDatastore.isEnabled) {
+      return Promise.reject('Parse.enableLocalDatastore() must be called first');
+    }
+    return ParseObject.unPinAllWithName(DEFAULT_PIN, objects);
+  }
+
+  /**
+   * Asynchronously removes the objects and every object they point to in the local datastore, recursively.
+   *
+   * <pre>
+   * await Parse.Object.unPinAllWithName(name, [obj1, obj2, ...]);
+   * </pre>
+   *
+   * @param {String} name Name of Pin.
+   * @param {Array} objects A list of <code>Parse.Object</code>.
+   * @return {Promise} A promise that is fulfilled when the unPin completes.
+   * @static
+   */
+  static unPinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (!localDatastore.isEnabled) {
+      return Promise.reject('Parse.enableLocalDatastore() must be called first');
+    }
+    return localDatastore._handleUnPinAllWithName(name, objects);
+  }
+
+  /**
+   * Asynchronously removes all objects in the local datastore using a default pin name: _default.
+   *
+   * <pre>
+   * await Parse.Object.unPinAllObjects();
+   * </pre>
+   *
+   * @return {Promise} A promise that is fulfilled when the unPin completes.
+   * @static
+   */
+  static unPinAllObjects(): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (!localDatastore.isEnabled) {
+      return Promise.reject('Parse.enableLocalDatastore() must be called first');
+    }
+    return localDatastore.unPinWithName(DEFAULT_PIN);
+  }
+
+  /**
+   * Asynchronously removes all objects with the specified pin name.
+   * Deletes the pin name also.
+   *
+   * <pre>
+   * await Parse.Object.unPinAllObjectsWithName(name);
+   * </pre>
+   *
+   * @param {String} name Name of Pin.
+   * @return {Promise} A promise that is fulfilled when the unPin completes.
+   * @static
+   */
+  static unPinAllObjectsWithName(name: string): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
+    if (!localDatastore.isEnabled) {
+      return Promise.reject('Parse.enableLocalDatastore() must be called first');
+    }
+    return localDatastore.unPinWithName(PIN_PREFIX + name);
+  }
 }
 
-var DefaultController = {
+const DefaultController = {
   fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): Promise {
+    const localDatastore = CoreManager.getLocalDatastore();
     if (Array.isArray(target)) {
       if (target.length < 1) {
         return Promise.resolve([]);
       }
-      var objs = [];
-      var ids = [];
-      var className = null;
-      var results = [];
-      var error = null;
+      const objs = [];
+      const ids = [];
+      let className = null;
+      const results = [];
+      let error = null;
       target.forEach((el) => {
         if (error) {
           return;
@@ -1653,19 +1982,19 @@ var DefaultController = {
       if (error) {
         return Promise.reject(error);
       }
-      var query = new ParseQuery(className);
+      const query = new ParseQuery(className);
       query.containedIn('objectId', ids);
       if (options && options.include) {
         query.include(options.include);
       }
       query._limit = ids.length;
-      return query.find(options).then((objects) => {
-        var idMap = {};
+      return query.find(options).then(async (objects) => {
+        const idMap = {};
         objects.forEach((o) => {
           idMap[o.id] = o;
         });
-        for (var i = 0; i < objs.length; i++) {
-          var obj = objs[i];
+        for (let i = 0; i < objs.length; i++) {
+          const obj = objs[i];
           if (!obj || !obj.id || !idMap[obj.id]) {
             if (forceFetch) {
               return Promise.reject(
@@ -1682,16 +2011,19 @@ var DefaultController = {
           for (let i = 0; i < results.length; i++) {
             const obj = results[i];
             if (obj && obj.id && idMap[obj.id]) {
-              var id = obj.id;
+              const id = obj.id;
               obj._finishFetch(idMap[id].toJSON());
               results[i] = idMap[id];
             }
           }
         }
+        for (const object of results) {
+          await localDatastore._updateObjectIfPinned(object);
+        }
         return Promise.resolve(results);
       });
     } else {
-      var RESTController = CoreManager.getRESTController();
+      const RESTController = CoreManager.getRESTController();
       const params = {};
       if (options && options.include) {
         params.include = options.include.join();
@@ -1701,30 +2033,34 @@ var DefaultController = {
         'classes/' + target.className + '/' + target._getId(),
         params,
         options
-      ).then((response) => {
+      ).then(async (response) => {
         if (target instanceof ParseObject) {
           target._clearPendingOps();
           target._clearServerData();
           target._finishFetch(response);
         }
+        await localDatastore._updateObjectIfPinned(target);
         return target;
       });
     }
   },
 
-  destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
-    var RESTController = CoreManager.getRESTController();
+  async destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
+    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
+    const localDatastore = CoreManager.getLocalDatastore();
+
+    const RESTController = CoreManager.getRESTController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
         return Promise.resolve([]);
       }
-      var batches = [[]];
+      const batches = [[]];
       target.forEach((obj) => {
         if (!obj.id) {
           return;
         }
         batches[batches.length - 1].push(obj);
-        if (batches[batches.length - 1].length >= 20) {
+        if (batches[batches.length - 1].length >= batchSize) {
           batches.push([]);
         }
       });
@@ -1732,8 +2068,8 @@ var DefaultController = {
         // If the last batch is empty, remove it
         batches.pop();
       }
-      var deleteCompleted = Promise.resolve();
-      var errors = [];
+      let deleteCompleted = Promise.resolve();
+      const errors = [];
       batches.forEach((batch) => {
         deleteCompleted = deleteCompleted.then(() => {
           return RESTController.request('POST', 'batch', {
@@ -1745,9 +2081,9 @@ var DefaultController = {
               };
             })
           }, options).then((results) => {
-            for (var i = 0; i < results.length; i++) {
+            for (let i = 0; i < results.length; i++) {
               if (results[i] && results[i].hasOwnProperty('error')) {
-                var err = new ParseError(
+                const err = new ParseError(
                   results[i].error.code,
                   results[i].error.error
                 );
@@ -1758,11 +2094,14 @@ var DefaultController = {
           });
         });
       });
-      return deleteCompleted.then(() => {
+      return deleteCompleted.then(async () => {
         if (errors.length) {
-          var aggregate = new ParseError(ParseError.AGGREGATE_ERROR);
+          const aggregate = new ParseError(ParseError.AGGREGATE_ERROR);
           aggregate.errors = errors;
           return Promise.reject(aggregate);
+        }
+        for (const object of target) {
+          await localDatastore._destroyObjectIfPinned(object);
         }
         return Promise.resolve(target);
       });
@@ -1772,31 +2111,37 @@ var DefaultController = {
         'classes/' + target.className + '/' + target._getId(),
         {},
         options
-      ).then(() => {
+      ).then(async () => {
+        await localDatastore._destroyObjectIfPinned(target);
         return Promise.resolve(target);
       });
     }
+    await localDatastore._destroyObjectIfPinned(target);
     return Promise.resolve(target);
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
-    var RESTController = CoreManager.getRESTController();
-    var stateController = CoreManager.getObjectStateController();
+    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
+    const localDatastore = CoreManager.getLocalDatastore();
+    const mapIdForPin = {};
+
+    const RESTController = CoreManager.getRESTController();
+    const stateController = CoreManager.getObjectStateController();
     if (Array.isArray(target)) {
       if (target.length < 1) {
         return Promise.resolve([]);
       }
 
-      var unsaved = target.concat();
-      for (var i = 0; i < target.length; i++) {
+      let unsaved = target.concat();
+      for (let i = 0; i < target.length; i++) {
         if (target[i] instanceof ParseObject) {
           unsaved = unsaved.concat(unsavedChildren(target[i], true));
         }
       }
       unsaved = unique(unsaved);
 
-      var filesSaved = Promise.resolve();
-      var pending: Array<ParseObject> = [];
+      let filesSaved = Promise.resolve();
+      let pending: Array<ParseObject> = [];
       unsaved.forEach((el) => {
         if (el instanceof ParseFile) {
           filesSaved = filesSaved.then(() => {
@@ -1808,14 +2153,14 @@ var DefaultController = {
       });
 
       return filesSaved.then(() => {
-        var objectError = null;
+        let objectError = null;
         return continueWhile(() => {
           return pending.length > 0;
         }, () => {
-          var batch = [];
-          var nextPending = [];
+          const batch = [];
+          const nextPending = [];
           pending.forEach((el) => {
-            if (batch.length < 20 && canBeSerialized(el)) {
+            if (batch.length < batchSize && canBeSerialized(el)) {
               batch.push(el);
             } else {
               nextPending.push(el);
@@ -1833,26 +2178,28 @@ var DefaultController = {
 
           // Queue up tasks for each object in the batch.
           // When every task is ready, the API request will execute
-          var res, rej;
-          var batchReturned = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+          let res, rej;
+          const batchReturned = new Promise((resolve, reject) => { res = resolve; rej = reject; });
           batchReturned.resolve = res;
           batchReturned.reject = rej;
-          var batchReady = [];
-          var batchTasks = [];
+          const batchReady = [];
+          const batchTasks = [];
           batch.forEach((obj, index) => {
-            var res, rej;
-            var ready = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+            let res, rej;
+            const ready = new Promise((resolve, reject) => { res = resolve; rej = reject; });
             ready.resolve = res;
             ready.reject = rej;
             batchReady.push(ready);
-            var task = function() {
+            const task = function() {
               ready.resolve();
               return batchReturned.then((responses, status) => {
                 if (responses[index].hasOwnProperty('success')) {
+                  const objectId = responses[index].success.objectId;
+                  mapIdForPin[objectId] = obj._localId;
                   obj._handleSaveResponse(responses[index].success, status);
                 } else {
                   if (!objectError && responses[index].hasOwnProperty('error')) {
-                    var serverError = responses[index].error;
+                    const serverError = responses[index].error;
                     objectError = new ParseError(serverError.code, serverError.error);
                     // Cancel the rest of the save
                     pending = [];
@@ -1869,7 +2216,7 @@ var DefaultController = {
             // Kick off the batch request
             return RESTController.request('POST', 'batch', {
               requests: batch.map((obj) => {
-                var params = obj._getSaveParams();
+                const params = obj._getSaveParams();
                 params.path = getServerUrlPath() + params.path;
                 return params;
               })
@@ -1881,9 +2228,13 @@ var DefaultController = {
           });
 
           return when(batchTasks);
-        }).then(() => {
+        }).then(async () => {
           if (objectError) {
             return Promise.reject(objectError);
+          }
+          for (const object of target) {
+            await localDatastore._updateLocalIdForObject(mapIdForPin[object.id], object);
+            await localDatastore._updateObjectIfPinned(object);
           }
           return Promise.resolve(target);
         });
@@ -1891,9 +2242,10 @@ var DefaultController = {
 
     } else if (target instanceof ParseObject) {
       // copying target lets Flow guarantee the pointer isn't modified elsewhere
-      var targetCopy = target;
-      var task = function() {
-        var params = targetCopy._getSaveParams();
+      const localId = target._localId;
+      const targetCopy = target;
+      const task = function() {
+        const params = targetCopy._getSaveParams();
         return RESTController.request(
           params.method,
           params.path,
@@ -1908,7 +2260,9 @@ var DefaultController = {
       }
 
       stateController.pushPendingState(target._getStateIdentifier());
-      return stateController.enqueueTask(target._getStateIdentifier(), task).then(() => {
+      return stateController.enqueueTask(target._getStateIdentifier(), task).then(async () => {
+        await localDatastore._updateLocalIdForObject(localId, target);
+        await localDatastore._updateObjectIfPinned(target);
         return target;
       }, (error) => {
         return Promise.reject(error);

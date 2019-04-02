@@ -11,7 +11,7 @@
 
 import CoreManager from './CoreManager';
 
-var StorageController = {
+const StorageController = {
   async: 1,
 
   getAsyncStorage(): any {
@@ -54,8 +54,44 @@ var StorageController = {
     });
   },
 
+  getAllKeys(): Promise {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().getAllKeys(function(err, keys) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(keys);
+        }
+      });
+    });
+  },
+
+  multiGet(keys: Array<string>): Promise<Array<Array<string>>> {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().multiGet(keys, function(err, result) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  },
+
+  multiRemove(keys: Array<string>): Promise {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().multiRemove(keys, function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(keys);
+        }
+      });
+    });
+  },
+
   clear() {
-    this.getAsyncStorage().clear();
+    return this.getAsyncStorage().clear();
   }
 };
 

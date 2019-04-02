@@ -47,11 +47,13 @@ describe('equals', () => {
     expect(equals(a, a)).toBe(true);
     expect(equals({}, {})).toBe(true);
     expect(equals({ a: 1 }, { a: 1 })).toBe(true);
+    expect(equals({ a: 1 }, { a: 2 })).toBe(false);
     expect(equals({ a: 1, b: 2 }, { b: 2, a: 1 })).toBe(true);
     expect(equals({ a: 1, b: 2 }, { b: 2 })).toBe(false);
     expect(equals({ a: {} }, { a: {} })).toBe(true);
 
     expect(equals([], [])).toBe(true);
+    expect(equals([], {})).toBe(false);
     expect(equals([1, 2, 3], [1, 2, 3])).toBe(true);
     expect(equals([1, 2, 3], [3, 2, 1])).toBe(false);
     expect(equals([1, 2, 3], [1, 2])).toBe(false);
@@ -119,5 +121,36 @@ describe('equals', () => {
     a.id = 'myobj';
     b.id = 'myobj';
     expect(equals(a, b)).toBe(true);
+
+    const c = {
+      __type: 'Pointer',
+      className: 'Item',
+      objectId: 'myobj',
+    };
+    const d = {
+      __type: 'Object',
+      className: 'Item',
+      objectId: 'myobj',
+    };
+    const e = {
+      __type: 'Unknown',
+      className: 'Item',
+      objectId: 'myobj',
+    };
+    expect(equals(c, b)).toBe(true);
+    expect(equals(d, b)).toBe(true);
+    expect(equals(e, b)).toBe(false);
+  });
+
+  it('tests equality of Date', () => {
+    const a = new Date('2018-08-09T00:01:53.964Z');
+    const b = new Date('2018-08-10T00:00:00.000Z');
+
+    expect(equals(a, a)).toBe(true);
+    expect(equals(a, b)).toBe(false);
+    expect(equals(b, a)).toBe(false);
+
+    const c = [];
+    expect(equals(a, c)).toBe(false);
   });
 });

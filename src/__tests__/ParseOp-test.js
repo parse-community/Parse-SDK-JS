@@ -26,6 +26,13 @@ mockObject.prototype._getId = function() {
 mockObject.registerSubclass = function() {};
 jest.setMock('../ParseObject', mockObject);
 
+const mockRelation = function(parent, key) {
+  this.parent = parent;
+  this.key = key;
+}
+jest.setMock('../ParseRelation', mockRelation);
+
+const ParseRelation = require('../ParseRelation');
 const ParseObject = require('../ParseObject');
 const ParseOp = require('../ParseOp');
 const {
@@ -363,5 +370,13 @@ describe('ParseOp', () => {
         }
       ]
     });
+  });
+
+  it('can merge Relation Op with the previous Op', () => {
+    const r = new RelationOp();
+    const relation = new ParseRelation(null, null);
+    const set = new SetOp(relation);
+
+    expect(r.mergeWith(set)).toEqual(r);
   });
 });

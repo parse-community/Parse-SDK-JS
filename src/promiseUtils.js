@@ -11,19 +11,19 @@ export function resolvingPromise() {
 }
 
 export function when(promises) {
-  var objects;
-  var arrayArgument = Array.isArray(promises);
+  let objects;
+  const arrayArgument = Array.isArray(promises);
   if (arrayArgument) {
     objects = promises;
   } else {
     objects = arguments;
   }
 
-  var total = objects.length;
-  var hadError = false;
-  var results = [];
-  var returnValue = arrayArgument ? [results] : results;
-  var errors = [];
+  let total = objects.length;
+  let hadError = false;
+  const results = [];
+  const returnValue = arrayArgument ? [results] : results;
+  const errors = [];
   results.length = objects.length;
   errors.length = objects.length;
 
@@ -31,9 +31,9 @@ export function when(promises) {
     return Promise.resolve(returnValue);
   }
 
-  var promise = new resolvingPromise();
+  const promise = new resolvingPromise();
 
-  var resolveOne = function() {
+  const resolveOne = function() {
     total--;
     if (total <= 0) {
       if (hadError) {
@@ -44,7 +44,7 @@ export function when(promises) {
     }
   };
 
-  var chain = function(object, index) {
+  const chain = function(object, index) {
     if (object && typeof object.then  === 'function') {
       object.then(function(result) {
         results[index] = result;
@@ -55,11 +55,11 @@ export function when(promises) {
         resolveOne();
       });
     } else {
-      results[i] = object;
+      results[index] = object;
       resolveOne();
     }
   };
-  for (var i = 0; i < objects.length; i++) {
+  for (let i = 0; i < objects.length; i++) {
     chain(objects[i], i);
   }
 

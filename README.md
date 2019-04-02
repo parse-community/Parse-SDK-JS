@@ -3,13 +3,13 @@
 [![Build Status][build-status-svg]][build-status-link]
 [![Test Coverage][coverage-status-svg]][coverage-status-link]
 [![Npm Version][npm-svg]][npm-link]
-[![CDNJS version](https://img.shields.io/cdnjs/v/parse.svg)](https://cdnjs.com/libraries/parse) [![Greenkeeper badge](https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg)](https://greenkeeper.io/)
-[![License][license-svg]][license-link]
+[![CDNJS version][cdn-svg]][cdn-link]
+[![Join The Conversation][discourse-svg]][discourse-link]
 [![Greenkeeper badge][greenkeeper-svg]][greenkeeper-link]
-
-[![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)](#backers)
-[![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)](#sponsors)
-
+[![License][license-svg]][license-link]
+[![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)][open-collective-link]
+[![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)][open-collective-link]
+[![Twitter Follow](https://img.shields.io/twitter/follow/ParsePlatform.svg?label=Follow%20us%20on%20Twitter&style=social)](https://twitter.com/intent/follow?screen_name=ParsePlatform)
 
 A library that gives you access to the powerful Parse cloud platform from your JavaScript app. For more information on Parse and its features, see [the website](http://parseplatform.org), [the JavaScript guide](http://docs.parseplatform.org/js/guide/) or [API Reference](http://parseplatform.org/Parse-SDK-JS/api/).
 
@@ -25,25 +25,32 @@ The JavaScript ecosystem is wide and incorporates a large number of platforms an
 To use the npm modules for a browser based application, include it as you normally would:
 
 ```js
-var Parse = require('parse');
+const Parse = require('parse');
 ```
 
 For server-side applications or Node.js command line tools, include `'parse/node'`:
 
 ```js
 // In a node.js environment
-var Parse = require('parse/node');
+const Parse = require('parse/node');
 ```
 
 For React Native applications, include `'parse/react-native'`:
 ```js
 // In a React Native application
-var Parse = require('parse/react-native');
+const Parse = require('parse/react-native');
 
 // On React Native >= 0.50 and Parse >= 1.11.0, set the Async
-var AsyncStorage = require('react-native').AsyncStorage;
+const AsyncStorage = require('react-native').AsyncStorage;
 Parse.setAsyncStorage(AsyncStorage);
 ```
+
+For TypeScript applications, install `'@types/parse'`:
+```
+$ npm install @types/parse
+```
+
+Types are updated manually after every release. If a definition doesn't exist, please submit a pull request to [@types/parse][types-parse]
 
 ## Upgrading to Parse SDK 2.0.0
 
@@ -62,6 +69,7 @@ LICENSE file in the root directory of this source tree. An additional grant
 of patent rights can be found in the PATENTS file in the same directory.
 ```
 
+-----
 As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code.
 
  [build-status-svg]: https://travis-ci.org/parse-community/Parse-SDK-JS.svg?branch=master
@@ -70,7 +78,13 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  [coverage-status-link]: http://codecov.io/github/parse-community/Parse-SDK-JS?branch=master
  [npm-svg]: https://badge.fury.io/js/parse.svg
  [npm-link]: https://npmjs.org/parse
+ [cdn-svg]: https://img.shields.io/cdnjs/v/parse.svg
+ [cdn-link]: https://cdnjs.com/libraries/parse
+ [discourse-svg]: https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg
+ [discourse-link]: https://community.parseplatform.org/c/sdk/js
  [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
  [license-link]: https://github.com/parse-community/Parse-SDK-JS/blob/master/LICENSE
- [greenkeeper-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
- [greenkeeper-link]: https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg
+ [greenkeeper-svg]: https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg
+ [greenkeeper-link]: https://greenkeeper.io/
+ [types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse
+ [open-collective-link]: https://opencollective.com/parse-server

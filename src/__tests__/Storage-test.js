@@ -8,27 +8,8 @@
  */
 
 jest.autoMockOff();
-let mockRNStorage = {};
-const mockRNStorageInterface = {
-  getItem(path, cb) {
-    cb(undefined, mockRNStorage[path] || null);
-  },
 
-  setItem(path, value, cb) {
-    mockRNStorage[path] = value;
-    cb();
-  },
-
-  removeItem(path, cb) {
-    delete mockRNStorage[path];
-    cb();
-  },
-
-  clear() {
-    mockRNStorage = {};
-  },
-};
-
+const mockRNStorageInterface = require('./test_helpers/mockRNStorage');
 const CoreManager = require('../CoreManager');
 
 let mockStorage = {};
@@ -132,6 +113,70 @@ describe('React Native StorageController', () => {
       done();
     });
   });
+
+  it('can getAllKeys', (done) => {
+    RNStorageController.setItemAsync('myKey', 'myValue').then(() => {
+      return RNStorageController.getItemAsync('myKey');
+    }).then((result) => {
+      expect(result).toBe('myValue');
+      return RNStorageController.getAllKeys();
+    }).then((keys) => {
+      expect(keys[0]).toBe('myKey');
+      done();
+    });
+  });
+
+  it('can handle set error', (done) => {
+    const mockRNError = {
+      setItem(path, value, cb) {
+        cb('Error Thrown', undefined);
+      },
+    };
+    CoreManager.setAsyncStorage(mockRNError);
+    RNStorageController.setItemAsync('myKey', 'myValue').catch((error) => {
+      expect(error).toBe('Error Thrown');
+      done();
+    });
+  });
+
+  it('can handle get error', (done) => {
+    const mockRNError = {
+      getItem(path, cb) {
+        cb('Error Thrown', undefined);
+      },
+    };
+    CoreManager.setAsyncStorage(mockRNError);
+    RNStorageController.getItemAsync('myKey').catch((error) => {
+      expect(error).toBe('Error Thrown');
+      done();
+    });
+  });
+
+  it('can handle remove error', (done) => {
+    const mockRNError = {
+      removeItem(path, cb) {
+        cb('Error Thrown', undefined);
+      },
+    };
+    CoreManager.setAsyncStorage(mockRNError);
+    RNStorageController.removeItemAsync('myKey').catch((error) => {
+      expect(error).toBe('Error Thrown');
+      done();
+    });
+  });
+
+  it('can handle getAllKeys error', (done) => {
+    const mockRNError = {
+      getAllKeys(cb) {
+        cb('Error Thrown', undefined);
+      },
+    };
+    CoreManager.setAsyncStorage(mockRNError);
+    RNStorageController.getAllKeys().catch((error) => {
+      expect(error).toBe('Error Thrown');
+      done();
+    });
+  });
 });
 
 const DefaultStorageController = require('../StorageController.default');
@@ -213,6 +258,7 @@ describe('Storage (Default StorageController)', () => {
 
 describe('Storage (Async StorageController)', () => {
   beforeEach(() => {
+    CoreManager.setAsyncStorage(mockRNStorageInterface);
     CoreManager.setStorageController(
       require('../StorageController.react-native')
     );

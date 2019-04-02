@@ -11,7 +11,7 @@
 
 import Storage from './Storage';
 
-var iidCache = null;
+let iidCache = null;
 
 function hexOctet() {
   return Math.floor(
@@ -29,12 +29,12 @@ function generateId() {
   );
 }
 
-var InstallationController = {
+const InstallationController = {
   currentInstallationId(): Promise {
     if (typeof iidCache === 'string') {
       return Promise.resolve(iidCache);
     }
-    var path = Storage.generatePath('installationId');
+    const path = Storage.generatePath('installationId');
     return Storage.getItemAsync(path).then((iid) => {
       if (!iid) {
         iid = generateId();

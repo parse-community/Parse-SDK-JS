@@ -376,4 +376,50 @@ describe('RESTController', () => {
       'Cannot use the Master Key, it has not been provided.'
     );
   });
+
+  it('sends auth header when the auth type and token flags are set', async () => {
+    CoreManager.set('SERVER_AUTH_TYPE', 'Bearer');
+    CoreManager.set('SERVER_AUTH_TOKEN', 'some_random_token');
+    const credentialsHeader = (header) => "Authorization" === header[0];
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    RESTController.request('GET', 'classes/MyObject', {}, {});
+    await flushPromises();
+    expect(xhr.setRequestHeader.mock.calls.filter(credentialsHeader)).toEqual(
+      [["Authorization", "Bearer some_random_token"]]
+    );
+    CoreManager.set('SERVER_AUTH_TYPE', null);
+    CoreManager.set('SERVER_AUTH_TOKEN', null);
+  });
+
+  it('reports upload progress of the AJAX request when callback is provided', (done) => {
+    const xhr = mockXHR([{ status: 200, response: { success: true }}], {
+      addEventListener: (name, callback) => {
+        if(name === "progress") {
+          callback({
+            lengthComputable: true,
+            loaded: 5,
+            total: 10
+          });
+        }
+      }
+    });
+    RESTController._setXHR(xhr);
+
+    const options = {
+      progress: function(){}
+    };
+    jest.spyOn(options, 'progress');
+
+    RESTController.ajax('POST', 'files/upload.txt', {}, {}, options).then(({ response, status }) => {
+      expect(options.progress).toHaveBeenCalledWith(0.5);
+      expect(response).toEqual({ success: true });
+      expect(status).toBe(200);
+      done();
+    });
+  });
 });

@@ -229,6 +229,181 @@ describe('Parse Object', () => {
     });
   });
 
+  it('can increment nested fields', async () => {
+    const obj = new TestObject();
+    obj.set('objectField', { number: 5 });
+    assert.equal(obj.get('objectField').number, 5);
+    await obj.save();
+
+    obj.increment('objectField.number', 15);
+    assert.equal(obj.get('objectField').number, 20);
+    await obj.save();
+
+    assert.equal(obj.get('objectField').number, 20);
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, 20);
+  });
+
+  it('can increment non existing field', async () => {
+    const obj = new TestObject();
+    obj.set('objectField', { number: 5 });
+    await obj.save();
+
+    obj.increment('objectField.unknown', 15);
+    assert.deepEqual(obj.get('objectField'), {
+      number: 5,
+      unknown: 15,
+    });
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, 5);
+    assert.equal(result.get('objectField').unknown, 15);
+  });
+
+  it('can increment nested fields two levels', async () => {
+    const obj = new TestObject();
+    obj.set('objectField', { foo: { bar: 5 } });
+    assert.equal(obj.get('objectField').foo.bar, 5);
+    await obj.save();
+
+    obj.increment('objectField.foo.bar', 15);
+    assert.equal(obj.get('objectField').foo.bar, 20);
+    await obj.save();
+
+    assert.equal(obj.get('objectField').foo.bar, 20);
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').foo.bar, 20);
+  });
+
+  it('can increment nested fields without object', async () => {
+    const obj = new TestObject();
+    obj.set('hello', 'world');
+    await obj.save();
+
+    obj.increment('hello.dot', 15);
+    try  {
+      await obj.save();
+      assert.equal(false, true);
+    } catch(error) {
+      assert.equal(error.message, "Cannot create property 'dot' on string 'world'");
+    }
+  });
+
+  it('can set nested fields', async () => {
+    const obj = new TestObject({ objectField: { number: 5 } });
+    assert.equal(obj.get('objectField').number, 5);
+    await obj.save();
+
+    assert.equal(obj.get('objectField').number, 5);
+    obj.set('objectField.number', 20);
+    assert.equal(obj.get('objectField').number, 20);
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, 20);
+  });
+
+  it('can set non existing fields', async () => {
+    const obj = new TestObject();
+    obj.set('objectField', { number: 5 });
+    await obj.save();
+
+    obj.set('objectField.unknown', 20);
+    await obj.save();
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, 5);
+    assert.equal(result.get('objectField').unknown, 20);
+  });
+
+  it('ignore set nested fields on new object', async () => {
+    const obj = new TestObject();
+    obj.set('objectField.number', 5);
+    assert.deepEqual(obj._getPendingOps()[0], {});
+    assert.equal(obj.get('objectField'), undefined);
+
+    await obj.save();
+    assert.equal(obj.get('objectField'), undefined);
+  });
+
+  it('can set nested fields two levels', async () => {
+    const obj = new TestObject({ objectField: { foo: { bar: 5 } } });
+    assert.equal(obj.get('objectField').foo.bar, 5);
+    await obj.save();
+
+    assert.equal(obj.get('objectField').foo.bar, 5);
+    obj.set('objectField.foo.bar', 20);
+    assert.equal(obj.get('objectField').foo.bar, 20);
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').foo.bar, 20);
+  });
+
+  it('can unset nested fields', async () => {
+    const obj = new TestObject({
+      objectField: {
+        number: 5,
+        string: 'hello',
+      }
+    });
+    await obj.save();
+
+    obj.unset('objectField.number');
+    assert.equal(obj.get('objectField').number, undefined);
+    assert.equal(obj.get('objectField').string, 'hello');
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, undefined);
+    assert.equal(result.get('objectField').string, 'hello');
+  });
+
+  it('can unset nested fields two levels', async () => {
+    const obj = new TestObject({
+      objectField: {
+        foo: {
+          bar: 5,
+        },
+        string: 'hello',
+      }
+    });
+    await obj.save();
+
+    obj.unset('objectField.foo.bar');
+    assert.equal(obj.get('objectField').foo.bar, undefined);
+    assert.equal(obj.get('objectField').string, 'hello');
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').foo.bar, undefined);
+    assert.equal(result.get('objectField').string, 'hello');
+  });
+
+  it('can unset non existing fields', async () => {
+    const obj = new TestObject();
+    obj.set('objectField', { number: 5 });
+    await obj.save();
+
+    obj.unset('objectField.unknown');
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, 5);
+    assert.equal(result.get('objectField').unknown, undefined);
+  });
+
   it('can set keys to null', (done) => {
     const obj = new TestObject();
     obj.set('foo', null);
@@ -1454,5 +1629,38 @@ describe('Parse Object', () => {
     } catch (e) {
       done();
     }
+  });
+
+  it('can clone with relation', async (done) => {
+    const testObject = new TestObject();
+    const o = new TestObject();
+    await o.save();
+    await testObject.save();
+    let relation = o.relation('aRelation');
+    relation.add(testObject);
+    await o.save();
+
+    const o2 = o.clone();
+    assert.equal(
+      o.relation('aRelation').targetClassName,
+      o2.relation('aRelation').targetClassName
+    );
+    let relations = await o.relation('aRelation').query().find();
+    assert.equal(relations.length, 1);
+
+    relations = await o2.relation('aRelation').query().find();
+    assert.equal(relations.length, 0);
+
+    relation = o2.relation('aRelation');
+    relation.add(testObject);
+    await o2.save();
+
+    relations = await o.relation('aRelation').query().find();
+    assert.equal(relations.length, 1);
+
+    relations = await o2.relation('aRelation').query().find();
+    assert.equal(relations.length, 1);
+
+    done();
   });
 });
