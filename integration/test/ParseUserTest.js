@@ -31,6 +31,19 @@ const provider = {
 };
 Parse.User._registerAuthenticationProvider(provider);
 
+const authResponse = {
+  userID: 'test',
+  accessToken: 'test',
+  expiresIn: 'test', // Should be unix timestamp
+};
+global.FB = {
+  init: () => {},
+  login: (cb) => {
+    cb({ authResponse });
+  },
+  getAuthResponse: () => authResponse,
+};
+
 describe('Parse User', () => {
   beforeAll(() => {
     Parse.initialize('integration', null, 'notsosecret');
@@ -619,6 +632,30 @@ describe('Parse User', () => {
     expect(user._isLinked(provider)).toBe(false);
   });
 
+  it('linked account can login with authData', async () => {
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.save(null, { useMasterKey: true });
+    await user._linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
+    expect(user._isLinked(provider)).toBe(true);
+    expect(user.authenticated()).toBeFalsy();
+    Parse.User.enableUnsafeCurrentUser();
+    const loggedIn = await Parse.User.logInWith(provider.getAuthType(), provider.getAuthData());
+    expect(loggedIn.authenticated()).toBeTruthy();
+  });
+
+  it('linking un-authenticated user without master key will throw', async (done) => {
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.save(null, { useMasterKey: true });
+    user._linkWith(provider.getAuthType(), provider.getAuthData())
+      .then(() => done.fail('should fail'))
+      .catch(e => expect(e.message).toBe(`Cannot modify user ${user.id}.`))
+      .then(done);
+  });
+
   it('can link with custom auth', async () => {
     Parse.User.enableUnsafeCurrentUser();
     const provider = {
@@ -648,5 +685,39 @@ describe('Parse User', () => {
     expect(user._isLinked(provider)).toBe(true);
     await user._unlinkFrom(provider);
     expect(user._isLinked(provider)).toBe(false);
+  });
+
+  it('can login with facebook', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    Parse.FacebookUtils.init();
+    const user = await Parse.FacebookUtils.logIn();
+    expect(Parse.FacebookUtils.isLinked(user)).toBe(true);
+  });
+
+  it('can link user with facebook', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    Parse.FacebookUtils.init();
+    const user = new Parse.User();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.signUp();
+    await Parse.FacebookUtils.link(user);
+    expect(Parse.FacebookUtils.isLinked(user)).toBe(true);
+    await Parse.FacebookUtils.unlink(user);
+    expect(Parse.FacebookUtils.isLinked(user)).toBe(false);
+  });
+
+  it('can link anonymous user with facebook', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    Parse.FacebookUtils.init();
+    const user = await Parse.AnonymousUtils.logIn();
+    await Parse.FacebookUtils.link(user);
+
+    expect(Parse.FacebookUtils.isLinked(user)).toBe(true);
+    expect(Parse.AnonymousUtils.isLinked(user)).toBe(true);
+    await Parse.FacebookUtils.unlink(user);
+
+    expect(Parse.FacebookUtils.isLinked(user)).toBe(false);
+    expect(Parse.AnonymousUtils.isLinked(user)).toBe(true);
   });
 });

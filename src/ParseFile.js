@@ -334,26 +334,26 @@ const DefaultController = {
   download: function(uri) {
     if (XHR) {
       return this.downloadAjax(uri);
-    }
-    if (process.env.PARSE_BUILD === 'browser') {
+    } else if (process.env.PARSE_BUILD === 'node') {
+      return new Promise((resolve, reject) => {
+        const client = uri.indexOf('https') === 0
+          ? require('https')
+          : require('http');
+        client.get(uri, (resp) => {
+          resp.setEncoding('base64');
+          let base64 = '';
+          resp.on('data', (data) => base64 += data);
+          resp.on('end', () => {
+            resolve({
+              base64,
+              contentType: resp.headers['content-type'],
+            });
+          });
+        }).on('error', reject);
+      });
+    } else {
       return Promise.reject('Cannot make a request: No definition of XMLHttpRequest was found.');
     }
-    return new Promise((resolve, reject) => {
-      const client = uri.indexOf('https') === 0
-        ? require('https')
-        : require('http');
-      client.get(uri, (resp) => {
-        resp.setEncoding('base64');
-        let base64 = '';
-        resp.on('data', (data) => base64 += data);
-        resp.on('end', () => {
-          resolve({
-            base64,
-            contentType: resp.headers['content-type'],
-          });
-        });
-      }).on('error', reject);
-    });
   },
 
   downloadAjax: function(uri) {
