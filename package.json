@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://parseplatform.org/",
   "keywords": [
@@ -77,8 +77,7 @@
     "watch": "PARSE_BUILD=${PARSE_BUILD:=node} gulp watch",
     "integration": "TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
-    "release_docs": "./release_docs.sh",
-    "prepare": "npm run build"
+    "release_docs": "./release_docs.sh"
   },
   "jest": {
     "automock": true,

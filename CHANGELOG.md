@@ -1,7 +1,14 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.1...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.2...master)
+
+## 2.3.2
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.1...2.3.2)
+
+- Support `getData` from Parse.File ([#780](https://github.com/parse-community/Parse-SDK-JS/pull/780))
+- Parse.FacebookUtils `logIn` and `link` support MasterKey and SessionToken options ([#779](https://github.com/parse-community/Parse-SDK-JS/pull/779))
+- Remove node modules `http` and `https` from React-Native build ([#776](https://github.com/parse-community/Parse-SDK-JS/pull/776))
 
 ## 2.3.1
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.0...2.3.1)
