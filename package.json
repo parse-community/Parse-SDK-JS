@@ -78,7 +78,6 @@
     "integration": "TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
     "release_docs": "./release_docs.sh",
-    "prepare": "npm run build"
   },
   "jest": {
     "automock": true,
