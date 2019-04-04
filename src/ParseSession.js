@@ -109,7 +109,7 @@ class ParseSession extends ParseObject {
 ParseObject.registerSubclass('_Session', ParseSession);
 
 const DefaultController = {
-  getSession(options: RequestOptions): Promise {
+  getSession(options: RequestOptions): Promise<ParseSession> {
     const RESTController = CoreManager.getRESTController();
     const session = new ParseSession();
 

@@ -271,7 +271,7 @@ class ParseObject {
     return dirty;
   }
 
-  _toFullJSON(seen: Array<any>): AttributeMap {
+  _toFullJSON(seen?: Array<any>): AttributeMap {
     const json: { [key: string]: mixed } = this.toJSON(seen);
     json.__type = 'Object';
     json.className = this.className;
@@ -1237,7 +1237,7 @@ class ParseObject {
    *
    * @return {Promise} A promise that is fulfilled when the pin completes.
    */
-  pin(): Promise {
+  pin(): Promise<void> {
     return ParseObject.pinAllWithName(DEFAULT_PIN, [this]);
   }
 
@@ -1251,7 +1251,7 @@ class ParseObject {
    *
    * @return {Promise} A promise that is fulfilled when the unPin completes.
    */
-  unPin(): Promise {
+  unPin(): Promise<void> {
     return ParseObject.unPinAllWithName(DEFAULT_PIN, [this]);
   }
 
@@ -1290,7 +1290,7 @@ class ParseObject {
    * @param {String} name Name of Pin.
    * @return {Promise} A promise that is fulfilled when the pin completes.
    */
-  pinWithName(name: string): Promise {
+  pinWithName(name: string): Promise<void> {
     return ParseObject.pinAllWithName(name, [this]);
   }
 
@@ -1304,7 +1304,7 @@ class ParseObject {
    * @param {String} name Name of Pin.
    * @return {Promise} A promise that is fulfilled when the unPin completes.
    */
-  unPinWithName(name: string): Promise {
+  unPinWithName(name: string): Promise<void> {
     return ParseObject.unPinAllWithName(name, [this]);
   }
 
@@ -1320,7 +1320,7 @@ class ParseObject {
    *
    * @return {Promise} A promise that is fulfilled when the fetch completes.
    */
-  async fetchFromLocalDatastore(): Promise {
+  async fetchFromLocalDatastore(): Promise<ParseObject> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       throw new Error('Parse.enableLocalDatastore() must be called first');
@@ -1559,7 +1559,7 @@ class ParseObject {
    *   <li>batchSize: Number of objects to process per request
    * </ul>
    */
-  static saveAll(list: Array<ParseObject>, options = {}) {
+  static saveAll(list: Array<ParseObject>, options: RequestOptions = {}) {
     const saveOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       saveOptions.useMasterKey = options.useMasterKey;
@@ -1590,7 +1590,7 @@ class ParseObject {
    * @static
    * @return {Parse.Object} A Parse.Object reference.
    */
-  static createWithoutData(id) {
+  static createWithoutData(id: string) {
     const obj = new this();
     obj.id = id;
     return obj;
@@ -1604,7 +1604,7 @@ class ParseObject {
    * @static
    * @return {Parse.Object} A Parse.Object reference
    */
-  static fromJSON(json, override) {
+  static fromJSON(json: any, override?: boolean) {
     if (!json.className) {
       throw new Error('Cannot create an object without a className');
     }
@@ -1645,7 +1645,7 @@ class ParseObject {
    * @param {String} className The class name of the subclass
    * @param {Class} constructor The subclass
    */
-  static registerSubclass(className, constructor) {
+  static registerSubclass(className: string, constructor: any) {
     if (typeof className !== 'string') {
       throw new TypeError('The first argument must be a valid class name.');
     }
@@ -1829,7 +1829,7 @@ class ParseObject {
    * @return {Promise} A promise that is fulfilled when the pin completes.
    * @static
    */
-  static pinAll(objects: Array<ParseObject>): Promise {
+  static pinAll(objects: Array<ParseObject>): Promise<void> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
@@ -1855,7 +1855,7 @@ class ParseObject {
    * @return {Promise} A promise that is fulfilled when the pin completes.
    * @static
    */
-  static pinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+  static pinAllWithName(name: string, objects: Array<ParseObject>): Promise<void> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
@@ -1875,7 +1875,7 @@ class ParseObject {
    * @return {Promise} A promise that is fulfilled when the unPin completes.
    * @static
    */
-  static unPinAll(objects: Array<ParseObject>): Promise {
+  static unPinAll(objects: Array<ParseObject>): Promise<void> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
@@ -1895,7 +1895,7 @@ class ParseObject {
    * @return {Promise} A promise that is fulfilled when the unPin completes.
    * @static
    */
-  static unPinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+  static unPinAllWithName(name: string, objects: Array<ParseObject>): Promise<void> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
@@ -1913,7 +1913,7 @@ class ParseObject {
    * @return {Promise} A promise that is fulfilled when the unPin completes.
    * @static
    */
-  static unPinAllObjects(): Promise {
+  static unPinAllObjects(): Promise<void> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
@@ -1933,7 +1933,7 @@ class ParseObject {
    * @return {Promise} A promise that is fulfilled when the unPin completes.
    * @static
    */
-  static unPinAllObjectsWithName(name: string): Promise {
+  static unPinAllObjectsWithName(name: string): Promise<void> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
@@ -1943,7 +1943,7 @@ class ParseObject {
 }
 
 const DefaultController = {
-  fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): Promise {
+  fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): Promise<Array<void> | ParseObject> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (Array.isArray(target)) {
       if (target.length < 1) {
@@ -2045,7 +2045,7 @@ const DefaultController = {
     }
   },
 
-  async destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise {
+  async destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise<Array<void> | ParseObject> {
     const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
     const localDatastore = CoreManager.getLocalDatastore();
 

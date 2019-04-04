@@ -27,7 +27,7 @@ const Storage = {
     return controller.getItem(path);
   },
 
-  getItemAsync(path: string): Promise {
+  getItemAsync(path: string): Promise<string> {
     const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.getItemAsync(path);
@@ -45,7 +45,7 @@ const Storage = {
     return controller.setItem(path, value);
   },
 
-  setItemAsync(path: string, value: string): Promise {
+  setItemAsync(path: string, value: string): Promise<void> {
     const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.setItemAsync(path, value);
@@ -63,7 +63,7 @@ const Storage = {
     return controller.removeItem(path);
   },
 
-  removeItemAsync(path: string): Promise {
+  removeItemAsync(path: string): Promise<void> {
     const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.removeItemAsync(path);
