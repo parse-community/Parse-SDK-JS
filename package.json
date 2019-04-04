@@ -28,18 +28,18 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime": "7.4.2",
+    "@babel/runtime": "7.4.3",
     "ws": "6.2.1",
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
-    "@babel/core": "7.4.0",
+    "@babel/core": "7.4.3",
     "@babel/plugin-proposal-class-properties": "7.4.0",
     "@babel/plugin-transform-flow-comments": "7.4.0",
     "@babel/plugin-transform-flow-strip-types": "7.4.0",
-    "@babel/plugin-transform-runtime": "7.4.0",
-    "@babel/polyfill": "7.4.0",
-    "@babel/preset-env": "7.4.2",
+    "@babel/plugin-transform-runtime": "7.4.3",
+    "@babel/polyfill": "7.4.3",
+    "@babel/preset-env": "7.4.3",
     "@babel/preset-react": "7.0.0",
     "@parse/minami": "1.0.0",
     "babel-core": "7.0.0-bridge.0",
