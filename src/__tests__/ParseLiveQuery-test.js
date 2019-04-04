@@ -197,6 +197,9 @@ describe('ParseLiveQuery', () => {
       // so we need to give it a chance to complete before finishing
       setTimeout(() => {
         try {
+          client.socket = {
+            send() {}
+          }
           client.connectPromise.resolve();
           const actualSubscription = client.subscriptions.get(1);
 
@@ -236,6 +239,15 @@ describe('ParseLiveQuery', () => {
   });
 
   it('should not throw on usubscribe', (done) => {
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve({
+          getSessionToken() {
+            return 'token';
+          }
+        });
+      }
+    });
     const query = new ParseQuery("ObjectType");
     query.equalTo("test", "value");
     const subscription = new LiveQuerySubscription('0', query, 'token');
