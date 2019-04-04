@@ -38,4 +38,47 @@ describe('Parse.File', () => {
     result = await query.get(object.id);
     assert.equal(file2.url(), result.get('file2').url());
   });
+
+  it('can not get data from unsaved file', async () => {
+    const file = new Parse.File('parse-server-logo', [61, 170, 236, 120]);
+    file._data = null;
+    try {
+      await file.getData();
+    } catch (e) {
+      assert.equal(e.message, 'Cannot retrieve data for unsaved ParseFile.');
+    }
+  });
+
+  it('can get file data from byte array', async () => {
+    const file = new Parse.File('parse-server-logo', [61, 170, 236, 120]);
+    let data = await file.getData();
+    assert.equal(data, 'ParseA==');
+    file._data = null;
+    await file.save();
+    assert.equal(file._data, null)
+    data = await file.getData();
+    assert.equal(data, 'ParseA==');
+  });
+
+  it('can get file data from base64', async () => {
+    const file = new Parse.File('parse-server-logo', { base64: 'ParseA==' });
+    let data = await file.getData();
+    assert.equal(data, 'ParseA==');
+    file._data = null;
+    await file.save();
+    assert.equal(file._data, null)
+    data = await file.getData();
+    assert.equal(data, 'ParseA==');
+  });
+
+  it('can get file data from full base64', async () => {
+    const file = new Parse.File('parse-server-logo', { base64: 'data:image/jpeg;base64,ParseA==' });
+    let data = await file.getData();
+    assert.equal(data, 'ParseA==');
+    file._data = null;
+    await file.save();
+    assert.equal(file._data, null)
+    data = await file.getData();
+    assert.equal(data, 'ParseA==');
+  });
 });
