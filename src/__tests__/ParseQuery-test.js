@@ -2718,4 +2718,31 @@ describe('ParseQuery LocalDatastore', () => {
     expect(subscription.sessionToken).toBeUndefined();
     expect(subscription.query).toEqual(query);
   });
+
+  it('can subscribe to query with sessionToken parameter', async () => {
+    const mockLiveQueryClient = {
+      shouldOpen: function() {
+        return true;
+      },
+      open: function() {},
+      subscribe: function(query, sessionToken) {
+        return new LiveQuerySubscription('0', query, sessionToken);
+      },
+    };
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve(null);
+      }
+    });
+    CoreManager.set('LiveQueryController', {
+      getDefaultLiveQueryClient() {
+        return Promise.resolve(mockLiveQueryClient);
+      }
+    });
+    const query = new ParseQuery('TestObject');
+    const subscription = await query.subscribe('r:test');
+    expect(subscription.id).toBe('0');
+    expect(subscription.sessionToken).toBe('r:test');
+    expect(subscription.query).toEqual(query);
+  });
 });
