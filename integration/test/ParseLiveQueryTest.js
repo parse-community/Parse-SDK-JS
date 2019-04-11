@@ -156,5 +156,6 @@ describe('Parse LiveQuery', () => {
     await object.save({ foo: 'bar' });
     await sleep(1000);
     assert.equal(count, 1);
+    await Parse.User.logOut();
   });
 });
