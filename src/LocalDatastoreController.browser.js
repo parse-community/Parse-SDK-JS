@@ -58,7 +58,7 @@ const LocalDatastoreController = {
     return storage;
   },
 
-  clear(): Promise<Array<void>> {
+  clear(): Promise {
     const toRemove = [];
     for (let i = 0; i < localStorage.length; i += 1) {
       const key = localStorage.key(i);
