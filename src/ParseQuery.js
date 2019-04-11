@@ -1558,7 +1558,7 @@ class ParseQuery {
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   fromLocalDatastore(): ParseQuery {
-    return this.fromPinWithName();
+    return this.fromPinWithName(null);
   }
 
   /**
