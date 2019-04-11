@@ -58,7 +58,7 @@ class ParseUser extends ParseObject {
    * @return {Promise} A promise that is resolved when the replacement
    *   token has been fetched.
    */
-  _upgradeToRevocableSession(options: RequestOptions): Promise {
+  _upgradeToRevocableSession(options: RequestOptions): Promise<void> {
     options = options || {};
 
     const upgradeOptions = {};
@@ -77,7 +77,7 @@ class ParseUser extends ParseObject {
    * Unlike in the Android/iOS SDKs, logInWith is unnecessary, since you can
    * call linkWith on the user (even if it doesn't exist yet on the server).
    */
-  _linkWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions): Promise {
+  _linkWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions): Promise<ParseUser> {
     let authType;
     if (typeof provider === 'string') {
       authType = provider;
@@ -372,7 +372,7 @@ class ParseUser extends ParseObject {
    * @return {Promise} A promise that is fulfilled when the signup
    *     finishes.
    */
-  signUp(attrs: AttributeMap, options: FullOptions): Promise {
+  signUp(attrs: AttributeMap, options?: FullOptions): Promise<ParseUser> {
     options = options || {};
 
     const signupOptions = {};
@@ -405,7 +405,7 @@ class ParseUser extends ParseObject {
    * @return {Promise} A promise that is fulfilled with the user when
    *     the login is complete.
    */
-  logIn(options: FullOptions): Promise {
+  logIn(options?: FullOptions): Promise<ParseUser> {
     options = options || {};
 
     const loginOptions = {};
@@ -424,7 +424,7 @@ class ParseUser extends ParseObject {
    * Wrap the default save behavior with functionality to save to local
    * storage if this is current user.
    */
-  save(...args: Array<any>): Promise {
+  save(...args: Array<any>): Promise<ParseUser> {
     return super.save.apply(this, args).then(() => {
       if (this.isCurrent()) {
         return CoreManager.getUserController().updateUserOnDisk(this);
@@ -437,7 +437,7 @@ class ParseUser extends ParseObject {
    * Wrap the default destroy behavior with functionality that logs out
    * the current user when it is destroyed
    */
-  destroy(...args: Array<any>): Promise {
+  destroy(...args: Array<any>): Promise<ParseUser> {
     return super.destroy.apply(this, args).then(() => {
       if (this.isCurrent()) {
         return CoreManager.getUserController().removeUserFromDisk();
@@ -450,7 +450,7 @@ class ParseUser extends ParseObject {
    * Wrap the default fetch behavior with functionality to save to local
    * storage if this is current user.
    */
-  fetch(...args: Array<any>): Promise {
+  fetch(...args: Array<any>): Promise<ParseUser> {
     return super.fetch.apply(this, args).then(() => {
       if (this.isCurrent()) {
         return CoreManager.getUserController().updateUserOnDisk(this);
@@ -463,7 +463,7 @@ class ParseUser extends ParseObject {
    * Wrap the default fetchWithInclude behavior with functionality to save to local
    * storage if this is current user.
    */
-  fetchWithInclude(...args: Array<any>): Promise {
+  fetchWithInclude(...args: Array<any>): Promise<ParseUser> {
     return super.fetchWithInclude.apply(this, args).then(() => {
       if (this.isCurrent()) {
         return CoreManager.getUserController().updateUserOnDisk(this);
@@ -536,7 +536,7 @@ class ParseUser extends ParseObject {
    * @return {Promise} A Promise that is resolved with the currently
    *   logged in Parse User
    */
-  static currentAsync(): Promise {
+  static currentAsync(): Promise<?ParseUser> {
     if (!canUseCurrentUser) {
       return Promise.resolve(null);
     }
@@ -561,7 +561,7 @@ class ParseUser extends ParseObject {
    * @return {Promise} A promise that is fulfilled with the user when
    *     the signup completes.
    */
-  static signUp(username, password, attrs, options) {
+  static signUp(username: string, password: string, attrs: AttributeMap, options?: FullOptions) {
     attrs = attrs || {};
     attrs.username = username;
     attrs.password = password;
@@ -584,7 +584,7 @@ class ParseUser extends ParseObject {
    * @return {Promise} A promise that is fulfilled with the user when
    *     the login completes.
    */
-  static logIn(username, password, options) {
+  static logIn(username: string, password: string, options?: FullOptions) {
     if (typeof username !== 'string') {
       return Promise.reject(
         new ParseError(
@@ -619,7 +619,7 @@ class ParseUser extends ParseObject {
    * @return {Promise} A promise that is fulfilled with the user when
    *     the login completes.
    */
-  static become(sessionToken, options) {
+  static become(sessionToken: string, options?: RequestOptions) {
     if (!canUseCurrentUser) {
       throw new Error(
         'It is not memory-safe to become a user in a server environment'
@@ -653,7 +653,7 @@ class ParseUser extends ParseObject {
     return controller.hydrate(userJSON);
   }
 
-  static logInWith(provider, options) {
+  static logInWith(provider: any, options?: RequestOptions) {
     return ParseUser._logInWith(provider, options);
   }
 
@@ -691,7 +691,7 @@ class ParseUser extends ParseObject {
    * @static
    * @returns {Promise}
    */
-  static requestPasswordReset(email, options) {
+  static requestPasswordReset(email: string, options?: RequestOptions) {
     options = options || {};
 
     const requestOptions = {};
@@ -733,7 +733,7 @@ class ParseUser extends ParseObject {
    *   completed. If a replacement session token is requested, the promise
    *   will be resolved after a new token has been fetched.
    */
-  static enableRevocableSession(options) {
+  static enableRevocableSession(options?: RequestOptions) {
     options = options || {};
     CoreManager.set('FORCE_REVOCABLE_SESSION', true);
     if (canUseCurrentUser) {
@@ -767,7 +767,7 @@ class ParseUser extends ParseObject {
     canUseCurrentUser = false;
   }
 
-  static _registerAuthenticationProvider(provider) {
+  static _registerAuthenticationProvider(provider: any) {
     authProviders[provider.getAuthType()] = provider;
     // Synchronize the current user with the auth provider.
     ParseUser.currentAsync().then((current) => {
@@ -777,7 +777,7 @@ class ParseUser extends ParseObject {
     });
   }
 
-  static _logInWith(provider, options) {
+  static _logInWith(provider: any, options?: RequestOptions) {
     const user = new ParseUser();
     return user._linkWith(provider, options);
   }
@@ -787,7 +787,7 @@ class ParseUser extends ParseObject {
     currentUserCacheMatchesDisk = false;
   }
 
-  static _setCurrentUserCache(user) {
+  static _setCurrentUserCache(user: ParseUser) {
     currentUserCache = user;
   }
 }
@@ -865,7 +865,7 @@ const DefaultController = {
     return current;
   },
 
-  currentUserAsync(): Promise {
+  currentUserAsync(): Promise<?ParseUser> {
     if (currentUserCache) {
       return Promise.resolve(currentUserCache)
     }
@@ -902,7 +902,7 @@ const DefaultController = {
     });
   },
 
-  signUp(user: ParseUser, attrs: AttributeMap, options: RequestOptions): Promise {
+  signUp(user: ParseUser, attrs: AttributeMap, options: RequestOptions): Promise<ParseUser> {
     const username = (attrs && attrs.username) || user.get('username');
     const password = (attrs && attrs.password) || user.get('password');
 
@@ -934,7 +934,7 @@ const DefaultController = {
     });
   },
 
-  logIn(user: ParseUser, options: RequestOptions): Promise {
+  logIn(user: ParseUser, options: RequestOptions): Promise<ParseUser> {
     const RESTController = CoreManager.getRESTController();
     const stateController = CoreManager.getObjectStateController();
     const auth = {
@@ -962,7 +962,7 @@ const DefaultController = {
     });
   },
 
-  become(options: RequestOptions): Promise {
+  become(options: RequestOptions): Promise<ParseUser> {
     const user = new ParseUser();
     const RESTController = CoreManager.getRESTController();
     return RESTController.request(
@@ -974,7 +974,7 @@ const DefaultController = {
     });
   },
 
-  hydrate(userJSON: AttributeMap) {
+  hydrate(userJSON: AttributeMap): Promise<ParseUser> {
     const user = new ParseUser();
     user._finishFetch(userJSON);
     user._setExisted(true);
@@ -985,7 +985,7 @@ const DefaultController = {
     }
   },
 
-  logOut(): Promise {
+  logOut(): Promise<ParseUser> {
     return DefaultController.currentUserAsync().then((currentUser) => {
       const path = Storage.generatePath(CURRENT_USER_KEY);
       let promise = Storage.removeItemAsync(path);
