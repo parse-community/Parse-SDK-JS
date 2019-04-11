@@ -30,7 +30,7 @@ function generateId() {
 }
 
 const InstallationController = {
-  currentInstallationId(): Promise {
+  currentInstallationId(): Promise<string> {
     if (typeof iidCache === 'string') {
       return Promise.resolve(iidCache);
     }

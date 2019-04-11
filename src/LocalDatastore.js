@@ -36,40 +36,43 @@ import { DEFAULT_PIN, PIN_PREFIX, OBJECT_PREFIX } from './LocalDatastoreUtils';
  * @static
  */
 const LocalDatastore = {
-  fromPinWithName(name: string): Promise {
+  isEnabled: false,
+  isSyncing: false,
+
+  fromPinWithName(name: string): Promise<Array<Object>> {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.fromPinWithName(name);
   },
 
-  pinWithName(name: string, value: any): Promise {
+  pinWithName(name: string, value: any): Promise<void> {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.pinWithName(name, value);
   },
 
-  unPinWithName(name: string): Promise {
+  unPinWithName(name: string): Promise<void> {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.unPinWithName(name);
   },
 
-  _getAllContents(): Promise {
+  _getAllContents(): Promise<Object> {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.getAllContents();
   },
 
   // Use for testing
-  _getRawStorage(): Promise {
+  _getRawStorage(): Promise<Object> {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.getRawStorage();
   },
 
-  _clear(): Promise {
+  _clear(): Promise<void> {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.clear();
   },
 
   // Pin the object and children recursively
   // Saves the object and children key to Pin Name
-  async _handlePinAllWithName(name: string, objects: Array<ParseObject>): Promise {
+  async _handlePinAllWithName(name: string, objects: Array<ParseObject>): Promise<void> {
     const pinName = this.getPinName(name);
     const toPinPromises = [];
     const objectKeys = [];
@@ -226,7 +229,7 @@ const LocalDatastore = {
 
   // Called when an object is save / fetched
   // Update object pin value
-  async _updateObjectIfPinned(object: ParseObject): Promise {
+  async _updateObjectIfPinned(object: ParseObject): Promise<void> {
     if (!this.isEnabled) {
       return;
     }
@@ -275,7 +278,7 @@ const LocalDatastore = {
   },
 
   // Update pin and references of the unsaved object
-  async _updateLocalIdForObject(localId, object: ParseObject) {
+  async _updateLocalIdForObject(localId: string, object: ParseObject) {
     if (!this.isEnabled) {
       return;
     }
@@ -385,9 +388,6 @@ const LocalDatastore = {
     return this.isEnabled;
   }
 };
-
-LocalDatastore.isEnabled = false;
-LocalDatastore.isSyncing = false;
 
 module.exports = LocalDatastore;
 
