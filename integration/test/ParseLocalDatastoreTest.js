@@ -90,7 +90,27 @@ function runTest(controller) {
       assert.deepEqual(localDatastore[LDS_KEY(object)], [object._toFullJSON()]);
     });
 
+    it(`${controller.name} can store data to pin (unsaved)`, async () => {
+      const object = new TestObject();
+      object.set('foo', 'bar');
+      await object.pin();
+
+      const query = new Parse.Query(TestObject);
+      query.fromLocalDatastore();
+      let results = await query.find();
+      assert.equal(results.length, 1);
+
+      let pinnedObject = results[0];
+      assert.equal(pinnedObject.get('foo'), 'bar');
+      pinnedObject.set('foo', 'baz');
+      await pinnedObject.pin();
+
+      results = await query.find();
+      assert.equal(results.length, 1);
       pinnedObject = results[0];
+      assert.equal(pinnedObject.get('foo'), 'baz');
+    });
+
     it(`${controller.name} cannot pin unsaved pointer`, async () => {
       try {
         const object = new TestObject();
