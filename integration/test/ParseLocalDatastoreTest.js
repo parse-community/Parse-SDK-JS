@@ -111,6 +111,34 @@ function runTest(controller) {
       assert.equal(pinnedObject.get('foo'), 'baz');
     });
 
+    it(`${controller.name} can query unsaved pin and save`, async () => {
+      const object = new TestObject();
+      object.set('foo', 'bar');
+      await object.pin();
+
+      const query = new Parse.Query(TestObject);
+      query.fromLocalDatastore();
+      let results = await query.find();
+
+      assert.equal(results.length, 1);
+
+      let pinnedObject = results[0];
+      assert.equal(pinnedObject.get('foo'), 'bar');
+
+      pinnedObject.set('foo', 'baz');
+      await pinnedObject.save();
+
+      assert(pinnedObject.id);
+      assert.equal(pinnedObject._localId, undefined);
+
+      results = await query.find();
+      pinnedObject = results[0];
+
+      assert.equal(pinnedObject.get('foo'), 'baz');
+      assert(pinnedObject.id);
+      assert.equal(pinnedObject._localId, undefined);
+    });
+
     it(`${controller.name} cannot pin unsaved pointer`, async () => {
       try {
         const object = new TestObject();
