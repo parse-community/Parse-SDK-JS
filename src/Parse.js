@@ -270,4 +270,9 @@ if (process.env.PARSE_BUILD === 'node') {
 // For legacy requires, of the form `var Parse = require('parse').Parse`
 Parse.Parse = Parse;
 
+// weapp
+if (wx) {
+  wx.Parse = Parse
+}
+
 module.exports = Parse;

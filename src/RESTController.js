@@ -78,10 +78,43 @@ function ajaxIE9(method: string, url: string, data: any, options?: FullOptions) 
   });
 }
 
+// weapp
+function ajaxWeapp(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
+  headers = headers || {};
+  if (typeof(headers['Content-Type']) !== 'string') {
+    headers['Content-Type'] = 'text/plain'; // Avoid pre-flight
+  }
+  if (CoreManager.get('IS_NODE')) {
+    headers['User-Agent'] = 'Parse/' + CoreManager.get('VERSION') +
+      ' (NodeJS ' + process.versions.node + ')';
+  }
+  if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
+    headers['Authorization'] = CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
+  }
+
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url,
+      method,
+      data,
+      header: headers,
+      success: res => {
+        resolve({ response: res.data});
+      },
+      fail: res => {
+        reject(res);
+      }
+    })
+  });
+}
+
 const RESTController = {
   ajax(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
     if (useXDomainRequest) {
       return ajaxIE9(method, url, data, headers, options);
+    }
+    if(wx){
+      return ajaxWeapp(method, url, data, headers, options);
     }
 
     let res, rej;

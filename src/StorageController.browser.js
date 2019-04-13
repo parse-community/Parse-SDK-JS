@@ -8,6 +8,22 @@
  *
  * @flow
  */
+/* weapp */
+localStorage = {
+  getItem(path) {
+    return wx.getStorageSync(path)
+  },
+  setItem(path, value) {
+    return wx.setStorageSync(path, value)
+  },
+  removeItem(path) {
+    return wx.removeStorageSync(path)
+  },
+  clear() {
+    return wx.clearStorageSync()
+  }
+}
+
 /* global localStorage */
 const StorageController = {
   async: 0,
