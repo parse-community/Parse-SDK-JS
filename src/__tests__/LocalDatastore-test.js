@@ -66,7 +66,7 @@ class MockObject {
   }
 
   _getId() {
-    return this.id;
+    return this.id || this._localId;
   }
 
   set(key, value) {
@@ -159,6 +159,18 @@ describe('LocalDatastore', () => {
     const object = new ParseObject('Item');
     await LocalDatastore._handlePinAllWithName('test_pin', [object]);
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(2);
+  });
+
+  it('_handlePinAllWithName with localId', async () => {
+    const object = new ParseObject('Item');
+    object._localId = 'local0';
+    object.id = null;
+    await LocalDatastore._handlePinAllWithName('test_pin', [object]);
+    console.log(mockLocalStorageController.pinWithName.mock.calls);
+    expect(mockLocalStorageController.pinWithName.mock.calls[0][0]).toEqual('Parse_LDS_Item_local0');
+    expect(mockLocalStorageController.pinWithName.mock.calls[0][1]).toEqual([
+      { __type: 'Object', className: 'Item', _localId: 'local0' }
+    ]);
   });
 
   it('_handlePinAllWithName default pin', async () => {
