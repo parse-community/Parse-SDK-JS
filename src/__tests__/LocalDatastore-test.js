@@ -166,7 +166,6 @@ describe('LocalDatastore', () => {
     object._localId = 'local0';
     object.id = null;
     await LocalDatastore._handlePinAllWithName('test_pin', [object]);
-    console.log(mockLocalStorageController.pinWithName.mock.calls);
     expect(mockLocalStorageController.pinWithName.mock.calls[0][0]).toEqual('Parse_LDS_Item_local0');
     expect(mockLocalStorageController.pinWithName.mock.calls[0][1]).toEqual([
       { __type: 'Object', className: 'Item', _localId: 'local0' }
