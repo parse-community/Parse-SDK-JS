@@ -28,8 +28,15 @@ var PRESETS = {
   }]],
   'react-native': ['@babel/preset-react'],
 };
+
+// var PLUGINS = {
+//   'browser': [transformRuntime, '@babel/plugin-transform-flow-comments', '@babel/plugin-proposal-class-properties', 'inline-package-json', 'transform-inline-environment-variables'],
+//   'node': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables'],
+//   'react-native': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables'],
+// };
+// weapp 移除transformRuntime，否则提示Function错误
 var PLUGINS = {
-  'browser': [transformRuntime, '@babel/plugin-transform-flow-comments', '@babel/plugin-proposal-class-properties', 'inline-package-json', 'transform-inline-environment-variables'],
+  'browser': ['@babel/plugin-transform-flow-comments', '@babel/plugin-proposal-class-properties', 'inline-package-json', 'transform-inline-environment-variables'],
   'node': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables'],
   'react-native': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables'],
 };
