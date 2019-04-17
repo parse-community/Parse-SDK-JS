@@ -11,6 +11,7 @@
 /* global XMLHttpRequest, XDomainRequest */
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
+import Fly from 'flyio/dist/npm/wx';
 
 export type RequestOptions = {
   useMasterKey?: boolean;
@@ -40,14 +41,14 @@ if (process.env.PARSE_BUILD === 'node') {
 
 let useXDomainRequest = false;
 if (typeof XDomainRequest !== 'undefined' &&
-    !('withCredentials' in new XMLHttpRequest())) {
+  !('withCredentials' in new XMLHttpRequest())) {
   useXDomainRequest = true;
 }
 
 function ajaxIE9(method: string, url: string, data: any, options?: FullOptions) {
   return new Promise((resolve, reject) => {
     const xdr = new XDomainRequest();
-    xdr.onload = function() {
+    xdr.onload = function () {
       let response;
       try {
         response = JSON.parse(xdr.responseText);
@@ -58,7 +59,7 @@ function ajaxIE9(method: string, url: string, data: any, options?: FullOptions) 
         resolve({ response });
       }
     };
-    xdr.onerror = xdr.ontimeout = function() {
+    xdr.onerror = xdr.ontimeout = function () {
       // Let's fake a real error message.
       const fakeResponse = {
         responseText: JSON.stringify({
@@ -68,8 +69,8 @@ function ajaxIE9(method: string, url: string, data: any, options?: FullOptions) 
       };
       reject(fakeResponse);
     };
-    xdr.onprogress = function() {
-      if(options && typeof options.progress === 'function') {
+    xdr.onprogress = function () {
+      if (options && typeof options.progress === 'function') {
         options.progress(xdr.responseText);
       }
     };
@@ -79,9 +80,14 @@ function ajaxIE9(method: string, url: string, data: any, options?: FullOptions) 
 }
 
 // weapp
+const fly = new Fly();
+if (wx) {
+  wx.fly = fly;
+}
+
 function ajaxWeapp(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
   headers = headers || {};
-  if (typeof(headers['Content-Type']) !== 'string') {
+  if (typeof (headers['Content-Type']) !== 'string') {
     headers['Content-Type'] = 'text/plain'; // Avoid pre-flight
   }
   if (CoreManager.get('IS_NODE')) {
@@ -92,20 +98,10 @@ function ajaxWeapp(method: string, url: string, data: any, headers?: any, option
     headers['Authorization'] = CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
   }
 
-  return new Promise((resolve, reject) => {
-    wx.request({
-      url,
-      method,
-      data,
-      header: headers,
-      success: res => {
-        resolve({ response: res.data});
-      },
-      fail: res => {
-        reject(res);
-      }
-    })
-  });
+  return fly.request(url, data, {
+    method,
+    headers
+  })
 }
 
 const RESTController = {
@@ -113,7 +109,7 @@ const RESTController = {
     if (useXDomainRequest) {
       return ajaxIE9(method, url, data, headers, options);
     }
-    if(wx){
+    if (wx) {
       return ajaxWeapp(method, url, data, headers, options);
     }
 
@@ -123,7 +119,7 @@ const RESTController = {
     promise.reject = rej;
     let attempts = 0;
 
-    const dispatch = function() {
+    const dispatch = function () {
       if (XHR == null) {
         throw new Error(
           'Cannot make a request: No definition of XMLHttpRequest was found.'
@@ -131,7 +127,7 @@ const RESTController = {
       }
       let handled = false;
       const xhr = new XHR();
-      xhr.onreadystatechange = function() {
+      xhr.onreadystatechange = function () {
         if (xhr.readyState !== 4 || handled) {
           return;
         }
@@ -172,7 +168,7 @@ const RESTController = {
       };
 
       headers = headers || {};
-      if (typeof(headers['Content-Type']) !== 'string') {
+      if (typeof (headers['Content-Type']) !== 'string') {
         headers['Content-Type'] = 'text/plain'; // Avoid pre-flight
       }
       if (CoreManager.get('IS_NODE')) {
@@ -183,7 +179,7 @@ const RESTController = {
         headers['Authorization'] = CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
       }
 
-      if(options && typeof options.progress === 'function') {
+      if (options && typeof options.progress === 'function') {
         if (xhr.upload) {
           xhr.upload.addEventListener('progress', (oEvent) => {
             if (oEvent.lengthComputable) {
@@ -291,7 +287,7 @@ const RESTController = {
       return RESTController.ajax(method, url, payloadString, {}, options).then(({ response }) => {
         return response;
       });
-    }).catch(function(response: { responseText: string }) {
+    }).catch(function (response: { responseText: string }) {
       // Transform the error into an instance of ParseError by trying to parse
       // the error string as JSON
       let error;
@@ -304,7 +300,7 @@ const RESTController = {
           error = new ParseError(
             ParseError.INVALID_JSON,
             'Received an error with invalid JSON from Parse: ' +
-              response.responseText
+            response.responseText
           );
         }
       } else {
