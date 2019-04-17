@@ -101,6 +101,8 @@ function ajaxWeapp(method: string, url: string, data: any, headers?: any, option
   return fly.request(url, data, {
     method,
     headers
+  }).then(res => {
+    return { response: res.data };
   })
 }
 
