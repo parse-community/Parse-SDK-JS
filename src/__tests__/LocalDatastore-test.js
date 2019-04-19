@@ -647,6 +647,40 @@ describe('LocalDatastore', () => {
     expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(1);
   });
 
+  it('updateFromServer ignore unsaved objects', async () => {
+    LocalDatastore.isEnabled = true;
+    LocalDatastore.isSyncing = false;
+
+    const object = new ParseObject('Item');
+    object._localId = 'local0';
+    object.id = null;
+
+    const OBJECT_KEY = LocalDatastore.getKeyForObject(object);
+    const LDS = {
+      [OBJECT_KEY]: [object._toFullJSON()],
+      [KEY1]: [item1._toFullJSON()],
+      [`${PIN_PREFIX}_testPinName`]: [KEY1, OBJECT_KEY],
+      [DEFAULT_PIN]: [KEY1, OBJECT_KEY],
+    };
+
+    mockLocalStorageController
+      .getAllContents
+      .mockImplementationOnce(() => LDS);
+
+    item1.set('updatedField', 'foo');
+    mockQueryFind.mockImplementationOnce(() => Promise.resolve([item1]));
+
+    await LocalDatastore.updateFromServer();
+
+    expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
+    expect(ParseQuery).toHaveBeenCalledTimes(1);
+    const mockQueryInstance = ParseQuery.mock.instances[0];
+
+    expect(mockQueryInstance.equalTo.mock.calls.length).toBe(1);
+    expect(mockQueryFind).toHaveBeenCalledTimes(1);
+    expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(1);
+  });
+
   it('updateFromServer handle error', async () => {
     LocalDatastore.isEnabled = true;
     LocalDatastore.isSyncing = false;

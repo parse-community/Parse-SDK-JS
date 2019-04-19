@@ -342,6 +342,9 @@ const LocalDatastore = {
     for (const key of keys) {
       // Ignore the OBJECT_PREFIX
       const [ , , className, objectId] = key.split('_');
+      if (objectId.startsWith('local')) {
+        continue;
+      }
       if (!(className in pointersHash)) {
         pointersHash[className] = new Set();
       }

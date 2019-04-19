@@ -926,6 +926,25 @@ function runTest(controller) {
       const childJSON = updatedLDS[LDS_KEY(child)];
       assert.equal(childJSON.foo, 'changed');
     });
+
+    it(`${controller.name} can update Local Datastore from network ignore unsaved`, async () => {
+      const object = new TestObject();
+      const item = new Item();
+      await item.save();
+      await Parse.Object.pinAll([object, item]);
+
+      // Updates item with { foo: 'changed' }
+      const params = { id: item.id };
+      await Parse.Cloud.run('TestFetchFromLocalDatastore', params);
+
+      Parse.LocalDatastore.isSyncing = false;
+
+      await Parse.LocalDatastore.updateFromServer();
+
+      const updatedLDS = await Parse.LocalDatastore._getAllContents();
+      const itemJSON = updatedLDS[LDS_KEY(item)];
+      assert.equal(itemJSON.foo, 'changed');
+    });
   });
 
   describe(`Parse Query Pinning (${controller.name})`, () => {
