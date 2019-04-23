@@ -98,6 +98,7 @@ const CoreManager = require('../CoreManager');
 const LocalDatastore = require('../LocalDatastore');
 const ParseObject = require('../ParseObject');
 const ParseQuery = require('../ParseQuery');
+const ParseUser = require('../ParseUser').default;
 const RNDatastoreController = require('../LocalDatastoreController.react-native');
 const BrowserDatastoreController = require('../LocalDatastoreController.browser');
 const DefaultDatastoreController = require('../LocalDatastoreController.default');
@@ -635,6 +636,40 @@ describe('LocalDatastore', () => {
 
     item1.set('updatedField', 'foo');
     mockQueryFind.mockImplementationOnce(() => Promise.resolve([item1]));
+
+    await LocalDatastore.updateFromServer();
+
+    expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
+    expect(ParseQuery).toHaveBeenCalledTimes(1);
+    const mockQueryInstance = ParseQuery.mock.instances[0];
+
+    expect(mockQueryInstance.equalTo.mock.calls.length).toBe(1);
+    expect(mockQueryFind).toHaveBeenCalledTimes(1);
+    expect(mockLocalStorageController.pinWithName).toHaveBeenCalledTimes(1);
+  });
+
+  it('updateFromServer on user', async () => {
+    LocalDatastore.isEnabled = true;
+    LocalDatastore.isSyncing = false;
+
+    const user = new ParseUser();
+    user.id = '1234';
+    user._localId = null;
+
+    const USER_KEY = LocalDatastore.getKeyForObject(user);
+    console.log(USER_KEY);
+    const LDS = {
+      [USER_KEY]: [user._toFullJSON()],
+      [`${PIN_PREFIX}_testPinName`]: [USER_KEY],
+      [DEFAULT_PIN]: [USER_KEY],
+    };
+
+    mockLocalStorageController
+      .getAllContents
+      .mockImplementationOnce(() => LDS);
+
+    user.set('updatedField', 'foo');
+    mockQueryFind.mockImplementationOnce(() => Promise.resolve([user]));
 
     await LocalDatastore.updateFromServer();
 

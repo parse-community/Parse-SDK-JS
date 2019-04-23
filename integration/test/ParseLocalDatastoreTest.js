@@ -150,6 +150,46 @@ function runTest(controller) {
       }
     });
 
+    it(`${controller.name} can pin user (unsaved)`, async () => {
+      const user = new Parse.User();
+      user.set('field', 'test');
+      await user.pin();
+
+      const json = user._toFullJSON();
+      json._localId = user._localId;
+
+      const localDatastore = await Parse.LocalDatastore._getAllContents();
+      const cachedObject = localDatastore[LDS_KEY(user)][0];
+      assert.equal(Object.keys(localDatastore).length, 2);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(user)]);
+      assert.deepEqual(localDatastore[LDS_KEY(user)], [json]);
+      assert.equal(cachedObject.objectId, user.id);
+      assert.equal(cachedObject.field, 'test');
+      await Parse.User.logOut();
+    });
+
+    it(`${controller.name} can pin user (saved)`, async () => {
+      const user = new Parse.User();
+      user.set('field', 'test');
+      user.setPassword('asdf');
+      user.setUsername('zxcv');
+      await user.signUp()
+      await user.pin();
+
+      const json = user._toFullJSON();
+      delete json.password;
+
+      const localDatastore = await Parse.LocalDatastore._getAllContents();
+      const cachedObject = localDatastore[LDS_KEY(user)][0];
+
+      assert.equal(Object.keys(localDatastore).length, 2);
+      assert.deepEqual(localDatastore[DEFAULT_PIN], [LDS_KEY(user)]);
+      assert.deepEqual(localDatastore[LDS_KEY(user)], [json]);
+      assert.equal(cachedObject.objectId, user.id);
+      assert.equal(cachedObject.field, 'test');
+      await Parse.User.logOut();
+    });
+
     it(`${controller.name} can pin (saved)`, async () => {
       const object = new TestObject();
       object.set('field', 'test');
@@ -216,6 +256,31 @@ function runTest(controller) {
       assert.deepEqual(localDatastore[LDS_KEY(parent)], [parent._toFullJSON()]);
       assert.deepEqual(localDatastore[LDS_KEY(child)], [child._toFullJSON()]);
       assert.deepEqual(localDatastore[LDS_KEY(grandchild)], [grandchild._toFullJSON()]);
+    });
+
+    it(`${controller.name} can pin user (recursive)`, async () => {
+      const parent = new TestObject();
+      const child = new Parse.User();
+      child.setUsername('username');
+      child.setPassword('password');
+      await child.signUp();
+      parent.set('field', 'test');
+      parent.set('child', child);
+      await parent.save();
+      await parent.pin();
+
+      const parentJSON = parent._toFullJSON();
+      const childJSON = child._toFullJSON();
+      delete childJSON.password;
+      delete parentJSON.child.password;
+
+      const localDatastore = await Parse.LocalDatastore._getAllContents();
+      assert.equal(Object.keys(localDatastore).length, 3);
+      assert.equal(localDatastore[DEFAULT_PIN].includes(LDS_KEY(parent)), true);
+      assert.equal(localDatastore[DEFAULT_PIN].includes(LDS_KEY(child)), true);
+      assert.deepEqual(localDatastore[LDS_KEY(parent)], [parentJSON]);
+      assert.deepEqual(localDatastore[LDS_KEY(child)], [childJSON]);
+      await Parse.User.logOut();
     });
 
     it(`${controller.name} can pinAll (unsaved)`, async () => {
@@ -945,6 +1010,27 @@ function runTest(controller) {
       const itemJSON = updatedLDS[LDS_KEY(item)];
       assert.equal(itemJSON.foo, 'changed');
     });
+
+    it(`${controller.name} can update Local Datastore User from network`, async () => {
+      const user = new Parse.User();
+      user.setUsername('asdf');
+      user.setPassword('zxcv');
+      await user.signUp();
+      await user.pin();
+
+      // Updates user with { foo: 'changed' }
+      const params = { id: user.id };
+      await Parse.Cloud.run('UpdateUser', params);
+
+      Parse.LocalDatastore.isSyncing = false;
+
+      await Parse.LocalDatastore.updateFromServer();
+
+      const updatedLDS = await Parse.LocalDatastore._getAllContents();
+      const userJSON = updatedLDS[LDS_KEY(user)];
+      assert.equal(userJSON.foo, 'changed');
+      await Parse.User.logOut();
+    });
   });
 
   describe(`Parse Query Pinning (${controller.name})`, () => {
@@ -1014,6 +1100,19 @@ function runTest(controller) {
       const results = await query.find();
 
       assert.equal(results.length, 3);
+    });
+
+    it(`${controller.name} can query user from pin`, async () => {
+      const user = await Parse.User.signUp('asdf', 'zxcv', { foo: 'bar' });
+      await user.pin();
+
+      const query = new Parse.Query(Parse.User);
+      query.fromPin();
+      const results = await query.find();
+
+      assert.equal(results.length, 1);
+      assert.equal(results[0].getSessionToken(), user.getSessionToken());
+      await Parse.User.logOut();
     });
 
     it(`${controller.name} can do basic queries`, async () => {
@@ -2551,6 +2650,7 @@ describe('Parse LocalDatastore', () => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.enableLocalDatastore();
+    Parse.User.enableUnsafeCurrentUser();
     Parse.Storage._clear();
     clear().then(() => {
       done()
