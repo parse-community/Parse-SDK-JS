@@ -22,7 +22,9 @@ const api = new ParseServer({
     facebook: {
       appIds: "test"
     }
-  }
+  },
+  verbose: false,
+  silent: true,
 });
 
 app.use('/parse', api);

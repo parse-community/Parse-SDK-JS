@@ -79,7 +79,11 @@ const LocalDatastore = {
     for (const parent of objects) {
       const children = this._getChildren(parent);
       const parentKey = this.getKeyForObject(parent);
-      children[parentKey] = parent._toFullJSON();
+      const json = parent._toFullJSON();
+      if (parent._localId) {
+        json._localId = parent._localId;
+      }
+      children[parentKey] = json;
       for (const objectKey in children) {
         objectKeys.push(objectKey);
         toPinPromises.push(this.pinWithName(objectKey, [children[objectKey]]));
@@ -338,6 +342,9 @@ const LocalDatastore = {
     for (const key of keys) {
       // Ignore the OBJECT_PREFIX
       const [ , , className, objectId] = key.split('_');
+      if (objectId.startsWith('local')) {
+        continue;
+      }
       if (!(className in pointersHash)) {
         pointersHash[className] = new Set();
       }

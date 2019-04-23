@@ -2268,6 +2268,38 @@ describe('ParseQuery LocalDatastore', () => {
     expect(results[0].id).toEqual(obj1.objectId);
   });
 
+  it('can query offline with localId', async () => {
+    const obj1 = {
+      className: 'Item',
+      _localId: 'local0',
+      count: 2,
+    };
+
+    const obj2 = {
+      className: 'Item',
+      objectId: 'objectId2',
+    };
+
+    const obj3 = {
+      className: 'Unknown',
+      objectId: 'objectId3',
+    };
+
+    mockLocalDatastore
+      ._serializeObjectsFromPinName
+      .mockImplementationOnce(() => [obj1, obj2, obj3]);
+
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementationOnce(() => true);
+
+    const q = new ParseQuery('Item');
+    q.equalTo('count', 2);
+    q.fromLocalDatastore();
+    const results = await q.find();
+    expect(results[0]._localId).toEqual(obj1._localId);
+  });
+
   it('can query offline first', async () => {
     const obj1 = {
       className: 'Item',
@@ -2716,6 +2748,33 @@ describe('ParseQuery LocalDatastore', () => {
     const subscription = await query.subscribe();
     expect(subscription.id).toBe('0');
     expect(subscription.sessionToken).toBeUndefined();
+    expect(subscription.query).toEqual(query);
+  });
+
+  it('can subscribe to query with sessionToken parameter', async () => {
+    const mockLiveQueryClient = {
+      shouldOpen: function() {
+        return true;
+      },
+      open: function() {},
+      subscribe: function(query, sessionToken) {
+        return new LiveQuerySubscription('0', query, sessionToken);
+      },
+    };
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve(null);
+      }
+    });
+    CoreManager.set('LiveQueryController', {
+      getDefaultLiveQueryClient() {
+        return Promise.resolve(mockLiveQueryClient);
+      }
+    });
+    const query = new ParseQuery('TestObject');
+    const subscription = await query.subscribe('r:test');
+    expect(subscription.id).toBe('0');
+    expect(subscription.sessionToken).toBe('r:test');
     expect(subscription.query).toEqual(query);
   });
 });
