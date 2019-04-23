@@ -2268,6 +2268,38 @@ describe('ParseQuery LocalDatastore', () => {
     expect(results[0].id).toEqual(obj1.objectId);
   });
 
+  it('can query offline with localId', async () => {
+    const obj1 = {
+      className: 'Item',
+      _localId: 'local0',
+      count: 2,
+    };
+
+    const obj2 = {
+      className: 'Item',
+      objectId: 'objectId2',
+    };
+
+    const obj3 = {
+      className: 'Unknown',
+      objectId: 'objectId3',
+    };
+
+    mockLocalDatastore
+      ._serializeObjectsFromPinName
+      .mockImplementationOnce(() => [obj1, obj2, obj3]);
+
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementationOnce(() => true);
+
+    const q = new ParseQuery('Item');
+    q.equalTo('count', 2);
+    q.fromLocalDatastore();
+    const results = await q.find();
+    expect(results[0]._localId).toEqual(obj1._localId);
+  });
+
   it('can query offline first', async () => {
     const obj1 = {
       className: 'Item',

@@ -324,7 +324,9 @@ class ParseQuery {
     const objects = await localDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
     let results = objects.map((json, index, arr) => {
       const object = ParseObject.fromJSON(json, false);
-
+      if (json._localId && !json.objectId) {
+        object._localId = json._localId;
+      }
       if (!OfflineQuery.matchesQuery(this.className, object, arr, this)) {
         return null;
       }
