@@ -18,7 +18,8 @@ if (typeof XMLHttpRequest !== 'undefined') {
 }
 
 type Base64 = { base64: string };
-type FileData = Array<number> | Base64 | File;
+type Uri = { uri: string };
+type FileData = Array<number> | Base64 | File | Uri;
 export type FileSource = {
   format: 'file';
   file: File;
@@ -64,8 +65,8 @@ class ParseFile {
   _name: string;
   _url: ?string;
   _source: FileSource;
-  _previousSave: ?Promise;
-  _data: string;
+  _previousSave: ?Promise<ParseFile>;
+  _data: ?string;
 
   /**
    * @param name {String} The file's name. This will be prefixed by a unique

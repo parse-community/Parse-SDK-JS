@@ -14,6 +14,8 @@ import decode from './decode';
 import encode from './encode';
 import ParseError from './ParseError';
 import ParseQuery from './ParseQuery';
+import ParseObject from './ParseObject';
+import type { RequestOptions } from './RESTController';
 
 /**
  * Contains functions for calling and declaring
@@ -40,8 +42,8 @@ import ParseQuery from './ParseQuery';
 export function run(
   name: string,
   data: mixed,
-  options: { [key: string]: mixed }
-): Promise {
+  options: RequestOptions
+): Promise<mixed> {
   options = options || {};
 
   if (typeof name !== 'string' || name.length === 0) {
@@ -66,7 +68,7 @@ export function run(
   * @return {Promise} A promise that will be resolved with the result
   * of the function.
   */
-export function getJobsData(): Promise {
+export function getJobsData(): Promise<Object> {
   const requestOptions = {
     useMasterKey: true
   };
@@ -79,13 +81,13 @@ export function getJobsData(): Promise {
   * @name Parse.Cloud.startJob
   * @param {String} name The function name.
   * @param {Object} data The parameters to send to the cloud function.
-  * @return {Promise} A promise that will be resolved with the result
-  * of the function.
+  * @return {Promise} A promise that will be resolved with the jobStatusId
+  * of the job.
   */
 export function startJob(
   name: string,
   data: mixed,
-): Promise {
+): Promise<string> {
 
   if (typeof name !== 'string' || name.length === 0) {
     throw new TypeError('Cloud job name must be a string.');
@@ -103,13 +105,13 @@ export function startJob(
   * @param {String} jobStatusId The Id of Job Status.
   * @return {Parse.Object} Status of Job.
   */
-export function getJobStatus(jobStatusId: string): Promise {
+export function getJobStatus(jobStatusId: string): Promise<ParseObject> {
   const query = new ParseQuery('_JobStatus');
   return query.get(jobStatusId, { useMasterKey: true });
 }
 
 const DefaultController = {
-  run(name, data, options) {
+  run(name, data, options: RequestOptions) {
     const RESTController = CoreManager.getRESTController();
 
     const payload = encode(data, true);
@@ -138,7 +140,7 @@ const DefaultController = {
     });
   },
 
-  getJobsData(options) {
+  getJobsData(options: RequestOptions) {
     const RESTController = CoreManager.getRESTController();
 
     return RESTController.request(
@@ -149,7 +151,7 @@ const DefaultController = {
     );
   },
 
-  startJob(name, data, options) {
+  startJob(name, data, options: RequestOptions) {
     const RESTController = CoreManager.getRESTController();
 
     const payload = encode(data, true);

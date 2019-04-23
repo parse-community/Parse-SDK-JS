@@ -12,6 +12,7 @@ describe('Parse LiveQuery', () => {
   beforeEach((done) => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
+    Parse.User.enableUnsafeCurrentUser();
     Parse.Storage._clear();
     clear().then(done).catch(done.fail);
   });
@@ -134,5 +135,24 @@ describe('Parse LiveQuery', () => {
     await objectB.save({ foo: 'baz' });
     await sleep(1000);
     assert.equal(count, 1);
+  });
+
+  it('can subscribe to ACL', async (done) => {
+    const user = await Parse.User.signUp('ooo', 'password');
+    const ACL = new Parse.ACL(user);
+
+    const object = new TestObject();
+    object.setACL(ACL);
+    await object.save();
+
+    const query = new Parse.Query(TestObject);
+    query.equalTo('objectId', object.id);
+    const subscription = await query.subscribe(user.getSessionToken());
+    subscription.on('update', async (object) => {
+      assert.equal(object.get('foo'), 'bar');
+      await Parse.User.logOut();
+      done();
+    })
+    await object.save({ foo: 'bar' });
   });
 });
