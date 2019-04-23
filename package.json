@@ -61,7 +61,7 @@
     "gulp-rename": "1.4.0",
     "gulp-uglify": "3.0.2",
     "gulp-watch": "5.0.1",
-    "jasmine": "3.3.1",
+    "jasmine": "3.4.0",
     "jasmine-reporters": "2.3.2",
     "jest": "24.5.0",
     "jsdoc": "3.5.5",
