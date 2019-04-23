@@ -30,13 +30,13 @@ import ParseGeoPoint from './ParseGeoPoint';
  * @alias Parse.Polygon
  */
 class ParsePolygon {
-  _coordinates: Array;
+  _coordinates: Array<Array<number>>;
 
   /**
    * @param {(Number[][]|Parse.GeoPoint[])} coordinates An Array of coordinate pairs
    */
   constructor(
-    arg1: Array,
+    arg1: Array<Array<number>> | Array<ParseGeoPoint>,
   ) {
     this._coordinates = ParsePolygon._validate(arg1);
   }
@@ -47,11 +47,11 @@ class ParsePolygon {
    * @property coordinates
    * @type Array
    */
-  get coordinates(): Array {
+  get coordinates(): Array<Array<number>> {
     return this._coordinates;
   }
 
-  set coordinates(coords: Array) {
+  set coordinates(coords: Array<Array<number>> | Array<ParseGeoPoint>) {
     this._coordinates = ParsePolygon._validate(coords);
   }
 
@@ -59,7 +59,7 @@ class ParsePolygon {
    * Returns a JSON representation of the Polygon, suitable for Parse.
    * @return {Object}
    */
-  toJSON(): { __type: string; coordinates: Array;} {
+  toJSON(): { __type: string; coordinates: Array<Array<number>>;} {
     ParsePolygon._validate(this._coordinates);
     return {
       __type: 'Polygon',
@@ -134,7 +134,7 @@ class ParsePolygon {
    * @param {Array} coords the list of coordinated to validate as a polygon
    * @throws {TypeError}
    */
-  static _validate(coords: Array) {
+  static _validate(coords: Array<Array<number>> | Array<ParseGeoPoint>): Array<Array<number>> {
     if (!Array.isArray(coords)) {
       throw new TypeError('Coordinates must be an Array');
     }

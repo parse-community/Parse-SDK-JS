@@ -18,27 +18,25 @@ import type { QueryJSON } from './ParseQuery';
 import type ParseUser from './ParseUser';
 import type { AuthData } from './ParseUser';
 import type { PushData } from './Push';
+import type { RequestOptions, FullOptions } from './RESTController';
 
-type RequestOptions = {
-  useMasterKey?: boolean;
-  sessionToken?: string;
-  installationId?: string;
-};
 type AnalyticsController = {
   track: (name: string, dimensions: { [key: string]: string }) => Promise;
 };
 type CloudController = {
-  run: (name: string, data: mixed, options: { [key: string]: mixed }) => Promise;
-  getJobsData: (options: { [key: string]: mixed }) => Promise;
-  startJob: (name: string, data: mixed, options: { [key: string]: mixed }) => Promise;
+  run: (name: string, data: mixed, options: RequestOptions) => Promise;
+  getJobsData: (options: RequestOptions) => Promise;
+  startJob: (name: string, data: mixed, options: RequestOptions) => Promise;
 };
 type ConfigController = {
   current: () => Promise;
   get: () => Promise;
+  save: (attrs: { [key: string]: any }) => Promise;
 };
 type FileController = {
-  saveFile: (name: string, source: FileSource) => Promise;
-  saveBase64: (name: string, source: FileSource) => Promise;
+  saveFile: (name: string, source: FileSource, options: FullOptions) => Promise;
+  saveBase64: (name: string, source: FileSource, options: FullOptions) => Promise;
+  download: (uri: string) => Promise;
 };
 type InstallationController = {
   currentInstallationId: () => Promise;
@@ -75,8 +73,8 @@ type QueryController = {
   aggregate: (className: string, params: any, options: RequestOptions) => Promise;
 };
 type RESTController = {
-  request: (method: string, path: string, data: mixed) => Promise;
-  ajax: (method: string, url: string, data: any, headers?: any) => Promise;
+  request: (method: string, path: string, data: mixed, options: RequestOptions) => Promise;
+  ajax: (method: string, url: string, data: any, headers?: any, options: FullOptions) => Promise;
 };
 type SchemaController = {
   purge: (className: string) => Promise;

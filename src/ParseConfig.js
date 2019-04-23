@@ -88,7 +88,7 @@ class ParseConfig {
    * @return {Promise} A promise that is resolved with a newly-created
    *     configuration object or with the current with the update.
    */
-  static save(attrs) {
+  static save(attrs: { [key: string]: any }) {
     const controller = CoreManager.getConfigController();
     //To avoid a mismatch with the local and the cloud config we get a new version
     return controller.save(attrs).then(() => {
@@ -177,7 +177,7 @@ const DefaultController = {
     });
   },
 
-  save(attrs) {
+  save(attrs: { [key: string]: any }) {
     const RESTController = CoreManager.getRESTController();
     const encodedAttrs = {};
     for(const key in attrs){

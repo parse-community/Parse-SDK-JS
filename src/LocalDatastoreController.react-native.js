@@ -22,7 +22,7 @@ const LocalDatastoreController = {
     return objects;
   },
 
-  async pinWithName(name: string, value: any): Promise {
+  async pinWithName(name: string, value: any): Promise<void> {
     try {
       const values = JSON.stringify(value);
       await RNStorage.setItemAsync(name, values);
@@ -32,11 +32,11 @@ const LocalDatastoreController = {
     }
   },
 
-  unPinWithName(name: string): Promise {
+  unPinWithName(name: string): Promise<void> {
     return RNStorage.removeItemAsync(name);
   },
 
-  async getAllContents(): Promise {
+  async getAllContents(): Promise<Object> {
     const keys = await RNStorage.getAllKeys();
     const batch = [];
     for (let i = 0; i < keys.length; i += 1) {
@@ -75,7 +75,7 @@ const LocalDatastoreController = {
     return storage;
   },
 
-  async clear(): Promise {
+  async clear(): Promise<void> {
     const keys = await RNStorage.getAllKeys();
     const batch = [];
     for (let i = 0; i < keys.length; i += 1) {
