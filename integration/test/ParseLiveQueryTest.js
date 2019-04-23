@@ -137,7 +137,7 @@ describe('Parse LiveQuery', () => {
     assert.equal(count, 1);
   });
 
-  it('can subscribe to ACL', async () => {
+  it('can subscribe to ACL', async (done) => {
     const user = await Parse.User.signUp('ooo', 'password');
     const ACL = new Parse.ACL(user);
 
@@ -148,14 +148,11 @@ describe('Parse LiveQuery', () => {
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
     const subscription = await query.subscribe(user.getSessionToken());
-    let count = 0;
-    subscription.on('update', object => {
-      count++;
+    subscription.on('update', async (object) => {
       assert.equal(object.get('foo'), 'bar');
+      await Parse.User.logOut();
+      done();
     })
     await object.save({ foo: 'bar' });
-    await sleep(1000);
-    assert.equal(count, 1);
-    await Parse.User.logOut();
   });
 });
