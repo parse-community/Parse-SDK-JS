@@ -1483,13 +1483,15 @@ class ParseQuery {
   /**
    * Subscribe this query to get liveQuery updates
    *
+   * @param {String} sessionToken (optional) Defaults to the currentUser
    * @return {Promise<LiveQuerySubscription>} Returns the liveQuerySubscription, it's an event emitter
    * which can be used to get liveQuery updates.
    */
-  async subscribe(): Promise<LiveQuerySubscription> {
+  async subscribe(sessionToken?: string): Promise<LiveQuerySubscription> {
     const currentUser = await CoreManager.getUserController().currentUserAsync();
-    const sessionToken =  currentUser ? currentUser.getSessionToken() : undefined;
-
+    if (!sessionToken) {
+      sessionToken =  currentUser ? currentUser.getSessionToken() : undefined;
+    }
     const liveQueryClient = await CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
     if (liveQueryClient.shouldOpen()) {
       liveQueryClient.open();
