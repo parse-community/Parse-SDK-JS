@@ -14,6 +14,13 @@ Parse.Cloud.define('TestFetchFromLocalDatastore', function (request) {
   return object.save();
 });
 
+Parse.Cloud.define('UpdateUser', function (request) {
+  const user = new Parse.User();
+  user.id = request.params.id;
+  user.set('foo', 'changed');
+  return user.save(null, { useMasterKey: true });
+});
+
 Parse.Cloud.define('CloudFunctionUndefined', function() {
   return undefined;
 });
