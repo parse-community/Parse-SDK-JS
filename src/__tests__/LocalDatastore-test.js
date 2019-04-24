@@ -872,23 +872,14 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
     expect(await LocalDatastore._getRawStorage()).toEqual({});
   });
 
-  it('can handle store error', async () => {
-    const windowSpy = jest.spyOn(window.localStorage.__proto__, 'setItem').mockImplementationOnce(() => {
-      throw new Error('error thrown');
-    });
-    console.log(localStorage);
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementationOnce(() => {});
-    await LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
-    expect(consoleSpy).toHaveBeenCalled();
-    consoleSpy.mockRestore();
-    windowSpy.mockRestore();
-  });
-
   it('can handle getAllContent error', async () => {
     const mockLocalStorageError = {
       getItem: () => '[1, ]',
+      setItem: () => jest.fn(),
       length: 1,
       key: () => '_default',
+      clear: () => jest.fn(),
+      removeItem: () => jest.fn(),
     };
     Object.defineProperty(window, 'localStorage', { // eslint-disable-line
       value: mockLocalStorageError,
@@ -900,6 +891,18 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
     expect(LDS).toEqual({});
     expect(spy).toHaveBeenCalled();
     spy.mockRestore();
+  });
+
+  it('can handle store error', async () => {
+    const windowSpy = jest.spyOn(localStorage, 'setItem').mockImplementationOnce(() => {
+      throw new Error('error thrown');
+    });
+    console.log(localStorage);
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementationOnce(() => {});
+    await LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
+    expect(consoleSpy).toHaveBeenCalled();
+    consoleSpy.mockRestore();
+    windowSpy.mockRestore();
   });
 });
 
