@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
+/* global window */
 
 jest.autoMockOff();
 jest.unmock('../LocalDatastoreUtils');
@@ -102,10 +103,6 @@ const ParseUser = require('../ParseUser').default;
 const RNDatastoreController = require('../LocalDatastoreController.react-native');
 const BrowserDatastoreController = require('../LocalDatastoreController.browser');
 const DefaultDatastoreController = require('../LocalDatastoreController.default');
-
-const mockLocalStorage = require('./test_helpers/mockLocalStorage');
-
-global.localStorage = mockLocalStorage;
 
 const item1 = new ParseObject('Item');
 const item2 = new ParseObject('Item');
@@ -657,7 +654,6 @@ describe('LocalDatastore', () => {
     user._localId = null;
 
     const USER_KEY = LocalDatastore.getKeyForObject(user);
-    console.log(USER_KEY);
     const LDS = {
       [USER_KEY]: [user._toFullJSON()],
       [`${PIN_PREFIX}_testPinName`]: [USER_KEY],
@@ -872,20 +868,30 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
     expect(await LocalDatastore._getRawStorage()).toEqual({});
   });
 
+  it('can handle getAllContent error', async () => {
+    await LocalDatastore.pinWithName('_default', [{ value: 'WILL_BE_MOCKED' }]);
+    const windowSpy = jest.spyOn(Object.getPrototypeOf(window.localStorage), 'getItem')
+      .mockImplementationOnce(() => {
+        return '[1, ]';
+      });
+    const spy = jest.spyOn(console, 'error').mockImplementationOnce(() => {});
+    const LDS = await LocalDatastore._getAllContents();
+    expect(LDS).toEqual({});
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
+    windowSpy.mockRestore();
+  });
+
   it('can handle store error', async () => {
-    const mockStorageError = {
-      setItem() {
+    const windowSpy = jest.spyOn(Object.getPrototypeOf(window.localStorage), 'setItem')
+      .mockImplementationOnce(() => {
         throw new Error('error thrown');
-      },
-    };
-    Object.defineProperty(window, 'localStorage', { // eslint-disable-line
-      value: mockStorageError
-    });
-    try {
-      await LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
-    } catch (e) {
-      expect(e.message).toBe('error thrown');
-    }
+      });
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementationOnce(() => {});
+    await LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
+    expect(consoleSpy).toHaveBeenCalled();
+    consoleSpy.mockRestore();
+    windowSpy.mockRestore();
   });
 });
 
