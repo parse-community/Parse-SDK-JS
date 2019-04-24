@@ -132,7 +132,7 @@ describe('LocalDatastore', () => {
   });
 
   it('isDisabled', () => {
-    const spy = jest.spyOn(console, 'error');
+    const spy = jest.spyOn(console, 'error').mockImplementationOnce(() => {});
     LocalDatastore.isEnabled = false;
     const isEnabled = LocalDatastore.checkIfEnabled();
     expect(isEnabled).toBe(false);
@@ -585,6 +585,7 @@ describe('LocalDatastore', () => {
 
   it('do not sync if disabled', async () => {
     LocalDatastore.isEnabled = false;
+    jest.spyOn(console, 'error').mockImplementationOnce(() => {});
     jest.spyOn(mockLocalStorageController, 'getAllContents');
 
     await LocalDatastore.updateFromServer();
@@ -730,7 +731,7 @@ describe('LocalDatastore', () => {
       return Promise.reject('Unable to connect to the Parse API');
     });
 
-    jest.spyOn(console, 'error');
+    jest.spyOn(console, 'error').mockImplementationOnce(() => {});
     await LocalDatastore.updateFromServer();
 
     expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
@@ -949,6 +950,7 @@ describe('LocalDatastore (RNDatastoreController)', () => {
         throw new Error('error thrown');
       },
     };
+    jest.spyOn(console, 'error').mockImplementationOnce(() => {});
     CoreManager.setAsyncStorage(mockStorageError);
     try {
       await LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
@@ -980,6 +982,7 @@ describe('LocalDatastore (RNDatastoreController)', () => {
         cb(undefined, [KEY1, 'DO_NOT_CLEAR']);
       }
     };
+    jest.spyOn(console, 'error').mockImplementationOnce(() => {});
     CoreManager.setAsyncStorage(mockStorageError);
     await LocalDatastore._clear();
   });
@@ -993,6 +996,7 @@ describe('LocalDatastore (RNDatastoreController)', () => {
         cb(undefined, [KEY1, 'DO_NOT_CLEAR']);
       }
     };
+    jest.spyOn(console, 'error').mockImplementationOnce(() => {});
     CoreManager.setAsyncStorage(mockStorageError);
     const LDS = await LocalDatastore._getAllContents();
     expect(LDS).toEqual({});

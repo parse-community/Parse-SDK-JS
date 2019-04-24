@@ -84,6 +84,7 @@ describe('Parse module', () => {
   });
 
   it('can enable LocalDatastore', () => {
+    jest.spyOn(console, 'log').mockImplementationOnce(() => {});
     Parse.LocalDatastore.isEnabled = false;
     Parse.enableLocalDatastore();
     expect(Parse.LocalDatastore.isEnabled).toBe(true);

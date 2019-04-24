@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://parseplatform.org/",
   "keywords": [
@@ -52,7 +52,7 @@
     "browserify": "16.2.3",
     "codecov": "3.3.0",
     "eslint": "5.16.0",
-    "eslint-plugin-flowtype": "3.6.0",
+    "eslint-plugin-flowtype": "3.6.1",
     "express": "4.16.4",
     "gulp": "4.0.1",
     "gulp-babel": "8.0.0",
