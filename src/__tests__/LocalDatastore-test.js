@@ -879,13 +879,31 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
       },
     };
     Object.defineProperty(window, 'localStorage', { // eslint-disable-line
-      value: mockStorageError
+      value: mockStorageError,
+      writable: true,
     });
     try {
       await LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
     } catch (e) {
       expect(e.message).toBe('error thrown');
     }
+  });
+
+  it('can handle getAllContent error', async () => {
+    const mockLocalStorageError = {
+      getItem: () => '[1, ]',
+      length: 1,
+      key: () => '_default',
+    };
+    Object.defineProperty(window, 'localStorage', { // eslint-disable-line
+      value: mockLocalStorageError,
+      writable: true,
+    });
+    const spy = jest.spyOn(console, 'error').mockImplementationOnce(() => {});
+    const LDS = await LocalDatastore._getAllContents();
+    expect(LDS).toEqual({});
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
   });
 });
 
