@@ -1,7 +1,26 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.2...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.4.0...master)
+
+## 2.4.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.2...2.4.0)
+
+**New Features**:
+- LocalDatastore: Support Users ([#801](https://github.com/parse-community/Parse-SDK-JS/pull/801))
+- LiveQuery subscribe with sessionToken ([#791](https://github.com/parse-community/Parse-SDK-JS/pull/791))
+
+**Improvements**:
+- LocalDatastore: Improve pinning unsaved objects ([#795](https://github.com/parse-community/Parse-SDK-JS/pull/795))
+- LocalDatastore: Improve error handling ([#803](https://github.com/parse-community/Parse-SDK-JS/pull/803))
+
+**Dependency Updates**:
+- [uuid@3.3.2](https://www.npmjs.com/package/uuid)
+
+**Development Dependency Updates**:
+- [eslint-plugin-flowtype@3.6.1](https://www.npmjs.com/package/eslint-plugin-flowtype)
+- [gulp@4.0.1](https://www.npmjs.com/package/gulp)
+- [jasmine@3.4.0](https://www.npmjs.com/package/jasmine)
 
 ## 2.3.2
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.1...2.3.2)
