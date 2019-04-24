@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
-/* global localStorage */
+/* global localStorage, window */
 
 jest.autoMockOff();
 jest.unmock('../LocalDatastoreUtils');
@@ -873,20 +873,15 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
   });
 
   it('can handle store error', async () => {
-    const mockStorageError = {
-      setItem() {
-        throw new Error('error thrown');
-      },
-    };
-    Object.defineProperty(window, 'localStorage', { // eslint-disable-line
-      value: mockStorageError,
-      writable: true,
+    const windowSpy = jest.spyOn(window.localStorage.__proto__, 'setItem').mockImplementationOnce(() => {
+      throw new Error('error thrown');
     });
-    try {
-      await LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
-    } catch (e) {
-      expect(e.message).toBe('error thrown');
-    }
+    console.log(localStorage);
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementationOnce(() => {});
+    await LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
+    expect(consoleSpy).toHaveBeenCalled();
+    consoleSpy.mockRestore();
+    windowSpy.mockRestore();
   });
 
   it('can handle getAllContent error', async () => {
@@ -895,14 +890,16 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
       length: 1,
       key: () => '_default',
     };
-    global.localStorage = mockLocalStorageError;
+    Object.defineProperty(window, 'localStorage', { // eslint-disable-line
+      value: mockLocalStorageError,
+      writable: true,
+    });
     console.log(localStorage);
     const spy = jest.spyOn(console, 'error').mockImplementationOnce(() => {});
     const LDS = await LocalDatastore._getAllContents();
     expect(LDS).toEqual({});
     expect(spy).toHaveBeenCalled();
     spy.mockRestore();
-    global.localStorage = mockLocalStorage;
   });
 });
 
