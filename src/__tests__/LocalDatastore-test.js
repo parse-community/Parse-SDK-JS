@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
-/* global localStorage, window */
+/* global window */
 
 jest.autoMockOff();
 jest.unmock('../LocalDatastoreUtils');
@@ -103,10 +103,6 @@ const ParseUser = require('../ParseUser').default;
 const RNDatastoreController = require('../LocalDatastoreController.react-native');
 const BrowserDatastoreController = require('../LocalDatastoreController.browser');
 const DefaultDatastoreController = require('../LocalDatastoreController.default');
-
-// const mockLocalStorage = require('./test_helpers/mockLocalStorage');
-
-// global.localStorage = mockLocalStorage;
 
 const item1 = new ParseObject('Item');
 const item2 = new ParseObject('Item');
