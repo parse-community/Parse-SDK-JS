@@ -104,9 +104,9 @@ const RNDatastoreController = require('../LocalDatastoreController.react-native'
 const BrowserDatastoreController = require('../LocalDatastoreController.browser');
 const DefaultDatastoreController = require('../LocalDatastoreController.default');
 
-const mockLocalStorage = require('./test_helpers/mockLocalStorage');
+// const mockLocalStorage = require('./test_helpers/mockLocalStorage');
 
-global.localStorage = mockLocalStorage;
+// global.localStorage = mockLocalStorage;
 
 const item1 = new ParseObject('Item');
 const item2 = new ParseObject('Item');
@@ -873,31 +873,24 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
   });
 
   it('can handle getAllContent error', async () => {
-    const mockLocalStorageError = {
-      getItem: () => '[1, ]',
-      setItem: () => jest.fn(),
-      length: 1,
-      key: () => '_default',
-      clear: () => jest.fn(),
-      removeItem: () => jest.fn(),
-    };
-    Object.defineProperty(window, 'localStorage', { // eslint-disable-line
-      value: mockLocalStorageError,
-      writable: true,
-    });
-    console.log(localStorage);
+    await LocalDatastore.pinWithName('_default', [{ value: 'WILL_BE_MOCKED' }]);
+    const windowSpy = jest.spyOn(Object.getPrototypeOf(window.localStorage), 'getItem')
+      .mockImplementationOnce(() => {
+        return '[1, ]';
+      });
     const spy = jest.spyOn(console, 'error').mockImplementationOnce(() => {});
     const LDS = await LocalDatastore._getAllContents();
     expect(LDS).toEqual({});
     expect(spy).toHaveBeenCalled();
     spy.mockRestore();
+    windowSpy.mockRestore();
   });
 
   it('can handle store error', async () => {
-    const windowSpy = jest.spyOn(localStorage, 'setItem').mockImplementationOnce(() => {
-      throw new Error('error thrown');
-    });
-    console.log(localStorage);
+    const windowSpy = jest.spyOn(Object.getPrototypeOf(window.localStorage), 'setItem')
+      .mockImplementationOnce(() => {
+        throw new Error('error thrown');
+      });
     const consoleSpy = jest.spyOn(console, 'log').mockImplementationOnce(() => {});
     await LocalDatastore.pinWithName('myKey', [{ name: 'test' }]);
     expect(consoleSpy).toHaveBeenCalled();
