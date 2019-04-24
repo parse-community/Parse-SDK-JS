@@ -657,7 +657,6 @@ describe('LocalDatastore', () => {
     user._localId = null;
 
     const USER_KEY = LocalDatastore.getKeyForObject(user);
-    console.log(USER_KEY);
     const LDS = {
       [USER_KEY]: [user._toFullJSON()],
       [`${PIN_PREFIX}_testPinName`]: [USER_KEY],
@@ -899,11 +898,14 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
       value: mockLocalStorageError,
       writable: true,
     });
+    global.localStorage = mockLocalStorageError;
+
     const spy = jest.spyOn(console, 'error').mockImplementationOnce(() => {});
     const LDS = await LocalDatastore._getAllContents();
     expect(LDS).toEqual({});
     expect(spy).toHaveBeenCalled();
     spy.mockRestore();
+    global.localStorage = mockLocalStorage;
   });
 });
 
