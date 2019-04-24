@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
+/* global localStorage */
 
 jest.autoMockOff();
 jest.unmock('../LocalDatastoreUtils');
@@ -894,12 +895,8 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
       length: 1,
       key: () => '_default',
     };
-    Object.defineProperty(window, 'localStorage', { // eslint-disable-line
-      value: mockLocalStorageError,
-      writable: true,
-    });
     global.localStorage = mockLocalStorageError;
-
+    console.log(localStorage);
     const spy = jest.spyOn(console, 'error').mockImplementationOnce(() => {});
     const LDS = await LocalDatastore._getAllContents();
     expect(LDS).toEqual({});
