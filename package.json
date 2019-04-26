@@ -28,7 +28,7 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime": "7.4.3",
+    "@babel/runtime": "7.4.4",
     "uuid": "3.3.2",
     "ws": "6.2.1",
     "xmlhttprequest": "1.8.0"
