@@ -36,7 +36,7 @@
   "devDependencies": {
     "@babel/core": "7.4.4",
     "@babel/plugin-proposal-class-properties": "7.4.4",
-    "@babel/plugin-transform-flow-comments": "7.4.0",
+    "@babel/plugin-transform-flow-comments": "7.4.4",
     "@babel/plugin-transform-flow-strip-types": "7.4.0",
     "@babel/plugin-transform-runtime": "7.4.3",
     "@babel/polyfill": "7.4.3",
