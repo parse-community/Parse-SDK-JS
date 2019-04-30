@@ -2590,6 +2590,45 @@ function runTest(controller) {
       });
     });
 
+    it(`${controller.name} can query from date`, async () => {
+      const now = new Date();
+      const obj = new TestObject({ dateField: now });
+      await obj.save();
+      await obj.pin();
+
+      let q = new Parse.Query(TestObject);
+      q.equalTo('dateField', now);
+      q.fromLocalDatastore();
+      let objects = await q.find();
+      assert.equal(objects.length, 1);
+
+      const future = new Date(now.getTime() + 1000);
+      q = new Parse.Query(TestObject);
+      q.lessThan('dateField', future);
+      q.fromLocalDatastore();
+      objects = await q.find();
+      assert.equal(objects.length, 1);
+
+      q = new Parse.Query(TestObject);
+      q.lessThanOrEqualTo('dateField', now);
+      q.fromLocalDatastore();
+      objects = await q.find();
+      assert.equal(objects.length, 1);
+
+      const past = new Date(now.getTime() - 1000);
+      q = new Parse.Query(TestObject);
+      q.greaterThan('dateField', past);
+      q.fromLocalDatastore();
+      objects = await q.find();
+      assert.equal(objects.length, 1);
+
+      q = new Parse.Query(TestObject);
+      q.greaterThanOrEqualTo('dateField', now);
+      q.fromLocalDatastore();
+      objects = await q.find();
+      assert.equal(objects.length, 1);
+    });
+
     it(`${controller.name} supports withinPolygon`, async () => {
       const sacramento = new TestObject();
       sacramento.set('location', new Parse.GeoPoint(38.52, -121.50));
