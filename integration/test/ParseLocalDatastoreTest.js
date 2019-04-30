@@ -2602,7 +2602,7 @@ function runTest(controller) {
       let objects = await q.find();
       assert.equal(objects.length, 1);
 
-      const future = Date(now.getTime() + 1000);
+      const future = new Date(now.getTime() + 1000);
       q = new Parse.Query(TestObject);
       q.lessThan('dateField', future);
       q.fromLocalDatastore();
@@ -2615,7 +2615,7 @@ function runTest(controller) {
       objects = await q.find();
       assert.equal(objects.length, 1);
 
-      const past = Date(now.getTime() - 1000);
+      const past = new Date(now.getTime() - 1000);
       q = new Parse.Query(TestObject);
       q.greaterThan('dateField', past);
       q.fromLocalDatastore();
