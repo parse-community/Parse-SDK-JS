@@ -21,7 +21,11 @@ const api = new ParseServer({
     },
     facebook: {
       appIds: "test"
-    }
+    },
+    twitter: {
+      consumer_key: "5QiVwxr8FQHbo5CMw46Z0jquF",
+      consumer_secret: "p05FDlIRAnOtqJtjIt0xcw390jCcjj56QMdE9B52iVgOEb7LuK",
+    },
   },
   verbose: false,
   silent: true,

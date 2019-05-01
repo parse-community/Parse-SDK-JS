@@ -916,4 +916,31 @@ describe('ParseUser', () => {
 
     expect(user.get('authData')).toEqual({ test: { id: 'id', access_token: 'access_token' } });
   });
+
+  it('can linkWith if no provider', async () => {
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid6',
+          sessionToken: 'r:123abc',
+          authData: {
+            testProvider: {
+              id: 'test',
+            }
+          }
+        }, 200);
+      },
+      ajax() {}
+    });
+    const user = new ParseUser();
+    await user._linkWith('testProvider', { authData: { id: 'test' } });
+    expect(user.get('authData')).toEqual({ testProvider: { id: 'test' } });
+
+    jest.spyOn(user, '_linkWith');
+
+    await user._unlinkFrom('testProvider');
+    const authProvider = user._linkWith.mock.calls[0][0];
+    expect(authProvider.getAuthType()).toBe('testProvider');
+  });
 });
