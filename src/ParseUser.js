@@ -81,7 +81,20 @@ class ParseUser extends ParseObject {
     let authType;
     if (typeof provider === 'string') {
       authType = provider;
-      provider = authProviders[provider];
+      if (authProviders[provider]) {
+        provider = authProviders[provider];
+      } else {
+        const authProvider = {
+          restoreAuthentication() {
+            return true;
+          },
+          getAuthType() {
+            return authType;
+          },
+        };
+        authProviders[authType] = authProvider;
+        provider = authProvider;
+      }
     } else {
       authType = provider.getAuthType();
     }
