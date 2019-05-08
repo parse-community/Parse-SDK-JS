@@ -52,7 +52,7 @@
     "browserify": "16.2.3",
     "codecov": "3.3.0",
     "eslint": "5.16.0",
-    "eslint-plugin-flowtype": "3.8.0",
+    "eslint-plugin-flowtype": "3.8.1",
     "express": "4.16.4",
     "gulp": "4.0.2",
     "gulp-babel": "8.0.0",
