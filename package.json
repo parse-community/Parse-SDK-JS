@@ -51,6 +51,7 @@
     "babel-plugin-transform-inline-environment-variables": "0.4.3",
     "browserify": "16.2.3",
     "codecov": "3.4.0",
+    "cross-env": "5.2.0",
     "eslint": "5.16.0",
     "eslint-plugin-flowtype": "3.8.1",
     "express": "4.16.4",
@@ -72,11 +73,11 @@
   "scripts": {
     "build": "./build_releases.sh",
     "release": "./build_releases.sh && npm publish",
-    "test": "PARSE_BUILD=node jest",
+    "test": "cross-env PARSE_BUILD=node jest",
     "lint": "eslint --cache src/ integration/",
     "lint:fix": "eslint --fix --cache src/ integration/",
-    "watch": "PARSE_BUILD=${PARSE_BUILD:=node} gulp watch",
-    "integration": "TESTING=1 jasmine --config=jasmine.json",
+    "watch": "cross-env PARSE_BUILD=${PARSE_BUILD:=node} gulp watch",
+    "integration": "cross-env TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
     "release_docs": "./release_docs.sh"
   },
