@@ -36,7 +36,7 @@ The Parse JS SDK is built for three platforms:
 
 When developing the SDK you can use `npm run watch` in order to rebuild your changes upon each saves.
 
-By default, the watch command will rebuild the SDK for the browser platform. The following commands will rebuild changes for a specific platforms.
+By default, the watch command will rebuild the SDK for the browser platform. The following commands will rebuild changes for a specific platform.
 
 - `npm run watch:node`
 - `npm run watch:browser`
