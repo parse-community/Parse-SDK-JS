@@ -76,7 +76,7 @@
     "test": "cross-env PARSE_BUILD=node jest",
     "lint": "eslint --cache src/ integration/",
     "lint:fix": "eslint --fix --cache src/ integration/",
-    "watch": "cross-env PARSE_BUILD=${PARSE_BUILD:=node} gulp watch",
+    "watch": "cross-env PARSE_BUILD=node gulp watch",
     "integration": "cross-env TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
     "release_docs": "./release_docs.sh"
