@@ -58,6 +58,30 @@ With Parse SDK 2.0.0, gone are the backbone style callbacks and Parse.Promises.
 
 We have curated a [migration guide](2.0.0.md) that should help you migrate your code.
 
+## Want to ride the bleeding edge?
+
+It is recommend to use builds deployed npm for many reasons, but if you want to use
+the latest not-yet-released version of Parse-SDK-JS, you can do so by depending
+directly on this branch:
+
+```
+npm install parse-community/Parse-SDK-JS.git#master
+```
+
+### Experimenting
+
+You can also use your own forks, and work in progress branches by specifying them:
+
+```
+npm install github:myUsername/Parse-SDK-JS#my-awesome-feature
+```
+
+And don't forget, if you plan to deploy it remotely, you should run `npm install` with the `--save` option.
+
+## Contributing
+
+We really want Parse to be yours, to see it grow and thrive in the open source community. Please see the [Contributing to Parse Javascript SDK guide](CONTRIBUTING.md).
+
 ## License
 
 ```
