@@ -65,7 +65,7 @@
     "jasmine": "3.4.0",
     "jasmine-reporters": "2.3.2",
     "jest": "24.5.0",
-    "jsdoc": "3.6.1",
+    "jsdoc": "3.6.2",
     "jsdoc-babel": "0.5.0",
     "parse-server": "github:parseplatform/parse-server#master",
     "vinyl-source-stream": "2.0.0"
