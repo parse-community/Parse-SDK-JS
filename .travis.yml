@@ -1,7 +1,7 @@
 language: node_js
 dist: trusty
 node_js:
-- '8.10'
+- '10.14'
 
 branches:
   only:
@@ -11,7 +11,7 @@ branches:
 
 cache:
   directories:
-  - node_modules
+  - "$HOME/.npm"
   - "$HOME/.mongodb/versions"
 
 jobs:
@@ -25,7 +25,6 @@ jobs:
       script:
       - npm run lint
       - npm test -- --maxWorkers=4
-      - npm run build
       - npm run integration
       after_script: ./node_modules/codecov/bin/codecov -f ./coverage/coverage-final.json && rm -rf ./coverage
     # release on github latest branch
@@ -36,7 +35,6 @@ jobs:
       after_script: skip
       script:
       - npm run release_docs
-      - npm run build
       deploy:
         - provider: pages
           skip_cleanup: true
