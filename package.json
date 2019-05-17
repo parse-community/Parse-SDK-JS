@@ -53,7 +53,7 @@
     "codecov": "3.5.0",
     "cross-env": "5.2.0",
     "eslint": "5.16.0",
-    "eslint-plugin-flowtype": "3.8.2",
+    "eslint-plugin-flowtype": "3.9.0",
     "express": "4.17.0",
     "gulp": "4.0.2",
     "gulp-babel": "8.0.0",
