@@ -712,13 +712,19 @@ class ParseObject {
       }
     }
 
-    // Consolidate Ops
-    const pendingOps = this._getPendingOps();
-    const last = pendingOps.length - 1;
-    const stateController = CoreManager.getObjectStateController();
-    for (const attr in newOps) {
-      const nextOp = newOps[attr].mergeWith(pendingOps[last][attr]);
-      stateController.setPendingOp(this._getStateIdentifier(), attr, nextOp);
+    const usePendingOps = options && options.usePendingOps !== undefined ? options.usePendingOps : true;
+
+    if (usePendingOps) {
+      var pendingOps = this._getPendingOps();
+
+      var last = pendingOps.length - 1;
+  
+      var stateController = _CoreManager.default.getObjectStateController();
+  
+      for (const attr in newOps) {
+        var nextOp = newOps[attr].mergeWith(pendingOps[last][attr]);
+        stateController.setPendingOp(this._getStateIdentifier(), attr, nextOp);
+      }  
     }
 
     return this;
