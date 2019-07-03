@@ -633,11 +633,6 @@ class ParseUser extends ParseObject {
    *     the login completes.
    */
   static become(sessionToken: string, options?: RequestOptions) {
-    if (!canUseCurrentUser) {
-      throw new Error(
-        'It is not memory-safe to become a user in a server environment'
-      );
-    }
     options = options || {};
 
     const becomeOptions: RequestOptions = {
@@ -674,20 +669,15 @@ class ParseUser extends ParseObject {
    * Logs out the currently logged in user session. This will remove the
    * session from disk, log out of linked services, and future calls to
    * <code>current</code> will return <code>null</code>.
-
+   *
+   * @param {Object} options
    * @static
    * @return {Promise} A promise that is resolved when the session is
    *   destroyed on the server.
    */
-  static logOut() {
-    if (!canUseCurrentUser) {
-      throw new Error(
-        'There is no current user on a node.js server environment.'
-      );
-    }
-
+  static logOut(options: RequestOptions = {}) {
     const controller = CoreManager.getUserController();
-    return controller.logOut();
+    return controller.logOut(options);
   }
 
   /**
@@ -983,6 +973,9 @@ const DefaultController = {
     ).then((response) => {
       user._finishFetch(response);
       user._setExisted(true);
+      if (!canUseCurrentUser) {
+        return Promise.resolve(user);
+      }
       return DefaultController.setCurrentUser(user);
     });
   },
@@ -998,11 +991,16 @@ const DefaultController = {
     }
   },
 
-  logOut(): Promise<ParseUser> {
+  logOut(options: RequestOptions): Promise<ParseUser> {
+    const RESTController = CoreManager.getRESTController();
+    if (options.sessionToken) {
+      return RESTController.request(
+        'POST', 'logout', {}, options
+      );
+    }
     return DefaultController.currentUserAsync().then((currentUser) => {
       const path = Storage.generatePath(CURRENT_USER_KEY);
       let promise = Storage.removeItemAsync(path);
-      const RESTController = CoreManager.getRESTController();
       if (currentUser !== null) {
         const isAnonymous = AnonymousUtils.isLinked(currentUser);
         const currentSession = currentUser.getSessionToken();
