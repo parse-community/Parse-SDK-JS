@@ -16,6 +16,7 @@ export type RequestOptions = {
   useMasterKey?: boolean;
   sessionToken?: string;
   installationId?: string;
+  returnStatus?: boolean;
   batchSize?: number;
   include?: any;
   progress?: any;
@@ -255,8 +256,12 @@ const RESTController = {
       }
 
       const payloadString = JSON.stringify(payload);
-      return RESTController.ajax(method, url, payloadString, {}, options).then(({ response }) => {
-        return response;
+      return RESTController.ajax(method, url, payloadString, {}, options).then(({ response, status })=>{
+        if (options.returnStatus) {
+          return { ...response, status };
+        } else {
+          return response;
+        }
       });
     }).catch(function(response: { responseText: string }) {
       // Transform the error into an instance of ParseError by trying to parse

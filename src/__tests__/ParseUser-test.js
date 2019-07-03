@@ -881,7 +881,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     CoreManager.setRESTController({
       request(method, path, body, options) {
-        expect(options).toEqual({ useMasterKey: true });
+        expect(options).toEqual(expect.objectContaining({ useMasterKey: true }));
         return Promise.resolve({
           objectId: 'uid5',
           sessionToken: 'r:123abc',

@@ -2134,6 +2134,9 @@ const DefaultController = {
 
     const RESTController = CoreManager.getRESTController();
     const stateController = CoreManager.getObjectStateController();
+
+    options = options || {};
+    options.returnStatus = options.returnStatus || true;
     if (Array.isArray(target)) {
       if (target.length < 1) {
         return Promise.resolve([]);
@@ -2228,7 +2231,9 @@ const DefaultController = {
                 return params;
               })
             }, options);
-          }).then((response, status) => {
+          }).then((response) => {
+            const status = response.status;
+            delete response.status;
             batchReturned.resolve(response, status);
           }, (error) => {
             batchReturned.reject(new ParseError(ParseError.INCORRECT_TYPE, error.message));
@@ -2258,7 +2263,9 @@ const DefaultController = {
           params.path,
           params.body,
           options
-        ).then((response, status) => {
+        ).then((response) => {
+          const status = response.status;
+          delete response.status;
           targetCopy._handleSaveResponse(response, status);
         }, (error) => {
           targetCopy._handleSaveError();
