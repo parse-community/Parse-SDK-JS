@@ -2202,9 +2202,11 @@ const DefaultController = {
             batchReady.push(ready);
             const task = function() {
               ready.resolve();
-              return batchReturned.then((responses, status) => {
+              return batchReturned.then((responses) => {
                 if (responses[index].hasOwnProperty('success')) {
                   const objectId = responses[index].success.objectId;
+                  const status = responses[index].status;
+                  delete responses[index].status;
                   mapIdForPin[objectId] = obj._localId;
                   obj._handleSaveResponse(responses[index].success, status);
                 } else {
@@ -2232,9 +2234,7 @@ const DefaultController = {
               })
             }, options);
           }).then((response) => {
-            const status = response.status;
-            delete response.status;
-            batchReturned.resolve(response, status);
+            batchReturned.resolve(response);
           }, (error) => {
             batchReturned.reject(new ParseError(ParseError.INCORRECT_TYPE, error.message));
           });

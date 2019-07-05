@@ -362,6 +362,16 @@ describe('RESTController', () => {
     });
   });
 
+  it('includes the status code when requested', (done) => {
+    RESTController._setXHR(mockXHR([{ status: 200, response: { success: true }}]));
+    RESTController.request('POST', 'users', {}, { returnStatus: true })
+      .then((response) => {
+        expect(response).toEqual(expect.objectContaining({ success: true }));
+        expect(response.status).toBe(200);
+        done();
+      });
+  });
+
   it('throws when attempted to use an unprovided master key', () => {
     CoreManager.set('MASTER_KEY', undefined);
     const xhr = {
