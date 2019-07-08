@@ -258,7 +258,7 @@ const RESTController = {
       const payloadString = JSON.stringify(payload);
       return RESTController.ajax(method, url, payloadString, {}, options).then(({ response, status })=>{
         if (options.returnStatus) {
-          return { ...response, status };
+          return { ...response, _status: status };
         } else {
           return response;
         }

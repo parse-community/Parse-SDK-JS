@@ -2205,8 +2205,8 @@ const DefaultController = {
               return batchReturned.then((responses) => {
                 if (responses[index].hasOwnProperty('success')) {
                   const objectId = responses[index].success.objectId;
-                  const status = responses[index].status;
-                  delete responses[index].status;
+                  const status = responses[index]._status;
+                  delete responses[index]._status;
                   mapIdForPin[objectId] = obj._localId;
                   obj._handleSaveResponse(responses[index].success, status);
                 } else {
@@ -2233,9 +2233,7 @@ const DefaultController = {
                 return params;
               })
             }, options);
-          }).then((response) => {
-            batchReturned.resolve(response);
-          }, (error) => {
+          }).then(batchReturned.resolve, (error) => {
             batchReturned.reject(new ParseError(ParseError.INCORRECT_TYPE, error.message));
           });
 
@@ -2264,8 +2262,8 @@ const DefaultController = {
           params.body,
           options
         ).then((response) => {
-          const status = response.status;
-          delete response.status;
+          const status = response._status;
+          delete response._status;
           targetCopy._handleSaveResponse(response, status);
         }, (error) => {
           targetCopy._handleSaveError();

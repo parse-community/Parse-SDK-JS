@@ -367,7 +367,7 @@ describe('RESTController', () => {
     RESTController.request('POST', 'users', {}, { returnStatus: true })
       .then((response) => {
         expect(response).toEqual(expect.objectContaining({ success: true }));
-        expect(response.status).toBe(200);
+        expect(response._status).toBe(200);
         done();
       });
   });
