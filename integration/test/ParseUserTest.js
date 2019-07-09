@@ -66,6 +66,7 @@ describe('Parse User', () => {
   it('can sign up users via static method', (done) => {
     Parse.User.signUp('asdf', 'zxcv').then((user) => {
       assert(user.getSessionToken());
+      expect(user.existed()).toBe(false);
       done();
     });
   });
@@ -76,6 +77,7 @@ describe('Parse User', () => {
     user.setUsername('zxcv');
     user.signUp().then((user) => {
       assert(user.getSessionToken());
+      expect(user.existed()).toBe(false);
       done();
     });
   });
@@ -101,6 +103,7 @@ describe('Parse User', () => {
       return Parse.User.logIn('asdf', 'zxcv');
     }).then((user) => {
       assert.equal(user.get('username'), 'asdf');
+      expect(user.existed()).toBe(true);
       done();
     });
   });
