@@ -633,6 +633,11 @@ class ParseUser extends ParseObject {
    *     the login completes.
    */
   static become(sessionToken: string, options?: RequestOptions) {
+    if (!canUseCurrentUser) {
+      throw new Error(
+        'It is not memory-safe to become a user in a server environment'
+      );
+    }
     options = options || {};
 
     const becomeOptions: RequestOptions = {
@@ -644,6 +649,25 @@ class ParseUser extends ParseObject {
 
     const controller = CoreManager.getUserController();
     return controller.become(becomeOptions);
+  }
+
+  /**
+   * Retrieves a user with a session token.
+   *
+   * @param {String} sessionToken The sessionToken to get user with.
+   * @param {Object} options
+   * @static
+   * @return {Promise} A promise that is fulfilled with the user is fetched.
+   */
+  static me(sessionToken: string, options?: RequestOptions = {}) {
+    const controller = CoreManager.getUserController();
+    const meOptions: RequestOptions = {
+      sessionToken: sessionToken
+    };
+    if (options.useMasterKey) {
+      meOptions.useMasterKey = options.useMasterKey;
+    }
+    return controller.me(meOptions);
   }
 
   /**
@@ -973,9 +997,6 @@ const DefaultController = {
     ).then((response) => {
       user._finishFetch(response);
       user._setExisted(true);
-      if (!canUseCurrentUser) {
-        return Promise.resolve(user);
-      }
       return DefaultController.setCurrentUser(user);
     });
   },
@@ -989,6 +1010,18 @@ const DefaultController = {
     } else {
       return Promise.resolve(user);
     }
+  },
+
+  me(options: RequestOptions): Promise<ParseUser> {
+    const RESTController = CoreManager.getRESTController();
+    return RESTController.request(
+      'GET', 'users/me', {}, options
+    ).then((response) => {
+      const user = new ParseUser();
+      user._finishFetch(response);
+      user._setExisted(true);
+      return user;
+    });
   },
 
   logOut(options: RequestOptions): Promise<ParseUser> {

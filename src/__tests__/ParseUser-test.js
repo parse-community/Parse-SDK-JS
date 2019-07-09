@@ -133,6 +133,12 @@ describe('ParseUser', () => {
     );
   });
 
+  it('does not allow current user actions on node servers', () => {
+    expect(ParseUser.become.bind(null, 'token')).toThrow(
+      'It is not memory-safe to become a user in a server environment'
+    );
+  });
+
   it('can sign up a new user', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
@@ -282,30 +288,6 @@ describe('ParseUser', () => {
       expect(u.existed()).toBe(true);
       done();
     });
-  });
-
-  it('can become a user with a session token in server environment', async () => {
-    ParseUser.disableUnsafeCurrentUser();
-    ParseUser._clearCache();
-    CoreManager.setRESTController({
-      request(method, path, body, options) {
-        expect(method).toBe('GET');
-        expect(path).toBe('users/me');
-        expect(options.sessionToken).toBe('123abc');
-
-        return Promise.resolve({
-          objectId: 'uid3',
-          username: 'username',
-          sessionToken: '123abc'
-        }, 200);
-      },
-      ajax() {}
-    });
-
-    const user = await ParseUser.become('123abc');
-    expect(user.id).toBe('uid3');
-    expect(user.isCurrent()).toBe(false);
-    expect(user.existed()).toBe(true);
   });
 
   it('can hydrate a user with sessionToken in server environment', async () => {
@@ -688,6 +670,53 @@ describe('ParseUser', () => {
       expect(Storage.getItem(path)).toBe(null);
       done();
     });
+  });
+
+  it('can retreive a user with sessionToken (me)', async () => {
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('GET');
+        expect(path).toBe('users/me');
+        expect(options.sessionToken).toBe('123abc');
+        return Promise.resolve({
+          objectId: 'uid3',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+
+    const user = await ParseUser.me('123abc');
+    expect(user.id).toBe('uid3');
+    expect(user.isCurrent()).toBe(false);
+    expect(user.existed()).toBe(true);
+  });
+
+  it('can retreive a user with sessionToken and masterKey(me)', async () => {
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('GET');
+        expect(path).toBe('users/me');
+        expect(options.sessionToken).toBe('123abc');
+        expect(options.useMasterKey).toBe(true);
+        return Promise.resolve({
+          objectId: 'uid3',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+
+    const user = await ParseUser.me('123abc', { useMasterKey: true });
+    expect(user.id).toBe('uid3');
+    expect(user.isCurrent()).toBe(false);
+    expect(user.existed()).toBe(true);
   });
 
   it('can logout user with sessionToken', async () => {

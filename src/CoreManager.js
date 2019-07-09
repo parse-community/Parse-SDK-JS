@@ -122,6 +122,7 @@ type UserController = {
   become: (options: RequestOptions) => Promise;
   hydrate: (userJSON: AttributeMap) => Promise;
   logOut: (options: RequestOptions) => Promise;
+  me: (options: RequestOptions) => Promise;
   requestPasswordReset: (email: string, options: RequestOptions) => Promise;
   updateUserOnDisk: (user: ParseUser) => Promise;
   upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => Promise;
@@ -378,6 +379,7 @@ module.exports = {
       'logIn',
       'become',
       'logOut',
+      'me',
       'requestPasswordReset',
       'upgradeToRevocableSession',
       'linkWith',
