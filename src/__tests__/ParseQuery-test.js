@@ -1315,7 +1315,10 @@ describe('ParseQuery', () => {
             size: {
               $in: ['small', 'medium']
             }
-          }
+          },
+          readPreference: 'PRIMARY',
+          includeReadPreference: 'SECONDARY',
+          subqueryReadPreference: 'SECONDARY_PREFERRED',
         });
         expect(options).toEqual({});
         return Promise.resolve({
@@ -1333,6 +1336,7 @@ describe('ParseQuery', () => {
       .skip(8)
       .ascending('createdAt')
       .select('size', 'name')
+      .readPreference('PRIMARY', 'SECONDARY', 'SECONDARY_PREFERRED')
       .find()
       .then((objs) => {
         expect(objs.length).toBe(2);
