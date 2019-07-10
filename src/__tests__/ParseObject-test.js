@@ -916,6 +916,18 @@ describe('ParseObject', () => {
     expect(p.op('age')).toBe(undefined);
   });
 
+  it('isDataAvailable', () => {
+    const p = new ParseObject('Person');
+    p.id = 'isdataavailable';
+    p.set('age', 24);
+    expect(p.isDataAvailable()).toBe(false);
+    const updated = new Date();
+    p._handleSaveResponse({
+      updatedAt: { __type: 'Date', iso: updated.toISOString() }
+    });
+    expect(p.isDataAvailable()).toBe(true);
+  });
+
   it('handles ACL when saved', () => {
     const p = new ParseObject('Person');
 

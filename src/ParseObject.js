@@ -525,6 +525,15 @@ class ParseObject {
   }
 
   /**
+   * Returns true if the object has been fetched.
+   * @return {Boolean}
+   */
+  isDataAvailable(): boolean {
+    const serverData = this._getServerData();
+    return !!Object.keys(serverData).length;
+  }
+
+  /**
    * Gets a Pointer referencing this Object.
    * @return {Pointer}
    */
@@ -1980,7 +1989,7 @@ const DefaultController = {
             'All objects must have an ID'
           );
         }
-        if (forceFetch || Object.keys(el._getServerData()).length === 0) {
+        if (forceFetch || !el.isDataAvailable()) {
           ids.push(el.id);
           objs.push(el);
         }
