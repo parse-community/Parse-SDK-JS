@@ -36,6 +36,9 @@ export type QueryJSON = {
   order?: string;
   className?: string;
   count?: number;
+  readPreference?: string;
+  includeReadPreference?: string;
+  subqueryReadPreference?: string;
 };
 
 /**
@@ -220,6 +223,9 @@ class ParseQuery {
   _limit: number;
   _skip: number;
   _order: Array<string>;
+  _readPreference: string;
+  _includeReadPreference: string;
+  _subqueryReadPreference: string;
   _queriesLocalDatastore: boolean;
   _localDatastorePinName: any;
   _extraOptions: { [key: string]: mixed };
@@ -253,6 +259,9 @@ class ParseQuery {
     this._include = [];
     this._limit = -1; // negative limit is not sent in the server request
     this._skip = 0;
+    this._readPreference = null;
+    this._includeReadPreference = null;
+    this._subqueryReadPreference = null;
     this._queriesLocalDatastore = false;
     this._localDatastorePinName = null;
     this._extraOptions = {};
@@ -391,6 +400,15 @@ class ParseQuery {
     if (this._order) {
       params.order = this._order.join(',');
     }
+    if (this._readPreference) {
+      params.readPreference = this._readPreference;
+    }
+    if (this._includeReadPreference) {
+      params.includeReadPreference = this._includeReadPreference;
+    }
+    if (this._subqueryReadPreference) {
+      params.subqueryReadPreference = this._subqueryReadPreference;
+    }
     for (const key in this._extraOptions) {
       params[key] = this._extraOptions[key];
     }
@@ -444,9 +462,21 @@ class ParseQuery {
       this._order = json.order.split(",");
     }
 
+    if (json.readPreference) {
+      this._readPreference = json.readPreference;
+    }
+
+    if (json.includeReadPreference) {
+      this._includeReadPreference = json.includeReadPreference;
+    }
+
+    if (json.subqueryReadPreference) {
+      this._subqueryReadPreference = json.subqueryReadPreference;
+    }
+
     for (const key in json) {
       if (json.hasOwnProperty(key))  {
-        if (["where", "include", "keys", "limit", "skip", "order"].indexOf(key) === -1) {
+        if (["where", "include", "keys", "limit", "skip", "order", "readPreference", "includeReadPreference", "subqueryReadPreference"].indexOf(key) === -1) {
           this._extraOptions[key] = json[key];
         }
       }
@@ -1479,6 +1509,20 @@ class ParseQuery {
         this._select.push(key);
       }
     });
+    return this;
+  }
+
+  /**
+   * Changes the read preference that the backend will use when performing the query to the database.
+   * @param {String} readPreference The read preference for the main query.
+   * @param {String} includeReadPreference The read preference for the queries to include pointers.
+   * @param {String} subqueryReadPreference The read preference for the sub queries.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  readPreference(readPreference: string, includeReadPreference: string, subqueryReadPreference: string): ParseQuery {
+    this._readPreference = readPreference;
+    this._includeReadPreference = includeReadPreference;
+    this._subqueryReadPreference = subqueryReadPreference;
     return this;
   }
 
