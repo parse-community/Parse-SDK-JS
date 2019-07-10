@@ -1519,7 +1519,7 @@ class ParseQuery {
    * @param {String} subqueryReadPreference The read preference for the sub queries.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  readPreference(readPreference: string, includeReadPreference: string, subqueryReadPreference: string): ParseQuery {
+  readPreference(readPreference: string, includeReadPreference?: string, subqueryReadPreference?: string): ParseQuery {
     this._readPreference = readPreference;
     this._includeReadPreference = includeReadPreference;
     this._subqueryReadPreference = subqueryReadPreference;
