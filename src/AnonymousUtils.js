@@ -10,6 +10,7 @@
  */
 import ParseUser from './ParseUser';
 const uuidv4 = require('uuid/v4');
+import type { RequestOptions } from './RESTController';
 
 let registered = false;
 
@@ -62,12 +63,13 @@ const AnonymousUtils = {
    *
    * @method logIn
    * @name Parse.AnonymousUtils.logIn
+   * @param {Object} options MasterKey / SessionToken.
    * @returns {Promise}
    * @static
    */
-  logIn() {
+  logIn(options?: RequestOptions) {
     const provider = this._getAuthProvider();
-    return ParseUser._logInWith(provider.getAuthType(), provider.getAuthData());
+    return ParseUser._logInWith(provider.getAuthType(), provider.getAuthData(), options);
   },
 
   /**
@@ -76,12 +78,13 @@ const AnonymousUtils = {
    * @method link
    * @name Parse.AnonymousUtils.link
    * @param {Parse.User} user User to link. This must be the current user.
+   * @param {Object} options MasterKey / SessionToken.
    * @returns {Promise}
    * @static
    */
-  link(user: ParseUser) {
+  link(user: ParseUser, options?: RequestOptions) {
     const provider = this._getAuthProvider();
-    return user._linkWith(provider.getAuthType(), provider.getAuthData());
+    return user._linkWith(provider.getAuthType(), provider.getAuthData(), options);
   },
 
   _getAuthProvider() {

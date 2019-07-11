@@ -74,7 +74,7 @@ describe('AnonymousUtils', () => {
     jest.spyOn(user, '_linkWith');
     AnonymousUtils.link(user);
     expect(user._linkWith).toHaveBeenCalledTimes(1);
-    expect(user._linkWith).toHaveBeenCalledWith('anonymous', mockProvider.getAuthData());
+    expect(user._linkWith).toHaveBeenCalledWith('anonymous', mockProvider.getAuthData(), undefined);
     expect(AnonymousUtils._getAuthProvider).toHaveBeenCalledTimes(1);
   });
 
@@ -82,7 +82,7 @@ describe('AnonymousUtils', () => {
     jest.spyOn(MockUser, '_logInWith');
     AnonymousUtils.logIn();
     expect(MockUser._logInWith).toHaveBeenCalledTimes(1);
-    expect(MockUser._logInWith).toHaveBeenCalledWith('anonymous', mockProvider.getAuthData());
+    expect(MockUser._logInWith).toHaveBeenCalledWith('anonymous', mockProvider.getAuthData(), undefined);
     expect(AnonymousUtils._getAuthProvider).toHaveBeenCalledTimes(1);
   });
 });

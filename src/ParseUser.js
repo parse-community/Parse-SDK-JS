@@ -77,7 +77,8 @@ class ParseUser extends ParseObject {
    * Unlike in the Android/iOS SDKs, logInWith is unnecessary, since you can
    * call linkWith on the user (even if it doesn't exist yet on the server).
    */
-  _linkWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions): Promise<ParseUser> {
+  _linkWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions = {}): Promise<ParseUser> {
+    saveOpts.sessionToken = saveOpts.sessionToken || this.getSessionToken() || '';
     let authType;
     if (typeof provider === 'string') {
       authType = provider;
@@ -685,8 +686,8 @@ class ParseUser extends ParseObject {
     return controller.hydrate(userJSON);
   }
 
-  static logInWith(provider: any, options?: RequestOptions) {
-    return ParseUser._logInWith(provider, options);
+  static logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions) {
+    return ParseUser._logInWith(provider, options, saveOpts);
   }
 
   /**
@@ -804,9 +805,9 @@ class ParseUser extends ParseObject {
     });
   }
 
-  static _logInWith(provider: any, options?: RequestOptions) {
+  static _logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions) {
     const user = new ParseUser();
-    return user._linkWith(provider, options);
+    return user._linkWith(provider, options, saveOpts);
   }
 
   static _clearCache() {
