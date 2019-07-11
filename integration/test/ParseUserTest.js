@@ -536,7 +536,6 @@ describe('Parse User', () => {
     Parse.User.enableUnsafeCurrentUser();
 
     await Parse.User.signUp('foobaz', '1234');
-    await Parse.User.logOut();
 
     const user = await Parse.AnonymousUtils.logIn();
     user.set('field', 'hello world');
@@ -550,6 +549,27 @@ describe('Parse User', () => {
     } catch (error) {
       expect(error.message).toBe('Object not found.');
     }
+  });
+
+  it('anonymous user logIn does not use currentUser sessionToken', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const user1 = await Parse.User.signUp('anon-not', '1234');
+    const user2 = await Parse.AnonymousUtils.logIn();
+    expect(user1.getSessionToken()).toBeDefined();
+    expect(user2.getSessionToken()).toBeDefined();
+    expect(user1.getSessionToken()).not.toBe(user2.getSessionToken());
+  });
+
+  it('facebook logIn does not use currentUser sessionToken', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    Parse.FacebookUtils.init();
+
+    const user1 = await Parse.User.signUp('facebook-not', '1234');
+    const user2 = await Parse.FacebookUtils.logIn();
+    expect(user1.getSessionToken()).toBeDefined();
+    expect(user2.getSessionToken()).toBeDefined();
+    expect(user1.getSessionToken()).not.toBe(user2.getSessionToken());
   });
 
   it('can signUp user with subclass', async () => {

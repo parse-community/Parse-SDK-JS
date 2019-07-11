@@ -685,8 +685,8 @@ class ParseUser extends ParseObject {
     return controller.hydrate(userJSON);
   }
 
-  static logInWith(provider: any, options?: RequestOptions) {
-    return ParseUser._logInWith(provider, options);
+  static logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions) {
+    return ParseUser._logInWith(provider, options, saveOpts);
   }
 
   /**
@@ -804,9 +804,11 @@ class ParseUser extends ParseObject {
     });
   }
 
-  static _logInWith(provider: any, options?: RequestOptions) {
+  static _logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions = {}) {
+    saveOpts.sessionToken = saveOpts.sessionToken || '';
+
     const user = new ParseUser();
-    return user._linkWith(provider, options);
+    return user._linkWith(provider, options, saveOpts);
   }
 
   static _clearCache() {
