@@ -1,7 +1,25 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.4.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.5.0...master)
+
+## 2.5.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.4.0...2.5.0)
+
+**New Features**:
+- Support query exclude keys ([#857](https://github.com/parse-community/Parse-SDK-JS/pull/857))
+- Support query read preference ([#855](https://github.com/parse-community/Parse-SDK-JS/pull/855))
+- Support object isDataAvailable ([#856](https://github.com/parse-community/Parse-SDK-JS/pull/856))
+
+**Improvements**:
+- Add options for AnonymousUtils ([#860](https://github.com/parse-community/Parse-SDK-JS/pull/860))
+- Stateless UserController ([#846](https://github.com/parse-community/Parse-SDK-JS/pull/846))
+- Fix Facebook login isExisted ([#845](https://github.com/parse-community/Parse-SDK-JS/pull/845))
+- Allow any Blob to be uploaded ([#837](https://github.com/parse-community/Parse-SDK-JS/pull/837))
+- Support _linkWith if no provider ([#810](https://github.com/parse-community/Parse-SDK-JS/pull/810))
+- LDS: Improve querying dates ([#808](https://github.com/parse-community/Parse-SDK-JS/pull/808))
+- Support testing on Windows ([#808](https://github.com/parse-community/Parse-SDK-JS/pull/820))
+- Support installing SDK from branch ([#821](https://github.com/parse-community/Parse-SDK-JS/pull/821))
 
 ## 2.4.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.2...2.4.0)
@@ -13,14 +31,6 @@
 **Improvements**:
 - LocalDatastore: Improve pinning unsaved objects ([#795](https://github.com/parse-community/Parse-SDK-JS/pull/795))
 - LocalDatastore: Improve error handling ([#803](https://github.com/parse-community/Parse-SDK-JS/pull/803))
-
-**Dependency Updates**:
-- [uuid@3.3.2](https://www.npmjs.com/package/uuid)
-
-**Development Dependency Updates**:
-- [eslint-plugin-flowtype@3.6.1](https://www.npmjs.com/package/eslint-plugin-flowtype)
-- [gulp@4.0.1](https://www.npmjs.com/package/gulp)
-- [jasmine@3.4.0](https://www.npmjs.com/package/jasmine)
 
 ## 2.3.2
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.1...2.3.2)
