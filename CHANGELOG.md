@@ -21,29 +21,6 @@
 - Support testing on Windows ([#808](https://github.com/parse-community/Parse-SDK-JS/pull/820))
 - Support installing SDK from branch ([#821](https://github.com/parse-community/Parse-SDK-JS/pull/821))
 
-**Dependency Updates**:
-- [@babel/runtime@7.5.4](https://www.npmjs.com/package/@babel/runtime)
-- [ws@7.1.0](https://www.npmjs.com/package/ws)
-
-**Development Dependency Updates**:
-- [@babel/core@7.5.4](https://www.npmjs.com/package/@babel/core)
-- [@babel/plugin-proposal-class-properties@7.5.0](https://www.npmjs.com/package/@babel/plugin-proposal-class-properties)
-- [@babel/plugin-transform-flow-comments@7.4.4](https://www.npmjs.com/package/@babel/plugin-transform-flow-comments)
-- [@babel/plugin-transform-flow-strip-types@7.4.4](https://www.npmjs.com/package/@babel/plugin-transform-flow-strip-types)
-- [@babel/plugin-transform-runtime@7.5.0](https://www.npmjs.com/package/@babel/plugin-transform-runtime)
-- [@babel/polyfill@7.4.4](https://www.npmjs.com/package/@babel/polyfill)
-- [@babel/preset-env@7.5.4](https://www.npmjs.com/package/@babel/preset-env)
-- [@babel/babel-eslint@10.0.2](https://www.npmjs.com/package/@babel/babel-eslint)
-- [browserify@16.3.0](https://www.npmjs.com/package/gulp)
-- [codecov@3.5.0](https://www.npmjs.com/package/codecov)
-- [cross-env@5.2.0](https://www.npmjs.com/package/cross-env)
-- [eslint@6.0.1](https://www.npmjs.com/package/eslint)
-- [eslint-plugin-flowtype@3.11.1](https://www.npmjs.com/package/eslint-plugin-flowtype)
-- [express@4.17.1](https://www.npmjs.com/package/express)
-- [gulp@4.0.2](https://www.npmjs.com/package/gulp)
-- [jsdoc@3.6.2](https://www.npmjs.com/package/jsdoc)
-- [parse-server@bb06376](https://github.com/parse-community/parse-server/commit/bb06376a32f0a3852609d9a5f76f9e8f7e4770e3)
-
 ## 2.4.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.2...2.4.0)
 
@@ -54,14 +31,6 @@
 **Improvements**:
 - LocalDatastore: Improve pinning unsaved objects ([#795](https://github.com/parse-community/Parse-SDK-JS/pull/795))
 - LocalDatastore: Improve error handling ([#803](https://github.com/parse-community/Parse-SDK-JS/pull/803))
-
-**Dependency Updates**:
-- [uuid@3.3.2](https://www.npmjs.com/package/uuid)
-
-**Development Dependency Updates**:
-- [eslint-plugin-flowtype@3.6.1](https://www.npmjs.com/package/eslint-plugin-flowtype)
-- [gulp@4.0.1](https://www.npmjs.com/package/gulp)
-- [jasmine@3.4.0](https://www.npmjs.com/package/jasmine)
 
 ## 2.3.2
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.3.1...2.3.2)
