@@ -1189,6 +1189,38 @@ describe('Parse Query', () => {
     });
   });
 
+  it('can exclude keys', async () => {
+    const object = new TestObject({
+      hello: 'world',
+      foo: 'bar',
+      slice: 'pizza',
+    });
+    await object.save();
+
+    const query = new Parse.Query(TestObject);
+    query.exclude('foo');
+    const result = await query.get(object.id);
+    assert.equal(result.get('foo'), undefined);
+    assert.equal(result.get('hello'), 'world');
+    assert.equal(result.get('slice'), 'pizza');
+  });
+
+  it('can exclude multiple keys', async () => {
+    const object = new TestObject({
+      hello: 'world',
+      foo: 'bar',
+      slice: 'pizza',
+    });
+    await object.save();
+
+    const query = new Parse.Query(TestObject);
+    query.exclude(['foo', 'hello']);
+    const result = await query.get(object.id);
+    assert.equal(result.get('foo'), undefined);
+    assert.equal(result.get('hello'), undefined);
+    assert.equal(result.get('slice'), 'pizza');
+  });
+
   it('uses subclasses when creating objects', (done) => {
     const ParentObject = Parse.Object.extend({ className: 'ParentObject' });
     let ChildObject = Parse.Object.extend('ChildObject', {

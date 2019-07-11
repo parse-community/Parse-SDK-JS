@@ -945,6 +945,32 @@ describe('ParseQuery', () => {
     expect(q2._include).toEqual(['*']);
   });
 
+  it('can exclude keys', () => {
+    const q = new ParseQuery('Item');
+    q.exclude('foo');
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      excludeKeys: 'foo'
+    });
+    const q2 = new ParseQuery('Item');
+    q2.withJSON(json);
+    expect(q2._exclude).toEqual(['foo']);
+  });
+
+  it('can exclude multiple keys', () => {
+    const q = new ParseQuery('Item');
+    q.exclude(['foo', 'bar']);
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      excludeKeys: 'foo,bar'
+    });
+    const q2 = new ParseQuery('Item');
+    q2.withJSON(json);
+    expect(q2._exclude).toEqual(['foo', 'bar']);
+  });
+
   it('can use extraOptions', () => {
     const q = new ParseQuery('Item');
     q._extraOptions.randomOption = 'test';

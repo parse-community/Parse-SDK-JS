@@ -6,6 +6,7 @@ const Parse = require('../../node');
 
 const TestObject = Parse.Object.extend('TestObject');
 const TestPoint = Parse.Object.extend('TestPoint');
+const Container = Parse.Object.extend('Container');
 
 describe('Geo Point', () => {
   beforeAll((done) => {
@@ -50,7 +51,7 @@ describe('Geo Point', () => {
 
   it('can only store one geo point per object', (done) => {
     const point = new Parse.GeoPoint(20, 20);
-    const obj = new TestObject();
+    const obj = new Container();
     obj.set('locationOne', point);
     obj.set('locationTwo', point);
     obj.save().then(done.fail).catch(() => {

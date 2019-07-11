@@ -536,6 +536,7 @@ describe('Parse User', () => {
     Parse.User.enableUnsafeCurrentUser();
 
     await Parse.User.signUp('foobaz', '1234');
+    await Parse.User.logOut();
 
     const user = await Parse.AnonymousUtils.logIn();
     user.set('field', 'hello world');
