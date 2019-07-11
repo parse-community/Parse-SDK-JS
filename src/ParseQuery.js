@@ -1524,7 +1524,7 @@ class ParseQuery {
 
   /**
    * Restricts the fields of the returned Parse.Objects to all keys except the
-   * provided keys. This call has precidence over select and include.
+   * provided keys. Exclude takes precedence over select and include.
    *
    * Requires Parse Server 3.6.0+
    *
