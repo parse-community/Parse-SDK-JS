@@ -1663,4 +1663,37 @@ describe('Parse Object', () => {
 
     done();
   });
+
+  it('isDataAvailable', async () => {
+    const child = new TestObject({ foo: 'bar' });
+    assert.equal(child.isDataAvailable(), false);
+
+    const parent = new TestObject({ child });
+    await parent.save();
+
+    assert.equal(child.isDataAvailable(), true);
+    assert.equal(parent.isDataAvailable(), true);
+
+    const query = new Parse.Query(TestObject);
+    const fetched = await query.get(parent.id);
+    const unfetched = fetched.get('child');
+
+    assert.equal(fetched.isDataAvailable(), true);
+    assert.equal(unfetched.isDataAvailable(), false);
+  });
+
+  it('isDataAvailable user', async () => {
+    let user = new Parse.User();
+    user.set('username', 'plain');
+    user.set('password', 'plain');
+    await user.signUp();
+    assert.equal(user.isDataAvailable(), true);
+
+    user = await Parse.User.logIn('plain', 'plain');
+    assert.equal(user.isDataAvailable(), true);
+
+    const query = new Parse.Query(Parse.User);
+    const fetched = await query.get(user.id);
+    assert.equal(fetched.isDataAvailable(), true);
+  });
 });
