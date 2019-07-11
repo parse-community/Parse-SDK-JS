@@ -30,6 +30,7 @@ export type WhereClause = {
 export type QueryJSON = {
   where: WhereClause;
   include?: string;
+  excludeKeys?: string;
   keys?: string;
   limit?: number;
   skip?: number;
@@ -219,6 +220,7 @@ class ParseQuery {
   className: string;
   _where: any;
   _include: Array<string>;
+  _exclude: Array<string>;
   _select: Array<string>;
   _limit: number;
   _skip: number;
@@ -257,6 +259,7 @@ class ParseQuery {
 
     this._where = {};
     this._include = [];
+    this._exclude = [];
     this._limit = -1; // negative limit is not sent in the server request
     this._skip = 0;
     this._readPreference = null;
@@ -388,6 +391,9 @@ class ParseQuery {
     if (this._include.length) {
       params.include = this._include.join(',');
     }
+    if (this._exclude.length) {
+      params.excludeKeys = this._exclude.join(',');
+    }
     if (this._select) {
       params.keys = this._select.join(',');
     }
@@ -448,6 +454,10 @@ class ParseQuery {
 
     if (json.keys) {
       this._select = json.keys.split(",");
+    }
+
+    if (json.excludeKeys) {
+      this._exclude = json.excludeKeys.split(",");
     }
 
     if (json.limit) {
@@ -1507,6 +1517,26 @@ class ParseQuery {
         this._select = this._select.concat(key);
       } else {
         this._select.push(key);
+      }
+    });
+    return this;
+  }
+
+  /**
+   * Restricts the fields of the returned Parse.Objects to all keys except the
+   * provided keys. This call has precidence over select and include.
+   *
+   * Requires Parse Server 3.6.0+
+   *
+   * @param {...String|Array<String>} keys The name(s) of the key(s) to exclude.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  exclude(...keys: Array<string|Array<string>>): ParseQuery {
+    keys.forEach((key) => {
+      if (Array.isArray(key)) {
+        this._exclude = this._exclude.concat(key);
+      } else {
+        this._exclude.push(key);
       }
     });
     return this;
