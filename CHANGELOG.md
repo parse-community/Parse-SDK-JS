@@ -3,7 +3,7 @@
 ### master
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.5.1...master)
 
-## 2.5.0
+## 2.5.1
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.5.0...2.5.1)
 - FIX: Update NPM credentials
 
