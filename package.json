@@ -34,7 +34,7 @@
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
-    "@babel/core": "7.5.4",
+    "@babel/core": "7.5.5",
     "@babel/plugin-proposal-class-properties": "7.5.0",
     "@babel/plugin-transform-flow-comments": "7.4.4",
     "@babel/plugin-transform-flow-strip-types": "7.4.4",
