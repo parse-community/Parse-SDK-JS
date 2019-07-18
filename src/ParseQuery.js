@@ -224,6 +224,7 @@ class ParseQuery {
   _select: Array<string>;
   _limit: number;
   _skip: number;
+  _count: boolean;
   _order: Array<string>;
   _readPreference: string;
   _includeReadPreference: string;
@@ -260,6 +261,7 @@ class ParseQuery {
     this._where = {};
     this._include = [];
     this._exclude = [];
+    this._count = false;
     this._limit = -1; // negative limit is not sent in the server request
     this._skip = 0;
     this._readPreference = null;
@@ -364,6 +366,12 @@ class ParseQuery {
         return handleOfflineSort(a, b, sorts);
       });
     }
+
+    let count // count total before applying limita/skip
+    if(params.count){
+      count = results.length // total count from response
+    }
+
     if (params.skip) {
       if (params.skip >= results.length) {
         results = [];
@@ -375,7 +383,13 @@ class ParseQuery {
     if (params.limit !== 0 && params.limit < results.length) {
       limit = params.limit;
     }
+
     results = results.splice(0, limit);
+
+    if(typeof count === 'number'){
+      return {results, count}
+    }
+
     return results;
   }
 
@@ -396,6 +410,9 @@ class ParseQuery {
     }
     if (this._select) {
       params.keys = this._select.join(',');
+    }
+    if (this._count) {
+      params.count = 1;
     }
     if (this._limit >= 0) {
       params.limit = this._limit;
@@ -460,6 +477,10 @@ class ParseQuery {
       this._exclude = json.excludeKeys.split(",");
     }
 
+    if (json.count) {
+      this._count = json.count !== 0;
+    }
+
     if (json.limit) {
       this._limit  = json.limit;
     }
@@ -486,7 +507,7 @@ class ParseQuery {
 
     for (const key in json) {
       if (json.hasOwnProperty(key))  {
-        if (["where", "include", "keys", "limit", "skip", "order", "readPreference", "includeReadPreference", "subqueryReadPreference"].indexOf(key) === -1) {
+        if (["where", "include", "keys", "count", "limit", "skip", "order", "readPreference", "includeReadPreference", "subqueryReadPreference"].indexOf(key) === -1) {
           this._extraOptions[key] = json[key];
         }
       }
@@ -588,7 +609,8 @@ class ParseQuery {
       this.toJSON(),
       findOptions
     ).then((response) => {
-      return response.results.map((data) => {
+
+      const results = response.results.map((data) => {
         // In cases of relations, the server may send back a className
         // on the top level of the payload
         const override = response.className || this.className;
@@ -605,6 +627,14 @@ class ParseQuery {
 
         return ParseObject.fromJSON(data, !select);
       });
+
+      const count = response.count;
+
+      if(typeof count === "number"){
+        return {results, count};
+      } else {
+        return results;
+      }
     });
   }
 
@@ -1468,6 +1498,20 @@ class ParseQuery {
     return this;
   }
 
+  /**
+   * Sets the flag for api to count the total number of objects satisfying this query, despite limits/skip.
+   * Might be useful for pagination. Note that result of this query will be wrapped as an object
+   * with results holding {ParseObject} array, and integer count.
+   * @param {boolean} b false - disable, true - enable.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  withCount(b: boolean): ParseQuery {
+    if (typeof b !== 'boolean') {
+      throw new Error('You can only set withCount to a boolean value');
+    }
+    this._count = b;
+    return this;
+  }
   /**
    * Includes nested Parse.Objects for the provided key.  You can use dot
    * notation to specify which fields in the included object are also fetched.
