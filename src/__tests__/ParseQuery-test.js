@@ -1451,7 +1451,7 @@ describe('ParseQuery', () => {
             { objectId: '2', name: 'Product 89' } ],
           count: 2
         });
-      };
+      }
     });
 
     const q = new ParseQuery('Item');
@@ -1459,7 +1459,7 @@ describe('ParseQuery', () => {
       .find({
         useMasterKey: true,
         sessionToken: '1234'
-      });
+      })
       .then((obj) => {
         expect(obj.results).toBeDefined();
         expect(obj.results.length).toBe(2);
