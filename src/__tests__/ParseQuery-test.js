@@ -1432,9 +1432,8 @@ describe('ParseQuery', () => {
       });
   });
 
-  it('can receive both count and objects from find() using withCount constraint', (done) => {
+  it('can receive both count and objects from find() using withCount flag', (done) => {
     CoreManager.setQueryController({
-
       aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
@@ -1452,8 +1451,7 @@ describe('ParseQuery', () => {
             { objectId: '2', name: 'Product 89' } ],
           count: 2
         });
-      },
-
+      };
     });
 
     const q = new ParseQuery('Item');
@@ -1461,12 +1459,12 @@ describe('ParseQuery', () => {
       .find({
         useMasterKey: true,
         sessionToken: '1234'
-      })
+      });
       .then((obj) => {
-        expect(obj.results).toBeDefined()
-        expect(obj.results.length).toBe(2)
-        expect(obj.count).toBeDefined()
-        expect(typeof obj.count).toBe('number')
+        expect(obj.results).toBeDefined();
+        expect(obj.results.length).toBe(2);
+        expect(obj.count).toBeDefined();
+        expect(typeof obj.count).toBe('number');
         done();
       });
   });
