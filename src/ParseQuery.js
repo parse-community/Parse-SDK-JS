@@ -367,7 +367,7 @@ class ParseQuery {
       });
     }
 
-    let count // count total before applying limita/skip
+    let count // count total before applying limit/skip
     if(params.count){
       count = results.length // total count from response
     }
@@ -1499,17 +1499,18 @@ class ParseQuery {
   }
 
   /**
-   * Sets the flag for api to count the total number of objects satisfying this query, despite limits/skip.
-   * Might be useful for pagination. Note that result of this query will be wrapped as an object
-   * with results holding {ParseObject} array, and integer count.
+   * Sets the flag to include with response the total number of objects satisfying this query,
+   * despite limits/skip. Might be useful for pagination.
+   * Note that result of this query will be wrapped as an object with
+   *`results`: holding {ParseObject} array and `count`: integer holding total number
    * @param {boolean} b false - disable, true - enable.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  withCount(b: boolean): ParseQuery {
-    if (typeof b !== 'boolean') {
+  withCount(includeCount: boolean): ParseQuery {
+    if (typeof includeCount !== 'boolean') {
       throw new Error('You can only set withCount to a boolean value');
     }
-    this._count = b;
+    this._count = includeCount;
     return this;
   }
   /**
