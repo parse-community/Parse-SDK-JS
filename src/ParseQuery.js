@@ -478,7 +478,7 @@ class ParseQuery {
     }
 
     if (json.count) {
-      this._count = json.count !== 0;
+      this._count = json.count === 1;
     }
 
     if (json.limit) {
@@ -1506,7 +1506,7 @@ class ParseQuery {
    * @param {boolean} b false - disable, true - enable.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  withCount(includeCount: boolean): ParseQuery {
+  withCount(includeCount: boolean = true): ParseQuery {
     if (typeof includeCount !== 'boolean') {
       throw new Error('You can only set withCount to a boolean value');
     }
