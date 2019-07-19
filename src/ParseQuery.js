@@ -369,7 +369,7 @@ class ParseQuery {
 
     let count // count total before applying limit/skip
     if(params.count){
-      count = results.length // total count from response
+      count = results.length; // total count from response
     }
 
     if (params.skip) {
@@ -387,7 +387,7 @@ class ParseQuery {
     results = results.splice(0, limit);
 
     if(typeof count === 'number'){
-      return {results, count}
+      return {results, count};
     }
 
     return results;

@@ -1865,7 +1865,7 @@ describe('ParseQuery', () => {
     q.include('manufacturer');
     q.select('inStock', 'lastPurchase');
     q.limit(10);
-    q.withCount(true)
+    q.withCount(true);
     q.ascending(['a', 'b', 'c']);
     q.skip(4);
     q.equalTo('size', 'medium');
@@ -2762,7 +2762,7 @@ describe('ParseQuery LocalDatastore', () => {
 
     let q = new ParseQuery('Item');
     q.skip(0);
-    q.withCount(true)
+    q.withCount(true);
     q.fromLocalDatastore();
     let result = await q.find();
     expect(result.results.length).toEqual(3);
@@ -2770,7 +2770,7 @@ describe('ParseQuery LocalDatastore', () => {
 
     q = new ParseQuery('Item');
     q.skip(1);
-    q.withCount(true)
+    q.withCount(true);
     q.fromLocalDatastore();
     result = await q.find();
     expect(result.results.length).toEqual(2);
@@ -2778,14 +2778,14 @@ describe('ParseQuery LocalDatastore', () => {
 
     q = new ParseQuery('Item');
     q.skip(3);
-    q.withCount(true)
+    q.withCount(true);
     q.fromLocalDatastore();
     result = await q.find();
     expect(result.results.length).toEqual(0);
     expect(result.count).toEqual(3);
 
     q = new ParseQuery('Item');
-    q.withCount(true)
+    q.withCount(true);
     q.skip(4);
     q.fromLocalDatastore();
     result = await q.find();
@@ -2795,7 +2795,7 @@ describe('ParseQuery LocalDatastore', () => {
     q = new ParseQuery('Item');
     q.limit(1);
     q.skip(2);
-    q.withCount(true)
+    q.withCount(true);
     q.fromLocalDatastore();
     result = await q.find();
     expect(result.results.length).toEqual(1);
@@ -2804,7 +2804,7 @@ describe('ParseQuery LocalDatastore', () => {
     q = new ParseQuery('Item');
     q.limit(1);
     q.skip(1);
-    q.withCount(true)
+    q.withCount(true);
     q.fromLocalDatastore();
     result = await q.find();
     expect(result.results.length).toEqual(1);
@@ -2813,7 +2813,7 @@ describe('ParseQuery LocalDatastore', () => {
     q = new ParseQuery('Item');
     q.limit(2);
     q.skip(1);
-    q.withCount(true)
+    q.withCount(true);
     q.fromLocalDatastore();
     result = await q.find();
     expect(result.results.length).toEqual(2);
