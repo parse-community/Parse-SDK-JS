@@ -898,6 +898,24 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can set withCount flag in find query', () => {
+    const q = new ParseQuery('Item');
+    expect(q.withCount.bind(q, 'string')).toThrow(
+      'You can only set withCount to a boolean value'
+    );
+
+    q.withCount(true);
+    expect(q.toJSON()).toEqual({
+      where: {},
+      count: 1
+    });
+    q.withCount(false);
+    expect(q.toJSON()).toEqual({
+      where: {}
+    });
+  });
+
+
   it('can generate queries that include full data for pointers', () => {
     const q = new ParseQuery('Item');
     q.greaterThan('inStock', 0);
@@ -1414,6 +1432,44 @@ describe('ParseQuery', () => {
       });
   });
 
+  it('can receive both count and objects from find() using withCount flag', (done) => {
+    CoreManager.setQueryController({
+      aggregate() {},
+      find(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          where: {},
+          count: 1
+        });
+        expect(options).toEqual({
+          useMasterKey: true,
+          sessionToken: '1234'
+        });
+        return Promise.resolve({
+          results:[
+            { objectId: '1', name: 'Product 55' },
+            { objectId: '2', name: 'Product 89' } ],
+          count: 2
+        });
+      }
+    });
+
+    const q = new ParseQuery('Item');
+    q.withCount(true)
+      .find({
+        useMasterKey: true,
+        sessionToken: '1234'
+      })
+      .then((obj) => {
+        expect(obj.results).toBeDefined();
+        expect(obj.results.length).toBe(2);
+        expect(obj.count).toBeDefined();
+        expect(typeof obj.count).toBe('number');
+        done();
+      });
+  });
+
+
   it('can iterate over results with each()', (done) => {
     CoreManager.setQueryController({
       aggregate() {},
@@ -1809,6 +1865,7 @@ describe('ParseQuery', () => {
     q.include('manufacturer');
     q.select('inStock', 'lastPurchase');
     q.limit(10);
+    q.withCount(true);
     q.ascending(['a', 'b', 'c']);
     q.skip(4);
     q.equalTo('size', 'medium');
@@ -1823,6 +1880,7 @@ describe('ParseQuery', () => {
       include: 'manufacturer',
       keys: 'inStock,lastPurchase',
       limit: 10,
+      count: 1,
       order: 'a,b,c',
       skip: 4,
       where: {
@@ -2668,6 +2726,98 @@ describe('ParseQuery LocalDatastore', () => {
     q.fromLocalDatastore();
     results = await q.find();
     expect(results.length).toEqual(2);
+  });
+
+  it('can query offline withCount, skip and limit', async () => {
+    const obj1 = {
+      className: 'Item',
+      objectId: 'objectId1',
+      password: 123,
+      number: 3,
+      string: 'a',
+    };
+
+    const obj2 = {
+      className: 'Item',
+      objectId: 'objectId2',
+      number: 1,
+      string: 'b',
+    };
+
+    const obj3 = {
+      className: 'Item',
+      objectId: 'objectId3',
+      number: 2,
+      string: 'c',
+    };
+
+    const objects = [obj1, obj2, obj3];
+    mockLocalDatastore
+      ._serializeObjectsFromPinName
+      .mockImplementation(() => objects);
+
+    mockLocalDatastore
+      .checkIfEnabled
+      .mockImplementation(() => true);
+
+    let q = new ParseQuery('Item');
+    q.skip(0);
+    q.withCount(true);
+    q.fromLocalDatastore();
+    let result = await q.find();
+    expect(result.results.length).toEqual(3);
+    expect(result.count).toEqual(3);
+
+    q = new ParseQuery('Item');
+    q.skip(1);
+    q.withCount(true);
+    q.fromLocalDatastore();
+    result = await q.find();
+    expect(result.results.length).toEqual(2);
+    expect(result.count).toEqual(3);
+
+    q = new ParseQuery('Item');
+    q.skip(3);
+    q.withCount(true);
+    q.fromLocalDatastore();
+    result = await q.find();
+    expect(result.results.length).toEqual(0);
+    expect(result.count).toEqual(3);
+
+    q = new ParseQuery('Item');
+    q.withCount(true);
+    q.skip(4);
+    q.fromLocalDatastore();
+    result = await q.find();
+    expect(result.results.length).toEqual(0);
+    expect(result.count).toEqual(3);
+
+    q = new ParseQuery('Item');
+    q.limit(1);
+    q.skip(2);
+    q.withCount(true);
+    q.fromLocalDatastore();
+    result = await q.find();
+    expect(result.results.length).toEqual(1);
+    expect(result.count).toEqual(3);
+
+    q = new ParseQuery('Item');
+    q.limit(1);
+    q.skip(1);
+    q.withCount(true);
+    q.fromLocalDatastore();
+    result = await q.find();
+    expect(result.results.length).toEqual(1);
+    expect(result.count).toEqual(3);
+
+    q = new ParseQuery('Item');
+    q.limit(2);
+    q.skip(1);
+    q.withCount(true);
+    q.fromLocalDatastore();
+    result = await q.find();
+    expect(result.results.length).toEqual(2);
+    expect(result.count).toEqual(3);
   });
 
   it('can query offline select keys', async () => {
