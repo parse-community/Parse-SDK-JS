@@ -103,7 +103,7 @@ describe('Parse Query', () => {
     for (let i = 0; i < 4; i++) {
       items.push(new TestObject({ countMe: 2}));
     }
-    await Parse.Object.saveAll(items)
+    await Parse.Object.saveAll(items);
     const query = new Parse.Query(TestObject);
     query.withCount(true);
     query.limit(2);
@@ -129,6 +129,39 @@ describe('Parse Query', () => {
 
     assert(typeof count == 'number');
     assert.equal(results.length, 1);
+    assert.equal(count, 4);
+  });
+
+  it('can do query when withCount set without arguments', async () => {
+    const items = [];
+    for (let i = 0; i < 4; i++) {
+      items.push(new TestObject({ countMe: 2}));
+    }
+    await Parse.Object.saveAll(items);
+    const query = new Parse.Query(TestObject);
+    query.withCount();
+
+    const {results,count} = await query.find();
+
+    assert(typeof count == 'number');
+    assert.equal(results.length, 4);
+    assert.equal(count, 4);
+  });
+
+  it('can do query when withCount undefined', async () => {
+    const items = [];
+    for (let i = 0; i < 4; i++) {
+      items.push(new TestObject({ countMe: 2}));
+    }
+    await Parse.Object.saveAll(items);
+    const query = new Parse.Query(TestObject);
+    let foo;
+    query.withCount(foo);
+
+    const {results,count} = await query.find();
+
+    assert(typeof count == 'number');
+    assert.equal(results.length, 4);
     assert.equal(count, 4);
   });
 
