@@ -29,7 +29,8 @@ var PRESETS = {
   'react-native': ['@babel/preset-react'],
 };
 var PLUGINS = {
-  'browser': [transformRuntime, '@babel/plugin-transform-flow-comments', '@babel/plugin-proposal-class-properties', 'inline-package-json', 'transform-inline-environment-variables'],
+  'browser': [transformRuntime, '@babel/plugin-transform-flow-comments', '@babel/plugin-proposal-class-properties', 'inline-package-json',
+    ['transform-inline-environment-variables', {'exclude': ['SERVER_RENDERING']}]],
   'node': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables'],
   'react-native': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables'],
 };
