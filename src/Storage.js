@@ -98,6 +98,8 @@ if (process.env.PARSE_BUILD === 'react-native') {
   CoreManager.setStorageController(require('./StorageController.react-native'));
 } else if (process.env.PARSE_BUILD === 'browser') {
   CoreManager.setStorageController(require('./StorageController.browser'));
+} else if (process.env.PARSE_BUILD === 'weapp') {
+  CoreManager.setStorageController(require('./StorageController.weapp'));
 } else {
   CoreManager.setStorageController(require('./StorageController.default'));
 }

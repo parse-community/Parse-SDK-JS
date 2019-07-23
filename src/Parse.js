@@ -267,6 +267,10 @@ if (process.env.PARSE_BUILD === 'node') {
   Parse.Hooks = require('./ParseHooks');
 }
 
+if (process.env.PARSE_BUILD === 'weapp') {
+  wx.Parse = Parse;
+}
+
 // For legacy requires, of the form `var Parse = require('parse').Parse`
 Parse.Parse = Parse;
 
