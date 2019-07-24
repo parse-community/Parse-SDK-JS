@@ -6,6 +6,9 @@
         "es6": true
     },
     "parser": "babel-eslint",
+    "globals": { 
+        "wx": true 
+    },
     "plugins": [
         "flowtype"
     ],

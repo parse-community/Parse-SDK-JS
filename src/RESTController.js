@@ -62,7 +62,7 @@ if (process.env.PARSE_BUILD === 'weapp') {
     getResponseHeader(key) {
       return this.responseHeader[key];
     }
-    
+
     setRequestHeader(key, value) {
       this.header[key] = value;
     }
@@ -70,7 +70,7 @@ if (process.env.PARSE_BUILD === 'weapp') {
     open(method, url) {
       this.method = method;
       this.url = url;
-    } 
+    }
 
     send(data) {
       wx.request({

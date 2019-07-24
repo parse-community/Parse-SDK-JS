@@ -8,7 +8,7 @@
  *
  * @flow
  */
-localStorage = {
+const localStorage = {
   getItem(path) {
     return wx.getStorageSync(path);
   },
