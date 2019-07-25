@@ -18,6 +18,7 @@
     "index.js",
     "node.js",
     "react-native.js",
+    "weapp.js",
     "dist/",
     "lib/",
     "LICENSE",

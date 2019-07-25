@@ -8,42 +8,27 @@
  *
  * @flow
  */
-const localStorage = {
-  getItem(path) {
-    return wx.getStorageSync(path);
-  },
-  setItem(path, value) {
-    return wx.setStorageSync(path, value);
-  },
-  removeItem(path) {
-    return wx.removeStorageSync(path);
-  },
-  clear() {
-    return wx.clearStorageSync();
-  }
-}
-
 const StorageController = {
   async: 0,
 
   getItem(path: string): ?string {
-    return localStorage.getItem(path);
+    return wx.getStorageSync(path);
   },
 
   setItem(path: string, value: string) {
     try {
-      localStorage.setItem(path, value);
+      wx.setStorageSync(path, value);
     } catch (e) {
-      // Quota exceeded, possibly due to Safari Private Browsing mode
+      // Quota exceeded
     }
   },
 
   removeItem(path: string) {
-    localStorage.removeItem(path);
+    wx.removeStorageSync(path);
   },
 
   clear() {
-    localStorage.clear();
+    wx.clearStorageSync();
   }
 };
 

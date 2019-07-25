@@ -45,6 +45,12 @@ const AsyncStorage = require('react-native').AsyncStorage;
 Parse.setAsyncStorage(AsyncStorage);
 ```
 
+For WeChat applications, include `'parse/weapp'`:
+```js
+// In a WeCat application
+const Parse = require('parse/weapp');
+```
+
 For TypeScript applications, install `'@types/parse'`:
 ```
 $ npm install @types/parse
