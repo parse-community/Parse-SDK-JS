@@ -1,11 +1,23 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.5.1...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.6.0...master)
+
+## 2.6.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.5.1...2.6.0)
+
+**New Features**:
+- Support configurable WebSocketController ([#64f359a](https://github.com/parse-community/Parse-SDK-JS/commit/64f359af251ccb9473f4464d09bf3ba8a0d12dc9))
+- Support for Wechat Mini Program ([#874](https://github.com/parse-community/Parse-SDK-JS/pull/874))
+- Support withCount query constraint ([#868](https://github.com/parse-community/Parse-SDK-JS/pull/868))
+
+**Improvements**:
+- Fix SERVER_RENDERING environment variable ([#873](https://github.com/parse-community/Parse-SDK-JS/pull/873))
 
 ## 2.5.1
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.5.0...2.5.1)
-- FIX: Update NPM credentials
+
+- FIX: NPM credentials
 
 ## 2.5.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.4.0...2.5.0)
