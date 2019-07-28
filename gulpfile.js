@@ -23,6 +23,9 @@ var PRESETS = {
   'browser': [["@babel/preset-env", {
     "targets": "> 0.25%, not dead"
   }], '@babel/preset-react'],
+  'weapp': [["@babel/preset-env", {
+    "targets": "> 0.25%, not dead"
+  }], '@babel/preset-react'],
   'node': [["@babel/preset-env", {
     "targets": { "node": "8" }
   }]],
@@ -31,8 +34,10 @@ var PRESETS = {
 var PLUGINS = {
   'browser': [transformRuntime, '@babel/plugin-transform-flow-comments', '@babel/plugin-proposal-class-properties', 'inline-package-json',
     ['transform-inline-environment-variables', {'exclude': ['SERVER_RENDERING']}]],
+  'weapp': [transformRuntime, '@babel/plugin-transform-flow-comments', '@babel/plugin-proposal-class-properties', 'inline-package-json',
+    ['transform-inline-environment-variables', {'exclude': ['SERVER_RENDERING']}]],
   'node': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables'],
-  'react-native': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables'],
+  'react-native': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables']
 };
 
 var DEV_HEADER = (
@@ -90,8 +95,35 @@ gulp.task('browserify', function(cb) {
     .pipe(gulp.dest('./dist'));
 });
 
+
+gulp.task('browserify-weapp', function(cb) {
+  var stream = browserify({
+    builtins: ['_process', 'events'],
+    entries: 'lib/weapp/Parse.js',
+    standalone: 'Parse'
+  })
+    .exclude('xmlhttprequest')
+    .ignore('_process')
+    .bundle();
+  stream.on('end', () => {
+    cb();
+  });
+  return stream.pipe(source('parse.weapp.js'))
+    .pipe(derequire())
+    .pipe(insert.prepend(DEV_HEADER))
+    .pipe(gulp.dest('./dist'));
+});
+
 gulp.task('minify', function() {
   return gulp.src('dist/parse.js')
+    .pipe(uglify())
+    .pipe(insert.prepend(FULL_HEADER))
+    .pipe(rename({ extname: '.min.js' }))
+    .pipe(gulp.dest('./dist'))
+});
+
+gulp.task('minify-weapp', function() {
+  return gulp.src('dist/parse.weapp.js')
     .pipe(uglify())
     .pipe(insert.prepend(FULL_HEADER))
     .pipe(rename({ extname: '.min.js' }))

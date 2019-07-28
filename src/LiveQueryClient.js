@@ -321,6 +321,8 @@ class LiveQueryClient extends EventEmitter {
       return require('ws');
     } else if (process.env.PARSE_BUILD === 'browser') {
       return typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null;
+    } else if (process.env.PARSE_BUILD === 'weapp') {
+      return require('./Socket.weapp');
     } else if (process.env.PARSE_BUILD === 'react-native') {
       return WebSocket;
     }

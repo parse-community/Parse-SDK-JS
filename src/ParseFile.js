@@ -16,6 +16,9 @@ let XHR = null;
 if (typeof XMLHttpRequest !== 'undefined') {
   XHR = XMLHttpRequest;
 }
+if (process.env.PARSE_BUILD === 'weapp') {
+  XHR = require('./Xhr.weapp');
+}
 
 type Base64 = { base64: string };
 type Uri = { uri: string };

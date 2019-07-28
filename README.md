@@ -45,6 +45,13 @@ const AsyncStorage = require('react-native').AsyncStorage;
 Parse.setAsyncStorage(AsyncStorage);
 ```
 
+For WeChat miniprogram, include `'parse/weapp'`:
+```js
+// In a WeChat miniprogram
+const Parse = require('parse/weapp');
+```
+If you want to use a pre-compiled file, you can fetch it from [unpkg](https://unpkg.com). The development version is available at [https://unpkg.com/parse/dist/parse.weapp.js](https://unpkg.com/parse/dist/parse.weapp.js), and the minified production version is at [https://unpkg.com/parse/dist/parse.weapp.min.js](https://unpkg.com/parse/dist/parse.weapp.min.js).
+
 For TypeScript applications, install `'@types/parse'`:
 ```
 $ npm install @types/parse
