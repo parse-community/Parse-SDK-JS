@@ -136,7 +136,14 @@ type HooksController = {
   update: (hook: mixed) => Promise;
   send: (method: string, path: string, body?: mixed) => Promise;
 };
-
+type WebSocketController = {
+  onopen: () => void;
+  onmessage: (message: any) => void;
+  onclose: () => void;
+  onerror: (error: any) => void;
+  send: (data: any) => void;
+  close: () => void;
+}
 type Config = {
   AnalyticsController?: AnalyticsController,
   CloudController?: CloudController,
@@ -154,6 +161,7 @@ type Config = {
   LocalDatastoreController?: LocalDatastoreController,
   UserController?: UserController,
   HooksController?: HooksController,
+  WebSocketController?: WebSocketController,
 };
 
 const config: Config & { [key: string]: mixed } = {
@@ -368,6 +376,14 @@ module.exports = {
 
   getAsyncStorage() {
     return config['AsyncStorage'];
+  },
+
+  setWebSocketController(controller: WebSocketController) {
+    config['WebSocketController'] = controller;
+  },
+
+  getWebSocketController(): WebSocketController {
+    return config['WebSocketController'];
   },
 
   setUserController(controller: UserController) {

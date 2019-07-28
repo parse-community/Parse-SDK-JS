@@ -238,7 +238,7 @@ class LiveQueryClient extends EventEmitter {
    *
    */
   open() {
-    const WebSocketImplementation = this._getWebSocketImplementation();
+    const WebSocketImplementation = CoreManager.getWebSocketController();
     if (!WebSocketImplementation) {
       this.emit(CLIENT_EMMITER_TYPES.ERROR, 'Can not find WebSocket implementation');
       return;
@@ -248,7 +248,6 @@ class LiveQueryClient extends EventEmitter {
       this.state = CLIENT_STATE.CONNECTING;
     }
 
-    // Get WebSocket implementation
     this.socket = new WebSocketImplementation(this.serverURL);
 
     // Bind WebSocket callbacks
@@ -314,18 +313,6 @@ class LiveQueryClient extends EventEmitter {
     }
     this._handleReset();
     this.emit(CLIENT_EMMITER_TYPES.CLOSE);
-  }
-
-  _getWebSocketImplementation(): any {
-    if (process.env.PARSE_BUILD === 'node') {
-      return require('ws');
-    } else if (process.env.PARSE_BUILD === 'browser') {
-      return typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null;
-    } else if (process.env.PARSE_BUILD === 'weapp') {
-      return require('./Socket.weapp');
-    } else if (process.env.PARSE_BUILD === 'react-native') {
-      return WebSocket;
-    }
   }
 
   // ensure we start with valid state if connect is called again after close
@@ -461,6 +448,16 @@ class LiveQueryClient extends EventEmitter {
       this.open();
     }).bind(this), time);
   }
+}
+
+if (process.env.PARSE_BUILD === 'node') {
+  CoreManager.setWebSocketController(require('ws'));
+} else if (process.env.PARSE_BUILD === 'browser') {
+  CoreManager.setWebSocketController(typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null);
+} else if (process.env.PARSE_BUILD === 'weapp') {
+  CoreManager.setWebSocketController(require('./Socket.weapp'));
+} else if (process.env.PARSE_BUILD === 'react-native') {
+  CoreManager.setWebSocketController(WebSocket);
 }
 
 export default LiveQueryClient;

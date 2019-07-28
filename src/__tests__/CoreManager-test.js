@@ -381,4 +381,18 @@ describe('CoreManager', () => {
     CoreManager.setLocalDatastoreController(controller);
     expect(CoreManager.getLocalDatastoreController()).toBe(controller);
   });
+
+  it('can set and get WebSocketController', () => {
+    const controller = {
+      onopen: function() {},
+      onmessage: function() {},
+      onclose: function() {},
+      onerror: function() {},
+      send: function() {},
+      close: function() {},
+    };
+
+    CoreManager.setWebSocketController(controller);
+    expect(CoreManager.getWebSocketController()).toBe(controller);
+  });
 });

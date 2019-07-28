@@ -26,9 +26,11 @@ module.exports = class SocketWeapp {
     })
   }
 
-  send(msg) {
-    wx.sendSocketMessage({
-      data: msg
-    })
+  send(data) {
+    wx.sendSocketMessage({ data });
+  }
+
+  close() {
+    wx.closeSocket();
   }
 }
