@@ -360,7 +360,6 @@ class LiveQueryClient extends EventEmitter {
       break;
     case OP_EVENTS.SUBSCRIBED:
       if (subscription) {
-        console.log(subscription);
         subscription.subscribed = true;
         subscription.subscribePromise.resolve();
         subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN);
