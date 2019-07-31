@@ -178,9 +178,9 @@ class LiveQueryClient extends EventEmitter {
    *
    * @param {Object} query - the ParseQuery you want to subscribe to
    * @param {string} sessionToken (optional)
-   * @return {Object} subscription
+   * @return {LiveQuerySubscription} subscription
    */
-  subscribe(query: Object, sessionToken: ?string): Object {
+  subscribe(query: Object, sessionToken: ?string): LiveQuerySubscription {
     if (!query) {
       return;
     }
@@ -309,6 +309,7 @@ class LiveQueryClient extends EventEmitter {
     this.socket.close();
     // Notify each subscription about the close
     for (const subscription of this.subscriptions.values()) {
+      subscription.subscribed = false;
       subscription.emit(SUBSCRIPTION_EMMITER_TYPES.CLOSE);
     }
     this._handleReset();
@@ -358,12 +359,15 @@ class LiveQueryClient extends EventEmitter {
       break;
     case OP_EVENTS.SUBSCRIBED:
       if (subscription) {
+        subscription.subscribed = true;
+        subscription.subscribePromise.resolve();
         subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN);
       }
       break;
     case OP_EVENTS.ERROR:
       if (data.requestId) {
         if (subscription) {
+          subscription.subscribePromise.resolve();
           subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, data.error);
         }
       } else {
@@ -435,7 +439,7 @@ class LiveQueryClient extends EventEmitter {
 
     // handle case when both close/error occur at frequent rates we ensure we do not reconnect unnecessarily.
     // we're unable to distinguish different between close/error when we're unable to reconnect therefore
-    // we try to reonnect in both cases
+    // we try to reconnect in both cases
     // server side ws and browser WebSocket behave differently in when close/error get triggered
 
     if (this.reconnectHandle) {

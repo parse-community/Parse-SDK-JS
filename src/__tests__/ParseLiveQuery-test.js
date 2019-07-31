@@ -157,7 +157,6 @@ describe('ParseLiveQuery', () => {
   });
 
   it('subscribes to all subscription events', (done) => {
-
     CoreManager.set('UserController', {
       currentUserAsync() {
         return Promise.resolve({
@@ -235,7 +234,6 @@ describe('ParseLiveQuery', () => {
         }
       }, 1);
     });
-
   });
 
   it('should not throw on usubscribe', (done) => {

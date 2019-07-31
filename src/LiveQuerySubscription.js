@@ -10,6 +10,7 @@
 
 import EventEmitter from './EventEmitter';
 import CoreManager from './CoreManager';
+import { resolvingPromise } from './promiseUtils';
 
 /**
  * Creates a new LiveQuery Subscription.
@@ -101,6 +102,8 @@ class Subscription extends EventEmitter {
     this.id = id;
     this.query = query;
     this.sessionToken = sessionToken;
+    this.subscribePromise = resolvingPromise();
+    this.subscribed = false;
 
     // adding listener so process does not crash
     // best practice is for developer to register their own listener

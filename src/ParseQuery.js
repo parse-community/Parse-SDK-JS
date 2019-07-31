@@ -1618,7 +1618,9 @@ class ParseQuery {
       liveQueryClient.open();
     }
     const subscription = liveQueryClient.subscribe(this, sessionToken);
-    return subscription;
+    return subscription.subscribePromise.then(() => {
+      return subscription;
+    });
   }
 
   /**

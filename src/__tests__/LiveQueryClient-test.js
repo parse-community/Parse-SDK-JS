@@ -51,6 +51,18 @@ const events = require('events');
 
 CoreManager.setLocalDatastore(mockLocalDatastore);
 
+function resolvingPromise() {
+  let res;
+  let rej;
+  const promise = new Promise((resolve, reject) => {
+    res = resolve;
+    rej = reject;
+  });
+  promise.resolve = res;
+  promise.reject = rej;
+  return promise;
+}
+
 describe('LiveQueryClient', () => {
   beforeEach(() => {
     mockLocalDatastore.isEnabled = false;
@@ -152,6 +164,8 @@ describe('LiveQueryClient', () => {
     });
     // Add mock subscription
     const subscription = new events.EventEmitter();
+    subscription.subscribePromise = resolvingPromise();
+
     liveQueryClient.subscriptions.set(1, subscription);
     const data = {
       op: 'subscribed',
@@ -193,6 +207,39 @@ describe('LiveQueryClient', () => {
     liveQueryClient.on('error', function(error) {
       isChecked = true;
       expect(error).toEqual('error');
+    });
+
+    liveQueryClient._handleWebSocketMessage(event);
+
+    expect(isChecked).toBe(true);
+  });
+
+  it('can handle WebSocket error while subscribing', () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken'
+    });
+    const subscription = new events.EventEmitter();
+    subscription.subscribePromise = resolvingPromise();
+    liveQueryClient.subscriptions.set(1, subscription);
+
+    const data = {
+      op: 'error',
+      clientId: 1,
+      requestId: 1,
+      error: 'error thrown'
+    };
+    const event = {
+      data: JSON.stringify(data)
+    }
+    // Register checked in advance
+    let isChecked = false;
+    subscription.on('error', function(error) {
+      isChecked = true;
+      expect(error).toEqual('error thrown');
     });
 
     liveQueryClient._handleWebSocketMessage(event);
@@ -457,9 +504,13 @@ describe('LiveQueryClient', () => {
     const query = new ParseQuery('Test');
     query.equalTo('key', 'value');
 
-    const subscription = liveQueryClient.subscribe(query);
+    const subscribePromise = liveQueryClient.subscribe(query);
+    const clientSub = liveQueryClient.subscriptions.get(1);
+    clientSub.subscribePromise.resolve();
+
+    const subscription = await subscribePromise;
     liveQueryClient.connectPromise.resolve();
-    expect(subscription).toBe(liveQueryClient.subscriptions.get(1));
+    expect(subscription).toBe(clientSub);
     expect(liveQueryClient.requestId).toBe(2);
     await liveQueryClient.connectPromise;
     const messageStr = liveQueryClient.socket.send.mock.calls[0][0];
