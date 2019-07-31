@@ -157,7 +157,6 @@ describe('ParseLiveQuery', () => {
   });
 
   it('subscribes to all subscription events', (done) => {
-
     CoreManager.set('UserController', {
       currentUserAsync() {
         return Promise.resolve({
@@ -172,39 +171,39 @@ describe('ParseLiveQuery', () => {
     CoreManager.set('LIVEQUERY_SERVER_URL', null);
 
     const controller = CoreManager.getLiveQueryController();
-    const isCalled = {};
 
     controller.getDefaultLiveQueryClient().then(async (client) => {
 
       const query = new ParseQuery("ObjectType");
       query.equalTo("test", "value");
-      client.subscribe(query, "close").then((ourSubscription) => {
-        ["open",
-          "close",
-          "error",
-          "create",
-          "update",
-          "enter",
-          "leave",
-          "delete"].forEach((key) =>{
-          ourSubscription.on(key, () => {
-            isCalled[key] = true;
-          });
+      const ourSubscription = await client.subscribe(query, "close");
+
+      const isCalled = {};
+      ["open",
+        "close",
+        "error",
+        "create",
+        "update",
+        "enter",
+        "leave",
+        "delete"].forEach((key) =>{
+        ourSubscription.on(key, () => {
+          isCalled[key] = true;
         });
       });
 
       // client.subscribe() completes asynchronously,
       // so we need to give it a chance to complete before finishing
-      try {
-        client.socket = {
-          send() {}
-        }
-        client.connectPromise.resolve();
-        const actualSubscription = client.subscriptions.get(1);
-        actualSubscription.subscribePromise.resolve();
-        expect(actualSubscription).toBeDefined();
+      setTimeout(() => {
+        try {
+          client.socket = {
+            send() {}
+          }
+          client.connectPromise.resolve();
+          const actualSubscription = client.subscriptions.get(1);
 
-        setTimeout(() => {
+          expect(actualSubscription).toBeDefined();
+
           actualSubscription.emit("open");
           expect(isCalled["open"]).toBe(true);
 
@@ -230,10 +229,10 @@ describe('ParseLiveQuery', () => {
           expect(isCalled["delete"]).toBe(true);
 
           done();
-        }, 1);
-      } catch(e){
-        done.fail(e);
-      }
+        } catch(e){
+          done.fail(e);
+        }
+      }, 1);
     });
   });
 

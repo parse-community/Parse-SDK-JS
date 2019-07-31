@@ -2849,7 +2849,9 @@ describe('ParseQuery LocalDatastore', () => {
         return false;
       },
       subscribe: function(query, sessionToken) {
-        return new LiveQuerySubscription('0', query, sessionToken);
+        const subscription = new LiveQuerySubscription('0', query, sessionToken);
+        subscription.subscribePromise.resolve();
+        return subscription;
       },
     };
     CoreManager.set('UserController', {
@@ -2880,7 +2882,9 @@ describe('ParseQuery LocalDatastore', () => {
       },
       open: function() {},
       subscribe: function(query, sessionToken) {
-        return new LiveQuerySubscription('0', query, sessionToken);
+        const subscription = new LiveQuerySubscription('0', query, sessionToken);
+        subscription.subscribePromise.resolve();
+        return subscription;
       },
     };
     CoreManager.set('UserController', {
@@ -2911,7 +2915,9 @@ describe('ParseQuery LocalDatastore', () => {
       },
       open: function() {},
       subscribe: function(query, sessionToken) {
-        return new LiveQuerySubscription('0', query, sessionToken);
+        const subscription = new LiveQuerySubscription('0', query, sessionToken);
+        subscription.subscribePromise.resolve();
+        return subscription;
       },
     };
     CoreManager.set('UserController', {
@@ -2938,7 +2944,9 @@ describe('ParseQuery LocalDatastore', () => {
       },
       open: function() {},
       subscribe: function(query, sessionToken) {
-        return new LiveQuerySubscription('0', query, sessionToken);
+        const subscription = new LiveQuerySubscription('0', query, sessionToken);
+        subscription.subscribePromise.resolve();
+        return subscription;
       },
     };
     CoreManager.set('UserController', {
