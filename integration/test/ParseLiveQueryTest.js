@@ -40,15 +40,16 @@ describe('Parse LiveQuery', () => {
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
     const client = await Parse.CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
-    client.open();
+    if (client.shouldOpen()) {
+      client.open();
+    }
     const subscription = client.subscribe(query);
 
     subscription.on('update', object => {
       assert.equal(object.get('foo'), 'bar');
       done();
     });
-    // await subscription.subscribePromise;
-    console.log('here');
+    await subscription.subscribePromise;
     object.set({ foo: 'bar' });
     await object.save();
   });
