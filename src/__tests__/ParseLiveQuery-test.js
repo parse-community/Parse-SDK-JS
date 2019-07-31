@@ -172,39 +172,39 @@ describe('ParseLiveQuery', () => {
     CoreManager.set('LIVEQUERY_SERVER_URL', null);
 
     const controller = CoreManager.getLiveQueryController();
+    const isCalled = {};
 
     controller.getDefaultLiveQueryClient().then(async (client) => {
 
       const query = new ParseQuery("ObjectType");
       query.equalTo("test", "value");
-      const ourSubscription = await client.subscribe(query, "close");
-
-      const isCalled = {};
-      ["open",
-        "close",
-        "error",
-        "create",
-        "update",
-        "enter",
-        "leave",
-        "delete"].forEach((key) =>{
-        ourSubscription.on(key, () => {
-          isCalled[key] = true;
+      client.subscribe(query, "close").then((ourSubscription) => {
+        ["open",
+          "close",
+          "error",
+          "create",
+          "update",
+          "enter",
+          "leave",
+          "delete"].forEach((key) =>{
+          ourSubscription.on(key, () => {
+            isCalled[key] = true;
+          });
         });
       });
 
       // client.subscribe() completes asynchronously,
       // so we need to give it a chance to complete before finishing
-      setTimeout(() => {
-        try {
-          client.socket = {
-            send() {}
-          }
-          client.connectPromise.resolve();
-          const actualSubscription = client.subscriptions.get(1);
+      try {
+        client.socket = {
+          send() {}
+        }
+        client.connectPromise.resolve();
+        const actualSubscription = client.subscriptions.get(1);
+        actualSubscription.subscribePromise.resolve();
+        expect(actualSubscription).toBeDefined();
 
-          expect(actualSubscription).toBeDefined();
-
+        setTimeout(() => {
           actualSubscription.emit("open");
           expect(isCalled["open"]).toBe(true);
 
@@ -230,12 +230,11 @@ describe('ParseLiveQuery', () => {
           expect(isCalled["delete"]).toBe(true);
 
           done();
-        } catch(e){
-          done.fail(e);
-        }
-      }, 1);
+        }, 1);
+      } catch(e){
+        done.fail(e);
+      }
     });
-
   });
 
   it('should not throw on usubscribe', (done) => {

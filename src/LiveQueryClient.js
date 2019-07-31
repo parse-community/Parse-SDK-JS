@@ -178,9 +178,9 @@ class LiveQueryClient extends EventEmitter {
    *
    * @param {Object} query - the ParseQuery you want to subscribe to
    * @param {string} sessionToken (optional)
-   * @return {Object} subscription
+   * @return {Promise<LiveQuerySubscription>} subscription
    */
-  subscribe(query: Object, sessionToken: ?string): Object {
+  subscribe(query: Object, sessionToken: ?string): Promise<LiveQuerySubscription> {
     if (!query) {
       return;
     }
@@ -208,8 +208,9 @@ class LiveQueryClient extends EventEmitter {
     this.connectPromise.then(() => {
       this.socket.send(JSON.stringify(subscribeRequest));
     });
-
-    return subscription;
+    return subscription.subscribePromise.then(() => {
+      return subscription;
+    });
   }
 
   /**
@@ -309,6 +310,7 @@ class LiveQueryClient extends EventEmitter {
     this.socket.close();
     // Notify each subscription about the close
     for (const subscription of this.subscriptions.values()) {
+      subscription.subscribed = false;
       subscription.emit(SUBSCRIPTION_EMMITER_TYPES.CLOSE);
     }
     this._handleReset();
@@ -358,12 +360,16 @@ class LiveQueryClient extends EventEmitter {
       break;
     case OP_EVENTS.SUBSCRIBED:
       if (subscription) {
+        console.log(subscription);
+        subscription.subscribed = true;
+        subscription.subscribePromise.resolve();
         subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN);
       }
       break;
     case OP_EVENTS.ERROR:
       if (data.requestId) {
         if (subscription) {
+          subscription.subscribePromise.resolve();
           subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, data.error);
         }
       } else {

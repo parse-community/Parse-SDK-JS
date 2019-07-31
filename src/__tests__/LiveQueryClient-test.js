@@ -51,6 +51,18 @@ const events = require('events');
 
 CoreManager.setLocalDatastore(mockLocalDatastore);
 
+function resolvingPromise() {
+  let res;
+  let rej;
+  const promise = new Promise((resolve, reject) => {
+    res = resolve;
+    rej = reject;
+  });
+  promise.resolve = res;
+  promise.reject = rej;
+  return promise;
+}
+
 describe('LiveQueryClient', () => {
   beforeEach(() => {
     mockLocalDatastore.isEnabled = false;
@@ -152,6 +164,8 @@ describe('LiveQueryClient', () => {
     });
     // Add mock subscription
     const subscription = new events.EventEmitter();
+    subscription.subscribePromise = resolvingPromise();
+
     liveQueryClient.subscriptions.set(1, subscription);
     const data = {
       op: 'subscribed',
@@ -457,9 +471,13 @@ describe('LiveQueryClient', () => {
     const query = new ParseQuery('Test');
     query.equalTo('key', 'value');
 
-    const subscription = liveQueryClient.subscribe(query);
+    const subscribePromise = liveQueryClient.subscribe(query);
+    const clientSub = liveQueryClient.subscriptions.get(1);
+    clientSub.subscribePromise.resolve();
+
+    const subscription = await subscribePromise;
     liveQueryClient.connectPromise.resolve();
-    expect(subscription).toBe(liveQueryClient.subscriptions.get(1));
+    expect(subscription).toBe(clientSub);
     expect(liveQueryClient.requestId).toBe(2);
     await liveQueryClient.connectPromise;
     const messageStr = liveQueryClient.socket.send.mock.calls[0][0];
