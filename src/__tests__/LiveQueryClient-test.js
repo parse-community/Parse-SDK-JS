@@ -214,6 +214,39 @@ describe('LiveQueryClient', () => {
     expect(isChecked).toBe(true);
   });
 
+  it('can handle WebSocket error while subscribing', () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken'
+    });
+    const subscription = new events.EventEmitter();
+    subscription.subscribePromise = resolvingPromise();
+    liveQueryClient.subscriptions.set(1, subscription);
+
+    const data = {
+      op: 'error',
+      clientId: 1,
+      requestId: 1,
+      error: 'error thrown'
+    };
+    const event = {
+      data: JSON.stringify(data)
+    }
+    // Register checked in advance
+    let isChecked = false;
+    subscription.on('error', function(error) {
+      isChecked = true;
+      expect(error).toEqual('error thrown');
+    });
+
+    liveQueryClient._handleWebSocketMessage(event);
+
+    expect(isChecked).toBe(true);
+  });
+
   it('can handle WebSocket event response message', () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
