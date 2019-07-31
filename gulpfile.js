@@ -13,7 +13,7 @@ var BUILD = process.env.PARSE_BUILD || 'browser';
 var VERSION = require('./package.json').version;
 
 var transformRuntime = ["@babel/plugin-transform-runtime", {
-  "corejs": false,
+  "corejs": 3,
   "helpers": true,
   "regenerator": true,
   "useESModules": false
