@@ -1,17 +1,49 @@
-# Parse SDK for JavaScript
+<p align="center">
+    <img alt="Parse Platform" src="Assets/logo large.png" width="200">
+  </a>
+</p>
 
-[![Build Status][build-status-svg]][build-status-link]
-[![Test Coverage][coverage-status-svg]][coverage-status-link]
-[![Npm Version][npm-svg]][npm-link]
-[![CDNJS version][cdn-svg]][cdn-link]
-[![Join The Conversation][discourse-svg]][discourse-link]
+<h2 align="center">Parse SDK for JavaScript</h2>
+
+<p align="center">
+    A library that gives you access to the powerful Parse Server backend from your JavaScript app.
+</p>
+
+<p align="center">
+    <a href="https://twitter.com/intent/follow?screen_name=parseplatform"><img alt="Follow on Twitter" src="https://img.shields.io/twitter/follow/parseplatform?style=social&label=Follow"></a>
+    <a href="https://community.parseplatform.org/"><img alt="Join the conversation" src="https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg"></a>
+    <a href="https://github.com/parse-community/Parse-SDK-JS/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-BSD-lightgrey.svg"></a>
+    <a href=" https://travis-ci.org/parse-community/Parse-SDK-JS"><img alt="Build status" src="https://travis-ci.org/parse-community/Parse-SDK-JS.svg?branch=master"></a>
+</p>
+
+<p align="center">
+    <a href="http://codecov.io/github/parse-community/Parse-SDK-JS?branch=master"><img alt="Test coverage" src="http://codecov.io/github/parse-community/Parse-SDK-JS/coverage.svg?branch=master"></a>
+    <a href="https://npmjs.org/parse"><img alt="npm version" src="https://badge.fury.io/js/parse.svg"></a>
+    <a href="https://cdnjs.com/libraries/parse"><img alt="CDNJS version" src="https://img.shields.io/cdnjs/v/parse.svg"></a>
+    <a href="https://greenkeeper.io/"><img alt="Greenkeeper badge" src="https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg"></a>
+</p>
+
+<h2 align="center">Our Sponsors</h2>
+<p align="center">
+    <p align="center">Our backers and sponsors help to ensure the quality and timely development of the Parse Platform.</p>
+  <details align="center">
+  <summary align="center"><b>🥉 Bronze Sponsors</b></summary>
+  <a href="https://opencollective.com/parse-server/sponsor/0/website" target="_blank"><img src="https://opencollective.com/parse-server/sponsor/0/avatar.svg"></a>
+  </details>
+
+</p>
+<p align="center">
+  <a href="#backers"><img alt="Backers on Open Collective" src="https://opencollective.com/parse-server/backers/badge.svg" /></a>
+  <a href="#sponsors"><img alt="Sponsors on Open Collective" src="https://opencollective.com/parse-server/sponsors/badge.svg" /></a>
+</p>
+<br>
+
+
+<!---
 [![Greenkeeper badge][greenkeeper-svg]][greenkeeper-link]
-[![License][license-svg]][license-link]
-[![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)][open-collective-link]
-[![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)][open-collective-link]
-[![Twitter Follow](https://img.shields.io/twitter/follow/ParsePlatform.svg?label=Follow%20us%20on%20Twitter&style=social)](https://twitter.com/intent/follow?screen_name=ParsePlatform)
+--->
 
-A library that gives you access to the powerful Parse cloud platform from your JavaScript app. For more information on Parse and its features, see [the website](http://parseplatform.org), [the JavaScript guide](http://docs.parseplatform.org/js/guide/) or [API Reference](http://parseplatform.org/Parse-SDK-JS/api/).
+For more information on Parse and its features, see [the website](http://parseplatform.org), [the JavaScript guide](http://docs.parseplatform.org/js/guide/) or [API Reference](http://parseplatform.org/Parse-SDK-JS/api/).
 
 ## Getting Started
 
@@ -100,20 +132,7 @@ of patent rights can be found in the PATENTS file in the same directory.
 
 -----
 As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code.
-
- [build-status-svg]: https://travis-ci.org/parse-community/Parse-SDK-JS.svg?branch=master
- [build-status-link]: https://travis-ci.org/parse-community/Parse-SDK-JS
- [coverage-status-svg]: http://codecov.io/github/parse-community/Parse-SDK-JS/coverage.svg?branch=master
- [coverage-status-link]: http://codecov.io/github/parse-community/Parse-SDK-JS?branch=master
- [npm-svg]: https://badge.fury.io/js/parse.svg
- [npm-link]: https://npmjs.org/parse
- [cdn-svg]: https://img.shields.io/cdnjs/v/parse.svg
- [cdn-link]: https://cdnjs.com/libraries/parse
- [discourse-svg]: https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg
- [discourse-link]: https://community.parseplatform.org/c/sdk/js
- [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
- [license-link]: https://github.com/parse-community/Parse-SDK-JS/blob/master/LICENSE
- [greenkeeper-svg]: https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg
- [greenkeeper-link]: https://greenkeeper.io/
+ 
  [types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse
+ 
  [open-collective-link]: https://opencollective.com/parse-server
