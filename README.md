@@ -24,13 +24,7 @@
     <a href="https://cdnjs.com/libraries/parse"><img alt="CDNJS version" src="https://img.shields.io/cdnjs/v/parse.svg"></a>
     <a href="https://greenkeeper.io/"><img alt="Greenkeeper badge" src="https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg"></a>
 </p>
-
 <br>
-
-
-<!---
-[![Greenkeeper badge][greenkeeper-svg]][greenkeeper-link]
---->
 
 For more information on Parse and its features, see [the website](https://parseplatform.org), [the JavaScript guide](https://docs.parseplatform.org/js/guide/) or [API Reference](https://parseplatform.org/Parse-SDK-JS/api/).
 
