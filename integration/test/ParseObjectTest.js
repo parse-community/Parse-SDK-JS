@@ -934,6 +934,52 @@ describe('Parse Object', () => {
     });
   });
 
+  it('can skip cascade saving as per request', async(done) => {
+    const Parent = Parse.Object.extend('Parent');
+    const Child = Parse.Object.extend('Child');
+
+    const parent = new Parent();
+    const child1 = new Child();
+    const child2 = new Child();
+    const child3 = await new Child().save();
+
+    child1.set('name', 'rob');
+    child2.set('name', 'sansa');
+    child3.set('name', 'john');
+    parent.set('children', [child1, child2]);
+    parent.set('bastard', child3);
+
+    await parent.save(null, { cascadeSave: false });
+    const results = await new Parse.Query(Child)
+      .ascending('name')
+      .find();
+
+    assert.equal(results.length, 3);
+    expect(results[0].get('name')).toBeUndefined();
+    assert.equal(results[1].get('name'), 'rob');
+    assert.equal(results[2].get('name'), 'sansa');
+
+    parent.set('dead', true);
+    child1.set('dead', true);
+    await parent.save(null);
+    const rob = await new Parse.Query(Child)
+      .equalTo('name', 'rob')
+      .first();
+
+    expect(rob.get('dead')).toBe(true);
+
+    parent.set('lastname', 'stark');
+    child3.set('lastname', 'stark');
+    await parent.save(null, { cascadeSave: false });
+    const john = await new Parse.Query(Child)
+      .doesNotExist('lastname')
+      .first();
+
+    expect(john.get('lastname')).toBeUndefined();
+
+    done();
+  });
+
   it('can do two saves at the same time', (done) => {
     const object = new TestObject();
     let firstSave = true;

@@ -54,6 +54,10 @@ type SaveParams = {
   body: AttributeMap;
 };
 
+type SaveOptions = FullOptions & {
+  cascadeSave?: boolean
+}
+
 const DEFAULT_BATCH_SIZE = 20;
 
 // Mapping of class names to constructors, so we can populate objects from the
@@ -1131,6 +1135,7 @@ class ParseObject {
    *     be used for this request.
    *       <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *       <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
    *     </ul>
    *   </li>
    * </ul>
@@ -1143,6 +1148,7 @@ class ParseObject {
    *       be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
    * </ul>
    *
    * @return {Promise} A promise that is fulfilled when the save
@@ -1150,8 +1156,8 @@ class ParseObject {
    */
   save(
     arg1: ?string | { [attr: string]: mixed },
-    arg2: FullOptions | mixed,
-    arg3?: FullOptions
+    arg2: SaveOptions | mixed,
+    arg3?: SaveOptions
   ): Promise {
     let attrs;
     let options;
@@ -1200,7 +1206,8 @@ class ParseObject {
       saveOptions.sessionToken = options.sessionToken;
     }
     const controller = CoreManager.getObjectController();
-    const unsaved = unsavedChildren(this);
+    let unsaved = unsavedChildren(this);
+    unsaved = unsaved.filter(o => o._localId || options.cascadeSave !== false);
     return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
     });
