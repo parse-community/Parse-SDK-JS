@@ -1206,8 +1206,7 @@ class ParseObject {
       saveOptions.sessionToken = options.sessionToken;
     }
     const controller = CoreManager.getObjectController();
-    let unsaved = unsavedChildren(this);
-    unsaved = unsaved && unsaved.filter(o => o._localId || options.cascadeSave !== false) || [];
+    const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
     return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
     });

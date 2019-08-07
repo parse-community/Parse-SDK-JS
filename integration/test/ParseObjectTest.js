@@ -941,7 +941,7 @@ describe('Parse Object', () => {
     const parent = new Parent();
     const child1 = new Child();
     const child2 = new Child();
-    const child3 = await new Child().save();
+    const child3 = new Child();
 
     child1.set('name', 'rob');
     child2.set('name', 'sansa');
@@ -949,32 +949,24 @@ describe('Parse Object', () => {
     parent.set('children', [child1, child2]);
     parent.set('bastard', child3);
 
-    await parent.save(null, { cascadeSave: false });
-    const results = await new Parse.Query(Child)
-      .ascending('name')
-      .find();
+    expect(parent.save).toThrow();
+    let results = await new Parse.Query(Child).find();
+    assert.equal(results.length, 0);
 
+    await parent.save(null, { cascadeSave: true });
+    results = await new Parse.Query(Child).find();
     assert.equal(results.length, 3);
-    expect(results[0].get('name')).toBeUndefined();
-    assert.equal(results[1].get('name'), 'rob');
-    assert.equal(results[2].get('name'), 'sansa');
 
     parent.set('dead', true);
     child1.set('dead', true);
     await parent.save(null);
-    const rob = await new Parse.Query(Child)
-      .equalTo('name', 'rob')
-      .first();
-
+    const rob = await new Parse.Query(Child).equalTo('name', 'rob').first();
     expect(rob.get('dead')).toBe(true);
 
     parent.set('lastname', 'stark');
     child3.set('lastname', 'stark');
     await parent.save(null, { cascadeSave: false });
-    const john = await new Parse.Query(Child)
-      .doesNotExist('lastname')
-      .first();
-
+    const john = await new Parse.Query(Child).doesNotExist('lastname').first();
     expect(john.get('lastname')).toBeUndefined();
 
     done();
