@@ -2143,6 +2143,7 @@ const DefaultController = {
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
+    console.log('saving object!!');
     const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
     const localDatastore = CoreManager.getLocalDatastore();
     const mapIdForPin = {};
