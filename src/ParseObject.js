@@ -309,6 +309,8 @@ class ParseObject {
     for (attr in pending[0]) {
       json[attr] = pending[0][attr].toJSON();
     }
+    json._batchIndex = this._batchIndex || 0;
+    json._batchCount = this._batchCount || 1;
     return json;
   }
 
@@ -2143,7 +2145,6 @@ const DefaultController = {
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
-    console.log('saving object!!');
     const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
     const localDatastore = CoreManager.getLocalDatastore();
     const mapIdForPin = {};
@@ -2161,6 +2162,8 @@ const DefaultController = {
       let unsaved = target.concat();
       for (let i = 0; i < target.length; i++) {
         if (target[i] instanceof ParseObject) {
+          target[i]._batchIndex = i;
+          target[i]._batchCount = target.length;
           unsaved = unsaved.concat(unsavedChildren(target[i], true));
         }
       }
