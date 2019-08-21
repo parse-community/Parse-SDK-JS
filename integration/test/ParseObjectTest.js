@@ -80,6 +80,14 @@ describe('Parse Object', () => {
     });
   });
 
+  it('can check if object exists', async () => {
+    const object = new TestObject();
+    await object.save();
+    assert.equal(await object.exists(), true);
+    await object.destroy();
+    assert.equal(await object.exists(), false);
+  });
+
   it('can find objects', (done) => {
     const object = new TestObject({ foo: 'bar' });
     object.save().then(() => {

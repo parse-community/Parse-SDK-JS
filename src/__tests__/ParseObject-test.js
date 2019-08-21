@@ -1109,6 +1109,22 @@ describe('ParseObject', () => {
     spy.mockRestore();
   });
 
+  it('can check if object exists', async () => {
+    const objectController = CoreManager.getObjectController();
+    const spy = jest.spyOn(
+      objectController,
+      'fetch'
+    )
+      .mockImplementationOnce(() => Promise.resolve())
+      .mockImplementationOnce(() => Promise.reject());
+
+    const parent = new ParseObject('Person');
+    expect(await parent.exists()).toBe(true);
+    expect(await parent.exists()).toBe(false);
+
+    spy.mockRestore();
+  });
+
   it('can save the object', (done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{

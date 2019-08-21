@@ -934,6 +934,27 @@ class ParseObject {
   }
 
   /**
+   * Returns true if this object exists on the Server
+   *
+   * @param {Object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @return {Promise<boolean>} A boolean promise that is fulfilled if object exists.
+   */
+  async exists(options?: RequestOptions): Promise<boolean> {
+    try {
+      await this.fetch(options);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
    * Checks if the model is currently in a valid state.
    * @return {Boolean}
    */
