@@ -649,7 +649,8 @@ class ParseUser extends ParseObject {
     }
 
     const controller = CoreManager.getUserController();
-    return controller.become(becomeOptions);
+    const user = new this();
+    return controller.become(user, becomeOptions);
   }
 
   /**
@@ -990,8 +991,7 @@ const DefaultController = {
     });
   },
 
-  become(options: RequestOptions): Promise<ParseUser> {
-    const user = new ParseUser();
+  become(user: ParseUser, options: RequestOptions): Promise<ParseUser> {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request(
       'GET', 'users/me', {}, options

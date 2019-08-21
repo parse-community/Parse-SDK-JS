@@ -658,6 +658,17 @@ describe('Parse User', () => {
     expect(user.doSomething()).toBe(5);
   });
 
+  it('can become user with subclass static', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    let user = await CustomUser.signUp('username', 'password');
+    const token = user.getSessionToken();
+
+    user = await CustomUser.become(token)
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+  });
+
   it('can link without master key', async () => {
     Parse.User.enableUnsafeCurrentUser();
 
