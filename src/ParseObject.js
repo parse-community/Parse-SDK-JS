@@ -946,11 +946,18 @@ class ParseObject {
    * @return {Promise<boolean>} A boolean promise that is fulfilled if object exists.
    */
   async exists(options?: RequestOptions): Promise<boolean> {
+    if (!this.id) {
+      return false;
+    }
     try {
-      await this.fetch(options);
+      const query = new ParseQuery(this.className)
+      await query.get(this.id, options);
       return true;
     } catch (e) {
-      return false;
+      if (e.code === ParseError.OBJECT_NOT_FOUND) {
+        return false;
+      }
+      throw e;
     }
   }
 

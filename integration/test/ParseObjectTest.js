@@ -82,6 +82,7 @@ describe('Parse Object', () => {
 
   it('can check if object exists', async () => {
     const object = new TestObject();
+    assert.equal(await object.exists(), false);
     await object.save();
     assert.equal(await object.exists(), true);
     await object.destroy();
