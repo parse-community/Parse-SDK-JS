@@ -1427,18 +1427,7 @@ class ParseObject {
       queryOptions.sessionToken = options.sessionToken;
     }
     if (options.hasOwnProperty('include')) {
-      queryOptions.include = [];
-      if (Array.isArray(options.include)) {
-        options.include.forEach((key) => {
-          if (Array.isArray(key)) {
-            queryOptions.include = queryOptions.include.concat(key);
-          } else {
-            queryOptions.include.push(key);
-          }
-        });
-      } else {
-        queryOptions.include.push(options.include);
-      }
+      queryOptions.include = ParseObject.handleIncludeOptions(options);
     }
     return CoreManager.getObjectController().fetch(
       list,
@@ -1485,6 +1474,41 @@ class ParseObject {
    * Fetches the given list of Parse.Object if needed.
    * If any error is encountered, stops and calls the error handler.
    *
+   * Includes nested Parse.Objects for the provided key. You can use dot
+   * notation to specify which fields in the included object are also fetched.
+   *
+   * If any error is encountered, stops and calls the error handler.
+   *
+   * <pre>
+   *   Parse.Object.fetchAllIfNeededWithInclude([object1, object2, ...], [pointer1, pointer2, ...])
+   *    .then((list) => {
+   *      // All the objects were fetched.
+   *    }, (error) => {
+   *      // An error occurred while fetching one of the objects.
+   *    });
+   * </pre>
+   *
+   * @param {Array} list A list of <code>Parse.Object</code>.
+   * @param {String|Array<string|Array<string>>} keys The name(s) of the key(s) to include.
+   * @param {Object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @static
+   */
+  static fetchAllIfNeededWithInclude(list: Array<ParseObject>, keys: String|Array<string|Array<string>>, options: RequestOptions) {
+    options = options || {};
+    options.include = keys;
+    return ParseObject.fetchAllIfNeeded(list, options);
+  }
+
+  /**
+   * Fetches the given list of Parse.Object if needed.
+   * If any error is encountered, stops and calls the error handler.
+   *
    * <pre>
    *   Parse.Object.fetchAllIfNeeded([object1, ...])
    *    .then((list) => {
@@ -1508,11 +1532,30 @@ class ParseObject {
     if (options.hasOwnProperty('sessionToken')) {
       queryOptions.sessionToken = options.sessionToken;
     }
+    if (options.hasOwnProperty('include')) {
+      queryOptions.include = ParseObject.handleIncludeOptions(options);
+    }
     return CoreManager.getObjectController().fetch(
       list,
       false,
       queryOptions
     );
+  }
+
+  static handleIncludeOptions(options) {
+    let include = [];
+    if (Array.isArray(options.include)) {
+      options.include.forEach((key) => {
+        if (Array.isArray(key)) {
+          include = include.concat(key);
+        } else {
+          include.push(key);
+        }
+      });
+    } else {
+      include.push(options.include);
+    }
+    return include;
   }
 
   /**
