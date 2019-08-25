@@ -44,7 +44,7 @@
     "@babel/preset-env": "7.5.5",
     "@babel/preset-react": "7.0.0",
     "@parse/minami": "1.0.0",
-    "babel-eslint": "10.0.2",
+    "babel-eslint": "10.0.3",
     "babel-jest": "24.5.0",
     "babel-plugin-inline-package-json": "2.0.0",
     "babel-plugin-minify-dead-code-elimination": "0.5.1",
