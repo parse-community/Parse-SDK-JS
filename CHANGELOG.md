@@ -1,7 +1,22 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.6.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.7.0...master)
+
+## 2.7.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.6.0...2.7.0)
+
+**New Features**
+- Support for `ParseObject.fetchAllIfNeededWithInclude` ([#900](https://github.com/parse-community/Parse-SDK-JS/pull/900))
+- Support for `ParseObject.exists` ([#898](https://github.com/parse-community/Parse-SDK-JS/pull/898))
+- Support for `ParseObject.save` with `cascadeSave` option ([#881](https://github.com/parse-community/Parse-SDK-JS/pull/881))
+
+**Fixes**
+- `ParseUser.become` should return subclass ([#897](https://github.com/parse-community/Parse-SDK-JS/pull/897))
+- Ensure LiveQuery subscribes before returning subscription ([#878](https://github.com/parse-community/Parse-SDK-JS/pull/878))
+
+**Improvements**
+- Remove deprecated `@babel/polyfill` ([#877](https://github.com/parse-community/Parse-SDK-JS/pull/877))
 
 ## 2.6.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.5.1...2.6.0)
