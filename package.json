@@ -54,7 +54,7 @@
     "core-js": "3.2.1",
     "cross-env": "5.2.1",
     "eslint": "6.3.0",
-    "eslint-plugin-flowtype": "4.0.0",
+    "eslint-plugin-flowtype": "4.3.0",
     "express": "4.17.1",
     "gulp": "4.0.2",
     "gulp-babel": "8.0.0",
