@@ -181,4 +181,24 @@ describe('Parse Object Subclasses', () => {
     const wartortle = new Wartortle();
     assert(wartortle.water);
   });
+
+  it('Retrieve objects with inited array properties', async done => {
+    class SubclassObject extends Parse.Object {
+      constructor(attributes) {
+        super('SubclassObject', attributes);
+      }
+    }
+
+    Parse.Object.registerSubclass('SubclassObject', SubclassObject);
+    const object = new SubclassObject({ foo: 'bar' });
+    await object.save();
+    assert.equal(object.get('foo'), 'bar');
+    object.unset('foo');
+    await object.save();
+    assert.equal(object.get('foo'), undefined);
+    const query = new Parse.Query(SubclassObject);
+    const result = await query.first();
+    assert.equal(result.get('foo'), undefined);
+    done();
+  });
 });
