@@ -13,8 +13,9 @@ import CoreManager from './CoreManager';
 import decode from './decode';
 import encode from './encode';
 import ParseError from './ParseError';
-import ParsePromise from './ParsePromise';
 import ParseQuery from './ParseQuery';
+import ParseObject from './ParseObject';
+import type { RequestOptions } from './RESTController';
 
 /**
  * Contains functions for calling and declaring
@@ -28,32 +29,28 @@ import ParseQuery from './ParseQuery';
  * @hideconstructor
  */
 
- /**
+/**
   * Makes a call to a cloud function.
   * @method run
   * @name Parse.Cloud.run
   * @param {String} name The function name.
   * @param {Object} data The parameters to send to the cloud function.
-  * @param {Object} options A Backbone-style options object
-  * options.success, if set, should be a function to handle a successful
-  * call to a cloud function.  options.error should be a function that
-  * handles an error running the cloud function.  Both functions are
-  * optional.  Both functions take a single argument.
-  * @return {Parse.Promise} A promise that will be resolved with the result
+  * @param {Object} options
+  * @return {Promise} A promise that will be resolved with the result
   * of the function.
   */
 export function run(
   name: string,
   data: mixed,
-  options: { [key: string]: mixed }
-): ParsePromise {
+  options: RequestOptions
+): Promise<mixed> {
   options = options || {};
 
   if (typeof name !== 'string' || name.length === 0) {
     throw new TypeError('Cloud function name must be a string.');
   }
 
-  var requestOptions = {};
+  const requestOptions = {};
   if (options.useMasterKey) {
     requestOptions.useMasterKey = options.useMasterKey;
   }
@@ -61,49 +58,36 @@ export function run(
     requestOptions.sessionToken = options.sessionToken;
   }
 
-  return CoreManager.getCloudController().run(name, data, requestOptions)._thenRunCallbacks(options);
+  return CoreManager.getCloudController().run(name, data, requestOptions);
 }
 
- /**
+/**
   * Gets data for the current set of cloud jobs.
   * @method getJobsData
   * @name Parse.Cloud.getJobsData
-  * @param {Object} options A Backbone-style options object
-  * options.success, if set, should be a function to handle a successful
-  * call to a cloud function.  options.error should be a function that
-  * handles an error running the cloud function.  Both functions are
-  * optional.  Both functions take a single argument.
-  * @return {Parse.Promise} A promise that will be resolved with the result
+  * @return {Promise} A promise that will be resolved with the result
   * of the function.
   */
-export function getJobsData(options: { [key: string]: mixed }): ParsePromise {
-  options = options || {};
+export function getJobsData(): Promise<Object> {
   const requestOptions = {
     useMasterKey: true
   };
-  return CoreManager.getCloudController().getJobsData(requestOptions)._thenRunCallbacks(options);
+  return CoreManager.getCloudController().getJobsData(requestOptions);
 }
 
- /**
+/**
   * Starts a given cloud job, which will process asynchronously.
   * @method startJob
   * @name Parse.Cloud.startJob
   * @param {String} name The function name.
   * @param {Object} data The parameters to send to the cloud function.
-  * @param {Object} options A Backbone-style options object
-  * options.success, if set, should be a function to handle a successful
-  * call to a cloud function.  options.error should be a function that
-  * handles an error running the cloud function.  Both functions are
-  * optional.  Both functions take a single argument.
-  * @return {Parse.Promise} A promise that will be resolved with the result
-  * of the function.
+  * @return {Promise} A promise that will be resolved with the jobStatusId
+  * of the job.
   */
 export function startJob(
   name: string,
   data: mixed,
-  options: { [key: string]: mixed }
-): ParsePromise {
-  options = options || {};
+): Promise<string> {
 
   if (typeof name !== 'string' || name.length === 0) {
     throw new TypeError('Cloud job name must be a string.');
@@ -111,74 +95,73 @@ export function startJob(
   const requestOptions = {
     useMasterKey: true
   };
-  return CoreManager.getCloudController().startJob(name, data, requestOptions)._thenRunCallbacks(options);
+  return CoreManager.getCloudController().startJob(name, data, requestOptions);
 }
 
- /**
+/**
   * Gets job status by Id
   * @method getJobStatus
   * @name Parse.Cloud.getJobStatus
   * @param {String} jobStatusId The Id of Job Status.
   * @return {Parse.Object} Status of Job.
   */
-export function getJobStatus(jobStatusId: string): ParsePromise {
-  var query = new ParseQuery('_JobStatus');
+export function getJobStatus(jobStatusId: string): Promise<ParseObject> {
+  const query = new ParseQuery('_JobStatus');
   return query.get(jobStatusId, { useMasterKey: true });
 }
 
-var DefaultController = {
-  run(name, data, options) {
-    var RESTController = CoreManager.getRESTController();
+const DefaultController = {
+  run(name, data, options: RequestOptions) {
+    const RESTController = CoreManager.getRESTController();
 
-    var payload = encode(data, true);
+    const payload = encode(data, true);
 
-    var request = RESTController.request(
+    const request = RESTController.request(
       'POST',
       'functions/' + name,
       payload,
       options
     );
 
-    return request.then(function(res) {
-      var decoded = decode(res);
-      if (decoded && decoded.hasOwnProperty('result')) {
-        return ParsePromise.as(decoded.result);
-      }
-      return ParsePromise.error(
-        new ParseError(
+    return request.then((res) => {
+      if (typeof res === 'object' &&
+          Object.keys(res).length > 0 &&
+          !res.hasOwnProperty('result')) {
+        throw new ParseError(
           ParseError.INVALID_JSON,
           'The server returned an invalid response.'
-        )
-      );
+        );
+      }
+      const decoded = decode(res);
+      if (decoded && decoded.hasOwnProperty('result')) {
+        return Promise.resolve(decoded.result);
+      }
+      return Promise.resolve(undefined);
     });
   },
 
-  getJobsData(options) {
-    var RESTController = CoreManager.getRESTController();
+  getJobsData(options: RequestOptions) {
+    const RESTController = CoreManager.getRESTController();
 
-    var request = RESTController.request(
+    return RESTController.request(
       'GET',
       'cloud_code/jobs/data',
       null,
       options
     );
-
-    return request;
   },
 
-  startJob(name, data, options) {
-    var RESTController = CoreManager.getRESTController();
+  startJob(name, data, options: RequestOptions) {
+    const RESTController = CoreManager.getRESTController();
 
-    var payload = encode(data, true);
+    const payload = encode(data, true);
 
-    var request = RESTController.request(
+    return RESTController.request(
       'POST',
       'jobs/' + name,
       payload,
       options,
     );
-
-    return request;
   }
 };
 

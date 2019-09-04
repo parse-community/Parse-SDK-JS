@@ -8,10 +8,8 @@
  *
  * @flow
  */
-
-import ParsePromise from './ParsePromise';
-
-var StorageController = {
+/* global localStorage */
+const StorageController = {
   async: 0,
 
   getItem(path: string): ?string {

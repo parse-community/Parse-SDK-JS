@@ -1,7 +1,7 @@
 {
   "plugins": ["node_modules/jsdoc-babel", "plugins/markdown"],
   "babel": {
-      "plugins": ["transform-flow-strip-types"]
+      "plugins": ["@babel/plugin-transform-flow-comments"]
   },
   "source": {
     "include":  ["./README.md"],
@@ -16,7 +16,7 @@
   },
   "opts": {
     "recurse": true,
-    "template": "node_modules/minami",
+    "template": "node_modules/@parse/minami",
     "showInheritedInNav": true,
     "useLongnameInNav": true
   }

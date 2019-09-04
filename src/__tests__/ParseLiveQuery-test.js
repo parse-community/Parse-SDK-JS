@@ -9,18 +9,22 @@
 
 jest.dontMock('../ParseLiveQuery');
 jest.dontMock('../CoreManager');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../LiveQueryClient');
 jest.dontMock('../LiveQuerySubscription');
 jest.dontMock('../ParseObject');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../ParseQuery');
 jest.dontMock('../EventEmitter');
+jest.dontMock('../promiseUtils');
 
-const ParseLiveQuery = require('../ParseLiveQuery');
+// Forces the loading
+const LiveQuery = require('../ParseLiveQuery').default;
 const CoreManager = require('../CoreManager');
-const ParsePromise = require('../ParsePromise').default;
 const ParseQuery = require('../ParseQuery').default;
+const LiveQuerySubscription = require('../LiveQuerySubscription').default;
+const mockLiveQueryClient = {
+  open: jest.fn(),
+  close: jest.fn(),
+};
 
 describe('ParseLiveQuery', () => {
   beforeEach(() => {
@@ -31,12 +35,12 @@ describe('ParseLiveQuery', () => {
   it('fails with an invalid livequery server url', (done) => {
     CoreManager.set('UserController', {
       currentUserAsync() {
-        return ParsePromise.as(undefined);
+        return Promise.resolve(undefined);
       }
     });
     CoreManager.set('LIVEQUERY_SERVER_URL', 'notaurl');
     const controller = CoreManager.getLiveQueryController();
-    controller.getDefaultLiveQueryClient().fail((err) => {
+    controller.getDefaultLiveQueryClient().catch((err) => {
       expect(err.message).toBe(
         'You need to set a proper Parse LiveQuery server url before using LiveQueryClient'
       );
@@ -47,7 +51,7 @@ describe('ParseLiveQuery', () => {
   it('initializes the client', (done) => {
     CoreManager.set('UserController', {
       currentUserAsync() {
-        return ParsePromise.as(undefined);
+        return Promise.resolve(undefined);
       }
     });
     CoreManager.set('APPLICATION_ID', 'appid');
@@ -63,14 +67,35 @@ describe('ParseLiveQuery', () => {
     });
   });
 
-  it('automatically generates a websocket url', (done) => {
+  it('automatically generates a ws websocket url', (done) => {
     CoreManager.set('UserController', {
       currentUserAsync() {
-        return ParsePromise.as(undefined);
+        return Promise.resolve(undefined);
       }
     });
     CoreManager.set('APPLICATION_ID', 'appid');
     CoreManager.set('JAVASCRIPT_KEY', 'jskey');
+    CoreManager.set('SERVER_URL', 'http://api.parse.com/1');
+    CoreManager.set('LIVEQUERY_SERVER_URL', null);
+    const controller = CoreManager.getLiveQueryController();
+    controller.getDefaultLiveQueryClient().then((client) => {
+      expect(client.serverURL).toBe('ws://api.parse.com/1');
+      expect(client.applicationId).toBe('appid');
+      expect(client.javascriptKey).toBe('jskey');
+      expect(client.sessionToken).toBe(undefined);
+      done();
+    });
+  });
+
+  it('automatically generates a wss websocket url', (done) => {
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve(undefined);
+      }
+    });
+    CoreManager.set('APPLICATION_ID', 'appid');
+    CoreManager.set('JAVASCRIPT_KEY', 'jskey');
+    CoreManager.set('SERVER_URL', 'https://api.parse.com/1');
     CoreManager.set('LIVEQUERY_SERVER_URL', null);
     const controller = CoreManager.getLiveQueryController();
     controller.getDefaultLiveQueryClient().then((client) => {
@@ -85,7 +110,7 @@ describe('ParseLiveQuery', () => {
   it('populates the session token', (done) => {
     CoreManager.set('UserController', {
       currentUserAsync() {
-        return ParsePromise.as({
+        return Promise.resolve({
           getSessionToken() {
             return 'token';
           }
@@ -105,11 +130,36 @@ describe('ParseLiveQuery', () => {
     });
   });
 
-  it('subscribes to all subscription events', (done) => {
+  it('handle LiveQueryClient events', async () => {
+    const spy = jest.spyOn(LiveQuery, 'emit');
 
     CoreManager.set('UserController', {
       currentUserAsync() {
-        return ParsePromise.as({
+        return Promise.resolve({
+          getSessionToken() {
+            return 'token';
+          }
+        });
+      }
+    });
+    CoreManager.set('APPLICATION_ID', 'appid');
+    CoreManager.set('JAVASCRIPT_KEY', 'jskey');
+    CoreManager.set('LIVEQUERY_SERVER_URL', null);
+    const controller = CoreManager.getLiveQueryController();
+    const client = await controller.getDefaultLiveQueryClient();
+    client.emit('error', 'error thrown');
+    client.emit('open');
+    client.emit('close');
+    expect(spy.mock.calls[0]).toEqual(['error', 'error thrown']);
+    expect(spy.mock.calls[1]).toEqual(['open']);
+    expect(spy.mock.calls[2]).toEqual(['close']);
+    spy.mockRestore();
+  });
+
+  it('subscribes to all subscription events', (done) => {
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve({
           getSessionToken() {
             return 'token';
           }
@@ -122,32 +172,35 @@ describe('ParseLiveQuery', () => {
 
     const controller = CoreManager.getLiveQueryController();
 
-    controller.getDefaultLiveQueryClient().then((client) => {
+    controller.getDefaultLiveQueryClient().then(async (client) => {
 
       const query = new ParseQuery("ObjectType");
       query.equalTo("test", "value");
-      const ourSubscription = controller.subscribe(query, "close");
+      const ourSubscription = await client.subscribe(query, "close");
 
-      var isCalled = {};
-      ["open", 
+      const isCalled = {};
+      ["open",
         "close",
         "error",
         "create",
-        "update", 
-        "enter", 
-        "leave", 
+        "update",
+        "enter",
+        "leave",
         "delete"].forEach((key) =>{
         ourSubscription.on(key, () => {
           isCalled[key] = true;
         });
       });
-      
-      // controller.subscribe() completes asynchronously, 
+
+      // client.subscribe() completes asynchronously,
       // so we need to give it a chance to complete before finishing
-      setTimeout(() => { 
+      setTimeout(() => {
         try {
+          client.socket = {
+            send() {}
+          }
           client.connectPromise.resolve();
-          var actualSubscription = client.subscriptions.get(1);
+          const actualSubscription = client.subscriptions.get(1);
 
           expect(actualSubscription).toBeDefined();
 
@@ -179,8 +232,51 @@ describe('ParseLiveQuery', () => {
         } catch(e){
           done.fail(e);
         }
-      }, 1); 
+      }, 1);
     });
+  });
 
+  it('should not throw on usubscribe', (done) => {
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve({
+          getSessionToken() {
+            return 'token';
+          }
+        });
+      }
+    });
+    const query = new ParseQuery("ObjectType");
+    query.equalTo("test", "value");
+    const subscription = new LiveQuerySubscription('0', query, 'token');
+    subscription.unsubscribe().then(done).catch(done.fail);
+  });
+
+  it('can handle LiveQuery open event', async () => {
+    jest.spyOn(mockLiveQueryClient, 'open');
+    const controller = CoreManager.getLiveQueryController();
+    controller.setDefaultLiveQueryClient(mockLiveQueryClient);
+
+    await LiveQuery.open();
+    expect(mockLiveQueryClient.open).toHaveBeenCalled();
+  });
+
+  it('can handle LiveQuery close event', async () => {
+    jest.spyOn(mockLiveQueryClient, 'close');
+    const controller = CoreManager.getLiveQueryController();
+    controller.setDefaultLiveQueryClient(mockLiveQueryClient);
+
+    await LiveQuery.close();
+    expect(mockLiveQueryClient.close).toHaveBeenCalled();
+  });
+
+  it('can handle LiveQuery error event', async () => {
+    try {
+      LiveQuery.emit('error');
+      expect(true).toBe(true);
+    } catch (error) {
+      // Should not throw error
+      expect(false).toBe(true);
+    }
   });
 });

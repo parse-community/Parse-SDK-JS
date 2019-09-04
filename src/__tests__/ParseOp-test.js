@@ -12,8 +12,8 @@ jest.dontMock('../encode');
 jest.dontMock('../ParseOp');
 jest.dontMock('../unique');
 
-var localCount = 0;
-var mockObject = function(className, id) {
+let localCount = 0;
+const mockObject = function(className, id) {
   this.className = className;
   this.id = id;
   if (!id) {
@@ -26,9 +26,16 @@ mockObject.prototype._getId = function() {
 mockObject.registerSubclass = function() {};
 jest.setMock('../ParseObject', mockObject);
 
-var ParseObject = require('../ParseObject');
-var ParseOp = require('../ParseOp');
-var {
+const mockRelation = function(parent, key) {
+  this.parent = parent;
+  this.key = key;
+}
+jest.setMock('../ParseRelation', mockRelation);
+
+const ParseRelation = require('../ParseRelation');
+const ParseObject = require('../ParseObject');
+const ParseOp = require('../ParseOp');
+const {
   Op,
   SetOp,
   UnsetOp,
@@ -50,7 +57,7 @@ describe('ParseOp', () => {
   });
 
   it('can create and apply Set Ops', () => {
-    var set = new SetOp(14);
+    const set = new SetOp(14);
 
     expect(set.applyTo(null)).toBe(14);
     expect(set.applyTo(undefined)).toBe(14);
@@ -69,7 +76,7 @@ describe('ParseOp', () => {
   });
 
   it('can create and apply Unset Ops', () => {
-    var unset = new UnsetOp();
+    const unset = new UnsetOp();
 
     expect(unset.applyTo(null)).toBe(undefined);
     expect(unset.applyTo(undefined)).toBe(undefined);
@@ -94,7 +101,7 @@ describe('ParseOp', () => {
     expect(function() { new IncrementOp('abc'); }).toThrow(
       'Increment Op must be initialized with a numeric amount.'
     );
-    var inc = new IncrementOp(1);
+    const inc = new IncrementOp(1);
     expect(inc.applyTo.bind(inc, null)).toThrow(
       'Cannot increment a non-numeric value.'
     );
@@ -104,13 +111,13 @@ describe('ParseOp', () => {
     expect(inc.applyTo(1)).toBe(2);
     expect(inc.applyTo(-40)).toBe(-39);
 
-    var bigInc = new IncrementOp(99);
+    const bigInc = new IncrementOp(99);
     expect(bigInc.applyTo(-98)).toBe(1);
 
     expect(inc.toJSON()).toEqual({ __op: 'Increment', amount: 1 });
     expect(bigInc.toJSON()).toEqual({ __op: 'Increment', amount: 99 });
 
-    var merge = inc.mergeWith(new SetOp(11));
+    let merge = inc.mergeWith(new SetOp(11));
     expect(merge instanceof SetOp).toBe(true);
     expect(merge._value).toBe(12);
     merge = inc.mergeWith(new UnsetOp());
@@ -129,7 +136,7 @@ describe('ParseOp', () => {
   });
 
   it('can create and apply Add Ops', () => {
-    var add = new AddOp('element');
+    const add = new AddOp('element');
 
     expect(add.applyTo(null)).toEqual(['element']);
     expect(add.applyTo(undefined)).toEqual(['element']);
@@ -140,13 +147,13 @@ describe('ParseOp', () => {
 
     expect(add.toJSON()).toEqual({ __op: 'Add', objects: ['element'] });
 
-    var addMany = new AddOp([1, 2, 2, 3, 4, 5]);
+    const addMany = new AddOp([1, 2, 2, 3, 4, 5]);
 
     expect(addMany.applyTo([-2, -1, 0])).toEqual([-2, -1, 0, 1, 2, 2, 3, 4, 5]);
 
     expect(addMany.toJSON()).toEqual({ __op: 'Add', objects: [1, 2, 2, 3, 4, 5] });
 
-    var merge = add.mergeWith(new SetOp(['an']));
+    let merge = add.mergeWith(new SetOp(['an']));
     expect(merge instanceof SetOp).toBe(true);
     expect(merge._value).toEqual(['an', 'element']);
 
@@ -166,7 +173,7 @@ describe('ParseOp', () => {
   });
 
   it('can create and apply AddUnique Ops', () => {
-    var add = new AddUniqueOp('element');
+    const add = new AddUniqueOp('element');
 
     expect(add.applyTo(null)).toEqual(['element']);
     expect(add.applyTo(undefined)).toEqual(['element']);
@@ -178,7 +185,7 @@ describe('ParseOp', () => {
 
     expect(add.toJSON()).toEqual({ __op: 'AddUnique', objects: ['element'] });
 
-    var addMany = new AddUniqueOp([1, 2, 2, 3, 4, 5]);
+    const addMany = new AddUniqueOp([1, 2, 2, 3, 4, 5]);
 
     expect(addMany.applyTo()).toEqual([1, 2, 3, 4, 5]);
 
@@ -189,7 +196,7 @@ describe('ParseOp', () => {
       objects: [1, 2, 3, 4, 5]
     });
 
-    var merge = add.mergeWith(new SetOp(['an', 'element']));
+    let merge = add.mergeWith(new SetOp(['an', 'element']));
     expect(merge instanceof SetOp).toBe(true);
     expect(merge._value).toEqual(['an', 'element']);
 
@@ -208,7 +215,7 @@ describe('ParseOp', () => {
       'Cannot merge AddUnique Op with the previous Op'
     );
 
-    var addObjects = new AddUniqueOp(new ParseObject('Item', 'i2'));
+    const addObjects = new AddUniqueOp(new ParseObject('Item', 'i2'));
     expect(addObjects.applyTo([
       new ParseObject('Item', 'i1'),
       new ParseObject('Item', 'i2'),
@@ -221,7 +228,7 @@ describe('ParseOp', () => {
   });
 
   it('can create and apply Remove Ops', () => {
-    var rem = new RemoveOp('element');
+    const rem = new RemoveOp('element');
 
     expect(rem.applyTo(null)).toEqual([]);
     expect(rem.applyTo(undefined)).toEqual([]);
@@ -234,7 +241,7 @@ describe('ParseOp', () => {
 
     expect(rem.toJSON()).toEqual({ __op: 'Remove', objects: ['element'] });
 
-    var removeMany = new RemoveOp([1, 2, 2, 3, 4, 5]);
+    const removeMany = new RemoveOp([1, 2, 2, 3, 4, 5]);
 
     expect(removeMany.applyTo([-2, 1, 4, 0])).toEqual([-2, 0]);
 
@@ -243,7 +250,7 @@ describe('ParseOp', () => {
       objects: [1, 2, 3, 4, 5]
     });
 
-    var merge = rem.mergeWith(new SetOp(['an', 'element']));
+    let merge = rem.mergeWith(new SetOp(['an', 'element']));
     expect(merge instanceof SetOp).toBe(true);
     expect(merge._value).toEqual(['an']);
 
@@ -251,7 +258,7 @@ describe('ParseOp', () => {
     expect(merge instanceof RemoveOp).toBe(true);
     expect(merge._value).toEqual([2, 4, 1, 3]);
 
-    var removeObjects = new RemoveOp(new ParseObject('Item', 'i2'));
+    const removeObjects = new RemoveOp(new ParseObject('Item', 'i2'));
     expect(removeObjects.applyTo([
       new ParseObject('Item', 'i1'),
       new ParseObject('Item', 'i2'),
@@ -274,7 +281,7 @@ describe('ParseOp', () => {
   });
 
   it('can create and apply Relation Ops', () => {
-    var r = new RelationOp();
+    let r = new RelationOp();
     expect(r.relationsToAdd).toBe(undefined);
     expect(r.relationsToRemove).toBe(undefined);
 
@@ -289,18 +296,18 @@ describe('ParseOp', () => {
     );
 
     expect(function() {
-      var a = new ParseObject('Item');
+      const a = new ParseObject('Item');
       a.id = 'I1';
-      var b = new ParseObject('Delivery');
+      const b = new ParseObject('Delivery');
       b.id = 'D1';
       new RelationOp([a, b]);
     }).toThrow(
       'Tried to create a Relation with 2 different object types: Item and Delivery.'
     );
 
-    var o = new ParseObject('Item');
+    const o = new ParseObject('Item');
     o.id = 'I1';
-    var o2 = new ParseObject('Item');
+    const o2 = new ParseObject('Item');
     o2.id = 'I2'
     r = new RelationOp([o, o, o2], []);
     expect(r.relationsToAdd).toEqual(['I1', 'I2']);
@@ -314,9 +321,9 @@ describe('ParseOp', () => {
       ]
     });
 
-    var o3 = new ParseObject('Item');
+    const o3 = new ParseObject('Item');
     o3.id = 'I3';
-    var r2 = new RelationOp([], [o3, o, o]);
+    const r2 = new RelationOp([], [o3, o, o]);
     expect(r2.relationsToAdd).toEqual([]);
     expect(r2.relationsToRemove).toEqual(['I3', 'I1']);
     expect(r2.toJSON()).toEqual({
@@ -327,15 +334,15 @@ describe('ParseOp', () => {
       ]
     });
 
-    var rel = r.applyTo(undefined, { className: 'Delivery', id: 'D3' }, 'shipments');
+    const rel = r.applyTo(undefined, { className: 'Delivery', id: 'D3' }, 'shipments');
     expect(rel.targetClassName).toBe('Item');
     expect(r2.applyTo(rel, { className: 'Delivery', id: 'D3' })).toBe(rel);
     expect(r.applyTo.bind(r, 'string')).toThrow(
       'Relation cannot be applied to a non-relation field'
     );
-    var p = new ParseObject('Person');
+    const p = new ParseObject('Person');
     p.id = 'P4';
-    var r3 = new RelationOp([p]);
+    const r3 = new RelationOp([p]);
     expect(r3.applyTo.bind(r3, rel, { className: 'Delivery', id: 'D3' }, 'packages'))
       .toThrow('Related object must be a Item, but a Person was passed in.');
 
@@ -347,7 +354,7 @@ describe('ParseOp', () => {
       'Cannot merge Relation Op with the previous Op'
     );
 
-    var merged = r2.mergeWith(r);
+    const merged = r2.mergeWith(r);
     expect(merged.toJSON()).toEqual({
       __op: 'Batch',
       ops: [
@@ -363,5 +370,13 @@ describe('ParseOp', () => {
         }
       ]
     });
+  });
+
+  it('can merge Relation Op with the previous Op', () => {
+    const r = new RelationOp();
+    const relation = new ParseRelation(null, null);
+    const set = new SetOp(relation);
+
+    expect(r.mergeWith(set)).toEqual(r);
   });
 });

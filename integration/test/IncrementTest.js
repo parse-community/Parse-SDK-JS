@@ -2,29 +2,28 @@
 
 const assert = require('assert');
 const clear = require('./clear');
-const mocha = require('mocha');
 const Parse = require('../../node');
 
 const TestObject = Parse.Object.extend('TestObject');
 
 describe('Increment', () => {
-  before((done) => {
+  beforeEach((done) => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
     clear().then(() => {
       done();
-    });
+    }).catch(done.fail);
   });
 
   it('can increment a field', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.set('score', 1);
     object.save().then(() => {
       object.increment('score');
       return object.save();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(o.get('score'), 2);
@@ -33,20 +32,20 @@ describe('Increment', () => {
   });
 
   it('can increment on a fresh object', () => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.set('score', 1);
     object.increment('score');
     assert.equal(object.get('score'), 2);
   });
 
   it('can increment by a value', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.set('score', 1);
     object.save().then(() => {
       object.increment('score', 10);
       return object.save();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(o.get('score'), 11);
@@ -55,13 +54,13 @@ describe('Increment', () => {
   });
 
   it('can increment with negative numbers', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.set('score', 1);
     object.save().then(() => {
       object.increment('score', -1);
       return object.save();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(o.get('score'), 0);
@@ -70,13 +69,13 @@ describe('Increment', () => {
   });
 
   it('can increment with floats', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.set('score', 1.0);
     object.save().then(() => {
       object.increment('score', 1.5);
       return object.save();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(o.get('score'), 2.5);
@@ -85,10 +84,10 @@ describe('Increment', () => {
   });
 
   it('increments atomically', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.set('score', 1);
     object.save().then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       object.increment('score');
@@ -97,7 +96,7 @@ describe('Increment', () => {
     }).then(() => {
       return object.save();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(o.get('score'), 3);
@@ -106,11 +105,11 @@ describe('Increment', () => {
   });
 
   it('gets a new value back on increment', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     let objectAgain;
     object.set('score', 1);
     object.save().then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       objectAgain = o;
@@ -129,11 +128,11 @@ describe('Increment', () => {
   });
 
   it('can combine increment with other updates', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.set('score', 1);
     object.set('name', 'hungry');
     object.save().then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       o.increment('score');
@@ -143,7 +142,7 @@ describe('Increment', () => {
       object.increment('score');
       return object.save();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(o.get('name'), 'parse');
@@ -153,7 +152,7 @@ describe('Increment', () => {
   });
 
   it('does not increment non-numbers', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.set('not_score', 'foo');
     object.save().then(() => {
       try {
@@ -165,7 +164,7 @@ describe('Increment', () => {
   });
 
   it('can increment on a deleted field', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.set('score', 1);
     object.save().then(() => {
       object.unset('score');
@@ -173,7 +172,7 @@ describe('Increment', () => {
       assert.equal(object.get('score'), 1);
       return object.save();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(o.get('score'), 1);
@@ -182,10 +181,10 @@ describe('Increment', () => {
   });
 
   it('can increment with an empty field on a fresh object', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.increment('score');
     object.save().then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       o.get('score', 1);
@@ -193,12 +192,12 @@ describe('Increment', () => {
     });
   });
 
-  it('can increment with an empty field', () => {
-    let object = new TestObject();
+  it('can increment with an empty field', (done) => {
+    const object = new TestObject();
     let objectAgain;
     object.save().then(() => {
       object.increment('score');
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       objectAgain = o;
@@ -207,7 +206,7 @@ describe('Increment', () => {
     }).then(() => {
       return objectAgain.save();
     }).then(() => {
-      let query = new Parse.Query(TestObject);
+      const query = new Parse.Query(TestObject);
       return query.get(object.id);
     }).then((o) => {
       assert.equal(o.get('score'), 2);
@@ -216,12 +215,12 @@ describe('Increment', () => {
   });
 
   it('solidifies the type by incrementing', (done) => {
-    let object = new TestObject();
+    const object = new TestObject();
     object.increment('numeric');
     object.save().then(() => {
       object.set('numeric', 'x');
       return object.save();
-    }).fail(() => {
+    }).catch(() => {
       done();
     });
   });

@@ -9,11 +9,9 @@
  * @flow
  */
 
-import CoreManager from './CoreManager';
-import ParsePromise from './ParsePromise';
 import Storage from './Storage';
 
-var iidCache = null;
+let iidCache = null;
 
 function hexOctet() {
   return Math.floor(
@@ -31,12 +29,12 @@ function generateId() {
   );
 }
 
-var InstallationController = {
-  currentInstallationId(): ParsePromise {
+const InstallationController = {
+  currentInstallationId(): Promise<string> {
     if (typeof iidCache === 'string') {
-      return ParsePromise.as(iidCache);
+      return Promise.resolve(iidCache);
     }
-    var path = Storage.generatePath('installationId');
+    const path = Storage.generatePath('installationId');
     return Storage.getItemAsync(path).then((iid) => {
       if (!iid) {
         iid = generateId();

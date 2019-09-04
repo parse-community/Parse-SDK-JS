@@ -1,18 +1,36 @@
-var express = require('express');
-var ParseServer = require('parse-server').ParseServer;
-var app = express();
+const express = require('express');
+const ParseServer = require('parse-server').ParseServer;
+const app = express();
+const CustomAuth = require('./test/CustomAuth');
 
-// Specify the connection string for your mongodb database
-// and the location to your Parse cloud code
-var api = new ParseServer({
+const api = new ParseServer({
   databaseURI: 'mongodb://localhost:27017/integration',
   appId: 'integration',
   masterKey: 'notsosecret',
-  serverURL: 'http://localhost:1337/parse', // Don't forget to change to https if needed
-  cloud: `${__dirname}/cloud/main.js`
+  serverURL: 'http://localhost:1337/parse',
+  cloud: `${__dirname}/cloud/main.js`,
+  liveQuery: {
+    classNames: ['TestObject', 'DiffObject'],
+  },
+  startLiveQueryServer: true,
+  auth: {
+    myAuth: {
+      module: CustomAuth,
+      option1: 'hello',
+      option2: 'world',
+    },
+    facebook: {
+      appIds: "test"
+    },
+    twitter: {
+      consumer_key: "5QiVwxr8FQHbo5CMw46Z0jquF",
+      consumer_secret: "p05FDlIRAnOtqJtjIt0xcw390jCcjj56QMdE9B52iVgOEb7LuK",
+    },
+  },
+  verbose: false,
+  silent: true,
 });
 
-// Serve the Parse API on the /parse URL prefix
 app.use('/parse', api);
 
 const TestUtils = require('parse-server').TestUtils;
@@ -23,6 +41,6 @@ app.get('/clear', (req, res) => {
   });
 });
 
-app.listen(1337, () => {
-  console.log('parse-server running on port 1337.');
-});
+module.exports = {
+  app
+};

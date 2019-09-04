@@ -14,7 +14,6 @@ import decode from './decode';
 import encode from './encode';
 import escape from './escape';
 import ParseError from './ParseError';
-import ParsePromise from './ParsePromise';
 import Storage from './Storage';
 
 /**
@@ -46,12 +45,12 @@ class ParseConfig {
    * @param {String} attr The name of an attribute.
    */
   escape(attr: string): string {
-    var html = this._escapedAttributes[attr];
+    const html = this._escapedAttributes[attr];
     if (html) {
       return html;
     }
-    var val = this.attributes[attr];
-    var escaped = '';
+    const val = this.attributes[attr];
+    let escaped = '';
     if (val != null) {
       escaped = escape(val.toString());
     }
@@ -68,36 +67,45 @@ class ParseConfig {
    *     exists, else an empty Parse.Config.
    */
   static current() {
-    var controller = CoreManager.getConfigController();
+    const controller = CoreManager.getConfigController();
     return controller.current();
   }
 
   /**
    * Gets a new configuration object from the server.
    * @static
-   * @param {Object} options A Backbone-style options object.
-   * Valid options are:<ul>
-   *   <li>success: Function to call when the get completes successfully.
-   *   <li>error: Function to call when the get fails.
-   * </ul>
-   * @return {Parse.Promise} A promise that is resolved with a newly-created
+   * @return {Promise} A promise that is resolved with a newly-created
    *     configuration object when the get completes.
    */
-  static get(options) {
-    options = options || {};
+  static get() {
+    const controller = CoreManager.getConfigController();
+    return controller.get();
+  }
 
-    var controller = CoreManager.getConfigController();
-    return controller.get()._thenRunCallbacks(options);
+  /**
+   * Save value keys to the server.
+   * @static
+   * @return {Promise} A promise that is resolved with a newly-created
+   *     configuration object or with the current with the update.
+   */
+  static save(attrs: { [key: string]: any }) {
+    const controller = CoreManager.getConfigController();
+    //To avoid a mismatch with the local and the cloud config we get a new version
+    return controller.save(attrs).then(() => {
+      return controller.get();
+    },(error) => {
+      return Promise.reject(error);
+    });
   }
 }
 
-var currentConfig = null;
+let currentConfig = null;
 
-var CURRENT_CONFIG_KEY = 'currentConfig';
+const CURRENT_CONFIG_KEY = 'currentConfig';
 
 function decodePayload(data) {
   try {
-    var json = JSON.parse(data);
+    const json = JSON.parse(data);
     if (json && typeof json === 'object') {
       return decode(json);
     }
@@ -106,20 +114,20 @@ function decodePayload(data) {
   }
 }
 
-var DefaultController = {
+const DefaultController = {
   current() {
     if (currentConfig) {
       return currentConfig;
     }
 
-    var config = new ParseConfig();
-    var storagePath = Storage.generatePath(CURRENT_CONFIG_KEY);
-    var configData;
+    const config = new ParseConfig();
+    const storagePath = Storage.generatePath(CURRENT_CONFIG_KEY);
+    let configData;
     if (!Storage.async()) {
       configData = Storage.getItem(storagePath);
 
       if (configData) {
-        var attributes = decodePayload(configData);
+        const attributes = decodePayload(configData);
         if (attributes) {
           config.attributes = attributes;
           currentConfig = config;
@@ -130,7 +138,7 @@ var DefaultController = {
     // Return a promise for async storage controllers
     return Storage.getItemAsync(storagePath).then((configData) => {
       if (configData) {
-        var attributes = decodePayload(configData);
+        const attributes = decodePayload(configData);
         if (attributes) {
           config.attributes = attributes;
           currentConfig = config;
@@ -141,22 +149,22 @@ var DefaultController = {
   },
 
   get() {
-    var RESTController = CoreManager.getRESTController();
+    const RESTController = CoreManager.getRESTController();
 
     return RESTController.request(
       'GET', 'config', {}, {}
     ).then((response) => {
       if (!response || !response.params) {
-        var error = new ParseError(
+        const error = new ParseError(
           ParseError.INVALID_JSON,
           'Config JSON response invalid.'
         );
-        return ParsePromise.error(error);
+        return Promise.reject(error);
       }
 
-      var config = new ParseConfig();
+      const config = new ParseConfig();
       config.attributes = {};
-      for (var attr in response.params) {
+      for (const attr in response.params) {
         config.attributes[attr] = decode(response.params[attr]);
       }
       currentConfig = config;
@@ -167,6 +175,30 @@ var DefaultController = {
         return config;
       });
     });
+  },
+
+  save(attrs: { [key: string]: any }) {
+    const RESTController = CoreManager.getRESTController();
+    const encodedAttrs = {};
+    for(const key in attrs){
+      encodedAttrs[key] = encode(attrs[key])
+    }
+    return RESTController.request(
+      'PUT',
+      'config',
+      { params: encodedAttrs },
+      { useMasterKey: true }
+    ).then(response => {
+      if(response && response.result){
+        return Promise.resolve()
+      } else {
+        const error = new ParseError(
+          ParseError.INTERNAL_SERVER_ERROR,
+          'Error occured updating Config.'
+        );
+        return Promise.reject(error)
+      }
+    })
   }
 };
 

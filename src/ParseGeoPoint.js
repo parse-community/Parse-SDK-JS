@@ -9,8 +9,6 @@
  * @flow
  */
 
-import ParsePromise from './ParsePromise';
-
 /**
  * Creates a new GeoPoint with any of the following forms:<br>
  *   <pre>
@@ -33,12 +31,13 @@ import ParsePromise from './ParsePromise';
  *   object.save();</pre></p>
  * @alias Parse.GeoPoint
  */
+/* global navigator */
 class ParseGeoPoint {
   _latitude: number;
   _longitude: number;
 
   /**
-   * @param {(Number[]|Object|Number)} options Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point. 
+   * @param {(Number[]|Object|Number)} options Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point.
    * @param {Number} longitude The longitude of the GeoPoint
    */
   constructor(
@@ -54,7 +53,7 @@ class ParseGeoPoint {
       ParseGeoPoint._validate(arg1.latitude, arg1.longitude);
       this._latitude = arg1.latitude;
       this._longitude = arg1.longitude;
-    } else if (typeof arg1 === 'number' && typeof arg2 === 'number') {
+    } else if (arg1 !== undefined && arg2 !== undefined) {
       ParseGeoPoint._validate(arg1, arg2);
       this._latitude = arg1;
       this._longitude = arg2;
@@ -123,17 +122,17 @@ class ParseGeoPoint {
    * @return {Number}
    */
   radiansTo(point: ParseGeoPoint): number {
-    var d2r = Math.PI / 180.0;
-    var lat1rad = this.latitude * d2r;
-    var long1rad = this.longitude * d2r;
-    var lat2rad = point.latitude * d2r;
-    var long2rad = point.longitude * d2r;
-    var deltaLat = lat1rad - lat2rad;
-    var deltaLong = long1rad - long2rad;
-    var sinDeltaLatDiv2 = Math.sin(deltaLat / 2);
-    var sinDeltaLongDiv2 = Math.sin(deltaLong / 2);
+    const d2r = Math.PI / 180.0;
+    const lat1rad = this.latitude * d2r;
+    const long1rad = this.longitude * d2r;
+    const lat2rad = point.latitude * d2r;
+    const long2rad = point.longitude * d2r;
+    const deltaLat = lat1rad - lat2rad;
+    const deltaLong = long1rad - long2rad;
+    const sinDeltaLatDiv2 = Math.sin(deltaLat / 2);
+    const sinDeltaLongDiv2 = Math.sin(deltaLong / 2);
     // Square of half the straight line chord distance between both points.
-    var a = ((sinDeltaLatDiv2 * sinDeltaLatDiv2) +
+    let a = ((sinDeltaLatDiv2 * sinDeltaLatDiv2) +
              (Math.cos(lat1rad) * Math.cos(lat2rad) *
               sinDeltaLongDiv2 * sinDeltaLongDiv2));
     a = Math.min(1.0, a);
@@ -164,7 +163,10 @@ class ParseGeoPoint {
    * Throws an exception if the given lat-long is out of bounds.
    */
   static _validate(latitude: number, longitude: number) {
-    if (latitude !== latitude || longitude !== longitude) {
+    if (
+      isNaN(latitude) || isNaN(longitude) ||
+      typeof latitude !== 'number' || typeof longitude !== 'number'
+    ) {
       throw new TypeError(
         'GeoPoint latitude and longitude must be valid numbers'
       );
@@ -194,21 +196,12 @@ class ParseGeoPoint {
   /**
    * Creates a GeoPoint with the user's current location, if available.
    * Calls options.success with a new GeoPoint instance or calls options.error.
-
-   * @param {Object} options An object with success and error callbacks.
    * @static
    */
-  static current(options) {
-    var promise = new ParsePromise();
-    navigator.geolocation.getCurrentPosition(function(location) {
-      promise.resolve(
-        new ParseGeoPoint(location.coords.latitude, location.coords.longitude)
-      );
-    }, function(error) {
-      promise.reject(error);
+  static current() {
+    return navigator.geolocation.getCurrentPosition((location) => {
+      return new ParseGeoPoint(location.coords.latitude, location.coords.longitude);
     });
-
-    return promise._thenRunCallbacks(options);
   }
 }
 

@@ -13,21 +13,19 @@ jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseOp');
-jest.dontMock('../ParsePromise');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../TaskQueue');
 
-var mockObject = function() {};
+const mockObject = function() {};
 mockObject.registerSubclass = function() {};
 jest.setMock('../ParseObject', mockObject);
 jest.useFakeTimers();
 
-var ParseFile = require('../ParseFile').default;
-var ParseGeoPoint = require('../ParseGeoPoint').default;
-var ParseOps = require('../ParseOp');
-var ParsePromise = require('../ParsePromise').default;
-var SingleInstanceStateController = require('../SingleInstanceStateController');
-var TaskQueue = require('../TaskQueue');
+const ParseFile = require('../ParseFile').default;
+const ParseGeoPoint = require('../ParseGeoPoint').default;
+const ParseOps = require('../ParseOp');
+const SingleInstanceStateController = require('../SingleInstanceStateController');
+const TaskQueue = require('../TaskQueue');
 
 describe('SingleInstanceStateController', () => {
   it('returns null state for an unknown object', () => {
@@ -69,7 +67,7 @@ describe('SingleInstanceStateController', () => {
 
   it('initializes server data when setting pending ops', () => {
     expect(SingleInstanceStateController.getState({ className: 'someClass', id: 'B' })).toBe(null);
-    var op = new ParseOps.IncrementOp(1);
+    const op = new ParseOps.IncrementOp(1);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'B' }, 'counter', op);
     expect(SingleInstanceStateController.getState({ className: 'someClass', id: 'B' })).toEqual({
       serverData: {},
@@ -127,8 +125,8 @@ describe('SingleInstanceStateController', () => {
   });
 
   it('can add multiple pending Ops', () => {
-    var op = new ParseOps.IncrementOp(1);
-    var op2 = new ParseOps.SetOp(true);
+    const op = new ParseOps.IncrementOp(1);
+    const op2 = new ParseOps.SetOp(true);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'E' }, 'counter', op);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'E' }, 'valid', op2);
     expect(SingleInstanceStateController.getState({ className: 'someClass', id: 'E' })).toEqual({
@@ -138,7 +136,7 @@ describe('SingleInstanceStateController', () => {
       tasks: new TaskQueue(),
       existed: false
     });
-    var op3 = new ParseOps.UnsetOp();
+    const op3 = new ParseOps.UnsetOp();
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'E' }, 'valid', op3);
     expect(SingleInstanceStateController.getState({ className: 'someClass', id: 'E' })).toEqual({
       serverData: {},
@@ -150,7 +148,7 @@ describe('SingleInstanceStateController', () => {
   });
 
   it('can unset pending Ops', () => {
-    var op = new ParseOps.IncrementOp(1);
+    const op = new ParseOps.IncrementOp(1);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'F' }, 'counter', op);
     expect(SingleInstanceStateController.getState({ className: 'someClass', id: 'F' })).toEqual({
       serverData: {},
@@ -170,7 +168,7 @@ describe('SingleInstanceStateController', () => {
   });
 
   it('can push a new pending state frame', () => {
-    var op = new ParseOps.IncrementOp(1);
+    const op = new ParseOps.IncrementOp(1);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'G' }, 'counter', op);
     expect(SingleInstanceStateController.getState({ className: 'someClass', id: 'G' })).toEqual({
       serverData: {},
@@ -187,7 +185,7 @@ describe('SingleInstanceStateController', () => {
       tasks: new TaskQueue(),
       existed: false
     });
-    var op2 = new ParseOps.SetOp(true);
+    const op2 = new ParseOps.SetOp(true);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'G' }, 'valid', op2);
     expect(SingleInstanceStateController.getState({ className: 'someClass', id: 'G' })).toEqual({
       serverData: {},
@@ -199,7 +197,7 @@ describe('SingleInstanceStateController', () => {
   });
 
   it('can pop a pending state frame', () => {
-    var op = new ParseOps.IncrementOp(1);
+    const op = new ParseOps.IncrementOp(1);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'H' }, 'counter', op);
     SingleInstanceStateController.pushPendingState({ className: 'someClass', id: 'H' });
     expect(SingleInstanceStateController.getState({ className: 'someClass', id: 'H' })).toEqual({
@@ -246,11 +244,11 @@ describe('SingleInstanceStateController', () => {
       .toBe(undefined);
     SingleInstanceStateController.setServerData({ className: 'someClass', id: 'J' }, { counter: 11 });
     expect(SingleInstanceStateController.estimateAttribute({ className: 'someClass', id: 'J' }, 'counter')).toBe(11);
-    var op = new ParseOps.IncrementOp(1);
+    const op = new ParseOps.IncrementOp(1);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'J' }, 'counter', op);
     expect(SingleInstanceStateController.estimateAttribute({ className: 'someClass', id: 'J' }, 'counter')).toBe(12);
     SingleInstanceStateController.pushPendingState({ className: 'someClass', id: 'J' });
-    var op2 = new ParseOps.IncrementOp(10);
+    const op2 = new ParseOps.IncrementOp(10);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'J' }, 'counter', op2);
     expect(SingleInstanceStateController.estimateAttribute({ className: 'someClass', id: 'J' }, 'counter')).toBe(22);
   });
@@ -258,8 +256,8 @@ describe('SingleInstanceStateController', () => {
   it('can estimate all attributes', () => {
     expect(SingleInstanceStateController.estimateAttributes({ className: 'someClass', id: 'K' })).toEqual({});
     SingleInstanceStateController.setServerData({ className: 'someClass', id: 'K' }, { counter: 11 });
-    var op = new ParseOps.IncrementOp(1);
-    var op2 = new ParseOps.SetOp(false);
+    const op = new ParseOps.IncrementOp(1);
+    const op2 = new ParseOps.SetOp(false);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'K' }, 'counter', op);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'K' }, 'valid', op2);
     expect(SingleInstanceStateController.estimateAttributes({ className: 'someClass', id: 'K' })).toEqual({
@@ -267,7 +265,7 @@ describe('SingleInstanceStateController', () => {
       valid: false
     });
     SingleInstanceStateController.pushPendingState({ className: 'someClass', id: 'K' });
-    var op3 = new ParseOps.UnsetOp();
+    const op3 = new ParseOps.UnsetOp();
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'K' }, 'valid', op3);
     expect(SingleInstanceStateController.estimateAttributes({ className: 'someClass', id: 'K' })).toEqual({
       counter: 12
@@ -289,45 +287,43 @@ describe('SingleInstanceStateController', () => {
     });
   });
 
-  it('can enqueue a chain of tasks', () => {
-    var p1 = new ParsePromise();
-    var p2 = new ParsePromise();
-    var called = [false, false, false];
-    var t1 = SingleInstanceStateController.enqueueTask({ className: 'someClass', id: 'M' }, () => {
+  it('can enqueue a chain of tasks', async () => {
+    let p1Resolve, p2Resolve;
+    const p1 = new Promise((resolve) => { p1Resolve = resolve });
+    const p2 = new Promise((resolve) => { p2Resolve = resolve });
+    const called = [false, false, false];
+    SingleInstanceStateController.enqueueTask({ className: 'someClass', id: 'M' }, () => {
       return p1.then(() => {
         called[0] = true;
       });
     });
-    var t2 = SingleInstanceStateController.enqueueTask({ className: 'someClass', id: 'M' }, () => {
+    SingleInstanceStateController.enqueueTask({ className: 'someClass', id: 'M' }, () => {
       return p2.then(() => {
         called[1] = true;
       });
     });
-    var t3 = SingleInstanceStateController.enqueueTask({ className: 'someClass', id: 'M' }, () => {
+    SingleInstanceStateController.enqueueTask({ className: 'someClass', id: 'M' }, () => {
       called[2] = true;
-      return ParsePromise.as();
+      return Promise.resolve();
     });
     expect(called).toEqual([false, false, false]);
-    p1.resolve();
-    jest.runAllTicks();
-    expect(t1._resolved).toBe(true);
-    expect(t2._resolved).toBe(false);
+    p1Resolve();
+    await p1;
     expect(called).toEqual([true, false, false]);
-    p2.resolve();
-    jest.runAllTicks();
-    expect(t2._resolved).toBe(true);
-    expect(t3._resolved).toBe(true);
+    p2Resolve();
+    await p2;
+    await new Promise(resolve => setImmediate(resolve));
     expect(called).toEqual([true, true, true]);
   });
 
   it('can merge the first entry into the next', () => {
-    var incCount = new ParseOps.IncrementOp(1);
-    var setName = new ParseOps.SetOp('demo');
+    const incCount = new ParseOps.IncrementOp(1);
+    const setName = new ParseOps.SetOp('demo');
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'N' }, 'counter', incCount);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'N' }, 'name', setName);
     SingleInstanceStateController.pushPendingState({ className: 'someClass', id: 'N' });
-    var setCount = new ParseOps.SetOp(44);
-    var setValid = new ParseOps.SetOp(true);
+    const setCount = new ParseOps.SetOp(44);
+    const setValid = new ParseOps.SetOp(true);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'N' }, 'counter', setCount);
     SingleInstanceStateController.setPendingOp({ className: 'someClass', id: 'N' }, 'valid', setValid);
     SingleInstanceStateController.mergeFirstPendingState({ className: 'someClass', id: 'N' });
@@ -345,7 +341,7 @@ describe('SingleInstanceStateController', () => {
   });
 
   it('stores cached versions of object attributes', () => {
-    var cache = SingleInstanceStateController.getObjectCache({ className: 'someClass', id: 'O' });
+    let cache = SingleInstanceStateController.getObjectCache({ className: 'someClass', id: 'O' });
     expect(cache).toEqual({});
     SingleInstanceStateController.commitServerChanges({ className: 'someClass', id: 'O' }, {
       name: 'MyObject',
@@ -378,7 +374,7 @@ describe('SingleInstanceStateController', () => {
       tasks: new TaskQueue(),
       existed: false
     });
-    let state = SingleInstanceStateController.removeState({ className: 'someClass', id: 'P' });
+    const state = SingleInstanceStateController.removeState({ className: 'someClass', id: 'P' });
     expect(state).toEqual({
       serverData: { counter: 12 },
       pendingOps: [{}],

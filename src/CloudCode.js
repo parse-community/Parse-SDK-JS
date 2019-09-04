@@ -6,7 +6,7 @@
  * @method define
  * @name Parse.Cloud.define
  * @param {String} name The name of the Cloud Function
- * @param {Function} data The Cloud Function to register. This function should take two parameters a {@link Parse.Cloud.FunctionRequest} and a {@link Parse.Cloud.FunctionResponse}
+ * @param {Function} data The Cloud Function to register. This function should take one parameter {@link Parse.Cloud.FunctionRequest}
  */
 
 /**
@@ -124,7 +124,7 @@
  * @method httpRequest
  * @name Parse.Cloud.httpRequest
  * @param {Parse.Cloud.HTTPOptions} options The Parse.Cloud.HTTPOptions object that makes the request.
- * @return {Parse.Promise<Parse.Cloud.HTTPResponse>} A promise that will be resolved with a {@link Parse.Cloud.HTTPResponse} object when the request completes.
+ * @return {Promise<Parse.Cloud.HTTPResponse>} A promise that will be resolved with a {@link Parse.Cloud.HTTPResponse} object when the request completes.
  */
 
 /**
@@ -165,7 +165,7 @@
  * @property {Object} params The params passed to the background job.
  */
 
- /**
+/**
  * @typedef Parse.Cloud.JobStatus
  * @property {function} error If error is called, will end the job unsuccessfully with an optional completion message to be stored in the job status.
  * @property {function} message If message is called with a string argument, will update the current message to be stored in the job status.

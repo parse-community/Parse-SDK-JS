@@ -9,54 +9,89 @@
  * @flow
  */
 
-import ParsePromise from './ParsePromise';
 import CoreManager from './CoreManager';
 
-var StorageController = {
+const StorageController = {
   async: 1,
 
   getAsyncStorage(): any {
     return CoreManager.getAsyncStorage();
   },
 
-  getItemAsync(path: string): ParsePromise {
-    var p = new ParsePromise();
-    this.getAsyncStorage().getItem(path, function(err, value) {
-      if (err) {
-        p.reject(err);
-      } else {
-        p.resolve(value);
-      }
+  getItemAsync(path: string): Promise {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().getItem(path, function(err, value) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(value);
+        }
+      });
     });
-    return p;
   },
 
-  setItemAsync(path: string, value: string): ParsePromise {
-    var p = new ParsePromise();
-    this.getAsyncStorage().setItem(path, value, function(err) {
-      if (err) {
-        p.reject(err);
-      } else {
-        p.resolve(value);
-      }
+  setItemAsync(path: string, value: string): Promise {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().setItem(path, value, function(err, value) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(value);
+        }
+      });
     });
-    return p;
   },
 
-  removeItemAsync(path: string): ParsePromise {
-    var p = new ParsePromise();
-    this.getAsyncStorage().removeItem(path, function(err) {
-      if (err) {
-        p.reject(err);
-      } else {
-        p.resolve();
-      }
+  removeItemAsync(path: string): Promise {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().removeItem(path, function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
     });
-    return p;
+  },
+
+  getAllKeys(): Promise {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().getAllKeys(function(err, keys) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(keys);
+        }
+      });
+    });
+  },
+
+  multiGet(keys: Array<string>): Promise<Array<Array<string>>> {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().multiGet(keys, function(err, result) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  },
+
+  multiRemove(keys: Array<string>): Promise {
+    return new Promise((resolve, reject) => {
+      this.getAsyncStorage().multiRemove(keys, function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(keys);
+        }
+      });
+    });
   },
 
   clear() {
-    this.getAsyncStorage().clear();
+    return this.getAsyncStorage().clear();
   }
 };
 

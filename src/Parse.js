@@ -21,7 +21,7 @@ import RESTController from './RESTController';
  * @class
  * @hideconstructor
  */
-var Parse = {
+const Parse = {
   /**
    * Call this method first to set up your authentication tokens for Parse.
    * You can get your keys from the Data Browser on parse.com.
@@ -32,10 +32,12 @@ var Parse = {
    */
   initialize(applicationId: string, javaScriptKey: string) {
     if (process.env.PARSE_BUILD === 'browser' && CoreManager.get('IS_NODE') && !process.env.SERVER_RENDERING) {
+      /* eslint-disable no-console */
       console.log(
         'It looks like you\'re using the browser version of the SDK in a ' +
         'node.js environment. You should require(\'parse/node\') instead.'
       );
+      /* eslint-enable no-console */
     }
     Parse._initialize(applicationId, javaScriptKey);
   },
@@ -56,11 +58,21 @@ var Parse = {
    */
   setAsyncStorage(storage: any) {
     CoreManager.setAsyncStorage(storage);
+  },
+
+  /**
+   * Call this method to set your LocalDatastoreStorage engine
+   * If using React-Native use {@link Parse.setAsyncStorage Parse.setAsyncStorage()}
+   * @param {LocalDatastoreController} controller a data storage.
+   * @static
+   */
+  setLocalDatastoreController(controller: any) {
+    CoreManager.setLocalDatastoreController(controller);
   }
 };
 
 /** These legacy setters may eventually be deprecated **/
-/** 
+/**
  * @member Parse.applicationId
  * @type string
  * @static
@@ -74,7 +86,7 @@ Object.defineProperty(Parse, 'applicationId', {
   }
 });
 
-/** 
+/**
  * @member Parse.javaScriptKey
  * @type string
  * @static
@@ -88,7 +100,7 @@ Object.defineProperty(Parse, 'javaScriptKey', {
   }
 });
 
-/** 
+/**
  * @member Parse.masterKey
  * @type string
  * @static
@@ -102,7 +114,7 @@ Object.defineProperty(Parse, 'masterKey', {
   }
 });
 
-/** 
+/**
  * @member Parse.serverURL
  * @type string
  * @static
@@ -115,7 +127,36 @@ Object.defineProperty(Parse, 'serverURL', {
     CoreManager.set('SERVER_URL', value);
   }
 });
-/** 
+
+/**
+ * @member Parse.serverAuthToken
+ * @type string
+ * @static
+ */
+Object.defineProperty(Parse, 'serverAuthToken', {
+  get() {
+    return CoreManager.get('SERVER_AUTH_TOKEN');
+  },
+  set(value) {
+    CoreManager.set('SERVER_AUTH_TOKEN', value);
+  }
+});
+
+/**
+ * @member Parse.serverAuthType
+ * @type string
+ * @static
+ */
+Object.defineProperty(Parse, 'serverAuthType', {
+  get() {
+    return CoreManager.get('SERVER_AUTH_TYPE');
+  },
+  set(value) {
+    CoreManager.set('SERVER_AUTH_TYPE', value);
+  }
+});
+
+/**
  * @member Parse.liveQueryServerURL
  * @type string
  * @static
@@ -132,6 +173,7 @@ Object.defineProperty(Parse, 'liveQueryServerURL', {
 
 Parse.ACL = require('./ParseACL').default;
 Parse.Analytics = require('./Analytics');
+Parse.AnonymousUtils = require('./AnonymousUtils').default;
 Parse.Cloud = require('./Cloud');
 Parse.CoreManager = require('./CoreManager');
 Parse.Config = require('./ParseConfig').default;
@@ -141,6 +183,7 @@ Parse.File = require('./ParseFile').default;
 Parse.GeoPoint = require('./ParseGeoPoint').default;
 Parse.Polygon = require('./ParsePolygon').default;
 Parse.Installation = require('./ParseInstallation').default;
+Parse.LocalDatastore = require('./LocalDatastore');
 Parse.Object = require('./ParseObject').default;
 Parse.Op = {
   Set: ParseOp.SetOp,
@@ -151,7 +194,6 @@ Parse.Op = {
   AddUnique: ParseOp.AddUniqueOp,
   Relation: ParseOp.RelationOp
 };
-Parse.Promise = require('./ParsePromise').default;
 Parse.Push = require('./Push');
 Parse.Query = require('./ParseQuery').default;
 Parse.Relation = require('./ParseRelation').default;
@@ -179,7 +221,40 @@ Parse._encode = function(value, _, disallowObjects) {
 Parse._getInstallationId = function() {
   return CoreManager.getInstallationController().currentInstallationId();
 }
-
+/**
+ * Enable pinning in your application.
+ * This must be called before your application can use pinning.
+ *
+ * @static
+ */
+Parse.enableLocalDatastore = function() {
+  Parse.LocalDatastore.isEnabled = true;
+}
+/**
+ * Flag that indicates whether Local Datastore is enabled.
+ *
+ * @static
+ */
+Parse.isLocalDatastoreEnabled = function() {
+  return Parse.LocalDatastore.isEnabled;
+}
+/**
+ * Gets all contents from Local Datastore
+ *
+ * <pre>
+ * await Parse.dumpLocalDatastore();
+ * </pre>
+ *
+ * @static
+ */
+Parse.dumpLocalDatastore = function() {
+  if (!Parse.LocalDatastore.isEnabled) {
+    console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
+    return Promise.resolve({});
+  } else {
+    return Parse.LocalDatastore._getAllContents();
+  }
+}
 CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);
 

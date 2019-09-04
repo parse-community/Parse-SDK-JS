@@ -8,38 +8,18 @@
  */
 
 jest.autoMockOff();
-var mockRNStorage = {};
-var mockRNStorageInterface = {
-  getItem(path, cb) {
-    cb(undefined, mockRNStorage[path] || null);
-  },
 
-  setItem(path, value, cb) {
-    mockRNStorage[path] = value;
-    cb();
-  },
+const mockRNStorageInterface = require('./test_helpers/mockRNStorage');
+const CoreManager = require('../CoreManager');
 
-  removeItem(path, cb) {
-    delete mockRNStorage[path];
-    cb();
-  },
-
-  clear() {
-    mockRNStorage = {};
-  },
-};
-
-var CoreManager = require('../CoreManager');
-var ParsePromise = require('../ParsePromise').default;
-
-var mockStorage = {};
-var mockStorageInterface = {
+let mockStorage = {};
+const mockStorageInterface = {
   getItem(path) {
     return mockStorage[path] || null;
   },
 
   getItemAsync(path) {
-    return ParsePromise.as(mockStorageInterface.getItem(path));
+    return Promise.resolve(mockStorageInterface.getItem(path));
   },
 
   setItem(path, value) {
@@ -47,7 +27,7 @@ var mockStorageInterface = {
   },
 
   setItemAsync(path, value) {
-    return ParsePromise.as(mockStorageInterface.setItem(path, value));
+    return Promise.resolve(mockStorageInterface.setItem(path, value));
   },
 
   removeItem(path) {
@@ -55,7 +35,7 @@ var mockStorageInterface = {
   },
 
   removeItemAsync(path) {
-    return ParsePromise.as(mockStorageInterface.removeItem(path));
+    return Promise.resolve(mockStorageInterface.removeItem(path));
   },
 
   clear() {
@@ -65,7 +45,7 @@ var mockStorageInterface = {
 
 global.localStorage = mockStorageInterface;
 
-var BrowserStorageController = require('../StorageController.browser');
+const BrowserStorageController = require('../StorageController.browser');
 
 describe('Browser StorageController', () => {
   beforeEach(() => {
@@ -93,7 +73,7 @@ describe('Browser StorageController', () => {
   });
 });
 
-var RNStorageController = require('../StorageController.react-native');
+const RNStorageController = require('../StorageController.react-native');
 
 describe('React Native StorageController', () => {
   beforeEach(() => {
@@ -133,9 +113,73 @@ describe('React Native StorageController', () => {
       done();
     });
   });
+
+  it('can getAllKeys', (done) => {
+    RNStorageController.setItemAsync('myKey', 'myValue').then(() => {
+      return RNStorageController.getItemAsync('myKey');
+    }).then((result) => {
+      expect(result).toBe('myValue');
+      return RNStorageController.getAllKeys();
+    }).then((keys) => {
+      expect(keys[0]).toBe('myKey');
+      done();
+    });
+  });
+
+  it('can handle set error', (done) => {
+    const mockRNError = {
+      setItem(path, value, cb) {
+        cb('Error Thrown', undefined);
+      },
+    };
+    CoreManager.setAsyncStorage(mockRNError);
+    RNStorageController.setItemAsync('myKey', 'myValue').catch((error) => {
+      expect(error).toBe('Error Thrown');
+      done();
+    });
+  });
+
+  it('can handle get error', (done) => {
+    const mockRNError = {
+      getItem(path, cb) {
+        cb('Error Thrown', undefined);
+      },
+    };
+    CoreManager.setAsyncStorage(mockRNError);
+    RNStorageController.getItemAsync('myKey').catch((error) => {
+      expect(error).toBe('Error Thrown');
+      done();
+    });
+  });
+
+  it('can handle remove error', (done) => {
+    const mockRNError = {
+      removeItem(path, cb) {
+        cb('Error Thrown', undefined);
+      },
+    };
+    CoreManager.setAsyncStorage(mockRNError);
+    RNStorageController.removeItemAsync('myKey').catch((error) => {
+      expect(error).toBe('Error Thrown');
+      done();
+    });
+  });
+
+  it('can handle getAllKeys error', (done) => {
+    const mockRNError = {
+      getAllKeys(cb) {
+        cb('Error Thrown', undefined);
+      },
+    };
+    CoreManager.setAsyncStorage(mockRNError);
+    RNStorageController.getAllKeys().catch((error) => {
+      expect(error).toBe('Error Thrown');
+      done();
+    });
+  });
 });
 
-var DefaultStorageController = require('../StorageController.default');
+const DefaultStorageController = require('../StorageController.default');
 
 describe('Default StorageController', () => {
   beforeEach(() => {
@@ -163,7 +207,7 @@ describe('Default StorageController', () => {
   });
 });
 
-var Storage = require('../Storage');
+const Storage = require('../Storage');
 
 describe('Storage (Default StorageController)', () => {
   beforeEach(() => {
@@ -194,7 +238,7 @@ describe('Storage (Default StorageController)', () => {
       return Storage.removeItemAsync('myKey');
     }).then(() => {
       return Storage.getItemAsync('myKey');
-    }).then((result) => {
+    }).then(() => {
       done();
     });
   });
@@ -214,6 +258,7 @@ describe('Storage (Default StorageController)', () => {
 
 describe('Storage (Async StorageController)', () => {
   beforeEach(() => {
+    CoreManager.setAsyncStorage(mockRNStorageInterface);
     CoreManager.setStorageController(
       require('../StorageController.react-native')
     );
@@ -242,7 +287,7 @@ describe('Storage (Async StorageController)', () => {
       return Storage.removeItemAsync('myKey');
     }).then(() => {
       return Storage.getItemAsync('myKey');
-    }).then((result) => {
+    }).then(() => {
       done();
     });
   });
