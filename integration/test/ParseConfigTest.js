@@ -5,15 +5,9 @@ const clear = require('./clear');
 const Parse = require('../../node');
 
 function testConfig() {
-  const data = {
-    params: { internal: 'i', public: 'p' },
-    masterKeyOnly: { internal: true },
-  };
-  return Parse.CoreManager.getRESTController().request(
-    'PUT',
-    'config',
-    data,
-    { useMasterKey: true }
+  return Parse.Config.save(
+    { internal: "i", public: "p" },
+    { internal: true }
   );
 }
 
