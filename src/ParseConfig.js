@@ -16,6 +16,8 @@ import escape from './escape';
 import ParseError from './ParseError';
 import Storage from './Storage';
 
+import type { RequestOptions } from './RESTController';
+
 /**
  * Parse.Config is a local representation of configuration data that
  * can be set from the Parse dashboard.
@@ -74,12 +76,17 @@ class ParseConfig {
   /**
    * Gets a new configuration object from the server.
    * @static
+   * @param {Object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   * </ul>
    * @return {Promise} A promise that is resolved with a newly-created
    *     configuration object when the get completes.
    */
-  static get() {
+  static get(options: RequestOptions = {}) {
     const controller = CoreManager.getConfigController();
-    return controller.get();
+    return controller.get(options);
   }
 
   /**
@@ -148,11 +155,11 @@ const DefaultController = {
     });
   },
 
-  get() {
+  get(options: RequestOptions = {}) {
     const RESTController = CoreManager.getRESTController();
 
     return RESTController.request(
-      'GET', 'config', {}, {}
+      'GET', 'config', {}, options
     ).then((response) => {
       if (!response || !response.params) {
         const error = new ParseError(
