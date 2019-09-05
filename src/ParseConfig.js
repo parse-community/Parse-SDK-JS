@@ -16,9 +16,7 @@ import escape from './escape';
 import ParseError from './ParseError';
 import Storage from './Storage';
 
-type GetOptions = {
-  useMasterKey?: boolean
-};
+import type { RequestOptions } from './RESTController';
 
 /**
  * Parse.Config is a local representation of configuration data that
@@ -86,7 +84,7 @@ class ParseConfig {
    * @return {Promise} A promise that is resolved with a newly-created
    *     configuration object when the get completes.
    */
-  static get(options: GetOptions) {
+  static get(options: RequestOptions = {}) {
     const controller = CoreManager.getConfigController();
     return controller.get(options);
   }
@@ -157,11 +155,11 @@ const DefaultController = {
     });
   },
 
-  get(options: GetOptions) {
+  get(options: RequestOptions = {}) {
     const RESTController = CoreManager.getRESTController();
 
     return RESTController.request(
-      'GET', 'config', {}, options || {}
+      'GET', 'config', {}, options
     ).then((response) => {
       if (!response || !response.params) {
         const error = new ParseError(
