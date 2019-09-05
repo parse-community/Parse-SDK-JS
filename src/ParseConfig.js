@@ -76,7 +76,7 @@ class ParseConfig {
   /**
    * Gets a new configuration object from the server.
    * @static
-   * @param {GetOptions} options
+   * @param {Object} options
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
