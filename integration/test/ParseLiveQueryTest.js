@@ -7,6 +7,7 @@ const sleep = require('./sleep');
 
 const TestObject = Parse.Object.extend('TestObject');
 const DiffObject = Parse.Object.extend('DiffObject');
+const SampleObject = Parse.Object.extend('SampleObject');
 
 describe('Parse LiveQuery', () => {
   beforeEach((done) => {
@@ -31,6 +32,35 @@ describe('Parse LiveQuery', () => {
     })
     object.set({ foo: 'bar' });
     await object.save();
+  });
+  
+  it('can subscribe to matchesKeyInQuery', async done => {
+    const objectA = new TestObject();
+    const objectB = new DiffObject();
+    const objectC = new SampleObject();
+
+    objectA.set({ name: 'test', sample: objectC });
+    objectB.set({ name: 'diff', sample: objectC });
+    objectC.set({ name: 'sample' });
+
+    await Parse.Object.saveAll([objectA, objectB, objectC]);
+
+    const subQuery = new Parse.Query(DiffObject);
+    subQuery.equalTo('name', 'diff');
+
+    const query = new Parse.Query(TestObject);
+    query.contains('name', 'test');
+    query.matchesKeyInQuery('sample', 'sample', subQuery);
+
+    const subscripton = await query.subscribe();
+
+    subscripton.on('update', object => {
+      assert.equal(object.get('name'), 'tester');
+      done();
+    });
+
+    objectA.set({ name: 'tester' });
+    await objectA.save();
   });
 
   it('can subscribe to query with client', async (done) => {
