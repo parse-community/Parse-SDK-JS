@@ -54,7 +54,7 @@ describe('Parse LiveQuery', () => {
 
     const subscripton = await query.subscribe();
 
-    subscripton.on('update', object => {
+    subscripton.on('leave', object => {
       assert.equal(object.get('name'), 'tester');
       done();
     });
