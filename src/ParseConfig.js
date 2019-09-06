@@ -105,7 +105,7 @@ class ParseConfig {
     const controller = CoreManager.getConfigController();
     //To avoid a mismatch with the local and the cloud config we get a new version
     return controller.save(attrs, masterKeyOnlyFlags).then(() => {
-      return controller.get({useMasterKey: true});
+      return controller.get({ useMasterKey: true });
     },(error) => {
       return Promise.reject(error);
     });
