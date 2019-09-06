@@ -9,6 +9,7 @@
 
 jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
+jest.dontMock('../encode');
 jest.dontMock('../escape');
 jest.dontMock('../ParseConfig');
 jest.dontMock('../ParseError');
@@ -123,6 +124,74 @@ describe('ParseConfig', () => {
         num: 46
       });
       done();
+    });
+  });
+
+  it('can save a config object that be retrieved with masterkey only', async () => {
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        console.log(method, path, body, options);
+        if (method === 'PUT') {
+          expect(method).toBe('PUT');
+          expect(path).toBe('config');
+          expect(body).toEqual({
+            params: { internal: 'i', number: 12 },
+            masterKeyOnly: { internal: true },
+          });
+          expect(options).toEqual({ useMasterKey: true });
+          return Promise.resolve({
+            params: {
+              internal: 'i',
+              number: 12
+            },
+            result: true,
+          });
+        } else if (method === 'GET') {
+          expect(method).toBe('GET');
+          expect(path).toBe('config');
+          expect(body).toEqual({});
+          expect(options).toEqual({ useMasterKey: true });
+          return Promise.resolve({
+            params: {
+              internal: 'i',
+              number: 12
+            },
+          });
+        }
+      },
+      ajax() {}
+    });
+    const config = await ParseConfig.save(
+      { internal: 'i', number: 12 },
+      { internal: true }
+    );
+    expect(config.get('internal')).toBe('i');
+    expect(config.get('number')).toBe(12);
+  });
+
+  it('can get a config object with master key', async () => {
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('GET');
+        expect(path).toBe('config');
+        expect(body).toEqual({});
+        expect(options).toEqual({ useMasterKey: true });
+        return Promise.resolve({
+          params: {
+            str: 'hello',
+            num: 45
+          }
+        });
+      },
+      ajax() {}
+    });
+    const config = await ParseConfig.get({ useMasterKey: true });
+    expect(config.get('str')).toBe('hello');
+    expect(config.get('num')).toBe(45);
+    const path = Storage.generatePath('currentConfig');
+    expect(JSON.parse(Storage.getItem(path))).toEqual({
+      str: 'hello',
+      num: 45,
     });
   });
 

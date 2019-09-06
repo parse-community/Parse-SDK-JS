@@ -5,15 +5,9 @@ const clear = require('./clear');
 const Parse = require('../../node');
 
 function testConfig() {
-  const data = {
-    params: { internal: 'i', public: 'p' },
-    masterKeyOnly: { internal: true },
-  };
-  return Parse.CoreManager.getRESTController().request(
-    'PUT',
-    'config',
-    data,
-    { useMasterKey: true }
+  return Parse.Config.save(
+    { internal: "i", string: "s", number: 12 },
+    { internal: true }
   );
 }
 
@@ -28,22 +22,21 @@ describe('Parse Config', () => {
   });
 
   it('can create a config', async () => {
-    const config = await Parse.Config.save({
-      str: 'hello',
-      num: 42
-    });
-    assert.equal(config.get('str'), 'hello');
-    assert.equal(config.get('num'), 42);
+    const config = await testConfig();
+
+    assert.notStrictEqual(config, undefined);
+    assert.strictEqual(config.get('string'), 's');
+    assert.strictEqual(config.get('internal'), 'i');
+    assert.strictEqual(config.get('number'), 12);
   });
 
   it('can get a config', async () => {
-    await Parse.Config.save({
-      str: 'hello',
-      num: 42
-    });
+    await testConfig();
+
     const config = await Parse.Config.get();
-    assert.equal(config.get('str'), 'hello');
-    assert.equal(config.get('num'), 42);
+    assert.notStrictEqual(config, undefined);
+    assert.strictEqual(config.get('string'), 's');
+    assert.strictEqual(config.get('number'), 12);
   });
 
   it('can get internal config parameter with masterkey', async () => {
@@ -51,7 +44,7 @@ describe('Parse Config', () => {
 
     const config = await Parse.Config.get({ useMasterKey: true });
     assert.equal(config.get('internal'), 'i');
-    assert.equal(config.get('public'), 'p');
+    assert.equal(config.get('string'), 's');
   });
 
   it('cannot get internal config parameter without masterkey', async () => {
@@ -59,6 +52,6 @@ describe('Parse Config', () => {
 
     const config = await Parse.Config.get();
     assert.equal(config.get('internal'), undefined);
-    assert.equal(config.get('public'), 'p');
+    assert.equal(config.get('string'), 's');
   });
 });
