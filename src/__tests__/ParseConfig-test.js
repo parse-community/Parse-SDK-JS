@@ -126,6 +126,31 @@ describe('ParseConfig', () => {
     });
   });
 
+  it('can save a config object that be retrieved with masterkey only', async () => {
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('PUT');
+        expect(path).toBe('config');
+        expect(body).toEqual({
+          params: {internal: 'i', number: 12},
+          masterKeyOnly: {internal: true} });
+        expect(options).toEqual({ useMasterKey: true });
+        return Promise.resolve({
+          params: {
+            internal: 'i',
+            number: 12
+          }
+        });
+      },
+      ajax() {}
+    });
+    const config = await ParseConfig.save(
+      {internal: 'i', number: 12},
+      {internal: true});
+    expect(config.get('internal')).toBe('i');
+    expect(config.get('number')).toBe(12);
+  });
+  
   it('rejects save on invalid response', (done) => {
     CoreManager.setRESTController({
       request() {
