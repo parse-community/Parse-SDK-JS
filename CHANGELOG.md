@@ -1,7 +1,14 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.7.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.7.1...master)
+
+## 2.7.1
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.7.0...2.7.1)
+
+**New Features**
+- Support for `ParseConfig.save` with `masterKeyOnlyFlags` option ([#910](https://github.com/parse-community/Parse-SDK-JS/pull/910)) (Requires Parse-Server 3.8.0+)
+- Support for `ParseConfig.get` with `useMasterKey` option ([#907](https://github.com/parse-community/Parse-SDK-JS/pull/907))
 
 ## 2.7.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.6.0...2.7.0)
