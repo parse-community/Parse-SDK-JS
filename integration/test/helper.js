@@ -1,6 +1,6 @@
 const ParseServer = require('parse-server').ParseServer;
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 beforeAll((done) => {
   const { app } = require('../server');
   const httpServer = require('http').createServer(app);
