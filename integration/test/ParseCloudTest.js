@@ -133,37 +133,4 @@ describe('Parse Cloud', () => {
       done();
     });
   });
-
-  it('retrieve subclass objects', async (done) => {
-    try {
-
-      // Register custom class with initial value prop
-      class MySubclass extends Parse.Object {
-        constructor(attr) {
-          super('MySubclass', attr);
-          if(!attr || !attr.defaultProp) {
-            this.defaultProp = 'default';
-          }
-        }
-        // get defaultProp() { return this.get('defaultProp'); }
-        // set defaultProp(val) { this.set('defaultProp', val); }
-      }
-      Parse.Object.registerSubclass('MySubclass', MySubclass);
-
-      const o = await new MySubclass().save();
-      let results = await new Parse.Query(MySubclass).find();
-      expect(results.length).toBe(1);
-      expect(results[0].defaultProp).toBe('default');
-      await o.destroy();
-
-      await new MySubclass({defaultProp: 'foo'}).save();
-      results = await new Parse.Query(MySubclass).find();
-      expect(results.length).toBe(1);
-      expect(results[0].defaultProp).toBe('foo');
-
-      done();
-    } catch(e) {
-      done.fail(e);
-    }
-  });
 });

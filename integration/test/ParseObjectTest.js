@@ -1774,4 +1774,26 @@ describe('Parse Object', () => {
     const fetched = await query.get(user.id);
     assert.equal(fetched.isDataAvailable(), true);
   });
+
+  it('retrieve subclass objects', async (done) => {
+    try {
+      class MySubclass extends Parse.Object {
+        constructor(attr) {
+          super('MySubclass', attr);
+          this.defaultProp = this.defaultProp || 'default';
+        }
+        get defaultProp() { return this.get('defaultProp'); }
+        set defaultProp(val) { this.set('defaultProp', val); }
+      }
+      Parse.Object.registerSubclass('MySubclass', MySubclass);
+
+      await new MySubclass({defaultProp: 'foo'}).save();
+      const result = await new Parse.Query(MySubclass).first();
+      expect(result.defaultProp).toBe('foo');
+
+      done();
+    } catch(e) {
+      done.fail(e);
+    }
+  });
 });
