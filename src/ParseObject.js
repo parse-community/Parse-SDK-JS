@@ -1702,7 +1702,7 @@ class ParseObject {
       throw new Error('Cannot create an object without a className');
     }
     const constructor = classMap[json.className];
-    const o = constructor ? new constructor() : new ParseObject(json.className);
+    const o = constructor ? new constructor(json) : new ParseObject(json.className, Object.assign(json, { className: undefined }));
     const otherAttributes = {};
     for (const attr in json) {
       if (attr !== 'className' && attr !== '__type') {

@@ -1796,4 +1796,33 @@ describe('Parse Object', () => {
       done.fail(e);
     }
   });
+
+  it('conver from JSON', async (done) => {
+    try {
+
+      // Object without constructor
+      const o = Parse.Object.fromJSON({
+        className: 'FooObject',
+        name: 'foo'
+      }, true);
+
+      await o.save();
+      let result = await new Parse.Query('FooObject').first();
+      expect(result.get('name')).toBe('foo');
+
+      // Object with constructor `TestObject`
+      const to = Parse.Object.fromJSON({
+        className: 'TestObject',
+        name: 'foo'
+      }, true);
+
+      await to.save();
+      result = await new Parse.Query('TestObject').first();
+      expect(result.get('name')).toBe('foo');
+
+      done();
+    } catch(e) {
+      done.fail(e);
+    }
+  });
 });
