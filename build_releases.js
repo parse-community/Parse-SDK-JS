@@ -25,8 +25,8 @@ console.log('Cleaning up old builds...\n');
 rmDir(path.join(__dirname, 'dist'));
 rmDir(path.join(__dirname, 'lib'));
 
-const crossEnv = path.join(__dirname, 'node_modules', 'cross-env', 'dist', 'bin', 'cross-env.js');
-const gulp = path.join(__dirname, 'node_modules', 'gulp', 'bin', 'gulp.js');
+const crossEnv = 'npm run cross-env';
+const gulp = 'npm run gulp';
 
 console.log('Browser Release:');
 execSync(`${crossEnv} PARSE_BUILD=browser ${gulp} compile`, { stdio: 'inherit' });
