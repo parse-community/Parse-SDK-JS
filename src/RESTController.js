@@ -132,8 +132,8 @@ const RESTController = {
           if (response) {
             promise.resolve({ response, status: xhr.status, xhr });
           }
-        } else if (aborted) {
-          promise.resolve({ response: {}, status: xhr.status, xhr });
+        } else if (aborted && xhr.status === 0) {
+          promise.resolve({ response: {}, status: 0, xhr });
         } else if (xhr.status >= 500 || xhr.status === 0) { // retry on 5XX or node-xmlhttprequest error
           if (++attempts < CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
             // Exponentially-growing random delay

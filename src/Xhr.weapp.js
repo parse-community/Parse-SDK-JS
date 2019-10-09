@@ -41,6 +41,7 @@ module.exports = class XhrWeapp {
       return;
     }
     this.requestTask.abort();
+    this.status = 0;
     this.onabort();
   }
 
