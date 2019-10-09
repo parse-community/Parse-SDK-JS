@@ -9,8 +9,10 @@ module.exports = class XhrWeapp {
     this.responseHeader = {};
     this.method = '';
     this.url = '';
-    this.onerror = () => {}
-    this.onreadystatechange = () => {}
+    this.onabort = () => {};
+    this.onerror = () => {};
+    this.onreadystatechange = () => {};
+    this.requestTask = null;
   }
 
   getAllResponseHeaders() {
@@ -34,8 +36,16 @@ module.exports = class XhrWeapp {
     this.url = url;
   }
 
+  abort() {
+    if (!this.requestTask) {
+      return;
+    }
+    this.requestTask.abort();
+    this.onabort();
+  }
+
   send(data) {
-    wx.request({
+    this.requestTask = wx.request({
       url: this.url,
       method: this.method,
       data: data,
@@ -46,10 +56,11 @@ module.exports = class XhrWeapp {
         this.response = res.data;
         this.responseHeader = res.header;
         this.responseText = JSON.stringify(res.data);
-
+        this.requestTask = null;
         this.onreadystatechange();
       },
       fail: (err) => {
+        this.requestTask = null;
         this.onerror(err);
       }
     })

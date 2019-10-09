@@ -51,6 +51,9 @@ if (typeof XDomainRequest !== 'undefined' &&
 function ajaxIE9(method: string, url: string, data: any, options?: FullOptions) {
   return new Promise((resolve, reject) => {
     const xdr = new XDomainRequest();
+    if (options && typeof options.requestTask === 'function') {
+      options.requestTask(xdr);
+    }
     xdr.onload = function() {
       let response;
       try {
@@ -101,7 +104,12 @@ const RESTController = {
         );
       }
       let handled = false;
+      let aborted = false;
+
       const xhr = new XHR();
+      if (options && typeof options.requestTask === 'function') {
+        options.requestTask(xhr);
+      }
       xhr.onreadystatechange = function() {
         if (xhr.readyState !== 4 || handled) {
           return;
@@ -124,6 +132,8 @@ const RESTController = {
           if (response) {
             promise.resolve({ response, status: xhr.status, xhr });
           }
+        } else if (aborted) {
+          promise.resolve({ response: {}, status: xhr.status, xhr });
         } else if (xhr.status >= 500 || xhr.status === 0) { // retry on 5XX or node-xmlhttprequest error
           if (++attempts < CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
             // Exponentially-growing random delay
@@ -173,7 +183,9 @@ const RESTController = {
           });
         }
       }
-
+      xhr.onabort = () => {
+        aborted = true;
+      };
       xhr.open(method, url, true);
 
       for (const h in headers) {
