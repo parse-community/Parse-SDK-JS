@@ -73,8 +73,8 @@
     "vinyl-source-stream": "2.0.0"
   },
   "scripts": {
-    "build": "./build_releases.sh",
-    "release": "./build_releases.sh && npm publish",
+    "build": "node build_releases.js",
+    "release": "node build_releases.js && npm publish",
     "test": "cross-env PARSE_BUILD=node jest",
     "lint": "eslint --cache src/ integration/",
     "lint:fix": "eslint --fix --cache src/ integration/",
@@ -85,7 +85,9 @@
     "integration": "cross-env TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
     "prepare": "npm run build",
-    "release_docs": "./release_docs.sh"
+    "release_docs": "./release_docs.sh",
+    "gulp": "gulp",
+    "cross-env": "cross-env"
   },
   "jest": {
     "automock": true,
