@@ -404,23 +404,23 @@ class ParseSchema {
   /**
    * Deleting a Field to Update on a Schema
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {String} targetClass Name of the target Pointer Class
+   * @param {String} name Name of the field
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
   deleteField(name: string) {
     this._fields[name] = { __op: 'Delete'};
+    return this;
   }
 
   /**
    * Deleting an Index to Update on a Schema
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {String} targetClass Name of the target Pointer Class
+   * @param {String} name Name of the field
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
   deleteIndex(name: string) {
     this._indexes[name] = { __op: 'Delete'};
+    return this;
   }
 }
 
