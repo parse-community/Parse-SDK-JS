@@ -43,6 +43,7 @@ module.exports = class XhrWeapp {
     this.requestTask.abort();
     this.status = 0;
     this.onabort();
+    this.onreadystatechange();
   }
 
   send(data) {
