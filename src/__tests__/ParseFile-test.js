@@ -233,6 +233,31 @@ describe('ParseFile', () => {
       expect(f.url()).toBe('http://files.parsetfss.com/a/progress.txt');
     });
   });
+
+  it('can cancel file upload', () => {
+    const mockRequestTask = {
+      abort: () => {},
+    };
+    CoreManager.setFileController({
+      saveFile: function(name, payload, options) {
+        options.requestTask(mockRequestTask);
+        return Promise.resolve({});
+      },
+      saveBase64: () => {},
+      download: () => {},
+    });
+    const file = new ParseFile('progress.txt', new File(["Parse"], "progress.txt"));
+
+    jest.spyOn(mockRequestTask, 'abort');
+    file.cancel();
+    expect(mockRequestTask.abort).toHaveBeenCalledTimes(0);
+
+    file.save();
+
+    expect(file._requestTask).toEqual(mockRequestTask);
+    file.cancel();
+    expect(mockRequestTask.abort).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('FileController', () => {
@@ -294,11 +319,10 @@ describe('FileController', () => {
     await file.save();
     expect(defaultController.download).toHaveBeenCalledTimes(1);
     expect(defaultController.saveBase64).toHaveBeenCalledTimes(1);
-    expect(defaultController.saveBase64.mock.calls[0]).toEqual([
-      'parse.png',
-      { format: 'base64', base64: 'ParseA==', type: 'image/png' },
-      {}
-    ]);
+    expect(defaultController.saveBase64.mock.calls[0][0]).toEqual('parse.png');
+    expect(defaultController.saveBase64.mock.calls[0][1]).toEqual({
+      format: 'base64', base64: 'ParseA==', type: 'image/png'
+    });
     spy.mockRestore();
   });
 

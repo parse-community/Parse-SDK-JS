@@ -70,6 +70,7 @@ class ParseFile {
   _source: FileSource;
   _previousSave: ?Promise<ParseFile>;
   _data: ?string;
+  _requestTask: ?any;
 
   /**
    * @param name {String} The file's name. This will be prefixed by a unique
@@ -210,6 +211,8 @@ class ParseFile {
    */
   save(options?: FullOptions) {
     options = options || {};
+    options.requestTask = (task) => this._requestTask = task;
+
     const controller = CoreManager.getFileController();
     if (!this._previousSave) {
       if (this._source.format === 'file') {
@@ -217,6 +220,7 @@ class ParseFile {
           this._name = res.name;
           this._url = res.url;
           this._data = null;
+          this._requestTask = null;
           return this;
         });
       } else if (this._source.format === 'uri') {
@@ -231,12 +235,14 @@ class ParseFile {
         }).then((res) => {
           this._name = res.name;
           this._url = res.url;
+          this._requestTask = null;
           return this;
         });
       } else {
         this._previousSave = controller.saveBase64(this._name, this._source, options).then((res) => {
           this._name = res.name;
           this._url = res.url;
+          this._requestTask = null;
           return this;
         });
       }
@@ -244,6 +250,13 @@ class ParseFile {
     if (this._previousSave) {
       return this._previousSave;
     }
+  }
+
+  cancel() {
+    if (this._requestTask && typeof this._requestTask.abort === 'function') {
+      this._requestTask.abort();
+    }
+    this._requestTask = null;
   }
 
   toJSON(): { name: ?string, url: ?string } {

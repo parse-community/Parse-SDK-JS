@@ -252,6 +252,26 @@ describe('RESTController', () => {
     expect(response.result).toBe('hello');
   });
 
+  it('handles aborted requests', (done) => {
+    const XHR = function() { };
+    XHR.prototype = {
+      open: function() { },
+      setRequestHeader: function() { },
+      send: function() {
+        this.status = 0;
+        this.responseText = '{"foo":"bar"}';
+        this.readyState = 4;
+        this.onabort();
+        this.onreadystatechange();
+      }
+    };
+    RESTController._setXHR(XHR);
+    RESTController.request('GET', 'classes/MyObject', {}, {})
+      .then(() => {
+        done();
+      });
+  });
+
   it('attaches the session token of the current user', async () => {
     CoreManager.setUserController({
       currentUserAsync() {
