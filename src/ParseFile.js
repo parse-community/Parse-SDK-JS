@@ -166,8 +166,11 @@ class ParseFile {
     if (!this._url) {
       throw new Error('Cannot retrieve data for unsaved ParseFile.');
     }
+    const options = {
+      requestTask: (task) => this._requestTask = task,
+    };
     const controller = CoreManager.getFileController();
-    const result = await controller.download(this._url);
+    const result = await controller.download(this._url, options);
     this._data = result.base64;
     return this._data;
   }
@@ -224,13 +227,17 @@ class ParseFile {
           return this;
         });
       } else if (this._source.format === 'uri') {
-        this._previousSave = controller.download(this._source.uri).then((result) => {
+        this._previousSave = controller.download(this._source.uri, options).then((result) => {
+          if (!result || !result.base64) {
+            return {};
+          }
           const newSource = {
             format: 'base64',
             base64: result.base64,
             type: result.contentType,
           };
           this._data = result.base64;
+          this._requestTask = null;
           return controller.saveBase64(this._name, newSource, options);
         }).then((res) => {
           this._name = res.name;
@@ -348,33 +355,43 @@ const DefaultController = {
     return CoreManager.getRESTController().request('POST', path, data, options);
   },
 
-  download: function(uri) {
+  download: function(uri, options) {
     if (XHR) {
-      return this.downloadAjax(uri);
+      return this.downloadAjax(uri, options);
     } else if (process.env.PARSE_BUILD === 'node') {
       return new Promise((resolve, reject) => {
+        let aborted = false;
         const client = uri.indexOf('https') === 0
           ? require('https')
           : require('http');
-        client.get(uri, (resp) => {
+        const req = client.get(uri, (resp) => {
           resp.setEncoding('base64');
           let base64 = '';
           resp.on('data', (data) => base64 += data);
           resp.on('end', () => {
+            if (aborted) {
+              return resolve({});
+            }
             resolve({
               base64,
               contentType: resp.headers['content-type'],
             });
           });
-        }).on('error', reject);
+        });
+        req.on('aborted', () => {
+          aborted = true;
+        });
+        req.on('error', reject);
+        options.requestTask(req);
       });
     } else {
       return Promise.reject('Cannot make a request: No definition of XMLHttpRequest was found.');
     }
   },
 
-  downloadAjax: function(uri) {
+  downloadAjax: function(uri, options) {
     return new Promise((resolve, reject) => {
+      let aborted = false;
       const xhr = new XHR();
       xhr.open('GET', uri, true);
       xhr.responseType = 'arraybuffer';
@@ -383,12 +400,19 @@ const DefaultController = {
         if (xhr.readyState !== 4) {
           return;
         }
+        if (aborted) {
+          return resolve({});
+        }
         const bytes = new Uint8Array(this.response);
         resolve({
           base64: ParseFile.encodeBase64(bytes),
           contentType: xhr.getResponseHeader('content-type'),
         });
       };
+      xhr.onabort = function() {
+        aborted = true;
+      };
+      options.requestTask(xhr);
       xhr.send();
     });
   },

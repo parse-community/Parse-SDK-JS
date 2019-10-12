@@ -130,7 +130,6 @@ describe('ParseConfig', () => {
   it('can save a config object that be retrieved with masterkey only', async () => {
     CoreManager.setRESTController({
       request(method, path, body, options) {
-        console.log(method, path, body, options);
         if (method === 'PUT') {
           expect(method).toBe('PUT');
           expect(path).toBe('config');

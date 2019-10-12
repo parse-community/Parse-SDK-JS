@@ -315,7 +315,7 @@ describe('FileController', () => {
         });
       });
 
-    jest.spyOn(defaultController, 'saveBase64');
+    const spy2 = jest.spyOn(defaultController, 'saveBase64');
     await file.save();
     expect(defaultController.download).toHaveBeenCalledTimes(1);
     expect(defaultController.saveBase64).toHaveBeenCalledTimes(1);
@@ -324,6 +324,25 @@ describe('FileController', () => {
       format: 'base64', base64: 'ParseA==', type: 'image/png'
     });
     spy.mockRestore();
+    spy2.mockRestore();
+  });
+
+  it('save with uri download abort', async () => {
+    const file = new ParseFile('parse.png', { uri: 'https://example.com/image.png' });
+    const spy = jest.spyOn(
+      defaultController,
+      'download'
+    )
+      .mockImplementationOnce(() => {
+        return Promise.resolve({});
+      });
+
+    const spy2 = jest.spyOn(defaultController, 'saveBase64');
+    await file.save();
+    expect(defaultController.download).toHaveBeenCalledTimes(1);
+    expect(defaultController.saveBase64).toHaveBeenCalledTimes(0);
+    spy.mockRestore();
+    spy2.mockRestore();
   });
 
   it('download with base64 http', async () => {
@@ -349,6 +368,32 @@ describe('FileController', () => {
     expect(data.contentType).toBe('image/png');
     expect(mockHttp.get).toHaveBeenCalledTimes(1);
     expect(mockHttps.get).toHaveBeenCalledTimes(0);
+    spy.mockRestore();
+  });
+
+  it('download with base64 http abort', async () => {
+    defaultController._setXHR(null);
+    const mockRequest = Object.create(EventEmitter.prototype);
+    const mockResponse = Object.create(EventEmitter.prototype);
+    EventEmitter.call(mockRequest);
+    EventEmitter.call(mockResponse);
+    mockResponse.setEncoding = function() {}
+    mockResponse.headers = {
+      'content-type': 'image/png'
+    };
+    const spy = jest.spyOn(mockHttp, 'get')
+      .mockImplementationOnce((uri, cb) => {
+        cb(mockResponse);
+        return mockRequest;
+      });
+    const options = {
+      requestTask: () => {},
+    };
+    defaultController.download('http://example.com/image.png', options).then((data) => {
+      expect(data).toEqual({});
+    });
+    mockRequest.emit('aborted');
+    mockResponse.emit('end');
     spy.mockRestore();
   });
 
@@ -395,10 +440,42 @@ describe('FileController', () => {
       };
     };
     defaultController._setXHR(mockXHR);
-
-    const data = await defaultController.download('https://example.com/image.png');
+    const options = {
+      requestTask: () => {},
+    };
+    const data = await defaultController.download('https://example.com/image.png', options);
     expect(data.base64).toBe('ParseA==');
     expect(data.contentType).toBe('image/png');
+  });
+
+  it('download with ajax abort', async () => {
+    const mockXHR = function () {
+      return {
+        open: jest.fn(),
+        send: jest.fn().mockImplementation(function() {
+          this.response = [61, 170, 236, 120];
+          this.readyState = 2;
+          this.onreadystatechange();
+        }),
+        getResponseHeader: function() {
+          return 'image/png';
+        },
+        abort: function() {
+          this.onabort();
+          this.readyState = 4;
+          this.onreadystatechange()
+        }
+      };
+    };
+    defaultController._setXHR(mockXHR);
+    let _requestTask;
+    const options = {
+      requestTask: (task) => _requestTask = task,
+    };
+    defaultController.download('https://example.com/image.png', options).then((data) => {
+      expect(data).toEqual({});
+    });
+    _requestTask.abort();
   });
 
   it('download with ajax error', async () => {
@@ -411,9 +488,11 @@ describe('FileController', () => {
       };
     };
     defaultController._setXHR(mockXHR);
-
+    const options = {
+      requestTask: () => {},
+    };
     try {
-      await defaultController.download('https://example.com/image.png');
+      await defaultController.download('https://example.com/image.png', options);
     } catch (e) {
       expect(e).toBe('error thrown');
     }
@@ -453,7 +532,8 @@ describe('FileController', () => {
       defaultController,
       'download'
     )
-      .mockImplementationOnce(() => {
+      .mockImplementationOnce((uri, options) => {
+        options.requestTask(null);
         return Promise.resolve({
           base64: 'ParseA==',
           contentType: 'image/png',
