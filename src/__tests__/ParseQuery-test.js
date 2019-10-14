@@ -21,6 +21,10 @@ jest.dontMock('../LocalDatastore');
 jest.dontMock('../OfflineQuery');
 jest.dontMock('../LiveQuerySubscription');
 
+jest.mock('uuid/v4', () => {
+  let value = 0;
+  return () => value++;
+});
 const mockObject = function(className) {
   this.className = className;
   this.attributes = {};
