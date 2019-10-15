@@ -173,9 +173,6 @@ class ParseSchema {
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
   setCLP(clp: { [key: string]: mixed }) {
-    if (!clp) {
-      return;
-    }
     this._clp = clp;
     return this;
   }

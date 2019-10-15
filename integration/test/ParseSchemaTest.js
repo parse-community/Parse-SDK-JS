@@ -136,6 +136,10 @@ describe('Schema', () => {
     let schema = await testSchema.save();
     assert.deepEqual(schema.classLevelPermissions, defaultCLPS);
 
+    testSchema.setCLP(1234);
+    schema = await testSchema.update();
+    assert.deepEqual(schema.classLevelPermissions, emptyCLPS);
+
     testSchema.setCLP(clp);
     schema = await testSchema.update();
     assert.deepEqual(schema.classLevelPermissions, clp);
