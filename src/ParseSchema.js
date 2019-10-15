@@ -363,7 +363,7 @@ class ParseSchema {
 }
 
 const DefaultController = {
-  send(className: string, method: string, params: any): Promise {
+  send(className: string, method: string, params: any = {}): Promise {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request(
       method,
@@ -374,7 +374,7 @@ const DefaultController = {
   },
 
   get(className: string): Promise {
-    return this.send(className, 'GET', {});
+    return this.send(className, 'GET');
   },
 
   create(className: string, params: any): Promise {
@@ -386,7 +386,7 @@ const DefaultController = {
   },
 
   delete(className: string): Promise {
-    return this.send(className, 'DELETE', {});
+    return this.send(className, 'DELETE');
   },
 
   purge(className: string): Promise {
