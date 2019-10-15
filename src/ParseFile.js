@@ -360,7 +360,6 @@ const DefaultController = {
       return this.downloadAjax(uri, options);
     } else if (process.env.PARSE_BUILD === 'node') {
       return new Promise((resolve, reject) => {
-        let aborted = false;
         const client = uri.indexOf('https') === 0
           ? require('https')
           : require('http');
@@ -369,17 +368,14 @@ const DefaultController = {
           let base64 = '';
           resp.on('data', (data) => base64 += data);
           resp.on('end', () => {
-            if (aborted) {
-              return resolve({});
-            }
             resolve({
               base64,
               contentType: resp.headers['content-type'],
             });
           });
         });
-        req.on('aborted', () => {
-          aborted = true;
+        req.on('abort', () => {
+          resolve({});
         });
         req.on('error', reject);
         options.requestTask(req);
@@ -391,16 +387,15 @@ const DefaultController = {
 
   downloadAjax: function(uri, options) {
     return new Promise((resolve, reject) => {
-      let aborted = false;
       const xhr = new XHR();
       xhr.open('GET', uri, true);
       xhr.responseType = 'arraybuffer';
       xhr.onerror = function(e) { reject(e); };
       xhr.onreadystatechange = function() {
-        if (xhr.readyState !== 4) {
+        if (xhr.readyState !== xhr.DONE) {
           return;
         }
-        if (aborted) {
+        if (!this.response) {
           return resolve({});
         }
         const bytes = new Uint8Array(this.response);
@@ -409,8 +404,6 @@ const DefaultController = {
           contentType: xhr.getResponseHeader('content-type'),
         });
       };
-      xhr.onabort = function() {
-        aborted = true;
       };
       options.requestTask(xhr);
       xhr.send();

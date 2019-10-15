@@ -1,7 +1,13 @@
 module.exports = class XhrWeapp {
   constructor() {
+    this.UNSENT = 0;
+    this.OPENED = 1;
+    this.HEADERS_RECEIVED = 2;
+    this.LOADING = 3;
+    this.DONE = 4;
+
     this.header = {};
-    this.readyState = 4;
+    this.readyState = this.DONE;
     this.status = 0;
     this.response = '';
     this.responseType = '';
