@@ -423,9 +423,10 @@ describe('FileController', () => {
     spy.mockRestore();
   });
 
-  it('download with ajax', async () => {
+  fit('download with ajax', async () => {
     const mockXHR = function () {
       return {
+        DONE: 4,
         open: jest.fn(),
         send: jest.fn().mockImplementation(function() {
           this.response = [61, 170, 236, 120];
@@ -461,7 +462,8 @@ describe('FileController', () => {
           return 'image/png';
         },
         abort: function() {
-          this.onabort();
+          this.status = 0;
+          this.response = undefined;
           this.readyState = 4;
           this.onreadystatechange()
         }

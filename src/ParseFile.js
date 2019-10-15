@@ -228,7 +228,7 @@ class ParseFile {
         });
       } else if (this._source.format === 'uri') {
         this._previousSave = controller.download(this._source.uri, options).then((result) => {
-          if (!result || !result.base64) {
+          if (!(result && result.base64)) {
             return {};
           }
           const newSource = {
