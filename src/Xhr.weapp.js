@@ -48,6 +48,7 @@ module.exports = class XhrWeapp {
     }
     this.requestTask.abort();
     this.status = 0;
+    this.response = undefined;
     this.onabort();
     this.onreadystatechange();
   }
