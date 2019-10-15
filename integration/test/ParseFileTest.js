@@ -39,6 +39,16 @@ describe('Parse.File', () => {
     assert.equal(file2.url(), result.get('file2').url());
   });
 
+  it('can cancel save file with uri', async () => {
+    const parseLogo = 'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
+    const file = new Parse.File('parse-server-logo', { uri: parseLogo });
+    file.save().then(() => {
+      assert.equal(file.name(), undefined);
+      assert.equal(file.url(), undefined);
+    });
+    file.cancel();
+  });
+
   it('can not get data from unsaved file', async () => {
     const file = new Parse.File('parse-server-logo', [61, 170, 236, 120]);
     file._data = null;
