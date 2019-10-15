@@ -1,7 +1,22 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.7.1...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.8.0...master)
+
+## 2.8.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.7.1...2.8.0)
+
+**New Features**
+- Parse.File save cancel ([#948](https://github.com/parse-community/Parse-SDK-JS/pull/948))
+- Parse.File getData cancel ([#951](https://github.com/parse-community/Parse-SDK-JS/pull/951))
+
+**Fixes**
+- React Native Emitter module ([#946](https://github.com/parse-community/Parse-SDK-JS/pull/946))
+- Parse.Schema deleteIndex, deleteField returns Parse.Schema ([#949](https://github.com/parse-community/Parse-SDK-JS/pull/949))
+
+**Improvements**
+- Compiling on Windows ([#947](https://github.com/parse-community/Parse-SDK-JS/pull/947))
+- Generate _localId as UUID ([#956](https://github.com/parse-community/Parse-SDK-JS/pull/956))
 
 ## 2.7.1
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.7.0...2.7.1)
