@@ -360,6 +360,14 @@ describe('SchemaController', () => {
     CoreManager.setRESTController({ request: request, ajax: ajax });
   });
 
+  it('save schema', (done) => {
+    const schema = new ParseSchema('SchemaTest');
+    schema.save().then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
+  });
+
   it('get schema', (done) => {
     const schema = new ParseSchema('SchemaTest');
     schema.get().then((results) => {
