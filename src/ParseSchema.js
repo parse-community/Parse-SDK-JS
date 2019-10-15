@@ -123,7 +123,6 @@ class ParseSchema {
 
     this._fields = {};
     this._indexes = {};
-    this._clp = null;
 
     return controller.update(this.className, params);
   }

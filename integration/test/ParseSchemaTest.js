@@ -149,6 +149,29 @@ describe('Schema', () => {
     assert.deepEqual(schema.classLevelPermissions, emptyCLPS);
   });
 
+  it('update class level permissions multiple', async () => {
+    const clp = {
+      get: { requiresAuthentication: true },
+      find: {},
+      count: {},
+      create: { '*': true },
+      update: { requiresAuthentication: true },
+      delete: {},
+      addField: {},
+      protectedFields: {}
+    };
+    const testSchema = new Parse.Schema('SchemaTest');
+    testSchema.setCLP(clp);
+    let schema = await testSchema.save();
+    assert.deepEqual(schema.classLevelPermissions, clp);
+
+    schema = await testSchema.update();
+    assert.deepEqual(schema.classLevelPermissions, clp);
+
+    schema = await testSchema.update();
+    assert.deepEqual(schema.classLevelPermissions, clp);
+  });
+
   it('update', (done) => {
     const testSchema = new Parse.Schema('SchemaTest');
     testSchema.addString('name');
