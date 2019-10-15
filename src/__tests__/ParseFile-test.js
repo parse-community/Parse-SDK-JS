@@ -423,7 +423,7 @@ describe('FileController', () => {
     spy.mockRestore();
   });
 
-  fit('download with ajax', async () => {
+  it('download with ajax', async () => {
     const mockXHR = function () {
       return {
         DONE: 4,
