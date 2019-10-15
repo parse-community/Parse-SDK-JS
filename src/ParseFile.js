@@ -259,6 +259,9 @@ class ParseFile {
     }
   }
 
+  /**
+   * Aborts the request if it has already been sent.
+   */
   cancel() {
     if (this._requestTask && typeof this._requestTask.abort === 'function') {
       this._requestTask.abort();
@@ -403,7 +406,6 @@ const DefaultController = {
           base64: ParseFile.encodeBase64(bytes),
           contentType: xhr.getResponseHeader('content-type'),
         });
-      };
       };
       options.requestTask(xhr);
       xhr.send();
