@@ -2,6 +2,28 @@ const assert = require('assert');
 const clear = require('./clear');
 const Parse = require('../../node');
 
+const emptyCLPS = {
+  find: {},
+  count: {},
+  get: {},
+  create: {},
+  update: {},
+  delete: {},
+  addField: {},
+  protectedFields: {},
+};
+
+const defaultCLPS = {
+  find: { '*': true },
+  count: { '*': true },
+  get: { '*': true },
+  create: { '*': true },
+  update: { '*': true },
+  delete: { '*': true },
+  addField: { '*': true },
+  protectedFields: { '*': [] },
+};
+
 describe('Schema', () => {
   beforeAll(() => {
     Parse.initialize('integration');
@@ -80,6 +102,47 @@ describe('Schema', () => {
       assert.equal(results.length, 1);
       done();
     });
+  });
+
+  it('save class level permissions', async () => {
+    const clp = {
+      get: { requiresAuthentication: true },
+      find: {},
+      count: {},
+      create: { '*': true },
+      update: { requiresAuthentication: true },
+      delete: {},
+      addField: {},
+      protectedFields: {}
+    };
+    const testSchema = new Parse.Schema('SchemaTest');
+    testSchema.setCLP(clp);
+    const schema = await testSchema.save();
+    assert.deepEqual(schema.classLevelPermissions, clp);
+  });
+
+  it('update class level permissions', async () => {
+    const clp = {
+      get: { requiresAuthentication: true },
+      find: {},
+      count: {},
+      create: { '*': true },
+      update: { requiresAuthentication: true },
+      delete: {},
+      addField: {},
+      protectedFields: {}
+    };
+    const testSchema = new Parse.Schema('SchemaTest');
+    let schema = await testSchema.save();
+    assert.deepEqual(schema.classLevelPermissions, defaultCLPS);
+
+    testSchema.setCLP(clp);
+    schema = await testSchema.update();
+    assert.deepEqual(schema.classLevelPermissions, clp);
+
+    testSchema.setCLP({});
+    schema = await testSchema.update();
+    assert.deepEqual(schema.classLevelPermissions, emptyCLPS);
   });
 
   it('update', (done) => {
