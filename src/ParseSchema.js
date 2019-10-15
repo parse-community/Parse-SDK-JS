@@ -10,7 +10,6 @@
  */
 
 import CoreManager from './CoreManager';
-import type { RequestOptions, FullOptions } from './RESTController';
 
 const FIELD_TYPES = ['String', 'Number', 'Boolean', 'Date', 'File', 'GeoPoint', 'Polygon', 'Array', 'Object', 'Pointer', 'Relation'];
 
@@ -21,7 +20,7 @@ const FIELD_TYPES = ['String', 'Number', 'Boolean', 'Date', 'File', 'GeoPoint', 
  * <pre>
  * const schema = new Parse.Schema('MyClass');
  * schema.addString('field');
- * schema.addIndex('index_name', {'field', 1});
+ * schema.addIndex('index_name', { 'field': 1 });
  * schema.save();
  * </pre>
  * </p>
@@ -51,22 +50,12 @@ class ParseSchema {
   /**
    * Static method to get all schemas
    *
-   * @param {Object} options
-   * Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
-   *
    * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  static all(options: FullOptions) {
-    options = options || {};
+  static all() {
     const controller = CoreManager.getSchemaController();
-
-    return controller.get('', options)
+    return controller.get('')
       .then((response) => {
         if (response.results.length === 0) {
           throw new Error('Schema not found.');
@@ -78,24 +67,14 @@ class ParseSchema {
   /**
    * Get the Schema from Parse
    *
-   * @param {Object} options
-   * Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
-   *
    * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  get(options: FullOptions) {
+  get() {
     this.assertClassName();
 
-    options = options || {};
     const controller = CoreManager.getSchemaController();
-
-    return controller.get(this.className, options)
+    return controller.get(this.className)
       .then((response) => {
         if (!response) {
           throw new Error('Schema not found.');
@@ -107,21 +86,12 @@ class ParseSchema {
   /**
    * Create a new Schema on Parse
    *
-   * @param {Object} options
-   * Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
-   *
    * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  save(options: FullOptions) {
+  save() {
     this.assertClassName();
 
-    options = options || {};
     const controller = CoreManager.getSchemaController();
     const params = {
       className: this.className,
@@ -129,30 +99,18 @@ class ParseSchema {
       indexes: this._indexes,
     };
 
-    return controller.create(this.className, params, options)
-      .then((response) => {
-        return response;
-      });
+    return controller.create(this.className, params);
   }
 
   /**
    * Update a Schema on Parse
    *
-   * @param {Object} options
-   * Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
-   *
    * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  update(options: FullOptions) {
+  update() {
     this.assertClassName();
 
-    options = options || {};
     const controller = CoreManager.getSchemaController();
     const params = {
       className: this.className,
@@ -163,37 +121,21 @@ class ParseSchema {
     this._fields = {};
     this._indexes = {};
 
-    return controller.update(this.className, params, options)
-      .then((response) => {
-        return response;
-      });
+    return controller.update(this.className, params);
   }
 
   /**
    * Removing a Schema from Parse
    * Can only be used on Schema without objects
    *
-   * @param {Object} options
-   * Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
-   *
    * @return {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  delete(options: FullOptions) {
+  delete() {
     this.assertClassName();
 
-    options = options || {};
     const controller = CoreManager.getSchemaController();
-
-    return controller.delete(this.className, options)
-      .then((response) => {
-        return response;
-      });
+    return controller.delete(this.className);
   }
 
   /**
@@ -206,11 +148,7 @@ class ParseSchema {
     this.assertClassName();
 
     const controller = CoreManager.getSchemaController();
-
-    return controller.purge(this.className)
-      .then((response) => {
-        return response;
-      });
+    return controller.purge(this.className);
   }
 
   /**
@@ -425,34 +363,30 @@ class ParseSchema {
 }
 
 const DefaultController = {
-  send(className: string, method: string, params: any, options: RequestOptions): Promise {
+  send(className: string, method: string, params: any): Promise {
     const RESTController = CoreManager.getRESTController();
-    const requestOptions = { useMasterKey: true };
-    if (options.hasOwnProperty('sessionToken')) {
-      requestOptions.sessionToken = options.sessionToken;
-    }
     return RESTController.request(
       method,
       `schemas/${className}`,
       params,
-      requestOptions
+      { useMasterKey: true }
     );
   },
 
-  get(className: string, options: RequestOptions): Promise {
-    return this.send(className, 'GET', {}, options);
+  get(className: string): Promise {
+    return this.send(className, 'GET', {});
   },
 
-  create(className: string, params: any, options: RequestOptions): Promise {
-    return this.send(className, 'POST', params, options);
+  create(className: string, params: any): Promise {
+    return this.send(className, 'POST', params);
   },
 
-  update(className: string, params: any, options: RequestOptions): Promise {
-    return this.send(className, 'PUT', params, options);
+  update(className: string, params: any): Promise {
+    return this.send(className, 'PUT', params);
   },
 
-  delete(className: string, options: RequestOptions): Promise {
-    return this.send(className, 'DELETE', {}, options);
+  delete(className: string): Promise {
+    return this.send(className, 'DELETE', {});
   },
 
   purge(className: string): Promise {

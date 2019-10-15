@@ -170,14 +170,13 @@ describe('ParseSchema', () => {
       update() {},
       delete() {},
       purge() {},
-      create(className, params, options) {
+      create(className, params) {
         expect(className).toBe('SchemaTest');
         expect(params).toEqual({
           className: 'SchemaTest',
           fields: { name: { type: 'String'} },
           indexes: { testIndex: { name: 1 } }
         });
-        expect(options).toEqual({});
         return Promise.resolve([]);
       },
     });
@@ -198,14 +197,13 @@ describe('ParseSchema', () => {
       create() {},
       delete() {},
       purge() {},
-      update(className, params, options) {
+      update(className, params) {
         expect(className).toBe('SchemaTest');
         expect(params).toEqual({
           className: 'SchemaTest',
           fields: { name: { type: 'String'} },
           indexes: { testIndex: { name: 1 } }
         });
-        expect(options).toEqual({});
         return Promise.resolve([]);
       },
     });
@@ -226,9 +224,8 @@ describe('ParseSchema', () => {
       update() {},
       get() {},
       purge() {},
-      delete(className, options) {
+      delete(className) {
         expect(className).toBe('SchemaTest');
-        expect(options).toEqual({});
         return Promise.resolve([]);
       },
     });
@@ -267,36 +264,14 @@ describe('ParseSchema', () => {
       update() {},
       delete() {},
       purge() {},
-      get(className, options) {
+      get(className) {
         expect(className).toBe('SchemaTest');
-        expect(options).toEqual({});
         return Promise.resolve([]);
       },
     });
 
     const schema = new ParseSchema('SchemaTest');
     schema.get().then((results) => {
-      expect(results).toEqual([]);
-      done();
-    });
-  });
-
-  it('can get schema with options', (done) => {
-    CoreManager.setSchemaController({
-      send() {},
-      create() {},
-      update() {},
-      delete() {},
-      purge() {},
-      get(className, options) {
-        expect(className).toBe('SchemaTest');
-        expect(options).toEqual({ sessionToken: 1234 });
-        return Promise.resolve([]);
-      },
-    });
-
-    const schema = new ParseSchema('SchemaTest');
-    schema.get({ sessionToken: 1234 }).then((results) => {
       expect(results).toEqual([]);
       done();
     });
@@ -309,9 +284,8 @@ describe('ParseSchema', () => {
       update() {},
       delete() {},
       purge() {},
-      get(className, options) {
+      get(className) {
         expect(className).toBe('SchemaTest');
-        expect(options).toEqual({});
         return Promise.resolve(null);
       },
     });
@@ -334,9 +308,8 @@ describe('ParseSchema', () => {
       update() {},
       delete() {},
       purge() {},
-      get(className, options) {
+      get(className) {
         expect(className).toBe('');
-        expect(options).toEqual({});
         return Promise.resolve({
           results: ['all']
         });
@@ -349,28 +322,6 @@ describe('ParseSchema', () => {
     });
   });
 
-  it('can get all schema with options', (done) => {
-    CoreManager.setSchemaController({
-      send() {},
-      create() {},
-      update() {},
-      delete() {},
-      purge() {},
-      get(className, options) {
-        expect(className).toBe('');
-        expect(options).toEqual({ sessionToken: 1234 });
-        return Promise.resolve({
-          results: ['all']
-        });
-      },
-    });
-
-    ParseSchema.all({ sessionToken: 1234 }).then((results) => {
-      expect(results[0]).toEqual('all');
-      done();
-    });
-  });
-
   it('cannot get all schema when empty', (done) => {
     CoreManager.setSchemaController({
       send() {},
@@ -378,9 +329,8 @@ describe('ParseSchema', () => {
       update() {},
       delete() {},
       purge() {},
-      get(className, options) {
+      get(className) {
         expect(className).toBe('');
-        expect(options).toEqual({});
         return Promise.resolve({
           results: []
         });
@@ -408,14 +358,6 @@ describe('SchemaController', () => {
       return Promise.resolve([]);
     };
     CoreManager.setRESTController({ request: request, ajax: ajax });
-  });
-
-  it('save schema with sessionToken', (done) => {
-    const schema = new ParseSchema('SchemaTest');
-    schema.save({ sessionToken: 1234 }).then((results) => {
-      expect(results).toEqual([]);
-      done();
-    });
   });
 
   it('get schema', (done) => {
