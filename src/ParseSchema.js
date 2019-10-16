@@ -10,6 +10,7 @@
  */
 
 import CoreManager from './CoreManager';
+import ParseObject from './ParseObject';
 
 const FIELD_TYPES = ['String', 'Number', 'Boolean', 'Date', 'File', 'GeoPoint', 'Polygon', 'Array', 'Object', 'Pointer', 'Relation'];
 
@@ -270,6 +271,9 @@ class ParseSchema {
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addDate(name: string, options: FieldOptions) {
+    if (options && options.defaultValue) {
+      options.defaultValue = { __type: 'Date', iso: new Date(options.defaultValue) }
+    }
     return this.addField(name, 'Date', options);
   }
 
@@ -344,6 +348,9 @@ class ParseSchema {
     }
     if (options.defaultValue !== undefined) {
       fieldOptions.defaultValue = options.defaultValue;
+      if (options.defaultValue instanceof ParseObject) {
+        fieldOptions.defaultValue = options.defaultValue.toPointer();
+      }
     }
     this._fields[name] = fieldOptions;
     return this;

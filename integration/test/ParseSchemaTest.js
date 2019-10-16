@@ -118,9 +118,20 @@ describe('Schema', () => {
     assert.equal(object.get('fieldString'), 'Hello World');
   });
 
-  it('set multiple required and default values', async () => {
+  it('save required and default pointer values', async () => {
     const pointer = new TestObject();
     await pointer.save();
+    const testSchema = new Parse.Schema('SchemaTest');
+    testSchema
+      .addPointer('pointerField', 'TestObject', { required: true, defaultValue: pointer })
+      .addPointer('pointerJSONField', 'TestObject', { required: true, defaultValue: pointer.toPointer() })
+    const schema = await testSchema.save();
+    assert.deepEqual(schema.fields.pointerField, schema.fields.pointerJSONField);
+    assert.deepEqual(schema.fields.pointerField.defaultValue, pointer.toPointer());
+    assert.equal(schema.fields.pointerField.required, true);
+  });
+
+  it('set multiple required and default values', async () => {
     const point = new Parse.GeoPoint(44.0, -11.0);
     const polygon = new Parse.Polygon([[0,0], [0,1], [1,1], [1,0]]);
     const file = new Parse.File('parse-server-logo', { base64: 'ParseA==' });
@@ -132,13 +143,13 @@ describe('Schema', () => {
       .addString('stringField', { required: true, defaultValue: 'world' })
       .addNumber('numberField', { required: true, defaultValue: 10 })
       .addBoolean('booleanField', { required: true, defaultValue: false })
-      // .addDate('dateField', { required: true, defaultValue: new Date('January 1, 2000 00:00:00') })
+      .addDate('dateField', { required: true, defaultValue: new Date('January 1, 2000 00:00:00') })
+      .addDate('dateStringField', { required: true, defaultValue:  '2000-01-01T00:00:00.000Z' })
       .addFile('fileField', { required: true, defaultValue: file })
       .addGeoPoint('geoPointField', { required: true, defaultValue: point })
       .addPolygon('polygonField', { required: true, defaultValue: polygon })
       .addArray('arrayField', { required: true, defaultValue: [1, 2, 3] })
       .addObject('objectField', { required: true, defaultValue: { foo: 'bar' } })
-      // .addPointer('pointerField', 'TestObject', { required: true, defaultValue: pointer })
 
     const schema = await testSchema.save();
     assert.deepEqual(schema.fields, {
@@ -149,6 +160,8 @@ describe('Schema', () => {
       stringField: { type: 'String', required: true, defaultValue: 'world' },
       numberField: { type: 'Number', required: true, defaultValue: 10 },
       booleanField: { type: 'Boolean', required: true, defaultValue: false },
+      dateField: { type: 'Date', required: true, defaultValue: { __type: 'Date', iso: '2000-01-01T06:00:00.000Z' } },
+      dateStringField: { type: 'Date', required: true, defaultValue: { __type: 'Date', iso: '2000-01-01T00:00:00.000Z' } },
       fileField: { type: 'File', required: true, defaultValue: file.toJSON() },
       geoPointField: { type: 'GeoPoint', required: true, defaultValue: point.toJSON() },
       polygonField: { type: 'Polygon', required: true, defaultValue: polygon.toJSON() },
@@ -168,6 +181,8 @@ describe('Schema', () => {
       stringField: 'world',
       numberField: 10,
       booleanField: false,
+      dateField: { __type: 'Date', iso: '2000-01-01T06:00:00.000Z' },
+      dateStringField: { __type: 'Date', iso: '2000-01-01T00:00:00.000Z' },
       fileField: file.toJSON(),
       geoPointField: point.toJSON(),
       polygonField: {
