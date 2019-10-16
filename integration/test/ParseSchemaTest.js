@@ -152,6 +152,8 @@ describe('Schema', () => {
       .addObject('objectField', { required: true, defaultValue: { foo: 'bar' } })
 
     const schema = await testSchema.save();
+    console.log(schema.fields);
+    console.log(schema.fields.polygonField.defaultValue);
     assert.deepEqual(schema.fields, {
       objectId: { type: 'String' },
       updatedAt: { type: 'Date' },
