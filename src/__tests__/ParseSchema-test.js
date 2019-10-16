@@ -83,7 +83,7 @@ describe('ParseSchema', () => {
     done();
   });
 
-  it('can create schema fields required and default values', (done) => {
+  it('can create schema fields required and default values', () => {
     const object = new ParseObject('TestObject', '1234');
     const schema = new ParseSchema('SchemaTest');
     schema
@@ -104,7 +104,6 @@ describe('ParseSchema', () => {
       required: true,
       defaultValue: { __type: 'Date', iso: new Date('2000-01-01T00:00:00.000Z') }
     });
-    done();
   });
 
   it('can create schema indexes', (done) => {
