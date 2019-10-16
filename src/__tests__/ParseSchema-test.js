@@ -8,7 +8,21 @@
  */
 
 jest.autoMockOff();
+const mockObject = function(className, id) {
+  this.className = className;
+  this.id = id;
+  this.attributes = {};
+  this.toPointer = function() {
+    return {
+      className: this.className,
+      __type: 'Pointer',
+      objectId: this.id,
+    }
+  };
+};
+jest.setMock('../ParseObject', mockObject);
 
+const ParseObject = require('../ParseObject');
 const ParseSchema = require('../ParseSchema').default;
 const CoreManager = require('../CoreManager');
 
@@ -67,6 +81,29 @@ describe('ParseSchema', () => {
     expect(schema._fields.pointerField.targetClass).toEqual('_User');
     expect(schema._fields.relationField.targetClass).toEqual('_User');
     done();
+  });
+
+  it('can create schema fields required and default values', () => {
+    const object = new ParseObject('TestObject', '1234');
+    const schema = new ParseSchema('SchemaTest');
+    schema
+      .addField('defaultFieldString', 'String', { required: true, defaultValue: 'hello' })
+      .addDate('dateField', { required: true, defaultValue: '2000-01-01T00:00:00.000Z' })
+      .addPointer('pointerField', 'TestObject', { required: true, defaultValue: object })
+      .addPointer('pointerJSONField', 'TestObject', { required: true, defaultValue: object.toPointer() });
+
+    expect(schema._fields.defaultFieldString.type).toEqual('String');
+    expect(schema._fields.defaultFieldString.required).toEqual(true);
+    expect(schema._fields.defaultFieldString.defaultValue).toEqual('hello');
+    expect(schema._fields.pointerField.type).toEqual('Pointer');
+    expect(schema._fields.pointerField.targetClass).toEqual('TestObject');
+    expect(schema._fields.pointerField.required).toEqual(true);
+    expect(schema._fields.pointerField.defaultValue).toEqual(object.toPointer());
+    expect(schema._fields.dateField).toEqual({
+      type: 'Date',
+      required: true,
+      defaultValue: { __type: 'Date', iso: new Date('2000-01-01T00:00:00.000Z') }
+    });
   });
 
   it('can create schema indexes', (done) => {

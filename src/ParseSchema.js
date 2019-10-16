@@ -10,16 +10,25 @@
  */
 
 import CoreManager from './CoreManager';
+import ParseObject from './ParseObject';
 
 const FIELD_TYPES = ['String', 'Number', 'Boolean', 'Date', 'File', 'GeoPoint', 'Polygon', 'Array', 'Object', 'Pointer', 'Relation'];
+
+type FieldOptions = {
+  required: boolean;
+  defaultValue: mixed;
+};
 
 /**
  * A Parse.Schema object is for handling schema data from Parse.
  * <p>All the schemas methods require MasterKey.
  *
+ * When adding fields, you may set required and default values. (Requires Parse Server 3.7.0+)
+ *
  * <pre>
+ * const options = { required: true, defaultValue: 'hello world' };
  * const schema = new Parse.Schema('MyClass');
- * schema.addString('field');
+ * schema.addString('field', options);
  * schema.addIndex('index_name', { 'field': 1 });
  * schema.save();
  * </pre>
@@ -180,10 +189,15 @@ class ParseSchema {
    * Adding a Field to Create / Update a Schema
    *
    * @param {String} name Name of the field that will be created on Parse
-   * @param {String} type TheCan be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)
+   * @param {String} type Can be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)
+   * @param {Object} options
+   * Valid options are:<ul>
+   *   <li>required: If field is not set, save operation fails (Requires Parse Server 3.7.0+)
+   *   <li>defaultValue: If field is not set, a default value is selected (Requires Parse Server 3.7.0+)
+   * </ul>
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addField(name: string, type: string) {
+  addField(name: string, type: string, options: FieldOptions = {}) {
     type = type || 'String';
 
     if (!name) {
@@ -192,9 +206,15 @@ class ParseSchema {
     if (FIELD_TYPES.indexOf(type) === -1) {
       throw new Error(`${type} is not a valid type.`);
     }
+    const fieldOptions = { type };
 
-    this._fields[name] = { type };
-
+    if (typeof options.required === 'boolean') {
+      fieldOptions.required = options.required;
+    }
+    if (options.defaultValue !== undefined) {
+      fieldOptions.defaultValue = options.defaultValue;
+    }
+    this._fields[name] = fieldOptions;
     return this;
   }
 
@@ -222,90 +242,102 @@ class ParseSchema {
    * Adding String Field
    *
    * @param {String} name Name of the field that will be created on Parse
+   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addString(name: string) {
-    return this.addField(name, 'String');
+  addString(name: string, options: FieldOptions) {
+    return this.addField(name, 'String', options);
   }
 
   /**
    * Adding Number Field
    *
    * @param {String} name Name of the field that will be created on Parse
+   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addNumber(name: string) {
-    return this.addField(name, 'Number');
+  addNumber(name: string, options: FieldOptions) {
+    return this.addField(name, 'Number', options);
   }
 
   /**
    * Adding Boolean Field
    *
    * @param {String} name Name of the field that will be created on Parse
+   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addBoolean(name: string) {
-    return this.addField(name, 'Boolean');
+  addBoolean(name: string, options: FieldOptions) {
+    return this.addField(name, 'Boolean', options);
   }
 
   /**
    * Adding Date Field
    *
    * @param {String} name Name of the field that will be created on Parse
+   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addDate(name: string) {
-    return this.addField(name, 'Date');
+  addDate(name: string, options: FieldOptions) {
+    if (options && options.defaultValue) {
+      options.defaultValue = { __type: 'Date', iso: new Date(options.defaultValue) }
+    }
+    return this.addField(name, 'Date', options);
   }
 
   /**
    * Adding File Field
    *
    * @param {String} name Name of the field that will be created on Parse
+   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addFile(name: string) {
-    return this.addField(name, 'File');
+  addFile(name: string, options: FieldOptions) {
+    return this.addField(name, 'File', options);
   }
 
   /**
    * Adding GeoPoint Field
    *
    * @param {String} name Name of the field that will be created on Parse
+   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addGeoPoint(name: string) {
-    return this.addField(name, 'GeoPoint');
+  addGeoPoint(name: string, options: FieldOptions) {
+    return this.addField(name, 'GeoPoint', options);
   }
 
   /**
    * Adding Polygon Field
    *
    * @param {String} name Name of the field that will be created on Parse
+   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addPolygon(name: string) {
-    return this.addField(name, 'Polygon');
+  addPolygon(name: string, options: FieldOptions) {
+    return this.addField(name, 'Polygon', options);
   }
 
   /**
    * Adding Array Field
    *
    * @param {String} name Name of the field that will be created on Parse
+   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addArray(name: string) {
-    return this.addField(name, 'Array');
+  addArray(name: string, options: FieldOptions) {
+    return this.addField(name, 'Array', options);
   }
 
   /**
    * Adding Object Field
    *
    * @param {String} name Name of the field that will be created on Parse
+   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addObject(name: string) {
-    return this.addField(name, 'Object');
+  addObject(name: string, options: FieldOptions) {
+    return this.addField(name, 'Object', options);
   }
 
   /**
@@ -313,21 +345,28 @@ class ParseSchema {
    *
    * @param {String} name Name of the field that will be created on Parse
    * @param {String} targetClass Name of the target Pointer Class
+   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addPointer(name: string, targetClass: string) {
+  addPointer(name: string, targetClass: string, options: FieldOptions = {}) {
     if (!name) {
       throw new Error('field name may not be null.');
     }
     if (!targetClass) {
       throw new Error('You need to set the targetClass of the Pointer.');
     }
+    const fieldOptions = { type: 'Pointer', targetClass };
 
-    this._fields[name] = {
-      type: 'Pointer',
-      targetClass
-    };
-
+    if (typeof options.required === 'boolean') {
+      fieldOptions.required = options.required;
+    }
+    if (options.defaultValue !== undefined) {
+      fieldOptions.defaultValue = options.defaultValue;
+      if (options.defaultValue instanceof ParseObject) {
+        fieldOptions.defaultValue = options.defaultValue.toPointer();
+      }
+    }
+    this._fields[name] = fieldOptions;
     return this;
   }
 
