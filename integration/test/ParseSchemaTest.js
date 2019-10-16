@@ -143,8 +143,8 @@ describe('Schema', () => {
       .addString('stringField', { required: true, defaultValue: 'world' })
       .addNumber('numberField', { required: true, defaultValue: 10 })
       .addBoolean('booleanField', { required: true, defaultValue: false })
-      .addDate('dateField', { required: true, defaultValue: new Date('January 1, 2000 00:00:00') })
-      .addDate('dateStringField', { required: true, defaultValue:  '2000-01-01T00:00:00.000Z' })
+      .addDate('dateField', { required: true, defaultValue: new Date('2000-01-01T00:00:00.000Z') })
+      .addDate('dateStringField', { required: true, defaultValue: '2000-01-01T00:00:00.000Z' })
       .addFile('fileField', { required: true, defaultValue: file })
       .addGeoPoint('geoPointField', { required: true, defaultValue: point })
       .addPolygon('polygonField', { required: true, defaultValue: polygon })
@@ -152,8 +152,6 @@ describe('Schema', () => {
       .addObject('objectField', { required: true, defaultValue: { foo: 'bar' } })
 
     const schema = await testSchema.save();
-    console.log(schema.fields);
-    console.log(schema.fields.polygonField.defaultValue);
     assert.deepEqual(schema.fields, {
       objectId: { type: 'String' },
       updatedAt: { type: 'Date' },
@@ -162,7 +160,7 @@ describe('Schema', () => {
       stringField: { type: 'String', required: true, defaultValue: 'world' },
       numberField: { type: 'Number', required: true, defaultValue: 10 },
       booleanField: { type: 'Boolean', required: true, defaultValue: false },
-      dateField: { type: 'Date', required: true, defaultValue: { __type: 'Date', iso: '2000-01-01T06:00:00.000Z' } },
+      dateField: { type: 'Date', required: true, defaultValue: { __type: 'Date', iso: '2000-01-01T00:00:00.000Z' } },
       dateStringField: { type: 'Date', required: true, defaultValue: { __type: 'Date', iso: '2000-01-01T00:00:00.000Z' } },
       fileField: { type: 'File', required: true, defaultValue: file.toJSON() },
       geoPointField: { type: 'GeoPoint', required: true, defaultValue: point.toJSON() },
@@ -183,7 +181,7 @@ describe('Schema', () => {
       stringField: 'world',
       numberField: 10,
       booleanField: false,
-      dateField: { __type: 'Date', iso: '2000-01-01T06:00:00.000Z' },
+      dateField: { __type: 'Date', iso: '2000-01-01T00:00:00.000Z' },
       dateStringField: { __type: 'Date', iso: '2000-01-01T00:00:00.000Z' },
       fileField: file.toJSON(),
       geoPointField: point.toJSON(),
