@@ -24,6 +24,8 @@ const defaultCLPS = {
   protectedFields: { '*': [] },
 };
 
+const TestObject = Parse.Object.extend('TestObject');
+
 describe('Schema', () => {
   beforeAll(() => {
     Parse.initialize('integration');
@@ -102,6 +104,80 @@ describe('Schema', () => {
       assert.equal(results.length, 1);
       done();
     });
+  });
+
+  it('save required and default values', async () => {
+    const testSchema = new Parse.Schema('SchemaTest');
+    testSchema.addField('fieldString', 'String', { required: true, defaultValue: 'Hello World' });
+    const schema = await testSchema.save();
+    assert.deepEqual(schema.fields.fieldString, {
+      type: 'String', required: true, defaultValue: 'Hello World'
+    })
+    const object = new Parse.Object('SchemaTest');
+    await object.save();
+    assert.equal(object.get('fieldString'), 'Hello World');
+  });
+
+  it('set multiple required and default values', async () => {
+    const pointer = new TestObject();
+    await pointer.save();
+    const point = new Parse.GeoPoint(44.0, -11.0);
+    const polygon = new Parse.Polygon([[0,0], [0,1], [1,1], [1,0]]);
+    const file = new Parse.File('parse-server-logo', { base64: 'ParseA==' });
+    await file.save();
+    const testSchema = new Parse.Schema('SchemaFieldTest');
+
+    testSchema
+      .addField('defaultFieldString', 'String', { required: true, defaultValue: 'hello' })
+      .addString('stringField', { required: true, defaultValue: 'world' })
+      .addNumber('numberField', { required: true, defaultValue: 10 })
+      .addBoolean('booleanField', { required: true, defaultValue: false })
+      // .addDate('dateField', { required: true, defaultValue: new Date('January 1, 2000 00:00:00') })
+      .addFile('fileField', { required: true, defaultValue: file })
+      .addGeoPoint('geoPointField', { required: true, defaultValue: point })
+      .addPolygon('polygonField', { required: true, defaultValue: polygon })
+      .addArray('arrayField', { required: true, defaultValue: [1, 2, 3] })
+      .addObject('objectField', { required: true, defaultValue: { foo: 'bar' } })
+      // .addPointer('pointerField', 'TestObject', { required: true, defaultValue: pointer })
+
+    const schema = await testSchema.save();
+    assert.deepEqual(schema.fields, {
+      objectId: { type: 'String' },
+      updatedAt: { type: 'Date' },
+      createdAt: { type: 'Date' },
+      defaultFieldString: { type: 'String', required: true, defaultValue: 'hello' },
+      stringField: { type: 'String', required: true, defaultValue: 'world' },
+      numberField: { type: 'Number', required: true, defaultValue: 10 },
+      booleanField: { type: 'Boolean', required: true, defaultValue: false },
+      fileField: { type: 'File', required: true, defaultValue: file.toJSON() },
+      geoPointField: { type: 'GeoPoint', required: true, defaultValue: point.toJSON() },
+      polygonField: { type: 'Polygon', required: true, defaultValue: polygon.toJSON() },
+      arrayField: { type: 'Array', required: true, defaultValue: [1, 2, 3] },
+      objectField: { type: 'Object', required: true, defaultValue: { foo: 'bar' } },
+      ACL: { type: 'ACL' }
+    });
+    const object = new Parse.Object('SchemaFieldTest');
+    await object.save();
+    const json = object.toJSON();
+    delete json.createdAt;
+    delete json.updatedAt;
+    delete json.objectId;
+
+    const expected = {
+      defaultFieldString: 'hello',
+      stringField: 'world',
+      numberField: 10,
+      booleanField: false,
+      fileField: file.toJSON(),
+      geoPointField: point.toJSON(),
+      polygonField: {
+        __type: 'Polygon',
+        coordinates: [ [ 0, 0 ], [ 0, 1 ], [ 1, 1 ], [ 1, 0 ], [ 0, 0 ] ]
+      },
+      arrayField: [ 1, 2, 3 ],
+      objectField: { foo: 'bar' },
+    };
+    assert.deepEqual(json, expected);
   });
 
   it('save class level permissions', async () => {
