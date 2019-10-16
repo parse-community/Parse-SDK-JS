@@ -69,6 +69,22 @@ describe('ParseSchema', () => {
     done();
   });
 
+  it('can create schema fields required and default values', (done) => {
+    const schema = new ParseSchema('SchemaTest');
+    schema
+      .addField('defaultFieldString', 'String', { required: true, defaultValue: 'hello' })
+      .addPointer('pointerField', '_User', { required: true, defaultValue: { className: 'TestObject', id: 1234 } });
+    console.log(schema._fields);
+    expect(schema._fields.defaultFieldString.type).toEqual('String');
+    expect(schema._fields.defaultFieldString.required).toEqual(true);
+    expect(schema._fields.defaultFieldString.defaultValue).toEqual('hello');
+    expect(schema._fields.pointerField.type).toEqual('Pointer');
+    expect(schema._fields.pointerField.targetClass).toEqual('_User');
+    expect(schema._fields.pointerField.required).toEqual(true);
+    expect(schema._fields.pointerField.defaultValue).toEqual({ className: 'TestObject', id: 1234 });
+    done();
+  });
+
   it('can create schema indexes', (done) => {
     const schema = new ParseSchema('SchemaTest');
     schema.addIndex('testIndex', { name: 1 });

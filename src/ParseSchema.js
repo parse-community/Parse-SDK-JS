@@ -206,7 +206,7 @@ class ParseSchema {
     if (typeof options.required === 'boolean') {
       fieldOptions.required = options.required;
     }
-    if (typeof options.defaultValue !== undefined) {
+    if (options.defaultValue !== undefined) {
       fieldOptions.defaultValue = options.defaultValue;
     }
     this._fields[name] = fieldOptions;
@@ -342,7 +342,7 @@ class ParseSchema {
     if (typeof options.required === 'boolean') {
       fieldOptions.required = options.required;
     }
-    if (typeof options.defaultValue !== undefined) {
+    if (options.defaultValue !== undefined) {
       fieldOptions.defaultValue = options.defaultValue;
     }
     this._fields[name] = fieldOptions;

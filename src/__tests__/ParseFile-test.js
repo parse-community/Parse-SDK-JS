@@ -392,8 +392,7 @@ describe('FileController', () => {
     defaultController.download('http://example.com/image.png', options).then((data) => {
       expect(data).toEqual({});
     });
-    mockRequest.emit('aborted');
-    mockResponse.emit('end');
+    mockRequest.emit('abort');
     spy.mockRestore();
   });
 
