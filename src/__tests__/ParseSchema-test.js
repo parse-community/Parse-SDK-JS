@@ -77,6 +77,28 @@ describe('ParseSchema', () => {
     done();
   });
 
+  it('can set schema class level permissions', (done) => {
+    const schema = new ParseSchema('SchemaTest');
+    expect(schema._clp).toBeUndefined();
+    schema.setCLP(undefined);
+    expect(schema._clp).toBeUndefined();
+    schema.setCLP({});
+    expect(schema._clp).toEqual({});
+    const clp = {
+      get: { requiresAuthentication: true },
+      find: {},
+      count: {},
+      create: { '*': true },
+      update: { requiresAuthentication: true },
+      delete: {},
+      addField: {},
+      protectedFields: {}
+    };
+    schema.setCLP(clp);
+    expect(schema._clp).toEqual(clp);
+    done();
+  });
+
   it('cannot add field with null name', (done) => {
     try {
       const schema = new ParseSchema('SchemaTest');

@@ -30,6 +30,7 @@ class ParseSchema {
   className: string;
   _fields: { [key: string]: mixed };
   _indexes: { [key: string]: mixed };
+  _clp: { [key: string]: mixed };
 
   /**
    * @param {String} className Parse Class string.
@@ -97,6 +98,7 @@ class ParseSchema {
       className: this.className,
       fields: this._fields,
       indexes: this._indexes,
+      classLevelPermissions: this._clp,
     };
 
     return controller.create(this.className, params);
@@ -116,6 +118,7 @@ class ParseSchema {
       className: this.className,
       fields: this._fields,
       indexes: this._indexes,
+      classLevelPermissions: this._clp,
     };
 
     this._fields = {};
@@ -159,6 +162,18 @@ class ParseSchema {
     if (!this.className) {
       throw new Error('You must set a Class Name before making any request.');
     }
+  }
+
+  /**
+   * Sets Class Level Permissions when creating / updating a Schema.
+   * EXERCISE CAUTION, running this may override CLP for this schema and cannot be reversed
+   *
+   * @param {Object} clp Class Level Permissions
+   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   */
+  setCLP(clp: { [key: string]: mixed }) {
+    this._clp = clp;
+    return this;
   }
 
   /**
