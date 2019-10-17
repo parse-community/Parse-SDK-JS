@@ -9,7 +9,7 @@
  * @flow-weak
  */
 import ParseUser from './ParseUser';
-const uuidv4 = require('uuid/v4');
+import uuid from './uuid';
 import type { RequestOptions } from './RESTController';
 
 let registered = false;
@@ -100,7 +100,7 @@ const AnonymousUtils = {
       getAuthData() {
         return {
           authData: {
-            id: uuidv4(),
+            id: uuid(),
           },
         };
       },

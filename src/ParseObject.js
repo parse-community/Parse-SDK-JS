@@ -8,7 +8,6 @@
  *
  * @flow
  */
-const uuidv4 = require('uuid/v4');
 
 import CoreManager from './CoreManager';
 import canBeSerialized from './canBeSerialized';
@@ -19,6 +18,7 @@ import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
 import ParseFile from './ParseFile';
+import uuid from './uuid';
 import { when, continueWhile } from './promiseUtils';
 import { DEFAULT_PIN, PIN_PREFIX } from './LocalDatastoreUtils';
 
@@ -187,7 +187,7 @@ class ParseObject {
     if (typeof this._localId === 'string') {
       return this._localId;
     }
-    const localId = 'local' + uuidv4();
+    const localId = 'local' + uuid();
     this._localId = localId;
     return localId;
   }

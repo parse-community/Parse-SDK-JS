@@ -26,11 +26,8 @@ jest.dontMock('../StorageController.default');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
 jest.dontMock('../UniqueInstanceStateController');
+jest.dontMock('../uuid');
 
-jest.mock('uuid/v4', () => {
-  let value = 0;
-  return () => value++;
-});
 jest.dontMock('./test_helpers/mockXHR');
 
 const CoreManager = require('../CoreManager');

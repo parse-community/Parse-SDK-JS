@@ -11,6 +11,7 @@ jest.dontMock('../CoreManager');
 jest.dontMock('../InstallationController');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
+jest.dontMock('../uuid');
 
 const CoreManager = require('../CoreManager');
 const InstallationController = require('../InstallationController');

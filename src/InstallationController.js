@@ -10,24 +10,9 @@
  */
 
 import Storage from './Storage';
+import uuid from './uuid';
 
 let iidCache = null;
-
-function hexOctet() {
-  return Math.floor(
-    (1 + Math.random()) * 0x10000
-  ).toString(16).substring(1);
-}
-
-function generateId() {
-  return (
-    hexOctet() + hexOctet() + '-' +
-    hexOctet() + '-' +
-    hexOctet() + '-' +
-    hexOctet() + '-' +
-    hexOctet() + hexOctet() + hexOctet()
-  );
-}
 
 const InstallationController = {
   currentInstallationId(): Promise<string> {
@@ -37,7 +22,7 @@ const InstallationController = {
     const path = Storage.generatePath('installationId');
     return Storage.getItemAsync(path).then((iid) => {
       if (!iid) {
-        iid = generateId();
+        iid = uuid();
         return Storage.setItemAsync(path, iid).then(() => {
           iidCache = iid;
           return iid;

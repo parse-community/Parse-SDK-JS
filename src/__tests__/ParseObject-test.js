@@ -31,11 +31,8 @@ jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 jest.dontMock('../LocalDatastore');
+jest.dontMock('../uuid');
 
-jest.mock('uuid/v4', () => {
-  let value = 0;
-  return () => value++;
-});
 jest.dontMock('./test_helpers/mockXHR');
 
 jest.useFakeTimers();
