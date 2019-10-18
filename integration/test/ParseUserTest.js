@@ -676,7 +676,7 @@ describe('Parse User', () => {
     user.setUsername('Alice');
     user.setPassword('sekrit');
     await user.signUp();
-    await user._linkWith(provider.getAuthType(), provider.getAuthData());
+    await user.linkWith(provider.getAuthType(), provider.getAuthData());
     expect(user._isLinked(provider)).toBe(true);
     await user._unlinkFrom(provider);
     expect(user._isLinked(provider)).toBe(false);
@@ -689,7 +689,7 @@ describe('Parse User', () => {
     user.setUsername('Alice');
     user.setPassword('sekrit');
     await user.save(null, { useMasterKey: true });
-    await user._linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
+    await user.linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
     expect(user._isLinked(provider)).toBe(true);
     await user._unlinkFrom(provider, { useMasterKey: true });
     expect(user._isLinked(provider)).toBe(false);
@@ -705,7 +705,7 @@ describe('Parse User', () => {
     expect(user.isCurrent()).toBe(false);
 
     const sessionToken = user.getSessionToken();
-    await user._linkWith(provider.getAuthType(), provider.getAuthData(), { sessionToken });
+    await user.linkWith(provider.getAuthType(), provider.getAuthData(), { sessionToken });
     expect(user._isLinked(provider)).toBe(true);
     await user._unlinkFrom(provider, { sessionToken });
     expect(user._isLinked(provider)).toBe(false);
@@ -716,7 +716,7 @@ describe('Parse User', () => {
     user.setUsername('Alice');
     user.setPassword('sekrit');
     await user.save(null, { useMasterKey: true });
-    await user._linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
+    await user.linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
     expect(user._isLinked(provider)).toBe(true);
     expect(user.authenticated()).toBeFalsy();
     Parse.User.enableUnsafeCurrentUser();
@@ -729,7 +729,7 @@ describe('Parse User', () => {
     user.setUsername('Alice');
     user.setPassword('sekrit');
     await user.save(null, { useMasterKey: true });
-    await user._linkWith(provider.getAuthType(), provider.getAuthData());
+    await user.linkWith(provider.getAuthType(), provider.getAuthData());
     expect(user.getSessionToken()).toBeDefined();
   });
 
@@ -758,7 +758,7 @@ describe('Parse User', () => {
     user.setUsername('Alice');
     user.setPassword('sekrit');
     await user.signUp();
-    await user._linkWith(provider.getAuthType(), provider.getAuthData());
+    await user.linkWith(provider.getAuthType(), provider.getAuthData());
     expect(user._isLinked(provider)).toBe(true);
     await user._unlinkFrom(provider);
     expect(user._isLinked(provider)).toBe(false);
@@ -812,7 +812,7 @@ describe('Parse User', () => {
     user.setPassword('sekrit');
     await user.signUp();
 
-    await user._linkWith('twitter', { authData });
+    await user.linkWith('twitter', { authData });
 
     expect(user.get('authData').twitter.id).toBe(authData.id);
     expect(user._isLinked('twitter')).toBe(true);
@@ -836,7 +836,7 @@ describe('Parse User', () => {
     user.setPassword('sekrit');
     await user.signUp();
 
-    await user._linkWith('twitter', { authData });
+    await user.linkWith('twitter', { authData });
     await Parse.FacebookUtils.link(user);
 
     expect(Parse.FacebookUtils.isLinked(user)).toBe(true);
