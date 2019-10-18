@@ -76,6 +76,7 @@ class ParseUser extends ParseObject {
   /**
    * Parse allows you to link your users with {@link https://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication 3rd party authentication}, enabling
    * your users to sign up or log into your application using their existing identities.
+   * Since 2.9.0
    *
    * @see {@link https://docs.parseplatform.org/js/guide/#linking-users Linking Users}
    * @param {String|AuthProvider} provider Name of auth provider or {@link https://parseplatform.org/Parse-SDK-JS/api/master/AuthProvider.html AuthProvider}
