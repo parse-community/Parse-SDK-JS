@@ -27,6 +27,10 @@ jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
 jest.dontMock('../UniqueInstanceStateController');
 
+jest.mock('uuid/v4', () => {
+  let value = 0;
+  return () => value++;
+});
 jest.dontMock('./test_helpers/mockXHR');
 
 const CoreManager = require('../CoreManager');
@@ -833,17 +837,17 @@ describe('ParseUser', () => {
     const provider = AnonymousUtils._getAuthProvider();
     ParseUser._registerAuthenticationProvider(provider);
     const user = new ParseUser();
-    jest.spyOn(user, '_linkWith');
+    jest.spyOn(user, 'linkWith');
     user._unlinkFrom(provider);
-    expect(user._linkWith).toHaveBeenCalledTimes(1);
-    expect(user._linkWith).toHaveBeenCalledWith(provider, { authData: null }, undefined);
+    expect(user.linkWith).toHaveBeenCalledTimes(1);
+    expect(user.linkWith).toHaveBeenCalledWith(provider, { authData: null }, undefined);
   });
 
   it('can unlink with options', async () => {
     const provider = AnonymousUtils._getAuthProvider();
     ParseUser._registerAuthenticationProvider(provider);
     const user = new ParseUser();
-    jest.spyOn(user, '_linkWith')
+    jest.spyOn(user, 'linkWith')
       .mockImplementationOnce((authProvider, authData, saveOptions) => {
         expect(authProvider).toEqual(provider);
         expect(authData).toEqual({ authData: null});
@@ -851,7 +855,7 @@ describe('ParseUser', () => {
         return Promise.resolve();
       });
     user._unlinkFrom(provider.getAuthType(), { useMasterKey: true });
-    expect(user._linkWith).toHaveBeenCalledTimes(1);
+    expect(user.linkWith).toHaveBeenCalledTimes(1);
   });
 
   it('can destroy anonymous user when login new user', async () => {
@@ -999,10 +1003,10 @@ describe('ParseUser', () => {
     await user._linkWith('testProvider', { authData: { id: 'test' } });
     expect(user.get('authData')).toEqual({ testProvider: { id: 'test' } });
 
-    jest.spyOn(user, '_linkWith');
+    jest.spyOn(user, 'linkWith');
 
     await user._unlinkFrom('testProvider');
-    const authProvider = user._linkWith.mock.calls[0][0];
+    const authProvider = user.linkWith.mock.calls[0][0];
     expect(authProvider.getAuthType()).toBe('testProvider');
   });
 });

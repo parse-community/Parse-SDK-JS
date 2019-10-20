@@ -1485,8 +1485,8 @@ class ParseQuery {
   }
 
   /**
-   * Sets the limit of the number of results to return. The default limit is
-   * 100, with a maximum of 1000 results being returned at a time.
+   * Sets the limit of the number of results to return. The default limit is 100.
+   *
    * @param {Number} n the number of results to limit to.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */

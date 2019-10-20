@@ -70,6 +70,7 @@ class ParseFile {
   _source: FileSource;
   _previousSave: ?Promise<ParseFile>;
   _data: ?string;
+  _requestTask: ?any;
 
   /**
    * @param name {String} The file's name. This will be prefixed by a unique
@@ -165,8 +166,11 @@ class ParseFile {
     if (!this._url) {
       throw new Error('Cannot retrieve data for unsaved ParseFile.');
     }
+    const options = {
+      requestTask: (task) => this._requestTask = task,
+    };
     const controller = CoreManager.getFileController();
-    const result = await controller.download(this._url);
+    const result = await controller.download(this._url, options);
     this._data = result.base64;
     return this._data;
   }
@@ -210,6 +214,8 @@ class ParseFile {
    */
   save(options?: FullOptions) {
     options = options || {};
+    options.requestTask = (task) => this._requestTask = task;
+
     const controller = CoreManager.getFileController();
     if (!this._previousSave) {
       if (this._source.format === 'file') {
@@ -217,26 +223,33 @@ class ParseFile {
           this._name = res.name;
           this._url = res.url;
           this._data = null;
+          this._requestTask = null;
           return this;
         });
       } else if (this._source.format === 'uri') {
-        this._previousSave = controller.download(this._source.uri).then((result) => {
+        this._previousSave = controller.download(this._source.uri, options).then((result) => {
+          if (!(result && result.base64)) {
+            return {};
+          }
           const newSource = {
             format: 'base64',
             base64: result.base64,
             type: result.contentType,
           };
           this._data = result.base64;
+          this._requestTask = null;
           return controller.saveBase64(this._name, newSource, options);
         }).then((res) => {
           this._name = res.name;
           this._url = res.url;
+          this._requestTask = null;
           return this;
         });
       } else {
         this._previousSave = controller.saveBase64(this._name, this._source, options).then((res) => {
           this._name = res.name;
           this._url = res.url;
+          this._requestTask = null;
           return this;
         });
       }
@@ -244,6 +257,16 @@ class ParseFile {
     if (this._previousSave) {
       return this._previousSave;
     }
+  }
+
+  /**
+   * Aborts the request if it has already been sent.
+   */
+  cancel() {
+    if (this._requestTask && typeof this._requestTask.abort === 'function') {
+      this._requestTask.abort();
+    }
+    this._requestTask = null;
   }
 
   toJSON(): { name: ?string, url: ?string } {
@@ -335,15 +358,15 @@ const DefaultController = {
     return CoreManager.getRESTController().request('POST', path, data, options);
   },
 
-  download: function(uri) {
+  download: function(uri, options) {
     if (XHR) {
-      return this.downloadAjax(uri);
+      return this.downloadAjax(uri, options);
     } else if (process.env.PARSE_BUILD === 'node') {
       return new Promise((resolve, reject) => {
         const client = uri.indexOf('https') === 0
           ? require('https')
           : require('http');
-        client.get(uri, (resp) => {
+        const req = client.get(uri, (resp) => {
           resp.setEncoding('base64');
           let base64 = '';
           resp.on('data', (data) => base64 += data);
@@ -353,22 +376,30 @@ const DefaultController = {
               contentType: resp.headers['content-type'],
             });
           });
-        }).on('error', reject);
+        });
+        req.on('abort', () => {
+          resolve({});
+        });
+        req.on('error', reject);
+        options.requestTask(req);
       });
     } else {
       return Promise.reject('Cannot make a request: No definition of XMLHttpRequest was found.');
     }
   },
 
-  downloadAjax: function(uri) {
+  downloadAjax: function(uri, options) {
     return new Promise((resolve, reject) => {
       const xhr = new XHR();
       xhr.open('GET', uri, true);
       xhr.responseType = 'arraybuffer';
       xhr.onerror = function(e) { reject(e); };
       xhr.onreadystatechange = function() {
-        if (xhr.readyState !== 4) {
+        if (xhr.readyState !== xhr.DONE) {
           return;
+        }
+        if (!this.response) {
+          return resolve({});
         }
         const bytes = new Uint8Array(this.response);
         resolve({
@@ -376,6 +407,7 @@ const DefaultController = {
           contentType: xhr.getResponseHeader('content-type'),
         });
       };
+      options.requestTask(xhr);
       xhr.send();
     });
   },

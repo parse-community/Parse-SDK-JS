@@ -1,7 +1,13 @@
 module.exports = class XhrWeapp {
   constructor() {
+    this.UNSENT = 0;
+    this.OPENED = 1;
+    this.HEADERS_RECEIVED = 2;
+    this.LOADING = 3;
+    this.DONE = 4;
+
     this.header = {};
-    this.readyState = 4;
+    this.readyState = this.DONE;
     this.status = 0;
     this.response = '';
     this.responseType = '';
@@ -9,8 +15,10 @@ module.exports = class XhrWeapp {
     this.responseHeader = {};
     this.method = '';
     this.url = '';
-    this.onerror = () => {}
-    this.onreadystatechange = () => {}
+    this.onabort = () => {};
+    this.onerror = () => {};
+    this.onreadystatechange = () => {};
+    this.requestTask = null;
   }
 
   getAllResponseHeaders() {
@@ -34,8 +42,19 @@ module.exports = class XhrWeapp {
     this.url = url;
   }
 
+  abort() {
+    if (!this.requestTask) {
+      return;
+    }
+    this.requestTask.abort();
+    this.status = 0;
+    this.response = undefined;
+    this.onabort();
+    this.onreadystatechange();
+  }
+
   send(data) {
-    wx.request({
+    this.requestTask = wx.request({
       url: this.url,
       method: this.method,
       data: data,
@@ -46,10 +65,11 @@ module.exports = class XhrWeapp {
         this.response = res.data;
         this.responseHeader = res.header;
         this.responseText = JSON.stringify(res.data);
-
+        this.requestTask = null;
         this.onreadystatechange();
       },
       fail: (err) => {
+        this.requestTask = null;
         this.onerror(err);
       }
     })

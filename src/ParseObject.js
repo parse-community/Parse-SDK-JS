@@ -8,6 +8,7 @@
  *
  * @flow
  */
+const uuidv4 = require('uuid/v4');
 
 import CoreManager from './CoreManager';
 import canBeSerialized from './canBeSerialized';
@@ -64,8 +65,6 @@ const DEFAULT_BATCH_SIZE = 20;
 // server with appropriate subclasses of ParseObject
 const classMap = {};
 
-// Global counter for generating unique local Ids
-let localCount = 0;
 // Global counter for generating unique Ids for non-single-instance objects
 let objectCount = 0;
 // On web clients, objects are single-instance: any two objects with the same Id
@@ -188,7 +187,7 @@ class ParseObject {
     if (typeof this._localId === 'string') {
       return this._localId;
     }
-    const localId = 'local' + String(localCount++);
+    const localId = 'local' + uuidv4();
     this._localId = localId;
     return localId;
   }
