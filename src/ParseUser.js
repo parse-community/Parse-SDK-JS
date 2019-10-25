@@ -687,7 +687,8 @@ class ParseUser extends ParseObject {
     if (options.useMasterKey) {
       meOptions.useMasterKey = options.useMasterKey;
     }
-    return controller.me(meOptions);
+    const user = new this();
+    return controller.me(user, meOptions);
   }
 
   /**
@@ -702,7 +703,8 @@ class ParseUser extends ParseObject {
    */
   static hydrate(userJSON: AttributeMap) {
     const controller = CoreManager.getUserController();
-    return controller.hydrate(userJSON);
+    const user = new this();
+    return controller.hydrate(user, userJSON);
   }
 
   /**
@@ -710,7 +712,7 @@ class ParseUser extends ParseObject {
    * @static
    */
   static logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions) {
-    const user = new ParseUser();
+    const user = new this();
     return user.linkWith(provider, options, saveOpts);
   }
 
@@ -845,7 +847,7 @@ class ParseUser extends ParseObject {
    * @static
    */
   static _logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions) {
-    const user = new ParseUser();
+    const user = new this();
     return user.linkWith(provider, options, saveOpts);
   }
 
@@ -1040,8 +1042,7 @@ const DefaultController = {
     });
   },
 
-  hydrate(userJSON: AttributeMap): Promise<ParseUser> {
-    const user = new ParseUser();
+  hydrate(user: ParseUser, userJSON: AttributeMap): Promise<ParseUser> {
     user._finishFetch(userJSON);
     user._setExisted(true);
     if (userJSON.sessionToken && canUseCurrentUser) {
@@ -1051,12 +1052,11 @@ const DefaultController = {
     }
   },
 
-  me(options: RequestOptions): Promise<ParseUser> {
+  me(user: ParseUser, options: RequestOptions): Promise<ParseUser> {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request(
       'GET', 'users/me', {}, options
     ).then((response) => {
-      const user = new ParseUser();
       user._finishFetch(response);
       user._setExisted(true);
       return user;
