@@ -669,6 +669,43 @@ describe('Parse User', () => {
     expect(user.doSomething()).toBe(5);
   });
 
+  it('can get user (me) with subclass static', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    let user = await CustomUser.signUp('username', 'password');
+    const token = user.getSessionToken();
+
+    user = await CustomUser.me(token)
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+  });
+
+  it('can get hydrate user with subclass static', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const user = await CustomUser.hydrate({
+      objectId: 'uid3',
+      username: 'username',
+      sessionToken: '123abc',
+    });
+
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+  });
+
+  it('can loginWith subclass static', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    let user = new CustomUser();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.signUp();
+    user = await CustomUser.logInWith(provider.getAuthType(), provider.getAuthData());
+    expect(user._isLinked(provider)).toBe(true);
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+  });
+
   it('can link without master key', async () => {
     Parse.User.enableUnsafeCurrentUser();
 
