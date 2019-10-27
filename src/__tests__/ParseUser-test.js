@@ -849,7 +849,7 @@ describe('ParseUser', () => {
     const user = new ParseUser();
     jest.spyOn(user, 'linkWith')
       .mockImplementationOnce((authProvider, authData, saveOptions) => {
-        expect(authProvider).toEqual(provider);
+        expect(authProvider).toEqual(provider.getAuthType());
         expect(authData).toEqual({ authData: null});
         expect(saveOptions).toEqual({ useMasterKey: true });
         return Promise.resolve();
@@ -1007,6 +1007,6 @@ describe('ParseUser', () => {
 
     await user._unlinkFrom('testProvider');
     const authProvider = user.linkWith.mock.calls[0][0];
-    expect(authProvider.getAuthType()).toBe('testProvider');
+    expect(authProvider).toBe('testProvider');
   });
 });
