@@ -69,7 +69,7 @@ const AnonymousUtils = {
    */
   logIn(options?: RequestOptions) {
     const provider = this._getAuthProvider();
-    return ParseUser._logInWith(provider.getAuthType(), provider.getAuthData(), options);
+    return ParseUser.logInWith(provider.getAuthType(), provider.getAuthData(), options);
   },
 
   /**
@@ -84,7 +84,7 @@ const AnonymousUtils = {
    */
   link(user: ParseUser, options?: RequestOptions) {
     const provider = this._getAuthProvider();
-    return user._linkWith(provider.getAuthType(), provider.getAuthData(), options);
+    return user.linkWith(provider.getAuthType(), provider.getAuthData(), options);
   },
 
   _getAuthProvider() {

@@ -80,6 +80,10 @@ With Parse SDK 2.0.0, gone are the backbone style callbacks and Parse.Promises.
 
 We have curated a [migration guide](2.0.0.md) that should help you migrate your code.
 
+## 3rd Party Authentications
+
+Parse Server supports many [3rd Party Authenications][3rd-parth-auth]. It is possible to [linkWith][link-with] any 3rd Party Authentication by creating a [custom authentication module][custom-auth-module].
+
 ## Want to ride the bleeding edge?
 
 We recommend using the most recent tagged build published to npm for production. However, you can test not-yet-released versions of the Parse-SDK-JS by referencing specific branches in your `package.json`. For example, to use the master branch:
@@ -116,6 +120,8 @@ of patent rights can be found in the PATENTS file in the same directory.
 -----
 As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code.
  
- [types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse
- 
- [open-collective-link]: https://opencollective.com/parse-server
+[3rd-party-auth]: http://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication
+[custom-auth-module]:https://docs.parseplatform.org/js/guide/#custom-authentication-module).
+[link-with]: https://docs.parseplatform.org/js/guide/#linking-users
+[open-collective-link]: https://opencollective.com/parse-server
+[types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse 

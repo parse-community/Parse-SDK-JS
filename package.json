@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "2.7.1",
+  "version": "2.8.0",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://parseplatform.org/",
   "keywords": [
@@ -29,20 +29,20 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime": "7.6.0",
-    "@babel/runtime-corejs3": "7.6.0",
+    "@babel/runtime": "7.6.3",
+    "@babel/runtime-corejs3": "7.6.3",
     "uuid": "3.3.3",
-    "ws": "7.1.2",
+    "ws": "7.2.0",
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
-    "@babel/core": "7.6.0",
+    "@babel/core": "7.6.4",
     "@babel/plugin-proposal-class-properties": "7.5.5",
-    "@babel/plugin-transform-flow-comments": "7.6.0",
-    "@babel/plugin-transform-flow-strip-types": "7.4.4",
-    "@babel/plugin-transform-runtime": "7.6.0",
-    "@babel/preset-env": "7.6.0",
-    "@babel/preset-react": "7.0.0",
+    "@babel/plugin-transform-flow-comments": "7.6.3",
+    "@babel/plugin-transform-flow-strip-types": "7.6.3",
+    "@babel/plugin-transform-runtime": "7.6.2",
+    "@babel/preset-env": "7.6.3",
+    "@babel/preset-react": "7.6.3",
     "@parse/minami": "1.0.0",
     "babel-eslint": "10.0.3",
     "babel-jest": "24.5.0",
@@ -50,10 +50,10 @@
     "babel-plugin-minify-dead-code-elimination": "0.5.1",
     "babel-plugin-transform-inline-environment-variables": "0.4.3",
     "browserify": "16.5.0",
-    "codecov": "3.5.0",
-    "core-js": "3.2.1",
-    "cross-env": "5.2.1",
-    "eslint": "6.4.0",
+    "codecov": "3.6.1",
+    "core-js": "3.3.4",
+    "cross-env": "6.0.3",
+    "eslint": "6.6.0",
     "eslint-plugin-flowtype": "4.3.0",
     "express": "4.17.1",
     "gulp": "4.0.2",
@@ -63,7 +63,7 @@
     "gulp-rename": "1.4.0",
     "gulp-uglify": "3.0.2",
     "gulp-watch": "5.0.1",
-    "jasmine": "3.4.0",
+    "jasmine": "3.5.0",
     "jasmine-reporters": "2.3.2",
     "jest": "24.5.0",
     "jsdoc": "3.6.3",
@@ -73,8 +73,8 @@
     "vinyl-source-stream": "2.0.0"
   },
   "scripts": {
-    "build": "./build_releases.sh",
-    "release": "./build_releases.sh && npm publish",
+    "build": "node build_releases.js",
+    "release": "node build_releases.js && npm publish",
     "test": "cross-env PARSE_BUILD=node jest",
     "lint": "eslint --cache src/ integration/",
     "lint:fix": "eslint --fix --cache src/ integration/",
@@ -85,7 +85,9 @@
     "integration": "cross-env TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
     "prepare": "npm run build",
-    "release_docs": "./release_docs.sh"
+    "release_docs": "./release_docs.sh",
+    "gulp": "gulp",
+    "cross-env": "cross-env"
   },
   "jest": {
     "automock": true,
