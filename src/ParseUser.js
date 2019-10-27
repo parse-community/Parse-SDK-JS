@@ -213,11 +213,13 @@ class ParseUser extends ParseObject {
 
   /**
    * Unlinks a user from a service.
+   *
+   * @param {String|AuthProvider} provider Name of auth provider or {@link https://parseplatform.org/Parse-SDK-JS/api/master/AuthProvider.html AuthProvider}
+   * @param {Object} options MasterKey / SessionToken
+   * @return {Promise} A promise that is fulfilled when the unlinking
+   *     finishes.
    */
-  _unlinkFrom(provider: any, options?: FullOptions) {
-    if (typeof provider === 'string') {
-      provider = authProviders[provider];
-    }
+  _unlinkFrom(provider: any, options?: FullOptions): Promise<ParseUser> {
     return this.linkWith(provider, { authData: null }, options).then(() => {
       this._synchronizeAuthData(provider);
       return Promise.resolve(this);
