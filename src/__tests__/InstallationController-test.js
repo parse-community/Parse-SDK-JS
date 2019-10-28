@@ -11,6 +11,10 @@ jest.dontMock('../CoreManager');
 jest.dontMock('../InstallationController');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
+jest.mock('uuid/v4', () => {
+  let value = 0;
+  return () => value++ + '';
+});
 
 const CoreManager = require('../CoreManager');
 const InstallationController = require('../InstallationController');
