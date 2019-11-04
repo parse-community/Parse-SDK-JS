@@ -86,9 +86,11 @@ const DefaultLiveQueryController = {
     if (defaultLiveQueryClient) {
       return defaultLiveQueryClient;
     }
-    const currentUser = await CoreManager.getUserController().currentUserAsync();
+    const [currentUser, installationId] = await Promise.all([
+      CoreManager.getUserController().currentUserAsync(),
+      CoreManager.getInstallationController().currentInstallationId()
+    ]);
     const sessionToken = currentUser ? currentUser.getSessionToken() : undefined;
-    const installationId = await CoreManager.getInstallationController().currentInstallationId();
 
     let liveQueryServerURL = CoreManager.get('LIVEQUERY_SERVER_URL');
     if (liveQueryServerURL && liveQueryServerURL.indexOf('ws') !== 0) {
