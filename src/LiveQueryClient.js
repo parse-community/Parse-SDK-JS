@@ -122,6 +122,8 @@ class LiveQueryClient extends EventEmitter {
   javascriptKey: ?string;
   masterKey: ?string;
   sessionToken: ?string;
+  installationId: ?string;
+  additionalProperties: boolean;
   connectPromise: Promise;
   subscriptions: Map;
   socket: any;
@@ -134,13 +136,15 @@ class LiveQueryClient extends EventEmitter {
    * @param {string} options.javascriptKey (optional)
    * @param {string} options.masterKey (optional) Your Parse Master Key. (Node.js only!)
    * @param {string} options.sessionToken (optional)
+   * @param {string} options.installationId (optional)
    */
   constructor({
     applicationId,
     serverURL,
     javascriptKey,
     masterKey,
-    sessionToken
+    sessionToken,
+    installationId,
   }) {
     super();
 
@@ -157,6 +161,8 @@ class LiveQueryClient extends EventEmitter {
     this.javascriptKey = javascriptKey;
     this.masterKey = masterKey;
     this.sessionToken = sessionToken;
+    this.installationId = installationId;
+    this.additionalProperties = true;
     this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
     this.state = CLIENT_STATE.INITIALIZED;
@@ -334,6 +340,9 @@ class LiveQueryClient extends EventEmitter {
       masterKey: this.masterKey,
       sessionToken: this.sessionToken
     };
+    if (this.additionalProperties) {
+      connectRequest.installationId = this.installationId;
+    }
     this.socket.send(JSON.stringify(connectRequest));
   }
 
@@ -372,6 +381,12 @@ class LiveQueryClient extends EventEmitter {
         }
       } else {
         this.emit(CLIENT_EMMITER_TYPES.ERROR, data.error);
+      }
+      if (data.error === 'Additional properties not allowed') {
+        this.additionalProperties = false;
+      }
+      if (data.reconnect) {
+        this._handleReconnect();
       }
       break;
     case OP_EVENTS.UNSUBSCRIBED:

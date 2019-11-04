@@ -86,7 +86,10 @@ const DefaultLiveQueryController = {
     if (defaultLiveQueryClient) {
       return defaultLiveQueryClient;
     }
-    const currentUser = await CoreManager.getUserController().currentUserAsync();
+    const [currentUser, installationId] = await Promise.all([
+      CoreManager.getUserController().currentUserAsync(),
+      CoreManager.getInstallationController().currentInstallationId()
+    ]);
     const sessionToken = currentUser ? currentUser.getSessionToken() : undefined;
 
     let liveQueryServerURL = CoreManager.get('LIVEQUERY_SERVER_URL');
@@ -115,6 +118,7 @@ const DefaultLiveQueryController = {
       javascriptKey,
       masterKey,
       sessionToken,
+      installationId,
     });
     defaultLiveQueryClient.on('error', (error) => {
       LiveQuery.emit('error', error);
