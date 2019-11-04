@@ -397,7 +397,6 @@ class LiveQueryClient extends EventEmitter {
       if (!subscription) {
         break;
       }
-      console.log(data);
       let override = false;
       if (data.original) {
         override = true;
