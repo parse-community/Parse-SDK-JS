@@ -21,14 +21,9 @@ const LocalDatastoreController = {
     return objects;
   },
 
-  async pinWithName(name: string, value: any) {
-    try {
-      const values = JSON.stringify(value);
-      await Storage.setItemAsync(name, values);
-    } catch (e) {
-      // Quota exceeded, possibly due to Safari Private Browsing mode
-      console.log(e.message);
-    }
+  pinWithName(name: string, value: any) {
+    const values = JSON.stringify(value);
+    return Storage.setItemAsync(name, values);
   },
 
   unPinWithName(name: string) {
@@ -39,7 +34,7 @@ const LocalDatastoreController = {
     const keys = await Storage.getAllKeysAsync();
     const LDS = {};
 
-    for(const key of keys){
+    for(const key of keys) {
       if (isLocalDatastoreKey(key)) {
         const value = await Storage.getItemAsync(key);
         try {
@@ -56,7 +51,7 @@ const LocalDatastoreController = {
     const keys = await Storage.getAllKeysAsync();
     const storage = {};
 
-    for(const key of keys){
+    for(const key of keys) {
       const value = await Storage.getItemAsync(key);
       storage[key] = value;
     }

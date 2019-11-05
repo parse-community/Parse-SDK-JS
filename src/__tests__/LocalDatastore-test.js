@@ -796,7 +796,7 @@ describe('LocalDatastore (BrowserStorageController)', () => {
     await LocalDatastore._clear();
   });
 
-  fit('can store and retrieve values', async () => {
+  it('can store and retrieve values', async () => {
     expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([]);
     await LocalDatastore.pinWithName(KEY1, [item1._toFullJSON()]);
     expect(await LocalDatastore.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
