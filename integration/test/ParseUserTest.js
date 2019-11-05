@@ -9,6 +9,7 @@ const TestObject = Parse.Object.extend('TestObject');
 class CustomUser extends Parse.User {
   constructor(attributes) {
     super(attributes);
+    this.className = 'CustomUser';
   }
 
   doSomething() {
@@ -638,6 +639,7 @@ describe('Parse User', () => {
     customUser.setPassword('password');
 
     await customUser.signUp();
+    Parse.User._clearCache();
 
     const user = CustomUser.current();
     expect(user instanceof CustomUser).toBe(true);
