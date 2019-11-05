@@ -37,7 +37,7 @@ const LocalDatastoreController = {
   },
 
   async getAllContents(): Promise<Object> {
-    const keys = await RNStorage.getAllKeys();
+    const keys = await RNStorage.getAllKeysAsync();
     const batch = [];
     for (let i = 0; i < keys.length; i += 1) {
       const key = keys[i];
@@ -65,7 +65,7 @@ const LocalDatastoreController = {
   },
 
   async getRawStorage(): Promise<Object> {
-    const keys = await RNStorage.getAllKeys();
+    const keys = await RNStorage.getAllKeysAsync();
     const storage = {};
     const results = await RNStorage.multiGet(keys);
     results.map((pair) => {
@@ -76,7 +76,7 @@ const LocalDatastoreController = {
   },
 
   async clear(): Promise<void> {
-    const keys = await RNStorage.getAllKeys();
+    const keys = await RNStorage.getAllKeysAsync();
     const batch = [];
     for (let i = 0; i < keys.length; i += 1) {
       const key = keys[i];

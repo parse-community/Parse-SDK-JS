@@ -27,6 +27,11 @@ const StorageController = {
     wx.removeStorageSync(path);
   },
 
+  getAllKeys() {
+    const res = wx.getStorageInfoSync();
+    return res.keys;
+  },
+
   clear() {
     wx.clearStorageSync();
   }

@@ -288,7 +288,8 @@ describe('CoreManager', () => {
       async: 0,
       getItem: function() {},
       setItem: function() {},
-      removeItem: function() {}
+      removeItem: function() {},
+      getAllKeys: function() {}
     })).not.toThrow();
 
     expect(CoreManager.setStorageController.bind(null, { async: 1 })).toThrow(
@@ -310,7 +311,8 @@ describe('CoreManager', () => {
       async: 1,
       getItemAsync: function() {},
       setItemAsync: function() {},
-      removeItemAsync: function() {}
+      removeItemAsync: function() {},
+      getAllKeysAsync: function() {}
     })).not.toThrow();
   });
 
@@ -319,7 +321,8 @@ describe('CoreManager', () => {
       async: 0,
       getItem: function() {},
       setItem: function() {},
-      removeItem: function() {}
+      removeItem: function() {},
+      getAllKeys: function() {}
     };
 
     CoreManager.setStorageController(controller);

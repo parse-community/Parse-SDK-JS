@@ -119,7 +119,7 @@ describe('React Native StorageController', () => {
       return RNStorageController.getItemAsync('myKey');
     }).then((result) => {
       expect(result).toBe('myValue');
-      return RNStorageController.getAllKeys();
+      return RNStorageController.getAllKeysAsync();
     }).then((keys) => {
       expect(keys[0]).toBe('myKey');
       done();
@@ -172,7 +172,7 @@ describe('React Native StorageController', () => {
       },
     };
     CoreManager.setAsyncStorage(mockRNError);
-    RNStorageController.getAllKeys().catch((error) => {
+    RNStorageController.getAllKeysAsync().catch((error) => {
       expect(error).toBe('Error Thrown');
       done();
     });

@@ -2697,8 +2697,7 @@ describe('Parse LocalDatastore', () => {
   });
 
   const controllers = [
-    { name: 'Default', file: '../../lib/node/LocalDatastoreController.default' },
-    { name: 'Browser', file: '../../lib/node/LocalDatastoreController.browser' },
+    { name: 'Default', file: '../../lib/node/LocalDatastoreController' },
     { name: 'React-Native', file: '../../lib/node/LocalDatastoreController.react-native' },
   ];
 

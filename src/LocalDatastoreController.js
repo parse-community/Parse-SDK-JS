@@ -9,55 +9,62 @@
  * @flow
  */
 import { isLocalDatastoreKey } from './LocalDatastoreUtils';
+import Storage from './Storage';
 
 const LocalDatastoreController = {
-  fromPinWithName(name: string): Array<Object> {
-    const values = wx.getStorageSync(name);
+  async fromPinWithName(name: string): Array<Object> {
+    const values = await Storage.getItemAsync(name);
     if (!values) {
       return [];
     }
-    return values;
+    const objects = JSON.parse(values);
+    return objects;
   },
 
-  pinWithName(name: string, value: any) {
+  async pinWithName(name: string, value: any) {
     try {
-      wx.setStorageSync(name, value);
+      const values = JSON.stringify(value);
+      await Storage.setItemAsync(name, values);
     } catch (e) {
-      // Quota exceeded
+      // Quota exceeded, possibly due to Safari Private Browsing mode
+      console.log(e.message);
     }
   },
 
   unPinWithName(name: string) {
-    wx.removeStorageSync(name);
+    return Storage.removeItemAsync(name);
   },
 
-  getAllContents(): Object {
-    const res = wx.getStorageInfoSync();
-    const keys = res.keys;
-
+  async getAllContents(): Object {
+    const keys = await Storage.getAllKeysAsync();
     const LDS = {};
+
     for(const key of keys){
       if (isLocalDatastoreKey(key)) {
-        LDS[key] = wx.getStorageSync(key);
+        const value = await Storage.getItemAsync(key);
+        try {
+          LDS[key] = JSON.parse(value);
+        } catch (error) {
+          console.error('Error getAllContents: ', error);
+        }
       }
     }
     return LDS;
   },
 
-  getRawStorage(): Object {
-    const res = wx.getStorageInfoSync();
-    const keys = res.keys;
-
+  async getRawStorage(): Object {
+    const keys = await Storage.getAllKeysAsync();
     const storage = {};
+
     for(const key of keys){
-      storage[key] = wx.getStorageSync(key);
+      const value = await Storage.getItemAsync(key);
+      storage[key] = value;
     }
     return storage;
   },
 
-  clear(): Promise {
-    const res = wx.getStorageInfoSync();
-    const keys = res.keys;
+  async clear(): Promise {
+    const keys = await Storage.getAllKeysAsync();
 
     const toRemove = [];
     for(const key of keys){

@@ -28,6 +28,14 @@ const StorageController = {
     localStorage.removeItem(path);
   },
 
+  getAllKeys() {
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i += 1) {
+      keys.push(localStorage.key(i));
+    }
+    return keys;
+  },
+
   clear() {
     localStorage.clear();
   }

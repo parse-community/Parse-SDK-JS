@@ -406,11 +406,7 @@ module.exports = LocalDatastore;
 
 if (process.env.PARSE_BUILD === 'react-native') {
   CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.react-native'));
-} else if (process.env.PARSE_BUILD === 'browser') {
-  CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.browser'));
-} else if (process.env.PARSE_BUILD === 'weapp') {
-  CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.weapp'));
 } else {
-  CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.default'));
+  CoreManager.setLocalDatastoreController(require('./LocalDatastoreController'));
 }
 CoreManager.setLocalDatastore(LocalDatastore);
