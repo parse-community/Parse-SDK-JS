@@ -9,7 +9,6 @@ const TestObject = Parse.Object.extend('TestObject');
 class CustomUser extends Parse.User {
   constructor(attributes) {
     super(attributes);
-    this.className = 'CustomUser';
   }
 
   doSomething() {
