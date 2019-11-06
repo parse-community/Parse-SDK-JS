@@ -32,30 +32,26 @@ const LocalDatastoreController = {
 
   async getAllContents(): Object {
     const keys = await Storage.getAllKeysAsync();
-    const LDS = {};
-
-    for(const key of keys) {
+    return keys.reduce(async (accumulator, key) => {
       if (isLocalDatastoreKey(key)) {
         const value = await Storage.getItemAsync(key);
         try {
-          LDS[key] = JSON.parse(value);
+          accumulator[key] = JSON.parse(value);
         } catch (error) {
           console.error('Error getAllContents: ', error);
         }
       }
-    }
-    return LDS;
+      return accumulator;
+    }, {});
   },
 
   async getRawStorage(): Object {
     const keys = await Storage.getAllKeysAsync();
-    const storage = {};
-
-    for(const key of keys) {
+    return keys.reduce(async (accumulator, key) => {
       const value = await Storage.getItemAsync(key);
-      storage[key] = value;
-    }
-    return storage;
+      accumulator[key] = value;
+      return accumulator;
+    }, {});
   },
 
   async clear(): Promise {
