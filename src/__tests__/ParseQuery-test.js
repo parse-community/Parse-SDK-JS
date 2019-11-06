@@ -1600,6 +1600,46 @@ describe('ParseQuery', () => {
     expect(results.length).toBe(3);
   });
 
+  it('can iterate over results with reduce()', async () => {
+    CoreManager.setQueryController({
+      aggregate() {},
+      find() {
+        return Promise.resolve({
+          results: [
+            { objectId: 'I55', number: 1 },
+            { objectId: 'I89', number: 2 },
+            { objectId: 'I91', number: 3 },
+          ]
+        });
+      }
+    });
+
+    const q = new ParseQuery('Item');
+
+    const result = await q.reduce((accumulator, object) => accumulator + object.attributes.number, 0);
+    expect(result).toBe(6);
+  });
+
+  it('can iterate over results with filter()', async () => {
+    CoreManager.setQueryController({
+      aggregate() {},
+      find() {
+        return Promise.resolve({
+          results: [
+            { objectId: 'I55', size: 'medium', name: 'Product 55' },
+            { objectId: 'I89', size: 'small', name: 'Product 89' },
+            { objectId: 'I91', size: 'small', name: 'Product 91' },
+          ]
+        });
+      }
+    });
+
+    const q = new ParseQuery('Item');
+
+    const results = await q.filter((object) => object.attributes.size === 'small');
+    expect(results.length).toBe(2);
+  });
+
   it('returns an error when iterating over an invalid query', (done) => {
     const q = new ParseQuery('Item');
     q.limit(10);
