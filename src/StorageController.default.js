@@ -29,6 +29,10 @@ const StorageController = {
     delete memMap[path];
   },
 
+  getAllKeys() {
+    return Object.keys(memMap);
+  },
+
   clear() {
     for (const key in memMap) {
       if (memMap.hasOwnProperty(key)) {

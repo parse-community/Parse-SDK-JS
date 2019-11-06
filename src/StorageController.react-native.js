@@ -54,7 +54,7 @@ const StorageController = {
     });
   },
 
-  getAllKeys(): Promise {
+  getAllKeysAsync(): Promise {
     return new Promise((resolve, reject) => {
       this.getAsyncStorage().getAllKeys(function(err, keys) {
         if (err) {

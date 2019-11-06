@@ -100,9 +100,10 @@ const LocalDatastore = require('../LocalDatastore');
 const ParseObject = require('../ParseObject');
 const ParseQuery = require('../ParseQuery');
 const ParseUser = require('../ParseUser').default;
+const LocalDatastoreController = require('../LocalDatastoreController');
 const RNDatastoreController = require('../LocalDatastoreController.react-native');
-const BrowserDatastoreController = require('../LocalDatastoreController.browser');
-const DefaultDatastoreController = require('../LocalDatastoreController.default');
+const BrowserStorageController = require('../StorageController.browser');
+const DefaultStorageController = require('../StorageController.default');
 
 const item1 = new ParseObject('Item');
 const item2 = new ParseObject('Item');
@@ -788,67 +789,10 @@ describe('LocalDatastore', () => {
   });
 });
 
-describe('BrowserDatastoreController', () => {
+describe('LocalDatastore (BrowserStorageController)', () => {
   beforeEach(async () => {
-    await BrowserDatastoreController.clear();
-  });
-
-  it('implement functionality', () => {
-    expect(typeof BrowserDatastoreController.fromPinWithName).toBe('function');
-    expect(typeof BrowserDatastoreController.pinWithName).toBe('function');
-    expect(typeof BrowserDatastoreController.unPinWithName).toBe('function');
-    expect(typeof BrowserDatastoreController.getAllContents).toBe('function');
-    expect(typeof BrowserDatastoreController.clear).toBe('function');
-  });
-
-  it('can store and retrieve values', async () => {
-    expect(await BrowserDatastoreController.fromPinWithName(KEY1)).toEqual([]);
-    await BrowserDatastoreController.pinWithName(KEY1, [item1._toFullJSON()]);
-    expect(await BrowserDatastoreController.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
-    expect(await BrowserDatastoreController.getAllContents()).toEqual({ [KEY1]: [item1._toFullJSON()] });
-  });
-
-  it('can remove values', async () => {
-    await BrowserDatastoreController.pinWithName(KEY1, [item1._toFullJSON()]);
-    expect(await BrowserDatastoreController.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
-    await BrowserDatastoreController.unPinWithName(KEY1);
-    expect(await BrowserDatastoreController.fromPinWithName(KEY1)).toEqual([]);
-    expect(await BrowserDatastoreController.getAllContents()).toEqual({});
-  });
-});
-
-describe('DefaultDatastoreController', () => {
-  beforeEach(async () => {
-    await DefaultDatastoreController.clear();
-  });
-
-  it('implement functionality', () => {
-    expect(typeof DefaultDatastoreController.fromPinWithName).toBe('function');
-    expect(typeof DefaultDatastoreController.pinWithName).toBe('function');
-    expect(typeof DefaultDatastoreController.unPinWithName).toBe('function');
-    expect(typeof DefaultDatastoreController.getAllContents).toBe('function');
-    expect(typeof DefaultDatastoreController.clear).toBe('function');
-  });
-
-  it('can store and retrieve values', async () => {
-    expect(await DefaultDatastoreController.fromPinWithName(KEY1)).toEqual([]);
-    await DefaultDatastoreController.pinWithName(KEY1, [item1._toFullJSON()]);
-    expect(await DefaultDatastoreController.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
-    expect(await DefaultDatastoreController.getAllContents()).toEqual({ [KEY1]: [item1._toFullJSON()] });
-  });
-
-  it('can remove values', async () => {
-    await DefaultDatastoreController.pinWithName(KEY1, [item1._toFullJSON()]);
-    expect(await DefaultDatastoreController.fromPinWithName(KEY1)).toEqual([item1._toFullJSON()]);
-    await DefaultDatastoreController.unPinWithName(KEY1);
-    expect(await DefaultDatastoreController.fromPinWithName(KEY1)).toEqual([]);
-    expect(await DefaultDatastoreController.getAllContents()).toEqual({});
-  });
-});
-
-describe('LocalDatastore (BrowserDatastoreController)', () => {
-  beforeEach(async () => {
-    CoreManager.setLocalDatastoreController(BrowserDatastoreController);
+    CoreManager.setStorageController(BrowserStorageController);
+    CoreManager.setLocalDatastoreController(LocalDatastoreController);
     await LocalDatastore._clear();
   });
 
@@ -896,9 +840,10 @@ describe('LocalDatastore (BrowserDatastoreController)', () => {
   });
 });
 
-describe('LocalDatastore (DefaultDatastoreController)', () => {
+describe('LocalDatastore (DefaultStorageController)', () => {
   beforeEach(async () => {
-    CoreManager.setLocalDatastoreController(DefaultDatastoreController);
+    CoreManager.setStorageController(DefaultStorageController);
+    CoreManager.setLocalDatastoreController(LocalDatastoreController);
     await LocalDatastore._clear();
   });
 

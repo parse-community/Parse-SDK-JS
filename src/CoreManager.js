@@ -338,12 +338,14 @@ module.exports = {
         'getItemAsync',
         'setItemAsync',
         'removeItemAsync',
+        'getAllKeysAsync'
       ], controller);
     } else {
       requireMethods('A synchronous StorageController', [
         'getItem',
         'setItem',
         'removeItem',
+        'getAllKeys'
       ], controller);
     }
     config['StorageController'] = controller;
