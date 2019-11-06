@@ -1580,6 +1580,28 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can iterate over results with map()', async () => {
+    CoreManager.setQueryController({
+      aggregate() {},
+      find() {
+        return Promise.resolve({
+          results: [
+            { objectId: 'I55', size: 'medium', name: 'Product 55' },
+            { objectId: 'I89', size: 'small', name: 'Product 89' },
+            { objectId: 'I91', size: 'small', name: 'Product 91' },
+          ]
+        });
+      }
+    });
+
+    const q = new ParseQuery('Item');
+
+    const results = await q.map((object) => {
+      return object.attributes.size;
+    });
+    expect(results.length).toBe(3);
+  });
+
   it('returns an error when iterating over an invalid query', (done) => {
     const q = new ParseQuery('Item');
     q.limit(10);

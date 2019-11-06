@@ -1947,4 +1947,23 @@ describe('Parse Query', () => {
       done();
     });
   });
+
+  it('can return results in map', async () => {
+    const obj1 = new TestObject({ foo: 'bar' });
+    const obj2 = new TestObject({ foo: 'baz' });
+    const obj3 = new TestObject({ foo: 'bin' });
+    await Parse.Object.saveAll([obj1, obj2, obj3]);
+    let i = 0;
+    const mapQuery = new Parse.Query(TestObject);
+    const results = await mapQuery.map((object, index, query) => {
+      assert.equal(index, i);
+      assert.equal(query, mapQuery);
+      i += 1;
+      return object.get('foo');
+    });
+    assert.equal(results.includes('bar'), true);
+    assert.equal(results.includes('baz'), true);
+    assert.equal(results.includes('bin'), true);
+    assert.equal(results.length, 3);
+  });
 });
