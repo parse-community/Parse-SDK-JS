@@ -910,6 +910,103 @@ class ParseQuery {
     });
   }
 
+  /**
+   * Iterates over each result of a query, calling a callback for each one. If
+   * the callback returns a promise, the iteration will not continue until
+   * that promise has been fulfilled. If the callback returns a rejected
+   * promise, then iteration will stop with that error. The items are
+   * processed in an unspecified order. The query may not have any sort order,
+   * and may not use limit or skip.
+   * @param {Function} callback Callback <ul>
+   *   <li>currentObject: The current Parse.Object being processed in the array.</li>
+   *   <li>index: The index of the current Parse.Object being processed in the array.</li>
+   *   <li>query: The query map was called upon.</li>
+   * </ul>
+   *
+   * @param {Object} options Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @return {Promise} A promise that will be fulfilled once the
+   *     iteration has completed.
+   */
+  async map(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any, options?: BatchOptions): Promise<Array<any>> {
+    const array = [];
+    let index = 0;
+    await this.each((object) => {
+      array.push(callback(object, index, this));
+      index += 1;
+    }, options);
+    return array;
+  }
+
+  /**
+   * Iterates over each result of a query, calling a callback for each one. If
+   * the callback returns a promise, the iteration will not continue until
+   * that promise has been fulfilled. If the callback returns a rejected
+   * promise, then iteration will stop with that error. The items are
+   * processed in an unspecified order. The query may not have any sort order,
+   * and may not use limit or skip.
+   * @param {Function} callback Callback <ul>
+   *   <li>accumulator: The accumulator accumulates the callback's return values. It is the accumulated value previously returned in the last invocation of the callback.</li>
+   *   <li>currentObject: The current Parse.Object being processed in the array.</li>
+   *   <li>index: The index of the current Parse.Object being processed in the array.</li>
+   * </ul>
+   * @param {Mixed} initialValue A value to use as the first argument to the first call of the callback. If no initialValue is supplied, the first object in the query will be used and skipped.
+   * @param {Object} options Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @return {Promise} A promise that will be fulfilled once the
+   *     iteration has completed.
+   */
+  async reduce(callback: (accumulator: any, currentObject: ParseObject, index: number) => any, initialValue: any, options?: BatchOptions): Promise<Array<any>> {
+    const objects = [];
+    await this.each((object) => {
+      objects.push(object);
+    }, options);
+    return objects.reduce(callback, initialValue);
+  }
+
+  /**
+   * Iterates over each result of a query, calling a callback for each one. If
+   * the callback returns a promise, the iteration will not continue until
+   * that promise has been fulfilled. If the callback returns a rejected
+   * promise, then iteration will stop with that error. The items are
+   * processed in an unspecified order. The query may not have any sort order,
+   * and may not use limit or skip.
+   * @param {Function} callback Callback <ul>
+   *   <li>currentObject: The current Parse.Object being processed in the array.</li>
+   *   <li>index: The index of the current Parse.Object being processed in the array.</li>
+   *   <li>query: The query filter was called upon.</li>
+   * </ul>
+   *
+   * @param {Object} options Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @return {Promise} A promise that will be fulfilled once the
+   *     iteration has completed.
+   */
+  async filter(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean, options?: BatchOptions): Promise<Array<ParseObject>> {
+    const array = [];
+    let index = 0;
+    await this.each((object) => {
+      const flag = callback(object, index, this);
+      if (flag) {
+        array.push(object);
+      }
+      index += 1;
+    }, options);
+    return array;
+  }
+
   /** Query Conditions **/
 
   /**
