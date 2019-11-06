@@ -1596,9 +1596,7 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Item');
 
-    const results = await q.map((object) => {
-      return object.attributes.size;
-    });
+    const results = await q.map((object) => object.attributes.size);
     expect(results.length).toBe(3);
   });
 
