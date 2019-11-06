@@ -32,26 +32,29 @@ const LocalDatastoreController = {
 
   async getAllContents(): Object {
     const keys = await Storage.getAllKeysAsync();
-    return keys.reduce(async (accumulator, key) => {
+    return keys.reduce(async (previousPromise, key) => {
+      const LDS = await previousPromise;
       if (isLocalDatastoreKey(key)) {
         const value = await Storage.getItemAsync(key);
         try {
-          accumulator[key] = JSON.parse(value);
+          LDS[key] = JSON.parse(value);
         } catch (error) {
           console.error('Error getAllContents: ', error);
         }
       }
-      return accumulator;
-    }, {});
+      return LDS;
+    }, Promise.resolve({}));
   },
 
+  // Used for testing
   async getRawStorage(): Object {
     const keys = await Storage.getAllKeysAsync();
-    return keys.reduce(async (accumulator, key) => {
+    return keys.reduce(async (previousPromise, key) => {
+      const LDS = await previousPromise;
       const value = await Storage.getItemAsync(key);
-      accumulator[key] = value;
-      return accumulator;
-    }, {});
+      LDS[key] = value;
+      return LDS;
+    }, Promise.resolve({}));
   },
 
   async clear(): Promise {

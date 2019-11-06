@@ -2688,6 +2688,7 @@ describe('Parse LocalDatastore', () => {
   beforeEach((done) => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
+    Parse.CoreManager.getInstallationController()._setInstallationIdCache('1234');
     Parse.enableLocalDatastore();
     Parse.User.enableUnsafeCurrentUser();
     Parse.Storage._clear();

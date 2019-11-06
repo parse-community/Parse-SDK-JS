@@ -64,6 +64,7 @@ const LocalDatastoreController = {
     return LDS;
   },
 
+  // Used for testing
   async getRawStorage(): Promise<Object> {
     const keys = await RNStorage.getAllKeysAsync();
     const storage = {};
