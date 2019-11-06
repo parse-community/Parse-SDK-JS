@@ -490,6 +490,38 @@ describe('LiveQueryClient', () => {
     expect(isChecked).toBe(true);
   });
 
+  it('can handle WebSocket reconnect on error event', () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken'
+    });
+    expect(liveQueryClient.additionalProperties).toBe(true);
+    const data = {
+      op: 'error',
+      code: 1,
+      reconnect: true,
+      error: 'Additional properties not allowed',
+    };
+    const event = {
+      data: JSON.stringify(data)
+    }
+    let isChecked = false;
+    liveQueryClient.on('error', function(error) {
+      isChecked = true;
+      expect(error).toEqual(data.error);
+    });
+    const spy = jest.spyOn(liveQueryClient, '_handleReconnect');
+    liveQueryClient._handleWebSocketMessage(event);
+
+    expect(isChecked).toBe(true);
+    expect(liveQueryClient._handleReconnect).toHaveBeenCalledTimes(1);
+    expect(liveQueryClient.additionalProperties).toBe(false);
+    spy.mockRestore();
+  });
+
   it('can subscribe', async () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
