@@ -1780,7 +1780,7 @@ describe('Parse Object', () => {
       class MySubclass extends Parse.Object {
         constructor(attr) {
           super('MySubclass', attr);
-          this.defaultProp = this.defaultProp || 'default';
+          this.defaultProp = attr && attr.defaultProp || 'default';
         }
         get defaultProp() { return this.get('defaultProp'); }
         set defaultProp(val) { this.set('defaultProp', val); }
