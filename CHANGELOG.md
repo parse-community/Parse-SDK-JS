@@ -1,7 +1,31 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.8.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.9.0...master)
+
+## 2.9.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.8.0...2.9.0)
+
+**Deprecation**
+`_linkWith` and `_logInWith` are deprecated. Replace with `linkWith` and `logInWith` respectively. ([#963](https://github.com/parse-community/Parse-SDK-JS/pull/963))
+
+**New Features**
+- Set Class Level Permission via Parse.Schema ([#960](https://github.com/parse-community/Parse-SDK-JS/pull/960))
+- Set required fields and default values via Parse.Schema ([#961](https://github.com/parse-community/Parse-SDK-JS/pull/961))
+- Add installationId to LiveQuery ([#977](https://github.com/parse-community/Parse-SDK-JS/pull/977))
+- Add response object to LiveQuery ([#979](https://github.com/parse-community/Parse-SDK-JS/pull/979))
+- Support query.map, query.filter, query.reduce ([#987](https://github.com/parse-community/Parse-SDK-JS/pull/987))
+
+**Fixes**
+- Can unlink without provider in cloud code ([#971](https://github.com/parse-community/Parse-SDK-JS/pull/971))
+- Properly store User Subclass in Storage ([#978](https://github.com/parse-community/Parse-SDK-JS/pull/978))
+
+**Improvements**
+- User subclass support for logInWith, hydrate, me, current ([#968](https://github.com/parse-community/Parse-SDK-JS/pull/968))
+- Remove unused options from Parse.Schema ([#959](https://github.com/parse-community/Parse-SDK-JS/pull/959))
+- Documentation for linking users and custom auth ([#963](https://github.com/parse-community/Parse-SDK-JS/pull/963))
+- Generate installationId as uuid v4 ([#972](https://github.com/parse-community/Parse-SDK-JS/pull/972))
+- Reuse StorageController for LDS ([#984](https://github.com/parse-community/Parse-SDK-JS/pull/984))
 
 ## 2.8.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.7.1...2.8.0)
