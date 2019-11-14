@@ -1,7 +1,13 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.9.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.9.1...master)
+
+## 2.9.1
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.9.0...2.9.1)
+
+**Fixes**
+- Storing user to disk ([#992](https://github.com/parse-community/Parse-SDK-JS/issues/992)) ([#999](https://github.com/parse-community/Parse-SDK-JS/pull/999))
 
 ## 2.9.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.8.0...2.9.0)
