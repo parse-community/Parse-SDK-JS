@@ -630,22 +630,21 @@ describe('Parse User', () => {
     expect(user.get('foo')).toBe('bar');
   });
 
-  // TODO: @dplewis
-  // it('can get current with subclass', async () => {
-  //   Parse.User.enableUnsafeCurrentUser();
+  it('can get current with subclass', async () => {
+    Parse.User.enableUnsafeCurrentUser();
 
-  //   const customUser = new CustomUser({ foo: 'bar' });
-  //   customUser.setUsername('username');
-  //   customUser.setPassword('password');
+    const customUser = new CustomUser({ foo: 'bar' });
+    customUser.setUsername('username');
+    customUser.setPassword('password');
 
-  //   await customUser.signUp();
-  //   Parse.User._clearCache();
+    await customUser.signUp();
+    Parse.User._clearCache();
 
-  //   const user = CustomUser.current();
-  //   expect(user instanceof CustomUser).toBe(true);
-  //   expect(user.doSomething()).toBe(5);
-  //   expect(user.get('foo')).toBe('bar');
-  // });
+    const user = CustomUser.current();
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+    expect(user.get('foo')).toBe('bar');
+  });
 
   it('can logIn user with subclass', async () => {
     Parse.User.enableUnsafeCurrentUser();
