@@ -2113,6 +2113,40 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can cancel query', async () => {
+    const mockRequestTask = {
+      abort: () => {},
+    };
+    const QueryController = {
+      _requestTask: null,
+      find: function() {
+        this._requestTask = mockRequestTask;
+        return Promise.resolve({
+          results: []
+        });
+      },
+      aggregate: () => {},
+      cancel: function() {
+        if (this._requestTask) {
+          this._requestTask.abort();
+        }
+      },
+    };
+
+    CoreManager.setQueryController(QueryController);
+    const query = new ParseQuery('TestCancel');
+
+    jest.spyOn(mockRequestTask, 'abort');
+    query.cancel();
+    expect(mockRequestTask.abort).toHaveBeenCalledTimes(0);
+
+    await query.find();
+
+    expect(QueryController._requestTask).toEqual(mockRequestTask);
+    query.cancel();
+    expect(mockRequestTask.abort).toHaveBeenCalledTimes(1);
+  });
+
   it('selecting sub-objects does not inject objects when sub-object does not exist', (done) => {
     jest.dontMock("../ParseObject");
     jest.resetModules();
