@@ -2346,6 +2346,10 @@ describe('ParseQuery LocalDatastore', () => {
     q.fromPin();
     expect(q._queriesLocalDatastore).toBe(true);
     expect(q._localDatastorePinName).toBe(DEFAULT_PIN);
+    const query = q.fromNetwork();
+    expect(q._queriesLocalDatastore).toBe(false);
+    expect(q._localDatastorePinName).toBe(null);
+    expect(query).toEqual(q);
   });
 
   it('can query from pin with name', () => {

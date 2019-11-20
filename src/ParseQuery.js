@@ -1775,6 +1775,17 @@ class ParseQuery {
   }
 
   /**
+   * Change the source of this query to the server.
+   *
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  fromNetwork(): ParseQuery {
+    this._queriesLocalDatastore = false;
+    this._localDatastorePinName = null;
+    return this;
+  }
+
+  /**
    * Changes the source of this query to all pinned objects.
    *
    * @return {Parse.Query} Returns the query, so you can chain this call.
