@@ -1820,6 +1820,7 @@ class ParseQuery {
 
   /**
    * Cancels the current network request (if any is running).
+   * Note: Support varies based on xmlhttprequest module used.
    *
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
