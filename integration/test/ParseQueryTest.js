@@ -2004,7 +2004,7 @@ describe('Parse Query', () => {
     for (let i = 0; i < 100; i += 1) {
       objects.push(new TestObject({ number: i }))
     }
-    await Parse.Object.saveAll([objects]);
+    await Parse.Object.saveAll(objects);
     const query = new Parse.Query(TestObject);
     query.find().then((results) => {
       assert.equal(results.length, 0);

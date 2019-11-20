@@ -232,6 +232,7 @@ class ParseQuery {
   _queriesLocalDatastore: boolean;
   _localDatastorePinName: any;
   _extraOptions: { [key: string]: mixed };
+  _xhrRequest: any;
 
   /**
    * @param {(String|Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
@@ -270,6 +271,10 @@ class ParseQuery {
     this._queriesLocalDatastore = false;
     this._localDatastorePinName = null;
     this._extraOptions = {};
+    this._xhrRequest = {
+      task: null,
+      onchange: () => {},
+    }
   }
 
   /**
@@ -596,6 +601,7 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       findOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(findOptions);
 
     const controller = CoreManager.getQueryController();
 
@@ -664,6 +670,7 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       findOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(findOptions);
 
     const controller = CoreManager.getQueryController();
 
@@ -701,12 +708,13 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       distinctOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(distinctOptions);
+
     const controller = CoreManager.getQueryController();
     const params = {
       distinct: key,
       where: this._where
     };
-
     return controller.aggregate(
       this.className,
       params,
@@ -736,6 +744,8 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       aggregateOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(aggregateOptions);
+
     const controller = CoreManager.getQueryController();
 
     if (!Array.isArray(pipeline) && typeof pipeline !== 'object') {
@@ -779,6 +789,7 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       findOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(findOptions);
 
     const controller = CoreManager.getQueryController();
 
@@ -1813,17 +1824,23 @@ class ParseQuery {
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   cancel(): ParseQuery {
-    const controller = CoreManager.getQueryController();
-    controller.cancel();
+    if (this._xhrRequest.task && typeof this._xhrRequest.task.abort === 'function') {
+      this._xhrRequest.task.abort();
+    }
+    this._xhrRequest.task = null;
     return this;
+  }
+
+  _setRequestTask(options) {
+    options.requestTask = (task) => {
+      this._xhrRequest.task = task;
+      this._xhrRequest.onchange();
+    };
   }
 }
 
 const DefaultController = {
-  _requestTask: null,
-
   find(className: string, params: QueryJSON, options: RequestOptions = {}): Promise<Array<ParseObject>> {
-    options.requestTask = (task) => this._requestTask = task;
     const RESTController = CoreManager.getRESTController();
 
     return RESTController.request(
@@ -1835,7 +1852,6 @@ const DefaultController = {
   },
 
   aggregate(className: string, params: any, options: RequestOptions = {}): Promise<Array<mixed>> {
-    options.requestTask = (task) => this._requestTask = task;
     const RESTController = CoreManager.getRESTController();
 
     return RESTController.request(
@@ -1845,13 +1861,6 @@ const DefaultController = {
       options
     );
   },
-
-  cancel(): void {
-    if (this._requestTask && typeof this._requestTask.abort === 'function') {
-      this._requestTask.abort();
-    }
-    this._requestTask = null;
-  }
 };
 
 CoreManager.setQueryController(DefaultController);
