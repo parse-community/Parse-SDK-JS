@@ -1820,7 +1820,7 @@ class ParseQuery {
 
   /**
    * Cancels the current network request (if any is running).
-   * Note: Support varies based on xmlhttprequest module used.
+   * Note: Support varies based on xmlhttprequest module used. (Will support browser)
    *
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1841,7 +1841,7 @@ class ParseQuery {
 }
 
 const DefaultController = {
-  find(className: string, params: QueryJSON, options: RequestOptions = {}): Promise<Array<ParseObject>> {
+  find(className: string, params: QueryJSON, options: RequestOptions): Promise<Array<ParseObject>> {
     const RESTController = CoreManager.getRESTController();
 
     return RESTController.request(
@@ -1852,7 +1852,7 @@ const DefaultController = {
     );
   },
 
-  aggregate(className: string, params: any, options: RequestOptions = {}): Promise<Array<mixed>> {
+  aggregate(className: string, params: any, options: RequestOptions): Promise<Array<mixed>> {
     const RESTController = CoreManager.getRESTController();
 
     return RESTController.request(
@@ -1861,7 +1861,7 @@ const DefaultController = {
       params,
       options
     );
-  },
+  }
 };
 
 CoreManager.setQueryController(DefaultController);

@@ -1998,17 +1998,4 @@ describe('Parse Query', () => {
     }, 0);
     assert.equal(result, 6);
   });
-
-  it('can cancel query', async () => {
-    const objects = [];
-    for (let i = 0; i < 100; i += 1) {
-      objects.push(new TestObject({ number: i }))
-    }
-    await Parse.Object.saveAll(objects);
-    const query = new Parse.Query(TestObject);
-    query.find().then((results) => {
-      assert.equal(results.length, 0);
-    });
-    query.cancel();
-  });
 });
