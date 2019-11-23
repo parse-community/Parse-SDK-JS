@@ -869,6 +869,8 @@ const DefaultController = {
   updateUserOnDisk(user) {
     const path = Storage.generatePath(CURRENT_USER_KEY);
     const json = user.toJSON();
+    delete json.password;
+
     json.className = user.constructor.name === ParseUser.name ? '_User' : user.constructor.name;
     return Storage.setItemAsync(
       path, JSON.stringify(json)
