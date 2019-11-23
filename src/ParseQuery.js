@@ -232,6 +232,7 @@ class ParseQuery {
   _queriesLocalDatastore: boolean;
   _localDatastorePinName: any;
   _extraOptions: { [key: string]: mixed };
+  _xhrRequest: any;
 
   /**
    * @param {(String|Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
@@ -270,6 +271,10 @@ class ParseQuery {
     this._queriesLocalDatastore = false;
     this._localDatastorePinName = null;
     this._extraOptions = {};
+    this._xhrRequest = {
+      task: null,
+      onchange: () => {},
+    }
   }
 
   /**
@@ -596,6 +601,7 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       findOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(findOptions);
 
     const controller = CoreManager.getQueryController();
 
@@ -664,6 +670,7 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       findOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(findOptions);
 
     const controller = CoreManager.getQueryController();
 
@@ -701,12 +708,13 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       distinctOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(distinctOptions);
+
     const controller = CoreManager.getQueryController();
     const params = {
       distinct: key,
       where: this._where
     };
-
     return controller.aggregate(
       this.className,
       params,
@@ -736,6 +744,8 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       aggregateOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(aggregateOptions);
+
     const controller = CoreManager.getQueryController();
 
     if (!Array.isArray(pipeline) && typeof pipeline !== 'object') {
@@ -779,6 +789,7 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       findOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(findOptions);
 
     const controller = CoreManager.getQueryController();
 
@@ -1816,6 +1827,27 @@ class ParseQuery {
       this._localDatastorePinName = name;
     }
     return this;
+  }
+
+  /**
+   * Cancels the current network request (if any is running).
+   * Note: Support varies based on xmlhttprequest module used. (Will support browser)
+   *
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  cancel(): ParseQuery {
+    if (this._xhrRequest.task && typeof this._xhrRequest.task.abort === 'function') {
+      this._xhrRequest.task.abort();
+    }
+    this._xhrRequest.task = null;
+    return this;
+  }
+
+  _setRequestTask(options) {
+    options.requestTask = (task) => {
+      this._xhrRequest.task = task;
+      this._xhrRequest.onchange();
+    };
   }
 }
 

@@ -1140,7 +1140,7 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [
             { objectId: 'I1', size: 'small', name: 'Product 3' }
@@ -1173,10 +1173,8 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: []
         });
@@ -1204,7 +1202,7 @@ describe('ParseQuery', () => {
             objectId: 'I27'
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [
             { objectId: 'I27', size: 'large', name: 'Product 27' }
@@ -1237,7 +1235,7 @@ describe('ParseQuery', () => {
             objectId: 'I28'
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: []
         });
@@ -1267,10 +1265,8 @@ describe('ParseQuery', () => {
             objectId: 'I27'
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [
             { objectId: 'I27', size: 'large', name: 'Product 27' }
@@ -1300,7 +1296,7 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
           count: 145
@@ -1327,10 +1323,8 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [],
           count: 145
@@ -1368,7 +1362,7 @@ describe('ParseQuery', () => {
           includeReadPreference: 'SECONDARY',
           subqueryReadPreference: 'SECONDARY_PREFERRED',
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
@@ -1414,10 +1408,8 @@ describe('ParseQuery', () => {
             }
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: []
         });
@@ -1445,10 +1437,8 @@ describe('ParseQuery', () => {
           where: {},
           count: 1
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results:[
             { objectId: '1', name: 'Product 55' },
@@ -1502,7 +1492,7 @@ describe('ParseQuery', () => {
             valid: true
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
@@ -1549,10 +1539,8 @@ describe('ParseQuery', () => {
             valid: true
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
@@ -1964,7 +1952,8 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({ useMasterKey: true });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: ['L'],
         });
@@ -1989,10 +1978,9 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: ['L']
         });
@@ -2020,7 +2008,8 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           pipeline: [{ group: { objectId: '$name' } }]
         });
-        expect(options).toEqual({ useMasterKey: true });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
         });
@@ -2045,7 +2034,8 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           pipeline: { group: { objectId: '$name' } }
         });
-        expect(options).toEqual({ useMasterKey: true });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
         });
@@ -2068,7 +2058,8 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           group: { objectId: '$name' }
         });
-        expect(options).toEqual({ useMasterKey: true });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
         });
@@ -2094,10 +2085,8 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           pipeline: [{ group: { objectId: '$name' } }]
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: []
         });
@@ -2111,6 +2100,33 @@ describe('ParseQuery', () => {
       expect(results).toEqual([]);
       done();
     });
+  });
+
+  it('can cancel query', async () => {
+    const mockRequestTask = {
+      abort: () => {},
+    };
+
+    CoreManager.setQueryController({
+      find: function(name, params, options) {
+        options.requestTask(mockRequestTask);
+        return Promise.resolve({
+          results: []
+        });
+      },
+      aggregate: () => {},
+    });
+    const query = new ParseQuery('TestCancel');
+
+    jest.spyOn(mockRequestTask, 'abort');
+    query.cancel();
+    expect(mockRequestTask.abort).toHaveBeenCalledTimes(0);
+
+    await query.find();
+
+    expect(query._xhrRequest.task).toEqual(mockRequestTask);
+    query.cancel();
+    expect(mockRequestTask.abort).toHaveBeenCalledTimes(1);
   });
 
   it('selecting sub-objects does not inject objects when sub-object does not exist', (done) => {
