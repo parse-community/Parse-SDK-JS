@@ -169,6 +169,34 @@ Object.defineProperty(Parse, 'liveQueryServerURL', {
     CoreManager.set('LIVEQUERY_SERVER_URL', value);
   }
 });
+
+/**
+ * @member Parse.encryptedKey
+ * @type string
+ * @static
+ */
+Object.defineProperty(Parse, 'encryptedKey', {
+  get() {
+    return CoreManager.get('ENCRYPTED_KEY');
+  },
+  set(value) {
+    CoreManager.set('ENCRYPTED_KEY', value);
+  }
+});
+
+/**
+ * @member Parse.encryptedUser
+ * @type boolean
+ * @static
+ */
+Object.defineProperty(Parse, 'encryptedUser', {
+  get() {
+    return CoreManager.get('ENCRYPTED_USER');
+  },
+  set(value) {
+    CoreManager.set('ENCRYPTED_USER', value);
+  }
+});
 /* End setters */
 
 Parse.ACL = require('./ParseACL').default;

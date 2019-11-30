@@ -175,13 +175,15 @@ const config: Config & { [key: string]: mixed } = {
   SERVER_AUTH_TYPE: null,
   SERVER_AUTH_TOKEN: null,
   LIVEQUERY_SERVER_URL: null,
+  ENCRYPTED_KEY: null,
   VERSION: 'js' + require('../package.json').version,
   APPLICATION_ID: null,
   JAVASCRIPT_KEY: null,
   MASTER_KEY: null,
   USE_MASTER_KEY: false,
   PERFORM_USER_REWRITE: true,
-  FORCE_REVOCABLE_SESSION: false
+  FORCE_REVOCABLE_SESSION: false,
+  ENCRYPTED_USER: false
 };
 
 function requireMethods(name: string, methods: Array<string>, controller: any) {
