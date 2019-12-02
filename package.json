@@ -51,7 +51,7 @@
     "babel-plugin-transform-inline-environment-variables": "0.4.3",
     "browserify": "16.5.0",
     "codecov": "3.6.1",
-    "core-js": "3.4.3",
+    "core-js": "3.4.6",
     "cross-env": "6.0.3",
     "eslint": "6.7.2",
     "eslint-plugin-flowtype": "4.5.1",
