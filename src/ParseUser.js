@@ -871,7 +871,7 @@ const DefaultController = {
     const json = user.toJSON();
     delete json.password;
 
-    json.className = user.constructor.name === ParseUser.name ? '_User' : user.constructor.name;
+    json.className = '_User';
     return Storage.setItemAsync(
       path, JSON.stringify(json)
     ).then(() => {

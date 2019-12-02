@@ -49,6 +49,7 @@ describe('Parse User', () => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
+    Parse.Object.registerSubclass('_User', Parse.User);
   });
 
   beforeEach((done) => {
@@ -632,6 +633,7 @@ describe('Parse User', () => {
 
   it('can get current with subclass', async () => {
     Parse.User.enableUnsafeCurrentUser();
+    Parse.Object.registerSubclass('_User', CustomUser);
 
     const customUser = new CustomUser({ foo: 'bar' });
     customUser.setUsername('username');
