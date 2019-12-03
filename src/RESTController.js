@@ -48,7 +48,7 @@ if (typeof XDomainRequest !== 'undefined' &&
   useXDomainRequest = true;
 }
 
-function ajaxIE9(method: string, url: string, data: any, options?: FullOptions) {
+function ajaxIE9(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
   return new Promise((resolve, reject) => {
     const xdr = new XDomainRequest();
     if (options && typeof options.requestTask === 'function') {
@@ -163,7 +163,10 @@ const RESTController = {
       if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
         headers['Authorization'] = CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
       }
-
+      const customHeaders = CoreManager.get('REQUEST_HEADERS');
+      for (const key in customHeaders) {
+        headers[key] = customHeaders[key];
+      }
       if(options && typeof options.progress === 'function') {
         if (xhr.upload) {
           xhr.upload.addEventListener('progress', (oEvent) => {
