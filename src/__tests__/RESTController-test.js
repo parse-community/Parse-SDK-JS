@@ -454,4 +454,21 @@ describe('RESTController', () => {
       done();
     });
   });
+
+  it('opens a XHR with the custom headers', () => {
+    CoreManager.set('REQUEST_HEADERS', { 'Cache-Control' : 'max-age=3600' });
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    RESTController.ajax('GET', 'users/me', {}, { 'X-Parse-Session-Token': '123' });
+    expect(xhr.setRequestHeader.mock.calls[3]).toEqual(
+      [ 'Cache-Control', 'max-age=3600' ]
+    );
+    expect(xhr.open.mock.calls[0]).toEqual([ 'GET', 'users/me', true ]);
+    expect(xhr.send.mock.calls[0][0]).toEqual({});
+    CoreManager.set('REQUEST_HEADERS', {});
+  });
 });

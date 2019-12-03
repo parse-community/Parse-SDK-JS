@@ -49,6 +49,7 @@ describe('Parse User', () => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
+    Parse.Object.registerSubclass('_User', Parse.User);
   });
 
   beforeEach((done) => {
@@ -632,6 +633,7 @@ describe('Parse User', () => {
 
   it('can get current with subclass', async () => {
     Parse.User.enableUnsafeCurrentUser();
+    Parse.Object.registerSubclass('_User', CustomUser);
 
     const customUser = new CustomUser({ foo: 'bar' });
     customUser.setUsername('username');
@@ -897,5 +899,23 @@ describe('Parse User', () => {
 
     expect(user.get('authData').twitter.id).toBe(authData.id);
     expect(user.get('authData').facebook.id).toBe('test');
+  });
+
+  it('fix GHSA-wvh7-5p38-2qfc', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    const user = new Parse.User();
+    user.setUsername('username');
+    user.setPassword('password');
+    await user.signUp();
+
+    const path = Parse.Storage.generatePath('currentUser');
+    let userData = Parse.Storage.getItem(path);
+    expect(JSON.parse(userData).password).toBeUndefined();
+
+    user.setPassword('password');
+    await user.save(null, { useMasterKey: true });
+
+    userData = Parse.Storage.getItem(path);
+    expect(JSON.parse(userData).password).toBeUndefined();
   });
 });
