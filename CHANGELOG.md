@@ -1,7 +1,21 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.9.1...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.10.0...master)
+
+## 2.10.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.9.1...2.10.0)
+
+**New Features**
+- Add query.fromNetwork() ([#1002](https://github.com/parse-community/Parse-SDK-JS/pull/1002))
+- Add query.cancel() (browser only) ([#1003](https://github.com/parse-community/Parse-SDK-JS/pull/1003))
+- Support custom request headers ([#1019](https://github.com/parse-community/Parse-SDK-JS/pull/1019))
+
+**Fixes**
+- To subclass Parse.User: `Parse.Object.registerSubclass('_User', CustomUser);`
+
+**Security**
+Address Security Advisory of possible leak of sensitive user info. ([#d110617](https://github.com/parse-community/Parse-SDK-JS/commit/d1106174571b699f972929dd7cbb8e45b5283cbb)), big thanks to [Colin Ulin](https://github.com/pocketcolin) for identifying the problem, following the vulnerability disclosure guidelines
 
 ## 2.9.1
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.9.0...2.9.1)
