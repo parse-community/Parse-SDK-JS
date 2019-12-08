@@ -51,9 +51,7 @@ if (typeof XDomainRequest !== 'undefined' &&
 function ajaxIE9(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
   return new Promise((resolve, reject) => {
     const xdr = new XDomainRequest();
-    if (options && typeof options.requestTask === 'function') {
-      options.requestTask(xdr);
-    }
+
     xdr.onload = function() {
       let response;
       try {
@@ -82,6 +80,10 @@ function ajaxIE9(method: string, url: string, data: any, headers?: any, options?
     };
     xdr.open(method, url);
     xdr.send(data);
+
+    if (options && typeof options.requestTask === 'function') {
+      options.requestTask(xdr);
+    }
   });
 }
 
@@ -107,9 +109,7 @@ const RESTController = {
       let aborted = false;
 
       const xhr = new XHR();
-      if (options && typeof options.requestTask === 'function') {
-        options.requestTask(xhr);
-      }
+
       xhr.onreadystatechange = function() {
         if (xhr.readyState !== 4 || handled) {
           return;
@@ -195,6 +195,10 @@ const RESTController = {
         xhr.setRequestHeader(h, headers[h]);
       }
       xhr.send(data);
+
+      if (options && typeof options.requestTask === 'function') {
+        options.requestTask(xhr);
+      }
     }
     dispatch();
 
