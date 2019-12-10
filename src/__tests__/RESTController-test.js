@@ -429,7 +429,13 @@ describe('RESTController', () => {
   });
 
   it('reports upload progress of the AJAX request when callback is provided', (done) => {
-    const xhr = mockXHR([{ status: 200, response: { success: true } }]);
+    const xhr = mockXHR([{ status: 200, response: { success: true } }], {
+      progress: {
+        lengthComputable: true,
+        loaded: 5,
+        total: 10
+      }
+    });
     RESTController._setXHR(xhr);
 
     const options = {
@@ -439,6 +445,29 @@ describe('RESTController', () => {
 
     RESTController.ajax('POST', 'files/upload.txt', {}, {}, options).then(({ response, status }) => {
       expect(options.progress).toHaveBeenCalledWith(0.5, 5, 10);
+      expect(response).toEqual({ success: true });
+      expect(status).toBe(200);
+      done();
+    });
+  });
+
+  it('does not upload progress when total is uncomputable', (done) => {
+    const xhr = mockXHR([{ status: 200, response: { success: true } }], {
+      progress: {
+        lengthComputable: false,
+        loaded: 5,
+        total: 0
+      }
+    });
+    RESTController._setXHR(xhr);
+
+    const options = {
+      progress: function(){}
+    };
+    jest.spyOn(options, 'progress');
+
+    RESTController.ajax('POST', 'files/upload.txt', {}, {}, options).then(({ response, status }) => {
+      expect(options.progress).toHaveBeenCalledWith(null);
       expect(response).toEqual({ success: true });
       expect(status).toBe(200);
       done();
