@@ -76,7 +76,7 @@ module.exports = class XhrWeapp {
     });
     this.requestTask.onProgressUpdate((res) => {
       const event = {
-        lengthComputable: true,
+        lengthComputable: (res.totalBytesExpectedToWrite !== 0),
         loaded: res.totalBytesWritten,
         total: res.totalBytesExpectedToWrite,
       };
