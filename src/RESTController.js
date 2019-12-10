@@ -167,27 +167,17 @@ const RESTController = {
       for (const key in customHeaders) {
         headers[key] = customHeaders[key];
       }
-      if(options && typeof options.progress === 'function') {
-        if (xhr.upload) {
-          xhr.upload.addEventListener('progress', (oEvent) => {
-            if (oEvent.lengthComputable) {
-              options.progress(oEvent.loaded / oEvent.total);
-            } else {
-              options.progress(null);
-            }
-          });
-        } else if (xhr.addEventListener) {
-          xhr.addEventListener('progress', (oEvent) => {
-            if (oEvent.lengthComputable) {
-              options.progress(oEvent.loaded / oEvent.total);
-            } else {
-              options.progress(null);
-            }
-          });
-        }
-      }
       xhr.onabort = () => {
         aborted = true;
+      };
+      xhr.onprogress = (event) => {
+        if(options && typeof options.progress === 'function') {
+          if (event.lengthComputable) {
+            options.progress(event.loaded / event.total, event.loaded, event.total);
+          } else {
+            options.progress(null);
+          }
+        }
       };
       xhr.open(method, url, true);
 
