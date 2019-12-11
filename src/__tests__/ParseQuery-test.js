@@ -2124,7 +2124,7 @@ describe('ParseQuery', () => {
 
     await query.find();
 
-    expect(query._xhrRequest.task).toEqual(mockRequestTask);
+    expect(query._xhrRequest.task).toEqual(null);
     query.cancel();
     expect(mockRequestTask.abort).toHaveBeenCalledTimes(1);
   });
