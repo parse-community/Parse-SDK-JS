@@ -1009,4 +1009,57 @@ describe('ParseUser', () => {
     const authProvider = user.linkWith.mock.calls[0][0];
     expect(authProvider).toBe('testProvider');
   });
+
+  it('can static signup a user with installationId', async () => {
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    const installationId = '12345678';
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('POST');
+        expect(path).toBe('users');
+        console.log(options);
+        expect(options.installationId).toBe(installationId);
+        return Promise.resolve({
+          objectId: 'uid3',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+
+    const user = await ParseUser.signUp('username', 'password', null, { installationId });
+    expect(user.id).toBe('uid3');
+    expect(user.isCurrent()).toBe(false);
+    expect(user.existed()).toBe(true);
+  });
+
+  it('can signup a user with installationId', async () => {
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    const installationId = '12345678';
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('POST');
+        expect(path).toBe('users');
+        console.log(options);
+        expect(options.installationId).toBe(installationId);
+        return Promise.resolve({
+          objectId: 'uid3',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+
+    const user = new ParseUser();
+    user.setUsername('name');
+    user.setPassword('pass');
+    await user.signUp(null, { installationId });
+    expect(user.id).toBe('uid3');
+    expect(user.isCurrent()).toBe(false);
+    expect(user.existed()).toBe(true);
+  });
 });

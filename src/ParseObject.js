@@ -1232,6 +1232,9 @@ class ParseObject {
     if (options.hasOwnProperty('sessionToken') && typeof options.sessionToken === 'string') {
       saveOptions.sessionToken = options.sessionToken;
     }
+    if (options.hasOwnProperty('installationId') && typeof options.installationId === 'string') {
+      saveOptions.installationId = options.installationId;
+    }
     const controller = CoreManager.getObjectController();
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
     return controller.save(unsaved, saveOptions).then(() => {
