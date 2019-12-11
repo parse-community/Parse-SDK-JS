@@ -1837,10 +1837,13 @@ class ParseQuery {
    */
   cancel(): ParseQuery {
     if (this._xhrRequest.task && typeof this._xhrRequest.task.abort === 'function') {
+      this._xhrRequest.task._aborted = true;
       this._xhrRequest.task.abort();
+      this._xhrRequest.task = null;
+      this._xhrRequest.onchange = () => {};
+      return this;
     }
-    this._xhrRequest.task = null;
-    return this;
+    return this._xhrRequest.onchange = () => this.cancel();
   }
 
   _setRequestTask(options) {
