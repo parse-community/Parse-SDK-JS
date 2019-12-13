@@ -22,15 +22,15 @@ import type { RequestOptions, FullOptions } from './RESTController';
 
 export type AuthData = ?{ [key: string]: mixed };
 
+let CryptoJS = null;
+if (process.env.PARSE_BUILD === 'browser') {
+  CryptoJS = require('crypto-js');
+}
+
 const CURRENT_USER_KEY = 'currentUser';
 let canUseCurrentUser = !CoreManager.get('IS_NODE');
 let currentUserCacheMatchesDisk = false;
 let currentUserCache = null;
-
-let CryptoJS = null;
-if (process.env.PARSE_BUILD === 'node' || process.env.PARSE_BUILD === 'browser') {
-  CryptoJS = require('crypto-js')
-}
 
 const authProviders = {};
 
@@ -879,7 +879,7 @@ const DefaultController = {
     json.className = user.constructor.name === ParseUser.name ? '_User' : user.constructor.name;
     return Storage.setItemAsync(
       path,
-      (!CoreManager.get('ENCRYPTED_USER'))
+      (!CoreManager.get('ENCRYPTED_USER') && process.env.PARSE_BUILD !== 'browser')
         ? JSON.stringify(json)
         : CryptoJS.AES.encrypt(JSON.stringify(json), CoreManager.get('ENCRYPTED_KEY'))
     ).then(() => {
@@ -921,13 +921,13 @@ const DefaultController = {
     }
     const path = Storage.generatePath(CURRENT_USER_KEY);
     let userData = Storage.getItem(path);
-    if (CoreManager.get('ENCRYPTED_USER')) {
-      userData = CryptoJS.AES.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY')).toString(CryptoJS.enc.Utf8);
-    }
     currentUserCacheMatchesDisk = true;
     if (!userData) {
       currentUserCache = null;
       return null;
+    }
+    if (CoreManager.get('ENCRYPTED_USER') && process.env.PARSE_BUILD === 'browser') {
+      userData = CryptoJS.AES.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY')).toString(CryptoJS.enc.Utf8);
     }
     userData = JSON.parse(userData);
     if (!userData.className) {
@@ -965,7 +965,7 @@ const DefaultController = {
         currentUserCache = null;
         return Promise.resolve(null);
       }
-      if (CoreManager.get('ENCRYPTED_USER')) {
+      if (CoreManager.get('ENCRYPTED_USER') && process.env.PARSE_BUILD === 'browser') {
         userData = CryptoJS.AES.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY')).toString(CryptoJS.enc.Utf8)
       }
       userData = JSON.parse(userData);

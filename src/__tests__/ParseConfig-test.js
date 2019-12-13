@@ -18,6 +18,7 @@ jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../RESTController');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
+jest.dontMock('crypto-js');
 
 const CoreManager = require('../CoreManager');
 const ParseConfig = require('../ParseConfig').default;

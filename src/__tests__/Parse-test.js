@@ -10,6 +10,7 @@
 jest.dontMock('../CoreManager');
 jest.dontMock('../Parse');
 jest.dontMock('../LocalDatastore');
+jest.dontMock('crypto-js');
 
 const CoreManager = require('../CoreManager');
 const Parse = require('../Parse');
@@ -108,5 +109,19 @@ describe('Parse module', () => {
     Parse.setLocalDatastoreController(controller);
     LDS = await Parse.dumpLocalDatastore();
     expect(LDS).toEqual({ key: 'value' });
+  });
+
+  it('can enable encrypter CurrentUser', () => {
+    jest.spyOn(console, 'log').mockImplementationOnce(() => {});
+    Parse.encryptedUser = false;
+    Parse.enableEncryptedUser();
+    expect(Parse.encryptedUser).toBe(true);
+    expect(Parse.isEncryptedUserEnabled()).toBe(true);
+  });
+
+  it('can set an encrypt token as String', () => {
+    Parse.encryptedKey = 'My Super secret key';
+    expect(CoreManager.get('ENCRYPTED_KEY')).toBe('My Super secret key');
+    expect(Parse.encryptedKey).toBe('My Super secret key');
   });
 });

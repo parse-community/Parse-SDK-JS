@@ -171,20 +171,6 @@ Object.defineProperty(Parse, 'liveQueryServerURL', {
 });
 
 /**
- * @member Parse.encryptedKey
- * @type string
- * @static
- */
-Object.defineProperty(Parse, 'encryptedKey', {
-  get() {
-    return CoreManager.get('ENCRYPTED_KEY');
-  },
-  set(value) {
-    CoreManager.set('ENCRYPTED_KEY', value);
-  }
-});
-
-/**
  * @member Parse.encryptedUser
  * @type boolean
  * @static
@@ -195,6 +181,20 @@ Object.defineProperty(Parse, 'encryptedUser', {
   },
   set(value) {
     CoreManager.set('ENCRYPTED_USER', value);
+  }
+});
+
+/**
+ * @member Parse.encryptedKey
+ * @type string
+ * @static
+ */
+Object.defineProperty(Parse, 'encryptedKey', {
+  get() {
+    return CoreManager.get('ENCRYPTED_KEY');
+  },
+  set(value) {
+    CoreManager.set('ENCRYPTED_KEY', value);
   }
 });
 /* End setters */
@@ -283,6 +283,25 @@ Parse.dumpLocalDatastore = function() {
     return Parse.LocalDatastore._getAllContents();
   }
 }
+
+/**
+ * Enable the current user encryption.
+ * This must be called before login any user.
+ *
+ * @static
+ */
+Parse.enableEncryptedUser = function() {
+  Parse.encryptedUser = true;
+}
+/**
+ * Flag that indicates whether Encrypted User is enabled.
+ *
+ * @static
+ */
+Parse.isEncryptedUserEnabled = function() {
+  return Parse.encryptedUser;
+}
+
 CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);
 

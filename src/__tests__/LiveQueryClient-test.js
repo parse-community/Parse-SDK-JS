@@ -34,6 +34,7 @@ jest.dontMock('../ParseACL');
 jest.dontMock('../ParseQuery');
 jest.dontMock('../LiveQuerySubscription');
 jest.dontMock('../LocalDatastore');
+jest.dontMock('crypto-js');
 
 jest.useFakeTimers();
 

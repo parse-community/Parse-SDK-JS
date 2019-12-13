@@ -16,6 +16,7 @@ jest.dontMock('../ParseOp');
 jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../promiseUtils');
+jest.dontMock('crypto-js');
 jest.useFakeTimers();
 
 const mockObject = function(className) {

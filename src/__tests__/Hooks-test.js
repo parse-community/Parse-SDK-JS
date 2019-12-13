@@ -11,6 +11,7 @@ jest.dontMock('../ParseHooks');
 jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
+jest.dontMock('crypto-js');
 
 const Hooks = require('../ParseHooks');
 const CoreManager = require('../CoreManager');

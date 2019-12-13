@@ -16,6 +16,7 @@ jest.dontMock('../ParseObject');
 jest.dontMock('../ParseQuery');
 jest.dontMock('../EventEmitter');
 jest.dontMock('../promiseUtils');
+jest.dontMock('crypto-js');
 
 // Forces the loading
 const LiveQuery = require('../ParseLiveQuery').default;

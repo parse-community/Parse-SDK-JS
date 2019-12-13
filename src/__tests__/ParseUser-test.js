@@ -26,6 +26,7 @@ jest.dontMock('../StorageController.default');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
 jest.dontMock('../UniqueInstanceStateController');
+jest.dontMock('crypto-js');
 
 jest.mock('uuid/v4', () => {
   let value = 0;
@@ -1008,5 +1009,27 @@ describe('ParseUser', () => {
     await user._unlinkFrom('testProvider');
     const authProvider = user.linkWith.mock.calls[0][0];
     expect(authProvider).toBe('testProvider');
+  });
+
+  it('can get the current user even encrypted', async () => {
+    CoreManager.set('ENCRYPTED_USER', true);
+    CoreManager.set('ENCRYPTED_KEY', 'secret');
+    let u = new ParseUser();
+    expect(u.isCurrent()).toBe(false);
+    expect(u.className).toBe('_User');
+    expect(u instanceof ParseObject).toBe(true);
+
+    u = new ParseUser({
+      username: 'andrew',
+      password: 'secret'
+    });
+    expect(u.get('username')).toBe('andrew');
+    expect(u.get('password')).toBe('secret');
+
+    expect(function() {
+      new ParseUser({
+        $$$: 'invalid'
+      });
+    }).toThrow('Can\'t create an invalid Parse User');
   });
 });

@@ -8,6 +8,7 @@
  */
 
 jest.dontMock('../ParseACL');
+jest.dontMock('crypto-js');
 
 const mockRole = function(name) {
   this.name = name;
