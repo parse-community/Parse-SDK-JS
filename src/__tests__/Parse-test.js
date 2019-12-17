@@ -113,6 +113,7 @@ describe('Parse module', () => {
 
   it('can enable encrypter CurrentUser', () => {
     jest.spyOn(console, 'log').mockImplementationOnce(() => {});
+    process.env.PARSE_BUILD = 'browser';
     Parse.encryptedUser = false;
     Parse.enableEncryptedUser();
     expect(Parse.encryptedUser).toBe(true);
@@ -120,8 +121,8 @@ describe('Parse module', () => {
   });
 
   it('can set an encrypt token as String', () => {
-    Parse.encryptedKey = 'My Super secret key';
+    Parse.secret = 'My Super secret key';
     expect(CoreManager.get('ENCRYPTED_KEY')).toBe('My Super secret key');
-    expect(Parse.encryptedKey).toBe('My Super secret key');
+    expect(Parse.secret).toBe('My Super secret key');
   });
 });

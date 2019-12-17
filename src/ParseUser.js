@@ -879,9 +879,9 @@ const DefaultController = {
     json.className = user.constructor.name === ParseUser.name ? '_User' : user.constructor.name;
     return Storage.setItemAsync(
       path,
-      (!CoreManager.get('ENCRYPTED_USER') && process.env.PARSE_BUILD !== 'browser')
-        ? JSON.stringify(json)
-        : CryptoJS.AES.encrypt(JSON.stringify(json), CoreManager.get('ENCRYPTED_KEY'))
+      (CoreManager.get('ENCRYPTED_USER') && CoreManager.get('ENCRYPTED_KEY') && process.env.PARSE_BUILD === 'browser')
+        ? CryptoJS.AES.encrypt(JSON.stringify(json), CoreManager.get('ENCRYPTED_KEY'))
+        : JSON.stringify(json)
     ).then(() => {
       return user;
     });
@@ -926,7 +926,7 @@ const DefaultController = {
       currentUserCache = null;
       return null;
     }
-    if (CoreManager.get('ENCRYPTED_USER') && process.env.PARSE_BUILD === 'browser') {
+    if (CoreManager.get('ENCRYPTED_USER') && CoreManager.get('ENCRYPTED_KEY') && process.env.PARSE_BUILD === 'browser') {
       userData = CryptoJS.AES.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY')).toString(CryptoJS.enc.Utf8);
     }
     userData = JSON.parse(userData);
@@ -965,7 +965,7 @@ const DefaultController = {
         currentUserCache = null;
         return Promise.resolve(null);
       }
-      if (CoreManager.get('ENCRYPTED_USER') && process.env.PARSE_BUILD === 'browser') {
+      if (CoreManager.get('ENCRYPTED_USER') && CoreManager.get('ENCRYPTED_KEY') && process.env.PARSE_BUILD === 'browser') {
         userData = CryptoJS.AES.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY')).toString(CryptoJS.enc.Utf8)
       }
       userData = JSON.parse(userData);

@@ -1011,9 +1011,58 @@ describe('ParseUser', () => {
     expect(authProvider).toBe('testProvider');
   });
 
+  it('Enable Encrypted User without secret token', async () => {
+    process.env.PARSE_BUILD = 'browser';
+    CoreManager.set('ENCRYPTED_USER', true);
+    expect(CoreManager.get('ENCRYPTED_KEY')).toBe(null);
+    let u = new ParseUser();
+    expect(u.isCurrent()).toBe(false);
+    expect(u.className).toBe('_User');
+    expect(u instanceof ParseObject).toBe(true);
+
+    u = new ParseUser({
+      username: 'andrew',
+      password: 'secret'
+    });
+    expect(u.get('username')).toBe('andrew');
+    expect(u.get('password')).toBe('secret');
+
+    expect(function() {
+      new ParseUser({
+        $$$: 'invalid'
+      });
+    }).toThrow('Can\'t create an invalid Parse User');
+  });
+
   it('can get the current user even encrypted', async () => {
+    process.env.PARSE_BUILD = 'browser';
     CoreManager.set('ENCRYPTED_USER', true);
     CoreManager.set('ENCRYPTED_KEY', 'secret');
+    let u = new ParseUser();
+    expect(u.isCurrent()).toBe(false);
+    expect(u.className).toBe('_User');
+    expect(u instanceof ParseObject).toBe(true);
+
+    u = new ParseUser({
+      username: 'andrew',
+      password: 'secret'
+    });
+    expect(u.get('username')).toBe('andrew');
+    expect(u.get('password')).toBe('secret');
+
+    expect(function() {
+      new ParseUser({
+        $$$: 'invalid'
+      });
+    }).toThrow('Can\'t create an invalid Parse User');
+  });
+  
+  it('Testing the encryption in other env build', async () => {
+    process.env.PARSE_BUILD = 'node';
+    CoreManager.set('ENCRYPTED_USER', true);
+    expect(CoreManager.get('ENCRYPTED_USER')).toBe(true);
+    CoreManager.set('ENCRYPTED_KEY', 'secret');
+    expect(CoreManager.get('ENCRYPTED_KEY')).toBe('secret');
     let u = new ParseUser();
     expect(u.isCurrent()).toBe(false);
     expect(u.className).toBe('_User');

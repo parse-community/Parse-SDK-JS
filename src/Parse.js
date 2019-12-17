@@ -185,11 +185,11 @@ Object.defineProperty(Parse, 'encryptedUser', {
 });
 
 /**
- * @member Parse.encryptedKey
+ * @member Parse.secret
  * @type string
  * @static
  */
-Object.defineProperty(Parse, 'encryptedKey', {
+Object.defineProperty(Parse, 'secret', {
   get() {
     return CoreManager.get('ENCRYPTED_KEY');
   },
@@ -291,7 +291,11 @@ Parse.dumpLocalDatastore = function() {
  * @static
  */
 Parse.enableEncryptedUser = function() {
-  Parse.encryptedUser = true;
+  if(process.env.PARSE_BUILD === 'browser') {
+    Parse.encryptedUser = true;
+  } else {
+    console.log('This option is only valid in the browser');
+  }
 }
 /**
  * Flag that indicates whether Encrypted User is enabled.

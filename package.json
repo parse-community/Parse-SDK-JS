@@ -31,7 +31,7 @@
   "dependencies": {
     "@babel/runtime": "7.7.4",
     "@babel/runtime-corejs3": "7.7.4",
-    "crypto-js": "^3.1.9-1",
+    "crypto-js": "3.1.9-1",
     "uuid": "3.3.3",
     "ws": "7.2.0",
     "xmlhttprequest": "1.8.0"
