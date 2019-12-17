@@ -12,7 +12,7 @@
       "outputSourceFiles": false,
       "staticFiles": {
         "include": [
-          "./assets"
+          "./Assets"
         ]
       }
     },
