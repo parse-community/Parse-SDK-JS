@@ -11,7 +11,6 @@ jest.dontMock('../encode');
 jest.dontMock('../ParseRelation');
 jest.dontMock('../ParseOp');
 jest.dontMock('../unique');
-jest.dontMock('crypto-js');
 
 const mockStore = {};
 const mockObject = function(className) {

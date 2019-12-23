@@ -22,11 +22,6 @@ import type { RequestOptions, FullOptions } from './RESTController';
 
 export type AuthData = ?{ [key: string]: mixed };
 
-let CryptoJS = null;
-if (process.env.PARSE_BUILD === 'browser') {
-  CryptoJS = require('crypto-js');
-}
-
 const CURRENT_USER_KEY = 'currentUser';
 let canUseCurrentUser = !CoreManager.get('IS_NODE');
 let currentUserCacheMatchesDisk = false;
@@ -877,11 +872,13 @@ const DefaultController = {
     delete json.password;
 
     json.className = '_User';
+    let userData = JSON.stringify(json);
+    if (CoreManager.get('ENCRYPTED_USER')) {
+      const crypto = CoreManager.getCryptoController();
+      userData = crypto.encrypt(json, CoreManager.get('ENCRYPTED_KEY'))
+    }
     return Storage.setItemAsync(
-      path,
-      (CoreManager.get('ENCRYPTED_USER') && CoreManager.get('ENCRYPTED_KEY') && process.env.PARSE_BUILD === 'browser')
-        ? CryptoJS.AES.encrypt(JSON.stringify(json), CoreManager.get('ENCRYPTED_KEY'))
-        : JSON.stringify(json)
+      path, userData
     ).then(() => {
       return user;
     });
@@ -926,8 +923,9 @@ const DefaultController = {
       currentUserCache = null;
       return null;
     }
-    if (CoreManager.get('ENCRYPTED_USER') && CoreManager.get('ENCRYPTED_KEY') && process.env.PARSE_BUILD === 'browser') {
-      userData = CryptoJS.AES.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY')).toString(CryptoJS.enc.Utf8);
+    if (CoreManager.get('ENCRYPTED_USER')) {
+      const crypto = CoreManager.getCryptoController();
+      userData = crypto.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY'));
     }
     userData = JSON.parse(userData);
     if (!userData.className) {
@@ -965,8 +963,9 @@ const DefaultController = {
         currentUserCache = null;
         return Promise.resolve(null);
       }
-      if (CoreManager.get('ENCRYPTED_USER') && CoreManager.get('ENCRYPTED_KEY') && process.env.PARSE_BUILD === 'browser') {
-        userData = CryptoJS.AES.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY')).toString(CryptoJS.enc.Utf8)
+      if (CoreManager.get('ENCRYPTED_USER')) {
+        const crypto = CoreManager.getCryptoController();
+        userData = crypto.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY'));
       }
       userData = JSON.parse(userData);
       if (!userData.className) {

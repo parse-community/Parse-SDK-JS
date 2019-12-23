@@ -10,7 +10,6 @@
 jest.dontMock('../decode');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
-jest.dontMock('crypto-js');
 
 const decode = require('../decode').default;
 

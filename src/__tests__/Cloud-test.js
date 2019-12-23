@@ -11,7 +11,6 @@ jest.dontMock('../Cloud');
 jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
-jest.dontMock('crypto-js');
 
 const Cloud = require('../Cloud');
 const CoreManager = require('../CoreManager');

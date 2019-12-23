@@ -20,7 +20,6 @@ jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('../OfflineQuery');
 jest.dontMock('../LiveQuerySubscription');
-jest.dontMock('crypto-js');
 
 jest.mock('uuid/v4', () => {
   let value = 0;

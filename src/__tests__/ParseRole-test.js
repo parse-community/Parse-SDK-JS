@@ -16,7 +16,6 @@ jest.dontMock('../ParseOp');
 jest.dontMock('../ParseRole');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../UniqueInstanceStateController');
-jest.dontMock('crypto-js');
 
 const ParseACL = require('../ParseACL').default;
 const ParseError = require('../ParseError').default;

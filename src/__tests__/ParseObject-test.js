@@ -31,7 +31,6 @@ jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 jest.dontMock('../LocalDatastore');
-jest.dontMock('crypto-js');
 
 jest.mock('uuid/v4', () => {
   let value = 0;

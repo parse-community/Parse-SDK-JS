@@ -936,6 +936,32 @@ describe('Parse User', () => {
     expect(user.get('authData').facebook.id).toBe('test');
   });
 
+  it('can encrypt user', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    Parse.enableEncryptedUser();
+    Parse.secret = 'My Secret Key';
+    const user = new Parse.User();
+    user.setUsername('usernameENC');
+    user.setPassword('passwordENC');
+    await user.signUp();
+
+    const path = Parse.Storage.generatePath('currentUser');
+    const encryptedUser = Parse.Storage.getItem(path);
+
+    const crypto = Parse.CoreManager.getCryptoController();
+    const decryptedUser = crypto.decrypt(encryptedUser, Parse.CoreManager.get('ENCRYPTED_KEY'))
+    expect(JSON.parse(decryptedUser).objectId).toBe(user.id);
+
+    const currentUser = Parse.User.current();
+    expect(currentUser).toEqual(user);
+
+    const currentUserAsync = await Parse.User.currentAsync();
+    expect(currentUserAsync).toEqual(user);
+    await Parse.User.logOut();
+    Parse.CoreManager.set('ENCRYPTED_USER', false);
+    Parse.CoreManager.set('ENCRYPTED_KEY', null);
+  });
+
   it('fix GHSA-wvh7-5p38-2qfc', async () => {
     Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();

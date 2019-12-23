@@ -8,9 +8,10 @@
  */
 
 jest.dontMock('../CoreManager');
+jest.dontMock('../CryptoController');
 jest.dontMock('../Parse');
 jest.dontMock('../LocalDatastore');
-jest.dontMock('crypto-js');
+jest.dontMock('crypto-js/aes');
 
 const CoreManager = require('../CoreManager');
 const Parse = require('../Parse');

@@ -15,7 +15,6 @@ jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseOp');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../TaskQueue');
-jest.dontMock('crypto-js');
 
 const mockObject = function() {};
 mockObject.registerSubclass = function() {};

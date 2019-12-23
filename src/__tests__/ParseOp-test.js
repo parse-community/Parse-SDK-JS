@@ -11,7 +11,6 @@ jest.dontMock('../arrayContainsObject');
 jest.dontMock('../encode');
 jest.dontMock('../ParseOp');
 jest.dontMock('../unique');
-jest.dontMock('crypto-js');
 
 let localCount = 0;
 const mockObject = function(className, id) {

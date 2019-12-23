@@ -8,7 +8,6 @@
  */
 
 jest.dontMock('../canBeSerialized');
-jest.dontMock('crypto-js');
 
 function mockObject(id, attributes) {
   this.id = id;

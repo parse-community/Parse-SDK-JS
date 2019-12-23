@@ -9,7 +9,6 @@
 
 jest.dontMock('../ParseFile');
 jest.dontMock('../unsavedChildren');
-jest.dontMock('crypto-js');
 
 function mockObject({ className, localId, id, attributes, dirty }) {
   this.className = className;

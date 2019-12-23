@@ -10,6 +10,7 @@
 import decode from './decode';
 import encode from './encode';
 import CoreManager from './CoreManager';
+import CryptoController from './CryptoController';
 import InstallationController from './InstallationController';
 import * as ParseOp from './ParseOp';
 import RESTController from './RESTController';
@@ -291,12 +292,9 @@ Parse.dumpLocalDatastore = function() {
  * @static
  */
 Parse.enableEncryptedUser = function() {
-  if(process.env.PARSE_BUILD === 'browser') {
-    Parse.encryptedUser = true;
-  } else {
-    console.log('This option is only valid in the browser');
-  }
+  Parse.encryptedUser = true;
 }
+
 /**
  * Flag that indicates whether Encrypted User is enabled.
  *
@@ -306,6 +304,7 @@ Parse.isEncryptedUserEnabled = function() {
   return Parse.encryptedUser;
 }
 
+CoreManager.setCryptoController(CryptoController);
 CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);
 

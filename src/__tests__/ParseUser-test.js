@@ -9,6 +9,7 @@
 
 jest.dontMock('../AnonymousUtils');
 jest.dontMock('../CoreManager');
+jest.dontMock('../CryptoController');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../isRevocableSession');
@@ -26,7 +27,6 @@ jest.dontMock('../StorageController.default');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
 jest.dontMock('../UniqueInstanceStateController');
-jest.dontMock('crypto-js');
 
 jest.mock('uuid/v4', () => {
   let value = 0;
@@ -1011,75 +1011,57 @@ describe('ParseUser', () => {
     expect(authProvider).toBe('testProvider');
   });
 
-  it('Enable Encrypted User without secret token', async () => {
-    process.env.PARSE_BUILD = 'browser';
+  it('can encrypt user', async () => {
     CoreManager.set('ENCRYPTED_USER', true);
-    expect(CoreManager.get('ENCRYPTED_KEY')).toBe(null);
-    let u = new ParseUser();
-    expect(u.isCurrent()).toBe(false);
-    expect(u.className).toBe('_User');
-    expect(u instanceof ParseObject).toBe(true);
+    CoreManager.set('ENCRYPTED_KEY', 'hello');
+    const ENCRYPTED_DATA = 'encryptedString';
 
-    u = new ParseUser({
-      username: 'andrew',
-      password: 'secret'
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    let u = null;
+    CoreManager.setRESTController({
+      request(method, path, body) {
+        expect(method).toBe('GET');
+        expect(path).toBe('login');
+        expect(body.username).toBe('username');
+        expect(body.password).toBe('password');
+
+        return Promise.resolve({
+          objectId: 'uid2',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
     });
-    expect(u.get('username')).toBe('andrew');
-    expect(u.get('password')).toBe('secret');
-
-    expect(function() {
-      new ParseUser({
-        $$$: 'invalid'
-      });
-    }).toThrow('Can\'t create an invalid Parse User');
-  });
-
-  it('can get the current user even encrypted', async () => {
-    process.env.PARSE_BUILD = 'browser';
-    CoreManager.set('ENCRYPTED_USER', true);
-    CoreManager.set('ENCRYPTED_KEY', 'secret');
-    let u = new ParseUser();
-    expect(u.isCurrent()).toBe(false);
-    expect(u.className).toBe('_User');
-    expect(u instanceof ParseObject).toBe(true);
-
-    u = new ParseUser({
-      username: 'andrew',
-      password: 'secret'
+    CoreManager.setCryptoController({
+      encrypt(obj, secretKey) {
+        expect(secretKey).toBe('hello');
+        return ENCRYPTED_DATA;
+      },
+      decrypt(encryptedText, secretKey) {
+        expect(encryptedText).toBe(ENCRYPTED_DATA);
+        expect(secretKey).toBe('hello');
+        return JSON.stringify(u.toJSON());
+      },
     });
-    expect(u.get('username')).toBe('andrew');
-    expect(u.get('password')).toBe('secret');
+    u = await ParseUser.logIn('username', 'password');
+    // Clear cache to read from disk
+    ParseUser._clearCache();
 
-    expect(function() {
-      new ParseUser({
-        $$$: 'invalid'
-      });
-    }).toThrow('Can\'t create an invalid Parse User');
-  });
+    expect(u.id).toBe('uid2');
+    expect(u.getSessionToken()).toBe('123abc');
+    expect(u.isCurrent()).toBe(true);
+    expect(u.authenticated()).toBe(true);
+    expect(ParseUser.current().id).toBe('uid2');
 
-  it('Testing the encryption in other env build', async () => {
-    process.env.PARSE_BUILD = 'node';
-    CoreManager.set('ENCRYPTED_USER', true);
-    expect(CoreManager.get('ENCRYPTED_USER')).toBe(true);
-    CoreManager.set('ENCRYPTED_KEY', 'secret');
-    expect(CoreManager.get('ENCRYPTED_KEY')).toBe('secret');
-    let u = new ParseUser();
-    expect(u.isCurrent()).toBe(false);
-    expect(u.className).toBe('_User');
-    expect(u instanceof ParseObject).toBe(true);
-
-    u = new ParseUser({
-      username: 'andrew',
-      password: 'secret'
-    });
-    expect(u.get('username')).toBe('andrew');
-    expect(u.get('password')).toBe('secret');
-
-    expect(function() {
-      new ParseUser({
-        $$$: 'invalid'
-      });
-    }).toThrow('Can\'t create an invalid Parse User');
+    const path = Storage.generatePath('currentUser');
+    const userStorage = Storage.getItem(path);
+    expect(userStorage).toBe(ENCRYPTED_DATA);
+    CoreManager.set('ENCRYPTED_USER', false);
+    CoreManager.set('ENCRYPTED_KEY', null);
+    Storage._clear();
   });
 
   it('can static signup a user with installationId', async () => {
