@@ -1056,7 +1056,7 @@ describe('ParseUser', () => {
       });
     }).toThrow('Can\'t create an invalid Parse User');
   });
-  
+
   it('Testing the encryption in other env build', async () => {
     process.env.PARSE_BUILD = 'node';
     CoreManager.set('ENCRYPTED_USER', true);
@@ -1090,7 +1090,6 @@ describe('ParseUser', () => {
       request(method, path, body, options) {
         expect(method).toBe('POST');
         expect(path).toBe('users');
-        console.log(options);
         expect(options.installationId).toBe(installationId);
         return Promise.resolve({
           objectId: 'uid3',
@@ -1115,7 +1114,6 @@ describe('ParseUser', () => {
       request(method, path, body, options) {
         expect(method).toBe('POST');
         expect(path).toBe('users');
-        console.log(options);
         expect(options.installationId).toBe(installationId);
         return Promise.resolve({
           objectId: 'uid3',
