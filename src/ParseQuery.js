@@ -232,7 +232,6 @@ class ParseQuery {
   _queriesLocalDatastore: boolean;
   _localDatastorePinName: any;
   _extraOptions: { [key: string]: mixed };
-
   /**
    * @param {(String|Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
    */
@@ -729,7 +728,6 @@ class ParseQuery {
    */
   aggregate(pipeline: mixed, options?: FullOptions): Promise<Array<mixed>> {
     options = options || {};
-
     const aggregateOptions = {};
     aggregateOptions.useMasterKey = true;
 
@@ -742,8 +740,7 @@ class ParseQuery {
       throw new Error('Invalid pipeline must be Array or Object');
     }
 
-    const params = { pipeline };
-
+    const params = { pipeline, hint: this._hint };
     return controller.aggregate(
       this.className,
       params,
@@ -908,6 +905,13 @@ class ParseQuery {
         });
       });
     });
+  }
+
+  hint(value: mixed): ParseQuery {
+    if (typeof value === 'undefined') {
+      delete this._hint;
+    }
+    this._hint = value;
   }
 
   /** Query Conditions **/
