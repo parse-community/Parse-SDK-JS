@@ -49,6 +49,7 @@ describe('Parse User', () => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
+    Parse.Object.registerSubclass('_User', Parse.User);
   });
 
   beforeEach((done) => {
@@ -106,6 +107,41 @@ describe('Parse User', () => {
       expect(user.existed()).toBe(true);
       done();
     });
+  });
+
+  it('can login users with installationId', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    const currentInstallation = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installationId = '12345678';
+    const user = new Parse.User();
+    user.set('username', 'parse');
+    user.set('password', 'mypass');
+    await user.signUp(null, { installationId });
+
+    const query = new Parse.Query(Parse.Session);
+    query.equalTo('user', user);
+    const result = await query.first({ useMasterKey: true });
+    expect(result.get('installationId')).toBe(installationId);
+    expect(result.get('sessionToken')).toBe(user.getSessionToken());
+
+    // Should not clean up sessions
+    const loggedUser = await Parse.User.logIn('parse', 'mypass');
+    const sessionQuery = new Parse.Query(Parse.Session);
+    let sessions = await sessionQuery.find({ useMasterKey: true });
+    expect(sessions.length).toBe(2);
+    expect(sessions[0].get('installationId')).toBe(installationId);
+    expect(sessions[1].get('installationId')).toBe(currentInstallation);
+    expect(sessions[0].get('sessionToken')).toBe(user.getSessionToken());
+    expect(sessions[1].get('sessionToken')).toBe(loggedUser.getSessionToken());
+
+    // Should clean up sessions
+    const installationUser = await Parse.User.logIn('parse', 'mypass', { installationId });
+    sessions = await sessionQuery.find({ useMasterKey: true });
+    expect(sessions.length).toBe(2);
+    expect(sessions[0].get('installationId')).toBe(currentInstallation);
+    expect(sessions[1].get('installationId')).toBe(installationId);
+    expect(sessions[0].get('sessionToken')).toBe(loggedUser.getSessionToken());
+    expect(sessions[1].get('sessionToken')).toBe(installationUser.getSessionToken());
   });
 
   it('can become a user', (done) => {
@@ -632,6 +668,7 @@ describe('Parse User', () => {
 
   it('can get current with subclass', async () => {
     Parse.User.enableUnsafeCurrentUser();
+    Parse.Object.registerSubclass('_User', CustomUser);
 
     const customUser = new CustomUser({ foo: 'bar' });
     customUser.setUsername('username');

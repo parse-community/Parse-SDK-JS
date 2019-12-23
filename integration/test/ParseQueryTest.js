@@ -1998,4 +1998,17 @@ describe('Parse Query', () => {
     }, 0);
     assert.equal(result, 6);
   });
+
+  it('can cancel query', async () => {
+    const obj1 = new TestObject({ number: 1 });
+    const obj2 = new TestObject({ number: 2 });
+    const obj3 = new TestObject({ number: 3 });
+    await Parse.Object.saveAll([obj1, obj2, obj3]);
+
+    const query = new Parse.Query(TestObject);
+    query.find().then((results) => {
+      assert.equal(results.length, 0);
+    });
+    query.cancel();
+  });
 });
