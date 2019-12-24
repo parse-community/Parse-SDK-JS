@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="Parse Platform" src="img/logo_large.png" width="200">
+    <img alt="Parse Platform" src="Assets/img/logo_large.png" width="200">
 </p>
 
 <h2 align="center">Parse SDK for JavaScript</h2>

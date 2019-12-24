@@ -1,7 +1,21 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.10.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.11.0...master)
+
+## 2.11.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.10.0...2.11.0)
+
+**New Features**
+- Support encrypting current user ([#1036](https://github.com/parse-community/Parse-SDK-JS/pull/1036))
+- File Upload Progress on Wechat ([#1029](https://github.com/parse-community/Parse-SDK-JS/pull/1029))
+
+**Improvements**
+- Support query.cancel() on Node ([#1030](https://github.com/parse-community/Parse-SDK-JS/pull/1030))
+
+**Fixes**
+- File Upload Progress on browser ([#1029](https://github.com/parse-community/Parse-SDK-JS/pull/1029))
+- User signup with installationId ([#1031](https://github.com/parse-community/Parse-SDK-JS/pull/1031))
 
 ## 2.10.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.9.1...2.10.0)
