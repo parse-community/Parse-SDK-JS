@@ -872,8 +872,13 @@ const DefaultController = {
     delete json.password;
 
     json.className = '_User';
+    let userData = JSON.stringify(json);
+    if (CoreManager.get('ENCRYPTED_USER')) {
+      const crypto = CoreManager.getCryptoController();
+      userData = crypto.encrypt(json, CoreManager.get('ENCRYPTED_KEY'))
+    }
     return Storage.setItemAsync(
-      path, JSON.stringify(json)
+      path, userData
     ).then(() => {
       return user;
     });
@@ -918,6 +923,10 @@ const DefaultController = {
       currentUserCache = null;
       return null;
     }
+    if (CoreManager.get('ENCRYPTED_USER')) {
+      const crypto = CoreManager.getCryptoController();
+      userData = crypto.decrypt(userData, CoreManager.get('ENCRYPTED_KEY'));
+    }
     userData = JSON.parse(userData);
     if (!userData.className) {
       userData.className = '_User';
@@ -953,6 +962,10 @@ const DefaultController = {
       if (!userData) {
         currentUserCache = null;
         return Promise.resolve(null);
+      }
+      if (CoreManager.get('ENCRYPTED_USER')) {
+        const crypto = CoreManager.getCryptoController();
+        userData = crypto.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY'));
       }
       userData = JSON.parse(userData);
       if (!userData.className) {
