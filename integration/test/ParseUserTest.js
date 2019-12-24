@@ -949,7 +949,7 @@ describe('Parse User', () => {
     const encryptedUser = Parse.Storage.getItem(path);
 
     const crypto = Parse.CoreManager.getCryptoController();
-    const decryptedUser = crypto.decrypt(encryptedUser, Parse.CoreManager.get('ENCRYPTED_KEY'))
+    const decryptedUser = crypto.decrypt(encryptedUser, Parse.CoreManager.get('ENCRYPTED_KEY'));
     expect(JSON.parse(decryptedUser).objectId).toBe(user.id);
 
     const currentUser = Parse.User.current();

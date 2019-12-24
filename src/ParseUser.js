@@ -925,7 +925,7 @@ const DefaultController = {
     }
     if (CoreManager.get('ENCRYPTED_USER')) {
       const crypto = CoreManager.getCryptoController();
-      userData = crypto.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY'));
+      userData = crypto.decrypt(userData, CoreManager.get('ENCRYPTED_KEY'));
     }
     userData = JSON.parse(userData);
     if (!userData.className) {

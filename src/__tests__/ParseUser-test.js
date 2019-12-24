@@ -27,6 +27,8 @@ jest.dontMock('../StorageController.default');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
 jest.dontMock('../UniqueInstanceStateController');
+jest.dontMock('crypto-js/aes');
+jest.dontMock('crypto-js/enc-utf8');
 
 jest.mock('uuid/v4', () => {
   let value = 0;
@@ -35,6 +37,7 @@ jest.mock('uuid/v4', () => {
 jest.dontMock('./test_helpers/mockXHR');
 
 const CoreManager = require('../CoreManager');
+const CryptoController = require('../CryptoController');
 const LocalDatastore = require('../LocalDatastore');
 const ParseObject = require('../ParseObject').default;
 const ParseUser = require('../ParseUser').default;
@@ -44,6 +47,7 @@ const AnonymousUtils = require('../AnonymousUtils').default;
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
+CoreManager.setCryptoController(CryptoController);
 
 function flushPromises() {
   return new Promise(resolve => setImmediate(resolve));
@@ -1014,6 +1018,57 @@ describe('ParseUser', () => {
   it('can encrypt user', async () => {
     CoreManager.set('ENCRYPTED_USER', true);
     CoreManager.set('ENCRYPTED_KEY', 'hello');
+
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    let u = null;
+    CoreManager.setRESTController({
+      request(method, path, body) {
+        expect(method).toBe('GET');
+        expect(path).toBe('login');
+        expect(body.username).toBe('username');
+        expect(body.password).toBe('password');
+
+        return Promise.resolve({
+          objectId: 'uid2',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+    u = await ParseUser.logIn('username', 'password');
+    // Clear cache to read from disk
+    ParseUser._clearCache();
+
+    expect(u.id).toBe('uid2');
+    expect(u.getSessionToken()).toBe('123abc');
+    expect(u.isCurrent()).toBe(true);
+    expect(u.authenticated()).toBe(true);
+
+    const currentUser = ParseUser.current();
+    expect(currentUser.id).toBe('uid2');
+
+    ParseUser._clearCache();
+
+    const currentUserAsync = await ParseUser.currentAsync();
+    expect(currentUserAsync.id).toEqual('uid2');
+
+    const path = Storage.generatePath('currentUser');
+    const encryptedUser = Storage.getItem(path);
+    const crypto = CoreManager.getCryptoController();
+    const decryptedUser = crypto.decrypt(encryptedUser, 'hello');
+    expect(JSON.parse(decryptedUser).objectId).toBe(u.id);
+
+    CoreManager.set('ENCRYPTED_USER', false);
+    CoreManager.set('ENCRYPTED_KEY', null);
+    Storage._clear();
+  });
+
+  it('can encrypt user with custom CryptoController', async () => {
+    CoreManager.set('ENCRYPTED_USER', true);
+    CoreManager.set('ENCRYPTED_KEY', 'hello');
     const ENCRYPTED_DATA = 'encryptedString';
 
     ParseUser.enableUnsafeCurrentUser();
@@ -1035,7 +1090,7 @@ describe('ParseUser', () => {
       },
       ajax() {}
     });
-    CoreManager.setCryptoController({
+    const CustomCrypto = {
       encrypt(obj, secretKey) {
         expect(secretKey).toBe('hello');
         return ENCRYPTED_DATA;
@@ -1045,7 +1100,8 @@ describe('ParseUser', () => {
         expect(secretKey).toBe('hello');
         return JSON.stringify(u.toJSON());
       },
-    });
+    };
+    CoreManager.setCryptoController(CustomCrypto);
     u = await ParseUser.logIn('username', 'password');
     // Clear cache to read from disk
     ParseUser._clearCache();
