@@ -1681,7 +1681,6 @@ describe('ParseObject', () => {
     jest.runAllTicks();
   });
 
-    let current = 0;
   it('returns the first error when saving an array of objects', async (done) => {
     const xhrs = [];
     for (let i = 0; i < 2; i++) {
