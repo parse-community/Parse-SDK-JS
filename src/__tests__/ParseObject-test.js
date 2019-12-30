@@ -1681,69 +1681,7 @@ describe('ParseObject', () => {
     jest.runAllTicks();
   });
 
-  it('can saveAll with batchSize', async (done) => {
-    const xhrs = [];
-    for (let i = 0; i < 2; i++) {
-      xhrs[i] = {
-        setRequestHeader: jest.fn(),
-        open: jest.fn(),
-        send: jest.fn(),
-        status: 200,
-        readyState: 4
-      };
-    }
     let current = 0;
-    RESTController._setXHR(function() { return xhrs[current++]; });
-    const objects = [];
-    for (let i = 0; i < 22; i++) {
-      objects[i] = new ParseObject('Person');
-    }
-    ParseObject.saveAll(objects, { batchSize: 20 }).then(() => {
-      expect(xhrs[0].open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/batch', true]
-      );
-      expect(xhrs[1].open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/batch', true]
-      );
-      done();
-    });
-    jest.runAllTicks();
-    await flushPromises();
-
-    xhrs[0].responseText = JSON.stringify([
-      { success: { objectId: 'pid0' } },
-      { success: { objectId: 'pid1' } },
-      { success: { objectId: 'pid2' } },
-      { success: { objectId: 'pid3' } },
-      { success: { objectId: 'pid4' } },
-      { success: { objectId: 'pid5' } },
-      { success: { objectId: 'pid6' } },
-      { success: { objectId: 'pid7' } },
-      { success: { objectId: 'pid8' } },
-      { success: { objectId: 'pid9' } },
-      { success: { objectId: 'pid10' } },
-      { success: { objectId: 'pid11' } },
-      { success: { objectId: 'pid12' } },
-      { success: { objectId: 'pid13' } },
-      { success: { objectId: 'pid14' } },
-      { success: { objectId: 'pid15' } },
-      { success: { objectId: 'pid16' } },
-      { success: { objectId: 'pid17' } },
-      { success: { objectId: 'pid18' } },
-      { success: { objectId: 'pid19' } },
-    ]);
-    xhrs[0].onreadystatechange();
-    jest.runAllTicks();
-    await flushPromises();
-
-    xhrs[1].responseText = JSON.stringify([
-      { success: { objectId: 'pid20' } },
-      { success: { objectId: 'pid21' } },
-    ]);
-    xhrs[1].onreadystatechange();
-    jest.runAllTicks();
-  });
-
   it('returns the first error when saving an array of objects', async (done) => {
     const xhrs = [];
     for (let i = 0; i < 2; i++) {
@@ -1765,7 +1703,7 @@ describe('ParseObject', () => {
       // The second batch never ran
       expect(xhrs[1].open.mock.calls.length).toBe(0);
       expect(objects[19].dirty()).toBe(false);
-      expect(objects[20].dirty()).toBe(true);
+      expect(objects[20].dirty()).toBe(false);
 
       expect(error.message).toBe('first error');
       done();
@@ -1793,6 +1731,8 @@ describe('ParseObject', () => {
       { success: { objectId: 'pid17' } },
       { success: { objectId: 'pid18' } },
       { success: { objectId: 'pid19' } },
+      { success: { objectId: 'pid20' } },
+      { success: { objectId: 'pid21' } },
     ]);
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
@@ -1927,81 +1867,6 @@ describe('ObjectController', () => {
     await result;
   });
 
-  it('can destroy an array of objects with batchSize', async () => {
-    const objectController = CoreManager.getObjectController();
-    const xhrs = [];
-    for (let i = 0; i < 3; i++) {
-      xhrs[i] = {
-        setRequestHeader: jest.fn(),
-        open: jest.fn(),
-        send: jest.fn()
-      };
-      xhrs[i].status = 200;
-      xhrs[i].responseText = JSON.stringify({});
-      xhrs[i].readyState = 4;
-    }
-    let current = 0;
-    RESTController._setXHR(function() { return xhrs[current++]; });
-    let objects = [];
-    for (let i = 0; i < 5; i++) {
-      objects[i] = new ParseObject('Person');
-      objects[i].id = 'pid' + i;
-    }
-    const result = objectController.destroy(objects, { batchSize: 20}).then(async () => {
-      expect(xhrs[0].open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/batch', true]
-      );
-      expect(JSON.parse(xhrs[0].send.mock.calls[0]).requests).toEqual([
-        {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid0',
-          body: {}
-        }, {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid1',
-          body: {}
-        }, {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid2',
-          body: {}
-        }, {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid3',
-          body: {}
-        }, {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid4',
-          body: {}
-        }
-      ]);
-
-      objects = [];
-      for (let i = 0; i < 22; i++) {
-        objects[i] = new ParseObject('Person');
-        objects[i].id = 'pid' + i;
-      }
-      const destroy = objectController.destroy(objects, { batchSize: 20 });
-      jest.runAllTicks();
-      await flushPromises();
-      xhrs[1].onreadystatechange();
-      jest.runAllTicks();
-      await flushPromises();
-      expect(xhrs[1].open.mock.calls.length).toBe(1);
-      xhrs[2].onreadystatechange();
-      jest.runAllTicks();
-      return destroy;
-    }).then(() => {
-      expect(JSON.parse(xhrs[1].send.mock.calls[0]).requests.length).toBe(20);
-      expect(JSON.parse(xhrs[2].send.mock.calls[0]).requests.length).toBe(2);
-    });
-    jest.runAllTicks();
-    await flushPromises();
-
-    xhrs[0].onreadystatechange();
-    jest.runAllTicks();
-    await result;
-  });
-
   it('can destroy an array of objects', async () => {
     const objectController = CoreManager.getObjectController();
     const xhrs = [];
@@ -2062,12 +1927,10 @@ describe('ObjectController', () => {
       jest.runAllTicks();
       await flushPromises();
       expect(xhrs[1].open.mock.calls.length).toBe(1);
-      xhrs[2].onreadystatechange();
       jest.runAllTicks();
       return destroy;
     }).then(() => {
-      expect(JSON.parse(xhrs[1].send.mock.calls[0]).requests.length).toBe(20);
-      expect(JSON.parse(xhrs[2].send.mock.calls[0]).requests.length).toBe(2);
+      expect(JSON.parse(xhrs[1].send.mock.calls[0]).requests.length).toBe(22);
     });
     jest.runAllTicks();
     await flushPromises();
@@ -2194,14 +2057,15 @@ describe('ObjectController', () => {
       jest.runAllTicks();
       await flushPromises();
 
-      xhrs[1].responseText = JSON.stringify(response.slice(0, 20));
-      xhrs[2].responseText = JSON.stringify(response.slice(20));
+      xhrs[1].responseText = JSON.stringify(response);
+
 
       // Objects in the second batch will not be prepared for save yet
       // This means they can also be modified before the first batch returns
       expect(
         SingleInstanceStateController.getState({ className: 'Person', id: objects[20]._getId() }).pendingOps.length
-      ).toBe(1);
+      ).toBe(2);
+
       objects[20].set('index', 0);
 
       xhrs[1].onreadystatechange();
@@ -2209,15 +2073,9 @@ describe('ObjectController', () => {
       await flushPromises();
       expect(objects[0].dirty()).toBe(false);
       expect(objects[0].id).toBe('pid0');
-      expect(objects[20].dirty()).toBe(true);
-      expect(objects[20].id).toBe(undefined);
-
-      xhrs[2].onreadystatechange();
-      jest.runAllTicks();
-      await flushPromises();
       expect(objects[20].dirty()).toBe(false);
-      expect(objects[20].get('index')).toBe(0);
       expect(objects[20].id).toBe('pid20');
+
       return save;
     }).then((results) => {
       expect(results.length).toBe(22);

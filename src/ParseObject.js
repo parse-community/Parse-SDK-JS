@@ -19,7 +19,7 @@ import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
 import ParseFile from './ParseFile';
-import { when, continueWhile } from './promiseUtils';
+import { when, continueWhile, resolvingPromise } from './promiseUtils';
 import { DEFAULT_PIN, PIN_PREFIX } from './LocalDatastoreUtils';
 
 import {
@@ -58,8 +58,6 @@ type SaveParams = {
 type SaveOptions = FullOptions & {
   cascadeSave?: boolean
 }
-
-const DEFAULT_BATCH_SIZE = 20;
 
 // Mapping of class names to constructors, so we can populate objects from the
 // server with appropriate subclasses of ParseObject
@@ -1608,7 +1606,6 @@ class ParseObject {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
-   *   <li>batchSize: Number of objects to process per request
    * </ul>
    * @return {Promise} A promise that is fulfilled when the destroyAll
    *     completes.
@@ -1620,9 +1617,6 @@ class ParseObject {
     }
     if (options.hasOwnProperty('sessionToken')) {
       destroyOptions.sessionToken = options.sessionToken;
-    }
-    if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
-      destroyOptions.batchSize = options.batchSize;
     }
     return CoreManager.getObjectController().destroy(
       list,
@@ -1651,7 +1645,6 @@ class ParseObject {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
-   *   <li>batchSize: Number of objects to process per request
    * </ul>
    */
   static saveAll(list: Array<ParseObject>, options: RequestOptions = {}) {
@@ -1661,9 +1654,6 @@ class ParseObject {
     }
     if (options.hasOwnProperty('sessionToken')) {
       saveOptions.sessionToken = options.sessionToken;
-    }
-    if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
-      saveOptions.batchSize = options.batchSize;
     }
     return CoreManager.getObjectController().save(
       list,
@@ -2141,7 +2131,6 @@ const DefaultController = {
   },
 
   async destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise<Array<void> | ParseObject> {
-    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
     const localDatastore = CoreManager.getLocalDatastore();
 
     const RESTController = CoreManager.getRESTController();
@@ -2149,45 +2138,33 @@ const DefaultController = {
       if (target.length < 1) {
         return Promise.resolve([]);
       }
-      const batches = [[]];
+      const objects = [];
       target.forEach((obj) => {
         if (!obj.id) {
           return;
         }
-        batches[batches.length - 1].push(obj);
-        if (batches[batches.length - 1].length >= batchSize) {
-          batches.push([]);
-        }
+        objects.push(obj);
       });
-      if (batches[batches.length - 1].length === 0) {
-        // If the last batch is empty, remove it
-        batches.pop();
-      }
-      let deleteCompleted = Promise.resolve();
       const errors = [];
-      batches.forEach((batch) => {
-        deleteCompleted = deleteCompleted.then(() => {
-          return RESTController.request('POST', 'batch', {
-            requests: batch.map((obj) => {
-              return {
-                method: 'DELETE',
-                path: getServerUrlPath() + 'classes/' + obj.className + '/' + obj._getId(),
-                body: {}
-              };
-            })
-          }, options).then((results) => {
-            for (let i = 0; i < results.length; i++) {
-              if (results[i] && results[i].hasOwnProperty('error')) {
-                const err = new ParseError(
-                  results[i].error.code,
-                  results[i].error.error
-                );
-                err.object = batch[i];
-                errors.push(err);
-              }
-            }
-          });
-        });
+      const deleteCompleted = RESTController.request('POST', 'batch', {
+        requests: objects.map((obj) => {
+          return {
+            method: 'DELETE',
+            path: getServerUrlPath() + 'classes/' + obj.className + '/' + obj._getId(),
+            body: {}
+          };
+        })
+      }, options).then((results) => {
+        for (let i = 0; i < results.length; i++) {
+          if (results[i] && results[i].hasOwnProperty('error')) {
+            const err = new ParseError(
+              results[i].error.code,
+              results[i].error.error
+            );
+            err.object = objects[i];
+            errors.push(err);
+          }
+        }
       });
       return deleteCompleted.then(async () => {
         if (errors.length) {
@@ -2216,7 +2193,6 @@ const DefaultController = {
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
-    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
     const localDatastore = CoreManager.getLocalDatastore();
     const mapIdForPin = {};
 
@@ -2238,19 +2214,17 @@ const DefaultController = {
       }
       unsaved = unique(unsaved);
 
-      let filesSaved = Promise.resolve();
+      const filesSaved: Array<ParseFile> = [];
       let pending: Array<ParseObject> = [];
       unsaved.forEach((el) => {
         if (el instanceof ParseFile) {
-          filesSaved = filesSaved.then(() => {
-            return el.save();
-          });
+          filesSaved.push(el.save());
         } else if (el instanceof ParseObject) {
           pending.push(el);
         }
       });
 
-      return filesSaved.then(() => {
+      return Promise.all(filesSaved).then(() => {
         let objectError = null;
         return continueWhile(() => {
           return pending.length > 0;
@@ -2258,7 +2232,7 @@ const DefaultController = {
           const batch = [];
           const nextPending = [];
           pending.forEach((el) => {
-            if (batch.length < batchSize && canBeSerialized(el)) {
+            if (canBeSerialized(el)) {
               batch.push(el);
             } else {
               nextPending.push(el);
@@ -2276,17 +2250,11 @@ const DefaultController = {
 
           // Queue up tasks for each object in the batch.
           // When every task is ready, the API request will execute
-          let res, rej;
-          const batchReturned = new Promise((resolve, reject) => { res = resolve; rej = reject; });
-          batchReturned.resolve = res;
-          batchReturned.reject = rej;
+          const batchReturned = new resolvingPromise();
           const batchReady = [];
           const batchTasks = [];
           batch.forEach((obj, index) => {
-            let res, rej;
-            const ready = new Promise((resolve, reject) => { res = resolve; rej = reject; });
-            ready.resolve = res;
-            ready.reject = rej;
+            const ready = new resolvingPromise();
             batchReady.push(ready);
             const task = function() {
               ready.resolve();

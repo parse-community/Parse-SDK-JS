@@ -17,7 +17,6 @@ export type RequestOptions = {
   sessionToken?: string;
   installationId?: string;
   returnStatus?: boolean;
-  batchSize?: number;
   include?: any;
   progress?: any;
 };
