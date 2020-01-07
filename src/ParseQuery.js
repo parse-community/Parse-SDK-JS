@@ -713,7 +713,7 @@ class ParseQuery {
     const params = {
       distinct: key,
       where: this._where,
-      hint: this._hint,
+      hint: this._hint ? this._hint : undefined,
     };
 
     return controller.aggregate(
@@ -750,7 +750,10 @@ class ParseQuery {
       throw new Error('Invalid pipeline must be Array or Object');
     }
 
-    const params = { pipeline, hint: this._hint };
+    const params = {
+      pipeline,
+      hint: this._hint ? this._hint : undefined,
+    };
     return controller.aggregate(
       this.className,
       params,
