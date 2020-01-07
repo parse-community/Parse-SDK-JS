@@ -232,6 +232,7 @@ class ParseQuery {
   _queriesLocalDatastore: boolean;
   _localDatastorePinName: any;
   _extraOptions: { [key: string]: mixed };
+  _hint: mixed;
   /**
    * @param {(String|Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
    */
@@ -269,6 +270,7 @@ class ParseQuery {
     this._queriesLocalDatastore = false;
     this._localDatastorePinName = null;
     this._extraOptions = {};
+    this._hint = null;
   }
 
   /**
@@ -431,6 +433,9 @@ class ParseQuery {
     if (this._subqueryReadPreference) {
       params.subqueryReadPreference = this._subqueryReadPreference;
     }
+    if (this._hint) {
+      params.hint = this._hint;
+    }
     for (const key in this._extraOptions) {
       params[key] = this._extraOptions[key];
     }
@@ -504,9 +509,13 @@ class ParseQuery {
       this._subqueryReadPreference = json.subqueryReadPreference;
     }
 
+    if (json.hint) {
+      this._hint = json.hint;
+    }
+
     for (const key in json) {
       if (json.hasOwnProperty(key))  {
-        if (["where", "include", "keys", "count", "limit", "skip", "order", "readPreference", "includeReadPreference", "subqueryReadPreference"].indexOf(key) === -1) {
+        if (["where", "include", "keys", "count", "limit", "skip", "order", "readPreference", "includeReadPreference", "subqueryReadPreference", "hint"].indexOf(key) === -1) {
           this._extraOptions[key] = json[key];
         }
       }
@@ -703,7 +712,8 @@ class ParseQuery {
     const controller = CoreManager.getQueryController();
     const params = {
       distinct: key,
-      where: this._where
+      where: this._where,
+      hint: this._hint,
     };
 
     return controller.aggregate(
@@ -855,7 +865,7 @@ class ParseQuery {
         return s;
       });
     }
-
+    query._hint = this._hint;
     query._where = {};
     for (const attr in this._where) {
       const val = this._where[attr];
@@ -1718,7 +1728,6 @@ class ParseQuery {
 const DefaultController = {
   find(className: string, params: QueryJSON, options: RequestOptions): Promise<Array<ParseObject>> {
     const RESTController = CoreManager.getRESTController();
-
     return RESTController.request(
       'GET',
       'classes/' + className,
