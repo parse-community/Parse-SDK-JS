@@ -74,10 +74,21 @@ class ParseUser extends ParseObject {
   }
 
   /**
-   * Unlike in the Android/iOS SDKs, logInWith is unnecessary, since you can
-   * call linkWith on the user (even if it doesn't exist yet on the server).
+   * Parse allows you to link your users with {@link https://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication 3rd party authentication}, enabling
+   * your users to sign up or log into your application using their existing identities.
+   * Since 2.9.0
+   *
+   * @see {@link https://docs.parseplatform.org/js/guide/#linking-users Linking Users}
+   * @param {String|AuthProvider} provider Name of auth provider or {@link https://parseplatform.org/Parse-SDK-JS/api/master/AuthProvider.html AuthProvider}
+   * @param {Object} options
+   * <ul>
+   *   <li>If provider is string, options is {@link http://docs.parseplatform.org/parse-server/guide/#supported-3rd-party-authentications authData}
+   *   <li>If provider is AuthProvider, options is saveOpts
+   * </ul>
+   * @param {Object} saveOpts useMasterKey / sessionToken
+   * @return {Promise} A promise that is fulfilled with the user is linked
    */
-  _linkWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions = {}): Promise<ParseUser> {
+  linkWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions = {}): Promise<ParseUser> {
     saveOpts.sessionToken = saveOpts.sessionToken || this.getSessionToken() || '';
     let authType;
     if (typeof provider === 'string') {
@@ -118,7 +129,7 @@ class ParseUser extends ParseObject {
           success: (provider, result) => {
             const opts = {};
             opts.authData = result;
-            this._linkWith(provider, opts, saveOpts).then(() => {
+            this.linkWith(provider, opts, saveOpts).then(() => {
               resolve(this);
             }, (error) => {
               reject(error);
@@ -130,6 +141,13 @@ class ParseUser extends ParseObject {
         });
       });
     }
+  }
+
+  /**
+   * @deprecated since 2.9.0 see {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#linkWith linkWith}
+   */
+  _linkWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions = {}): Promise<ParseUser> {
+    return this.linkWith(provider, options, saveOpts);
   }
 
   /**
@@ -195,12 +213,14 @@ class ParseUser extends ParseObject {
 
   /**
    * Unlinks a user from a service.
+   *
+   * @param {String|AuthProvider} provider Name of auth provider or {@link https://parseplatform.org/Parse-SDK-JS/api/master/AuthProvider.html AuthProvider}
+   * @param {Object} options MasterKey / SessionToken
+   * @return {Promise} A promise that is fulfilled when the unlinking
+   *     finishes.
    */
-  _unlinkFrom(provider: any, options?: FullOptions) {
-    if (typeof provider === 'string') {
-      provider = authProviders[provider];
-    }
-    return this._linkWith(provider, { authData: null }, options).then(() => {
+  _unlinkFrom(provider: any, options?: FullOptions): Promise<ParseUser> {
+    return this.linkWith(provider, { authData: null }, options).then(() => {
       this._synchronizeAuthData(provider);
       return Promise.resolve(this);
     });
@@ -649,7 +669,8 @@ class ParseUser extends ParseObject {
     }
 
     const controller = CoreManager.getUserController();
-    return controller.become(becomeOptions);
+    const user = new this();
+    return controller.become(user, becomeOptions);
   }
 
   /**
@@ -668,7 +689,8 @@ class ParseUser extends ParseObject {
     if (options.useMasterKey) {
       meOptions.useMasterKey = options.useMasterKey;
     }
-    return controller.me(meOptions);
+    const user = new this();
+    return controller.me(user, meOptions);
   }
 
   /**
@@ -683,11 +705,17 @@ class ParseUser extends ParseObject {
    */
   static hydrate(userJSON: AttributeMap) {
     const controller = CoreManager.getUserController();
-    return controller.hydrate(userJSON);
+    const user = new this();
+    return controller.hydrate(user, userJSON);
   }
 
+  /**
+   * Static version of {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#linkWith linkWith}
+   * @static
+   */
   static logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions) {
-    return ParseUser._logInWith(provider, options, saveOpts);
+    const user = new this();
+    return user.linkWith(provider, options, saveOpts);
   }
 
   /**
@@ -795,6 +823,17 @@ class ParseUser extends ParseObject {
     canUseCurrentUser = false;
   }
 
+  /**
+   * When registering users with {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#linkWith linkWith} a basic auth provider
+   * is automatically created for you.
+   *
+   * For advanced authentication, you can register an Auth provider to
+   * implement custom authentication, deauthentication.
+   *
+   * @see {@link https://parseplatform.org/Parse-SDK-JS/api/master/AuthProvider.html AuthProvider}
+   * @see {@link https://docs.parseplatform.org/js/guide/#custom-authentication-module Custom Authentication Module}
+   * @static
+   */
   static _registerAuthenticationProvider(provider: any) {
     authProviders[provider.getAuthType()] = provider;
     // Synchronize the current user with the auth provider.
@@ -805,9 +844,13 @@ class ParseUser extends ParseObject {
     });
   }
 
+  /**
+   * @deprecated since 2.9.0 see {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#logInWith logInWith}
+   * @static
+   */
   static _logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions) {
-    const user = new ParseUser();
-    return user._linkWith(provider, options, saveOpts);
+    const user = new this();
+    return user.linkWith(provider, options, saveOpts);
   }
 
   static _clearCache() {
@@ -826,9 +869,16 @@ const DefaultController = {
   updateUserOnDisk(user) {
     const path = Storage.generatePath(CURRENT_USER_KEY);
     const json = user.toJSON();
+    delete json.password;
+
     json.className = '_User';
+    let userData = JSON.stringify(json);
+    if (CoreManager.get('ENCRYPTED_USER')) {
+      const crypto = CoreManager.getCryptoController();
+      userData = crypto.encrypt(json, CoreManager.get('ENCRYPTED_KEY'))
+    }
     return Storage.setItemAsync(
-      path, JSON.stringify(json)
+      path, userData
     ).then(() => {
       return user;
     });
@@ -873,6 +923,10 @@ const DefaultController = {
       currentUserCache = null;
       return null;
     }
+    if (CoreManager.get('ENCRYPTED_USER')) {
+      const crypto = CoreManager.getCryptoController();
+      userData = crypto.decrypt(userData, CoreManager.get('ENCRYPTED_KEY'));
+    }
     userData = JSON.parse(userData);
     if (!userData.className) {
       userData.className = '_User';
@@ -908,6 +962,10 @@ const DefaultController = {
       if (!userData) {
         currentUserCache = null;
         return Promise.resolve(null);
+      }
+      if (CoreManager.get('ENCRYPTED_USER')) {
+        const crypto = CoreManager.getCryptoController();
+        userData = crypto.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY'));
       }
       userData = JSON.parse(userData);
       if (!userData.className) {
@@ -990,8 +1048,7 @@ const DefaultController = {
     });
   },
 
-  become(options: RequestOptions): Promise<ParseUser> {
-    const user = new ParseUser();
+  become(user: ParseUser, options: RequestOptions): Promise<ParseUser> {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request(
       'GET', 'users/me', {}, options
@@ -1002,8 +1059,7 @@ const DefaultController = {
     });
   },
 
-  hydrate(userJSON: AttributeMap): Promise<ParseUser> {
-    const user = new ParseUser();
+  hydrate(user: ParseUser, userJSON: AttributeMap): Promise<ParseUser> {
     user._finishFetch(userJSON);
     user._setExisted(true);
     if (userJSON.sessionToken && canUseCurrentUser) {
@@ -1013,12 +1069,11 @@ const DefaultController = {
     }
   },
 
-  me(options: RequestOptions): Promise<ParseUser> {
+  me(user: ParseUser, options: RequestOptions): Promise<ParseUser> {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request(
       'GET', 'users/me', {}, options
     ).then((response) => {
-      const user = new ParseUser();
       user._finishFetch(response);
       user._setExisted(true);
       return user;

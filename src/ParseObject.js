@@ -8,6 +8,7 @@
  *
  * @flow
  */
+const uuidv4 = require('uuid/v4');
 
 import CoreManager from './CoreManager';
 import canBeSerialized from './canBeSerialized';
@@ -64,8 +65,6 @@ const DEFAULT_BATCH_SIZE = 20;
 // server with appropriate subclasses of ParseObject
 const classMap = {};
 
-// Global counter for generating unique local Ids
-let localCount = 0;
 // Global counter for generating unique Ids for non-single-instance objects
 let objectCount = 0;
 // On web clients, objects are single-instance: any two objects with the same Id
@@ -188,7 +187,7 @@ class ParseObject {
     if (typeof this._localId === 'string') {
       return this._localId;
     }
-    const localId = 'local' + String(localCount++);
+    const localId = 'local' + uuidv4();
     this._localId = localId;
     return localId;
   }
@@ -934,6 +933,34 @@ class ParseObject {
   }
 
   /**
+   * Returns true if this object exists on the Server
+   *
+   * @param {Object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @return {Promise<boolean>} A boolean promise that is fulfilled if object exists.
+   */
+  async exists(options?: RequestOptions): Promise<boolean> {
+    if (!this.id) {
+      return false;
+    }
+    try {
+      const query = new ParseQuery(this.className)
+      await query.get(this.id, options);
+      return true;
+    } catch (e) {
+      if (e.code === ParseError.OBJECT_NOT_FOUND) {
+        return false;
+      }
+      throw e;
+    }
+  }
+
+  /**
    * Checks if the model is currently in a valid state.
    * @return {Boolean}
    */
@@ -1205,6 +1232,9 @@ class ParseObject {
     if (options.hasOwnProperty('sessionToken') && typeof options.sessionToken === 'string') {
       saveOptions.sessionToken = options.sessionToken;
     }
+    if (options.hasOwnProperty('installationId') && typeof options.installationId === 'string') {
+      saveOptions.installationId = options.installationId;
+    }
     const controller = CoreManager.getObjectController();
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
     return controller.save(unsaved, saveOptions).then(() => {
@@ -1399,18 +1429,7 @@ class ParseObject {
       queryOptions.sessionToken = options.sessionToken;
     }
     if (options.hasOwnProperty('include')) {
-      queryOptions.include = [];
-      if (Array.isArray(options.include)) {
-        options.include.forEach((key) => {
-          if (Array.isArray(key)) {
-            queryOptions.include = queryOptions.include.concat(key);
-          } else {
-            queryOptions.include.push(key);
-          }
-        });
-      } else {
-        queryOptions.include.push(options.include);
-      }
+      queryOptions.include = ParseObject.handleIncludeOptions(options);
     }
     return CoreManager.getObjectController().fetch(
       list,
@@ -1457,6 +1476,41 @@ class ParseObject {
    * Fetches the given list of Parse.Object if needed.
    * If any error is encountered, stops and calls the error handler.
    *
+   * Includes nested Parse.Objects for the provided key. You can use dot
+   * notation to specify which fields in the included object are also fetched.
+   *
+   * If any error is encountered, stops and calls the error handler.
+   *
+   * <pre>
+   *   Parse.Object.fetchAllIfNeededWithInclude([object1, object2, ...], [pointer1, pointer2, ...])
+   *    .then((list) => {
+   *      // All the objects were fetched.
+   *    }, (error) => {
+   *      // An error occurred while fetching one of the objects.
+   *    });
+   * </pre>
+   *
+   * @param {Array} list A list of <code>Parse.Object</code>.
+   * @param {String|Array<string|Array<string>>} keys The name(s) of the key(s) to include.
+   * @param {Object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @static
+   */
+  static fetchAllIfNeededWithInclude(list: Array<ParseObject>, keys: String|Array<string|Array<string>>, options: RequestOptions) {
+    options = options || {};
+    options.include = keys;
+    return ParseObject.fetchAllIfNeeded(list, options);
+  }
+
+  /**
+   * Fetches the given list of Parse.Object if needed.
+   * If any error is encountered, stops and calls the error handler.
+   *
    * <pre>
    *   Parse.Object.fetchAllIfNeeded([object1, ...])
    *    .then((list) => {
@@ -1480,11 +1534,30 @@ class ParseObject {
     if (options.hasOwnProperty('sessionToken')) {
       queryOptions.sessionToken = options.sessionToken;
     }
+    if (options.hasOwnProperty('include')) {
+      queryOptions.include = ParseObject.handleIncludeOptions(options);
+    }
     return CoreManager.getObjectController().fetch(
       list,
       false,
       queryOptions
     );
+  }
+
+  static handleIncludeOptions(options) {
+    let include = [];
+    if (Array.isArray(options.include)) {
+      options.include.forEach((key) => {
+        if (Array.isArray(key)) {
+          include = include.concat(key);
+        } else {
+          include.push(key);
+        }
+      });
+    } else {
+      include.push(options.include);
+    }
+    return include;
   }
 
   /**

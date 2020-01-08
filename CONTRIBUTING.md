@@ -34,7 +34,7 @@ The Parse JS SDK is built for three platforms:
 - nodejs
 - react-native
 
-When developing the SDK you can use `npm run watch` in order to rebuild your changes upon each saves.
+When developing the SDK you can use `npm run watch` in order to rebuild your changes upon each save.
 
 By default, the watch command will rebuild the SDK for the browser platform. The following commands will rebuild changes for a specific platform.
 
@@ -44,7 +44,7 @@ By default, the watch command will rebuild the SDK for the browser platform. The
 
 ### Testing the code
 
-The SDK is tested through two lenses. unit tests are run with jest and integrationt tests with jasmine.
+The SDK is tested through two lenses. unit tests are run with jest and integration tests with jasmine.
 
 Two different frameworks are used as the integration tests leverage a stateful server, with the data saved into the database, and Jest is running many tests in parallel, which makes it incompatible with our integration tests.
 
@@ -54,12 +54,11 @@ Those tests are located in [/src/__tests__](/src/__tests__) and are responsible 
 
 To run unit tests, run `npm test`. If you have the vscode Jest plugin extension (as recommended), you can run your tests by clicking the *Debug* lens that appears near by the test.
 
-
 #### Integration tests
 
 Those tests are located in [/integration/test](/integration/test) and are responsible for ensuring a proper communication with parse-server. With the integration tests, we ensure all communications between the SDK and the server are behaving accordingly.
 
-To run the integtation tests, you will need a valid mongodb running on your local machine. You can get easily mongodb running with `mongodb-runner` (see [Recommended setup](#recommended-setup)). 
+To run the integration tests, you will need a valid mongodb running on your local machine. You can get easily mongodb running with `mongodb-runner` (see [Recommended setup](#recommended-setup)). 
 
 Use `npm run integration` in order to run the integration tests. If you have the vscode Jasmine extension installed (as recommended), you can run your tests by clicking the *Run* or the *Debug* lens that appears near by the test.
 

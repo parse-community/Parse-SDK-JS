@@ -10,6 +10,7 @@
 import decode from './decode';
 import encode from './encode';
 import CoreManager from './CoreManager';
+import CryptoController from './CryptoController';
 import InstallationController from './InstallationController';
 import * as ParseOp from './ParseOp';
 import RESTController from './RESTController';
@@ -169,6 +170,34 @@ Object.defineProperty(Parse, 'liveQueryServerURL', {
     CoreManager.set('LIVEQUERY_SERVER_URL', value);
   }
 });
+
+/**
+ * @member Parse.encryptedUser
+ * @type boolean
+ * @static
+ */
+Object.defineProperty(Parse, 'encryptedUser', {
+  get() {
+    return CoreManager.get('ENCRYPTED_USER');
+  },
+  set(value) {
+    CoreManager.set('ENCRYPTED_USER', value);
+  }
+});
+
+/**
+ * @member Parse.secret
+ * @type string
+ * @static
+ */
+Object.defineProperty(Parse, 'secret', {
+  get() {
+    return CoreManager.get('ENCRYPTED_KEY');
+  },
+  set(value) {
+    CoreManager.set('ENCRYPTED_KEY', value);
+  }
+});
 /* End setters */
 
 Parse.ACL = require('./ParseACL').default;
@@ -255,6 +284,27 @@ Parse.dumpLocalDatastore = function() {
     return Parse.LocalDatastore._getAllContents();
   }
 }
+
+/**
+ * Enable the current user encryption.
+ * This must be called before login any user.
+ *
+ * @static
+ */
+Parse.enableEncryptedUser = function() {
+  Parse.encryptedUser = true;
+}
+
+/**
+ * Flag that indicates whether Encrypted User is enabled.
+ *
+ * @static
+ */
+Parse.isEncryptedUserEnabled = function() {
+  return Parse.encryptedUser;
+}
+
+CoreManager.setCryptoController(CryptoController);
 CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);
 

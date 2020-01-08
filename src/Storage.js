@@ -71,6 +71,24 @@ const Storage = {
     return Promise.resolve(controller.removeItem(path));
   },
 
+  getAllKeys(): Array<string> {
+    const controller = CoreManager.getStorageController();
+    if (controller.async === 1) {
+      throw new Error(
+        'Synchronous storage is not supported by the current storage controller'
+      );
+    }
+    return controller.getAllKeys();
+  },
+
+  getAllKeysAsync(): Promise<Array<string>> {
+    const controller = CoreManager.getStorageController();
+    if (controller.async === 1) {
+      return controller.getAllKeysAsync();
+    }
+    return Promise.resolve(controller.getAllKeys());
+  },
+
   generatePath(path: string): string {
     if (!CoreManager.get('APPLICATION_ID')) {
       throw new Error('You need to call Parse.initialize before using Parse.');

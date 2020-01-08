@@ -20,13 +20,15 @@ describe('Parse LiveQuery', () => {
   it('can subscribe to query', async (done) => {
     const object = new TestObject();
     await object.save();
+    const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
 
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
     const subscription = await query.subscribe();
 
-    subscription.on('update', object => {
+    subscription.on('update', (object, original, response) => {
       assert.equal(object.get('foo'), 'bar');
+      assert.equal(response.installationId, installationId);
       done();
     })
     object.set({ foo: 'bar' });
@@ -36,6 +38,7 @@ describe('Parse LiveQuery', () => {
   it('can subscribe to query with client', async (done) => {
     const object = new TestObject();
     await object.save();
+    const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
 
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
@@ -45,8 +48,9 @@ describe('Parse LiveQuery', () => {
     }
     const subscription = client.subscribe(query);
 
-    subscription.on('update', object => {
+    subscription.on('update', (object, original, response) => {
       assert.equal(object.get('foo'), 'bar');
+      assert.equal(response.installationId, installationId);
       done();
     });
     await subscription.subscribePromise;

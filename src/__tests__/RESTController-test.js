@@ -252,6 +252,26 @@ describe('RESTController', () => {
     expect(response.result).toBe('hello');
   });
 
+  it('handles aborted requests', (done) => {
+    const XHR = function() { };
+    XHR.prototype = {
+      open: function() { },
+      setRequestHeader: function() { },
+      send: function() {
+        this.status = 0;
+        this.responseText = '{"foo":"bar"}';
+        this.readyState = 4;
+        this.onabort();
+        this.onreadystatechange();
+      }
+    };
+    RESTController._setXHR(XHR);
+    RESTController.request('GET', 'classes/MyObject', {}, {})
+      .then(() => {
+        done();
+      });
+  });
+
   it('attaches the session token of the current user', async () => {
     CoreManager.setUserController({
       currentUserAsync() {
@@ -409,15 +429,11 @@ describe('RESTController', () => {
   });
 
   it('reports upload progress of the AJAX request when callback is provided', (done) => {
-    const xhr = mockXHR([{ status: 200, response: { success: true }}], {
-      addEventListener: (name, callback) => {
-        if(name === "progress") {
-          callback({
-            lengthComputable: true,
-            loaded: 5,
-            total: 10
-          });
-        }
+    const xhr = mockXHR([{ status: 200, response: { success: true } }], {
+      progress: {
+        lengthComputable: true,
+        loaded: 5,
+        total: 10
       }
     });
     RESTController._setXHR(xhr);
@@ -428,10 +444,50 @@ describe('RESTController', () => {
     jest.spyOn(options, 'progress');
 
     RESTController.ajax('POST', 'files/upload.txt', {}, {}, options).then(({ response, status }) => {
-      expect(options.progress).toHaveBeenCalledWith(0.5);
+      expect(options.progress).toHaveBeenCalledWith(0.5, 5, 10);
       expect(response).toEqual({ success: true });
       expect(status).toBe(200);
       done();
     });
+  });
+
+  it('does not upload progress when total is uncomputable', (done) => {
+    const xhr = mockXHR([{ status: 200, response: { success: true } }], {
+      progress: {
+        lengthComputable: false,
+        loaded: 5,
+        total: 0
+      }
+    });
+    RESTController._setXHR(xhr);
+
+    const options = {
+      progress: function(){}
+    };
+    jest.spyOn(options, 'progress');
+
+    RESTController.ajax('POST', 'files/upload.txt', {}, {}, options).then(({ response, status }) => {
+      expect(options.progress).toHaveBeenCalledWith(null);
+      expect(response).toEqual({ success: true });
+      expect(status).toBe(200);
+      done();
+    });
+  });
+
+  it('opens a XHR with the custom headers', () => {
+    CoreManager.set('REQUEST_HEADERS', { 'Cache-Control' : 'max-age=3600' });
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    RESTController.ajax('GET', 'users/me', {}, { 'X-Parse-Session-Token': '123' });
+    expect(xhr.setRequestHeader.mock.calls[3]).toEqual(
+      [ 'Cache-Control', 'max-age=3600' ]
+    );
+    expect(xhr.open.mock.calls[0]).toEqual([ 'GET', 'users/me', true ]);
+    expect(xhr.send.mock.calls[0][0]).toEqual({});
+    CoreManager.set('REQUEST_HEADERS', {});
   });
 });

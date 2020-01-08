@@ -8,13 +8,12 @@
  *
  * @flow
  */
-
-/* global localStorage */
 import { isLocalDatastoreKey } from './LocalDatastoreUtils';
+import Storage from './Storage';
 
 const LocalDatastoreController = {
-  fromPinWithName(name: string): Array<Object> {
-    const values = localStorage.getItem(name);
+  async fromPinWithName(name: string): Array<Object> {
+    const values = await Storage.getItemAsync(name);
     if (!values) {
       return [];
     }
@@ -23,49 +22,46 @@ const LocalDatastoreController = {
   },
 
   pinWithName(name: string, value: any) {
-    try {
-      const values = JSON.stringify(value);
-      localStorage.setItem(name, values);
-    } catch (e) {
-      // Quota exceeded, possibly due to Safari Private Browsing mode
-      console.log(e.message);
-    }
+    const values = JSON.stringify(value);
+    return Storage.setItemAsync(name, values);
   },
 
   unPinWithName(name: string) {
-    localStorage.removeItem(name);
+    return Storage.removeItemAsync(name);
   },
 
-  getAllContents(): Object {
-    const LDS = {};
-    for (let i = 0; i < localStorage.length; i += 1) {
-      const key = localStorage.key(i);
+  async getAllContents(): Object {
+    const keys = await Storage.getAllKeysAsync();
+    return keys.reduce(async (previousPromise, key) => {
+      const LDS = await previousPromise;
       if (isLocalDatastoreKey(key)) {
-        const value = localStorage.getItem(key);
+        const value = await Storage.getItemAsync(key);
         try {
           LDS[key] = JSON.parse(value);
         } catch (error) {
           console.error('Error getAllContents: ', error);
         }
       }
-    }
-    return LDS;
+      return LDS;
+    }, Promise.resolve({}));
   },
 
-  getRawStorage(): Object {
-    const storage = {};
-    for (let i = 0; i < localStorage.length; i += 1) {
-      const key = localStorage.key(i);
-      const value = localStorage.getItem(key);
-      storage[key] = value;
-    }
-    return storage;
+  // Used for testing
+  async getRawStorage(): Object {
+    const keys = await Storage.getAllKeysAsync();
+    return keys.reduce(async (previousPromise, key) => {
+      const LDS = await previousPromise;
+      const value = await Storage.getItemAsync(key);
+      LDS[key] = value;
+      return LDS;
+    }, Promise.resolve({}));
   },
 
-  clear(): Promise {
+  async clear(): Promise {
+    const keys = await Storage.getAllKeysAsync();
+
     const toRemove = [];
-    for (let i = 0; i < localStorage.length; i += 1) {
-      const key = localStorage.key(i);
+    for(const key of keys){
       if (isLocalDatastoreKey(key)) {
         toRemove.push(key);
       }

@@ -32,6 +32,10 @@ jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 jest.dontMock('../LocalDatastore');
 
+jest.mock('uuid/v4', () => {
+  let value = 0;
+  return () => value++;
+});
 jest.dontMock('./test_helpers/mockXHR');
 
 jest.useFakeTimers();
@@ -100,6 +104,13 @@ mockQuery.prototype.include = function(keys) {
 
 mockQuery.prototype.find = function() {
   return Promise.resolve(this.results);
+};
+mockQuery.prototype.get = function(id) {
+  const object = ParseObject.fromJSON({
+    className: this.className,
+    objectId: id
+  });
+  return Promise.resolve(object);
 };
 jest.setMock('../ParseQuery', mockQuery);
 
@@ -1113,6 +1124,13 @@ describe('ParseObject', () => {
     ]);
 
     spy.mockRestore();
+  });
+
+  it('can check if object exists', async () => {
+    const parent = new ParseObject('Person');
+    expect(await parent.exists()).toBe(false);
+    parent.id = '1234'
+    expect(await parent.exists()).toBe(true);
   });
 
   it('can save the object', (done) => {

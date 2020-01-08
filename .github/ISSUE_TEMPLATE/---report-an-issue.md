@@ -32,6 +32,10 @@ You may also search through existing issues before opening a new one: https://gi
 
 <!--- What is happening instead. --->
 
+### Test Case
+
+To accurately reproduce your issue. Add your test cases [here](https://github.com/parse-community/Parse-SDK-JS/tree/master/integration/test) and read the [Contributing Guide](https://github.com/parse-community/Parse-SDK-JS/blob/master/CONTRIBUTING.md) to run the tests. 
+
 ### Environment Setup
 
 - **Server**
