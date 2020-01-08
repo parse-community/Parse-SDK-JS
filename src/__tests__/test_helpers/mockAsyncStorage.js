@@ -1,4 +1,4 @@
-const mockStorage = {};
+let mockStorage = {};
 const mockAsyncStorage = {
   async: 1,
   async getItemAsync(path) {
