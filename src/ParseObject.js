@@ -59,8 +59,6 @@ type SaveOptions = FullOptions & {
   cascadeSave?: boolean
 }
 
-const DEFAULT_BATCH_SIZE = 20;
-
 // Mapping of class names to constructors, so we can populate objects from the
 // server with appropriate subclasses of ParseObject
 const classMap = {};
@@ -2141,7 +2139,7 @@ const DefaultController = {
   },
 
   async destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise<Array<void> | ParseObject> {
-    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
+    const batchSize = (options && options.batchSize) ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
 
     const RESTController = CoreManager.getRESTController();
@@ -2216,7 +2214,7 @@ const DefaultController = {
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
-    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
+    const batchSize = (options && options.batchSize) ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
     const mapIdForPin = {};
 

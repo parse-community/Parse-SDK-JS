@@ -126,4 +126,11 @@ describe('Parse module', () => {
     expect(CoreManager.get('ENCRYPTED_KEY')).toBe('My Super secret key');
     expect(Parse.secret).toBe('My Super secret key');
   });
+
+  it('can set and get request batch size', () => {
+    expect(CoreManager.get('REQUEST_BATCH_SIZE')).toBe(20);
+    CoreManager.set('REQUEST_BATCH_SIZE', 4);
+    expect(CoreManager.get('REQUEST_BATCH_SIZE')).toBe(4);
+    CoreManager.set('REQUEST_BATCH_SIZE', 20);
+  });
 });
