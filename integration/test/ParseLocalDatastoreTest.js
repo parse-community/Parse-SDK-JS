@@ -2688,6 +2688,7 @@ describe('Parse LocalDatastore', () => {
   beforeEach((done) => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
+    Parse.CoreManager.getInstallationController()._setInstallationIdCache('1234');
     Parse.enableLocalDatastore();
     Parse.User.enableUnsafeCurrentUser();
     Parse.Storage._clear();
@@ -2697,8 +2698,7 @@ describe('Parse LocalDatastore', () => {
   });
 
   const controllers = [
-    { name: 'Default', file: '../../lib/node/LocalDatastoreController.default' },
-    { name: 'Browser', file: '../../lib/node/LocalDatastoreController.browser' },
+    { name: 'Default', file: '../../lib/node/LocalDatastoreController' },
     { name: 'React-Native', file: '../../lib/node/LocalDatastoreController.react-native' },
   ];
 

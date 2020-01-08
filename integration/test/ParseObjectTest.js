@@ -80,6 +80,15 @@ describe('Parse Object', () => {
     });
   });
 
+  it('can check if object exists', async () => {
+    const object = new TestObject();
+    assert.equal(await object.exists(), false);
+    await object.save();
+    assert.equal(await object.exists(), true);
+    await object.destroy();
+    assert.equal(await object.exists(), false);
+  });
+
   it('can find objects', (done) => {
     const object = new TestObject({ foo: 'bar' });
     object.save().then(() => {
@@ -1437,6 +1446,37 @@ describe('Parse Object', () => {
       assert.equal(user.updatedAt.getTime(), sameUser.updatedAt.getTime());
       return Parse.User.logOut().then(() => { done(); }, () => { done(); });
     }).catch(done.fail);
+  });
+
+  it('can fetchAllIfNeededWithInclude', async () => {
+    const pointer = new TestObject({ foo: 'bar' });
+    const item1 = new Item({ x: 1});
+    const item2 = new Item({ x: 2, pointer });
+    const items = [item1, item2];
+
+    await Parse.Object.saveAll(items);
+
+    const container = new Container();
+    container.set('items', items);
+    await container.save();
+
+    const query = new Parse.Query(Container);
+    const containerAgain = await query.get(container.id);
+
+    // Fetch objects with no data
+    const itemsAgain = containerAgain.get('items');
+    const item1Again = itemsAgain[0].set('x', 100);
+    const item2Again = itemsAgain[1];
+
+    // Override item1 in database, this shouldn't fetch
+    await item1Again.save();
+
+    const fetchedItems = await Parse.Object.fetchAllIfNeededWithInclude([item1, item2Again], ['pointer']);
+    assert.equal(fetchedItems.length, items.length);
+    assert.equal(fetchedItems[0].get('x'), 1);
+    assert.equal(fetchedItems[1].get('x'), 2); // item2Again should update
+    assert.equal(fetchedItems[1].get('pointer').id, pointer.id);
+    assert.equal(fetchedItems[1].get('pointer').get('foo'), 'bar');
   });
 
   it('can fetchAllIfNeeded', (done) => {

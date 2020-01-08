@@ -49,6 +49,7 @@ describe('Parse User', () => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
+    Parse.Object.registerSubclass('_User', Parse.User);
   });
 
   beforeEach((done) => {
@@ -106,6 +107,41 @@ describe('Parse User', () => {
       expect(user.existed()).toBe(true);
       done();
     });
+  });
+
+  it('can login users with installationId', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    const currentInstallation = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installationId = '12345678';
+    const user = new Parse.User();
+    user.set('username', 'parse');
+    user.set('password', 'mypass');
+    await user.signUp(null, { installationId });
+
+    const query = new Parse.Query(Parse.Session);
+    query.equalTo('user', user);
+    const result = await query.first({ useMasterKey: true });
+    expect(result.get('installationId')).toBe(installationId);
+    expect(result.get('sessionToken')).toBe(user.getSessionToken());
+
+    // Should not clean up sessions
+    const loggedUser = await Parse.User.logIn('parse', 'mypass');
+    const sessionQuery = new Parse.Query(Parse.Session);
+    let sessions = await sessionQuery.find({ useMasterKey: true });
+    expect(sessions.length).toBe(2);
+    expect(sessions[0].get('installationId')).toBe(installationId);
+    expect(sessions[1].get('installationId')).toBe(currentInstallation);
+    expect(sessions[0].get('sessionToken')).toBe(user.getSessionToken());
+    expect(sessions[1].get('sessionToken')).toBe(loggedUser.getSessionToken());
+
+    // Should clean up sessions
+    const installationUser = await Parse.User.logIn('parse', 'mypass', { installationId });
+    sessions = await sessionQuery.find({ useMasterKey: true });
+    expect(sessions.length).toBe(2);
+    expect(sessions[0].get('installationId')).toBe(currentInstallation);
+    expect(sessions[1].get('installationId')).toBe(installationId);
+    expect(sessions[0].get('sessionToken')).toBe(loggedUser.getSessionToken());
+    expect(sessions[1].get('sessionToken')).toBe(installationUser.getSessionToken());
   });
 
   it('can become a user', (done) => {
@@ -630,6 +666,23 @@ describe('Parse User', () => {
     expect(user.get('foo')).toBe('bar');
   });
 
+  it('can get current with subclass', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    Parse.Object.registerSubclass('_User', CustomUser);
+
+    const customUser = new CustomUser({ foo: 'bar' });
+    customUser.setUsername('username');
+    customUser.setPassword('password');
+
+    await customUser.signUp();
+    Parse.User._clearCache();
+
+    const user = CustomUser.current();
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+    expect(user.get('foo')).toBe('bar');
+  });
+
   it('can logIn user with subclass', async () => {
     Parse.User.enableUnsafeCurrentUser();
 
@@ -658,6 +711,54 @@ describe('Parse User', () => {
     expect(user.doSomething()).toBe(5);
   });
 
+  it('can become user with subclass static', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    let user = await CustomUser.signUp('username', 'password');
+    const token = user.getSessionToken();
+
+    user = await CustomUser.become(token)
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+  });
+
+  it('can get user (me) with subclass static', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    let user = await CustomUser.signUp('username', 'password');
+    const token = user.getSessionToken();
+
+    user = await CustomUser.me(token)
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+  });
+
+  it('can get hydrate user with subclass static', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const user = await CustomUser.hydrate({
+      objectId: 'uid3',
+      username: 'username',
+      sessionToken: '123abc',
+    });
+
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+  });
+
+  it('can loginWith subclass static', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    let user = new CustomUser();
+    user.setUsername('Alice');
+    user.setPassword('sekrit');
+    await user.signUp();
+    user = await CustomUser.logInWith(provider.getAuthType(), provider.getAuthData());
+    expect(user._isLinked(provider)).toBe(true);
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+  });
+
   it('can link without master key', async () => {
     Parse.User.enableUnsafeCurrentUser();
 
@@ -665,7 +766,7 @@ describe('Parse User', () => {
     user.setUsername('Alice');
     user.setPassword('sekrit');
     await user.signUp();
-    await user._linkWith(provider.getAuthType(), provider.getAuthData());
+    await user.linkWith(provider.getAuthType(), provider.getAuthData());
     expect(user._isLinked(provider)).toBe(true);
     await user._unlinkFrom(provider);
     expect(user._isLinked(provider)).toBe(false);
@@ -678,7 +779,7 @@ describe('Parse User', () => {
     user.setUsername('Alice');
     user.setPassword('sekrit');
     await user.save(null, { useMasterKey: true });
-    await user._linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
+    await user.linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
     expect(user._isLinked(provider)).toBe(true);
     await user._unlinkFrom(provider, { useMasterKey: true });
     expect(user._isLinked(provider)).toBe(false);
@@ -694,7 +795,7 @@ describe('Parse User', () => {
     expect(user.isCurrent()).toBe(false);
 
     const sessionToken = user.getSessionToken();
-    await user._linkWith(provider.getAuthType(), provider.getAuthData(), { sessionToken });
+    await user.linkWith(provider.getAuthType(), provider.getAuthData(), { sessionToken });
     expect(user._isLinked(provider)).toBe(true);
     await user._unlinkFrom(provider, { sessionToken });
     expect(user._isLinked(provider)).toBe(false);
@@ -705,7 +806,7 @@ describe('Parse User', () => {
     user.setUsername('Alice');
     user.setPassword('sekrit');
     await user.save(null, { useMasterKey: true });
-    await user._linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
+    await user.linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
     expect(user._isLinked(provider)).toBe(true);
     expect(user.authenticated()).toBeFalsy();
     Parse.User.enableUnsafeCurrentUser();
@@ -718,7 +819,7 @@ describe('Parse User', () => {
     user.setUsername('Alice');
     user.setPassword('sekrit');
     await user.save(null, { useMasterKey: true });
-    await user._linkWith(provider.getAuthType(), provider.getAuthData());
+    await user.linkWith(provider.getAuthType(), provider.getAuthData());
     expect(user.getSessionToken()).toBeDefined();
   });
 
@@ -747,7 +848,7 @@ describe('Parse User', () => {
     user.setUsername('Alice');
     user.setPassword('sekrit');
     await user.signUp();
-    await user._linkWith(provider.getAuthType(), provider.getAuthData());
+    await user.linkWith(provider.getAuthType(), provider.getAuthData());
     expect(user._isLinked(provider)).toBe(true);
     await user._unlinkFrom(provider);
     expect(user._isLinked(provider)).toBe(false);
@@ -801,7 +902,7 @@ describe('Parse User', () => {
     user.setPassword('sekrit');
     await user.signUp();
 
-    await user._linkWith('twitter', { authData });
+    await user.linkWith('twitter', { authData });
 
     expect(user.get('authData').twitter.id).toBe(authData.id);
     expect(user._isLinked('twitter')).toBe(true);
@@ -825,7 +926,7 @@ describe('Parse User', () => {
     user.setPassword('sekrit');
     await user.signUp();
 
-    await user._linkWith('twitter', { authData });
+    await user.linkWith('twitter', { authData });
     await Parse.FacebookUtils.link(user);
 
     expect(Parse.FacebookUtils.isLinked(user)).toBe(true);
@@ -833,5 +934,49 @@ describe('Parse User', () => {
 
     expect(user.get('authData').twitter.id).toBe(authData.id);
     expect(user.get('authData').facebook.id).toBe('test');
+  });
+
+  it('can encrypt user', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    Parse.enableEncryptedUser();
+    Parse.secret = 'My Secret Key';
+    const user = new Parse.User();
+    user.setUsername('usernameENC');
+    user.setPassword('passwordENC');
+    await user.signUp();
+
+    const path = Parse.Storage.generatePath('currentUser');
+    const encryptedUser = Parse.Storage.getItem(path);
+
+    const crypto = Parse.CoreManager.getCryptoController();
+    const decryptedUser = crypto.decrypt(encryptedUser, Parse.CoreManager.get('ENCRYPTED_KEY'));
+    expect(JSON.parse(decryptedUser).objectId).toBe(user.id);
+
+    const currentUser = Parse.User.current();
+    expect(currentUser).toEqual(user);
+
+    const currentUserAsync = await Parse.User.currentAsync();
+    expect(currentUserAsync).toEqual(user);
+    await Parse.User.logOut();
+    Parse.CoreManager.set('ENCRYPTED_USER', false);
+    Parse.CoreManager.set('ENCRYPTED_KEY', null);
+  });
+
+  it('fix GHSA-wvh7-5p38-2qfc', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    const user = new Parse.User();
+    user.setUsername('username');
+    user.setPassword('password');
+    await user.signUp();
+
+    const path = Parse.Storage.generatePath('currentUser');
+    let userData = Parse.Storage.getItem(path);
+    expect(JSON.parse(userData).password).toBeUndefined();
+
+    user.setPassword('password');
+    await user.save(null, { useMasterKey: true });
+
+    userData = Parse.Storage.getItem(path);
+    expect(JSON.parse(userData).password).toBeUndefined();
   });
 });

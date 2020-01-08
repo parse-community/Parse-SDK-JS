@@ -232,6 +232,7 @@ class ParseQuery {
   _queriesLocalDatastore: boolean;
   _localDatastorePinName: any;
   _extraOptions: { [key: string]: mixed };
+  _xhrRequest: any;
 
   /**
    * @param {(String|Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
@@ -270,6 +271,10 @@ class ParseQuery {
     this._queriesLocalDatastore = false;
     this._localDatastorePinName = null;
     this._extraOptions = {};
+    this._xhrRequest = {
+      task: null,
+      onchange: () => {},
+    }
   }
 
   /**
@@ -596,6 +601,7 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       findOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(findOptions);
 
     const controller = CoreManager.getQueryController();
 
@@ -664,6 +670,7 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       findOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(findOptions);
 
     const controller = CoreManager.getQueryController();
 
@@ -701,12 +708,13 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       distinctOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(distinctOptions);
+
     const controller = CoreManager.getQueryController();
     const params = {
       distinct: key,
       where: this._where
     };
-
     return controller.aggregate(
       this.className,
       params,
@@ -736,6 +744,8 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       aggregateOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(aggregateOptions);
+
     const controller = CoreManager.getQueryController();
 
     if (!Array.isArray(pipeline) && typeof pipeline !== 'object') {
@@ -779,6 +789,7 @@ class ParseQuery {
     if (options.hasOwnProperty('sessionToken')) {
       findOptions.sessionToken = options.sessionToken;
     }
+    this._setRequestTask(findOptions);
 
     const controller = CoreManager.getQueryController();
 
@@ -908,6 +919,103 @@ class ParseQuery {
         });
       });
     });
+  }
+
+  /**
+   * Iterates over each result of a query, calling a callback for each one. If
+   * the callback returns a promise, the iteration will not continue until
+   * that promise has been fulfilled. If the callback returns a rejected
+   * promise, then iteration will stop with that error. The items are
+   * processed in an unspecified order. The query may not have any sort order,
+   * and may not use limit or skip.
+   * @param {Function} callback Callback <ul>
+   *   <li>currentObject: The current Parse.Object being processed in the array.</li>
+   *   <li>index: The index of the current Parse.Object being processed in the array.</li>
+   *   <li>query: The query map was called upon.</li>
+   * </ul>
+   *
+   * @param {Object} options Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @return {Promise} A promise that will be fulfilled once the
+   *     iteration has completed.
+   */
+  async map(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any, options?: BatchOptions): Promise<Array<any>> {
+    const array = [];
+    let index = 0;
+    await this.each((object) => {
+      array.push(callback(object, index, this));
+      index += 1;
+    }, options);
+    return array;
+  }
+
+  /**
+   * Iterates over each result of a query, calling a callback for each one. If
+   * the callback returns a promise, the iteration will not continue until
+   * that promise has been fulfilled. If the callback returns a rejected
+   * promise, then iteration will stop with that error. The items are
+   * processed in an unspecified order. The query may not have any sort order,
+   * and may not use limit or skip.
+   * @param {Function} callback Callback <ul>
+   *   <li>accumulator: The accumulator accumulates the callback's return values. It is the accumulated value previously returned in the last invocation of the callback.</li>
+   *   <li>currentObject: The current Parse.Object being processed in the array.</li>
+   *   <li>index: The index of the current Parse.Object being processed in the array.</li>
+   * </ul>
+   * @param {Mixed} initialValue A value to use as the first argument to the first call of the callback. If no initialValue is supplied, the first object in the query will be used and skipped.
+   * @param {Object} options Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @return {Promise} A promise that will be fulfilled once the
+   *     iteration has completed.
+   */
+  async reduce(callback: (accumulator: any, currentObject: ParseObject, index: number) => any, initialValue: any, options?: BatchOptions): Promise<Array<any>> {
+    const objects = [];
+    await this.each((object) => {
+      objects.push(object);
+    }, options);
+    return objects.reduce(callback, initialValue);
+  }
+
+  /**
+   * Iterates over each result of a query, calling a callback for each one. If
+   * the callback returns a promise, the iteration will not continue until
+   * that promise has been fulfilled. If the callback returns a rejected
+   * promise, then iteration will stop with that error. The items are
+   * processed in an unspecified order. The query may not have any sort order,
+   * and may not use limit or skip.
+   * @param {Function} callback Callback <ul>
+   *   <li>currentObject: The current Parse.Object being processed in the array.</li>
+   *   <li>index: The index of the current Parse.Object being processed in the array.</li>
+   *   <li>query: The query filter was called upon.</li>
+   * </ul>
+   *
+   * @param {Object} options Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @return {Promise} A promise that will be fulfilled once the
+   *     iteration has completed.
+   */
+  async filter(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean, options?: BatchOptions): Promise<Array<ParseObject>> {
+    const array = [];
+    let index = 0;
+    await this.each((object) => {
+      const flag = callback(object, index, this);
+      if (flag) {
+        array.push(object);
+      }
+      index += 1;
+    }, options);
+    return array;
   }
 
   /** Query Conditions **/
@@ -1485,8 +1593,8 @@ class ParseQuery {
   }
 
   /**
-   * Sets the limit of the number of results to return. The default limit is
-   * 100, with a maximum of 1000 results being returned at a time.
+   * Sets the limit of the number of results to return. The default limit is 100.
+   *
    * @param {Number} n the number of results to limit to.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
@@ -1678,6 +1786,17 @@ class ParseQuery {
   }
 
   /**
+   * Change the source of this query to the server.
+   *
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  fromNetwork(): ParseQuery {
+    this._queriesLocalDatastore = false;
+    this._localDatastorePinName = null;
+    return this;
+  }
+
+  /**
    * Changes the source of this query to all pinned objects.
    *
    * @return {Parse.Query} Returns the query, so you can chain this call.
@@ -1708,6 +1827,29 @@ class ParseQuery {
       this._localDatastorePinName = name;
     }
     return this;
+  }
+
+  /**
+   * Cancels the current network request (if any is running).
+   *
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  cancel(): ParseQuery {
+    if (this._xhrRequest.task && typeof this._xhrRequest.task.abort === 'function') {
+      this._xhrRequest.task._aborted = true;
+      this._xhrRequest.task.abort();
+      this._xhrRequest.task = null;
+      this._xhrRequest.onchange = () => {};
+      return this;
+    }
+    return this._xhrRequest.onchange = () => this.cancel();
+  }
+
+  _setRequestTask(options) {
+    options.requestTask = (task) => {
+      this._xhrRequest.task = task;
+      this._xhrRequest.onchange();
+    };
   }
 }
 

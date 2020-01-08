@@ -119,7 +119,7 @@ describe('React Native StorageController', () => {
       return RNStorageController.getItemAsync('myKey');
     }).then((result) => {
       expect(result).toBe('myValue');
-      return RNStorageController.getAllKeys();
+      return RNStorageController.getAllKeysAsync();
     }).then((keys) => {
       expect(keys[0]).toBe('myKey');
       done();
@@ -172,7 +172,7 @@ describe('React Native StorageController', () => {
       },
     };
     CoreManager.setAsyncStorage(mockRNError);
-    RNStorageController.getAllKeys().catch((error) => {
+    RNStorageController.getAllKeysAsync().catch((error) => {
       expect(error).toBe('Error Thrown');
       done();
     });
@@ -218,6 +218,7 @@ describe('Storage (Default StorageController)', () => {
     expect(Storage.getItem('myKey')).toBe(null);
     Storage.setItem('myKey', 'myValue');
     expect(Storage.getItem('myKey')).toBe('myValue');
+    expect(Storage.getAllKeys()).toEqual(['myKey']);
   });
 
   it('can remove values', () => {
@@ -274,6 +275,9 @@ describe('Storage (Async StorageController)', () => {
     expect(Storage.removeItem).toThrow(
       'Synchronous storage is not supported by the current storage controller'
     );
+    expect(Storage.getAllKeys).toThrow(
+      'Synchronous storage is not supported by the current storage controller'
+    );
   });
 
   it('wraps synchronous methods in async wrappers', (done) => {
@@ -284,6 +288,9 @@ describe('Storage (Async StorageController)', () => {
       return Storage.getItemAsync('myKey');
     }).then((result) => {
       expect(result).toBe('myValue');
+      return Storage.getAllKeysAsync();
+    }).then((result) => {
+      expect(result).toEqual(['myKey']);
       return Storage.removeItemAsync('myKey');
     }).then(() => {
       return Storage.getItemAsync('myKey');

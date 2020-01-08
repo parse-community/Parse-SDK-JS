@@ -170,10 +170,10 @@ const FacebookUtils = {
         );
       }
       requestedPermissions = permissions;
-      return ParseUser._logInWith('facebook', options);
+      return ParseUser.logInWith('facebook', options);
     }
     const authData = { authData: permissions };
-    return ParseUser._logInWith('facebook', authData, options);
+    return ParseUser.logInWith('facebook', authData, options);
   },
 
   /**
@@ -210,10 +210,10 @@ const FacebookUtils = {
         );
       }
       requestedPermissions = permissions;
-      return user._linkWith('facebook', options);
+      return user.linkWith('facebook', options);
     }
     const authData = { authData: permissions };
-    return user._linkWith('facebook', authData, options);
+    return user.linkWith('facebook', authData, options);
   },
 
   /**

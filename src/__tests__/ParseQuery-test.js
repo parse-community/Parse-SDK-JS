@@ -21,6 +21,10 @@ jest.dontMock('../LocalDatastore');
 jest.dontMock('../OfflineQuery');
 jest.dontMock('../LiveQuerySubscription');
 
+jest.mock('uuid/v4', () => {
+  let value = 0;
+  return () => value++;
+});
 const mockObject = function(className) {
   this.className = className;
   this.attributes = {};
@@ -1136,7 +1140,7 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [
             { objectId: 'I1', size: 'small', name: 'Product 3' }
@@ -1169,10 +1173,8 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: []
         });
@@ -1200,7 +1202,7 @@ describe('ParseQuery', () => {
             objectId: 'I27'
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [
             { objectId: 'I27', size: 'large', name: 'Product 27' }
@@ -1233,7 +1235,7 @@ describe('ParseQuery', () => {
             objectId: 'I28'
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: []
         });
@@ -1263,10 +1265,8 @@ describe('ParseQuery', () => {
             objectId: 'I27'
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [
             { objectId: 'I27', size: 'large', name: 'Product 27' }
@@ -1296,7 +1296,7 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
           count: 145
@@ -1323,10 +1323,8 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [],
           count: 145
@@ -1364,7 +1362,7 @@ describe('ParseQuery', () => {
           includeReadPreference: 'SECONDARY',
           subqueryReadPreference: 'SECONDARY_PREFERRED',
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
@@ -1410,10 +1408,8 @@ describe('ParseQuery', () => {
             }
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: []
         });
@@ -1441,10 +1437,8 @@ describe('ParseQuery', () => {
           where: {},
           count: 1
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results:[
             { objectId: '1', name: 'Product 55' },
@@ -1498,7 +1492,7 @@ describe('ParseQuery', () => {
             valid: true
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
@@ -1545,10 +1539,8 @@ describe('ParseQuery', () => {
             valid: true
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
@@ -1574,6 +1566,66 @@ describe('ParseQuery', () => {
       expect(calls).toBe(3);
       done();
     });
+  });
+
+  it('can iterate over results with map()', async () => {
+    CoreManager.setQueryController({
+      aggregate() {},
+      find() {
+        return Promise.resolve({
+          results: [
+            { objectId: 'I55', size: 'medium', name: 'Product 55' },
+            { objectId: 'I89', size: 'small', name: 'Product 89' },
+            { objectId: 'I91', size: 'small', name: 'Product 91' },
+          ]
+        });
+      }
+    });
+
+    const q = new ParseQuery('Item');
+
+    const results = await q.map((object) => object.attributes.size);
+    expect(results.length).toBe(3);
+  });
+
+  it('can iterate over results with reduce()', async () => {
+    CoreManager.setQueryController({
+      aggregate() {},
+      find() {
+        return Promise.resolve({
+          results: [
+            { objectId: 'I55', number: 1 },
+            { objectId: 'I89', number: 2 },
+            { objectId: 'I91', number: 3 },
+          ]
+        });
+      }
+    });
+
+    const q = new ParseQuery('Item');
+
+    const result = await q.reduce((accumulator, object) => accumulator + object.attributes.number, 0);
+    expect(result).toBe(6);
+  });
+
+  it('can iterate over results with filter()', async () => {
+    CoreManager.setQueryController({
+      aggregate() {},
+      find() {
+        return Promise.resolve({
+          results: [
+            { objectId: 'I55', size: 'medium', name: 'Product 55' },
+            { objectId: 'I89', size: 'small', name: 'Product 89' },
+            { objectId: 'I91', size: 'small', name: 'Product 91' },
+          ]
+        });
+      }
+    });
+
+    const q = new ParseQuery('Item');
+
+    const results = await q.filter((object) => object.attributes.size === 'small');
+    expect(results.length).toBe(2);
   });
 
   it('returns an error when iterating over an invalid query', (done) => {
@@ -1900,7 +1952,8 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({ useMasterKey: true });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: ['L'],
         });
@@ -1925,10 +1978,9 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: ['L']
         });
@@ -1956,7 +2008,8 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           pipeline: [{ group: { objectId: '$name' } }]
         });
-        expect(options).toEqual({ useMasterKey: true });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
         });
@@ -1981,7 +2034,8 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           pipeline: { group: { objectId: '$name' } }
         });
-        expect(options).toEqual({ useMasterKey: true });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
         });
@@ -2004,7 +2058,8 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           group: { objectId: '$name' }
         });
-        expect(options).toEqual({ useMasterKey: true });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
         });
@@ -2030,10 +2085,8 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           pipeline: [{ group: { objectId: '$name' } }]
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: []
         });
@@ -2047,6 +2100,33 @@ describe('ParseQuery', () => {
       expect(results).toEqual([]);
       done();
     });
+  });
+
+  it('can cancel query', async () => {
+    const mockRequestTask = {
+      abort: () => {},
+    };
+
+    CoreManager.setQueryController({
+      find: function(name, params, options) {
+        options.requestTask(mockRequestTask);
+        return Promise.resolve({
+          results: []
+        });
+      },
+      aggregate: () => {},
+    });
+    const query = new ParseQuery('TestCancel');
+
+    jest.spyOn(mockRequestTask, 'abort');
+    query.cancel();
+    expect(mockRequestTask.abort).toHaveBeenCalledTimes(0);
+
+    await query.find();
+
+    expect(query._xhrRequest.task).toEqual(null);
+    query.cancel();
+    expect(mockRequestTask.abort).toHaveBeenCalledTimes(1);
   });
 
   it('selecting sub-objects does not inject objects when sub-object does not exist', (done) => {
@@ -2282,6 +2362,10 @@ describe('ParseQuery LocalDatastore', () => {
     q.fromPin();
     expect(q._queriesLocalDatastore).toBe(true);
     expect(q._localDatastorePinName).toBe(DEFAULT_PIN);
+    const query = q.fromNetwork();
+    expect(q._queriesLocalDatastore).toBe(false);
+    expect(q._localDatastorePinName).toBe(null);
+    expect(query).toEqual(q);
   });
 
   it('can query from pin with name', () => {

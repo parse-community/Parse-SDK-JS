@@ -17,6 +17,12 @@ import { resolvingPromise } from './promiseUtils';
  * Extends events.EventEmitter
  * <a href="https://nodejs.org/api/events.html#events_class_eventemitter">cloud functions</a>.
  *
+ * <p>Response Object - Contains data from the client that made the request
+ * <ul>
+ * <li>clientId</li>
+ * <li>installationId - requires Parse Server 4.0.0+</li>
+ * </ul>
+ * </p>
  *
  * <p>Open Event - When you call query.subscribe(), we send a subscribe request to
  * the LiveQuery server, when we get the confirmation from the LiveQuery server,
@@ -26,7 +32,7 @@ import { resolvingPromise } from './promiseUtils';
  * you'll also get this event.
  *
  * <pre>
- * subscription.on('open', () => {
+ * subscription.on('open', (response) => {
  *
  * });</pre></p>
  *
@@ -34,7 +40,7 @@ import { resolvingPromise } from './promiseUtils';
  * you'll get this event. The object is the ParseObject which is created.
  *
  * <pre>
- * subscription.on('create', (object) => {
+ * subscription.on('create', (object, response) => {
  *
  * });</pre></p>
  *
@@ -46,7 +52,7 @@ import { resolvingPromise } from './promiseUtils';
  * Parse-Server 3.1.3+ Required for original object parameter
  *
  * <pre>
- * subscription.on('update', (object, original) => {
+ * subscription.on('update', (object, original, response) => {
  *
  * });</pre></p>
  *
@@ -57,7 +63,7 @@ import { resolvingPromise } from './promiseUtils';
  * Parse-Server 3.1.3+ Required for original object parameter
  *
  * <pre>
- * subscription.on('enter', (object, original) => {
+ * subscription.on('enter', (object, original, response) => {
  *
  * });</pre></p>
  *
@@ -67,7 +73,7 @@ import { resolvingPromise } from './promiseUtils';
  * which leaves the ParseQuery. Its content is the latest value of the ParseObject.
  *
  * <pre>
- * subscription.on('leave', (object) => {
+ * subscription.on('leave', (object, response) => {
  *
  * });</pre></p>
  *
@@ -76,7 +82,7 @@ import { resolvingPromise } from './promiseUtils';
  * get this event. The object is the ParseObject which is deleted.
  *
  * <pre>
- * subscription.on('delete', (object) => {
+ * subscription.on('delete', (object, response) => {
  *
  * });</pre></p>
  *

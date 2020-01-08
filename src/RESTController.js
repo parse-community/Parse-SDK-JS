@@ -48,7 +48,7 @@ if (typeof XDomainRequest !== 'undefined' &&
   useXDomainRequest = true;
 }
 
-function ajaxIE9(method: string, url: string, data: any, options?: FullOptions) {
+function ajaxIE9(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
   return new Promise((resolve, reject) => {
     const xdr = new XDomainRequest();
     xdr.onload = function() {
@@ -79,6 +79,9 @@ function ajaxIE9(method: string, url: string, data: any, options?: FullOptions) 
     };
     xdr.open(method, url);
     xdr.send(data);
+    if (options && typeof options.requestTask === 'function') {
+      options.requestTask(xdr);
+    }
   });
 }
 
@@ -101,9 +104,10 @@ const RESTController = {
         );
       }
       let handled = false;
+
       const xhr = new XHR();
       xhr.onreadystatechange = function() {
-        if (xhr.readyState !== 4 || handled) {
+        if (xhr.readyState !== 4 || handled || xhr._aborted) {
           return;
         }
         handled = true;
@@ -153,33 +157,36 @@ const RESTController = {
       if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
         headers['Authorization'] = CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
       }
-
-      if(options && typeof options.progress === 'function') {
-        if (xhr.upload) {
-          xhr.upload.addEventListener('progress', (oEvent) => {
-            if (oEvent.lengthComputable) {
-              options.progress(oEvent.loaded / oEvent.total);
-            } else {
-              options.progress(null);
-            }
-          });
-        } else if (xhr.addEventListener) {
-          xhr.addEventListener('progress', (oEvent) => {
-            if (oEvent.lengthComputable) {
-              options.progress(oEvent.loaded / oEvent.total);
-            } else {
-              options.progress(null);
-            }
-          });
-        }
+      const customHeaders = CoreManager.get('REQUEST_HEADERS');
+      for (const key in customHeaders) {
+        headers[key] = customHeaders[key];
       }
-
+      xhr.onprogress = (event) => {
+        if(options && typeof options.progress === 'function') {
+          if (event.lengthComputable) {
+            options.progress(event.loaded / event.total, event.loaded, event.total);
+          } else {
+            options.progress(null);
+          }
+        }
+      };
       xhr.open(method, url, true);
 
       for (const h in headers) {
         xhr.setRequestHeader(h, headers[h]);
       }
+      xhr.onabort = function () {
+        promise.resolve({
+          response: { results: [] },
+          status: 0,
+          xhr,
+        });
+      };
       xhr.send(data);
+
+      if (options && typeof options.requestTask === 'function') {
+        options.requestTask(xhr);
+      }
     }
     dispatch();
 
