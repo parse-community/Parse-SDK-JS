@@ -932,11 +932,18 @@ class ParseQuery {
     });
   }
 
+  /**
+   * Adds a hint to force index selection. (https://docs.mongodb.com/manual/reference/operator/meta/hint/)
+   *
+   * @param {Mixed} value String or Object of index that should be used when executing query
+   * @return {Promise} A promise that is resolved with the query completes.
+   */
   hint(value: mixed): ParseQuery {
     if (typeof value === 'undefined') {
       delete this._hint;
     }
     this._hint = value;
+    return this;
   }
 
   /**
