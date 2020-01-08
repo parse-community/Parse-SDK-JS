@@ -11,6 +11,7 @@
 /* global XMLHttpRequest, XDomainRequest */
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
+import { resolvingPromise } from './promiseUtils';
 
 export type RequestOptions = {
   useMasterKey?: boolean;
@@ -90,11 +91,7 @@ const RESTController = {
     if (useXDomainRequest) {
       return ajaxIE9(method, url, data, headers, options);
     }
-
-    let res, rej;
-    const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
-    promise.resolve = res;
-    promise.reject = rej;
+    const promise = resolvingPromise();
     let attempts = 0;
 
     const dispatch = function() {
