@@ -919,6 +919,14 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can set hint value', () => {
+    const q = new ParseQuery('Item');
+    q.hint('_id_');
+    expect(q.toJSON()).toEqual({
+      where: {},
+      hint: '_id_',
+    });
+  });
 
   it('can generate queries that include full data for pointers', () => {
     const q = new ParseQuery('Item');
@@ -1004,6 +1012,19 @@ describe('ParseQuery', () => {
     const q2 = new ParseQuery('Item');
     q2.withJSON(json);
     expect(q2._extraOptions.randomOption).toBe('test');
+  });
+
+  it('can use hint', () => {
+    const q = new ParseQuery('Item');
+    q.hint('_id_');
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      hint: '_id_',
+    });
+    const q2 = new ParseQuery('Item');
+    q2.withJSON(json);
+    expect(q2._hint).toBe('_id_');
   });
 
   it('can specify certain fields to send back', () => {
@@ -1568,6 +1589,74 @@ describe('ParseQuery', () => {
     });
   });
 
+
+  it('can pass options to each() with hint', (done) => {
+    CoreManager.setQueryController({
+      aggregate() {},
+      find(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          limit: 100,
+          order: 'objectId',
+          keys: 'size,name',
+          where: {
+            size: {
+              $in: ['small', 'medium']
+            },
+            valid: true
+          },
+          hint: '_id_',
+        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
+        return Promise.resolve({
+          results: [
+            { objectId: 'I55', size: 'medium', name: 'Product 55' },
+            { objectId: 'I89', size: 'small', name: 'Product 89' },
+            { objectId: 'I91', size: 'small', name: 'Product 91' },
+          ]
+        });
+      }
+    });
+
+    const q = new ParseQuery('Item');
+    q.containedIn('size', ['small', 'medium']);
+    q.equalTo('valid', true);
+    q.select('size', 'name');
+    q.hint('_id_');
+    let calls = 0;
+
+    q.each(() => {
+      calls++;
+    }, {
+      useMasterKey: true,
+      sessionToken: '1234'
+    }).then(() => {
+      expect(calls).toBe(3);
+      done();
+    });
+  });
+
+  it('should add hint as string', () => {
+    const q = new ParseQuery('Item');
+    q.hint('_id_');
+    expect(q._hint).toBe('_id_');
+  });
+
+  it('should set hint as object', () => {
+    const q = new ParseQuery('Item');
+    q.hint({ _id: 1 });
+    expect(q._hint).toStrictEqual({ _id: 1 });
+  });
+
+  it('should delete hint when set as undefined', () => {
+    const q = new ParseQuery('Item');
+    q.hint('_id_');
+    expect(q._hint).toBe('_id_');
+    q.hint();
+    expect(q._hint).toBeUndefined();
+  });
+
   it('can iterate over results with map()', async () => {
     CoreManager.setQueryController({
       aggregate() {},
@@ -1997,6 +2086,37 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can pass options to a distinct query with hint', (done) => {
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          distinct: 'size',
+          where: {
+            size: 'small'
+          },
+          hint: '_id_',
+        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
+        expect(options.requestTask).toBeDefined();
+        return Promise.resolve({
+          results: ['L']
+        });
+      }
+    });
+
+
+    const q = new ParseQuery('Item');
+    q.equalTo('size', 'small').hint('_id_').distinct('size', {
+      sessionToken: '1234'
+    }).then((results) => {
+      expect(results[0]).toBe('L');
+      done();
+    });
+  });
+
   it('can issue an aggregate query with array pipeline', (done) => {
     const pipeline = [
       { group: { objectId: '$name' } }
@@ -2095,6 +2215,35 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Item');
     q.aggregate(pipeline, {
+      sessionToken: '1234'
+    }).then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
+  });
+
+  it('can pass options to an aggregate query with hint', (done) => {
+    const pipeline = [
+      { group: { objectId: '$name' } }
+    ];
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          pipeline: [{ group: { objectId: '$name' } }],
+          hint: '_id_',
+        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
+        return Promise.resolve({
+          results: []
+        });
+      }
+    });
+
+    const q = new ParseQuery('Item');
+    q.hint('_id_').aggregate(pipeline, {
       sessionToken: '1234'
     }).then((results) => {
       expect(results).toEqual([]);

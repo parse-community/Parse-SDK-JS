@@ -272,7 +272,6 @@ class ParseQuery {
     this._queriesLocalDatastore = false;
     this._localDatastorePinName = null;
     this._extraOptions = {};
-    this._hint = null;
     this._xhrRequest = {
       task: null,
       onchange: () => {},
@@ -723,7 +722,7 @@ class ParseQuery {
     const params = {
       distinct: key,
       where: this._where,
-      hint: this._hint ? this._hint : undefined,
+      hint: this._hint,
     };
     return controller.aggregate(
       this.className,
@@ -763,7 +762,7 @@ class ParseQuery {
 
     const params = {
       pipeline,
-      hint: this._hint ? this._hint : undefined,
+      hint: this._hint,
     };
     return controller.aggregate(
       this.className,
@@ -936,7 +935,7 @@ class ParseQuery {
    * Adds a hint to force index selection. (https://docs.mongodb.com/manual/reference/operator/meta/hint/)
    *
    * @param {Mixed} value String or Object of index that should be used when executing query
-   * @return {Promise} A promise that is resolved with the query completes.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   hint(value: mixed): ParseQuery {
     if (typeof value === 'undefined') {
