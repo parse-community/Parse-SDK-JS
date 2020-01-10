@@ -1,3 +1,4 @@
+// Create Deferred Promise
 export function resolvingPromise() {
   let res;
   let rej;
