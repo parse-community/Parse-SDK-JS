@@ -546,4 +546,71 @@ describe('FileController', () => {
     expect(data).toBe('ParseA==');
     spy.mockRestore();
   });
+
+  it('saves files via ajax with sessionToken option', () => {
+    const request = function(method, path) {
+      const name = path.substr(path.indexOf('/') + 1);
+      return Promise.resolve({
+        name: name,
+        url: 'https://files.parsetfss.com/a/' + name
+      });
+    };
+    const ajax = function(method, path, data, headers) {
+      expect(headers['X-Parse-Session-Token']).toBe('testing_sessionToken')
+      const name = path.substr(path.indexOf('/') + 1);
+      return Promise.resolve({
+        response: {
+          name: name,
+          url: 'https://files.parsetfss.com/a/' + name
+        }
+      });
+    };
+    CoreManager.setRESTController({ request, ajax });
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file._source.format = 'file';
+
+    return file.save({ sessionToken: 'testing_sessionToken' }).then(function(f) {
+      expect(f).toBe(file);
+      expect(f.name()).toBe('/api.parse.com/1/files/parse.txt');
+      expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
+    });
+  });
+
+  it('saves files via ajax currentUser sessionToken', () => {
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve({
+          getSessionToken() {
+            return 'currentUserToken';
+          }
+        });
+      }
+    });
+    const request = function(method, path) {
+      const name = path.substr(path.indexOf('/') + 1);
+      return Promise.resolve({
+        name: name,
+        url: 'https://files.parsetfss.com/a/' + name
+      });
+    };
+    const ajax = function(method, path, data, headers) {
+      expect(headers['X-Parse-Session-Token']).toBe('currentUserToken')
+      const name = path.substr(path.indexOf('/') + 1);
+      return Promise.resolve({
+        response: {
+          name: name,
+          url: 'https://files.parsetfss.com/a/' + name
+        }
+      });
+    };
+    CoreManager.setRESTController({ request, ajax });
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file._source.format = 'file';
+
+    return file.save().then(function(f) {
+      expect(f).toBe(file);
+      expect(f.name()).toBe('/api.parse.com/1/files/parse.txt');
+      expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
+    });
+  });
 });
