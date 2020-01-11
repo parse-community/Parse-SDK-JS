@@ -180,4 +180,29 @@ describe('Parse LiveQuery', () => {
     })
     await object.save({ foo: 'bar' });
   });
+
+  it('can subscribe to null sessionToken', async (done) => {
+    const user = await Parse.User.signUp('oooooo', 'password');
+
+    const readOnly = Parse.User.readOnlyAttributes();
+    Parse.User.readOnlyAttributes = null;
+    user.set('sessionToken', null);
+    assert.equal(user.getSessionToken(), null);
+
+    const object = new TestObject();
+    await object.save();
+
+    const query = new Parse.Query(TestObject);
+    query.equalTo('objectId', object.id);
+    const subscription = await query.subscribe();
+    subscription.on('update', async (object) => {
+      assert.equal(object.get('foo'), 'bar');
+      Parse.User.readOnlyAttributes = function() {
+        return readOnly;
+      };
+      await Parse.User.logOut();
+      done();
+    })
+    await object.save({ foo: 'bar' });
+  });
 });

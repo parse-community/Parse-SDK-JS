@@ -160,7 +160,7 @@ class LiveQueryClient extends EventEmitter {
     this.applicationId = applicationId;
     this.javascriptKey = javascriptKey;
     this.masterKey = masterKey;
-    this.sessionToken = sessionToken;
+    this.sessionToken = sessionToken || undefined;
     this.installationId = installationId;
     this.additionalProperties = true;
     this.connectPromise = resolvingPromise();
