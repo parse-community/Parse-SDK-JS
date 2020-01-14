@@ -175,6 +175,7 @@ const config: Config & { [key: string]: mixed } = {
             !!process.versions.node &&
             !process.versions.electron),
   REQUEST_ATTEMPT_LIMIT: 5,
+  REQUEST_BATCH_SIZE: 20,
   REQUEST_HEADERS: {},
   SERVER_URL: 'https://api.parse.com/1',
   SERVER_AUTH_TYPE: null,
