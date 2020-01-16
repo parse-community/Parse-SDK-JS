@@ -2024,20 +2024,4 @@ describe('Parse Query', () => {
     const explain = await query.find();
     assert.equal(explain.queryPlanner.winningPlan.inputStage.inputStage.indexName, '_id_');
   });
-
-  it('can query aggregate with hint', async () => {
-    const obj1 = new TestObject({ number: 1 });
-    const obj2 = new TestObject({ number: 2 });
-    const obj3 = new TestObject({ number: 3 });
-    await Parse.Object.saveAll([obj1, obj2, obj3]);
-    const pipeline = {
-      group: { objectId: '$number' },
-    };
-    const query = new Parse.Query(TestObject);
-    query.hint('_id_');
-    query.explain();
-    const result = await query.aggregate(pipeline);
-    const queryPlanner = result[0].stages[0].$cursor.queryPlanner;
-    assert.equal(queryPlanner.winningPlan.inputStage.indexName, '_id_');
-  });
 });
