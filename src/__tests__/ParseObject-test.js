@@ -454,11 +454,15 @@ describe('ParseObject', () => {
     expect(o.attributes).toEqual({ age: 1 });
     expect(o.op('age') instanceof IncrementOp).toBe(true);
     expect(o.dirtyKeys()).toEqual(['age']);
-    expect(o._getSaveJSON()).toEqual({ age: { __op: 'Increment', amount: 1 } });
+    expect(o._getSaveJSON()).toEqual({
+      age: { __op: 'Increment', amount: 1 }
+    });
 
     o.increment('age', 4);
     expect(o.attributes).toEqual({ age: 5 });
-    expect(o._getSaveJSON()).toEqual({ age: { __op: 'Increment', amount: 5 } });
+    expect(o._getSaveJSON()).toEqual({
+      age: { __op: 'Increment', amount: 5 }
+    });
 
     expect(o.increment.bind(o, 'age', 'four')).toThrow(
       'Cannot increment by a non-numeric amount.'
@@ -473,7 +477,9 @@ describe('ParseObject', () => {
     o.set('age', 30);
     o.increment('age');
     expect(o.attributes).toEqual({ age: 31 });
-    expect(o._getSaveJSON()).toEqual({ age: 31 });
+    expect(o._getSaveJSON()).toEqual({
+      age: 31
+    });
 
     const o2 = new ParseObject('Person');
     o2._finishFetch({
@@ -1513,7 +1519,7 @@ describe('ParseObject', () => {
       [{
         method: 'POST',
         path: '/1/classes/Item',
-        body: { }
+        body: {}
       }]
     );
     xhrs[0].responseText = JSON.stringify([ { success: { objectId: 'grandchild' } } ]);
