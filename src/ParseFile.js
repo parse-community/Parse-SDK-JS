@@ -301,7 +301,7 @@ class ParseFile {
   }
 
   /**
-   * Sets metadata to be saved with file object.
+   * Sets metadata to be saved with file object. Overwrites existing metadata
    * @param {Object} metadata Key value pairs to be stored with file object
    */
   setMetadata(metadata: Object) {
@@ -313,7 +313,7 @@ class ParseFile {
   }
 
   /**
-   * Sets metadata to be saved with file object.
+   * Sets metadata to be saved with file object. Adds to existing metadata
    * @param {String} key
    * @param {String} value
    */
@@ -324,7 +324,7 @@ class ParseFile {
   }
 
   /**
-   * Sets tags to be saved with file object.
+   * Sets tags to be saved with file object. Overwrites existing tags
    * @param {Object} tags Key value pairs to be stored with file object
    */
   setTags(tags: Object) {
@@ -336,7 +336,7 @@ class ParseFile {
   }
 
   /**
-   * Sets tags to be saved with file object.
+   * Sets tags to be saved with file object. Adds to existing tags
    * @param {String} key
    * @param {String} value
    */
