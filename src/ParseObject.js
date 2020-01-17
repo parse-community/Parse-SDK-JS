@@ -2121,6 +2121,12 @@ const DefaultController = {
       if (options && options.include) {
         params.include = options.include.join();
       }
+      if (!target.id) {
+        return Promise.reject(new ParseError(
+          ParseError.MISSING_OBJECT_ID,
+          'Object does not have an ID'
+        ));
+      }
       return RESTController.request(
         'GET',
         'classes/' + target.className + '/' + target._getId(),

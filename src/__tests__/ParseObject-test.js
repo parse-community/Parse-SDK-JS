@@ -1425,7 +1425,10 @@ describe('ParseObject', () => {
     p.id = '';
     await expect(p.fetch())
       .rejects
-      .toThrowError();
+      .toThrowError(new ParseError(
+        ParseError.MISSING_OBJECT_ID,
+        'Object does not have an ID'
+      ));
   });
 
   it('should fail on invalid date', (done) => {
