@@ -71,6 +71,8 @@ class ParseFile {
   _previousSave: ?Promise<ParseFile>;
   _data: ?string;
   _requestTask: ?any;
+  _metadata: ?Object;
+  _tags: ?Object;
 
   /**
    * @param name {String} The file's name. This will be prefixed by a unique
@@ -99,11 +101,15 @@ class ParseFile {
    * @param type {String} Optional Content-Type header to use for the file. If
    *     this is omitted, the content type will be inferred from the name's
    *     extension.
+   * @param metadata {Object} Optional key value pairs to be stored with file object (S3 Only)
+   * @param tags {Object} Optional key value pairs to be stored with file object (S3 Only)
    */
-  constructor(name: string, data?: FileData, type?: string) {
+  constructor(name: string, data?: FileData, type?: string, metadata?: Object, tags?: Object) {
     const specifiedType = type || '';
 
     this._name = name;
+    this._metadata = metadata || {};
+    this._tags = tags || {};
 
     if (data !== undefined) {
       if (Array.isArray(data)) {
@@ -217,6 +223,8 @@ class ParseFile {
   save(options?: FullOptions) {
     options = options || {};
     options.requestTask = (task) => this._requestTask = task;
+    options.metadata = this._metadata;
+    options.tags = this._tags;
 
     const controller = CoreManager.getFileController();
     if (!this._previousSave) {
@@ -290,6 +298,52 @@ class ParseFile {
       this.url() === other.url() &&
       typeof this.url() !== 'undefined'
     );
+  }
+
+  /**
+   * Sets metadata to be saved with file object.
+   * @param {Object} metadata Key value pairs to be stored with file object
+   */
+  setMetadata(metadata: Object) {
+    if (metadata && typeof metadata === 'object') {
+      Object.keys(metadata).forEach((key) => {
+        this.addMetadata(key, metadata[key]);
+      });
+    }
+  }
+
+  /**
+   * Sets metadata to be saved with file object.
+   * @param {String} key
+   * @param {String} value
+   */
+  addMetadata(key: String, value: String) {
+    if (typeof key === 'string' && typeof value === 'string') {
+      this._metadata[key] = value;
+    }
+  }
+
+  /**
+   * Sets tags to be saved with file object.
+   * @param {Object} tags Key value pairs to be stored with file object
+   */
+  setTags(tags: Object) {
+    if (tags && typeof tags === 'object') {
+      Object.keys(tags).forEach((key) => {
+        this.addTag(key, tags[key]);
+      });
+    }
+  }
+
+  /**
+   * Sets tags to be saved with file object.
+   * @param {String} key
+   * @param {String} value
+   */
+  addTag(key: String, value: String) {
+    if (typeof key === 'string' && typeof value === 'string') {
+      this._tags[key] = value;
+    }
   }
 
   static fromJSON(obj): ParseFile {
