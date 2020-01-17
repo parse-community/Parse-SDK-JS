@@ -315,10 +315,10 @@ class ParseFile {
   /**
    * Sets metadata to be saved with file object. Adds to existing metadata
    * @param {String} key
-   * @param {String} value
+   * @param {Mixed} value
    */
-  addMetadata(key: String, value: String) {
-    if (typeof key === 'string' && typeof value === 'string') {
+  addMetadata(key: String, value: any) {
+    if (typeof key === 'string') {
       this._metadata[key] = value;
     }
   }
@@ -338,10 +338,10 @@ class ParseFile {
   /**
    * Sets tags to be saved with file object. Adds to existing tags
    * @param {String} key
-   * @param {String} value
+   * @param {Mixed} value
    */
   addTag(key: String, value: String) {
-    if (typeof key === 'string' && typeof value === 'string') {
+    if (typeof key === 'string') {
       this._tags[key] = value;
     }
   }

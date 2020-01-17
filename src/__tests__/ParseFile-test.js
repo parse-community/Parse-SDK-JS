@@ -307,12 +307,6 @@ describe('ParseFile', () => {
     expect(file._metadata).toEqual({ foo: 'bar' });
   });
 
-  it('should not set metadata if value is not a string', () => {
-    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
-    file.addMetadata('foo', 10);
-    expect(file._metadata).toEqual({});
-  });
-
   it('should not set metadata if key is not a string', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     file.addMetadata(10, '');
@@ -329,12 +323,6 @@ describe('ParseFile', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     file.addTag('foo', 'bar');
     expect(file._tags).toEqual({ foo: 'bar' });
-  });
-
-  it('should not set tag if value is not a string', () => {
-    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
-    file.addTag('foo', 10);
-    expect(file._tags).toEqual({});
   });
 
   it('should not set tag if key is not a string', () => {
