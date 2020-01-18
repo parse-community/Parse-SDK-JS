@@ -613,4 +613,23 @@ describe('FileController', () => {
       expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
     });
   });
+
+  it('should throw error if file deleted without name', async (done) => {
+    const file = new ParseFile('', [1, 2, 3]);
+    try {
+      await file.destroy();
+    } catch (e) {
+      expect(e.message).toBe('Cannot delete an unnamed ParseFile');
+      done();
+    }
+  });
+
+  it('should delete file', async () => {
+    const file = new ParseFile('filename', [1, 2, 3]);
+    const request = jest.fn().mockResolvedValueOnce({ foo: 'bar' });
+    CoreManager.setRESTController({ request, ajax: () => {} });
+    const result = await file.destroy({ sessionToken: 'some-session-token' });
+    expect(result).toEqual({ foo: 'bar' });
+    expect(request).toHaveBeenCalledWith('DELETE', 'files/filename', {}, { sessionToken: 'some-session-token' });
+  });
 });

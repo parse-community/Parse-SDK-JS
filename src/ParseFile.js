@@ -271,6 +271,25 @@ class ParseFile {
     this._requestTask = null;
   }
 
+  /**
+   * Deletes the file from the Parse cloud.
+   * @param {Object} options
+   *  * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *     behalf of a specific user.
+   * </ul>
+   * @return {Promise} Promise that is resolved when the delete finishes.
+   */
+  destroy(options?: FullOptions) {
+    if (!this._name) {
+      throw new Error('Cannot delete an unnamed ParseFile');
+    }
+    const controller = CoreManager.getFileController();
+    return controller.deleteFile(this._name, options);
+  }
+
   toJSON(): { name: ?string, url: ?string } {
     return {
       __type: 'File',
@@ -425,6 +444,11 @@ const DefaultController = {
 
   _setXHR(xhr: any) {
     XHR = xhr;
+  },
+
+  deleteFile: function(name, options) {
+    const path = 'files/' + name;
+    return CoreManager.getRESTController().request('DELETE', path, {}, options);
   }
 };
 
