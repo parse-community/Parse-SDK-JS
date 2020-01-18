@@ -101,6 +101,96 @@
  * @param {Function} func The function to run before a save. This function should take two parameters a {@link Parse.Cloud.TriggerRequest} and a {@link Parse.Cloud.BeforeSaveResponse}.
  */
 
+
+/**
+ *
+ * Registers an before save file function. A new Parse.File can be returned to override the file that gets saved.
+ * If you want to replace the rquesting Parse.File with a Parse.File that is already saved, simply return the already saved Parse.File.
+ * You can also add metadata and tags to the file that will be stored via whatever file storage solution you're using (currently available in AWS S3 only)
+ *
+ * **Available in Cloud Code only.**
+ *
+ * Example: adding metadata and tags
+ * ```
+ * Parse.Cloud.beforeSaveFile(({ file, user }) => {
+ *   file.addMetadata('foo', 'bar');
+ *   file.addTag('createdBy', user.id);
+ * });
+ *
+ * ```
+ *
+ * Example: replacing file with an already saved file
+ *
+ * ```
+ * Parse.Cloud.beforeSaveFile(({ file, user }) => {
+ *   return user.get('avatar');
+ * });
+ *
+ * ```
+ *
+ * Example: replacing file with a different file
+ *
+ * ```
+ * Parse.Cloud.beforeSaveFile(({ file, user }) => {
+ *   const metadata = { foo: 'bar' };
+ *   const tags = { createdBy: user.id };
+ *   const newFile = new Parse.File(file.name(), <some other file data>, 'text/plain', { metadata, tags });
+ *   return newFile;
+ * });
+ *
+ * ```
+ *
+ * @method beforeSaveFile
+ * @name Parse.Cloud.beforeSaveFile
+ * @param {Function} func The function to run before a file saves. This function should take one parameter, a {@link Parse.Cloud.FileTriggerRequest}.
+ */
+
+
+/**
+ *
+ * Registers an after save file function.
+ *
+ * **Available in Cloud Code only.**
+ *
+ * Example: creating a new object that references this file in a separate collection
+ * ```
+ * Parse.Cloud.afterSaveFile(async ({ file, user }) => {
+ *   const fileObject = new Parse.Object('FileObject');
+ *   fileObject.set('metadata', file.getMetadata());
+ *   fileObject.set('tags', file.getTags());
+ *   fileObject.set('name', file.name());
+ *   fileObject.set('createdBy', user);
+ *   await fileObject.save({ sessionToken: user.getSessionToken() });
+ * });
+ *
+ * ```
+ *
+ * Example: replacing file with an already saved file
+ *
+ * ```
+ * Parse.Cloud.beforeSaveFile(({ file, user }) => {
+ *   return user.get('avatar');
+ * });
+ *
+ * ```
+ *
+ * Example: replacing file with a different file
+ *
+ * ```
+ * Parse.Cloud.beforeSaveFile(({ file, user }) => {
+ *   const metadata = { foo: 'bar' };
+ *   const tags = { createdBy: user.id };
+ *   const newFile = new Parse.File(file.name(), <some other file data>, 'text/plain', { metadata, tags });
+ *   return newFile;
+ * });
+ *
+ * ```
+ *
+ * @method beforeSaveFile
+ * @name Parse.Cloud.beforeSaveFile
+ * @param {Function} func The function to run before a file saves. This function should take one parameter, a {@link Parse.Cloud.FileTriggerRequest}.
+ */
+
 /**
  * Makes an HTTP Request.
  *
@@ -152,7 +242,20 @@
  * @property {Parse.Object} original If set, the object, as currently stored.
  */
 
+
 /**
+ * @typedef Parse.Cloud.FileTriggerRequest
+ * @property {String} installationId If set, the installationId triggering the request.
+ * @property {Boolean} master If true, means the master key was used.
+ * @property {Parse.User} user If set, the user that made the request.
+ * @property {Parse.File} file The file triggering the hook.
+ * @property {String} ip The IP address of the client making the request.
+ * @property {Object} headers The original HTTP headers for the request.
+ * @property {String} triggerName The name of the trigger (`beforeSaveFile`, `afterSaveFile`, ...)
+ * @property {Object} log The current logger inside Parse Server.
+ */
+
+ /**
  * @typedef Parse.Cloud.FunctionRequest
  * @property {String} installationId If set, the installationId triggering the request.
  * @property {Boolean} master If true, means the master key was used.
