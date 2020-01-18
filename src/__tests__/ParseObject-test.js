@@ -359,7 +359,7 @@ describe('ParseObject', () => {
     expect(o.dirtyKeys()).toEqual(['name']);
     expect(o.dirty()).toBe(true);
     expect(o.dirty('name')).toBe(true);
-    expect(o._getSaveJSON()).toEqual({ name: 'Will', _batchCount: 1, _batchIndex: 0 });
+    expect(o._getSaveJSON()).toEqual({ name: 'Will' });
 
     // set multiple fields at once
     o.set({ name: 'William', behavior: 'formal' });
@@ -516,8 +516,6 @@ describe('ParseObject', () => {
     expect(o.dirtyKeys()).toEqual(['otherField', 'objectField.number', 'objectField']);
     expect(o._getSaveJSON()).toEqual({
       'objectField.number': 20,
-      _batchCount: 1,
-      _batchIndex: 0,
       otherField: { hello: 'world' },
     });
   });
@@ -529,10 +527,7 @@ describe('ParseObject', () => {
     expect(o.attributes).toEqual({});
     expect(o.op('objectField.number') instanceof SetOp).toBe(false);
     expect(o.dirtyKeys()).toEqual([]);
-    expect(o._getSaveJSON()).toEqual({
-      _batchCount: 1,
-      _batchIndex: 0
-    });
+    expect(o._getSaveJSON()).toEqual({});
   });
 
   it('can add elements to an array field', () => {
@@ -672,8 +667,6 @@ describe('ParseObject', () => {
     expect(o.dirty()).toBe(true);
     expect(o.dirtyKeys()).toEqual(['obj']);
     expect(o._getSaveJSON()).toEqual({
-      _batchCount: 1,
-      _batchIndex: 0,
       obj: {
         a: 12,
         b: 21
@@ -1466,8 +1459,6 @@ describe('ParseObject', () => {
         method: 'POST',
         path: '/1/classes/Item',
         body: {
-          _batchCount: 2,
-          _batchIndex: 0,
           child: {
             __type: 'Pointer',
             className: 'Item',
@@ -1545,8 +1536,6 @@ describe('ParseObject', () => {
         method: 'POST',
         path: '/1/classes/Item',
         body: {
-          _batchCount: 1,
-          _batchIndex: 0,
           child: {
             __type: 'Pointer',
             className: 'Item',
@@ -1569,8 +1558,6 @@ describe('ParseObject', () => {
         method: 'POST',
         path: '/1/classes/Item',
         body: {
-          _batchCount: 1,
-          _batchIndex: 0,
           child: {
             __type: 'Pointer',
             className: 'Item',
@@ -1681,10 +1668,7 @@ describe('ParseObject', () => {
       expect(JSON.parse(xhr.send.mock.calls[0]).requests[0]).toEqual({
         method: 'POST',
         path: '/1/classes/Person',
-        body: {
-          _batchCount: 5,
-          _batchIndex: 0,
-        }
+        body: {}
       });
       done();
     });
@@ -2341,10 +2325,7 @@ describe('ObjectController', () => {
       objectId: 'b123',
       items: [{ __type: 'Pointer', objectId: 'i222', className: 'Item' }]
     });
-    expect(brand._getSaveJSON()).toEqual({
-      _batchCount: 1,
-      _batchIndex: 0,
-    });
+    expect(brand._getSaveJSON()).toEqual({});
     const items = brand.get('items');
     items.push(new ParseObject('Item'));
     brand.set('items', items);
@@ -2501,10 +2482,7 @@ describe('ParseObject (unique instance mode)', () => {
       expect(JSON.parse(xhr.send.mock.calls[0]).requests[0]).toEqual({
         method: 'POST',
         path: '/1/classes/Person',
-        body: {
-          _batchCount: 5,
-          _batchIndex: 0,
-        }
+        body: {}
       });
     });
     jest.runAllTicks();

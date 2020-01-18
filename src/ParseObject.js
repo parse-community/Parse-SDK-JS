@@ -306,8 +306,6 @@ class ParseObject {
     for (attr in pending[0]) {
       json[attr] = pending[0][attr].toJSON();
     }
-    json._batchIndex = this._batchIndex || 0;
-    json._batchCount = this._batchCount || 1;
     return json;
   }
 
@@ -2233,8 +2231,6 @@ const DefaultController = {
       let unsaved = target.concat();
       for (let i = 0; i < target.length; i++) {
         if (target[i] instanceof ParseObject) {
-          target[i]._batchIndex = i;
-          target[i]._batchCount = target.length;
           unsaved = unsaved.concat(unsavedChildren(target[i], true));
         }
       }
