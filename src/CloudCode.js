@@ -163,32 +163,9 @@
  *   await fileObject.save({ sessionToken: user.getSessionToken() });
  * });
  *
- * ```
- *
- * Example: replacing file with an already saved file
- *
- * ```
- * Parse.Cloud.beforeSaveFile(({ file, user }) => {
- *   return user.get('avatar');
- * });
- *
- * ```
- *
- * Example: replacing file with a different file
- *
- * ```
- * Parse.Cloud.beforeSaveFile(({ file, user }) => {
- *   const metadata = { foo: 'bar' };
- *   const tags = { createdBy: user.id };
- *   const newFile = new Parse.File(file.name(), <some other file data>, 'text/plain', { metadata, tags });
- *   return newFile;
- * });
- *
- * ```
- *
- * @method beforeSaveFile
- * @name Parse.Cloud.beforeSaveFile
- * @param {Function} func The function to run before a file saves. This function should take one parameter, a {@link Parse.Cloud.FileTriggerRequest}.
+ * @method afterSaveFile
+ * @name Parse.Cloud.afterSaveFile
+ * @param {Function} func The function to run after a file saves. This function should take one parameter, a {@link Parse.Cloud.FileTriggerRequest}.
  */
 
 /**
