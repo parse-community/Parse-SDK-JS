@@ -8,6 +8,7 @@
  *
  * @flow
  */
+import { resolvingPromise } from './promiseUtils';
 
 type Task = {
   task: () => Promise;
@@ -22,14 +23,7 @@ class TaskQueue {
   }
 
   enqueue(task: () => Promise): Promise {
-    let res;
-    let rej;
-    const taskComplete = new Promise((resolve, reject) => {
-      res = resolve;
-      rej = reject;
-    });
-    taskComplete.resolve = res;
-    taskComplete.reject = rej;
+    const taskComplete = new resolvingPromise();
     this.queue.push({
       task: task,
       _completion: taskComplete

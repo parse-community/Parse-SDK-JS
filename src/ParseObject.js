@@ -19,7 +19,7 @@ import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
 import ParseFile from './ParseFile';
-import { when, continueWhile } from './promiseUtils';
+import { when, continueWhile, resolvingPromise } from './promiseUtils';
 import { DEFAULT_PIN, PIN_PREFIX } from './LocalDatastoreUtils';
 
 import {
@@ -58,8 +58,6 @@ type SaveParams = {
 type SaveOptions = FullOptions & {
   cascadeSave?: boolean
 }
-
-const DEFAULT_BATCH_SIZE = 20;
 
 // Mapping of class names to constructors, so we can populate objects from the
 // server with appropriate subclasses of ParseObject
@@ -2143,7 +2141,7 @@ const DefaultController = {
   },
 
   async destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise<Array<void> | ParseObject> {
-    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
+    const batchSize = (options && options.batchSize) ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
 
     const RESTController = CoreManager.getRESTController();
@@ -2218,7 +2216,7 @@ const DefaultController = {
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
-    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
+    const batchSize = (options && options.batchSize) ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
     const mapIdForPin = {};
 
@@ -2242,19 +2240,17 @@ const DefaultController = {
       }
       unsaved = unique(unsaved);
 
-      let filesSaved = Promise.resolve();
+      const filesSaved: Array<ParseFile> = [];
       let pending: Array<ParseObject> = [];
       unsaved.forEach((el) => {
         if (el instanceof ParseFile) {
-          filesSaved = filesSaved.then(() => {
-            return el.save();
-          });
+          filesSaved.push(el.save());
         } else if (el instanceof ParseObject) {
           pending.push(el);
         }
       });
 
-      return filesSaved.then(() => {
+      return Promise.all(filesSaved).then(() => {
         let objectError = null;
         return continueWhile(() => {
           return pending.length > 0;
@@ -2280,17 +2276,11 @@ const DefaultController = {
 
           // Queue up tasks for each object in the batch.
           // When every task is ready, the API request will execute
-          let res, rej;
-          const batchReturned = new Promise((resolve, reject) => { res = resolve; rej = reject; });
-          batchReturned.resolve = res;
-          batchReturned.reject = rej;
+          const batchReturned = new resolvingPromise();
           const batchReady = [];
           const batchTasks = [];
           batch.forEach((obj, index) => {
-            let res, rej;
-            const ready = new Promise((resolve, reject) => { res = resolve; rej = reject; });
-            ready.resolve = res;
-            ready.reject = rej;
+            const ready = new resolvingPromise();
             batchReady.push(ready);
             const task = function() {
               ready.resolve();

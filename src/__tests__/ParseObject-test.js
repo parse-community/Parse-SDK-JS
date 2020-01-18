@@ -455,16 +455,12 @@ describe('ParseObject', () => {
     expect(o.op('age') instanceof IncrementOp).toBe(true);
     expect(o.dirtyKeys()).toEqual(['age']);
     expect(o._getSaveJSON()).toEqual({
-      _batchCount: 1,
-      _batchIndex: 0,
       age: { __op: 'Increment', amount: 1 }
     });
 
     o.increment('age', 4);
     expect(o.attributes).toEqual({ age: 5 });
     expect(o._getSaveJSON()).toEqual({
-      _batchCount: 1,
-      _batchIndex: 0,
       age: { __op: 'Increment', amount: 5 }
     });
 
@@ -482,8 +478,6 @@ describe('ParseObject', () => {
     o.increment('age');
     expect(o.attributes).toEqual({ age: 31 });
     expect(o._getSaveJSON()).toEqual({
-      _batchCount: 1,
-      _batchIndex: 0,
       age: 31
     });
 
@@ -1534,10 +1528,7 @@ describe('ParseObject', () => {
       [{
         method: 'POST',
         path: '/1/classes/Item',
-        body: {
-          _batchCount: 1,
-          _batchIndex: 0,
-        }
+        body: {}
       }]
     );
     xhrs[0].responseText = JSON.stringify([ { success: { objectId: 'grandchild' } } ]);
@@ -1730,6 +1721,69 @@ describe('ParseObject', () => {
       objects[i] = new ParseObject('Person');
     }
     ParseObject.saveAll(objects, { batchSize: 20 }).then(() => {
+      expect(xhrs[0].open.mock.calls[0]).toEqual(
+        ['POST', 'https://api.parse.com/1/batch', true]
+      );
+      expect(xhrs[1].open.mock.calls[0]).toEqual(
+        ['POST', 'https://api.parse.com/1/batch', true]
+      );
+      done();
+    });
+    jest.runAllTicks();
+    await flushPromises();
+
+    xhrs[0].responseText = JSON.stringify([
+      { success: { objectId: 'pid0' } },
+      { success: { objectId: 'pid1' } },
+      { success: { objectId: 'pid2' } },
+      { success: { objectId: 'pid3' } },
+      { success: { objectId: 'pid4' } },
+      { success: { objectId: 'pid5' } },
+      { success: { objectId: 'pid6' } },
+      { success: { objectId: 'pid7' } },
+      { success: { objectId: 'pid8' } },
+      { success: { objectId: 'pid9' } },
+      { success: { objectId: 'pid10' } },
+      { success: { objectId: 'pid11' } },
+      { success: { objectId: 'pid12' } },
+      { success: { objectId: 'pid13' } },
+      { success: { objectId: 'pid14' } },
+      { success: { objectId: 'pid15' } },
+      { success: { objectId: 'pid16' } },
+      { success: { objectId: 'pid17' } },
+      { success: { objectId: 'pid18' } },
+      { success: { objectId: 'pid19' } },
+    ]);
+    xhrs[0].onreadystatechange();
+    jest.runAllTicks();
+    await flushPromises();
+
+    xhrs[1].responseText = JSON.stringify([
+      { success: { objectId: 'pid20' } },
+      { success: { objectId: 'pid21' } },
+    ]);
+    xhrs[1].onreadystatechange();
+    jest.runAllTicks();
+  });
+
+  it('can saveAll with global batchSize', async (done) => {
+    const xhrs = [];
+    for (let i = 0; i < 2; i++) {
+      xhrs[i] = {
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn(),
+        status: 200,
+        readyState: 4
+      };
+    }
+    let current = 0;
+    RESTController._setXHR(function() { return xhrs[current++]; });
+    const objects = [];
+    for (let i = 0; i < 22; i++) {
+      objects[i] = new ParseObject('Person');
+    }
+    ParseObject.saveAll(objects).then(() => {
       expect(xhrs[0].open.mock.calls[0]).toEqual(
         ['POST', 'https://api.parse.com/1/batch', true]
       );

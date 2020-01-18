@@ -208,6 +208,8 @@ class ParseFile {
    *  * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *     behalf of a specific user.
    *   <li>progress: In Browser only, callback for upload progress
    * </ul>
    * @return {Promise} Promise that is resolved when the save finishes.
@@ -323,7 +325,7 @@ class ParseFile {
 }
 
 const DefaultController = {
-  saveFile: function(name: string, source: FileSource, options?: FullOptions) {
+  saveFile: async function(name: string, source: FileSource, options?: FullOptions) {
     if (source.format !== 'file') {
       throw new Error('saveFile can only be used with File-type sources.');
     }
@@ -335,6 +337,15 @@ const DefaultController = {
     const jsKey = CoreManager.get('JAVASCRIPT_KEY');
     if (jsKey) {
       headers['X-Parse-JavaScript-Key'] = jsKey;
+    }
+    let sessionToken = options.sessionToken;
+    const userController = CoreManager.getUserController();
+    if (!sessionToken && userController) {
+      const currentUser = await userController.currentUserAsync();
+      sessionToken =  currentUser ? currentUser.getSessionToken() : undefined;
+    }
+    if (sessionToken) {
+      headers['X-Parse-Session-Token'] = sessionToken;
     }
     let url = CoreManager.get('SERVER_URL');
     if (url[url.length - 1] !== '/') {

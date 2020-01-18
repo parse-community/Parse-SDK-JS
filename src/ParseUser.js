@@ -891,16 +891,15 @@ const DefaultController = {
     return Storage.removeItemAsync(path);
   },
 
-  setCurrentUser(user) {
-    const currentUser = this.currentUser();
-    let promise = Promise.resolve();
+  async setCurrentUser(user) {
+    const currentUser = await this.currentUserAsync();
     if (currentUser && !user.equals(currentUser) && AnonymousUtils.isLinked(currentUser)) {
-      promise = currentUser.destroy({ sessionToken: currentUser.getSessionToken() })
+      await currentUser.destroy({ sessionToken: currentUser.getSessionToken() })
     }
     currentUserCache = user;
     user._cleanupAuthData();
     user._synchronizeAllAuthData();
-    return promise.then(() => DefaultController.updateUserOnDisk(user));
+    return DefaultController.updateUserOnDisk(user);
   },
 
   currentUser(): ?ParseUser {

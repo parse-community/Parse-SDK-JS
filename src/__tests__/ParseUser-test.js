@@ -20,6 +20,7 @@ jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
 jest.dontMock('../ParseUser');
+jest.dontMock('../promiseUtils');
 jest.dontMock('../RESTController');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../Storage');
@@ -35,7 +36,9 @@ jest.mock('uuid/v4', () => {
   return () => value++;
 });
 jest.dontMock('./test_helpers/mockXHR');
+jest.dontMock('./test_helpers/mockAsyncStorage');
 
+const mockAsyncStorage = require('./test_helpers/mockAsyncStorage');
 const CoreManager = require('../CoreManager');
 const CryptoController = require('../CryptoController');
 const LocalDatastore = require('../LocalDatastore');
@@ -298,6 +301,34 @@ describe('ParseUser', () => {
       done();
     });
   });
+
+  it('can become a user with async storage', async () => {
+    const currentStorage = CoreManager.getStorageController();
+    CoreManager.setStorageController(mockAsyncStorage);
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('GET');
+        expect(path).toBe('users/me');
+        expect(options.sessionToken).toBe('123abc');
+
+        return Promise.resolve({
+          objectId: 'uid3',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+
+    const u = await ParseUser.become('123abc');
+    expect(u.id).toBe('uid3');
+    expect(u.isCurrent()).toBe(true);
+    expect(u.existed()).toBe(true);
+    CoreManager.setStorageController(currentStorage);
+  });
+
 
   it('can hydrate a user with sessionToken in server environment', async () => {
     ParseUser.enableUnsafeCurrentUser();
