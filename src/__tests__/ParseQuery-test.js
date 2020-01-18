@@ -928,6 +928,25 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can set explain value', () => {
+    const q = new ParseQuery('Item');
+    q.explain();
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      explain: true,
+    });
+    const q2 = new ParseQuery('Item');
+    q2.withJSON(json);
+    expect(q2._explain).toBe(true);
+
+    q.explain(false);
+    expect(q.toJSON()).toEqual({
+      where: {},
+    });
+    expect(q.explain.bind(q, 'not boolean')).toThrow('You can only set explain to a boolean value');
+  });
+
   it('can generate queries that include full data for pointers', () => {
     const q = new ParseQuery('Item');
     q.greaterThan('inStock', 0);

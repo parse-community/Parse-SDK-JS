@@ -37,6 +37,8 @@ export type QueryJSON = {
   order?: string;
   className?: string;
   count?: number;
+  hint? : mixed;
+  explain? : boolean;
   readPreference?: string;
   includeReadPreference?: string;
   subqueryReadPreference?: string;
@@ -233,6 +235,7 @@ class ParseQuery {
   _localDatastorePinName: any;
   _extraOptions: { [key: string]: mixed };
   _hint: mixed;
+  _explain: boolean;
   _xhrRequest: any;
 
   /**
@@ -441,6 +444,9 @@ class ParseQuery {
     if (this._hint) {
       params.hint = this._hint;
     }
+    if (this._explain) {
+      params.explain = true;
+    }
     for (const key in this._extraOptions) {
       params[key] = this._extraOptions[key];
     }
@@ -518,9 +524,13 @@ class ParseQuery {
       this._hint = json.hint;
     }
 
+    if (json.explain) {
+      this._explain = !!json.explain;
+    }
+
     for (const key in json) {
       if (json.hasOwnProperty(key))  {
-        if (["where", "include", "keys", "count", "limit", "skip", "order", "readPreference", "includeReadPreference", "subqueryReadPreference", "hint"].indexOf(key) === -1) {
+        if (["where", "include", "keys", "count", "limit", "skip", "order", "readPreference", "includeReadPreference", "subqueryReadPreference", "hint", "explain"].indexOf(key) === -1) {
           this._extraOptions[key] = json[key];
         }
       }
@@ -623,7 +633,10 @@ class ParseQuery {
       this.toJSON(),
       findOptions
     ).then((response) => {
-
+      // Return generic object when explain is used
+      if (this._explain) {
+        return response.results;
+      }
       const results = response.results.map((data) => {
         // In cases of relations, the server may send back a className
         // on the top level of the payload
@@ -763,6 +776,7 @@ class ParseQuery {
     const params = {
       pipeline,
       hint: this._hint,
+      explain: this._explain,
     };
     return controller.aggregate(
       this.className,
@@ -942,6 +956,20 @@ class ParseQuery {
       delete this._hint;
     }
     this._hint = value;
+    return this;
+  }
+
+  /**
+   * Investigates the query execution plan. Useful for optimizing queries. (https://docs.mongodb.com/manual/reference/operator/meta/explain/)
+   *
+   * @param {Boolean} explain Used to toggle the information on the query plan.
+   * @return {Parse.Query} Returns the query, so you can chain this call.
+   */
+  explain(explain: boolean = true): ParseQuery {
+    if (typeof explain !== 'boolean') {
+      throw new Error('You can only set explain to a boolean value');
+    }
+    this._explain = explain;
     return this;
   }
 
