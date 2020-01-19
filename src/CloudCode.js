@@ -229,7 +229,7 @@
  * @property {Object} log The current logger inside Parse Server.
  */
 
- /**
+/**
  * @typedef Parse.Cloud.FunctionRequest
  * @property {String} installationId If set, the installationId triggering the request.
  * @property {Boolean} master If true, means the master key was used.

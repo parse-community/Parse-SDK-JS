@@ -101,8 +101,8 @@ class ParseFile {
    * @param type {String} Optional Content-Type header to use for the file. If
    *     this is omitted, the content type will be inferred from the name's
    *     extension.
-   * @param metadata {Object} Optional key value pairs to be stored with file object (S3 Only)
-   * @param tags {Object} Optional key value pairs to be stored with file object (S3 Only)
+   * @param metadata {Object} Optional key value pairs to be stored with file object
+   * @param tags {Object} Optional key value pairs to be stored with file object
    */
   constructor(name: string, data?: FileData, type?: string, metadata?: Object, tags?: Object) {
     const specifiedType = type || '';
@@ -339,7 +339,7 @@ class ParseFile {
    * Sets metadata to be saved with file object. Overwrites existing metadata
    * @param {Object} metadata Key value pairs to be stored with file object
    */
-  setMetadata(metadata: Object) {
+  setMetadata(metadata: any) {
     if (metadata && typeof metadata === 'object') {
       Object.keys(metadata).forEach((key) => {
         this.addMetadata(key, metadata[key]);
@@ -352,7 +352,7 @@ class ParseFile {
    * @param {String} key
    * @param {Mixed} value
    */
-  addMetadata(key: String, value: any) {
+  addMetadata(key: string, value: any) {
     if (typeof key === 'string') {
       this._metadata[key] = value;
     }
@@ -362,7 +362,7 @@ class ParseFile {
    * Sets tags to be saved with file object. Overwrites existing tags
    * @param {Object} tags Key value pairs to be stored with file object
    */
-  setTags(tags: Object) {
+  setTags(tags: any) {
     if (tags && typeof tags === 'object') {
       Object.keys(tags).forEach((key) => {
         this.addTag(key, tags[key]);
@@ -375,7 +375,7 @@ class ParseFile {
    * @param {String} key
    * @param {Mixed} value
    */
-  addTag(key: String, value: String) {
+  addTag(key: string, value: string) {
     if (typeof key === 'string') {
       this._tags[key] = value;
     }
