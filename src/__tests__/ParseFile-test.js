@@ -629,11 +629,12 @@ describe('FileController', () => {
     const file = new ParseFile('filename', [1, 2, 3]);
     const ajax = jest.fn().mockResolvedValueOnce({ foo: 'bar' });
     CoreManager.setRESTController({ ajax, request: () => {} });
-    const result = await file.destroy();
+    const result = await file.destroy({ useMasterKey: true });
     expect(result).toEqual(file);
     expect(ajax).toHaveBeenCalledWith('DELETE', 'https://api.parse.com/1/files/filename', '', {
       "X-Parse-Application-ID": null,
       "X-Parse-Master-Key": null,
+      "X-Parse-Session-Token": 'currentUserToken',
     });
   });
 
@@ -642,11 +643,12 @@ describe('FileController', () => {
     const ajax = jest.fn().mockResolvedValueOnce(Promise.reject(new ParseError(403, 'Cannot delete file.')));
     const handleError = jest.fn();
     CoreManager.setRESTController({ ajax, request: () => {}, handleError });
-    const result = await file.destroy();
+    const result = await file.destroy({ useMasterKey: true });
     expect(result).toEqual(file);
     expect(ajax).toHaveBeenCalledWith('DELETE', 'https://api.parse.com/1/files/filename', '', {
       "X-Parse-Application-ID": null,
       "X-Parse-Master-Key": null,
+      "X-Parse-Session-Token": 'currentUserToken',
     });
     expect(handleError).toHaveBeenCalled();
   });
@@ -657,11 +659,12 @@ describe('FileController', () => {
     const ajax = jest.fn().mockResolvedValueOnce(Promise.reject(response));
     const handleError = jest.fn();
     CoreManager.setRESTController({ ajax, request: () => {}, handleError });
-    const result = await file.destroy();
+    const result = await file.destroy({ useMasterKey: true });
     expect(result).toEqual(file);
     expect(ajax).toHaveBeenCalledWith('DELETE', 'https://api.parse.com/1/files/filename', '', {
       "X-Parse-Application-ID": null,
       "X-Parse-Master-Key": null,
+      "X-Parse-Session-Token": 'currentUserToken',
     });
     expect(handleError).not.toHaveBeenCalled();
   });

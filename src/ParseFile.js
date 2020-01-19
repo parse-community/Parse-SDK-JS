@@ -273,16 +273,19 @@ class ParseFile {
 
   /**
    * Deletes the file from the Parse cloud.
-   * In Cloud Code and Node only with Master Key
-   *
+   * @param {Object} options
+   *  * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   * </ul>
    * @return {Promise} Promise that is resolved when the delete finishes.
    */
-  destroy() {
+  destroy(options = {}) {
     if (!this._name) {
       throw new Error('Cannot delete an unsaved ParseFile.');
     }
     const controller = CoreManager.getFileController();
-    return controller.deleteFile(this._name).then(() => {
+    return controller.deleteFile(this._name, options).then(() => {
       this._data = null;
       this._requestTask = null;
       return this;
@@ -441,24 +444,43 @@ const DefaultController = {
     });
   },
 
-  deleteFile: function(name) {
+  deleteFile: async function(name, options) {
     const headers = {
       'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
-      'X-Parse-Master-Key': CoreManager.get('MASTER_KEY'),
     };
+    if (options.useMasterKey === true) {
+      headers['X-Parse-Master-Key'] = CoreManager.get('MASTER_KEY');
+    }
+    const jsKey = CoreManager.get('JAVASCRIPT_KEY');
+    if (jsKey) {
+      headers['X-Parse-JavaScript-Key'] = jsKey;
+    }
+    // Although master key is required to delete files, having the session token option
+    // allows for client side file deletion in the future
+    let sessionToken = options.sessionToken;
+    const userController = CoreManager.getUserController();
+    if (!sessionToken && userController) {
+      const currentUser = await userController.currentUserAsync();
+      sessionToken =  currentUser ? currentUser.getSessionToken() : undefined;
+    }
+    if (sessionToken) {
+      headers['X-Parse-Session-Token'] = sessionToken;
+    }
     let url = CoreManager.get('SERVER_URL');
     if (url[url.length - 1] !== '/') {
       url += '/';
     }
     url += 'files/' + name;
-    return CoreManager.getRESTController().ajax('DELETE', url, '', headers).catch(response => {
+    try {
+      return await CoreManager.getRESTController().ajax('DELETE', url, '', headers)
+    } catch (error) {
       // TODO: return JSON object in server
-      if (!response || response === 'SyntaxError: Unexpected end of JSON input') {
+      if (!error || error === 'SyntaxError: Unexpected end of JSON input') {
         return Promise.resolve();
       } else {
-        return CoreManager.getRESTController().handleError(response);
+        return CoreManager.getRESTController().handleError(error);
       }
-    });
+    }
   },
 
   _setXHR(xhr: any) {
