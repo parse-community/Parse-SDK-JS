@@ -291,44 +291,44 @@ describe('ParseFile', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120], '', metadata, tags);
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('');
-    expect(file._metadata).toBe(metadata);
-    expect(file._tags).toBe(tags);
+    expect(file.metadata()).toBe(metadata);
+    expect(file.tags()).toBe(tags);
   });
 
   it('should set metadata', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     file.setMetadata({ foo: 'bar' });
-    expect(file._metadata).toEqual({ foo: 'bar' });
+    expect(file.metadata()).toEqual({ foo: 'bar' });
   });
 
   it('should set metadata key', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     file.addMetadata('foo', 'bar');
-    expect(file._metadata).toEqual({ foo: 'bar' });
+    expect(file.metadata()).toEqual({ foo: 'bar' });
   });
 
   it('should not set metadata if key is not a string', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     file.addMetadata(10, '');
-    expect(file._metadata).toEqual({});
+    expect(file.metadata()).toEqual({});
   });
 
   it('should set tags', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     file.setTags({ foo: 'bar' });
-    expect(file._tags).toEqual({ foo: 'bar' });
+    expect(file.tags()).toEqual({ foo: 'bar' });
   });
 
   it('should set tag key', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     file.addTag('foo', 'bar');
-    expect(file._tags).toEqual({ foo: 'bar' });
+    expect(file.tags()).toEqual({ foo: 'bar' });
   });
 
   it('should not set tag if key is not a string', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     file.addTag(10, 'bar');
-    expect(file._tags).toEqual({});
+    expect(file.tags()).toEqual({});
   });
 });
 

@@ -180,6 +180,7 @@ class ParseFile {
     this._data = result.base64;
     return this._data;
   }
+
   /**
    * Gets the name of the file. Before save is called, this is the filename
    * given by the user. After save is called, that name gets prefixed with a
@@ -206,6 +207,22 @@ class ParseFile {
     } else {
       return this._url;
     }
+  }
+
+  /**
+   * Gets the metadata of the file.
+   * @return {Object}
+   */
+  metadata(): Object {
+    return this._metadata;
+  }
+
+  /**
+   * Gets the tags of the file.
+   * @return {Object}
+   */
+  tags(): Object {
+    return this._tags;
   }
 
   /**

@@ -101,16 +101,15 @@
  * @param {Function} func The function to run before a save. This function should take two parameters a {@link Parse.Cloud.TriggerRequest} and a {@link Parse.Cloud.BeforeSaveResponse}.
  */
 
-
 /**
  *
  * Registers an before save file function. A new Parse.File can be returned to override the file that gets saved.
  * If you want to replace the rquesting Parse.File with a Parse.File that is already saved, simply return the already saved Parse.File.
- * You can also add metadata and tags to the file that will be stored via whatever file storage solution you're using (currently available in AWS S3 only)
+ * You can also add metadata to the file that will be stored via whatever file storage solution you're using.
  *
  * **Available in Cloud Code only.**
  *
- * Example: adding metadata and tags
+ * Example: Adding metadata and tags
  * ```
  * Parse.Cloud.beforeSaveFile(({ file, user }) => {
  *   file.addMetadata('foo', 'bar');
@@ -134,7 +133,7 @@
  * Parse.Cloud.beforeSaveFile(({ file, user }) => {
  *   const metadata = { foo: 'bar' };
  *   const tags = { createdBy: user.id };
- *   const newFile = new Parse.File(file.name(), <some other file data>, 'text/plain', { metadata, tags });
+ *   const newFile = new Parse.File(file.name(), <some other file data>, 'text/plain', metadata, tags);
  *   return newFile;
  * });
  *
@@ -144,7 +143,6 @@
  * @name Parse.Cloud.beforeSaveFile
  * @param {Function} func The function to run before a file saves. This function should take one parameter, a {@link Parse.Cloud.FileTriggerRequest}.
  */
-
 
 /**
  *
@@ -156,8 +154,8 @@
  * ```
  * Parse.Cloud.afterSaveFile(async ({ file, user }) => {
  *   const fileObject = new Parse.Object('FileObject');
- *   fileObject.set('metadata', file.getMetadata());
- *   fileObject.set('tags', file.getTags());
+ *   fileObject.set('metadata', file.metadata());
+ *   fileObject.set('tags', file.tags());
  *   fileObject.set('name', file.name());
  *   fileObject.set('createdBy', user);
  *   await fileObject.save({ sessionToken: user.getSessionToken() });
@@ -218,7 +216,6 @@
  * @property {Object} log The current logger inside Parse Server.
  * @property {Parse.Object} original If set, the object, as currently stored.
  */
-
 
 /**
  * @typedef Parse.Cloud.FileTriggerRequest
