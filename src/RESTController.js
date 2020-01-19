@@ -270,31 +270,32 @@ const RESTController = {
           return response;
         }
       });
-    }).catch(function(response: { responseText: string }) {
-      // Transform the error into an instance of ParseError by trying to parse
-      // the error string as JSON
-      let error;
-      if (response && response.responseText) {
-        try {
-          const errorJSON = JSON.parse(response.responseText);
-          error = new ParseError(errorJSON.code, errorJSON.error);
-        } catch (e) {
-          // If we fail to parse the error text, that's okay.
-          error = new ParseError(
-            ParseError.INVALID_JSON,
-            'Received an error with invalid JSON from Parse: ' +
-              response.responseText
-          );
-        }
-      } else {
+    }).catch(RESTController.handleError);
+  },
+
+  handleError(response) {
+    // Transform the error into an instance of ParseError by trying to parse
+    // the error string as JSON
+    let error;
+    if (response && response.responseText) {
+      try {
+        const errorJSON = JSON.parse(response.responseText);
+        error = new ParseError(errorJSON.code, errorJSON.error);
+      } catch (e) {
+        // If we fail to parse the error text, that's okay.
         error = new ParseError(
-          ParseError.CONNECTION_FAILED,
-          'XMLHttpRequest failed: ' + JSON.stringify(response)
+          ParseError.INVALID_JSON,
+          'Received an error with invalid JSON from Parse: ' +
+            response.responseText
         );
       }
-
-      return Promise.reject(error);
-    });
+    } else {
+      error = new ParseError(
+        ParseError.CONNECTION_FAILED,
+        'XMLHttpRequest failed: ' + JSON.stringify(response)
+      );
+    }
+    return Promise.reject(error);
   },
 
   _setXHR(xhr: any) {

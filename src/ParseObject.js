@@ -2116,16 +2116,16 @@ const DefaultController = {
         return Promise.resolve(results);
       });
     } else {
-      const RESTController = CoreManager.getRESTController();
-      const params = {};
-      if (options && options.include) {
-        params.include = options.include.join();
-      }
       if (!target.id) {
         return Promise.reject(new ParseError(
           ParseError.MISSING_OBJECT_ID,
           'Object does not have an ID'
         ));
+      }
+      const RESTController = CoreManager.getRESTController();
+      const params = {};
+      if (options && options.include) {
+        params.include = options.include.join();
       }
       return RESTController.request(
         'GET',
