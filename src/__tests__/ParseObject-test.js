@@ -1411,6 +1411,26 @@ describe('ParseObject', () => {
     });
   });
 
+  it('throw for fetch with empty string as ID', async () => {
+    expect.assertions(1);
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: {
+          count: 10
+        }
+      }])
+    );
+    const p = new ParseObject('Person');
+    p.id = '';
+    await expect(p.fetch())
+      .rejects
+      .toThrowError(new ParseError(
+        ParseError.MISSING_OBJECT_ID,
+        'Object does not have an ID'
+      ));
+  });
+
   it('should fail on invalid date', (done) => {
     const obj = new ParseObject('Item');
     obj.set('when', new Date(Date.parse(null)));
