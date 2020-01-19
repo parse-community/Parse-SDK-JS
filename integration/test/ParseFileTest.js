@@ -103,4 +103,16 @@ describe('Parse.File', () => {
     assert.equal(file, deletedFile);
     assert.notEqual(data, deletedData);
   });
+
+  it('can handle delete file error', async () => {
+    const parseLogo = 'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
+    const file = new Parse.File('parse-server-logo', { uri: parseLogo });
+    try {
+      await file.destroy();
+      assert.equal(false, true);
+    } catch (e) {
+      assert.equal(e.code, Parse.Error.FILE_DELETE_ERROR);
+      assert.equal(e.message, 'Could not delete file.');
+    }
+  });
 });
