@@ -98,7 +98,7 @@ describe('Parse.File', () => {
     await file.save();
     const data = await file.getData();
 
-    const deletedFile = await file.destroy();
+    const deletedFile = await file.destroy({ useMasterKey: true });
     const deletedData = await file.getData();
     assert.equal(file, deletedFile);
     assert.notEqual(data, deletedData);
@@ -108,7 +108,7 @@ describe('Parse.File', () => {
     const parseLogo = 'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
     const file = new Parse.File('parse-server-logo', { uri: parseLogo });
     try {
-      await file.destroy();
+      await file.destroy({ useMasterKey: true });
       assert.equal(false, true);
     } catch (e) {
       assert.equal(e.code, Parse.Error.FILE_DELETE_ERROR);
