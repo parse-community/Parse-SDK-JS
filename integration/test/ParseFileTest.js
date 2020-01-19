@@ -6,7 +6,7 @@ const Parse = require('../../node');
 
 describe('Parse.File', () => {
   beforeEach((done) => {
-    Parse.initialize('integration');
+    Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
     clear().then(done).catch(done.fail);
@@ -90,5 +90,17 @@ describe('Parse.File', () => {
     assert.equal(file._data, null)
     data = await file.getData();
     assert.equal(data, 'ParseA==');
+  });
+
+  it('can delete file', async () => {
+    const parseLogo = 'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
+    const file = new Parse.File('parse-server-logo', { uri: parseLogo });
+    await file.save();
+    const data = await file.getData();
+
+    const deletedFile = await file.destroy();
+    const deletedData = await file.getData();
+    assert.equal(file, deletedFile);
+    assert.notEqual(data, deletedData);
   });
 });
