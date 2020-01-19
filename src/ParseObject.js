@@ -2116,6 +2116,12 @@ const DefaultController = {
         return Promise.resolve(results);
       });
     } else {
+      if (!target.id) {
+        return Promise.reject(new ParseError(
+          ParseError.MISSING_OBJECT_ID,
+          'Object does not have an ID'
+        ));
+      }
       const RESTController = CoreManager.getRESTController();
       const params = {};
       if (options && options.include) {

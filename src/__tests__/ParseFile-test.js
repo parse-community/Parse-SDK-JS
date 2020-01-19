@@ -11,6 +11,7 @@ jest.autoMockOff();
 jest.mock('http');
 jest.mock('https');
 
+const ParseError = require('../ParseError').default;
 const ParseFile = require('../ParseFile').default;
 const CoreManager = require('../CoreManager');
 const EventEmitter = require('../EventEmitter');
@@ -684,5 +685,56 @@ describe('FileController', () => {
       expect(f.name()).toBe('/api.parse.com/1/files/parse.txt');
       expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
     });
+  });
+
+  it('should throw error if file deleted without name', async (done) => {
+    const file = new ParseFile('', [1, 2, 3]);
+    try {
+      await file.destroy();
+    } catch (e) {
+      expect(e.message).toBe('Cannot delete an unsaved ParseFile.');
+      done();
+    }
+  });
+
+  it('should delete file', async () => {
+    const file = new ParseFile('filename', [1, 2, 3]);
+    const ajax = jest.fn().mockResolvedValueOnce({ foo: 'bar' });
+    CoreManager.setRESTController({ ajax, request: () => {} });
+    const result = await file.destroy();
+    expect(result).toEqual(file);
+    expect(ajax).toHaveBeenCalledWith('DELETE', 'https://api.parse.com/1/files/filename', '', {
+      "X-Parse-Application-ID": null,
+      "X-Parse-Master-Key": null,
+    });
+  });
+
+  it('should handle delete file error', async () => {
+    const file = new ParseFile('filename', [1, 2, 3]);
+    const ajax = jest.fn().mockResolvedValueOnce(Promise.reject(new ParseError(403, 'Cannot delete file.')));
+    const handleError = jest.fn();
+    CoreManager.setRESTController({ ajax, request: () => {}, handleError });
+    const result = await file.destroy();
+    expect(result).toEqual(file);
+    expect(ajax).toHaveBeenCalledWith('DELETE', 'https://api.parse.com/1/files/filename', '', {
+      "X-Parse-Application-ID": null,
+      "X-Parse-Master-Key": null,
+    });
+    expect(handleError).toHaveBeenCalled();
+  });
+
+  it('should handle delete file error invalid server response', async () => {
+    const file = new ParseFile('filename', [1, 2, 3]);
+    const response = null;
+    const ajax = jest.fn().mockResolvedValueOnce(Promise.reject(response));
+    const handleError = jest.fn();
+    CoreManager.setRESTController({ ajax, request: () => {}, handleError });
+    const result = await file.destroy();
+    expect(result).toEqual(file);
+    expect(ajax).toHaveBeenCalledWith('DELETE', 'https://api.parse.com/1/files/filename', '', {
+      "X-Parse-Application-ID": null,
+      "X-Parse-Master-Key": null,
+    });
+    expect(handleError).not.toHaveBeenCalled();
   });
 });
