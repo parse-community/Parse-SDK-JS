@@ -273,21 +273,20 @@ class ParseFile {
 
   /**
    * Deletes the file from the Parse cloud.
-   * @param {Object} options
-   *  * Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *     behalf of a specific user.
-   * </ul>
+   * In Cloud Code and Node only with Master Key
+   *
    * @return {Promise} Promise that is resolved when the delete finishes.
    */
-  destroy(options?: FullOptions) {
+  destroy() {
     if (!this._name) {
-      throw new Error('Cannot delete an unnamed ParseFile');
+      throw new Error('Cannot delete an unsaved ParseFile.');
     }
     const controller = CoreManager.getFileController();
-    return controller.deleteFile(this._name, options);
+    return controller.deleteFile(this._name).then(() => {
+      this._data = null;
+      this._requestTask = null;
+      return this;
+    });
   }
 
   toJSON(): { name: ?string, url: ?string } {
@@ -442,14 +441,29 @@ const DefaultController = {
     });
   },
 
+  deleteFile: function(name) {
+    const headers = {
+      'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
+      'X-Parse-Master-Key': CoreManager.get('MASTER_KEY'),
+    };
+    let url = CoreManager.get('SERVER_URL');
+    if (url[url.length - 1] !== '/') {
+      url += '/';
+    }
+    url += 'files/' + name;
+    return CoreManager.getRESTController().ajax('DELETE', url, '', headers).catch(response => {
+      // TODO: return JSON object in server
+      if (!response || response === 'SyntaxError: Unexpected end of JSON input') {
+        return Promise.resolve();
+      } else {
+        return CoreManager.getRESTController().handleError(response);
+      }
+    });
+  },
+
   _setXHR(xhr: any) {
     XHR = xhr;
   },
-
-  deleteFile: function(name, options) {
-    const path = 'files/' + name;
-    return CoreManager.getRESTController().request('DELETE', path, {}, options);
-  }
 };
 
 CoreManager.setFileController(DefaultController);
