@@ -1,5 +1,5 @@
 {
-  "name": "@leapllc/parse",
+  "name": "parse",
   "version": "2.11.0",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://parseplatform.org/",
@@ -11,7 +11,7 @@
   "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stevestencil/Parse-SDK-JS.git"
+    "url": "https://github.com/parse-community/Parse-SDK-JS"
   },
   "bugs": "https://github.com/parse-community/Parse-SDK-JS/issues",
   "files": [
