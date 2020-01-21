@@ -259,6 +259,78 @@ describe('ParseFile', () => {
     file.cancel();
     expect(mockRequestTask.abort).toHaveBeenCalledTimes(1);
   });
+
+  it('should save file with metadata and tag options', async () => {
+    const fileController = {
+      saveFile: jest.fn().mockResolvedValue({}),
+      saveBase64: () => {},
+      download: () => {},
+    };
+    CoreManager.setFileController(fileController);
+    const file = new ParseFile('donald_duck.txt', new File(['Parse'], 'donald_duck.txt'));
+    file.addMetadata('foo', 'bar');
+    file.addTag('bar', 'foo');
+    await file.save();
+    expect(fileController.saveFile).toHaveBeenCalledWith(
+      'donald_duck.txt',
+      {
+        file: expect.any(File),
+        format: 'file',
+        type: ''
+      },
+      {
+        metadata: { foo: 'bar' },
+        tags: { bar: 'foo' },
+        requestTask: expect.any(Function),
+      },
+    );
+  });
+
+  it('should create new ParseFile with metadata and tags', () => {
+    const metadata = { foo: 'bar' };
+    const tags = { bar: 'foo' };
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120], '', metadata, tags);
+    expect(file._source.base64).toBe('ParseA==');
+    expect(file._source.type).toBe('');
+    expect(file.metadata()).toBe(metadata);
+    expect(file.tags()).toBe(tags);
+  });
+
+  it('should set metadata', () => {
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file.setMetadata({ foo: 'bar' });
+    expect(file.metadata()).toEqual({ foo: 'bar' });
+  });
+
+  it('should set metadata key', () => {
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file.addMetadata('foo', 'bar');
+    expect(file.metadata()).toEqual({ foo: 'bar' });
+  });
+
+  it('should not set metadata if key is not a string', () => {
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file.addMetadata(10, '');
+    expect(file.metadata()).toEqual({});
+  });
+
+  it('should set tags', () => {
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file.setTags({ foo: 'bar' });
+    expect(file.tags()).toEqual({ foo: 'bar' });
+  });
+
+  it('should set tag key', () => {
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file.addTag('foo', 'bar');
+    expect(file.tags()).toEqual({ foo: 'bar' });
+  });
+
+  it('should not set tag if key is not a string', () => {
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file.addTag(10, 'bar');
+    expect(file.tags()).toEqual({});
+  });
 });
 
 describe('FileController', () => {
