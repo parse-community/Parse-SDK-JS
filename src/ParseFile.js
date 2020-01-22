@@ -424,6 +424,7 @@ const DefaultController = {
       return await DefaultController.saveBase64(name, source, options);
     }
     const base64Data = await new Promise((res, rej) => {
+      // eslint-disable-next-line no-undef
       const reader = new FileReader();
       reader.readAsDataURL(source.file);
       reader.onload = () => res(reader.result);
