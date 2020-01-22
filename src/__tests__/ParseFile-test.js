@@ -370,8 +370,8 @@ describe('FileController', () => {
 
     return file.save().then(function(f) {
       expect(f).toBe(file);
-      expect(f.name()).toBe('/api.parse.com/1/files/parse.txt');
-      expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
+      expect(f.name()).toBe('parse.txt');
+      expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
     });
   });
 
@@ -644,8 +644,8 @@ describe('FileController', () => {
 
     return file.save({ sessionToken: 'testing_sessionToken' }).then(function(f) {
       expect(f).toBe(file);
-      expect(f.name()).toBe('/api.parse.com/1/files/parse.txt');
-      expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
+      expect(f.name()).toBe('parse.txt');
+      expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
     });
   });
 
@@ -682,9 +682,63 @@ describe('FileController', () => {
 
     return file.save().then(function(f) {
       expect(f).toBe(file);
-      expect(f.name()).toBe('/api.parse.com/1/files/parse.txt');
-      expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
+      expect(f.name()).toBe('parse.txt');
+      expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
     });
+  });
+
+  it('should save file using saveFile with metadata and tags', async () => {
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve({
+          getSessionToken() {
+            return 'currentUserToken';
+          }
+        });
+      }
+    });
+    const request = jest.fn((method, path) => {
+      const name = path.substr(path.indexOf('/') + 1);
+      return Promise.resolve({
+        name: name,
+        url: 'https://files.parsetfss.com/a/' + name
+      });
+    });
+    const ajax = function(method, path, data, headers) {
+      expect(headers['X-Parse-Session-Token']).toBe('currentUserToken')
+      const name = path.substr(path.indexOf('/') + 1);
+      return Promise.resolve({
+        response: {
+          name: name,
+          url: 'https://files.parsetfss.com/a/' + name
+        }
+      });
+    };
+    CoreManager.setRESTController({ request, ajax });
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file._source.format = 'file';
+    file.addMetadata('foo', 'bar');
+    file.addTag('bar', 'foo');
+    const f = await file.save();
+    expect(f).toBe(file);
+    expect(f.name()).toBe('parse.txt');
+    expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
+    expect(request).toHaveBeenCalledWith(
+      'POST',
+      'files/parse.txt',
+      {
+        base64: 'ParseA==',
+        fileData: {
+          metadata: {
+            foo: 'bar',
+          },
+          tags: {
+            bar: 'foo',
+          },
+        },
+      },
+      { requestTask: expect.any(Function) },
+    );
   });
 
   it('should throw error if file deleted without name', async (done) => {
