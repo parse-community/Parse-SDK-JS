@@ -765,6 +765,24 @@ class ParseObject {
   }
 
   /**
+   * Atomically decrements the value of the given attribute the next time the
+   * object is saved. If no amount is specified, 1 is used by default.
+   *
+   * @param attr {String} The key.
+   * @param amount {Number} The amount to decrement by (optional).
+   * @return {(ParseObject|Boolean)}
+   */
+  decrement(attr: string, amount?: number): ParseObject | boolean {
+    if (typeof amount === 'undefined') {
+      amount = 1;
+    }
+    if (typeof amount !== 'number') {
+      throw new Error('Cannot decrement by a non-numeric amount.');
+    }
+    return this.set(attr, new IncrementOp(amount * -1));
+  }
+
+  /**
    * Atomically add an object to the end of the array associated with a given
    * key.
    * @param attr {String} The key.
