@@ -222,7 +222,7 @@ class ParseSchema {
    * Adding an Index to Create / Update a Schema
    *
    * @param {String} name Name of the index
-   * @param {Object} index {[fieldName: string]: string | number | boolean | Date | File | GeoPoint | any[] | object | Pointer | Relation}
+   * @param {Object} index { field: value }
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
    *
    * <pre>
