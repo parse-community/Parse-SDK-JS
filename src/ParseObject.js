@@ -2336,6 +2336,7 @@ const DefaultController = {
 
     } else if (target instanceof ParseObject) {
       // copying target lets Flow guarantee the pointer isn't modified elsewhere
+      target._getId();
       const localId = target._localId;
       const targetCopy = target;
       const task = function() {
