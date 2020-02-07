@@ -171,7 +171,7 @@ describe('ParseUser', () => {
       // Should not be reached
       expect(true).toBe(false);
     }, (error) => {
-      expect(error.message).toBe('Cannot sign up user with an empty name.');
+      expect(error.message).toBe('Cannot sign up user with an empty username.');
     });
     ParseUser.signUp('username').then(() => {
       // Should not be reached
