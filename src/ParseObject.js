@@ -2353,8 +2353,10 @@ const DefaultController = {
       });
 
     } else if (target instanceof ParseObject) {
-      // copying target lets Flow guarantee the pointer isn't modified elsewhere
+      // generate _localId in case if cascadeSave=false
+      target._getId();
       const localId = target._localId;
+      // copying target lets Flow guarantee the pointer isn't modified elsewhere
       const targetCopy = target;
       const task = function() {
         const params = targetCopy._getSaveParams();
