@@ -491,6 +491,50 @@ describe('ParseObject', () => {
     expect(o2.attributes).toEqual({ age: 41 });
   });
 
+
+  it('can decrement a field', () => {
+    const o = new ParseObject('Person');
+    o.decrement('age');
+    expect(o.attributes).toEqual({ age: -1 });
+    expect(o.op('age') instanceof IncrementOp).toBe(true);
+    expect(o.dirtyKeys()).toEqual(['age']);
+    expect(o._getSaveJSON()).toEqual({
+      age: { __op: 'Increment', amount: -1 }
+    });
+
+    o.decrement('age', 4);
+    expect(o.attributes).toEqual({ age: -5 });
+    expect(o._getSaveJSON()).toEqual({
+      age: { __op: 'Increment', amount: -5 }
+    });
+
+    expect(o.decrement.bind(o, 'age', 'four')).toThrow(
+      'Cannot decrement by a non-numeric amount.'
+    );
+    expect(o.decrement.bind(o, 'age', null)).toThrow(
+      'Cannot decrement by a non-numeric amount.'
+    );
+    expect(o.decrement.bind(o, 'age', { amount: 4 })).toThrow(
+      'Cannot decrement by a non-numeric amount.'
+    );
+
+    o.set('age', 30);
+    o.decrement('age');
+    expect(o.attributes).toEqual({ age: 29 });
+    expect(o._getSaveJSON()).toEqual({
+      age: 29
+    });
+
+    const o2 = new ParseObject('Person');
+    o2._finishFetch({
+      objectId: 'ABC123',
+      age: 40
+    });
+    expect(o2.attributes).toEqual({ age: 40 });
+    o2.decrement('age');
+    expect(o2.attributes).toEqual({ age: 39 });
+  });
+
   it('can set nested field', () => {
     const o = new ParseObject('Person');
     o._finishFetch({

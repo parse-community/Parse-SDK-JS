@@ -995,7 +995,7 @@ const DefaultController = {
       return Promise.reject(
         new ParseError(
           ParseError.OTHER_CAUSE,
-          'Cannot sign up user with an empty name.'
+          'Cannot sign up user with an empty username.'
         )
       );
     }
