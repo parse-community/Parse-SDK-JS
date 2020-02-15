@@ -21,6 +21,7 @@ export type RequestOptions = {
   batchSize?: number;
   include?: any;
   progress?: any;
+  transaction?: boolean;
 };
 
 export type FullOptions = {
@@ -30,6 +31,7 @@ export type FullOptions = {
   sessionToken?: string;
   installationId?: string;
   progress?: any;
+  transaction?: boolean;
 };
 
 let XHR = null;
@@ -228,6 +230,11 @@ const RESTController = {
       } else {
         throw new Error('Cannot use the Master Key, it has not been provided.');
       }
+    }
+
+    const transaction = options.transaction;
+    if (transaction) {
+        payload.transaction = true;
     }
 
     if (CoreManager.get('FORCE_REVOCABLE_SESSION')) {
