@@ -9,6 +9,7 @@
 
 jest.dontMock('../ParseLiveQuery');
 jest.dontMock('../CoreManager');
+jest.dontMock('../InstallationController');
 jest.dontMock('../LiveQueryClient');
 jest.dontMock('../LiveQuerySubscription');
 jest.dontMock('../ParseObject');
@@ -30,6 +31,11 @@ describe('ParseLiveQuery', () => {
   beforeEach(() => {
     const controller = CoreManager.getLiveQueryController();
     controller._clearCachedDefaultClient();
+    CoreManager.set('InstallationController', {
+      currentInstallationId() {
+        return Promise.resolve('1234');
+      }
+    });
   });
 
   it('fails with an invalid livequery server url', (done) => {
@@ -63,6 +69,8 @@ describe('ParseLiveQuery', () => {
       expect(client.applicationId).toBe('appid');
       expect(client.javascriptKey).toBe('jskey');
       expect(client.sessionToken).toBe(undefined);
+      expect(client.installationId).toBe('1234');
+      expect(client.additionalProperties).toBe(true);
       done();
     });
   });

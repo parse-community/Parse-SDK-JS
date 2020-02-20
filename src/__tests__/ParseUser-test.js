@@ -9,6 +9,7 @@
 
 jest.dontMock('../AnonymousUtils');
 jest.dontMock('../CoreManager');
+jest.dontMock('../CryptoController');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../isRevocableSession');
@@ -19,6 +20,7 @@ jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
 jest.dontMock('../ParseUser');
+jest.dontMock('../promiseUtils');
 jest.dontMock('../RESTController');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../Storage');
@@ -26,14 +28,19 @@ jest.dontMock('../StorageController.default');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
 jest.dontMock('../UniqueInstanceStateController');
+jest.dontMock('crypto-js/aes');
+jest.dontMock('crypto-js/enc-utf8');
 
 jest.mock('uuid/v4', () => {
   let value = 0;
   return () => value++;
 });
 jest.dontMock('./test_helpers/mockXHR');
+jest.dontMock('./test_helpers/mockAsyncStorage');
 
+const mockAsyncStorage = require('./test_helpers/mockAsyncStorage');
 const CoreManager = require('../CoreManager');
+const CryptoController = require('../CryptoController');
 const LocalDatastore = require('../LocalDatastore');
 const ParseObject = require('../ParseObject').default;
 const ParseUser = require('../ParseUser').default;
@@ -43,6 +50,7 @@ const AnonymousUtils = require('../AnonymousUtils').default;
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
+CoreManager.setCryptoController(CryptoController);
 
 function flushPromises() {
   return new Promise(resolve => setImmediate(resolve));
@@ -163,7 +171,7 @@ describe('ParseUser', () => {
       // Should not be reached
       expect(true).toBe(false);
     }, (error) => {
-      expect(error.message).toBe('Cannot sign up user with an empty name.');
+      expect(error.message).toBe('Cannot sign up user with an empty username.');
     });
     ParseUser.signUp('username').then(() => {
       // Should not be reached
@@ -293,6 +301,34 @@ describe('ParseUser', () => {
       done();
     });
   });
+
+  it('can become a user with async storage', async () => {
+    const currentStorage = CoreManager.getStorageController();
+    CoreManager.setStorageController(mockAsyncStorage);
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('GET');
+        expect(path).toBe('users/me');
+        expect(options.sessionToken).toBe('123abc');
+
+        return Promise.resolve({
+          objectId: 'uid3',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+
+    const u = await ParseUser.become('123abc');
+    expect(u.id).toBe('uid3');
+    expect(u.isCurrent()).toBe(true);
+    expect(u.existed()).toBe(true);
+    CoreManager.setStorageController(currentStorage);
+  });
+
 
   it('can hydrate a user with sessionToken in server environment', async () => {
     ParseUser.enableUnsafeCurrentUser();
@@ -849,7 +885,7 @@ describe('ParseUser', () => {
     const user = new ParseUser();
     jest.spyOn(user, 'linkWith')
       .mockImplementationOnce((authProvider, authData, saveOptions) => {
-        expect(authProvider).toEqual(provider);
+        expect(authProvider).toEqual(provider.getAuthType());
         expect(authData).toEqual({ authData: null});
         expect(saveOptions).toEqual({ useMasterKey: true });
         return Promise.resolve();
@@ -1007,6 +1043,162 @@ describe('ParseUser', () => {
 
     await user._unlinkFrom('testProvider');
     const authProvider = user.linkWith.mock.calls[0][0];
-    expect(authProvider.getAuthType()).toBe('testProvider');
+    expect(authProvider).toBe('testProvider');
+  });
+
+  it('can encrypt user', async () => {
+    CoreManager.set('ENCRYPTED_USER', true);
+    CoreManager.set('ENCRYPTED_KEY', 'hello');
+
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    let u = null;
+    CoreManager.setRESTController({
+      request(method, path, body) {
+        expect(method).toBe('GET');
+        expect(path).toBe('login');
+        expect(body.username).toBe('username');
+        expect(body.password).toBe('password');
+
+        return Promise.resolve({
+          objectId: 'uid2',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+    u = await ParseUser.logIn('username', 'password');
+    // Clear cache to read from disk
+    ParseUser._clearCache();
+
+    expect(u.id).toBe('uid2');
+    expect(u.getSessionToken()).toBe('123abc');
+    expect(u.isCurrent()).toBe(true);
+    expect(u.authenticated()).toBe(true);
+
+    const currentUser = ParseUser.current();
+    expect(currentUser.id).toBe('uid2');
+
+    ParseUser._clearCache();
+
+    const currentUserAsync = await ParseUser.currentAsync();
+    expect(currentUserAsync.id).toEqual('uid2');
+
+    const path = Storage.generatePath('currentUser');
+    const encryptedUser = Storage.getItem(path);
+    const crypto = CoreManager.getCryptoController();
+    const decryptedUser = crypto.decrypt(encryptedUser, 'hello');
+    expect(JSON.parse(decryptedUser).objectId).toBe(u.id);
+
+    CoreManager.set('ENCRYPTED_USER', false);
+    CoreManager.set('ENCRYPTED_KEY', null);
+    Storage._clear();
+  });
+
+  it('can encrypt user with custom CryptoController', async () => {
+    CoreManager.set('ENCRYPTED_USER', true);
+    CoreManager.set('ENCRYPTED_KEY', 'hello');
+    const ENCRYPTED_DATA = 'encryptedString';
+
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    let u = null;
+    CoreManager.setRESTController({
+      request(method, path, body) {
+        expect(method).toBe('GET');
+        expect(path).toBe('login');
+        expect(body.username).toBe('username');
+        expect(body.password).toBe('password');
+
+        return Promise.resolve({
+          objectId: 'uid2',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+    const CustomCrypto = {
+      encrypt(obj, secretKey) {
+        expect(secretKey).toBe('hello');
+        return ENCRYPTED_DATA;
+      },
+      decrypt(encryptedText, secretKey) {
+        expect(encryptedText).toBe(ENCRYPTED_DATA);
+        expect(secretKey).toBe('hello');
+        return JSON.stringify(u.toJSON());
+      },
+    };
+    CoreManager.setCryptoController(CustomCrypto);
+    u = await ParseUser.logIn('username', 'password');
+    // Clear cache to read from disk
+    ParseUser._clearCache();
+
+    expect(u.id).toBe('uid2');
+    expect(u.getSessionToken()).toBe('123abc');
+    expect(u.isCurrent()).toBe(true);
+    expect(u.authenticated()).toBe(true);
+    expect(ParseUser.current().id).toBe('uid2');
+
+    const path = Storage.generatePath('currentUser');
+    const userStorage = Storage.getItem(path);
+    expect(userStorage).toBe(ENCRYPTED_DATA);
+    CoreManager.set('ENCRYPTED_USER', false);
+    CoreManager.set('ENCRYPTED_KEY', null);
+    Storage._clear();
+  });
+
+  it('can static signup a user with installationId', async () => {
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    const installationId = '12345678';
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('POST');
+        expect(path).toBe('users');
+        expect(options.installationId).toBe(installationId);
+        return Promise.resolve({
+          objectId: 'uid3',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+
+    const user = await ParseUser.signUp('username', 'password', null, { installationId });
+    expect(user.id).toBe('uid3');
+    expect(user.isCurrent()).toBe(false);
+    expect(user.existed()).toBe(true);
+  });
+
+  it('can signup a user with installationId', async () => {
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    const installationId = '12345678';
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('POST');
+        expect(path).toBe('users');
+        expect(options.installationId).toBe(installationId);
+        return Promise.resolve({
+          objectId: 'uid3',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+
+    const user = new ParseUser();
+    user.setUsername('name');
+    user.setPassword('pass');
+    await user.signUp(null, { installationId });
+    expect(user.id).toBe('uid3');
+    expect(user.isCurrent()).toBe(false);
+    expect(user.existed()).toBe(true);
   });
 });

@@ -213,11 +213,13 @@ class ParseUser extends ParseObject {
 
   /**
    * Unlinks a user from a service.
+   *
+   * @param {String|AuthProvider} provider Name of auth provider or {@link https://parseplatform.org/Parse-SDK-JS/api/master/AuthProvider.html AuthProvider}
+   * @param {Object} options MasterKey / SessionToken
+   * @return {Promise} A promise that is fulfilled when the unlinking
+   *     finishes.
    */
-  _unlinkFrom(provider: any, options?: FullOptions) {
-    if (typeof provider === 'string') {
-      provider = authProviders[provider];
-    }
+  _unlinkFrom(provider: any, options?: FullOptions): Promise<ParseUser> {
     return this.linkWith(provider, { authData: null }, options).then(() => {
       this._synchronizeAuthData(provider);
       return Promise.resolve(this);
@@ -687,7 +689,8 @@ class ParseUser extends ParseObject {
     if (options.useMasterKey) {
       meOptions.useMasterKey = options.useMasterKey;
     }
-    return controller.me(meOptions);
+    const user = new this();
+    return controller.me(user, meOptions);
   }
 
   /**
@@ -702,7 +705,8 @@ class ParseUser extends ParseObject {
    */
   static hydrate(userJSON: AttributeMap) {
     const controller = CoreManager.getUserController();
-    return controller.hydrate(userJSON);
+    const user = new this();
+    return controller.hydrate(user, userJSON);
   }
 
   /**
@@ -710,7 +714,7 @@ class ParseUser extends ParseObject {
    * @static
    */
   static logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions) {
-    const user = new ParseUser();
+    const user = new this();
     return user.linkWith(provider, options, saveOpts);
   }
 
@@ -845,7 +849,7 @@ class ParseUser extends ParseObject {
    * @static
    */
   static _logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions) {
-    const user = new ParseUser();
+    const user = new this();
     return user.linkWith(provider, options, saveOpts);
   }
 
@@ -865,9 +869,16 @@ const DefaultController = {
   updateUserOnDisk(user) {
     const path = Storage.generatePath(CURRENT_USER_KEY);
     const json = user.toJSON();
+    delete json.password;
+
     json.className = '_User';
+    let userData = JSON.stringify(json);
+    if (CoreManager.get('ENCRYPTED_USER')) {
+      const crypto = CoreManager.getCryptoController();
+      userData = crypto.encrypt(json, CoreManager.get('ENCRYPTED_KEY'))
+    }
     return Storage.setItemAsync(
-      path, JSON.stringify(json)
+      path, userData
     ).then(() => {
       return user;
     });
@@ -880,16 +891,15 @@ const DefaultController = {
     return Storage.removeItemAsync(path);
   },
 
-  setCurrentUser(user) {
-    const currentUser = this.currentUser();
-    let promise = Promise.resolve();
+  async setCurrentUser(user) {
+    const currentUser = await this.currentUserAsync();
     if (currentUser && !user.equals(currentUser) && AnonymousUtils.isLinked(currentUser)) {
-      promise = currentUser.destroy({ sessionToken: currentUser.getSessionToken() })
+      await currentUser.destroy({ sessionToken: currentUser.getSessionToken() })
     }
     currentUserCache = user;
     user._cleanupAuthData();
     user._synchronizeAllAuthData();
-    return promise.then(() => DefaultController.updateUserOnDisk(user));
+    return DefaultController.updateUserOnDisk(user);
   },
 
   currentUser(): ?ParseUser {
@@ -911,6 +921,10 @@ const DefaultController = {
     if (!userData) {
       currentUserCache = null;
       return null;
+    }
+    if (CoreManager.get('ENCRYPTED_USER')) {
+      const crypto = CoreManager.getCryptoController();
+      userData = crypto.decrypt(userData, CoreManager.get('ENCRYPTED_KEY'));
     }
     userData = JSON.parse(userData);
     if (!userData.className) {
@@ -948,6 +962,10 @@ const DefaultController = {
         currentUserCache = null;
         return Promise.resolve(null);
       }
+      if (CoreManager.get('ENCRYPTED_USER')) {
+        const crypto = CoreManager.getCryptoController();
+        userData = crypto.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY'));
+      }
       userData = JSON.parse(userData);
       if (!userData.className) {
         userData.className = '_User';
@@ -977,7 +995,7 @@ const DefaultController = {
       return Promise.reject(
         new ParseError(
           ParseError.OTHER_CAUSE,
-          'Cannot sign up user with an empty name.'
+          'Cannot sign up user with an empty username.'
         )
       );
     }
@@ -1040,8 +1058,7 @@ const DefaultController = {
     });
   },
 
-  hydrate(userJSON: AttributeMap): Promise<ParseUser> {
-    const user = new ParseUser();
+  hydrate(user: ParseUser, userJSON: AttributeMap): Promise<ParseUser> {
     user._finishFetch(userJSON);
     user._setExisted(true);
     if (userJSON.sessionToken && canUseCurrentUser) {
@@ -1051,12 +1068,11 @@ const DefaultController = {
     }
   },
 
-  me(options: RequestOptions): Promise<ParseUser> {
+  me(user: ParseUser, options: RequestOptions): Promise<ParseUser> {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request(
       'GET', 'users/me', {}, options
     ).then((response) => {
-      const user = new ParseUser();
       user._finishFetch(response);
       user._setExisted(true);
       return user;

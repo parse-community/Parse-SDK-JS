@@ -122,6 +122,8 @@ class LiveQueryClient extends EventEmitter {
   javascriptKey: ?string;
   masterKey: ?string;
   sessionToken: ?string;
+  installationId: ?string;
+  additionalProperties: boolean;
   connectPromise: Promise;
   subscriptions: Map;
   socket: any;
@@ -134,13 +136,15 @@ class LiveQueryClient extends EventEmitter {
    * @param {string} options.javascriptKey (optional)
    * @param {string} options.masterKey (optional) Your Parse Master Key. (Node.js only!)
    * @param {string} options.sessionToken (optional)
+   * @param {string} options.installationId (optional)
    */
   constructor({
     applicationId,
     serverURL,
     javascriptKey,
     masterKey,
-    sessionToken
+    sessionToken,
+    installationId,
   }) {
     super();
 
@@ -156,7 +160,9 @@ class LiveQueryClient extends EventEmitter {
     this.applicationId = applicationId;
     this.javascriptKey = javascriptKey;
     this.masterKey = masterKey;
-    this.sessionToken = sessionToken;
+    this.sessionToken = sessionToken || undefined;
+    this.installationId = installationId;
+    this.additionalProperties = true;
     this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
     this.state = CLIENT_STATE.INITIALIZED;
@@ -334,6 +340,9 @@ class LiveQueryClient extends EventEmitter {
       masterKey: this.masterKey,
       sessionToken: this.sessionToken
     };
+    if (this.additionalProperties) {
+      connectRequest.installationId = this.installationId;
+    }
     this.socket.send(JSON.stringify(connectRequest));
   }
 
@@ -347,6 +356,10 @@ class LiveQueryClient extends EventEmitter {
       subscription =
        this.subscriptions.get(data.requestId);
     }
+    const response = {
+      clientId: data.clientId,
+      installationId: data.installationId,
+    };
     switch(data.op) {
     case OP_EVENTS.CONNECTED:
       if (this.state === CLIENT_STATE.RECONNECTING) {
@@ -361,7 +374,7 @@ class LiveQueryClient extends EventEmitter {
       if (subscription) {
         subscription.subscribed = true;
         subscription.subscribePromise.resolve();
-        subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN);
+        subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN, response);
       }
       break;
     case OP_EVENTS.ERROR:
@@ -372,6 +385,12 @@ class LiveQueryClient extends EventEmitter {
         }
       } else {
         this.emit(CLIENT_EMMITER_TYPES.ERROR, data.error);
+      }
+      if (data.error === 'Additional properties not allowed') {
+        this.additionalProperties = false;
+      }
+      if (data.reconnect) {
+        this._handleReconnect();
       }
       break;
     case OP_EVENTS.UNSUBSCRIBED:
@@ -397,7 +416,11 @@ class LiveQueryClient extends EventEmitter {
       delete data.object.__type;
       const parseObject = ParseObject.fromJSON(data.object, override);
 
-      subscription.emit(data.op, parseObject, data.original);
+      if (data.original) {
+        subscription.emit(data.op, parseObject, data.original, response);
+      } else {
+        subscription.emit(data.op, parseObject, response);
+      }
 
       const localDatastore = CoreManager.getLocalDatastore();
       if (override && localDatastore.isEnabled) {

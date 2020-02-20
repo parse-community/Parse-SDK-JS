@@ -33,6 +33,10 @@ type ConfigController = {
   get: () => Promise;
   save: (attrs: { [key: string]: any }) => Promise;
 };
+type CryptoController = {
+  encrypt: (obj: any, secretKey: string) => string;
+  decrypt: (encryptedText: string, secretKey: any) => string;
+};
 type FileController = {
   saveFile: (name: string, source: FileSource, options: FullOptions) => Promise;
   saveBase64: (name: string, source: FileSource, options: FullOptions) => Promise;
@@ -171,17 +175,21 @@ const config: Config & { [key: string]: mixed } = {
             !!process.versions.node &&
             !process.versions.electron),
   REQUEST_ATTEMPT_LIMIT: 5,
+  REQUEST_BATCH_SIZE: 20,
+  REQUEST_HEADERS: {},
   SERVER_URL: 'https://api.parse.com/1',
   SERVER_AUTH_TYPE: null,
   SERVER_AUTH_TOKEN: null,
   LIVEQUERY_SERVER_URL: null,
+  ENCRYPTED_KEY: null,
   VERSION: 'js' + require('../package.json').version,
   APPLICATION_ID: null,
   JAVASCRIPT_KEY: null,
   MASTER_KEY: null,
   USE_MASTER_KEY: false,
   PERFORM_USER_REWRITE: true,
-  FORCE_REVOCABLE_SESSION: false
+  FORCE_REVOCABLE_SESSION: false,
+  ENCRYPTED_USER: false
 };
 
 function requireMethods(name: string, methods: Array<string>, controller: any) {
@@ -231,6 +239,15 @@ module.exports = {
 
   getConfigController(): ConfigController {
     return config['ConfigController'];
+  },
+
+  setCryptoController(controller: CryptoController) {
+    requireMethods('CryptoController', ['encrypt', 'decrypt'], controller);
+    config['CryptoController'] = controller;
+  },
+
+  getCryptoController(): CryptoController {
+    return config['CryptoController'];
   },
 
   setFileController(controller: FileController) {
@@ -338,12 +355,14 @@ module.exports = {
         'getItemAsync',
         'setItemAsync',
         'removeItemAsync',
+        'getAllKeysAsync'
       ], controller);
     } else {
       requireMethods('A synchronous StorageController', [
         'getItem',
         'setItem',
         'removeItem',
+        'getAllKeys'
       ], controller);
     }
     config['StorageController'] = controller;

@@ -11,6 +11,7 @@
 /* global XMLHttpRequest, XDomainRequest */
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
+import { resolvingPromise } from './promiseUtils';
 
 export type RequestOptions = {
   useMasterKey?: boolean;
@@ -48,12 +49,9 @@ if (typeof XDomainRequest !== 'undefined' &&
   useXDomainRequest = true;
 }
 
-function ajaxIE9(method: string, url: string, data: any, options?: FullOptions) {
+function ajaxIE9(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
   return new Promise((resolve, reject) => {
     const xdr = new XDomainRequest();
-    if (options && typeof options.requestTask === 'function') {
-      options.requestTask(xdr);
-    }
     xdr.onload = function() {
       let response;
       try {
@@ -82,6 +80,9 @@ function ajaxIE9(method: string, url: string, data: any, options?: FullOptions) 
     };
     xdr.open(method, url);
     xdr.send(data);
+    if (options && typeof options.requestTask === 'function') {
+      options.requestTask(xdr);
+    }
   });
 }
 
@@ -90,11 +91,7 @@ const RESTController = {
     if (useXDomainRequest) {
       return ajaxIE9(method, url, data, headers, options);
     }
-
-    let res, rej;
-    const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
-    promise.resolve = res;
-    promise.reject = rej;
+    const promise = resolvingPromise();
     let attempts = 0;
 
     const dispatch = function() {
@@ -104,14 +101,10 @@ const RESTController = {
         );
       }
       let handled = false;
-      let aborted = false;
 
       const xhr = new XHR();
-      if (options && typeof options.requestTask === 'function') {
-        options.requestTask(xhr);
-      }
       xhr.onreadystatechange = function() {
-        if (xhr.readyState !== 4 || handled) {
+        if (xhr.readyState !== 4 || handled || xhr._aborted) {
           return;
         }
         handled = true;
@@ -132,8 +125,6 @@ const RESTController = {
           if (response) {
             promise.resolve({ response, status: xhr.status, xhr });
           }
-        } else if (aborted && xhr.status === 0) {
-          promise.resolve({ response: {}, status: 0, xhr });
         } else if (xhr.status >= 500 || xhr.status === 0) { // retry on 5XX or node-xmlhttprequest error
           if (++attempts < CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
             // Exponentially-growing random delay
@@ -163,35 +154,36 @@ const RESTController = {
       if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
         headers['Authorization'] = CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
       }
-
-      if(options && typeof options.progress === 'function') {
-        if (xhr.upload) {
-          xhr.upload.addEventListener('progress', (oEvent) => {
-            if (oEvent.lengthComputable) {
-              options.progress(oEvent.loaded / oEvent.total);
-            } else {
-              options.progress(null);
-            }
-          });
-        } else if (xhr.addEventListener) {
-          xhr.addEventListener('progress', (oEvent) => {
-            if (oEvent.lengthComputable) {
-              options.progress(oEvent.loaded / oEvent.total);
-            } else {
-              options.progress(null);
-            }
-          });
-        }
+      const customHeaders = CoreManager.get('REQUEST_HEADERS');
+      for (const key in customHeaders) {
+        headers[key] = customHeaders[key];
       }
-      xhr.onabort = () => {
-        aborted = true;
+      xhr.onprogress = (event) => {
+        if(options && typeof options.progress === 'function') {
+          if (event.lengthComputable) {
+            options.progress(event.loaded / event.total, event.loaded, event.total);
+          } else {
+            options.progress(null);
+          }
+        }
       };
       xhr.open(method, url, true);
 
       for (const h in headers) {
         xhr.setRequestHeader(h, headers[h]);
       }
+      xhr.onabort = function () {
+        promise.resolve({
+          response: { results: [] },
+          status: 0,
+          xhr,
+        });
+      };
       xhr.send(data);
+
+      if (options && typeof options.requestTask === 'function') {
+        options.requestTask(xhr);
+      }
     }
     dispatch();
 
@@ -278,31 +270,32 @@ const RESTController = {
           return response;
         }
       });
-    }).catch(function(response: { responseText: string }) {
-      // Transform the error into an instance of ParseError by trying to parse
-      // the error string as JSON
-      let error;
-      if (response && response.responseText) {
-        try {
-          const errorJSON = JSON.parse(response.responseText);
-          error = new ParseError(errorJSON.code, errorJSON.error);
-        } catch (e) {
-          // If we fail to parse the error text, that's okay.
-          error = new ParseError(
-            ParseError.INVALID_JSON,
-            'Received an error with invalid JSON from Parse: ' +
-              response.responseText
-          );
-        }
-      } else {
+    }).catch(RESTController.handleError);
+  },
+
+  handleError(response) {
+    // Transform the error into an instance of ParseError by trying to parse
+    // the error string as JSON
+    let error;
+    if (response && response.responseText) {
+      try {
+        const errorJSON = JSON.parse(response.responseText);
+        error = new ParseError(errorJSON.code, errorJSON.error);
+      } catch (e) {
+        // If we fail to parse the error text, that's okay.
         error = new ParseError(
-          ParseError.CONNECTION_FAILED,
-          'XMLHttpRequest failed: ' + JSON.stringify(response)
+          ParseError.INVALID_JSON,
+          'Received an error with invalid JSON from Parse: ' +
+            response.responseText
         );
       }
-
-      return Promise.reject(error);
-    });
+    } else {
+      error = new ParseError(
+        ParseError.CONNECTION_FAILED,
+        'XMLHttpRequest failed: ' + JSON.stringify(response)
+      );
+    }
+    return Promise.reject(error);
   },
 
   _setXHR(xhr: any) {
