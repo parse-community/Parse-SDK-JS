@@ -49,10 +49,10 @@ For server-side applications or Node.js command line tools, include `'parse/node
 const Parse = require('parse/node');
 ```
 
-For React Native applications, include `'parse/react-native'`:
+For React Native applications, include `'parse/react-native.js'`:
 ```js
 // In a React Native application
-const Parse = require('parse/react-native');
+const Parse = require('parse/react-native.js');
 
 // On React Native >= 0.50 and Parse >= 1.11.0, set the Async
 const AsyncStorage = require('react-native').AsyncStorage;
