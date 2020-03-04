@@ -2936,4 +2936,21 @@ describe('ParseObject pin', () => {
       expect(error).toBe('Parse.enableLocalDatastore() must be called first');
     }
   });
+  it('gets id for new object when cascadeSave = false and singleInstance = false', (done) => {
+    ParseObject.disableSingleInstance();
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: {
+          objectId: 'P5',
+        }
+      }])
+    );
+    const p = new ParseObject('Person');
+    p.save(null, {cascadeSave: false}).then((obj) => {
+      expect(obj).toBe(p);
+      expect(obj.id).toBe('P5');
+      done();
+    });
+  })
 });

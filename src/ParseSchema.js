@@ -221,9 +221,13 @@ class ParseSchema {
   /**
    * Adding an Index to Create / Update a Schema
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {String} type Can be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)
+   * @param {String} name Name of the index
+   * @param {Object} index { field: value }
    * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   *
+   * <pre>
+   * schema.addIndex('index_name', { 'field': 1 });
+   * </pre>
    */
   addIndex(name: string, index: any) {
     if (!name) {
