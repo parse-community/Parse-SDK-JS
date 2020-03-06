@@ -10,14 +10,22 @@
 jest.autoMockOff();
 jest.mock('http');
 jest.mock('https');
+jest.mock('../ParseACL');
 
 const ParseError = require('../ParseError').default;
 const ParseFile = require('../ParseFile').default;
+const ParseObject = require('../ParseObject').default;
 const CoreManager = require('../CoreManager');
 const EventEmitter = require('../EventEmitter');
 
 const mockHttp = require('http');
 const mockHttps = require('https');
+
+const mockLocalDatastore = {
+  _updateLocalIdForObject: jest.fn(),
+  _updateObjectIfPinned: jest.fn(),
+};
+jest.setMock('../LocalDatastore', mockLocalDatastore);
 
 function generateSaveMock(prefix) {
   return function(name, payload, options) {
@@ -739,6 +747,30 @@ describe('FileController', () => {
       },
       { requestTask: expect.any(Function) },
     );
+  });
+
+  it('saves files via object saveAll options', async () => {
+    const ajax = jest.fn().mockResolvedValueOnce({
+      response: {
+        name: 'parse.txt',
+        url: 'http://files.parsetfss.com/a/parse.txt'
+      }
+    });
+    CoreManager.setRESTController({ ajax, request: () => {
+      return [ { success: { objectId: 'child' } } ];
+    } });
+    CoreManager.setLocalDatastore(mockLocalDatastore);
+
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file._source.format = 'file';
+    const object = ParseObject.fromJSON({ className: 'TestObject' });
+    object.set('file', file);
+    await ParseObject.saveAll([object], { sessionToken: 'testToken' });
+
+    const request = ajax.mock.calls[0];
+    expect(request[1]).toBe('https://api.parse.com/1/files/parse.txt')
+    expect(request[3]['X-Parse-Session-Token']).toBe('testToken');
+    expect(request[4].sessionToken).toBe('testToken');
   });
 
   it('should throw error if file deleted without name', async (done) => {
