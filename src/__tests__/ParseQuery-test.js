@@ -1676,24 +1676,44 @@ describe('ParseQuery', () => {
     expect(q._hint).toBeUndefined();
   });
 
-  it('can iterate over results with map()', async () => {
-    CoreManager.setQueryController({
-      aggregate() {},
-      find() {
-        return Promise.resolve({
-          results: [
-            { objectId: 'I55', size: 'medium', name: 'Product 55' },
-            { objectId: 'I89', size: 'small', name: 'Product 89' },
-            { objectId: 'I91', size: 'small', name: 'Product 91' },
-          ]
-        });
-      }
+  describe('iterating over results via .map()', () => {
+    beforeEach(() => {
+      CoreManager.setQueryController({
+        aggregate() {},
+        find() {
+          return Promise.resolve({
+            results: [
+              { objectId: 'I55', size: 'medium', name: 'Product 55' },
+              { objectId: 'I89', size: 'small', name: 'Product 89' },
+              { objectId: 'I91', size: 'small', name: 'Product 91' },
+            ]
+          });
+        }
+      });
     });
 
-    const q = new ParseQuery('Item');
+    it('can iterate with a synchronous callback', async () => {
+      const callback = (object) => object.attributes.size;
+      const q = new ParseQuery('Item');
+      const results = await q.map(callback);
+      expect(results).toEqual(['medium', 'small', 'small']);
+    });
 
-    const results = await q.map((object) => object.attributes.size);
-    expect(results.length).toBe(3);
+    it('can iterate with an asynchronous callback', async () => {
+      const callback = async (object) => object.attributes.size;
+      const q = new ParseQuery('Item');
+      const results = await q.map(callback);
+      expect(results).toEqual(['medium', 'small', 'small']);
+    });
+
+    it('stops iteration when a rejected promise is returned', async () => {
+      let callCount = 0;
+      await new ParseQuery('Item').map(() => {
+        callCount++;
+        return Promise.reject(new Error('Callback rejecting'));
+      }).catch(() => {});
+      expect(callCount).toEqual(1);
+    });
   });
 
   it('can iterate over results with reduce()', async () => {
