@@ -1030,11 +1030,22 @@ class ParseQuery {
    *     iteration has completed.
    */
   async reduce(callback: (accumulator: any, currentObject: ParseObject, index: number) => any, initialValue: any, options?: BatchOptions): Promise<Array<any>> {
-    const objects = [];
+    let accumulator = initialValue;
+    let index = 0;
     await this.each((object) => {
-      objects.push(object);
+      // If no initial value was given, we take the first object from the query
+      // as the initial value and don't call the callback with it.
+      if (index === 0 && initialValue === undefined) {
+        accumulator = object;
+        index += 1;
+        return;
+      }
+      return Promise.resolve(callback(accumulator, object, index)).then((result) => {
+        accumulator = result;
+        index += 1;
+      });
     }, options);
-    return objects.reduce(callback, initialValue);
+    return accumulator;
   }
 
   /**

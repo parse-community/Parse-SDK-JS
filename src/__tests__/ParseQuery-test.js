@@ -1716,24 +1716,60 @@ describe('ParseQuery', () => {
     });
   });
 
-  it('can iterate over results with reduce()', async () => {
-    CoreManager.setQueryController({
-      aggregate() {},
-      find() {
-        return Promise.resolve({
-          results: [
-            { objectId: 'I55', number: 1 },
-            { objectId: 'I89', number: 2 },
-            { objectId: 'I91', number: 3 },
-          ]
-        });
-      }
+  describe('iterating over results with .reduce()', () => {
+    beforeEach(() => {
+      CoreManager.setQueryController({
+        aggregate() {},
+        find() {
+          return Promise.resolve({
+            results: [
+              { objectId: 'I55', number: 1 },
+              { objectId: 'I89', number: 2 },
+              { objectId: 'I91', number: 3 },
+            ]
+          });
+        }
+      });
     });
 
-    const q = new ParseQuery('Item');
+    it('can iterate with a synchronous callback', async () => {
+      const callback = (accumulator, object) => accumulator + object.attributes.number;
+      const q = new ParseQuery('Item');
+      const result = await q.reduce(callback, 0);
+      expect(result).toBe(6);
+    });
 
-    const result = await q.reduce((accumulator, object) => accumulator + object.attributes.number, 0);
-    expect(result).toBe(6);
+    it('can iterate with an asynchronous callback', async () => {
+      const callback = async (accumulator, object) => accumulator + object.attributes.number;
+      const q = new ParseQuery('Item');
+      const result = await q.reduce(callback, 0);
+      expect(result).toBe(6);
+    });
+
+    it('stops iteration when a rejected promise is returned', async () => {
+      let callCount = 0;
+      const callback = () => {
+        callCount += 1;
+        return Promise.reject(new Error("Callback rejecting"));
+      }
+      const q = new ParseQuery('Item');
+      await q.reduce(callback, 0).catch(() => {});
+      expect(callCount).toBe(1);
+    });
+
+    it('uses the first object as an initial value when no initial value is passed', async () => {
+      let callCount = 0;
+      const callback = (accumulator, object) => {
+        callCount += 1;
+        accumulator.attributes.number += object.attributes.number;
+        return accumulator;
+      }
+      const q = new ParseQuery('Item');
+      const result = await q.reduce(callback);
+      expect(result.id).toBe('I55');
+      expect(result.attributes.number).toBe(6);
+      expect(callCount).toBe(2); // Not called for the first object when used as initial value
+    });
   });
 
   it('can iterate over results with filter()', async () => {
