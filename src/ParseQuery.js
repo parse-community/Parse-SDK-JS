@@ -1074,11 +1074,12 @@ class ParseQuery {
     const array = [];
     let index = 0;
     await this.each((object) => {
-      const flag = callback(object, index, this);
-      if (flag) {
-        array.push(object);
-      }
-      index += 1;
+      return Promise.resolve(callback(object, index, this)).then((flag) => {
+        if (flag) {
+          array.push(object);
+        }
+        index += 1;
+      });
     }, options);
     return array;
   }

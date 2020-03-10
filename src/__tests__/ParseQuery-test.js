@@ -1772,24 +1772,46 @@ describe('ParseQuery', () => {
     });
   });
 
-  it('can iterate over results with filter()', async () => {
-    CoreManager.setQueryController({
-      aggregate() {},
-      find() {
-        return Promise.resolve({
-          results: [
-            { objectId: 'I55', size: 'medium', name: 'Product 55' },
-            { objectId: 'I89', size: 'small', name: 'Product 89' },
-            { objectId: 'I91', size: 'small', name: 'Product 91' },
-          ]
-        });
-      }
+  describe('iterating over results with .filter()', () => {
+    beforeEach(() => {
+      CoreManager.setQueryController({
+        aggregate() {},
+        find() {
+          return Promise.resolve({
+            results: [
+              { objectId: 'I55', size: 'medium', name: 'Product 55' },
+              { objectId: 'I89', size: 'small', name: 'Product 89' },
+              { objectId: 'I91', size: 'small', name: 'Product 91' },
+            ]
+          });
+        }
+      });
     });
 
-    const q = new ParseQuery('Item');
+    it('can iterate results with a synchronous callback', async () => {
+      const callback = (object) => object.attributes.size === 'small';
+      const q = new ParseQuery('Item');
+      const results = await q.filter(callback);
+      expect(results.length).toBe(2);
+    });
 
-    const results = await q.filter((object) => object.attributes.size === 'small');
-    expect(results.length).toBe(2);
+    it('can iterate results with an async callback', async () => {
+      const callback = async (object) => object.attributes.size === 'small';
+      const q = new ParseQuery('Item');
+      const results = await q.filter(callback);
+      expect(results.length).toBe(2);
+    });
+
+    it('stops iteration when a rejected promise is returned', async () => {
+      let callCount = 0;
+      const callback = async () => {
+        callCount += 1;
+        return Promise.reject(new Error('Callback rejecting'));
+      };
+      const q = new ParseQuery('Item');
+      await q.filter(callback).catch(() => {});
+      expect(callCount).toBe(1);
+    });
   });
 
   it('returns an error when iterating over an invalid query', (done) => {
