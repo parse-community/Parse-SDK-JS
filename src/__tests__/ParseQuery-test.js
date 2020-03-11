@@ -1770,6 +1770,20 @@ describe('ParseQuery', () => {
       expect(result.attributes.number).toBe(6);
       expect(callCount).toBe(2); // Not called for the first object when used as initial value
     });
+
+    it('rejects with a TypeError when there are no results and no initial value was provided', async () => {
+      CoreManager.setQueryController({
+        aggregate() {},
+        find() { return Promise.resolve({ results: [] }) },
+      });
+
+      const q = new ParseQuery('Item');
+      const callback = (accumulator, object) => {
+        accumulator.attributes.number += object.attributes.number;
+        return accumulator;
+      }
+      return expect(q.reduce(callback)).rejects.toThrow(TypeError);
+    });
   });
 
   describe('iterating over results with .filter()', () => {

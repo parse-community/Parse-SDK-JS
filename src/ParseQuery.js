@@ -1045,6 +1045,11 @@ class ParseQuery {
         index += 1;
       });
     }, options);
+    if (index === 0 && initialValue === undefined) {
+      // Match Array.reduce behavior: "Calling reduce() on an empty array
+      // without an initialValue will throw a TypeError".
+      throw new TypeError("Reducing empty query result set with no initial value");
+    }
     return accumulator;
   }
 
