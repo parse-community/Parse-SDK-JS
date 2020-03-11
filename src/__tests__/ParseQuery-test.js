@@ -1503,6 +1503,134 @@ describe('ParseQuery', () => {
       });
   });
 
+  describe('iterating over batches with .eachBatch()', () => {
+    let findMock;
+    beforeEach(() => {
+      findMock = jest.fn();
+      findMock.mockReturnValueOnce(Promise.resolve({
+        results: [
+          { objectId: 'I55', size: 'medium', name: 'Product 55' },
+          { objectId: 'I89', size: 'small', name: 'Product 89' },
+        ]
+      }));
+      findMock.mockReturnValueOnce(Promise.resolve({
+        results: [
+          { objectId: 'I91', size: 'small', name: 'Product 91' },
+        ]
+      }));
+      CoreManager.setQueryController({
+        aggregate() {},
+        find: findMock,
+      });
+    });
+
+    it('passes query attributes through to the REST API', async () => {
+      const q = new ParseQuery('Item');
+      q.containedIn('size', ['small', 'medium']);
+      q.matchesKeyInQuery(
+        'name',
+        'productName',
+        new ParseQuery('Review').equalTo('stars', 5)
+      );
+      q.equalTo('valid', true);
+      q.select('size', 'name');
+      q.includeAll();
+      q.hint('_id_');
+
+      await q.eachBatch(() => {});
+
+      expect(findMock).toHaveBeenCalledTimes(1);
+      const [className, params, options] = findMock.mock.calls[0];
+      expect(className).toBe('Item')
+      expect(params).toEqual({
+        limit: 100,
+        order: 'objectId',
+        keys: 'size,name',
+        include: '*',
+        hint: '_id_',
+        where: {
+          size: {
+            $in: ['small', 'medium']
+          },
+          name: {
+            $select: {
+              key: 'productName',
+              query: {
+                className: 'Review',
+                where: {
+                  stars: 5
+                }
+              }
+            }
+          },
+          valid: true
+        }
+      });
+      expect(options.requestTask).toBeDefined();
+    });
+
+    it('passes options through to the REST API', async () => {
+      const batchOptions = {
+        useMasterKey: true,
+        sessionToken: '1234',
+        batchSize: 50,
+      };
+      const q = new ParseQuery('Item');
+      await q.eachBatch(() => {}, batchOptions);
+      expect(findMock).toHaveBeenCalledTimes(1);
+      const [className, params, options] = findMock.mock.calls[0];
+      expect(className).toBe('Item');
+      expect(params).toEqual({
+        limit: 50,
+        order: 'objectId',
+        where: {},
+      });
+      expect(options.useMasterKey).toBe(true);
+      expect(options.sessionToken).toEqual('1234');
+    });
+
+    it('only makes one request when the results fit in one page', async () => {
+      const q = new ParseQuery('Item');
+      await q.eachBatch(() => {});
+      expect(findMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('makes more requests when the results do not fit in one page', async () => {
+      const q = new ParseQuery('Item');
+      await q.eachBatch(() => {}, { batchSize: 2 });
+      expect(findMock).toHaveBeenCalledTimes(2);
+    })
+
+    it('stops iteration when the callback returns a promise that rejects', async () => {
+      let callCount = 0;
+      const callback = () => {
+        callCount++;
+        return Promise.reject(new Error('Callback rejecting'));
+      };
+      const q = new ParseQuery('Item');
+      await q.eachBatch(callback, { batchSize: 2 }).catch(() => {});
+      expect(callCount).toBe(1);
+    });
+
+    it('handles a synchronous callback', async () => {
+      const results = [];
+      const q = new ParseQuery('Item');
+      await q.eachBatch((items) => {
+        items.map(item => results.push(item.attributes.size))
+      });
+      expect(results).toEqual(['medium', 'small']);
+    });
+
+    it('handles an asynchronous callback', async () => {
+      const results = [];
+      const q = new ParseQuery('Item');
+      await q.eachBatch((items) => {
+        items.map(item => results.push(item.attributes.size))
+        return new Promise(resolve => setImmediate(resolve));
+      });
+      expect(results).toEqual(['medium', 'small']);
+    });
+  });
 
   it('can iterate over results with each()', (done) => {
     CoreManager.setQueryController({
