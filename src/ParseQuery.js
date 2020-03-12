@@ -856,15 +856,16 @@ class ParseQuery {
   }
 
   /**
-   * Iterates over each result of a query, calling a callback for each one. If
-   * the callback returns a promise, the iteration will not continue until
+   * Iterates over objects matching a query, calling a callback for each batch.
+   * If the callback returns a promise, the iteration will not continue until
    * that promise has been fulfilled. If the callback returns a rejected
-   * promise, then iteration will stop with that error. The items are
-   * processed in an unspecified order. The query may not have any sort order,
-   * and may not use limit or skip.
+   * promise, then iteration will stop with that error. The items are processed
+   * in an unspecified order. The query may not have any sort order, and may
+   * not use limit or skip.
    * @param {Function} callback Callback that will be called with each result
    *     of the query.
    * @param {Object} options Valid options are:<ul>
+   *   <li>batchSize: How many objects to yield in each batch (default: 100)
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -873,7 +874,7 @@ class ParseQuery {
    * @return {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
-  each(callback: (obj: ParseObject) => any, options?: BatchOptions): Promise<Array<ParseObject>> {
+  eachBatch(callback: (objs: Array<ParseObject>) => Promise<*>, options?: BatchOptions): Promise<void> {
     options = options || {};
 
     if (this._order || this._skip || (this._limit >= 0)) {
@@ -882,8 +883,6 @@ class ParseQuery {
     }
 
     const query = new ParseQuery(this.className);
-    // We can override the batch size from the options.
-    // This is undocumented, but useful for testing.
     query._limit = options.batchSize || 100;
     query._include = this._include.map((i) => {
       return i;
@@ -927,14 +926,7 @@ class ParseQuery {
       return !finished;
     }, () => {
       return query.find(findOptions).then((results) => {
-        let callbacksDone = Promise.resolve();
-        results.forEach((result) => {
-          callbacksDone = callbacksDone.then(() => {
-            return callback(result);
-          });
-        });
-
-        return callbacksDone.then(() => {
+        return Promise.resolve(callback(results)).then(() => {
           if (results.length >= query._limit) {
             query.greaterThan('objectId', results[results.length - 1].id);
           } else {
@@ -943,6 +935,36 @@ class ParseQuery {
         });
       });
     });
+  }
+
+  /**
+   * Iterates over each result of a query, calling a callback for each one. If
+   * the callback returns a promise, the iteration will not continue until
+   * that promise has been fulfilled. If the callback returns a rejected
+   * promise, then iteration will stop with that error. The items are
+   * processed in an unspecified order. The query may not have any sort order,
+   * and may not use limit or skip.
+   * @param {Function} callback Callback that will be called with each result
+   *     of the query.
+   * @param {Object} options Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @return {Promise} A promise that will be fulfilled once the
+   *     iteration has completed.
+   */
+  each(callback: (obj: ParseObject) => any, options?: BatchOptions): Promise<void> {
+    return this.eachBatch((results) => {
+      let callbacksDone = Promise.resolve();
+      results.forEach((result) => {
+        callbacksDone = callbacksDone.then(() => {
+          return callback(result);
+        });
+      });
+      return callbacksDone;
+    }, options);
   }
 
   /**
