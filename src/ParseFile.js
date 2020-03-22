@@ -418,11 +418,6 @@ const DefaultController = {
     if (source.format !== 'file') {
       throw new Error('saveFile can only be used with File-type sources.');
     }
-    if (source.base64) {
-      // If base64 data has already been created, go ahead and save it.
-      source.format = 'base64';
-      return await DefaultController.saveBase64(name, source, options);
-    }
     const base64Data = await new Promise((res, rej) => {
       // eslint-disable-next-line no-undef
       const reader = new FileReader();
