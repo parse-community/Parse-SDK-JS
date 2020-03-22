@@ -987,7 +987,7 @@ describe('Parse Query', () => {
         'website',
         'parse # First fragment. We\'ll write this in one case but match ' +
         'insensitively\n.com  # Second fragment. This can be separated by any ' +
-        'character, including newline',
+        'character, including newline\n',
         'mixs'
       );
       return query.find();
