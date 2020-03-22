@@ -1503,6 +1503,134 @@ describe('ParseQuery', () => {
       });
   });
 
+  describe('iterating over batches with .eachBatch()', () => {
+    let findMock;
+    beforeEach(() => {
+      findMock = jest.fn();
+      findMock.mockReturnValueOnce(Promise.resolve({
+        results: [
+          { objectId: 'I55', size: 'medium', name: 'Product 55' },
+          { objectId: 'I89', size: 'small', name: 'Product 89' },
+        ]
+      }));
+      findMock.mockReturnValueOnce(Promise.resolve({
+        results: [
+          { objectId: 'I91', size: 'small', name: 'Product 91' },
+        ]
+      }));
+      CoreManager.setQueryController({
+        aggregate() {},
+        find: findMock,
+      });
+    });
+
+    it('passes query attributes through to the REST API', async () => {
+      const q = new ParseQuery('Item');
+      q.containedIn('size', ['small', 'medium']);
+      q.matchesKeyInQuery(
+        'name',
+        'productName',
+        new ParseQuery('Review').equalTo('stars', 5)
+      );
+      q.equalTo('valid', true);
+      q.select('size', 'name');
+      q.includeAll();
+      q.hint('_id_');
+
+      await q.eachBatch(() => {});
+
+      expect(findMock).toHaveBeenCalledTimes(1);
+      const [className, params, options] = findMock.mock.calls[0];
+      expect(className).toBe('Item')
+      expect(params).toEqual({
+        limit: 100,
+        order: 'objectId',
+        keys: 'size,name',
+        include: '*',
+        hint: '_id_',
+        where: {
+          size: {
+            $in: ['small', 'medium']
+          },
+          name: {
+            $select: {
+              key: 'productName',
+              query: {
+                className: 'Review',
+                where: {
+                  stars: 5
+                }
+              }
+            }
+          },
+          valid: true
+        }
+      });
+      expect(options.requestTask).toBeDefined();
+    });
+
+    it('passes options through to the REST API', async () => {
+      const batchOptions = {
+        useMasterKey: true,
+        sessionToken: '1234',
+        batchSize: 50,
+      };
+      const q = new ParseQuery('Item');
+      await q.eachBatch(() => {}, batchOptions);
+      expect(findMock).toHaveBeenCalledTimes(1);
+      const [className, params, options] = findMock.mock.calls[0];
+      expect(className).toBe('Item');
+      expect(params).toEqual({
+        limit: 50,
+        order: 'objectId',
+        where: {},
+      });
+      expect(options.useMasterKey).toBe(true);
+      expect(options.sessionToken).toEqual('1234');
+    });
+
+    it('only makes one request when the results fit in one page', async () => {
+      const q = new ParseQuery('Item');
+      await q.eachBatch(() => {});
+      expect(findMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('makes more requests when the results do not fit in one page', async () => {
+      const q = new ParseQuery('Item');
+      await q.eachBatch(() => {}, { batchSize: 2 });
+      expect(findMock).toHaveBeenCalledTimes(2);
+    })
+
+    it('stops iteration when the callback returns a promise that rejects', async () => {
+      let callCount = 0;
+      const callback = () => {
+        callCount++;
+        return Promise.reject(new Error('Callback rejecting'));
+      };
+      const q = new ParseQuery('Item');
+      await q.eachBatch(callback, { batchSize: 2 }).catch(() => {});
+      expect(callCount).toBe(1);
+    });
+
+    it('handles a synchronous callback', async () => {
+      const results = [];
+      const q = new ParseQuery('Item');
+      await q.eachBatch((items) => {
+        items.map(item => results.push(item.attributes.size))
+      });
+      expect(results).toEqual(['medium', 'small']);
+    });
+
+    it('handles an asynchronous callback', async () => {
+      const results = [];
+      const q = new ParseQuery('Item');
+      await q.eachBatch((items) => {
+        items.map(item => results.push(item.attributes.size))
+        return new Promise(resolve => setImmediate(resolve));
+      });
+      expect(results).toEqual(['medium', 'small']);
+    });
+  });
 
   it('can iterate over results with each()', (done) => {
     CoreManager.setQueryController({
@@ -1676,64 +1804,156 @@ describe('ParseQuery', () => {
     expect(q._hint).toBeUndefined();
   });
 
-  it('can iterate over results with map()', async () => {
-    CoreManager.setQueryController({
-      aggregate() {},
-      find() {
-        return Promise.resolve({
-          results: [
-            { objectId: 'I55', size: 'medium', name: 'Product 55' },
-            { objectId: 'I89', size: 'small', name: 'Product 89' },
-            { objectId: 'I91', size: 'small', name: 'Product 91' },
-          ]
-        });
-      }
+  describe('iterating over results via .map()', () => {
+    beforeEach(() => {
+      CoreManager.setQueryController({
+        aggregate() {},
+        find() {
+          return Promise.resolve({
+            results: [
+              { objectId: 'I55', size: 'medium', name: 'Product 55' },
+              { objectId: 'I89', size: 'small', name: 'Product 89' },
+              { objectId: 'I91', size: 'small', name: 'Product 91' },
+            ]
+          });
+        }
+      });
     });
 
-    const q = new ParseQuery('Item');
+    it('can iterate with a synchronous callback', async () => {
+      const callback = (object) => object.attributes.size;
+      const q = new ParseQuery('Item');
+      const results = await q.map(callback);
+      expect(results).toEqual(['medium', 'small', 'small']);
+    });
 
-    const results = await q.map((object) => object.attributes.size);
-    expect(results.length).toBe(3);
+    it('can iterate with an asynchronous callback', async () => {
+      const callback = async (object) => object.attributes.size;
+      const q = new ParseQuery('Item');
+      const results = await q.map(callback);
+      expect(results).toEqual(['medium', 'small', 'small']);
+    });
+
+    it('stops iteration when a rejected promise is returned', async () => {
+      let callCount = 0;
+      await new ParseQuery('Item').map(() => {
+        callCount++;
+        return Promise.reject(new Error('Callback rejecting'));
+      }).catch(() => {});
+      expect(callCount).toEqual(1);
+    });
   });
 
-  it('can iterate over results with reduce()', async () => {
-    CoreManager.setQueryController({
-      aggregate() {},
-      find() {
-        return Promise.resolve({
-          results: [
-            { objectId: 'I55', number: 1 },
-            { objectId: 'I89', number: 2 },
-            { objectId: 'I91', number: 3 },
-          ]
-        });
-      }
+  describe('iterating over results with .reduce()', () => {
+    beforeEach(() => {
+      CoreManager.setQueryController({
+        aggregate() {},
+        find() {
+          return Promise.resolve({
+            results: [
+              { objectId: 'I55', number: 1 },
+              { objectId: 'I89', number: 2 },
+              { objectId: 'I91', number: 3 },
+            ]
+          });
+        }
+      });
     });
 
-    const q = new ParseQuery('Item');
+    it('can iterate with a synchronous callback', async () => {
+      const callback = (accumulator, object) => accumulator + object.attributes.number;
+      const q = new ParseQuery('Item');
+      const result = await q.reduce(callback, 0);
+      expect(result).toBe(6);
+    });
 
-    const result = await q.reduce((accumulator, object) => accumulator + object.attributes.number, 0);
-    expect(result).toBe(6);
+    it('can iterate with an asynchronous callback', async () => {
+      const callback = async (accumulator, object) => accumulator + object.attributes.number;
+      const q = new ParseQuery('Item');
+      const result = await q.reduce(callback, 0);
+      expect(result).toBe(6);
+    });
+
+    it('stops iteration when a rejected promise is returned', async () => {
+      let callCount = 0;
+      const callback = () => {
+        callCount += 1;
+        return Promise.reject(new Error("Callback rejecting"));
+      }
+      const q = new ParseQuery('Item');
+      await q.reduce(callback, 0).catch(() => {});
+      expect(callCount).toBe(1);
+    });
+
+    it('uses the first object as an initial value when no initial value is passed', async () => {
+      let callCount = 0;
+      const callback = (accumulator, object) => {
+        callCount += 1;
+        accumulator.attributes.number += object.attributes.number;
+        return accumulator;
+      }
+      const q = new ParseQuery('Item');
+      const result = await q.reduce(callback);
+      expect(result.id).toBe('I55');
+      expect(result.attributes.number).toBe(6);
+      expect(callCount).toBe(2); // Not called for the first object when used as initial value
+    });
+
+    it('rejects with a TypeError when there are no results and no initial value was provided', async () => {
+      CoreManager.setQueryController({
+        aggregate() {},
+        find() { return Promise.resolve({ results: [] }) },
+      });
+
+      const q = new ParseQuery('Item');
+      const callback = (accumulator, object) => {
+        accumulator.attributes.number += object.attributes.number;
+        return accumulator;
+      }
+      return expect(q.reduce(callback)).rejects.toThrow(TypeError);
+    });
   });
 
-  it('can iterate over results with filter()', async () => {
-    CoreManager.setQueryController({
-      aggregate() {},
-      find() {
-        return Promise.resolve({
-          results: [
-            { objectId: 'I55', size: 'medium', name: 'Product 55' },
-            { objectId: 'I89', size: 'small', name: 'Product 89' },
-            { objectId: 'I91', size: 'small', name: 'Product 91' },
-          ]
-        });
-      }
+  describe('iterating over results with .filter()', () => {
+    beforeEach(() => {
+      CoreManager.setQueryController({
+        aggregate() {},
+        find() {
+          return Promise.resolve({
+            results: [
+              { objectId: 'I55', size: 'medium', name: 'Product 55' },
+              { objectId: 'I89', size: 'small', name: 'Product 89' },
+              { objectId: 'I91', size: 'small', name: 'Product 91' },
+            ]
+          });
+        }
+      });
     });
 
-    const q = new ParseQuery('Item');
+    it('can iterate results with a synchronous callback', async () => {
+      const callback = (object) => object.attributes.size === 'small';
+      const q = new ParseQuery('Item');
+      const results = await q.filter(callback);
+      expect(results.length).toBe(2);
+    });
 
-    const results = await q.filter((object) => object.attributes.size === 'small');
-    expect(results.length).toBe(2);
+    it('can iterate results with an async callback', async () => {
+      const callback = async (object) => object.attributes.size === 'small';
+      const q = new ParseQuery('Item');
+      const results = await q.filter(callback);
+      expect(results.length).toBe(2);
+    });
+
+    it('stops iteration when a rejected promise is returned', async () => {
+      let callCount = 0;
+      const callback = async () => {
+        callCount += 1;
+        return Promise.reject(new Error('Callback rejecting'));
+      };
+      const q = new ParseQuery('Item');
+      await q.filter(callback).catch(() => {});
+      expect(callCount).toBe(1);
+    });
   });
 
   it('returns an error when iterating over an invalid query', (done) => {

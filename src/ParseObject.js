@@ -2270,7 +2270,7 @@ const DefaultController = {
       let pending: Array<ParseObject> = [];
       unsaved.forEach((el) => {
         if (el instanceof ParseFile) {
-          filesSaved.push(el.save());
+          filesSaved.push(el.save(options));
         } else if (el instanceof ParseObject) {
           pending.push(el);
         }
