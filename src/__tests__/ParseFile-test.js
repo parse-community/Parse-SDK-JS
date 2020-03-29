@@ -373,6 +373,7 @@ describe('FileController', () => {
   });
 
   it('saves files via ajax', () => {
+    // eslint-disable-next-line no-undef
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
@@ -648,6 +649,7 @@ describe('FileController', () => {
       });
     };
     CoreManager.setRESTController({ request, ajax });
+    // eslint-disable-next-line no-undef
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
@@ -687,6 +689,7 @@ describe('FileController', () => {
       });
     };
     CoreManager.setRESTController({ request, ajax });
+    // eslint-disable-next-line no-undef
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
@@ -726,6 +729,7 @@ describe('FileController', () => {
       });
     };
     CoreManager.setRESTController({ request, ajax });
+    // eslint-disable-next-line no-undef
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
@@ -768,6 +772,7 @@ describe('FileController', () => {
     CoreManager.setRESTController({ ajax, request });
     CoreManager.setLocalDatastore(mockLocalDatastore);
 
+    // eslint-disable-next-line no-undef
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
