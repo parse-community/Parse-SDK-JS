@@ -3,6 +3,29 @@
 ### master
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.11.0...master)
 
+## 2.12.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.11.0...2.12.0)
+
+**New Features**
+- Support Parse.Query hint ([#1054](https://github.com/parse-community/Parse-SDK-JS/pull/1054))
+- Support Parse.Query eachBatch ([#1114](https://github.com/parse-community/Parse-SDK-JS/pull/1114))
+- Support Parse.Object decrement ([#1069](https://github.com/parse-community/Parse-SDK-JS/pull/1069))
+- Support deleting Parse.File ([#1067](https://github.com/parse-community/Parse-SDK-JS/pull/1067))
+- Support File Metadata ([#1065](https://github.com/parse-community/Parse-SDK-JS/pull/1065)) ([#1070](https://github.com/parse-community/Parse-SDK-JS/pull/1070))
+
+**Improvements**
+- Support global request batch size ([#1053](https://github.com/parse-community/Parse-SDK-JS/pull/1053))
+- Username signup error ([#1080](https://github.com/parse-community/Parse-SDK-JS/pull/1080))
+- Pass SaveAll options to Files ([#1107](https://github.com/parse-community/Parse-SDK-JS/pull/1107))
+- Make iteration query methods (map, filter, reduce) returned promises ([#1112](https://github.com/parse-community/Parse-SDK-JS/pull/1112))
+
+**Fixes**
+- Fix user.become for AsyncStorage ([#1056](https://github.com/parse-community/Parse-SDK-JS/pull/1056))
+- Subscribing to query with null sessionToken ([#1058](https://github.com/parse-community/Parse-SDK-JS/pull/1058))
+- Fix addIndex annotation in Parse.Schema ([#1071](https://github.com/parse-community/Parse-SDK-JS/pull/1071))
+- Fix cascadeSave=false bug for SingleInstance objects ([#1078](https://github.com/parse-community/Parse-SDK-JS/pull/1078))
+- Fix react-native build ([#1094](https://github.com/parse-community/Parse-SDK-JS/pull/1094))
+
 ## 2.11.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.10.0...2.11.0)
 
