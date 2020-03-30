@@ -1,7 +1,7 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.11.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.12.0...master)
 
 ## 2.12.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.11.0...2.12.0)
