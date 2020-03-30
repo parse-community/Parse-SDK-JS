@@ -51,7 +51,7 @@
     "babel-plugin-inline-package-json": "2.0.0",
     "babel-plugin-minify-dead-code-elimination": "0.5.1",
     "babel-plugin-transform-inline-environment-variables": "0.4.3",
-    "browserify": "16.5.0",
+    "browserify": "16.5.1",
     "codecov": "3.6.5",
     "core-js": "3.6.1",
     "cross-env": "7.0.2",
