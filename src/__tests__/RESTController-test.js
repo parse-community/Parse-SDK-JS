@@ -428,7 +428,7 @@ describe('RESTController', () => {
     CoreManager.set('SERVER_AUTH_TOKEN', null);
   });
 
-  it('reports upload progress of the AJAX request when callback is provided', (done) => {
+  it('reports upload/download progress of the AJAX request when callback is provided', (done) => {
     const xhr = mockXHR([{ status: 200, response: { success: true } }], {
       progress: {
         lengthComputable: true,
@@ -444,7 +444,8 @@ describe('RESTController', () => {
     jest.spyOn(options, 'progress');
 
     RESTController.ajax('POST', 'files/upload.txt', {}, {}, options).then(({ response, status }) => {
-      expect(options.progress).toHaveBeenCalledWith(0.5, 5, 10);
+      expect(options.progress).toHaveBeenCalledWith('download', 0.5, 5, 10);
+      expect(options.progress).toHaveBeenCalledWith('upload', 0.5, 5, 10);
       expect(response).toEqual({ success: true });
       expect(status).toBe(200);
       done();
@@ -467,7 +468,7 @@ describe('RESTController', () => {
     jest.spyOn(options, 'progress');
 
     RESTController.ajax('POST', 'files/upload.txt', {}, {}, options).then(({ response, status }) => {
-      expect(options.progress).toHaveBeenCalledWith(null);
+      expect(options.progress).toHaveBeenCalledWith('upload', null);
       expect(response).toEqual({ success: true });
       expect(status).toBe(200);
       done();

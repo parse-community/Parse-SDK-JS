@@ -22,6 +22,7 @@ function mockXHR(results, options = {}) {
   XHR.prototype = {
     open: function() { },
     setRequestHeader: function() { },
+    upload: function() { },
     send: function() {
       this.status = results[attempts].status;
       this.responseText = JSON.stringify(results[attempts].response || {});
@@ -29,6 +30,7 @@ function mockXHR(results, options = {}) {
       attempts++;
       this.onreadystatechange();
       this.onprogress(options.progress);
+      this.upload.onprogress(options.progress);
     }
   };
   return XHR;
