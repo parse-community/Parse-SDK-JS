@@ -68,7 +68,7 @@
     "jasmine": "3.5.0",
     "jasmine-reporters": "2.3.2",
     "jest": "24.9.0",
-    "jsdoc": "3.6.3",
+    "jsdoc": "3.6.4",
     "jsdoc-babel": "0.5.0",
     "metro-react-native-babel-preset": "0.59.0",
     "parse-server": "github:parse-community/parse-server#master",
