@@ -115,4 +115,13 @@ describe('Parse.File', () => {
       assert.equal(e.message, 'Could not delete file.');
     }
   });
+
+  it('can update existing file data', async () => {
+    const parseLogo = 'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
+    const file = new Parse.File('parse-server-logo', { uri: parseLogo });
+    await file.save();
+    file.addMetadata('foo', 'bar');
+    file.addTag('bar', 'foo');
+    await file.save();
+  });
 });
