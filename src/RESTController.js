@@ -163,13 +163,13 @@ const RESTController = {
         if (options && typeof options.progress === 'function') {
           if (event.lengthComputable) {
             options.progress(
-              type,
               event.loaded / event.total,
               event.loaded,
-              event.total
+              event.total,
+              { type }
             );
           } else {
-            options.progress(type, null);
+            options.progress(null, null, null, { type });
           }
         }
       }
