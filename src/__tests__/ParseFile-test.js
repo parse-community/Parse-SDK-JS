@@ -10,19 +10,27 @@
 jest.autoMockOff();
 jest.mock('http');
 jest.mock('https');
+jest.mock('../ParseACL');
 
 const ParseError = require('../ParseError').default;
 const ParseFile = require('../ParseFile').default;
+const ParseObject = require('../ParseObject').default;
 const CoreManager = require('../CoreManager');
 const EventEmitter = require('../EventEmitter');
 
 const mockHttp = require('http');
 const mockHttps = require('https');
 
+const mockLocalDatastore = {
+  _updateLocalIdForObject: jest.fn(),
+  _updateObjectIfPinned: jest.fn(),
+};
+jest.setMock('../LocalDatastore', mockLocalDatastore);
+
 function generateSaveMock(prefix) {
   return function(name, payload, options) {
     if (options && typeof options.progress === 'function') {
-      options.progress(0.5);
+      options.progress(0.5, 5, 10);
     }
     return Promise.resolve({
       name: name,
@@ -228,7 +236,7 @@ describe('ParseFile', () => {
     jest.spyOn(options, 'progress');
 
     return file.save(options).then(function(f) {
-      expect(options.progress).toHaveBeenCalledWith(0.5);
+      expect(options.progress).toHaveBeenCalledWith(0.5, 5, 10);
       expect(f).toBe(file);
       expect(f.name()).toBe('progress.txt');
       expect(f.url()).toBe('http://files.parsetfss.com/a/progress.txt');
@@ -365,13 +373,15 @@ describe('FileController', () => {
   });
 
   it('saves files via ajax', () => {
-    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    // eslint-disable-next-line no-undef
+    const blob = new Blob([61, 170, 236, 120]);
+    const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
 
     return file.save().then(function(f) {
       expect(f).toBe(file);
-      expect(f.name()).toBe('/api.parse.com/1/files/parse.txt');
-      expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
+      expect(f.name()).toBe('parse.txt');
+      expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
     });
   });
 
@@ -639,13 +649,15 @@ describe('FileController', () => {
       });
     };
     CoreManager.setRESTController({ request, ajax });
-    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    // eslint-disable-next-line no-undef
+    const blob = new Blob([61, 170, 236, 120]);
+    const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
 
     return file.save({ sessionToken: 'testing_sessionToken' }).then(function(f) {
       expect(f).toBe(file);
-      expect(f.name()).toBe('/api.parse.com/1/files/parse.txt');
-      expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
+      expect(f.name()).toBe('parse.txt');
+      expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
     });
   });
 
@@ -677,14 +689,97 @@ describe('FileController', () => {
       });
     };
     CoreManager.setRESTController({ request, ajax });
-    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    // eslint-disable-next-line no-undef
+    const blob = new Blob([61, 170, 236, 120]);
+    const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
 
     return file.save().then(function(f) {
       expect(f).toBe(file);
-      expect(f.name()).toBe('/api.parse.com/1/files/parse.txt');
-      expect(f.url()).toBe('https://files.parsetfss.com/a//api.parse.com/1/files/parse.txt');
+      expect(f.name()).toBe('parse.txt');
+      expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
     });
+  });
+
+  it('should save file using saveFile with metadata and tags', async () => {
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve({
+          getSessionToken() {
+            return 'currentUserToken';
+          }
+        });
+      }
+    });
+    const request = jest.fn((method, path) => {
+      const name = path.substr(path.indexOf('/') + 1);
+      return Promise.resolve({
+        name: name,
+        url: 'https://files.parsetfss.com/a/' + name
+      });
+    });
+    const ajax = function(method, path, data, headers, options) {
+      expect(options.sessionToken).toBe('currentUserToken')
+      const name = path.substr(path.indexOf('/') + 1);
+      return Promise.resolve({
+        response: {
+          name: name,
+          url: 'https://files.parsetfss.com/a/' + name
+        }
+      });
+    };
+    CoreManager.setRESTController({ request, ajax });
+    // eslint-disable-next-line no-undef
+    const blob = new Blob([61, 170, 236, 120]);
+    const file = new ParseFile('parse.txt', blob);
+    file._source.format = 'file';
+    file.addMetadata('foo', 'bar');
+    file.addTag('bar', 'foo');
+    const f = await file.save();
+    expect(f).toBe(file);
+    expect(f.name()).toBe('parse.txt');
+    expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
+    expect(request).toHaveBeenCalledWith(
+      'POST',
+      'files/parse.txt',
+      {
+        base64: 'NjExNzAyMzYxMjA=',
+        fileData: {
+          metadata: {
+            foo: 'bar',
+          },
+          tags: {
+            bar: 'foo',
+          },
+        },
+      },
+      { requestTask: expect.any(Function) },
+    );
+  });
+
+  it('saves files via object saveAll options', async () => {
+    const ajax = async () => {};
+    const request = jest.fn(async (method, path, data, options) => {
+      if (path.indexOf('files/') === 0) {
+        expect(options.sessionToken).toBe('testToken');
+        return {
+          name: 'parse.txt',
+          url: 'http://files.parsetfss.com/a/parse.txt'
+        };
+      }
+      return [ { success: { objectId: 'child' } } ];
+    });
+    CoreManager.setRESTController({ ajax, request });
+    CoreManager.setLocalDatastore(mockLocalDatastore);
+
+    // eslint-disable-next-line no-undef
+    const blob = new Blob([61, 170, 236, 120]);
+    const file = new ParseFile('parse.txt', blob);
+    file._source.format = 'file';
+    const object = ParseObject.fromJSON({ className: 'TestObject' });
+    object.set('file', file);
+    await ParseObject.saveAll([object], { sessionToken: 'testToken' });
+    expect(request).toHaveBeenCalled();
   });
 
   it('should throw error if file deleted without name', async (done) => {

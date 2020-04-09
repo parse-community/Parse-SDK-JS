@@ -428,7 +428,7 @@ describe('RESTController', () => {
     CoreManager.set('SERVER_AUTH_TOKEN', null);
   });
 
-  it('reports upload progress of the AJAX request when callback is provided', (done) => {
+  it('reports upload/download progress of the AJAX request when callback is provided', (done) => {
     const xhr = mockXHR([{ status: 200, response: { success: true } }], {
       progress: {
         lengthComputable: true,
@@ -445,6 +445,7 @@ describe('RESTController', () => {
 
     RESTController.ajax('POST', 'files/upload.txt', {}, {}, options).then(({ response, status }) => {
       expect(options.progress).toHaveBeenCalledWith(0.5, 5, 10);
+      expect(options.progress).toHaveBeenCalledTimes(2);
       expect(response).toEqual({ success: true });
       expect(status).toBe(200);
       done();
