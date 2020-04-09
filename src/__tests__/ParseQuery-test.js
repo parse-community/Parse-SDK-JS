@@ -2461,6 +2461,27 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can issue an aggregate query with read preference', async() => {
+    // Override controller
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params.readPreference).toEqual('SECONDARY');
+        expect(options.useMasterKey).toEqual(true);
+        return Promise.resolve({
+          results: []
+        });
+      }
+    });
+    // Query
+    const q = new ParseQuery('Item');
+    q.readPreference('SECONDARY');
+    const results = await q.aggregate([], { sessionToken: '1234' });
+    // Validate
+    expect(results).toEqual([]);
+  });
+
   it('can pass options to an aggregate query with hint', (done) => {
     const pipeline = [
       { group: { objectId: '$name' } }
