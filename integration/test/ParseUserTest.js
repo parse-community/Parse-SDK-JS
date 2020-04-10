@@ -981,11 +981,10 @@ describe('Parse User', () => {
   });
 
   it('can verify user password', async () => {
-    Parse.User.enableUnsafeCurrentUser();
-    const user = await Parse.User.signUp('asd', 'xyz')
-    const res = await user.verifyPassword('xyz');
+    const user = await Parse.User.signUp('asd123', 'xyz123');
+    const res = await user.verifyPassword('xyz123');
     expect(typeof res).toBe('object');
-    expect(res.username).toBe('asd');
+    expect(res.username).toBe('asd123');
 
     try {
       await user.verifyPassword('wrong password');
