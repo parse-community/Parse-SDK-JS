@@ -287,6 +287,8 @@ describe('RESTController', () => {
       requestPasswordReset() {},
       upgradeToRevocableSession() {},
       linkWith() {},
+      requestEmailVerification() {},
+      verifyPassword() {},
     });
 
     const xhr = {
@@ -323,6 +325,8 @@ describe('RESTController', () => {
       requestPasswordReset() {},
       upgradeToRevocableSession() {},
       linkWith() {},
+      requestEmailVerification() {},
+      verifyPassword() {},
     });
 
     const xhr = {

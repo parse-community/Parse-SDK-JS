@@ -132,6 +132,8 @@ type UserController = {
   upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => Promise;
   linkWith: (user: ParseUser, authData: AuthData) => Promise;
   removeUserFromDisk: () => Promise;
+  verifyPassword: (username: string, password: string, options: RequestOptions) => Promise;
+  requestEmailVerification: (email: string, options: RequestOptions) => Promise;
 };
 type HooksController = {
   get: (type: string, functionName?: string, triggerName?: string) => Promise;
@@ -417,6 +419,8 @@ module.exports = {
       'me',
       'requestPasswordReset',
       'upgradeToRevocableSession',
+      'requestEmailVerification',
+      'verifyPassword',
       'linkWith',
     ], controller);
     config['UserController'] = controller;

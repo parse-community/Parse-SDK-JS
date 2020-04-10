@@ -979,4 +979,19 @@ describe('Parse User', () => {
     userData = Parse.Storage.getItem(path);
     expect(JSON.parse(userData).password).toBeUndefined();
   });
+
+  it('can verify user password', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    const user = await Parse.User.signUp('asd', 'xyz')
+    const res = await user.verifyPassword('xyz');
+    expect(typeof res).toBe('object');
+    expect(res.username).toBe('asd');
+
+    try {
+      await user.verifyPassword('wrong password');
+    } catch (error) {
+      expect(error.code).toBe(101);
+      expect(error.message).toBe('Invalid username/password.');
+    }
+  });
 });
