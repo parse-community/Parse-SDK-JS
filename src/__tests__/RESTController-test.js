@@ -444,8 +444,8 @@ describe('RESTController', () => {
     jest.spyOn(options, 'progress');
 
     RESTController.ajax('POST', 'files/upload.txt', {}, {}, options).then(({ response, status }) => {
-      expect(options.progress).toHaveBeenCalledWith(0.5, 5, 10);
-      expect(options.progress).toHaveBeenCalledTimes(2);
+      expect(options.progress).toHaveBeenCalledWith(0.5, 5, 10, { type: 'download' });
+      expect(options.progress).toHaveBeenCalledWith(0.5, 5, 10, { type: 'upload' });
       expect(response).toEqual({ success: true });
       expect(status).toBe(200);
       done();
@@ -468,7 +468,7 @@ describe('RESTController', () => {
     jest.spyOn(options, 'progress');
 
     RESTController.ajax('POST', 'files/upload.txt', {}, {}, options).then(({ response, status }) => {
-      expect(options.progress).toHaveBeenCalledWith(null);
+      expect(options.progress).toHaveBeenCalledWith(null, null, null, { type: 'upload' });
       expect(response).toEqual({ success: true });
       expect(status).toBe(200);
       done();

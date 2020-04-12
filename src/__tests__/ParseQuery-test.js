@@ -2364,9 +2364,7 @@ describe('ParseQuery', () => {
       find() {},
       aggregate(className, params, options) {
         expect(className).toBe('Item');
-        expect(params).toEqual({
-          pipeline: [{ group: { objectId: '$name' } }]
-        });
+        expect(params.pipeline).toEqual([{ group: { objectId: '$name' } }]);
         expect(options.useMasterKey).toEqual(true);
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
@@ -2390,9 +2388,7 @@ describe('ParseQuery', () => {
       find() {},
       aggregate(className, params, options) {
         expect(className).toBe('Item');
-        expect(params).toEqual({
-          pipeline: { group: { objectId: '$name' } }
-        });
+        expect(params.pipeline).toEqual({ group: { objectId: '$name' } });
         expect(options.useMasterKey).toEqual(true);
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
@@ -2441,9 +2437,7 @@ describe('ParseQuery', () => {
       find() {},
       aggregate(className, params, options) {
         expect(className).toBe('Item');
-        expect(params).toEqual({
-          pipeline: [{ group: { objectId: '$name' } }]
-        });
+        expect(params.pipeline).toEqual([{ group: { objectId: '$name' } }]);
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
@@ -2461,6 +2455,27 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can issue an aggregate query with read preference', async() => {
+    // Override controller
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params.readPreference).toEqual('SECONDARY');
+        expect(options.useMasterKey).toEqual(true);
+        return Promise.resolve({
+          results: []
+        });
+      }
+    });
+    // Query
+    const q = new ParseQuery('Item');
+    q.readPreference('SECONDARY');
+    const results = await q.aggregate([], { sessionToken: '1234' });
+    // Validate
+    expect(results).toEqual([]);
+  });
+
   it('can pass options to an aggregate query with hint', (done) => {
     const pipeline = [
       { group: { objectId: '$name' } }
@@ -2469,10 +2484,8 @@ describe('ParseQuery', () => {
       find() {},
       aggregate(className, params, options) {
         expect(className).toBe('Item');
-        expect(params).toEqual({
-          pipeline: [{ group: { objectId: '$name' } }],
-          hint: '_id_',
-        });
+        expect(params.pipeline).toEqual([{ group: { objectId: '$name' } }]);
+        expect(params.hint).toEqual('_id_');
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
