@@ -159,27 +159,28 @@ const RESTController = {
         headers[key] = customHeaders[key];
       }
 
-      function handleProgress(event) {
+      function handleProgress(type, event) {
         if (options && typeof options.progress === 'function') {
           if (event.lengthComputable) {
             options.progress(
               event.loaded / event.total,
               event.loaded,
-              event.total
+              event.total,
+              { type }
             );
           } else {
-            options.progress(null);
+            options.progress(null, null, null, { type });
           }
         }
       }
 
       xhr.onprogress = (event) => {
-        handleProgress(event);
+        handleProgress('download', event);
       };
 
       if (xhr.upload) {
         xhr.upload.onprogress = (event) => {
-          handleProgress(event);
+          handleProgress('upload', event);
         }
       }
 
