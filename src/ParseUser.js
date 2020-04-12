@@ -517,15 +517,7 @@ class ParseUser extends ParseObject {
   verifyPassword(password: string, options?: RequestOptions): Promise<ParseUser> {
     const username = this.getUsername() || '';
 
-    options = options || {};
-
-    const verificationOption = {};
-    if (options.hasOwnProperty("useMasterKey")) {
-      verificationOption.useMasterKey = options.useMasterKey;
-    }
-
-    const controller = CoreManager.getUserController();
-    return controller.verifyPassword(username, password, verificationOption);
+    return ParseUser.verifyPassword(username, password, options);
   }
 
   static readOnlyAttributes() {
