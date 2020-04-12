@@ -89,6 +89,37 @@ describe('Parse Object', () => {
     assert.equal(await object.exists(), false);
   });
 
+  it('exists method should throw an error instead of returning false if limited by requiresAuthentication', async (done) => {
+    const clp = {
+      get: { requiresAuthentication: true },
+      find: {},
+      count: {},
+      create: { '*': true },
+      update: { requiresAuthentication: true },
+      delete: {},
+      addField: {},
+      protectedFields: {}
+    };
+    const testSchema = new Parse.Schema('SchemaTest');
+
+    testSchema.setCLP(clp);
+    const schema = await testSchema.save();
+
+    assert.deepEqual(schema.classLevelPermissions, clp);
+
+    const TestObject = Parse.Object.extend('SchemaTest');
+
+    const object = new TestObject();
+
+    await object.save();
+
+    object.exists().then(done.fail).catch((error) => {
+      assert.equal(error.code, Parse.Error.OperationForbidden);
+      done();
+    });
+
+  });
+
   it('can find objects', (done) => {
     const object = new TestObject({ foo: 'bar' });
     object.save().then(() => {
