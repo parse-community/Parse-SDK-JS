@@ -30,7 +30,7 @@ jest.setMock('../LocalDatastore', mockLocalDatastore);
 function generateSaveMock(prefix) {
   return function(name, payload, options) {
     if (options && typeof options.progress === 'function') {
-      options.progress(0.5, 5, 10);
+      options.progress(0.5, 5, 10, { type: 'upload' });
     }
     return Promise.resolve({
       name: name,
@@ -236,7 +236,7 @@ describe('ParseFile', () => {
     jest.spyOn(options, 'progress');
 
     return file.save(options).then(function(f) {
-      expect(options.progress).toHaveBeenCalledWith(0.5, 5, 10);
+      expect(options.progress).toHaveBeenCalledWith(0.5, 5, 10, { type: 'upload' });
       expect(f).toBe(file);
       expect(f.name()).toBe('progress.txt');
       expect(f.url()).toBe('http://files.parsetfss.com/a/progress.txt');

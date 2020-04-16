@@ -233,7 +233,17 @@ class ParseFile {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *     behalf of a specific user.
-   *   <li>progress: In Browser only, callback for upload progress
+   *   <li>progress: In Browser only, callback for upload progress. For example:
+   * <pre>
+   * let parseFile = new Parse.File(name, file);
+   * parseFile.save({
+   *   progress: (progressValue, loaded, total, { type }) => {
+   *     if (type === "upload" && progressValue !== null) {
+   *       // Update the UI using progressValue
+   *     }
+   *   }
+   * });
+   * </pre>
    * </ul>
    * @return {Promise} Promise that is resolved when the save finishes.
    */

@@ -777,6 +777,7 @@ class ParseQuery {
       pipeline,
       hint: this._hint,
       explain: this._explain,
+      readPreference: this._readPreference
     };
     return controller.aggregate(
       this.className,
