@@ -56,7 +56,8 @@ type SaveParams = {
 };
 
 type SaveOptions = FullOptions & {
-  cascadeSave?: boolean
+  cascadeSave?: boolean;
+  context?: AttributeMap;
 }
 
 // Mapping of class names to constructors, so we can populate objects from the
@@ -1250,6 +1251,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('installationId') && typeof options.installationId === 'string') {
       saveOptions.installationId = options.installationId;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      saveOptions.context = options.context;
     }
     const controller = CoreManager.getObjectController();
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
