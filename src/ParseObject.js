@@ -1180,6 +1180,7 @@ class ParseObject {
    *       <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *       <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
+   *       <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
    *     </ul>
    *   </li>
    * </ul>
@@ -1193,6 +1194,7 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
    * </ul>
    *
    * @return {Promise} A promise that is fulfilled when the save
