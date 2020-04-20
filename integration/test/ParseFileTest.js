@@ -112,7 +112,6 @@ describe('Parse.File', () => {
       assert.equal(false, true);
     } catch (e) {
       assert.equal(e.code, Parse.Error.FILE_DELETE_ERROR);
-      assert.equal(e.message, 'Could not delete file.');
     }
   });
 });
