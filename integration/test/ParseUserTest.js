@@ -936,6 +936,34 @@ describe('Parse User', () => {
     expect(user.get('authData').facebook.id).toBe('test');
   });
 
+  it('can verify user password via static method', async () => {
+    await Parse.User.signUp('asd123', 'xyz123');
+    const res = await Parse.User.verifyPassword('asd123', 'xyz123');
+    expect(typeof res).toBe('object');
+    expect(res.username).toBe('asd123');
+
+    try {
+      await Parse.User.verifyPassword('asd123', 'wrong password');
+    } catch (error) {
+      expect(error.code).toBe(101);
+      expect(error.message).toBe('Invalid username/password.');
+    }
+  });
+
+  it('can verify user password via instance method', async () => {
+    const user = await Parse.User.signUp('asd123', 'xyz123');
+    const res = await user.verifyPassword('xyz123');
+    expect(typeof res).toBe('object');
+    expect(res.username).toBe('asd123');
+
+    try {
+      await user.verifyPassword('wrong password');
+    } catch (error) {
+      expect(error.code).toBe(101);
+      expect(error.message).toBe('Invalid username/password.');
+    }
+  });
+
   it('can encrypt user', async () => {
     Parse.User.enableUnsafeCurrentUser();
     Parse.enableEncryptedUser();
@@ -978,33 +1006,5 @@ describe('Parse User', () => {
 
     userData = Parse.Storage.getItem(path);
     expect(JSON.parse(userData).password).toBeUndefined();
-  });
-
-  it('can verify user password via static method', async () => {
-    const user = await Parse.User.signUp('asd123', 'xyz123');
-    const res = await Parse.User.verifyPassword('asd123', 'xyz123');
-    expect(typeof res).toBe('object');
-    expect(res.username).toBe('asd123');
-
-    try {
-      await Parse.User.verifyPassword('asd123', 'wrong password');
-    } catch (error) {
-      expect(error.code).toBe(101);
-      expect(error.message).toBe('Invalid username/password.');
-    }
-  });
-
-  it('can verify user password via instance method', async () => {
-    const user = await Parse.User.signUp('asd123', 'xyz123');
-    const res = await user.verifyPassword('xyz123');
-    expect(typeof res).toBe('object');
-    expect(res.username).toBe('asd123');
-
-    try {
-      await user.verifyPassword('wrong password');
-    } catch (error) {
-      expect(error.code).toBe(101);
-      expect(error.message).toBe('Invalid username/password.');
-    }
   });
 });
