@@ -1219,6 +1219,26 @@ describe('ParseObject', () => {
     });
   });
 
+  it('accepts context on save', async () => {
+    // Mock XHR
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: { objectId: 'newattributes' }
+      }])
+    );
+    // Spy on REST controller
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+    // Save object
+    const context = {a: "a"};
+    const obj = new ParseObject('Item');
+    await obj.save(null, {context});
+    // Validate
+    const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
+    expect(jsonBody._context).toEqual(context);
+  });
+
   it('interpolates delete operations', (done) => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([{

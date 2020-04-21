@@ -21,6 +21,7 @@ export type RequestOptions = {
   batchSize?: number;
   include?: any;
   progress?: any;
+  context?: any;
 };
 
 export type FullOptions = {
@@ -220,6 +221,13 @@ const RESTController = {
       for (const k in data) {
         payload[k] = data[k];
       }
+    }
+
+    // Add context
+    const context = options.context;
+    if (context !== undefined) {
+      payload._context = context;
+      delete options.context;
     }
 
     if (method !== 'POST') {
