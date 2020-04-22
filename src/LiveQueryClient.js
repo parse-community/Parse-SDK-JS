@@ -374,7 +374,7 @@ class LiveQueryClient extends EventEmitter {
       if (subscription) {
         subscription.subscribed = true;
         subscription.subscribePromise.resolve();
-        subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN, response);
+        setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN, response), 200);
       }
       break;
     case OP_EVENTS.ERROR:
