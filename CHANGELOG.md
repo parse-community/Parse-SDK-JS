@@ -1,7 +1,23 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.12.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.13.0...master)
+
+## 2.13.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.12.0...2.13.0)
+
+**New Features**
+- Add Email Verification to Parse.User ([#1144](https://github.com/parse-community/Parse-SDK-JS/pull/1144))
+- Add Verify Password to Parse.User ([#1144](https://github.com/parse-community/Parse-SDK-JS/pull/1144))
+
+**Improvements**
+- Add read preference for aggregate query ([#1143](https://github.com/parse-community/Parse-SDK-JS/pull/1143))
+- Add file progress type (upload/download) ([#1140](https://github.com/parse-community/Parse-SDK-JS/pull/1140))
+- Add context to Parse.Object.save ([#1150](https://github.com/parse-community/Parse-SDK-JS/pull/1150))
+
+**Fixes**
+- File upload progress ([#1133](https://github.com/parse-community/Parse-SDK-JS/pull/1133))
+- Live Query Subscription Open Event ([#1151](https://github.com/parse-community/Parse-SDK-JS/pull/1151))
 
 ## 2.12.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.11.0...2.12.0)
