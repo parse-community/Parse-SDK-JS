@@ -56,7 +56,8 @@ type SaveParams = {
 };
 
 type SaveOptions = FullOptions & {
-  cascadeSave?: boolean
+  cascadeSave?: boolean;
+  context?: AttributeMap;
 }
 
 // Mapping of class names to constructors, so we can populate objects from the
@@ -1179,6 +1180,7 @@ class ParseObject {
    *       <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *       <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
+   *       <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
    *     </ul>
    *   </li>
    * </ul>
@@ -1192,6 +1194,7 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
    * </ul>
    *
    * @return {Promise} A promise that is fulfilled when the save
@@ -1250,6 +1253,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('installationId') && typeof options.installationId === 'string') {
       saveOptions.installationId = options.installationId;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      saveOptions.context = options.context;
     }
     const controller = CoreManager.getObjectController();
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;

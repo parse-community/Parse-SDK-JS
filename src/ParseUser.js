@@ -506,6 +506,20 @@ class ParseUser extends ParseObject {
     });
   }
 
+  /**
+   * Verify whether a given password is the password of the current user.
+   *
+   * @param {String} password A password to be verified
+   * @param {Object} options
+   * @return {Promise} A promise that is fulfilled with a user
+   *  when the password is correct.
+   */
+  verifyPassword(password: string, options?: RequestOptions): Promise<ParseUser> {
+    const username = this.getUsername() || '';
+
+    return ParseUser.verifyPassword(username, password, options);
+  }
+
   static readOnlyAttributes() {
     return ['sessionToken'];
   }
@@ -759,6 +773,69 @@ class ParseUser extends ParseObject {
     return controller.requestPasswordReset(
       email, requestOptions
     );
+  }
+
+  /**
+   * Request an email verification.
+   *
+   * <p>Calls options.success or options.error on completion.</p>
+   *
+   * @param {String} email The email address associated with the user that
+   *     forgot their password.
+   * @param {Object} options
+   * @static
+   * @returns {Promise}
+   */
+  static requestEmailVerification(email: string, options?: RequestOptions) {
+    options = options || {};
+
+    const requestOptions = {};
+    if (options.hasOwnProperty('useMasterKey')) {
+      requestOptions.useMasterKey = options.useMasterKey;
+    }
+
+    const controller = CoreManager.getUserController();
+    return controller.requestEmailVerification(email, requestOptions);
+  }
+
+  /**
+   * Verify whether a given password is the password of the current user.
+   *
+   * @param {String} username  A username to be used for identificaiton
+   * @param {String} password A password to be verified
+   * @param {Object} options
+   * @static
+   * @returns {Promise} A promise that is fulfilled with a user
+   *  when the password is correct.
+   */
+  static verifyPassword(username: string, password: string, options?: RequestOptions) {
+    if (typeof username !== 'string') {
+      return Promise.reject(
+        new ParseError(
+          ParseError.OTHER_CAUSE,
+          'Username must be a string.'
+        )
+      );
+    }
+
+    if (typeof password !== 'string') {
+      return Promise.reject(
+        new ParseError(
+          ParseError.OTHER_CAUSE,
+          'Password must be a string.'
+        )
+      );
+    }
+
+    options = options || {};
+
+    const verificationOption = {};
+    if (options.hasOwnProperty('useMasterKey')) {
+      verificationOption.useMasterKey = options.useMasterKey;
+    }
+
+    const controller = CoreManager.getUserController();
+    return controller.verifyPassword(username, password, verificationOption);
   }
 
   /**
@@ -1160,6 +1237,26 @@ const DefaultController = {
       }
       return user;
     });
+  },
+
+  verifyPassword(username: string, password: string, options: RequestOptions) {
+    const RESTController = CoreManager.getRESTController();
+    return RESTController.request(
+      'GET',
+      'verifyPassword',
+      { username, password },
+      options
+    );
+  },
+
+  requestEmailVerification(email: string, options: RequestOptions) {
+    const RESTController = CoreManager.getRESTController();
+    return RESTController.request(
+      'POST',
+      'verificationEmailRequest',
+      { email: email },
+      options
+    );
   }
 };
 

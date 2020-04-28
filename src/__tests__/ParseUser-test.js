@@ -1201,4 +1201,55 @@ describe('ParseUser', () => {
     expect(user.isCurrent()).toBe(false);
     expect(user.existed()).toBe(true);
   });
+
+  it('can verify user password', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({
+          objectId: 'uid2',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+    const user = await ParseUser.verifyPassword('username', 'password');
+    expect(user.objectId).toBe('uid2');
+    expect(user.username).toBe('username');
+
+    CoreManager.setRESTController({
+      request() {
+        const parseError = new ParseError(
+          ParseError.OBJECT_NOT_FOUND,
+          'Invalid username/password.'
+        );
+        return Promise.reject(parseError);
+      },
+      ajax() {}
+    });
+
+    try {
+      await ParseUser.verifyPassword('username','wrong password');
+    } catch(error) {
+      expect(error.code).toBe(101);
+      expect(error.message).toBe('Invalid username/password.');
+    }
+  });
+
+  it('can send an email verification request', () => {
+    CoreManager.setRESTController({
+      request(method, path, body) {
+        expect(method).toBe('POST');
+        expect(path).toBe("verificationEmailRequest");
+        expect(body).toEqual({ email: "me@parse.com" });
+
+        return Promise.resolve({}, 200);
+      },
+      ajax() {}
+    });
+
+    ParseUser.requestEmailVerification("me@parse.com");
+  });
 });
