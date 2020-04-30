@@ -4,6 +4,7 @@ daysUntilStale: 45
 daysUntilClose: 7
 # Issues with these labels will never be considered stale
 exemptLabels:
+  - accepted
   - pinned
   - security
   - good first task
@@ -16,8 +17,10 @@ exemptLabels:
   - needs more info
   - discussion
   - question
+  - pr-submitted
+  - proposal
 # Label to use when marking an issue as stale
-staleLabel: wontfix
+staleLabel: stale
 # Limit to only `issues` not `pulls`
 only: issues
 # Comment to post when marking an issue as stale. Set to `false` to disable
