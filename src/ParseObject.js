@@ -8,7 +8,7 @@
  *
  * @flow
  */
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 
 import CoreManager from './CoreManager';
 import canBeSerialized from './canBeSerialized';
