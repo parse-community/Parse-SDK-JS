@@ -1566,6 +1566,28 @@ describe('ParseObject', () => {
     await result;
   });
 
+  it('accepts context on saveAll', async () => {
+    // Mock XHR
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: [{}]
+      }])
+    );
+    // Spy on REST controller
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+    // Save object
+    const context = {a: "a"};
+    const obj = new ParseObject('Item');
+    obj.id = 'pid';
+    obj.set('test', 'value');
+    await ParseObject.saveAll([obj], {context})
+    // Validate
+    const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
+    expect(jsonBody._context).toEqual(context);
+  });
+
   it('can save a chain of unsaved objects', async () => {
     const xhrs = [];
     RESTController._setXHR(function() {
@@ -1732,6 +1754,27 @@ describe('ParseObject', () => {
     xhr.onreadystatechange();
     jest.runAllTicks();
     await result;
+  });
+
+  it('accepts context on destroy', async () => {
+    // Mock XHR
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: {}
+      }])
+    );
+    // Spy on REST controller
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+    // Save object
+    const context = {a: "a"};
+    const obj = new ParseObject('Item');
+    obj.id = 'pid';
+    await obj.destroy({context});
+    // Validate
+    const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
+    expect(jsonBody._context).toEqual(context);
   });
 
   it('can save an array of objects', async (done) => {
@@ -1978,6 +2021,27 @@ describe('ObjectController', () => {
     xhr.readyState = 4;
     xhr.onreadystatechange();
     jest.runAllTicks();
+  });
+
+  it('accepts context on fetch', async () => {
+    // Mock XHR
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: {}
+      }])
+    );
+    // Spy on REST controller
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+    // Save object
+    const context = {a: "a"};
+    const obj = new ParseObject('Item');
+    obj.id = 'pid';
+    await obj.fetch({context});
+    // Validate
+    const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
+    expect(jsonBody._context).toEqual(context);
   });
 
   it('can fetch an array of objects', (done) => {
