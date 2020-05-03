@@ -14,7 +14,6 @@ jest.dontMock('../encode');
 
 const Cloud = require('../Cloud');
 const CoreManager = require('../CoreManager');
-const mockXHR = require('./test_helpers/mockXHR');
 
 const defaultController = CoreManager.getCloudController();
 
