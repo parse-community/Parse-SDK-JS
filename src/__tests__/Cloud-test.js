@@ -14,6 +14,7 @@ jest.dontMock('../encode');
 
 const Cloud = require('../Cloud');
 const CoreManager = require('../CoreManager');
+const mockXHR = require('./test_helpers/mockXHR');
 
 const defaultController = CoreManager.getCloudController();
 
@@ -204,5 +205,22 @@ describe('CloudController', () => {
 
     expect(CoreManager.getRESTController().request.mock.calls[0])
       .toEqual(['GET', 'cloud_code/jobs/data', null, { useMasterKey: true }]);
+  });
+
+  it('accepts context on cloud function call', async () => {
+    const request = jest.fn();
+    request.mockReturnValue(Promise.resolve(undefined));
+
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request: request, ajax: ajax });
+
+    // Spy on REST controller
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+    // Save object
+    const context = {a: "a"};
+    await Cloud.run('myfunction', {}, { context: context });
+    // Validate
+    expect(controller.request.mock.calls[0][3].context).toEqual(context);
   });
 });
