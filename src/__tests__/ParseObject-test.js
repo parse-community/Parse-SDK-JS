@@ -1588,6 +1588,27 @@ describe('ParseObject', () => {
     expect(jsonBody._context).toEqual(context);
   });
 
+  it('accepts context on destroyAll', async () => {
+    // Mock XHR
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: [{}]
+      }])
+    );
+    // Spy on REST controller
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+    // Save object
+    const context = {a: "a"};
+    const obj = new ParseObject('Item');
+    obj.id = 'pid';
+    await ParseObject.destroyAll([obj], { context: context })
+    // Validate
+    const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
+    expect(jsonBody._context).toEqual(context);
+  });
+
   it('can save a chain of unsaved objects', async () => {
     const xhrs = [];
     RESTController._setXHR(function() {

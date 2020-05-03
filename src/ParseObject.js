@@ -1639,6 +1639,7 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>batchSize: Number of objects to process per request
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
    * </ul>
    * @return {Promise} A promise that is fulfilled when the destroyAll
    *     completes.
@@ -1653,6 +1654,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
       destroyOptions.batchSize = options.batchSize;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      destroyOptions.context = options.context;
     }
     return CoreManager.getObjectController().destroy(
       list,
@@ -1682,7 +1686,7 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>batchSize: Number of objects to process per request
-   *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
    * </ul>
    */
   static saveAll(list: Array<ParseObject>, options: RequestOptions = {}) {
