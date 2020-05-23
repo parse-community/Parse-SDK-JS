@@ -773,6 +773,11 @@ class ParseQuery {
       throw new Error('Invalid pipeline must be Array or Object');
     }
 
+    if (Object.keys(this._where || {}).length) {
+      if(!Array.isArray(pipeline)) pipeline = [pipeline];
+      pipeline.unshift({ match: this._where });
+    }
+
     const params = {
       pipeline,
       hint: this._hint,

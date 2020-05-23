@@ -96,6 +96,25 @@ describe('Parse Aggregate Query', () => {
     expect(results[0].tempPointer.value).toEqual(2);
   });
 
+  it('aggregate pipeline on top of a simple query', async done => {
+    const pipeline = {
+      group: { objectId: '$name' },
+    };
+    let results = await new Parse.Query(TestObject)
+      .equalTo('name', 'foo')
+      .aggregate(pipeline);
+
+    expect(results.length).toBe(1);
+
+    results = await new Parse.Query(TestObject)
+      .equalTo('score', 20)
+      .aggregate(pipeline);
+
+    expect(results.length).toBe(1);
+
+    done();
+  });
+
   it('distinct query', () => {
     const query = new Parse.Query(TestObject);
     return query.distinct('score').then((results) => {
