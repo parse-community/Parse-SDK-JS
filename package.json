@@ -42,7 +42,7 @@
     "@babel/plugin-proposal-class-properties": "7.10.1",
     "@babel/plugin-transform-flow-comments": "7.10.1",
     "@babel/plugin-transform-flow-strip-types": "7.10.1",
-    "@babel/plugin-transform-runtime": "7.10.0",
+    "@babel/plugin-transform-runtime": "7.10.1",
     "@babel/preset-env": "7.10.0",
     "@babel/preset-react": "7.10.0",
     "@parse/minami": "1.0.0",
