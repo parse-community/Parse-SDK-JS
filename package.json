@@ -29,7 +29,7 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime": "7.10.1",
+    "@babel/runtime": "7.10.2",
     "@babel/runtime-corejs3": "7.10.2",
     "crypto-js": "4.0.0",
     "react-native-crypto-js": "1.0.0",
@@ -38,12 +38,12 @@
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
-    "@babel/core": "7.10.1",
+    "@babel/core": "7.10.2",
     "@babel/plugin-proposal-class-properties": "7.10.1",
     "@babel/plugin-transform-flow-comments": "7.10.1",
     "@babel/plugin-transform-flow-strip-types": "7.10.1",
     "@babel/plugin-transform-runtime": "7.10.1",
-    "@babel/preset-env": "7.10.1",
+    "@babel/preset-env": "7.10.2",
     "@babel/preset-react": "7.10.1",
     "@parse/minami": "1.0.0",
     "babel-eslint": "10.1.0",
