@@ -923,18 +923,21 @@ class ParseQuery {
     }
 
     let finished = false;
+    let previousResults = [];
     return continueWhile(() => {
       return !finished;
     }, () => {
-      return query.find(findOptions).then((results) => {
-        return Promise.resolve(callback(results)).then(() => {
-          if (results.length >= query._limit) {
-            query.greaterThan('objectId', results[results.length - 1].id);
-          } else {
+      return Promise.all([
+        query.find(findOptions),
+        Promise.resolve(callback(previousResults))])
+        .then(([results]) => {
+          if (results.length == 0) {
             finished = true;
+          } else {
+            query.greaterThan('objectId', results[results.length - 1].id);
+            previousResults = results;
           }
         });
-      });
     });
   }
 
