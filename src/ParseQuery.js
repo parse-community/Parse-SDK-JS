@@ -564,6 +564,7 @@ class ParseQuery {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    * </ul>
    *
    * @return {Promise} A promise that is resolved with the result when
@@ -578,6 +579,9 @@ class ParseQuery {
     }
     if (options && options.hasOwnProperty('sessionToken')) {
       firstOptions.sessionToken = options.sessionToken;
+    }
+    if (options && options.hasOwnProperty('context') && typeof options.context === 'object') {
+      firstOptions.context = options.context;
     }
 
     return this.first(firstOptions).then((response) => {
@@ -604,6 +608,7 @@ class ParseQuery {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    * </ul>
    *
    * @return {Promise} A promise that is resolved with the results when
@@ -618,6 +623,9 @@ class ParseQuery {
     }
     if (options.hasOwnProperty('sessionToken')) {
       findOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      findOptions.context = options.context;
     }
     this._setRequestTask(findOptions);
 
@@ -799,6 +807,7 @@ class ParseQuery {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    * </ul>
    *
    * @return {Promise} A promise that is resolved with the object when
@@ -813,6 +822,9 @@ class ParseQuery {
     }
     if (options.hasOwnProperty('sessionToken')) {
       findOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      findOptions.context = options.context;
     }
     this._setRequestTask(findOptions);
 
@@ -871,6 +883,7 @@ class ParseQuery {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    * </ul>
    * @return {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
@@ -920,6 +933,9 @@ class ParseQuery {
     }
     if (options.hasOwnProperty('sessionToken')) {
       findOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      findOptions.context = options.context;
     }
 
     let finished = false;
