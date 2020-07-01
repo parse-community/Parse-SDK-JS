@@ -227,7 +227,6 @@ const RESTController = {
     const context = options.context;
     if (context !== undefined) {
       payload._context = context;
-      delete options.context;
     }
 
     if (method !== 'POST') {
