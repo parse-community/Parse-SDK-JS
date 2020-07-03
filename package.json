@@ -33,7 +33,7 @@
     "@babel/runtime-corejs3": "7.10.2",
     "crypto-js": "4.0.0",
     "react-native-crypto-js": "1.0.0",
-    "uuid": "3.3.3",
+    "uuid": "8.1.0",
     "ws": "7.3.0",
     "xmlhttprequest": "1.8.0"
   },
