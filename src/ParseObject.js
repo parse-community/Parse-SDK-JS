@@ -1084,6 +1084,7 @@ class ParseObject {
    *       behalf of a specific user.
    *   <li>include: The name(s) of the key(s) to include. Can be a string, an array of strings,
    *       or an array of array of strings.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    * </ul>
    * @return {Promise} A promise that is fulfilled when the fetch
    *     completes.
@@ -1096,6 +1097,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('sessionToken')) {
       fetchOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      fetchOptions.context = options.context;
     }
     if (options.hasOwnProperty('include')) {
       fetchOptions.include = [];
@@ -1273,6 +1277,7 @@ class ParseObject {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
    * </ul>
    * @return {Promise} A promise that is fulfilled when the destroy
    *     completes.
@@ -1285,6 +1290,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('sessionToken')) {
       destroyOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      destroyOptions.context = options.context;
     }
     if (!this.id) {
       return Promise.resolve();
@@ -1631,6 +1639,7 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>batchSize: Number of objects to process per request
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
    * </ul>
    * @return {Promise} A promise that is fulfilled when the destroyAll
    *     completes.
@@ -1645,6 +1654,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
       destroyOptions.batchSize = options.batchSize;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      destroyOptions.context = options.context;
     }
     return CoreManager.getObjectController().destroy(
       list,
@@ -1674,6 +1686,7 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>batchSize: Number of objects to process per request
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
    * </ul>
    */
   static saveAll(list: Array<ParseObject>, options: RequestOptions = {}) {
@@ -1686,6 +1699,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
       saveOptions.batchSize = options.batchSize;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      saveOptions.context = options.context;
     }
     return CoreManager.getObjectController().save(
       list,
