@@ -354,6 +354,15 @@ ParseError.FILE_DELETE_ERROR = 153;
 ParseError.REQUEST_LIMIT_EXCEEDED = 155;
 
 /**
+ * Error code indicating that the request was a duplicate and has been discarded due to
+ * idempotency rules.
+ * @property DUPLICATE_REQUEST
+ * @static
+ * @final
+ */
+ParseError.DUPLICATE_REQUEST = 159;
+
+/**
  * Error code indicating an invalid event name.
  * @property INVALID_EVENT_NAME
  * @static
