@@ -1,6 +1,5 @@
 <p align="center">
-    <img alt="Parse Platform" src="Assets/logo large.png" width="200">
-  </a>
+    <img alt="Parse Platform" src="Assets/img/logo_large.png" width="200">
 </p>
 
 <h2 align="center">Parse SDK for JavaScript</h2>
@@ -50,10 +49,10 @@ For server-side applications or Node.js command line tools, include `'parse/node
 const Parse = require('parse/node');
 ```
 
-For React Native applications, include `'parse/react-native'`:
+For React Native applications, include `'parse/react-native.js'`:
 ```js
 // In a React Native application
-const Parse = require('parse/react-native');
+const Parse = require('parse/react-native.js');
 
 // On React Native >= 0.50 and Parse >= 1.11.0, set the Async
 const AsyncStorage = require('react-native').AsyncStorage;
@@ -82,7 +81,7 @@ We have curated a [migration guide](2.0.0.md) that should help you migrate your 
 
 ## 3rd Party Authentications
 
-Parse Server supports many [3rd Party Authenications][3rd-parth-auth]. It is possible to [linkWith][link-with] any 3rd Party Authentication by creating a [custom authentication module][custom-auth-module].
+Parse Server supports many [3rd Party Authenications][3rd-party-auth]. It is possible to [linkWith][link-with] any 3rd Party Authentication by creating a [custom authentication module][custom-auth-module].
 
 ## Want to ride the bleeding edge?
 
@@ -121,7 +120,7 @@ of patent rights can be found in the PATENTS file in the same directory.
 As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code.
  
 [3rd-party-auth]: http://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication
-[custom-auth-module]:https://docs.parseplatform.org/js/guide/#custom-authentication-module).
+[custom-auth-module]: https://docs.parseplatform.org/js/guide/#custom-authentication-module
 [link-with]: https://docs.parseplatform.org/js/guide/#linking-users
 [open-collective-link]: https://opencollective.com/parse-server
 [types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse 

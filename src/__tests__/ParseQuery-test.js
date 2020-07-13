@@ -919,6 +919,33 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can set hint value', () => {
+    const q = new ParseQuery('Item');
+    q.hint('_id_');
+    expect(q.toJSON()).toEqual({
+      where: {},
+      hint: '_id_',
+    });
+  });
+
+  it('can set explain value', () => {
+    const q = new ParseQuery('Item');
+    q.explain();
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      explain: true,
+    });
+    const q2 = new ParseQuery('Item');
+    q2.withJSON(json);
+    expect(q2._explain).toBe(true);
+
+    q.explain(false);
+    expect(q.toJSON()).toEqual({
+      where: {},
+    });
+    expect(q.explain.bind(q, 'not boolean')).toThrow('You can only set explain to a boolean value');
+  });
 
   it('can generate queries that include full data for pointers', () => {
     const q = new ParseQuery('Item');
@@ -1004,6 +1031,19 @@ describe('ParseQuery', () => {
     const q2 = new ParseQuery('Item');
     q2.withJSON(json);
     expect(q2._extraOptions.randomOption).toBe('test');
+  });
+
+  it('can use hint', () => {
+    const q = new ParseQuery('Item');
+    q.hint('_id_');
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      hint: '_id_',
+    });
+    const q2 = new ParseQuery('Item');
+    q2.withJSON(json);
+    expect(q2._hint).toBe('_id_');
   });
 
   it('can specify certain fields to send back', () => {
@@ -1140,7 +1180,7 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [
             { objectId: 'I1', size: 'small', name: 'Product 3' }
@@ -1173,10 +1213,8 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: []
         });
@@ -1204,7 +1242,7 @@ describe('ParseQuery', () => {
             objectId: 'I27'
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [
             { objectId: 'I27', size: 'large', name: 'Product 27' }
@@ -1237,7 +1275,7 @@ describe('ParseQuery', () => {
             objectId: 'I28'
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: []
         });
@@ -1257,6 +1295,7 @@ describe('ParseQuery', () => {
   });
 
   it('can pass options to a get() query', (done) => {
+    const context = {a: "a"};
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1267,10 +1306,9 @@ describe('ParseQuery', () => {
             objectId: 'I27'
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
+        expect(options.context).toEqual(context);
         return Promise.resolve({
           results: [
             { objectId: 'I27', size: 'large', name: 'Product 27' }
@@ -1282,7 +1320,8 @@ describe('ParseQuery', () => {
     const q = new ParseQuery('Item');
     q.get('I27', {
       useMasterKey: true,
-      sessionToken: '1234'
+      sessionToken: '1234',
+      context: context
     }).then(() => {
       done();
     });
@@ -1300,7 +1339,7 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
           count: 145
@@ -1327,10 +1366,8 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [],
           count: 145
@@ -1368,7 +1405,7 @@ describe('ParseQuery', () => {
           includeReadPreference: 'SECONDARY',
           subqueryReadPreference: 'SECONDARY_PREFERRED',
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
@@ -1403,6 +1440,7 @@ describe('ParseQuery', () => {
   });
 
   it('can pass options to find()', (done) => {
+    const context = {a: "a"};
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1414,10 +1452,9 @@ describe('ParseQuery', () => {
             }
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
+        expect(options.context).toEqual(context);
         return Promise.resolve({
           results: []
         });
@@ -1428,7 +1465,8 @@ describe('ParseQuery', () => {
     q.containedIn('size', ['small', 'medium'])
       .find({
         useMasterKey: true,
-        sessionToken: '1234'
+        sessionToken: '1234',
+        context: context
       })
       .then((objs) => {
         expect(objs).toEqual([]);
@@ -1445,10 +1483,8 @@ describe('ParseQuery', () => {
           where: {},
           count: 1
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results:[
             { objectId: '1', name: 'Product 55' },
@@ -1473,6 +1509,134 @@ describe('ParseQuery', () => {
       });
   });
 
+  describe('iterating over batches with .eachBatch()', () => {
+    let findMock;
+    beforeEach(() => {
+      findMock = jest.fn();
+      findMock.mockReturnValueOnce(Promise.resolve({
+        results: [
+          { objectId: 'I55', size: 'medium', name: 'Product 55' },
+          { objectId: 'I89', size: 'small', name: 'Product 89' },
+        ]
+      }));
+      findMock.mockReturnValueOnce(Promise.resolve({
+        results: [
+          { objectId: 'I91', size: 'small', name: 'Product 91' },
+        ]
+      }));
+      CoreManager.setQueryController({
+        aggregate() {},
+        find: findMock,
+      });
+    });
+
+    it('passes query attributes through to the REST API', async () => {
+      const q = new ParseQuery('Item');
+      q.containedIn('size', ['small', 'medium']);
+      q.matchesKeyInQuery(
+        'name',
+        'productName',
+        new ParseQuery('Review').equalTo('stars', 5)
+      );
+      q.equalTo('valid', true);
+      q.select('size', 'name');
+      q.includeAll();
+      q.hint('_id_');
+
+      await q.eachBatch(() => {});
+
+      expect(findMock).toHaveBeenCalledTimes(1);
+      const [className, params, options] = findMock.mock.calls[0];
+      expect(className).toBe('Item')
+      expect(params).toEqual({
+        limit: 100,
+        order: 'objectId',
+        keys: 'size,name',
+        include: '*',
+        hint: '_id_',
+        where: {
+          size: {
+            $in: ['small', 'medium']
+          },
+          name: {
+            $select: {
+              key: 'productName',
+              query: {
+                className: 'Review',
+                where: {
+                  stars: 5
+                }
+              }
+            }
+          },
+          valid: true
+        }
+      });
+      expect(options.requestTask).toBeDefined();
+    });
+
+    it('passes options through to the REST API', async () => {
+      const batchOptions = {
+        useMasterKey: true,
+        sessionToken: '1234',
+        batchSize: 50,
+      };
+      const q = new ParseQuery('Item');
+      await q.eachBatch(() => {}, batchOptions);
+      expect(findMock).toHaveBeenCalledTimes(1);
+      const [className, params, options] = findMock.mock.calls[0];
+      expect(className).toBe('Item');
+      expect(params).toEqual({
+        limit: 50,
+        order: 'objectId',
+        where: {},
+      });
+      expect(options.useMasterKey).toBe(true);
+      expect(options.sessionToken).toEqual('1234');
+    });
+
+    it('only makes one request when the results fit in one page', async () => {
+      const q = new ParseQuery('Item');
+      await q.eachBatch(() => {});
+      expect(findMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('makes more requests when the results do not fit in one page', async () => {
+      const q = new ParseQuery('Item');
+      await q.eachBatch(() => {}, { batchSize: 2 });
+      expect(findMock).toHaveBeenCalledTimes(2);
+    })
+
+    it('stops iteration when the callback returns a promise that rejects', async () => {
+      let callCount = 0;
+      const callback = () => {
+        callCount++;
+        return Promise.reject(new Error('Callback rejecting'));
+      };
+      const q = new ParseQuery('Item');
+      await q.eachBatch(callback, { batchSize: 2 }).catch(() => {});
+      expect(callCount).toBe(1);
+    });
+
+    it('handles a synchronous callback', async () => {
+      const results = [];
+      const q = new ParseQuery('Item');
+      await q.eachBatch((items) => {
+        items.map(item => results.push(item.attributes.size))
+      });
+      expect(results).toEqual(['medium', 'small']);
+    });
+
+    it('handles an asynchronous callback', async () => {
+      const results = [];
+      const q = new ParseQuery('Item');
+      await q.eachBatch((items) => {
+        items.map(item => results.push(item.attributes.size))
+        return new Promise(resolve => setImmediate(resolve));
+      });
+      expect(results).toEqual(['medium', 'small']);
+    });
+  });
 
   it('can iterate over results with each()', (done) => {
     CoreManager.setQueryController({
@@ -1502,7 +1666,7 @@ describe('ParseQuery', () => {
             valid: true
           }
         });
-        expect(options).toEqual({});
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
@@ -1534,6 +1698,7 @@ describe('ParseQuery', () => {
   });
 
   it('can pass options to each()', (done) => {
+    const context = {a: "a"};
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1549,10 +1714,9 @@ describe('ParseQuery', () => {
             valid: true
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
+        expect(options.context).toEqual(context);
         return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
@@ -1573,10 +1737,234 @@ describe('ParseQuery', () => {
       calls++;
     }, {
       useMasterKey: true,
-      sessionToken: '1234'
+      sessionToken: '1234',
+      context: context
     }).then(() => {
       expect(calls).toBe(3);
       done();
+    });
+  });
+
+
+  it('can pass options to each() with hint', (done) => {
+    const context = {a: "a"};
+    CoreManager.setQueryController({
+      aggregate() {},
+      find(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          limit: 100,
+          order: 'objectId',
+          keys: 'size,name',
+          where: {
+            size: {
+              $in: ['small', 'medium']
+            },
+            valid: true
+          },
+          hint: '_id_',
+        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
+        expect(options.context).toEqual(context);
+        return Promise.resolve({
+          results: [
+            { objectId: 'I55', size: 'medium', name: 'Product 55' },
+            { objectId: 'I89', size: 'small', name: 'Product 89' },
+            { objectId: 'I91', size: 'small', name: 'Product 91' },
+          ]
+        });
+      }
+    });
+
+    const q = new ParseQuery('Item');
+    q.containedIn('size', ['small', 'medium']);
+    q.equalTo('valid', true);
+    q.select('size', 'name');
+    q.hint('_id_');
+    let calls = 0;
+
+    q.each(() => {
+      calls++;
+    }, {
+      useMasterKey: true,
+      sessionToken: '1234',
+      context: context
+    }).then(() => {
+      expect(calls).toBe(3);
+      done();
+    });
+  });
+
+  it('should add hint as string', () => {
+    const q = new ParseQuery('Item');
+    q.hint('_id_');
+    expect(q._hint).toBe('_id_');
+  });
+
+  it('should set hint as object', () => {
+    const q = new ParseQuery('Item');
+    q.hint({ _id: 1 });
+    expect(q._hint).toStrictEqual({ _id: 1 });
+  });
+
+  it('should delete hint when set as undefined', () => {
+    const q = new ParseQuery('Item');
+    q.hint('_id_');
+    expect(q._hint).toBe('_id_');
+    q.hint();
+    expect(q._hint).toBeUndefined();
+  });
+
+  describe('iterating over results via .map()', () => {
+    beforeEach(() => {
+      CoreManager.setQueryController({
+        aggregate() {},
+        find() {
+          return Promise.resolve({
+            results: [
+              { objectId: 'I55', size: 'medium', name: 'Product 55' },
+              { objectId: 'I89', size: 'small', name: 'Product 89' },
+              { objectId: 'I91', size: 'small', name: 'Product 91' },
+            ]
+          });
+        }
+      });
+    });
+
+    it('can iterate with a synchronous callback', async () => {
+      const callback = (object) => object.attributes.size;
+      const q = new ParseQuery('Item');
+      const results = await q.map(callback);
+      expect(results).toEqual(['medium', 'small', 'small']);
+    });
+
+    it('can iterate with an asynchronous callback', async () => {
+      const callback = async (object) => object.attributes.size;
+      const q = new ParseQuery('Item');
+      const results = await q.map(callback);
+      expect(results).toEqual(['medium', 'small', 'small']);
+    });
+
+    it('stops iteration when a rejected promise is returned', async () => {
+      let callCount = 0;
+      await new ParseQuery('Item').map(() => {
+        callCount++;
+        return Promise.reject(new Error('Callback rejecting'));
+      }).catch(() => {});
+      expect(callCount).toEqual(1);
+    });
+  });
+
+  describe('iterating over results with .reduce()', () => {
+    beforeEach(() => {
+      CoreManager.setQueryController({
+        aggregate() {},
+        find() {
+          return Promise.resolve({
+            results: [
+              { objectId: 'I55', number: 1 },
+              { objectId: 'I89', number: 2 },
+              { objectId: 'I91', number: 3 },
+            ]
+          });
+        }
+      });
+    });
+
+    it('can iterate with a synchronous callback', async () => {
+      const callback = (accumulator, object) => accumulator + object.attributes.number;
+      const q = new ParseQuery('Item');
+      const result = await q.reduce(callback, 0);
+      expect(result).toBe(6);
+    });
+
+    it('can iterate with an asynchronous callback', async () => {
+      const callback = async (accumulator, object) => accumulator + object.attributes.number;
+      const q = new ParseQuery('Item');
+      const result = await q.reduce(callback, 0);
+      expect(result).toBe(6);
+    });
+
+    it('stops iteration when a rejected promise is returned', async () => {
+      let callCount = 0;
+      const callback = () => {
+        callCount += 1;
+        return Promise.reject(new Error("Callback rejecting"));
+      }
+      const q = new ParseQuery('Item');
+      await q.reduce(callback, 0).catch(() => {});
+      expect(callCount).toBe(1);
+    });
+
+    it('uses the first object as an initial value when no initial value is passed', async () => {
+      let callCount = 0;
+      const callback = (accumulator, object) => {
+        callCount += 1;
+        accumulator.attributes.number += object.attributes.number;
+        return accumulator;
+      }
+      const q = new ParseQuery('Item');
+      const result = await q.reduce(callback);
+      expect(result.id).toBe('I55');
+      expect(result.attributes.number).toBe(6);
+      expect(callCount).toBe(2); // Not called for the first object when used as initial value
+    });
+
+    it('rejects with a TypeError when there are no results and no initial value was provided', async () => {
+      CoreManager.setQueryController({
+        aggregate() {},
+        find() { return Promise.resolve({ results: [] }) },
+      });
+
+      const q = new ParseQuery('Item');
+      const callback = (accumulator, object) => {
+        accumulator.attributes.number += object.attributes.number;
+        return accumulator;
+      }
+      return expect(q.reduce(callback)).rejects.toThrow(TypeError);
+    });
+  });
+
+  describe('iterating over results with .filter()', () => {
+    beforeEach(() => {
+      CoreManager.setQueryController({
+        aggregate() {},
+        find() {
+          return Promise.resolve({
+            results: [
+              { objectId: 'I55', size: 'medium', name: 'Product 55' },
+              { objectId: 'I89', size: 'small', name: 'Product 89' },
+              { objectId: 'I91', size: 'small', name: 'Product 91' },
+            ]
+          });
+        }
+      });
+    });
+
+    it('can iterate results with a synchronous callback', async () => {
+      const callback = (object) => object.attributes.size === 'small';
+      const q = new ParseQuery('Item');
+      const results = await q.filter(callback);
+      expect(results.length).toBe(2);
+    });
+
+    it('can iterate results with an async callback', async () => {
+      const callback = async (object) => object.attributes.size === 'small';
+      const q = new ParseQuery('Item');
+      const results = await q.filter(callback);
+      expect(results.length).toBe(2);
+    });
+
+    it('stops iteration when a rejected promise is returned', async () => {
+      let callCount = 0;
+      const callback = async () => {
+        callCount += 1;
+        return Promise.reject(new Error('Callback rejecting'));
+      };
+      const q = new ParseQuery('Item');
+      await q.filter(callback).catch(() => {});
+      expect(callCount).toBe(1);
     });
   });
 
@@ -1904,7 +2292,8 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({ useMasterKey: true });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: ['L'],
         });
@@ -1929,10 +2318,9 @@ describe('ParseQuery', () => {
             size: 'small'
           }
         });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: ['L']
         });
@@ -1949,6 +2337,37 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can pass options to a distinct query with hint', (done) => {
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          distinct: 'size',
+          where: {
+            size: 'small'
+          },
+          hint: '_id_',
+        });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
+        expect(options.requestTask).toBeDefined();
+        return Promise.resolve({
+          results: ['L']
+        });
+      }
+    });
+
+
+    const q = new ParseQuery('Item');
+    q.equalTo('size', 'small').hint('_id_').distinct('size', {
+      sessionToken: '1234'
+    }).then((results) => {
+      expect(results[0]).toBe('L');
+      done();
+    });
+  });
+
   it('can issue an aggregate query with array pipeline', (done) => {
     const pipeline = [
       { group: { objectId: '$name' } }
@@ -1957,10 +2376,9 @@ describe('ParseQuery', () => {
       find() {},
       aggregate(className, params, options) {
         expect(className).toBe('Item');
-        expect(params).toEqual({
-          pipeline: [{ group: { objectId: '$name' } }]
-        });
-        expect(options).toEqual({ useMasterKey: true });
+        expect(params.pipeline).toEqual([{ group: { objectId: '$name' } }]);
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
         });
@@ -1982,10 +2400,9 @@ describe('ParseQuery', () => {
       find() {},
       aggregate(className, params, options) {
         expect(className).toBe('Item');
-        expect(params).toEqual({
-          pipeline: { group: { objectId: '$name' } }
-        });
-        expect(options).toEqual({ useMasterKey: true });
+        expect(params.pipeline).toEqual({ group: { objectId: '$name' } });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
         });
@@ -2008,7 +2425,8 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           group: { objectId: '$name' }
         });
-        expect(options).toEqual({ useMasterKey: true });
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
         });
@@ -2031,13 +2449,9 @@ describe('ParseQuery', () => {
       find() {},
       aggregate(className, params, options) {
         expect(className).toBe('Item');
-        expect(params).toEqual({
-          pipeline: [{ group: { objectId: '$name' } }]
-        });
-        expect(options).toEqual({
-          useMasterKey: true,
-          sessionToken: '1234'
-        });
+        expect(params.pipeline).toEqual([{ group: { objectId: '$name' } }]);
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: []
         });
@@ -2051,6 +2465,81 @@ describe('ParseQuery', () => {
       expect(results).toEqual([]);
       done();
     });
+  });
+
+  it('can issue an aggregate query with read preference', async() => {
+    // Override controller
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params.readPreference).toEqual('SECONDARY');
+        expect(options.useMasterKey).toEqual(true);
+        return Promise.resolve({
+          results: []
+        });
+      }
+    });
+    // Query
+    const q = new ParseQuery('Item');
+    q.readPreference('SECONDARY');
+    const results = await q.aggregate([], { sessionToken: '1234' });
+    // Validate
+    expect(results).toEqual([]);
+  });
+
+  it('can pass options to an aggregate query with hint', (done) => {
+    const pipeline = [
+      { group: { objectId: '$name' } }
+    ];
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params.pipeline).toEqual([{ group: { objectId: '$name' } }]);
+        expect(params.hint).toEqual('_id_');
+        expect(options.useMasterKey).toEqual(true);
+        expect(options.sessionToken).toEqual('1234');
+        return Promise.resolve({
+          results: []
+        });
+      }
+    });
+
+    const q = new ParseQuery('Item');
+    q.hint('_id_').aggregate(pipeline, {
+      sessionToken: '1234'
+    }).then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
+  });
+
+  it('can cancel query', async () => {
+    const mockRequestTask = {
+      abort: () => {},
+    };
+
+    CoreManager.setQueryController({
+      find: function(name, params, options) {
+        options.requestTask(mockRequestTask);
+        return Promise.resolve({
+          results: []
+        });
+      },
+      aggregate: () => {},
+    });
+    const query = new ParseQuery('TestCancel');
+
+    jest.spyOn(mockRequestTask, 'abort');
+    query.cancel();
+    expect(mockRequestTask.abort).toHaveBeenCalledTimes(0);
+
+    await query.find();
+
+    expect(query._xhrRequest.task).toEqual(null);
+    query.cancel();
+    expect(mockRequestTask.abort).toHaveBeenCalledTimes(1);
   });
 
   it('selecting sub-objects does not inject objects when sub-object does not exist', (done) => {
@@ -2286,6 +2775,10 @@ describe('ParseQuery LocalDatastore', () => {
     q.fromPin();
     expect(q._queriesLocalDatastore).toBe(true);
     expect(q._localDatastorePinName).toBe(DEFAULT_PIN);
+    const query = q.fromNetwork();
+    expect(q._queriesLocalDatastore).toBe(false);
+    expect(q._localDatastorePinName).toBe(null);
+    expect(query).toEqual(q);
   });
 
   it('can query from pin with name', () => {

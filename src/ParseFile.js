@@ -71,6 +71,8 @@ class ParseFile {
   _previousSave: ?Promise<ParseFile>;
   _data: ?string;
   _requestTask: ?any;
+  _metadata: ?Object;
+  _tags: ?Object;
 
   /**
    * @param name {String} The file's name. This will be prefixed by a unique
@@ -99,11 +101,15 @@ class ParseFile {
    * @param type {String} Optional Content-Type header to use for the file. If
    *     this is omitted, the content type will be inferred from the name's
    *     extension.
+   * @param metadata {Object} Optional key value pairs to be stored with file object
+   * @param tags {Object} Optional key value pairs to be stored with file object
    */
-  constructor(name: string, data?: FileData, type?: string) {
+  constructor(name: string, data?: FileData, type?: string, metadata?: Object, tags?: Object) {
     const specifiedType = type || '';
 
     this._name = name;
+    this._metadata = metadata || {};
+    this._tags = tags || {};
 
     if (data !== undefined) {
       if (Array.isArray(data)) {
@@ -174,6 +180,7 @@ class ParseFile {
     this._data = result.base64;
     return this._data;
   }
+
   /**
    * Gets the name of the file. Before save is called, this is the filename
    * given by the user. After save is called, that name gets prefixed with a
@@ -203,18 +210,48 @@ class ParseFile {
   }
 
   /**
+   * Gets the metadata of the file.
+   * @return {Object}
+   */
+  metadata(): Object {
+    return this._metadata;
+  }
+
+  /**
+   * Gets the tags of the file.
+   * @return {Object}
+   */
+  tags(): Object {
+    return this._tags;
+  }
+
+  /**
    * Saves the file to the Parse cloud.
    * @param {Object} options
    *  * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
-   *   <li>progress: In Browser only, callback for upload progress
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *     behalf of a specific user.
+   *   <li>progress: In Browser only, callback for upload progress. For example:
+   * <pre>
+   * let parseFile = new Parse.File(name, file);
+   * parseFile.save({
+   *   progress: (progressValue, loaded, total, { type }) => {
+   *     if (type === "upload" && progressValue !== null) {
+   *       // Update the UI using progressValue
+   *     }
+   *   }
+   * });
+   * </pre>
    * </ul>
    * @return {Promise} Promise that is resolved when the save finishes.
    */
   save(options?: FullOptions) {
     options = options || {};
     options.requestTask = (task) => this._requestTask = task;
+    options.metadata = this._metadata;
+    options.tags = this._tags;
 
     const controller = CoreManager.getFileController();
     if (!this._previousSave) {
@@ -269,6 +306,24 @@ class ParseFile {
     this._requestTask = null;
   }
 
+  /**
+   * Deletes the file from the Parse cloud.
+   * In Cloud Code and Node only with Master Key
+   *
+   * @return {Promise} Promise that is resolved when the delete finishes.
+   */
+  destroy() {
+    if (!this._name) {
+      throw new Error('Cannot delete an unsaved ParseFile.');
+    }
+    const controller = CoreManager.getFileController();
+    return controller.deleteFile(this._name).then(() => {
+      this._data = null;
+      this._requestTask = null;
+      return this;
+    });
+  }
+
   toJSON(): { name: ?string, url: ?string } {
     return {
       __type: 'File',
@@ -288,6 +343,52 @@ class ParseFile {
       this.url() === other.url() &&
       typeof this.url() !== 'undefined'
     );
+  }
+
+  /**
+   * Sets metadata to be saved with file object. Overwrites existing metadata
+   * @param {Object} metadata Key value pairs to be stored with file object
+   */
+  setMetadata(metadata: any) {
+    if (metadata && typeof metadata === 'object') {
+      Object.keys(metadata).forEach((key) => {
+        this.addMetadata(key, metadata[key]);
+      });
+    }
+  }
+
+  /**
+   * Sets metadata to be saved with file object. Adds to existing metadata
+   * @param {String} key
+   * @param {Mixed} value
+   */
+  addMetadata(key: string, value: any) {
+    if (typeof key === 'string') {
+      this._metadata[key] = value;
+    }
+  }
+
+  /**
+   * Sets tags to be saved with file object. Overwrites existing tags
+   * @param {Object} tags Key value pairs to be stored with file object
+   */
+  setTags(tags: any) {
+    if (tags && typeof tags === 'object') {
+      Object.keys(tags).forEach((key) => {
+        this.addTag(key, tags[key]);
+      });
+    }
+  }
+
+  /**
+   * Sets tags to be saved with file object. Adds to existing tags
+   * @param {String} key
+   * @param {Mixed} value
+   */
+  addTag(key: string, value: string) {
+    if (typeof key === 'string') {
+      this._tags[key] = value;
+    }
   }
 
   static fromJSON(obj): ParseFile {
@@ -323,34 +424,44 @@ class ParseFile {
 }
 
 const DefaultController = {
-  saveFile: function(name: string, source: FileSource, options?: FullOptions) {
+  saveFile: async function(name: string, source: FileSource, options?: FullOptions) {
     if (source.format !== 'file') {
       throw new Error('saveFile can only be used with File-type sources.');
     }
-    // To directly upload a File, we use a REST-style AJAX request
-    const headers = {
-      'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
-      'Content-Type': source.type || (source.file ? source.file.type : null)
+    const base64Data = await new Promise((res, rej) => {
+      // eslint-disable-next-line no-undef
+      const reader = new FileReader();
+      reader.readAsDataURL(source.file);
+      reader.onload = () => res(reader.result);
+      reader.onerror = error => rej(error);
+    });
+    // we only want the data after the comma
+    // For example: "data:application/pdf;base64,JVBERi0xLjQKJ..." we would only want "JVBERi0xLjQKJ..."
+    const [first, second] = base64Data.split(',');
+    // in the event there is no 'data:application/pdf;base64,' at the beginning of the base64 string
+    // use the entire string instead
+    const data = second ? second : first;
+    const newSource = {
+      format: 'base64',
+      base64: data,
+      type: source.type || (source.file ? source.file.type : null),
     };
-    const jsKey = CoreManager.get('JAVASCRIPT_KEY');
-    if (jsKey) {
-      headers['X-Parse-JavaScript-Key'] = jsKey;
-    }
-    let url = CoreManager.get('SERVER_URL');
-    if (url[url.length - 1] !== '/') {
-      url += '/';
-    }
-    url += 'files/' + name;
-    return CoreManager.getRESTController().ajax('POST', url, source.file, headers, options).then(res=>res.response)
+    return await DefaultController.saveBase64(name, newSource, options);
   },
 
   saveBase64: function(name: string, source: FileSource, options?: FullOptions) {
     if (source.format !== 'base64') {
       throw new Error('saveBase64 can only be used with Base64-type sources.');
     }
-    const data: { base64: any; _ContentType?: any } = {
-      base64: source.base64
+    const data: { base64: any; _ContentType?: any, fileData: Object } = {
+      base64: source.base64,
+      fileData: {
+        metadata: { ...options.metadata },
+        tags: { ...options.tags },
+      },
     };
+    delete options.metadata;
+    delete options.tags;
     if (source.type) {
       data._ContentType = source.type;
     }
@@ -412,9 +523,29 @@ const DefaultController = {
     });
   },
 
+  deleteFile: function(name) {
+    const headers = {
+      'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
+      'X-Parse-Master-Key': CoreManager.get('MASTER_KEY'),
+    };
+    let url = CoreManager.get('SERVER_URL');
+    if (url[url.length - 1] !== '/') {
+      url += '/';
+    }
+    url += 'files/' + name;
+    return CoreManager.getRESTController().ajax('DELETE', url, '', headers).catch(response => {
+      // TODO: return JSON object in server
+      if (!response || response === 'SyntaxError: Unexpected end of JSON input') {
+        return Promise.resolve();
+      } else {
+        return CoreManager.getRESTController().handleError(response);
+      }
+    });
+  },
+
   _setXHR(xhr: any) {
     XHR = xhr;
-  }
+  },
 };
 
 CoreManager.setFileController(DefaultController);

@@ -16,6 +16,7 @@ module.exports = class XhrWeapp {
     this.method = '';
     this.url = '';
     this.onabort = () => {};
+    this.onprogress = () => {};
     this.onerror = () => {};
     this.onreadystatechange = () => {};
     this.requestTask = null;
@@ -72,6 +73,14 @@ module.exports = class XhrWeapp {
         this.requestTask = null;
         this.onerror(err);
       }
-    })
+    });
+    this.requestTask.onProgressUpdate((res) => {
+      const event = {
+        lengthComputable: (res.totalBytesExpectedToWrite !== 0),
+        loaded: res.totalBytesWritten,
+        total: res.totalBytesExpectedToWrite,
+      };
+      this.onprogress(event);
+    });
   }
 };

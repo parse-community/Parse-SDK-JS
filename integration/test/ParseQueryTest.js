@@ -987,7 +987,7 @@ describe('Parse Query', () => {
         'website',
         'parse # First fragment. We\'ll write this in one case but match ' +
         'insensitively\n.com  # Second fragment. This can be separated by any ' +
-        'character, including newline',
+        'character, including newline\n',
         'mixs'
       );
       return query.find();
@@ -1946,5 +1946,82 @@ describe('Parse Query', () => {
     }).catch(() => {
       done();
     });
+  });
+
+  it('can return results in map', async () => {
+    const obj1 = new TestObject({ foo: 'bar' });
+    const obj2 = new TestObject({ foo: 'baz' });
+    const obj3 = new TestObject({ foo: 'bin' });
+    await Parse.Object.saveAll([obj1, obj2, obj3]);
+    let i = 0;
+    const mapQuery = new Parse.Query(TestObject);
+    const results = await mapQuery.map((object, index, query) => {
+      assert.equal(index, i);
+      assert.equal(query, mapQuery);
+      i += 1;
+      return object.get('foo');
+    });
+    assert.equal(results.includes('bar'), true);
+    assert.equal(results.includes('baz'), true);
+    assert.equal(results.includes('bin'), true);
+    assert.equal(results.length, 3);
+  });
+
+  it('can return results in filter', async () => {
+    const obj1 = new TestObject({ foo: 'bar' });
+    const obj2 = new TestObject({ foo: 'baz' });
+    const obj3 = new TestObject({ foo: 'bin' });
+    await Parse.Object.saveAll([obj1, obj2, obj3]);
+    let i = 0;
+    const filterQuery = new Parse.Query(TestObject);
+    const results = await filterQuery.filter((object, index, query) => {
+      assert.equal(index, i);
+      assert.equal(query, filterQuery);
+      i += 1;
+      return object.get('foo') === 'bar';
+    });
+    assert.equal(results[0].get('foo'), 'bar');
+    assert.equal(results.length, 1);
+  });
+
+  it('can return results in reduce', async () => {
+    const obj1 = new TestObject({ number: 1 });
+    const obj2 = new TestObject({ number: 2 });
+    const obj3 = new TestObject({ number: 3 });
+    await Parse.Object.saveAll([obj1, obj2, obj3]);
+    let i = 0;
+    const reduceQuery = new Parse.Query(TestObject);
+    const result = await reduceQuery.reduce((accumulator, object, index) => {
+      assert.equal(index, i);
+      i += 1;
+      return accumulator + object.get('number');
+    }, 0);
+    assert.equal(result, 6);
+  });
+
+  it('can cancel query', async () => {
+    const obj1 = new TestObject({ number: 1 });
+    const obj2 = new TestObject({ number: 2 });
+    const obj3 = new TestObject({ number: 3 });
+    await Parse.Object.saveAll([obj1, obj2, obj3]);
+
+    const query = new Parse.Query(TestObject);
+    query.find().then((results) => {
+      assert.equal(results.length, 0);
+    });
+    query.cancel();
+  });
+
+  it('can query with hint', async () => {
+    const obj1 = new TestObject({ number: 1 });
+    const obj2 = new TestObject({ number: 2 });
+    const obj3 = new TestObject({ number: 3 });
+    await Parse.Object.saveAll([obj1, obj2, obj3]);
+
+    const query = new Parse.Query(TestObject);
+    query.hint('_id_');
+    query.explain();
+    const explain = await query.find();
+    assert.equal(explain.queryPlanner.winningPlan.inputStage.inputStage.indexName, '_id_');
   });
 });

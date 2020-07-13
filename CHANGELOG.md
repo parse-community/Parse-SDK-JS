@@ -1,7 +1,117 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.8.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.14.0...master)
+
+## 2.14.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.13.0...2.14.0)
+
+**New Features**
+- Passing context in destroy, saveAll, get, find hooks. ([#1159](https://github.com/parse-community/Parse-SDK-JS/pull/1159))
+- Support using aggregate on top of constructed query ([#1170](https://github.com/parse-community/Parse-SDK-JS/pull/1170))
+
+**Improvements**
+- Performance improvement for Query.eachBatch ([#1179](https://github.com/parse-community/Parse-SDK-JS/pull/1179))
+
+**Fixes**
+- Fix context for cascade saving ([#1186](https://github.com/parse-community/Parse-SDK-JS/pull/1186))
+
+## 2.13.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.12.0...2.13.0)
+
+**New Features**
+- Add Email Verification to Parse.User ([#1144](https://github.com/parse-community/Parse-SDK-JS/pull/1144))
+- Add Verify Password to Parse.User ([#1144](https://github.com/parse-community/Parse-SDK-JS/pull/1144))
+
+**Improvements**
+- Add read preference for aggregate query ([#1143](https://github.com/parse-community/Parse-SDK-JS/pull/1143))
+- Add file progress type (upload/download) ([#1140](https://github.com/parse-community/Parse-SDK-JS/pull/1140))
+- Add context to Parse.Object.save ([#1150](https://github.com/parse-community/Parse-SDK-JS/pull/1150))
+
+**Fixes**
+- File upload progress ([#1133](https://github.com/parse-community/Parse-SDK-JS/pull/1133))
+- Live Query Subscription Open Event ([#1151](https://github.com/parse-community/Parse-SDK-JS/pull/1151))
+
+## 2.12.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.11.0...2.12.0)
+
+**New Features**
+- Support Parse.Query hint ([#1054](https://github.com/parse-community/Parse-SDK-JS/pull/1054))
+- Support Parse.Query eachBatch ([#1114](https://github.com/parse-community/Parse-SDK-JS/pull/1114))
+- Support Parse.Object decrement ([#1069](https://github.com/parse-community/Parse-SDK-JS/pull/1069))
+- Support deleting Parse.File ([#1067](https://github.com/parse-community/Parse-SDK-JS/pull/1067))
+- Support File Metadata ([#1065](https://github.com/parse-community/Parse-SDK-JS/pull/1065)) ([#1070](https://github.com/parse-community/Parse-SDK-JS/pull/1070))
+
+**Improvements**
+- Support global request batch size ([#1053](https://github.com/parse-community/Parse-SDK-JS/pull/1053))
+- Username signup error ([#1080](https://github.com/parse-community/Parse-SDK-JS/pull/1080))
+- Pass SaveAll options to Files ([#1107](https://github.com/parse-community/Parse-SDK-JS/pull/1107))
+- Make iteration query methods (map, filter, reduce) returned promises ([#1112](https://github.com/parse-community/Parse-SDK-JS/pull/1112))
+
+**Fixes**
+- Fix user.become for AsyncStorage ([#1056](https://github.com/parse-community/Parse-SDK-JS/pull/1056))
+- Subscribing to query with null sessionToken ([#1058](https://github.com/parse-community/Parse-SDK-JS/pull/1058))
+- Fix addIndex annotation in Parse.Schema ([#1071](https://github.com/parse-community/Parse-SDK-JS/pull/1071))
+- Fix cascadeSave=false bug for SingleInstance objects ([#1078](https://github.com/parse-community/Parse-SDK-JS/pull/1078))
+- Fix react-native build ([#1094](https://github.com/parse-community/Parse-SDK-JS/pull/1094))
+
+## 2.11.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.10.0...2.11.0)
+
+**New Features**
+- Support encrypting current user ([#1036](https://github.com/parse-community/Parse-SDK-JS/pull/1036))
+- File Upload Progress on Wechat ([#1029](https://github.com/parse-community/Parse-SDK-JS/pull/1029))
+
+**Improvements**
+- Support query.cancel() on Node ([#1030](https://github.com/parse-community/Parse-SDK-JS/pull/1030))
+
+**Fixes**
+- File Upload Progress on browser ([#1029](https://github.com/parse-community/Parse-SDK-JS/pull/1029))
+- User signup with installationId ([#1031](https://github.com/parse-community/Parse-SDK-JS/pull/1031))
+
+## 2.10.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.9.1...2.10.0)
+
+**New Features**
+- Add query.fromNetwork() ([#1002](https://github.com/parse-community/Parse-SDK-JS/pull/1002))
+- Add query.cancel() (browser only) ([#1003](https://github.com/parse-community/Parse-SDK-JS/pull/1003))
+- Support custom request headers ([#1019](https://github.com/parse-community/Parse-SDK-JS/pull/1019))
+
+**Fixes**
+- To subclass Parse.User: `Parse.Object.registerSubclass('_User', CustomUser);`
+
+**Security**
+Address Security Advisory of possible leak of sensitive user info. ([#d110617](https://github.com/parse-community/Parse-SDK-JS/commit/d1106174571b699f972929dd7cbb8e45b5283cbb)), big thanks to [Colin Ulin](https://github.com/pocketcolin) for identifying the problem, following the vulnerability disclosure guidelines
+
+## 2.9.1
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.9.0...2.9.1)
+
+**Fixes**
+- Storing user to disk ([#992](https://github.com/parse-community/Parse-SDK-JS/issues/992)) ([#999](https://github.com/parse-community/Parse-SDK-JS/pull/999))
+
+## 2.9.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.8.0...2.9.0)
+
+**Deprecation**
+`_linkWith` and `_logInWith` are deprecated. Replace with `linkWith` and `logInWith` respectively. ([#963](https://github.com/parse-community/Parse-SDK-JS/pull/963))
+
+**New Features**
+- Set Class Level Permission via Parse.Schema ([#960](https://github.com/parse-community/Parse-SDK-JS/pull/960))
+- Set required fields and default values via Parse.Schema ([#961](https://github.com/parse-community/Parse-SDK-JS/pull/961))
+- Add installationId to LiveQuery ([#977](https://github.com/parse-community/Parse-SDK-JS/pull/977))
+- Add response object to LiveQuery ([#979](https://github.com/parse-community/Parse-SDK-JS/pull/979))
+- Support query.map, query.filter, query.reduce ([#987](https://github.com/parse-community/Parse-SDK-JS/pull/987))
+
+**Fixes**
+- Can unlink without provider in cloud code ([#971](https://github.com/parse-community/Parse-SDK-JS/pull/971))
+- Properly store User Subclass in Storage ([#978](https://github.com/parse-community/Parse-SDK-JS/pull/978))
+
+**Improvements**
+- User subclass support for logInWith, hydrate, me, current ([#968](https://github.com/parse-community/Parse-SDK-JS/pull/968))
+- Remove unused options from Parse.Schema ([#959](https://github.com/parse-community/Parse-SDK-JS/pull/959))
+- Documentation for linking users and custom auth ([#963](https://github.com/parse-community/Parse-SDK-JS/pull/963))
+- Generate installationId as uuid v4 ([#972](https://github.com/parse-community/Parse-SDK-JS/pull/972))
+- Reuse StorageController for LDS ([#984](https://github.com/parse-community/Parse-SDK-JS/pull/984))
 
 ## 2.8.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.7.1...2.8.0)

@@ -16,20 +16,22 @@
  * alongside it.
  * `upload` can be provided to mock the XMLHttpRequest.upload property.
  */
-function mockXHR(results, upload) {
+function mockXHR(results, options = {}) {
   const XHR = function() { };
   let attempts = 0;
   XHR.prototype = {
     open: function() { },
     setRequestHeader: function() { },
+    upload: function() { },
     send: function() {
       this.status = results[attempts].status;
       this.responseText = JSON.stringify(results[attempts].response || {});
       this.readyState = 4;
       attempts++;
       this.onreadystatechange();
-    },
-    upload: upload
+      this.onprogress(options.progress);
+      this.upload.onprogress(options.progress);
+    }
   };
   return XHR;
 }

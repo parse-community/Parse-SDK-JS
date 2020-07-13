@@ -57,6 +57,9 @@ export function run(
   if (options.sessionToken) {
     requestOptions.sessionToken = options.sessionToken;
   }
+  if (options.context && typeof options.context === 'object') {
+    requestOptions.context = options.context;
+  }
 
   return CoreManager.getCloudController().run(name, data, requestOptions);
 }

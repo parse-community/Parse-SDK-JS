@@ -19,7 +19,7 @@ import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
 import ParseFile from './ParseFile';
-import { when, continueWhile } from './promiseUtils';
+import { when, continueWhile, resolvingPromise } from './promiseUtils';
 import { DEFAULT_PIN, PIN_PREFIX } from './LocalDatastoreUtils';
 
 import {
@@ -56,10 +56,9 @@ type SaveParams = {
 };
 
 type SaveOptions = FullOptions & {
-  cascadeSave?: boolean
+  cascadeSave?: boolean;
+  context?: AttributeMap;
 }
-
-const DEFAULT_BATCH_SIZE = 20;
 
 // Mapping of class names to constructors, so we can populate objects from the
 // server with appropriate subclasses of ParseObject
@@ -767,6 +766,24 @@ class ParseObject {
   }
 
   /**
+   * Atomically decrements the value of the given attribute the next time the
+   * object is saved. If no amount is specified, 1 is used by default.
+   *
+   * @param attr {String} The key.
+   * @param amount {Number} The amount to decrement by (optional).
+   * @return {(ParseObject|Boolean)}
+   */
+  decrement(attr: string, amount?: number): ParseObject | boolean {
+    if (typeof amount === 'undefined') {
+      amount = 1;
+    }
+    if (typeof amount !== 'number') {
+      throw new Error('Cannot decrement by a non-numeric amount.');
+    }
+    return this.set(attr, new IncrementOp(amount * -1));
+  }
+
+  /**
    * Atomically add an object to the end of the array associated with a given
    * key.
    * @param attr {String} The key.
@@ -1067,6 +1084,7 @@ class ParseObject {
    *       behalf of a specific user.
    *   <li>include: The name(s) of the key(s) to include. Can be a string, an array of strings,
    *       or an array of array of strings.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    * </ul>
    * @return {Promise} A promise that is fulfilled when the fetch
    *     completes.
@@ -1079,6 +1097,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('sessionToken')) {
       fetchOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      fetchOptions.context = options.context;
     }
     if (options.hasOwnProperty('include')) {
       fetchOptions.include = [];
@@ -1163,6 +1184,7 @@ class ParseObject {
    *       <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *       <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
+   *       <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
    *     </ul>
    *   </li>
    * </ul>
@@ -1176,6 +1198,7 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
    * </ul>
    *
    * @return {Promise} A promise that is fulfilled when the save
@@ -1232,6 +1255,12 @@ class ParseObject {
     if (options.hasOwnProperty('sessionToken') && typeof options.sessionToken === 'string') {
       saveOptions.sessionToken = options.sessionToken;
     }
+    if (options.hasOwnProperty('installationId') && typeof options.installationId === 'string') {
+      saveOptions.installationId = options.installationId;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      saveOptions.context = options.context;
+    }
     const controller = CoreManager.getObjectController();
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
     return controller.save(unsaved, saveOptions).then(() => {
@@ -1248,6 +1277,7 @@ class ParseObject {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
    * </ul>
    * @return {Promise} A promise that is fulfilled when the destroy
    *     completes.
@@ -1260,6 +1290,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('sessionToken')) {
       destroyOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      destroyOptions.context = options.context;
     }
     if (!this.id) {
       return Promise.resolve();
@@ -1606,6 +1639,7 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>batchSize: Number of objects to process per request
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
    * </ul>
    * @return {Promise} A promise that is fulfilled when the destroyAll
    *     completes.
@@ -1620,6 +1654,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
       destroyOptions.batchSize = options.batchSize;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      destroyOptions.context = options.context;
     }
     return CoreManager.getObjectController().destroy(
       list,
@@ -1649,6 +1686,7 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>batchSize: Number of objects to process per request
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
    * </ul>
    */
   static saveAll(list: Array<ParseObject>, options: RequestOptions = {}) {
@@ -1661,6 +1699,9 @@ class ParseObject {
     }
     if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
       saveOptions.batchSize = options.batchSize;
+    }
+    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
+      saveOptions.context = options.context;
     }
     return CoreManager.getObjectController().save(
       list,
@@ -2130,6 +2171,12 @@ const DefaultController = {
         return Promise.resolve(results);
       });
     } else {
+      if (!target.id) {
+        return Promise.reject(new ParseError(
+          ParseError.MISSING_OBJECT_ID,
+          'Object does not have an ID'
+        ));
+      }
       const RESTController = CoreManager.getRESTController();
       const params = {};
       if (options && options.include) {
@@ -2153,7 +2200,7 @@ const DefaultController = {
   },
 
   async destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise<Array<void> | ParseObject> {
-    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
+    const batchSize = (options && options.batchSize) ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
 
     const RESTController = CoreManager.getRESTController();
@@ -2228,7 +2275,7 @@ const DefaultController = {
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
-    const batchSize = (options && options.batchSize) ? options.batchSize : DEFAULT_BATCH_SIZE;
+    const batchSize = (options && options.batchSize) ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
     const mapIdForPin = {};
 
@@ -2250,19 +2297,17 @@ const DefaultController = {
       }
       unsaved = unique(unsaved);
 
-      let filesSaved = Promise.resolve();
+      const filesSaved: Array<ParseFile> = [];
       let pending: Array<ParseObject> = [];
       unsaved.forEach((el) => {
         if (el instanceof ParseFile) {
-          filesSaved = filesSaved.then(() => {
-            return el.save();
-          });
+          filesSaved.push(el.save(options));
         } else if (el instanceof ParseObject) {
           pending.push(el);
         }
       });
 
-      return filesSaved.then(() => {
+      return Promise.all(filesSaved).then(() => {
         let objectError = null;
         return continueWhile(() => {
           return pending.length > 0;
@@ -2288,17 +2333,11 @@ const DefaultController = {
 
           // Queue up tasks for each object in the batch.
           // When every task is ready, the API request will execute
-          let res, rej;
-          const batchReturned = new Promise((resolve, reject) => { res = resolve; rej = reject; });
-          batchReturned.resolve = res;
-          batchReturned.reject = rej;
+          const batchReturned = new resolvingPromise();
           const batchReady = [];
           const batchTasks = [];
           batch.forEach((obj, index) => {
-            let res, rej;
-            const ready = new Promise((resolve, reject) => { res = resolve; rej = reject; });
-            ready.resolve = res;
-            ready.reject = rej;
+            const ready = new resolvingPromise();
             batchReady.push(ready);
             const task = function() {
               ready.resolve();
@@ -2351,8 +2390,10 @@ const DefaultController = {
       });
 
     } else if (target instanceof ParseObject) {
-      // copying target lets Flow guarantee the pointer isn't modified elsewhere
+      // generate _localId in case if cascadeSave=false
+      target._getId();
       const localId = target._localId;
+      // copying target lets Flow guarantee the pointer isn't modified elsewhere
       const targetCopy = target;
       const task = function() {
         const params = targetCopy._getSaveParams();

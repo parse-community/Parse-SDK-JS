@@ -15,7 +15,7 @@ jobs:
   include:
   - stage: test
     env:
-    - MONGODB_VERSION=3.2.13
+    - MONGODB_VERSION=3.6.9
     before_script:
     - npm install -g mongodb-runner
     - mongodb-runner start
