@@ -244,6 +244,7 @@ describe('LiveQueryClient', () => {
 
     liveQueryClient._handleWebSocketMessage(event);
 
+    jest.runOnlyPendingTimers();
     expect(isChecked).toBe(true);
   });
 
