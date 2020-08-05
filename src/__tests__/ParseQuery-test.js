@@ -1295,6 +1295,7 @@ describe('ParseQuery', () => {
   });
 
   it('can pass options to a get() query', (done) => {
+    const context = {a: "a"};
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1307,6 +1308,7 @@ describe('ParseQuery', () => {
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
+        expect(options.context).toEqual(context);
         return Promise.resolve({
           results: [
             { objectId: 'I27', size: 'large', name: 'Product 27' }
@@ -1318,7 +1320,8 @@ describe('ParseQuery', () => {
     const q = new ParseQuery('Item');
     q.get('I27', {
       useMasterKey: true,
-      sessionToken: '1234'
+      sessionToken: '1234',
+      context: context
     }).then(() => {
       done();
     });
@@ -1437,6 +1440,7 @@ describe('ParseQuery', () => {
   });
 
   it('can pass options to find()', (done) => {
+    const context = {a: "a"};
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1450,6 +1454,7 @@ describe('ParseQuery', () => {
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
+        expect(options.context).toEqual(context);
         return Promise.resolve({
           results: []
         });
@@ -1460,7 +1465,8 @@ describe('ParseQuery', () => {
     q.containedIn('size', ['small', 'medium'])
       .find({
         useMasterKey: true,
-        sessionToken: '1234'
+        sessionToken: '1234',
+        context: context
       })
       .then((objs) => {
         expect(objs).toEqual([]);
@@ -1692,6 +1698,7 @@ describe('ParseQuery', () => {
   });
 
   it('can pass options to each()', (done) => {
+    const context = {a: "a"};
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1709,6 +1716,7 @@ describe('ParseQuery', () => {
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
+        expect(options.context).toEqual(context);
         return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
@@ -1729,7 +1737,8 @@ describe('ParseQuery', () => {
       calls++;
     }, {
       useMasterKey: true,
-      sessionToken: '1234'
+      sessionToken: '1234',
+      context: context
     }).then(() => {
       expect(calls).toBe(3);
       done();
@@ -1738,6 +1747,7 @@ describe('ParseQuery', () => {
 
 
   it('can pass options to each() with hint', (done) => {
+    const context = {a: "a"};
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1756,6 +1766,7 @@ describe('ParseQuery', () => {
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
+        expect(options.context).toEqual(context);
         return Promise.resolve({
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
@@ -1777,7 +1788,8 @@ describe('ParseQuery', () => {
       calls++;
     }, {
       useMasterKey: true,
-      sessionToken: '1234'
+      sessionToken: '1234',
+      context: context
     }).then(() => {
       expect(calls).toBe(3);
       done();

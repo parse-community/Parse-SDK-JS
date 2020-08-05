@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "2.13.0",
+  "version": "2.15.0",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://parseplatform.org/",
   "keywords": [
@@ -29,12 +29,12 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime": "7.10.2",
-    "@babel/runtime-corejs3": "7.10.2",
+    "@babel/runtime-corejs3": "7.10.4",
+    "@babel/runtime": "7.10.4",
     "crypto-js": "4.0.0",
     "react-native-crypto-js": "1.0.0",
-    "uuid": "3.3.3",
-    "ws": "7.3.0",
+    "uuid": "3.4.0",
+    "ws": "7.3.1",
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
@@ -52,7 +52,7 @@
     "babel-plugin-minify-dead-code-elimination": "0.5.1",
     "babel-plugin-transform-inline-environment-variables": "0.4.3",
     "browserify": "16.5.1",
-    "codecov": "3.7.0",
+    "codecov": "3.7.1",
     "core-js": "3.6.5",
     "cross-env": "7.0.2",
     "eslint": "6.8.0",

@@ -1,7 +1,29 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.13.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.15.0...master)
+
+## 2.15.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.14.0...2.15.0)
+
+**Features**
+- New Parse.Error 159 DUPLICATE_REQUEST ([#1189](https://github.com/parse-community/Parse-SDK-JS/pull/1189))
+
+**Fixes**
+- Live Query Subscription Error Event ([#1193](https://github.com/parse-community/Parse-SDK-JS/pull/1193))
+
+## 2.14.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.13.0...2.14.0)
+
+**New Features**
+- Passing context in destroy, saveAll, get, find hooks. ([#1159](https://github.com/parse-community/Parse-SDK-JS/pull/1159))
+- Support using aggregate on top of constructed query ([#1170](https://github.com/parse-community/Parse-SDK-JS/pull/1170))
+
+**Improvements**
+- Performance improvement for Query.eachBatch ([#1179](https://github.com/parse-community/Parse-SDK-JS/pull/1179))
+
+**Fixes**
+- Fix context for cascade saving ([#1186](https://github.com/parse-community/Parse-SDK-JS/pull/1186))
 
 ## 2.13.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.12.0...2.13.0)
