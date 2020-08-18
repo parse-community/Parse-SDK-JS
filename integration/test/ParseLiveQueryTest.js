@@ -221,4 +221,23 @@ describe('Parse LiveQuery', () => {
       done();
     })
   });
+
+  it('can subscribe to query with fields', async (done) => {
+    const object = new TestObject();
+    await object.save({ name: 'hello', age: 21 });
+
+    const query = new Parse.Query(TestObject);
+    query.equalTo('objectId', object.id);
+    query.select(['name']);
+    const subscription = await query.subscribe();
+
+    subscription.on('update', (object) => {
+      assert.equal(object.get('name'), 'hello');
+      assert.equal(object.get('age'), undefined)
+      assert.equal(object.get('foo'), undefined);
+      done();
+    })
+    object.set({ foo: 'bar' });
+    await object.save();
+  });
 });
