@@ -34,6 +34,7 @@ function flushPromises() {
 describe('RESTController', () => {
   it('throws if there is no XHR implementation', () => {
     RESTController._setXHR(null);
+    expect(RESTController._getXHR()).toBe(null);
     expect(RESTController.ajax.bind(null, 'GET', 'users/me', {})).toThrow(
       'Cannot make a request: No definition of XMLHttpRequest was found.'
     );

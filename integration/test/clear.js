@@ -6,6 +6,6 @@ const Parse = require('../../node');
  *
  * @param {boolean} fast set to true if it's ok to just drop objects and not indexes.
  */
-module.exports = function(fast = false) {
+module.exports = function(fast = true) {
   return Parse._ajax('GET', `http://localhost:1337/clear/${fast}`, '');
 };

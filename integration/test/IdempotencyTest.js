@@ -11,7 +11,7 @@ describe('Idempotency', () => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
-    clear(true).then(() => {
+    clear().then(() => {
       done();
     });
   });
