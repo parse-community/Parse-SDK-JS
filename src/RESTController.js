@@ -9,6 +9,8 @@
  * @flow
  */
 /* global XMLHttpRequest, XDomainRequest */
+const uuidv4 = require('uuid/v4');
+
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
 import { resolvingPromise } from './promiseUtils';
@@ -151,6 +153,9 @@ const RESTController = {
       if (CoreManager.get('IS_NODE')) {
         headers['User-Agent'] = 'Parse/' + CoreManager.get('VERSION') +
           ' (NodeJS ' + process.versions.node + ')';
+      }
+      if (CoreManager.get('IDEMPOTENCY')) {
+        headers['X-Parse-Request-Id'] = uuidv4();
       }
       if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
         headers['Authorization'] = CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
@@ -314,9 +319,10 @@ const RESTController = {
         );
       }
     } else {
+      const message = response.message ? response.message : response;
       error = new ParseError(
         ParseError.CONNECTION_FAILED,
-        'XMLHttpRequest failed: ' + JSON.stringify(response)
+        'XMLHttpRequest failed: ' + JSON.stringify(message)
       );
     }
     return Promise.reject(error);
@@ -324,6 +330,10 @@ const RESTController = {
 
   _setXHR(xhr: any) {
     XHR = xhr;
+  },
+
+  _getXHR() {
+    return XHR;
   }
 }
 

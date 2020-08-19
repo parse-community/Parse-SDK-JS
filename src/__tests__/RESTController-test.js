@@ -9,6 +9,10 @@
 
 jest.autoMockOff();
 jest.useFakeTimers();
+jest.mock('uuid/v4', () => {
+  let value = 1000;
+  return () => (value++).toString();
+});
 
 const CoreManager = require('../CoreManager');
 const RESTController = require('../RESTController');
@@ -430,6 +434,30 @@ describe('RESTController', () => {
     );
     CoreManager.set('SERVER_AUTH_TYPE', null);
     CoreManager.set('SERVER_AUTH_TOKEN', null);
+  });
+
+  it('sends requestId header for idempotency', async () => {
+    CoreManager.set('IDEMPOTENCY', true);
+    const requestIdHeader = (header) => 'X-Parse-Request-Id' === header[0];
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    RESTController.request('GET', 'classes/MyObject', {}, {});
+    await flushPromises();
+    expect(xhr.setRequestHeader.mock.calls.filter(requestIdHeader)).toEqual(
+      [["X-Parse-Request-Id", '1000']]
+    );
+    xhr.setRequestHeader.mockClear();
+
+    RESTController.request('GET', 'classes/MyObject', {}, {});
+    await flushPromises();
+    expect(xhr.setRequestHeader.mock.calls.filter(requestIdHeader)).toEqual(
+      [["X-Parse-Request-Id", '1001']]
+    );
+    CoreManager.set('IDEMPOTENCY', false);
   });
 
   it('reports upload/download progress of the AJAX request when callback is provided', (done) => {
