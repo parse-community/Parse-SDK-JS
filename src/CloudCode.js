@@ -74,7 +74,7 @@
  * @method beforeDelete
  * @name Parse.Cloud.beforeDelete
  * @param {(String|Parse.Object)} arg1 The Parse.Object subclass to register the before delete function for. This can instead be a String that is the className of the subclass.
- * @param {Function} func The function to run after a save. This function should take just one parameter, {@link Parse.Cloud.TriggerRequest}.
+ * @param {Function} func The function to run before a delete. This function should take just one parameter, {@link Parse.Cloud.TriggerRequest}.
  */
 
 /**
@@ -98,7 +98,7 @@
  * @method beforeSave
  * @name Parse.Cloud.beforeSave
  * @param {(String|Parse.Object)} arg1 The Parse.Object subclass to register the after save function for. This can instead be a String that is the className of the subclass.
- * @param {Function} func The function to run after a save. This function should take just one parameter, {@link Parse.Cloud.TriggerRequest}.
+ * @param {Function} func The function to run before a save. This function should take just one parameter, {@link Parse.Cloud.TriggerRequest}.
  */
 
 /**
