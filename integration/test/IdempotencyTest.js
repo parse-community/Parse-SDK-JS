@@ -1,6 +1,5 @@
 'use strict';
 
-const assert = require('assert');
 const clear = require('./clear');
 const Parse = require('../../node');
 
@@ -30,19 +29,12 @@ describe('Idempotency', () => {
     }
     restController._setXHR(DuplicateXHR);
     await Parse.Cloud.run('CloudFunctionIdempotency');
-    try {
-      await Parse.Cloud.run('CloudFunctionIdempotency');
-    } catch (e) {
-      assert.equal(e.code, Parse.Error.DUPLICATE_REQUEST);
-    }
-    try {
-      await Parse.Cloud.run('CloudFunctionIdempotency');
-    } catch (e) {
-      assert.equal(e.code, Parse.Error.DUPLICATE_REQUEST);
-    }
+    await expectAsync(Parse.Cloud.run('CloudFunctionIdempotency')).toBeRejectedWithError('Duplicate request');
+    await expectAsync(Parse.Cloud.run('CloudFunctionIdempotency')).toBeRejectedWithError('Duplicate request');
+
     const query = new Parse.Query(Item);
     const results = await query.find();
-    assert.equal(results.length, 1);
+    expect(results.length).toBe(1);
 
     restController._setXHR(XHR);
   });

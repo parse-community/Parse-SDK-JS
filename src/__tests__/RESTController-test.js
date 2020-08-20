@@ -437,7 +437,7 @@ describe('RESTController', () => {
     CoreManager.set('SERVER_AUTH_TOKEN', null);
   });
 
-  it('sends requestId header for idempotency', async () => {
+  it('idempotency - sends requestId header', async () => {
     CoreManager.set('IDEMPOTENCY', true);
     const requestIdHeader = (header) => 'X-Parse-Request-Id' === header[0];
     const xhr = {
@@ -446,18 +446,38 @@ describe('RESTController', () => {
       send: jest.fn()
     };
     RESTController._setXHR(function() { return xhr; });
-    RESTController.request('GET', 'classes/MyObject', {}, {});
+    RESTController.request('POST', 'classes/MyObject', {}, {});
     await flushPromises();
     expect(xhr.setRequestHeader.mock.calls.filter(requestIdHeader)).toEqual(
       [["X-Parse-Request-Id", '1000']]
     );
     xhr.setRequestHeader.mockClear();
 
-    RESTController.request('GET', 'classes/MyObject', {}, {});
+    RESTController.request('PUT', 'classes/MyObject', {}, {});
     await flushPromises();
     expect(xhr.setRequestHeader.mock.calls.filter(requestIdHeader)).toEqual(
       [["X-Parse-Request-Id", '1001']]
     );
+    CoreManager.set('IDEMPOTENCY', false);
+  });
+
+  it('idempotency - handle requestId on network retries', (done) => {
+    CoreManager.set('IDEMPOTENCY', true);
+    RESTController._setXHR(mockXHR([
+      { status: 500 },
+      { status: 500 },
+      { status: 200, response: { success: true }}
+    ]));
+    RESTController.ajax('POST', 'users', {}).then(({ response, status, xhr }) => {
+      // X-Parse-Request-Id should be the same for all retries
+      const requestIdHeaders = xhr.setRequestHeader.mock.calls.filter((header) => 'X-Parse-Request-Id' === header[0])
+      expect(requestIdHeaders.every((header) => header[1] === '1000')).toBeTruthy();
+      expect(requestIdHeaders.length).toBe(3);
+      expect(response).toEqual({ success: true });
+      expect(status).toBe(200);
+      done();
+    });
+    jest.runAllTimers();
     CoreManager.set('IDEMPOTENCY', false);
   });
 
