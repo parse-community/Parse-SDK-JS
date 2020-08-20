@@ -62,11 +62,11 @@
  *
  * If you want to use beforeDelete for a predefined class in the Parse JavaScript SDK (e.g. {@link Parse.User}), you should pass the class itself and not the String for arg1.
  * ```
- * Parse.Cloud.beforeDelete('MyCustomClass', (request, response) => {
+ * Parse.Cloud.beforeDelete('MyCustomClass', (request) => {
  *   // code here
  * })
  *
- * Parse.Cloud.beforeDelete(Parse.User, (request, response) => {
+ * Parse.Cloud.beforeDelete(Parse.User, (request) => {
  *   // code here
  * })
  *```
@@ -74,7 +74,7 @@
  * @method beforeDelete
  * @name Parse.Cloud.beforeDelete
  * @param {(String|Parse.Object)} arg1 The Parse.Object subclass to register the before delete function for. This can instead be a String that is the className of the subclass.
- * @param {Function} func The function to run before a delete. This function should take two parameters a {@link Parse.Cloud.TriggerRequest} and a {@link Parse.Cloud.BeforeDeleteResponse}.
+ * @param {Function} func The function to run before a delete. This function should take just one parameter, {@link Parse.Cloud.TriggerRequest}.
  */
 
 /**
@@ -86,11 +86,11 @@
  * If you want to use beforeSave for a predefined class in the Parse JavaScript SDK (e.g. {@link Parse.User}), you should pass the class itself and not the String for arg1.
  *
  * ```
- * Parse.Cloud.beforeSave('MyCustomClass', (request, response) => {
+ * Parse.Cloud.beforeSave('MyCustomClass', (request) => {
  *   // code here
  * })
  *
- * Parse.Cloud.beforeSave(Parse.User, (request, response) => {
+ * Parse.Cloud.beforeSave(Parse.User, (request) => {
  *   // code here
  * })
  * ```
@@ -98,7 +98,7 @@
  * @method beforeSave
  * @name Parse.Cloud.beforeSave
  * @param {(String|Parse.Object)} arg1 The Parse.Object subclass to register the after save function for. This can instead be a String that is the className of the subclass.
- * @param {Function} func The function to run before a save. This function should take two parameters a {@link Parse.Cloud.TriggerRequest} and a {@link Parse.Cloud.BeforeSaveResponse}.
+ * @param {Function} func The function to run before a save. This function should take just one parameter, {@link Parse.Cloud.TriggerRequest}.
  */
 
 /**
@@ -167,6 +167,51 @@
  */
 
 /**
+ * @method beforeConnect
+ * @name Parse.Cloud.beforeConnect
+ * @param {Function} func The function to before connection is made. This function can be async and should take just one parameter, {@link Parse.Cloud.ConnectTriggerRequest}.
+ */
+/**
+ *
+ * Registers a before connect function.
+ *
+ * **Available in Cloud Code only.**
+ *
+ * Example: restrict LiveQueries to logged in users.
+ * ```
+ * Parse.Cloud.beforeConnect((request) => {
+ *   if (!request.user) {
+ *     throw "Please login before you attempt to connect."
+ *   }
+ * });
+ * ```
+*/
+
+/**
+ * @method beforeSubscribe
+ * @name Parse.Cloud.beforeSubscribe
+ * @param {(String|Parse.Object)} arg1 The Parse.Object subclass to register the before subscription function for. This can instead be a String that is the className of the subclass.
+ * @param {Function} func The function to run before a subscription. This function can be async and should take one parameter, a {@link Parse.Cloud.TriggerRequest}.
+ */
+/**
+ *
+ * Registers a before subscribe function.
+ *
+ * **Available in Cloud Code only.**
+ * Example: restrict subscriptions to MyObject to Admin accounts only.
+ * ```
+ *  Parse.Cloud.beforeSubscribe('MyObject', (request) => {
+ *   if (!request.user.get('Admin')) {
+ *       throw new Parse.Error(101, 'You are not authorized to subscribe to MyObject.');
+ *   }
+ *   let query = request.query; // the Parse.Query
+ *   query.select("name","year")
+ * });
+ * ```
+*/
+
+
+/**
  * Makes an HTTP Request.
  *
  * **Available in Cloud Code only.**
@@ -230,6 +275,16 @@
  */
 
 /**
+ * @typedef Parse.Cloud.ConnectTriggerRequest
+ * @property {String} installationId If set, the installationId triggering the request.
+ * @property {Boolean} useMasterKey If true, means the master key was used.
+ * @property {Parse.User} user If set, the user that made the request.
+ * @property {Integer} clients The number of clients connected.
+ * @property {Integer} subscriptions The number of subscriptions connected.
+ * @property {String} sessionToken If set, the session of the user that made the request.
+ */
+
+/**
  * @typedef Parse.Cloud.FunctionRequest
  * @property {String} installationId If set, the installationId triggering the request.
  * @property {Boolean} master If true, means the master key was used.
@@ -247,24 +302,6 @@
  * @property {function} error If error is called, will end the job unsuccessfully with an optional completion message to be stored in the job status.
  * @property {function} message If message is called with a string argument, will update the current message to be stored in the job status.
  * @property {function} success If success is called, will end the job successfullly with the optional completion message to be stored in the job status.
- */
-
-/**
- * @typedef Parse.Cloud.BeforeSaveResponse
- * @property {function} success If called, will allow the save to happen. If a Parse.Object is passed in, then the passed in object will be saved instead.
- * @property {function} error If called, will reject the save. An optional error message may be passed in.
- */
-
-/**
- * @typedef Parse.Cloud.BeforeDeleteResponse
- * @property {function} success If called, will allow the delete to happen.
- * @property {function} error If called, will reject the save. An optional error message may be passed in.
- */
-
-/**
- * @typedef Parse.Cloud.FunctionResponse
- * @property {function} success If success is called, will return a successful response with the optional argument to the caller.
- * @property {function} error If error is called, will return an error response with an optionally passed message.
  */
 
 /**
