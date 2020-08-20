@@ -30,7 +30,11 @@ const api = new ParseServer({
   verbose: false,
   silent: true,
   idempotencyOptions: {
-    paths: ['functions/CloudFunctionIdempotency'],
+    paths: [
+      'functions/CloudFunctionIdempotency',
+      'jobs/CloudJob1',
+      'classes/IdempotentTest'
+    ],
     ttl: 120
   }
 });
