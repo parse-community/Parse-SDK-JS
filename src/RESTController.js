@@ -95,7 +95,7 @@ const RESTController = {
       return ajaxIE9(method, url, data, headers, options);
     }
     const promise = resolvingPromise();
-    const isIdempotent = CoreManager.get('IDEMPOTENCY');
+    const isIdempotent = CoreManager.get('IDEMPOTENCY') && ['POST', 'PUT'].includes(method);
     const requestId = isIdempotent ? uuidv4() : '';
     let attempts = 0;
 
@@ -156,7 +156,7 @@ const RESTController = {
         headers['User-Agent'] = 'Parse/' + CoreManager.get('VERSION') +
           ' (NodeJS ' + process.versions.node + ')';
       }
-      if (isIdempotent && ['POST', 'PUT'].includes(method)) {
+      if (isIdempotent) {
         headers['X-Parse-Request-Id'] = requestId;
       }
       if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
