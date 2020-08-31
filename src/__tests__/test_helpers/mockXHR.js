@@ -19,9 +19,15 @@
 function mockXHR(results, options = {}) {
   const XHR = function() { };
   let attempts = 0;
+  const headers = {};
   XHR.prototype = {
     open: function() { },
-    setRequestHeader: function() { },
+    setRequestHeader: jest.fn((key, value) => {
+      headers[key] = value;
+    }),
+    getRequestHeader: function(key) {
+      return headers[key];
+    },
     upload: function() { },
     send: function() {
       this.status = results[attempts].status;

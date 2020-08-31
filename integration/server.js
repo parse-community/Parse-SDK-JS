@@ -29,14 +29,23 @@ const api = new ParseServer({
   },
   verbose: false,
   silent: true,
+  idempotencyOptions: {
+    paths: [
+      'functions/CloudFunctionIdempotency',
+      'jobs/CloudJob1',
+      'classes/IdempotentTest'
+    ],
+    ttl: 120
+  }
 });
 
 app.use('/parse', api);
 
 const TestUtils = require('parse-server').TestUtils;
 
-app.get('/clear', (req, res) => {
-  TestUtils.destroyAllDataPermanently().then(() => {
+app.get('/clear/:fast', (req, res) => {
+  const { fast } = req.params;
+  TestUtils.destroyAllDataPermanently(fast).then(() => {
     res.send('{}');
   });
 });

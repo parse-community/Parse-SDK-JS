@@ -1804,12 +1804,12 @@ describe('Parse Query', () => {
     ];
     const objects = [];
     for (const i in subjects) {
-      const obj = new TestObject({ comment: subjects[i] });
+      const obj = new TestObject({ subject: subjects[i] });
       objects.push(obj);
     }
     return Parse.Object.saveAll(objects).then(() => {
       const q = new Parse.Query(TestObject);
-      q.fullText('comment', 'coffee');
+      q.fullText('subject', 'coffee');
       q.ascending('$score');
       q.select('$score');
       return q.find();

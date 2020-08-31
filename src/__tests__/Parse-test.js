@@ -58,6 +58,15 @@ describe('Parse module', () => {
     expect(Parse.serverAuthToken).toBe('some_token');
   });
 
+  it('can set idempotency', () => {
+    expect(Parse.idempotency).toBe(false);
+    Parse.idempotency = true;
+    expect(CoreManager.get('IDEMPOTENCY')).toBe(true);
+    expect(Parse.idempotency).toBe(true);
+    Parse.idempotency = false;
+    expect(Parse.idempotency).toBe(false);
+  });
+
   it('can set LocalDatastoreController', () => {
     const controller = {
       fromPinWithName: function() {},

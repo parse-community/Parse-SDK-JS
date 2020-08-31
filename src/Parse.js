@@ -198,6 +198,20 @@ Object.defineProperty(Parse, 'secret', {
     CoreManager.set('ENCRYPTED_KEY', value);
   }
 });
+
+/**
+ * @member Parse.idempotency
+ * @type boolean
+ * @static
+ */
+Object.defineProperty(Parse, 'idempotency', {
+  get() {
+    return CoreManager.get('IDEMPOTENCY');
+  },
+  set(value) {
+    CoreManager.set('IDEMPOTENCY', value);
+  }
+});
 /* End setters */
 
 Parse.ACL = require('./ParseACL').default;

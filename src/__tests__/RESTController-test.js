@@ -9,6 +9,10 @@
 
 jest.autoMockOff();
 jest.useFakeTimers();
+jest.mock('uuid/v4', () => {
+  let value = 1000;
+  return () => (value++).toString();
+});
 
 const CoreManager = require('../CoreManager');
 const RESTController = require('../RESTController');
@@ -30,6 +34,7 @@ function flushPromises() {
 describe('RESTController', () => {
   it('throws if there is no XHR implementation', () => {
     RESTController._setXHR(null);
+    expect(RESTController._getXHR()).toBe(null);
     expect(RESTController.ajax.bind(null, 'GET', 'users/me', {})).toThrow(
       'Cannot make a request: No definition of XMLHttpRequest was found.'
     );
@@ -250,6 +255,64 @@ describe('RESTController', () => {
     RESTController._setXHR(XHR);
     const response = await RESTController.request('GET', 'classes/MyObject', {}, {})
     expect(response.result).toBe('hello');
+  });
+
+  it('idempotency - sends requestId header', async () => {
+    CoreManager.set('IDEMPOTENCY', true);
+    const requestIdHeader = (header) => 'X-Parse-Request-Id' === header[0];
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    RESTController.request('POST', 'classes/MyObject', {}, {});
+    await flushPromises();
+    expect(xhr.setRequestHeader.mock.calls.filter(requestIdHeader)).toEqual(
+      [["X-Parse-Request-Id", '1000']]
+    );
+    xhr.setRequestHeader.mockClear();
+
+    RESTController.request('PUT', 'classes/MyObject', {}, {});
+    await flushPromises();
+    expect(xhr.setRequestHeader.mock.calls.filter(requestIdHeader)).toEqual(
+      [["X-Parse-Request-Id", '1001']]
+    );
+    CoreManager.set('IDEMPOTENCY', false);
+  });
+
+  it('idempotency - handle requestId on network retries', (done) => {
+    CoreManager.set('IDEMPOTENCY', true);
+    RESTController._setXHR(mockXHR([
+      { status: 500 },
+      { status: 500 },
+      { status: 200, response: { success: true }}
+    ]));
+    RESTController.ajax('POST', 'users', {}).then(({ response, status, xhr }) => {
+      // X-Parse-Request-Id should be the same for all retries
+      const requestIdHeaders = xhr.setRequestHeader.mock.calls.filter((header) => 'X-Parse-Request-Id' === header[0])
+      expect(requestIdHeaders.every((header) => header[1] === requestIdHeaders[0][1])).toBeTruthy();
+      expect(requestIdHeaders.length).toBe(3);
+      expect(response).toEqual({ success: true });
+      expect(status).toBe(200);
+      done();
+    });
+    jest.runAllTimers();
+    CoreManager.set('IDEMPOTENCY', false);
+  });
+
+  it('idempotency - should properly handle url method not POST / PUT', () => {
+    CoreManager.set('IDEMPOTENCY', true);
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    RESTController.ajax('GET', 'users/me', {}, {});
+    const requestIdHeaders = xhr.setRequestHeader.mock.calls.filter((header) => 'X-Parse-Request-Id' === header[0]);
+    expect(requestIdHeaders.length).toBe(0);
+    CoreManager.set('IDEMPOTENCY', false);
   });
 
   it('handles aborted requests', (done) => {
