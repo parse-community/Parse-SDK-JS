@@ -565,6 +565,44 @@ describe('ParseObject', () => {
     });
   });
 
+  it('can increment a nested field', () => {
+    const o = new ParseObject('Person');
+    o._finishFetch({
+      objectId: 'incNested',
+      objectField: {
+        number: 5,
+        letter: 'a'
+      },
+    });
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 5, letter: 'a' },
+    });
+    o.increment('objectField.number');
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 6, letter: 'a' },
+    });
+    expect(o.op('objectField.number') instanceof IncrementOp).toBe(true);
+    expect(o.dirtyKeys()).toEqual(['objectField.number', 'objectField']);
+    expect(o._getSaveJSON()).toEqual({
+      'objectField.number': {
+        "__op": "Increment",
+        "amount": 1
+      },
+    });
+
+    // Nested objects only return values changed
+    o._handleSaveResponse({
+      objectId: 'incNested',
+      objectField: {
+        number: 6
+      }
+    })
+    expect(o.get('objectField').number).toEqual(6)
+    expect(o.get('objectField').letter).toEqual('a')
+  });
+
   it('ignore set nested field on new object', () => {
     const o = new ParseObject('Person');
     o.set('objectField.number', 20);

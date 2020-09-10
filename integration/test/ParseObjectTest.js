@@ -255,6 +255,27 @@ describe('Parse Object', () => {
     assert.equal(result.get('objectField').number, 20);
   });
 
+  it('can increment nested field and retain full object', async () => {
+    const obj = new TestObject();
+    obj.set('objectField', { number: 5, letter: 'a' });
+    assert.equal(obj.get('objectField').number, 5);
+    assert.equal(obj.get('objectField').letter, 'a');
+    await obj.save();
+
+    obj.increment('objectField.number', 15);
+    assert.equal(obj.get('objectField').number, 20);
+    assert.equal(obj.get('objectField').letter, 'a');
+    await obj.save();
+
+    assert.equal(obj.get('objectField').number, 20);
+    assert.equal(obj.get('objectField').letter, 'a');
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, 20);
+    assert.equal(result.get('objectField').letter, 'a');
+  });
+
   it('can increment non existing field', async () => {
     const obj = new TestObject();
     obj.set('objectField', { number: 5 });
