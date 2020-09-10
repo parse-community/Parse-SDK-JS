@@ -540,20 +540,21 @@ describe('ParseObject', () => {
     o._finishFetch({
       objectId: 'setNested',
       objectField: {
-        number: 5
+        number: 5,
+        letter: 'a'
       },
       otherField: {},
     });
 
     expect(o.attributes).toEqual({
-      objectField: { number: 5 },
+      objectField: { number: 5, letter: 'a' },
       otherField: {},
     });
     o.set('otherField', { hello: 'world' });
     o.set('objectField.number', 20);
 
     expect(o.attributes).toEqual({
-      objectField: { number: 20 },
+      objectField: { number: 20, letter: 'a' },
       otherField: { hello: 'world' },
     });
     expect(o.op('objectField.number') instanceof SetOp).toBe(true);
