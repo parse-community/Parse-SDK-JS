@@ -31,7 +31,7 @@ function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, 
       value.dirty() ||
       Object.keys(value._getServerData()).length < 1
     ) {
-      if (offline && value._localId) {
+      if (offline && value._getId().startsWith('local')) {
         return value.toOfflinePointer();
       }
       return value.toPointer();
