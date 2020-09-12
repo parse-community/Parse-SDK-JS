@@ -4,6 +4,8 @@ const assert = require('assert');
 const clear = require('./clear');
 const Parse = require('../../node');
 
+const TestObject = Parse.Object.extend('TestObject');
+
 describe('Parse Relation', () => {
   beforeEach((done) => {
     Parse.initialize('integration', null, 'notsosecret');
@@ -210,5 +212,39 @@ describe('Parse Relation', () => {
       assert.equal(wheels[0].id, origWheel.id);
       done();
     });
+  });
+
+  it('can add empty array to relation', async () => {
+    const object1 = new TestObject();
+    await object1.save();
+
+    const object2 = new TestObject();
+    object2.relation('related').add(object1);
+    await object2.save();
+
+    object2.relation('related').add([]);
+    await object2.save();
+
+    const relation = object2.relation('related');
+    const query = relation.query();
+    const results = await query.find();
+    expect(results.length).toBe(1);
+  });
+
+  it('can remove empty array from relation', async () => {
+    const object1 = new TestObject();
+    await object1.save();
+
+    const object2 = new TestObject();
+    object2.relation('related').add(object1);
+    await object2.save();
+
+    object2.relation('related').remove([]);
+    await object2.save();
+
+    const relation = object2.relation('related');
+    const query = relation.query();
+    const results = await query.find();
+    expect(results.length).toBe(1);
   });
 });
