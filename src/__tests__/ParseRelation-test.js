@@ -118,6 +118,38 @@ describe('ParseRelation', () => {
     });
   });
 
+  it('can add empty array to a relation', () => {
+    const parent = new ParseObject('Item');
+    parent.id = 'I1234';
+    const r = new ParseRelation(parent, 'shipments');
+    const o = new ParseObject('Delivery');
+    o.id = 'D1234';
+    const p = r.add(o);
+    expect(p).toBeTruthy();
+    expect(r.toJSON()).toEqual({
+      __type: 'Relation',
+      className: 'Delivery'
+    });
+    expect(parent.op('shipments').toJSON()).toEqual({
+      __op: 'AddRelation',
+      objects: [
+        { __type: 'Pointer', objectId: 'D1234', className: 'Delivery' }
+      ]
+    });
+    // Adding empty array shouldn't change the relation
+    r.add([]);
+    expect(r.toJSON()).toEqual({
+      __type: 'Relation',
+      className: 'Delivery'
+    });
+    expect(parent.op('shipments').toJSON()).toEqual({
+      __op: 'AddRelation',
+      objects: [
+        { __type: 'Pointer', objectId: 'D1234', className: 'Delivery' }
+      ]
+    });
+  });
+
   it('can remove objects from a relation', () => {
     const parent = new ParseObject('Item');
     parent.id = 'I2';
@@ -151,6 +183,37 @@ describe('ParseRelation', () => {
         { __type: 'Pointer', objectId: 'D1', className: 'Delivery' },
         { __type: 'Pointer', objectId: 'D2', className: 'Delivery' },
         { __type: 'Pointer', objectId: 'D3', className: 'Delivery' },
+      ]
+    });
+  });
+
+  it('can remove empty array from a relation', () => {
+    const parent = new ParseObject('Item');
+    parent.id = 'I5678';
+    const r = new ParseRelation(parent, 'shipments');
+    const o = new ParseObject('Delivery');
+    o.id = 'D5678';
+    r.remove(o);
+    expect(r.toJSON()).toEqual({
+      __type: 'Relation',
+      className: 'Delivery'
+    });
+    expect(parent.op('shipments').toJSON()).toEqual({
+      __op: 'RemoveRelation',
+      objects: [
+        { __type: 'Pointer', objectId: 'D5678', className: 'Delivery' }
+      ]
+    });
+    // Removing empty array shouldn't change the relation
+    r.remove([]);
+    expect(r.toJSON()).toEqual({
+      __type: 'Relation',
+      className: 'Delivery'
+    });
+    expect(parent.op('shipments').toJSON()).toEqual({
+      __op: 'RemoveRelation',
+      objects: [
+        { __type: 'Pointer', objectId: 'D5678', className: 'Delivery' }
       ]
     });
   });
