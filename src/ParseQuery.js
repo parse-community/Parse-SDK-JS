@@ -97,7 +97,7 @@ function handleSelectResult(data: any, select: Array<string>){
         if (obj && !obj.hasOwnProperty(component)) {
           obj[component] = undefined;
         }
-        if (obj !== undefined) {
+        if (obj != undefined) {
           obj = obj[component];
         }
 
