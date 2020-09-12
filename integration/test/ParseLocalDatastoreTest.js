@@ -139,15 +139,11 @@ function runTest(controller) {
       assert.equal(pinnedObject._localId, undefined);
     });
 
-    it(`${controller.name} cannot pin unsaved pointer`, async () => {
-      try {
-        const object = new TestObject();
-        const pointer = new Item();
-        object.set('child', pointer);
-        await object.pin();
-      } catch (e) {
-        assert.equal(e.message, 'Cannot create a pointer to an unsaved ParseObject');
-      }
+    it(`${controller.name} can pin unsaved pointer`, async () => {
+      const object = new TestObject();
+      const pointer = new Item();
+      object.set('child', pointer);
+      await object.pin();
     });
 
     it(`${controller.name} can pin user (unsaved)`, async () => {
@@ -2680,6 +2676,54 @@ function runTest(controller) {
       query.fromLocalDatastore();
       const results = await query.find();
       assert.equal(results.length, 2);
+    });
+
+    it(`${controller.name} can query from pin subclass`, async () => {
+      class ClassA extends Parse.Object {
+        constructor() {
+          super('ClassA');
+        }
+        get name() { return this.get('name'); }
+        set name(value) { this.set('name', value); }
+      }
+      Parse.Object.registerSubclass('ClassA', ClassA);
+
+      class ClassB extends Parse.Object {
+        constructor() {
+          super('ClassB');
+        }
+        get name() { return this.get('name'); }
+        set name(value) { this.set('name', value); }
+
+        get classA() { return this.get('classA'); }
+        set classA(value) { this.set('classA', value); }
+      }
+      Parse.Object.registerSubclass('ClassB', ClassB);
+
+      const testClassA = new ClassA();
+      testClassA.name = 'ABC';
+      await testClassA.pin();
+
+      const query = new Parse.Query(ClassA);
+      query.fromLocalDatastore();
+      query.equalTo('name', 'ABC');
+      const result = await query.first();
+      expect(result.get('name')).toBe('ABC');
+
+      const testClassB = new ClassB();
+      testClassB.name = 'XYZ';
+      testClassB.classA = testClassA;
+      await testClassB.pin();
+
+      let localDatastore = await Parse.LocalDatastore._getAllContents();
+      expect(localDatastore[LDS_KEY(testClassB)][0].classA).toEqual(testClassA.toOfflinePointer());
+
+      await testClassB.save();
+      expect(testClassB.classA).toBe(testClassA);
+      expect(testClassA.id).toBeDefined();
+
+      localDatastore = await Parse.LocalDatastore._getAllContents();
+      expect(localDatastore[LDS_KEY(testClassB)][0].classA.objectId).toEqual(testClassA.id);
     });
   });
 }
