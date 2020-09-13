@@ -37,7 +37,7 @@ function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, 
       return value.toPointer();
     }
     seen = seen.concat(seenEntry);
-    return value._toFullJSON(seen);
+    return value._toFullJSON(seen, offline);
   }
   if (value instanceof Op ||
       value instanceof ParseACL ||

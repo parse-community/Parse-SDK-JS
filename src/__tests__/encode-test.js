@@ -23,17 +23,23 @@ mockObject.prototype = {
   toPointer() {
     return 'POINTER';
   },
+  toOfflinePointer() {
+    return 'OFFLINE_POINTER';
+  },
+  _getId() {
+    return 'local1234';
+  },
   dirty() {},
   toJSON() {
     return this.attributes;
   },
-  _toFullJSON(seen) {
+  _toFullJSON(seen, offline) {
     const json = {
       __type: 'Object',
       className: this.className
     };
     for (const attr in this.attributes) {
-      json[attr] = encode(this.attributes[attr], false, false, seen.concat(this));
+      json[attr] = encode(this.attributes[attr], false, false, seen.concat(this), offline);
     }
     return json;
   }
@@ -136,6 +142,28 @@ describe('encode', () => {
         iso: '2015-02-01T00:00:00.000Z'
       },
       self: 'POINTER'
+    });
+  });
+
+  it('encodes ParseObjects offline', () => {
+    const obj = new ParseObject('Item');
+    obj._serverData = {};
+    expect(encode(obj, false, false, undefined, true)).toEqual('OFFLINE_POINTER');
+    obj._serverData = obj.attributes = {
+      str: 'string',
+      date: new Date(Date.UTC(2015, 1, 1))
+    };
+    obj.attributes.self = obj;
+
+    expect(encode(obj, false, false, undefined, true)).toEqual({
+      __type: 'Object',
+      className: 'Item',
+      str: 'string',
+      date: {
+        __type: 'Date',
+        iso: '2015-02-01T00:00:00.000Z'
+      },
+      self: 'OFFLINE_POINTER'
     });
   });
 
