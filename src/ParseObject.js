@@ -401,11 +401,13 @@ class ParseObject {
         changes[attr] = new ParseACL(response[attr]);
       } else if (attr !== 'objectId') {
         const val = decode(response[attr]);
-        if (val && typeof val === Object
+        if (val && typeof val === 'object'
           && !(val instanceof Array)
           && !(val instanceof ParseObject)
           && !(val instanceof ParseFile)
-          && !(val instanceof ParseRelation)) {
+          && !(val instanceof ParseRelation)
+          && !(val instanceof Op)
+          && !(Object.prototype.toString.call(val) === '[object Date]')) {
 
           // Update the object by merging in updates w/ old object
           changes[attr] = { ...this.attributes[attr], ...val }
