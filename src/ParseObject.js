@@ -273,8 +273,8 @@ class ParseObject {
     return dirty;
   }
 
-  _toFullJSON(seen?: Array<any>): AttributeMap {
-    const json: { [key: string]: mixed } = this.toJSON(seen);
+  _toFullJSON(seen?: Array<any>, offline?: boolean): AttributeMap {
+    const json: { [key: string]: mixed } = this.toJSON(seen, offline);
     json.__type = 'Object';
     json.className = this.className;
     return json;
@@ -434,7 +434,7 @@ class ParseObject {
    * Returns a JSON version of the object suitable for saving to Parse.
    * @return {Object}
    */
-  toJSON(seen: Array<any> | void): AttributeMap {
+  toJSON(seen: Array<any> | void, offline?: boolean): AttributeMap {
     const seenEntry = this.id ? this.className + ':' + this.id : this;
     seen = seen || [seenEntry];
     const json = {};
@@ -443,12 +443,12 @@ class ParseObject {
       if ((attr === 'createdAt' || attr === 'updatedAt') && attrs[attr].toJSON) {
         json[attr] = attrs[attr].toJSON();
       } else {
-        json[attr] = encode(attrs[attr], false, false, seen);
+        json[attr] = encode(attrs[attr], false, false, seen, offline);
       }
     }
     const pending = this._getPendingOps();
     for (const attr in pending[0]) {
-      json[attr] = pending[0][attr].toJSON();
+      json[attr] = pending[0][attr].toJSON(offline);
     }
 
     if (this.id) {
@@ -547,6 +547,21 @@ class ParseObject {
       __type: 'Pointer',
       className: this.className,
       objectId: this.id
+    };
+  }
+
+  /**
+   * Gets a Pointer referencing this Object.
+   * @return {Pointer}
+   */
+  toOfflinePointer(): Pointer {
+    if (!this._localId) {
+      throw new Error('Cannot create a offline pointer to a saved ParseObject');
+    }
+    return {
+      __type: 'Object',
+      className: this.className,
+      _localId: this._localId
     };
   }
 

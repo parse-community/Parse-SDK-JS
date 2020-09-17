@@ -338,6 +338,20 @@ describe('ParseObject', () => {
     });
   });
 
+  it('can convert to a offline pointer', () => {
+    const o = new ParseObject('Item');
+    o.id = 'AnObjectId';
+    expect(function() {o.toOfflinePointer();}).toThrow(
+      'Cannot create a offline pointer to a saved ParseObject'
+    );
+    o._localId = 'local1234';
+    expect(o.toOfflinePointer()).toEqual({
+      __type: 'Object',
+      className: 'Item',
+      _localId: 'local1234'
+    });
+  });
+
   it('can test equality against another ParseObject', () => {
     const a = new ParseObject('Item');
     expect(a.equals(a)).toBe(true);

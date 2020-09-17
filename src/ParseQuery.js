@@ -1299,6 +1299,7 @@ class ParseQuery {
    * This may be slow for large datasets.
    * @param {String} key The key that the string to match is stored in.
    * @param {RegExp} regex The regular expression pattern to match.
+   * @param {String} modifiers The regular expression mode.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
   matches(key: string, regex: RegExp, modifiers: string): ParseQuery {

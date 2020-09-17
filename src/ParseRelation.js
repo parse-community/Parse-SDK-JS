@@ -85,6 +85,9 @@ class ParseRelation {
     if (!parent) {
       throw new Error('Cannot add to a Relation without a parent');
     }
+    if (objects.length === 0) {
+      return parent;
+    }
     parent.set(this.key, change);
     this.targetClassName = change._targetClassName;
     return parent;
@@ -103,6 +106,9 @@ class ParseRelation {
     const change = new RelationOp([], objects);
     if (!this.parent) {
       throw new Error('Cannot remove from a Relation without a parent');
+    }
+    if (objects.length === 0) {
+      return;
     }
     this.parent.set(this.key, change);
     this.targetClassName = change._targetClassName;
