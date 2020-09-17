@@ -36,7 +36,10 @@ const api = new ParseServer({
       'classes/IdempotentTest'
     ],
     ttl: 120
-  }
+  },
+  serverStartComplete: () => {
+    /* Ignore ParseError: schema class name does not revalidate */
+  },
 });
 
 app.use('/parse', api);
