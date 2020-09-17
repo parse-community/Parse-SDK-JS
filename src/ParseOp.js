@@ -84,8 +84,8 @@ export class SetOp extends Op {
     return new SetOp(this._value);
   }
 
-  toJSON() {
-    return encode(this._value, false, true);
+  toJSON(offline?: boolean) {
+    return encode(this._value, false, true, undefined, offline);
   }
 }
 
