@@ -1,7 +1,28 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.15.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.16.0...master)
+
+## 2.16.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.15.0...2.16.0)
+
+Idempotency enforcement for client requests. This deduplicates requests where the client intends to send one request to Parse Server but due to network issues the server receives the request multiple times. (Parse-Server 4.3.0+)
+**Caution, this is an experimental feature that may not be appropriate for production.**
+
+To enable use either of the following:
+* `Parse.CoreManager.set('IDEMPOTENCY', true)`
+* `Parse.idempotency = true`
+
+**Features**
+- Idempotency Request ([#1210](https://github.com/parse-community/Parse-SDK-JS/pull/1210))
+
+**Improvements**
+- Allow Pin of unsaved objects in LocalDatastore ([#1225](https://github.com/parse-community/Parse-SDK-JS/pull/1225))
+
+**Fixes**
+- crypto-js crashing React Native ([#1218](https://github.com/parse-community/Parse-SDK-JS/pull/1218))
+- Schema mismatch error on add / remove empty array on Relation  ([#1222](https://github.com/parse-community/Parse-SDK-JS/pull/1222))
+- query.select error on null fields ([#1223](https://github.com/parse-community/Parse-SDK-JS/pull/1223))
 
 ## 2.15.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.14.0...2.15.0)
