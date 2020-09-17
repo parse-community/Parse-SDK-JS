@@ -2024,4 +2024,19 @@ describe('Parse Query', () => {
     const explain = await query.find();
     assert.equal(explain.queryPlanner.winningPlan.inputStage.inputStage.indexName, '_id_');
   });
+
+  it('can query with select on null field', async () => {
+    const obj1 = new TestObject({ number: 1, arrayField: [] });
+    const obj2 = new TestObject({ number: 2, arrayField: [{ subfield: 1 }] });
+    const obj3 = new TestObject({ number: 3, arrayField: null });
+    await Parse.Object.saveAll([obj1, obj2, obj3]);
+
+    const query = new Parse.Query(TestObject);
+    query.select(['arrayField.subfield']);
+    query.ascending('number');
+    const results = await query.find();
+    expect(results[0].get('arrayField')).toEqual([]);
+    expect(results[1].get('arrayField')).toEqual([{ subfield: 1 }]);
+    expect(results[2].get('arrayField')).toEqual(null);
+  });
 });
