@@ -79,7 +79,7 @@ const LocalDatastore = {
     for (const parent of objects) {
       const children = this._getChildren(parent);
       const parentKey = this.getKeyForObject(parent);
-      const json = parent._toFullJSON();
+      const json = parent._toFullJSON(undefined, true);
       if (parent._localId) {
         json._localId = parent._localId;
       }
@@ -139,7 +139,7 @@ const LocalDatastore = {
   // Retrieve all pointer fields from object recursively
   _getChildren(object: ParseObject) {
     const encountered = {};
-    const json = object._toFullJSON();
+    const json = object._toFullJSON(undefined, true);
     for (const key in json) {
       if (json[key] && json[key].__type && json[key].__type === 'Object') {
         this._traverse(json[key], encountered);
