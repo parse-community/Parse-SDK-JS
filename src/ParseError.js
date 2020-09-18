@@ -40,8 +40,6 @@ ParseError.OTHER_CAUSE = -1;
 
 /**
  * Error code indicating that something has gone wrong with the server.
- * If you get this error code, it is Parse's fault. Contact us at
- * https://parse.com/help
  * @property INTERNAL_SERVER_ERROR
  * @static
  * @final
