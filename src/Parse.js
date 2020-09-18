@@ -25,7 +25,6 @@ import RESTController from './RESTController';
 const Parse = {
   /**
    * Call this method first to set up your authentication tokens for Parse.
-   * You can get your keys from the Data Browser on parse.com.
    * @param {String} applicationId Your Parse Application ID.
    * @param {String} javaScriptKey (optional) Your Parse JavaScript Key (Not needed for parse-server)
    * @param {String} masterKey (optional) Your Parse Master Key. (Node.js only!)

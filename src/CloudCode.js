@@ -221,7 +221,7 @@
  * Sample request:
  * ```
  * Parse.Cloud.httpRequest({
- *   url: 'http://www.parse.com/'
+ *   url: 'http://www.example.com/'
  * }).then(function(httpResponse) {
  *   // success
  *   console.log(httpResponse.text);
