@@ -229,6 +229,39 @@ describe('ParseUser', () => {
     });
   });
 
+  it('can log in as a user with POST method', (done) => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body) {
+        expect(method).toBe('POST');
+        expect(path).toBe('login');
+        expect(body.username).toBe('username');
+        expect(body.password).toBe('password');
+
+        return Promise.resolve({
+          objectId: 'uid2',
+          username: 'username',
+          sessionToken: '123abc'
+        }, 200);
+      },
+      ajax() {}
+    });
+    ParseUser.logIn('username', 'password', { usePost: true }).then((u) => {
+      expect(u.id).toBe('uid2');
+      expect(u.getSessionToken()).toBe('123abc');
+      expect(u.isCurrent()).toBe(true);
+      expect(u.authenticated()).toBe(true);
+      expect(ParseUser.current()).toBe(u);
+      ParseUser._clearCache();
+      const current = ParseUser.current();
+      expect(current instanceof ParseUser).toBe(true);
+      expect(current.id).toBe('uid2');
+      expect(current.authenticated()).toBe(true);
+      done();
+    });
+  });
+
   it('fail login when invalid username or password is used', (done) => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();

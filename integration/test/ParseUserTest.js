@@ -109,6 +109,16 @@ describe('Parse User', () => {
     });
   });
 
+  it('can log in a user using POST method', (done) => {
+    Parse.User.signUp('asdf', 'zxcv').then(() => {
+      return Parse.User.logIn('asdf', 'zxcv', { usePost: true });
+    }).then((user) => {
+      assert.equal(user.get('username'), 'asdf');
+      expect(user.existed()).toBe(true);
+      done();
+    });
+  });
+
   it('can login users with installationId', async () => {
     Parse.User.enableUnsafeCurrentUser();
     const currentInstallation = await Parse.CoreManager.getInstallationController().currentInstallationId();
