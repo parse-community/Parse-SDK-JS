@@ -449,6 +449,9 @@ class ParseUser extends ParseObject {
     if (options.hasOwnProperty('installationId')) {
       loginOptions.installationId = options.installationId;
     }
+    if (options.hasOwnProperty('usePost')) {
+      loginOptions.usePost = options.usePost;
+    }
 
     const controller = CoreManager.getUserController();
     return controller.logIn(this, loginOptions);
@@ -1104,7 +1107,7 @@ const DefaultController = {
       password: user.get('password')
     };
     return RESTController.request(
-      'GET', 'login', auth, options
+      options.usePost ? 'POST' : 'GET', 'login', auth, options
     ).then((response) => {
       user._migrateId(response.objectId);
       user._setExisted(true);
