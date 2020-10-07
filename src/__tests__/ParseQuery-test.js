@@ -2290,7 +2290,9 @@ describe('ParseQuery', () => {
           distinct: 'size',
           where: {
             size: 'small'
-          }
+          },
+          hint: undefined,
+          readPreference: null,
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.requestTask).toBeDefined();
@@ -2316,7 +2318,9 @@ describe('ParseQuery', () => {
           distinct: 'size',
           where: {
             size: 'small'
-          }
+          },
+          hint: undefined,
+          readPreference: null,
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
@@ -2348,6 +2352,7 @@ describe('ParseQuery', () => {
             size: 'small'
           },
           hint: '_id_',
+          readPreference: null,
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
