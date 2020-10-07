@@ -1,7 +1,13 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.16.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.17.0...master)
+
+## 2.17.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.16.0...2.17.0)
+
+**Improvements**
+- User LogIn with usePost option ([#1229](https://github.com/parse-community/Parse-SDK-JS/pull/1229))
 
 ## 2.16.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.15.0...2.16.0)
