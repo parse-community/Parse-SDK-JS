@@ -744,6 +744,7 @@ class ParseQuery {
       distinct: key,
       where: this._where,
       hint: this._hint,
+      readPreference: this._readPreference,
     };
     return controller.aggregate(
       this.className,

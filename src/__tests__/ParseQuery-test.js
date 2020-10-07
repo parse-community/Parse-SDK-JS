@@ -2368,6 +2368,27 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can issue an distinct query with read preference', async() => {
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params.readPreference).toEqual('SECONDARY');
+        expect(params.distinct).toEqual('size');
+        expect(params.hint).toEqual(undefined);
+        expect(params.where).toEqual({});
+        expect(options.useMasterKey).toEqual(true);
+        return Promise.resolve({
+          results: []
+        });
+      }
+    });
+    const q = new ParseQuery('Item');
+    q.readPreference('SECONDARY');
+    const results = await q.distinct('size', { sessionToken: '1234' });
+    expect(results).toEqual([]);
+  });
+
   it('can issue an aggregate query with array pipeline', (done) => {
     const pipeline = [
       { group: { objectId: '$name' } }
