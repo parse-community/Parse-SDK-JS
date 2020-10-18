@@ -1223,6 +1223,18 @@ describe('Parse Query', () => {
     });
   });
 
+  it('can return all objects with findAll', async () => {
+    const objs = [...Array(101)].map(() => new Parse.Object('Container'));
+
+    await Parse.Object.saveAll(objs);
+
+    const query = new Parse.Query('Container');
+
+    const result = await query.findAll();
+
+    assert.equal(result.length, 101);
+  });
+
   it('can include nested objects via array', (done) => {
     const child = new TestObject();
     const parent = new Parse.Object('Container');
