@@ -674,6 +674,28 @@ class ParseQuery {
   }
 
   /**
+   * Retrieves a complete list of ParseObjects that satisfy this query.
+   * Using `eachBatch` under the hood to fetch all the valid objects.
+   *
+   * @param {Object} options Valid options are:<ul>
+   *   <li>batchSize: How many objects to yield in each batch (default: 100)
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   * </ul>
+   * @return {Promise} A promise that is resolved with the results when
+   * the query completes.
+   */
+  async findAll(options?: BatchOptions): Promise<Array<ParseObject>> {
+    let result: ParseObject[] = [];
+    await this.eachBatch((objects: ParseObject[]) => {
+      result = [...result, ...objects];
+    }, options);
+    return result;
+  }
+
+  /**
    * Counts the number of objects that match this query.
    * Either options.success or options.error is called when the count
    * completes.
