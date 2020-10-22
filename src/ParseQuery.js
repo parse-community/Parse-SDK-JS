@@ -1171,9 +1171,7 @@ class ParseQuery {
    */
   equalTo(key: string | { [key: string]: any }, value: ?mixed): ParseQuery {
     if (key && typeof key === 'object') {
-      Object.entries(key).forEach(([k, val]) => {
-        return this.equalTo(k, val)
-      })
+      Object.entries(key).forEach(([k, val]) => this.equalTo(k, val))
       return this
     }
     if (typeof value === 'undefined') {
@@ -1193,10 +1191,7 @@ class ParseQuery {
    */
   notEqualTo(key: string | { [key: string]: any }, value: ?mixed): ParseQuery {
     if (key && typeof key === 'object') {
-      Object.entries(key).forEach(([k, val]) => {
-        console.log(k, val)
-        return this.notEqualTo(k, val);
-      })
+      Object.entries(key).forEach(([k, val]) => this.notEqualTo(k, val))
       return this
     }
     return this._addCondition(key, '$ne', value);
