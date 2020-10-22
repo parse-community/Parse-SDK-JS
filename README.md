@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="Parse Platform" src="Assets/img/logo_large.png" width="200">
+    <img alt="Parse Platform" src="https://github.com/parse-community/Parse-SDK-JS/raw/master/.github/parse-logo.png" width="200">
 </p>
 
 <h2 align="center">Parse SDK for JavaScript</h2>
@@ -77,7 +77,7 @@ Types are updated manually after every release. If a definition doesn't exist, p
 
 With Parse SDK 2.0.0, gone are the backbone style callbacks and Parse.Promises.
 
-We have curated a [migration guide](2.0.0.md) that should help you migrate your code.
+We have curated a [migration guide][migration] that should help you migrate your code.
 
 ## 3rd Party Authentications
 
@@ -103,7 +103,7 @@ And don't forget, if you plan to deploy it remotely, you should run `npm install
 
 ## Contributing
 
-We really want Parse to be yours, to see it grow and thrive in the open source community. Please see the [Contributing to Parse Javascript SDK guide](CONTRIBUTING.md).
+We really want Parse to be yours, to see it grow and thrive in the open source community. Please see the [Contributing to Parse Javascript SDK guide][contributing].
 
 ## License
 
@@ -120,7 +120,9 @@ of patent rights can be found in the PATENTS file in the same directory.
 As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code.
  
 [3rd-party-auth]: http://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication
+[contributing]: https://github.com/parse-community/Parse-SDK-JS/blob/master/CONTRIBUTING.md
 [custom-auth-module]: https://docs.parseplatform.org/js/guide/#custom-authentication-module
 [link-with]: https://docs.parseplatform.org/js/guide/#linking-users
+[migration]: https://github.com/parse-community/Parse-SDK-JS/blob/master/2.0.0.md
 [open-collective-link]: https://opencollective.com/parse-server
 [types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse 

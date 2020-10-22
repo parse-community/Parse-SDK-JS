@@ -9,12 +9,7 @@
   },
   "templates": {
     "default": {
-      "outputSourceFiles": false,
-      "staticFiles": {
-        "include": [
-          "./Assets"
-        ]
-      }
+      "outputSourceFiles": false
     },
     "cleverLinks": false,
     "monospaceLinks": false
