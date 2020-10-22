@@ -362,6 +362,15 @@ describe('Parse Query', () => {
     });
   });
 
+  it('can do equalTo queries with object', (done) => {
+    const query = new Parse.Query('BoxedNumber');
+    query.equalTo({ number: 3 });
+    query.find().then((results) => {
+      assert.equal(results.length, 1);
+      done();
+    });
+  });
+
   it('can test equality with undefined', (done) => {
     const query = new Parse.Query('BoxedNumber');
     query.equalTo('number', undefined);
@@ -430,6 +439,15 @@ describe('Parse Query', () => {
   it('can perform notEqualTo queries', (done) => {
     const query = new Parse.Query('BoxedNumber');
     query.notEqualTo('number', 5);
+    query.find().then((results) => {
+      assert.equal(results.length, 9);
+      done();
+    });
+  });
+
+  it('can perform notEqualTo queries with object', (done) => {
+    const query = new Parse.Query('BoxedNumber');
+    query.notEqualTo({ number: 5 });
     query.find().then((results) => {
       assert.equal(results.length, 9);
       done();

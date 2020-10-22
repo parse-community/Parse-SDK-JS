@@ -1169,7 +1169,11 @@ class ParseQuery {
    * @param value The value that the Parse.Object must contain.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  equalTo(key: string, value: mixed): ParseQuery {
+  equalTo(key: string | { [key: string]: any }, value: ?mixed): ParseQuery {
+    if (key && typeof key === 'object') {
+      Object.entries(key).forEach(([k, val]) => this.equalTo(k, val))
+      return this
+    }
     if (typeof value === 'undefined') {
       return this.doesNotExist(key);
     }
@@ -1185,7 +1189,11 @@ class ParseQuery {
    * @param value The value that must not be equalled.
    * @return {Parse.Query} Returns the query, so you can chain this call.
    */
-  notEqualTo(key: string, value: mixed): ParseQuery {
+  notEqualTo(key: string | { [key: string]: any }, value: ?mixed): ParseQuery {
+    if (key && typeof key === 'object') {
+      Object.entries(key).forEach(([k, val]) => this.notEqualTo(k, val))
+      return this
+    }
     return this._addCondition(key, '$ne', value);
   }
 
