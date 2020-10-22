@@ -109,6 +109,16 @@ describe('ParseQuery', () => {
         }
       }
     });
+
+    const size = 'medium';
+    const stock = true;
+    q.equalTo({ size, stock });
+    expect(q.toJSON()).toEqual({
+      where: {
+        size: 'medium',
+        stock: true,
+      }
+    });
   });
 
   it('can generate inequality queries', () => {
@@ -127,6 +137,20 @@ describe('ParseQuery', () => {
       where: {
         size: {
           $ne: 'medium'
+        }
+      }
+    });
+
+    const size = 'medium';
+    const stock = true;
+    q.notEqualTo({ size, stock });
+    expect(q.toJSON()).toEqual({
+      where: {
+        size: {
+          $ne: 'medium',
+        },
+        stock: {
+          $ne: true,
         }
       }
     });
