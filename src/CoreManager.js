@@ -70,7 +70,7 @@ type ObjectStateController = {
   duplicateState: (source: any, dest: any) => void;
 };
 type PushController = {
-  send: (data: PushData, options: RequestOptions) => Promise;
+  send: (data: PushData) => Promise;
 };
 type QueryController = {
   find: (className: string, params: QueryJSON, options: RequestOptions) => Promise;
