@@ -68,150 +68,118 @@ const Parse = {
    */
   setLocalDatastoreController(controller: any) {
     CoreManager.setLocalDatastoreController(controller);
-  }
-};
+  },
 
-/** These legacy setters may eventually be deprecated **/
-/**
- * @member Parse.applicationId
- * @type string
- * @static
- */
-Object.defineProperty(Parse, 'applicationId', {
-  get() {
+  /**
+   * @member {string} Parse.applicationId
+   * @static
+   */
+  get applicationId() {
     return CoreManager.get('APPLICATION_ID');
   },
-  set(value) {
+  set applicationId(value) {
     CoreManager.set('APPLICATION_ID', value);
-  }
-});
+  },
 
-/**
- * @member Parse.javaScriptKey
- * @type string
- * @static
- */
-Object.defineProperty(Parse, 'javaScriptKey', {
-  get() {
+  /**
+   * @member {string} Parse.javaScriptKey
+   * @static
+   */
+  get javaScriptKey() {
     return CoreManager.get('JAVASCRIPT_KEY');
   },
-  set(value) {
+  set javaScriptKey(value) {
     CoreManager.set('JAVASCRIPT_KEY', value);
-  }
-});
+  },
 
-/**
- * @member Parse.masterKey
- * @type string
- * @static
- */
-Object.defineProperty(Parse, 'masterKey', {
-  get() {
+  /**
+   * @member {string} Parse.masterKey
+   * @static
+   */
+  get masterKey() {
     return CoreManager.get('MASTER_KEY');
   },
-  set(value) {
+  set masterKey(value) {
     CoreManager.set('MASTER_KEY', value);
-  }
-});
+  },
 
-/**
- * @member Parse.serverURL
- * @type string
- * @static
- */
-Object.defineProperty(Parse, 'serverURL', {
-  get() {
+  /**
+   * @member {string} Parse.serverURL
+   * @static
+   */
+  get serverURL() {
     return CoreManager.get('SERVER_URL');
   },
-  set(value) {
+  set serverURL(value) {
     CoreManager.set('SERVER_URL', value);
-  }
-});
+  },
 
-/**
- * @member Parse.serverAuthToken
- * @type string
- * @static
- */
-Object.defineProperty(Parse, 'serverAuthToken', {
-  get() {
+  /**
+   * @member {string} Parse.serverAuthToken
+   * @static
+   */
+  get serverAuthToken() {
     return CoreManager.get('SERVER_AUTH_TOKEN');
   },
-  set(value) {
+  set serverAuthToken(value) {
     CoreManager.set('SERVER_AUTH_TOKEN', value);
-  }
-});
+  },
 
-/**
- * @member Parse.serverAuthType
- * @type string
- * @static
- */
-Object.defineProperty(Parse, 'serverAuthType', {
-  get() {
+  /**
+   * @member {string} Parse.serverAuthType
+   * @static
+   */
+  get serverAuthType() {
     return CoreManager.get('SERVER_AUTH_TYPE');
   },
-  set(value) {
+  set serverAuthType(value) {
     CoreManager.set('SERVER_AUTH_TYPE', value);
-  }
-});
+  },
 
-/**
- * @member Parse.liveQueryServerURL
- * @type string
- * @static
- */
-Object.defineProperty(Parse, 'liveQueryServerURL', {
-  get() {
+  /**
+   * @member {string} Parse.liveQueryServerURL
+   * @static
+   */
+  get liveQueryServerURL() {
     return CoreManager.get('LIVEQUERY_SERVER_URL');
   },
-  set(value) {
+  set liveQueryServerURL(value) {
     CoreManager.set('LIVEQUERY_SERVER_URL', value);
-  }
-});
+  },
 
-/**
- * @member Parse.encryptedUser
- * @type boolean
- * @static
- */
-Object.defineProperty(Parse, 'encryptedUser', {
-  get() {
+  /**
+   * @member {string} Parse.encryptedUser
+   * @static
+   */
+  get encryptedUser() {
     return CoreManager.get('ENCRYPTED_USER');
   },
-  set(value) {
+  set encryptedUser(value) {
     CoreManager.set('ENCRYPTED_USER', value);
-  }
-});
+  },
 
-/**
- * @member Parse.secret
- * @type string
- * @static
- */
-Object.defineProperty(Parse, 'secret', {
-  get() {
+  /**
+   * @member {string} Parse.secret
+   * @static
+   */
+  get secret() {
     return CoreManager.get('ENCRYPTED_KEY');
   },
-  set(value) {
+  set secret(value) {
     CoreManager.set('ENCRYPTED_KEY', value);
-  }
-});
+  },
 
-/**
- * @member Parse.idempotency
- * @type boolean
- * @static
- */
-Object.defineProperty(Parse, 'idempotency', {
-  get() {
+  /**
+   * @member {boolean} Parse.idempotency
+   * @static
+   */
+  get idempotency() {
     return CoreManager.get('IDEMPOTENCY');
   },
-  set(value) {
+  set idempotency(value) {
     CoreManager.set('IDEMPOTENCY', value);
-  }
-});
-/* End setters */
+  },
+};
 
 Parse.ACL = require('./ParseACL').default;
 Parse.Analytics = require('./Analytics');
