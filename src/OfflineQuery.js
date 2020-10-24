@@ -6,6 +6,9 @@ const ParseGeoPoint = require('./ParseGeoPoint').default;
 
 /**
  * contains -- Determines if an object is contained in a list with special handling for Parse pointers.
+ *
+ * @param haystack
+ * @param needle
  */
 function contains(haystack, needle) {
 
@@ -35,6 +38,11 @@ function transformObject(object) {
  * It's a lightweight, where-clause only implementation of a full query engine.
  * Since we find queries that match objects, rather than objects that match
  * queries, we can avoid building a full-blown query tool.
+ *
+ * @param className
+ * @param object
+ * @param objects
+ * @param query
  */
 function matchesQuery(className, object, objects, query) {
   if (object.className !== className) {
@@ -71,6 +79,12 @@ function equalObjectsGeneric(obj, compareTo, eqlFn) {
 
 /**
  * Determines whether an object matches a single key's constraints
+ *
+ * @param className
+ * @param object
+ * @param objects
+ * @param key
+ * @param constraints
  */
 function matchesKeyConstraints(className, object, objects, key, constraints) {
   if (constraints === null) {

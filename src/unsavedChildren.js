@@ -21,6 +21,9 @@ type EncounterMap = {
 /**
  * Return an array of unsaved children, which are either Parse Objects or Files.
  * If it encounters any dirty Objects without Ids, it will throw an exception.
+ *
+ * @param obj
+ * @param allowDeepUnsaved
  */
 export default function unsavedChildren(
   obj: ParseObject,

@@ -76,6 +76,7 @@ const provider = {
 
 /**
  * Provides a set of utilities for using Parse with Facebook.
+ *
  * @class Parse.FacebookUtils
  * @static
  * @hideconstructor
@@ -90,9 +91,9 @@ const FacebookUtils = {
    * FB.init()</a></code>.  Parse.FacebookUtils will invoke FB.init() for you
    * with these arguments.
    *
-   * @method init
+   * @function init
    * @name Parse.FacebookUtils.init
-   * @param {Object} options Facebook options argument as described here:
+   * @param {object} options Facebook options argument as described here:
    *   <a href=
    *   "https://developers.facebook.com/docs/reference/javascript/FB.init/">
    *   FB.init()</a>. The status flag will be coerced to 'false' because it
@@ -127,11 +128,11 @@ const FacebookUtils = {
   /**
    * Gets whether the user has their account linked to Facebook.
    *
-   * @method isLinked
+   * @function isLinked
    * @name Parse.FacebookUtils.isLinked
    * @param {Parse.User} user User to check for a facebook link.
    *     The user must be logged in on this device.
-   * @return {Boolean} <code>true</code> if the user has their account
+   * @returns {boolean} <code>true</code> if the user has their account
    *     linked to Facebook.
    */
   isLinked(user) {
@@ -152,14 +153,14 @@ const FacebookUtils = {
    *
    * <code>logIn(authData: Object, options?: Object);</code>
    *
-   * @method logIn
+   * @function logIn
    * @name Parse.FacebookUtils.logIn
-   * @param {(String|Object)} permissions The permissions required for Facebook
+   * @param {(string | object)} permissions The permissions required for Facebook
    *    log in.  This is a comma-separated string of permissions.
    *    Alternatively, supply a Facebook authData object as described in our
    *    REST API docs if you want to handle getting facebook auth tokens
    *    yourself.
-   * @param {Object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
+   * @param {object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
    * @returns {Promise}
    */
   logIn(permissions, options) {
@@ -190,16 +191,16 @@ const FacebookUtils = {
    *
    * <code>link(user: Parse.User, authData: Object, options?: FullOptions);</code>
    *
-   * @method link
+   * @function link
    * @name Parse.FacebookUtils.link
    * @param {Parse.User} user User to link to Facebook. This must be the
    *     current user.
-   * @param {(String|Object)} permissions The permissions required for Facebook
+   * @param {(string | object)} permissions The permissions required for Facebook
    *    log in.  This is a comma-separated string of permissions.
    *    Alternatively, supply a Facebook authData object as described in our
    *    REST API docs if you want to handle getting facebook auth tokens
    *    yourself.
-   * @param {Object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
+   * @param {object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
    * @returns {Promise}
    */
   link(user, permissions, options) {
@@ -219,11 +220,11 @@ const FacebookUtils = {
   /**
    * Unlinks the Parse.User from a Facebook account.
    *
-   * @method unlink
+   * @function unlink
    * @name Parse.FacebookUtils.unlink
    * @param {Parse.User} user User to unlink from Facebook. This must be the
    *     current user.
-   * @param {Object} options Standard options object with success and error
+   * @param {object} options Standard options object with success and error
    *    callbacks.
    * @returns {Promise}
    */

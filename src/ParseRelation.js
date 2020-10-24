@@ -23,6 +23,7 @@ import ParseQuery from './ParseQuery';
  * relationship.  Each instance of Parse.Relation is associated with a
  * particular parent object and key.
  * </p>
+ *
  * @alias Parse.Relation
  */
 class ParseRelation {
@@ -32,7 +33,7 @@ class ParseRelation {
 
   /**
    * @param {Parse.Object} parent The parent of this relation.
-   * @param {String} key The key for this relation on the parent.
+   * @param {string} key The key for this relation on the parent.
    */
   constructor(parent: ?ParseObject, key: ?string) {
     this.parent = parent;
@@ -72,8 +73,9 @@ class ParseRelation {
 
   /**
    * Adds a Parse.Object or an array of Parse.Objects to the relation.
-
-   * @param {} objects The item or items to add.
+   *
+   * @param {(Parse.Object|Array)} objects The item or items to add.
+   * @returns {Parse.Object} The parent of the relation.
    */
   add(objects: ParseObject | Array<ParseObject | string>): ParseObject {
     if (!Array.isArray(objects)) {
@@ -95,8 +97,8 @@ class ParseRelation {
 
   /**
    * Removes a Parse.Object or an array of Parse.Objects from this relation.
-
-   * @param {} objects The item or items to remove.
+   *
+   * @param {(Parse.Object|Array)} objects The item or items to remove.
    */
   remove(objects: ParseObject | Array<ParseObject | string>) {
     if (!Array.isArray(objects)) {
@@ -116,8 +118,8 @@ class ParseRelation {
 
   /**
    * Returns a JSON version of the object suitable for saving to disk.
-
-   * @return {Object}
+   *
+   * @returns {object} JSON representation of Relation
    */
   toJSON(): { __type: 'Relation', className: ?string } {
     return {
@@ -129,8 +131,8 @@ class ParseRelation {
   /**
    * Returns a Parse.Query that is limited to objects in this
    * relation.
-
-   * @return {Parse.Query}
+   *
+   * @returns {Parse.Query} Relation Query
    */
   query(): ParseQuery {
     let query;
