@@ -398,9 +398,6 @@ class ParseUser extends ParseObject {
    *
    * <p>A username and password must be set before calling signUp.</p>
    *
-   * <p>Calls options.success or options.error on completion.</p>
-   *
-
    * @param {Object} attrs Extra fields to set on the new user, or null.
    * @param {Object} options
    * @return {Promise} A promise that is fulfilled when the signup
@@ -432,9 +429,6 @@ class ParseUser extends ParseObject {
    *
    * <p>A username and password must be set before calling logIn.</p>
    *
-   * <p>Calls options.success or options.error on completion.</p>
-   *
-
    * @param {Object} options
    * @return {Promise} A promise that is fulfilled with the user when
    *     the login is complete.
@@ -601,9 +595,6 @@ class ParseUser extends ParseObject {
    * session in localStorage so that you can access the user using
    * {@link #current}.
    *
-   * <p>Calls options.success or options.error on completion.</p>
-   *
-
    * @param {String} username The username (or email) to sign up with.
    * @param {String} password The password to sign up with.
    * @param {Object} attrs Extra fields to set on the new user.
@@ -625,9 +616,6 @@ class ParseUser extends ParseObject {
    * saves the session to disk, so you can retrieve the currently logged in
    * user using <code>current</code>.
    *
-   * <p>Calls options.success or options.error on completion.</p>
-   *
-
    * @param {String} username The username (or email) to log in with.
    * @param {String} password The password to log in with.
    * @param {Object} options
@@ -661,9 +649,6 @@ class ParseUser extends ParseObject {
    * to disk, so you can retrieve the currently logged in user using
    * <code>current</code>.
    *
-   * <p>Calls options.success or options.error on completion.</p>
-   *
-
    * @param {String} sessionToken The sessionToken to log in with.
    * @param {Object} options
    * @static
@@ -755,9 +740,6 @@ class ParseUser extends ParseObject {
    * associated with the user account. This email allows the user to securely
    * reset their password on the Parse site.
    *
-   * <p>Calls options.success or options.error on completion.</p>
-   *
-
    * @param {String} email The email address associated with the user that
    *     forgot their password.
    * @param {Object} options
@@ -780,8 +762,6 @@ class ParseUser extends ParseObject {
 
   /**
    * Request an email verification.
-   *
-   * <p>Calls options.success or options.error on completion.</p>
    *
    * @param {String} email The email address associated with the user that
    *     forgot their password.

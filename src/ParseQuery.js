@@ -554,8 +554,7 @@ class ParseQuery {
 
   /**
    * Constructs a Parse.Object whose id is already known by fetching data from
-   * the server.  Either options.success or options.error is called when the
-   * find completes. Unlike the <code>first</code> method, it never returns undefined.
+   * the server. Unlike the <code>first</code> method, it never returns undefined.
    *
    * @param {String} objectId The id of the object to be fetched.
    * @param {Object} options
@@ -599,8 +598,6 @@ class ParseQuery {
 
   /**
    * Retrieves a list of ParseObjects that satisfy this query.
-   * Either options.success or options.error is called when the find
-   * completes.
    *
    * @param {Object} options Valid options
    * are:<ul>
@@ -697,8 +694,6 @@ class ParseQuery {
 
   /**
    * Counts the number of objects that match this query.
-   * Either options.success or options.error is called when the count
-   * completes.
    *
    * @param {Object} options
    * Valid options are:<ul>
@@ -826,8 +821,7 @@ class ParseQuery {
   /**
    * Retrieves at most one Parse.Object that satisfies this query.
    *
-   * Either options.success or options.error is called when it completes.
-   * success is passed the object if there is one. otherwise, undefined.
+   * Returns the object if there is one, otherwise undefined.
    *
    * @param {Object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to

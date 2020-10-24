@@ -1237,26 +1237,9 @@ class ParseObject {
       options = arg3;
     }
 
-    // TODO: safely remove me
-    // Support save({ success: function() {}, error: function() {} })
-    if (!options && attrs) {
-      options = {};
-      if (typeof attrs.success === 'function') {
-        options.success = attrs.success;
-        delete attrs.success;
-      }
-      if (typeof attrs.error === 'function') {
-        options.error = attrs.error;
-        delete attrs.error;
-      }
-    }
-
     if (attrs) {
       const validation = this.validate(attrs);
       if (validation) {
-        if (options && typeof options.error === 'function') {
-          options.error(this, validation);
-        }
         return Promise.reject(validation);
       }
       this.set(attrs, options);
