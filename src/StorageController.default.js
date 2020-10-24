@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  * @flow
+ * @private
  */
 
 // When there is no native storage interface, we default to an in-memory map

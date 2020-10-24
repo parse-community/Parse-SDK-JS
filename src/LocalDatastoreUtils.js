@@ -7,7 +7,9 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  * @flow
+ * @private
  */
+
 const DEFAULT_PIN = '_default';
 const PIN_PREFIX = 'parsePin_';
 const OBJECT_PREFIX = 'Parse_LDS_';

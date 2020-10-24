@@ -8,9 +8,10 @@
  *
  * @flow-weak
  */
+
 import ParseUser from './ParseUser';
-const uuidv4 = require('uuid/v4');
 import type { RequestOptions } from './RESTController';
+const uuidv4 = require('uuid/v4');
 
 let registered = false;
 

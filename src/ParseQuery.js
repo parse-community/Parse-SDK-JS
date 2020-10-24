@@ -51,8 +51,9 @@ export type QueryJSON = {
  *
  * @param s
  * @private
+ * @returns {string}
  */
-function quote(s: string) {
+function quote(s: string): string {
   return '\\Q' + s.replace('\\E', '\\E\\\\E\\Q') + '\\E';
 }
 
@@ -61,6 +62,8 @@ function quote(s: string) {
  * class name an error will be thrown.
  *
  * @param queries
+ * @private
+ * @returns {string}
  */
 function _getClassNameFromQueries(queries: Array<ParseQuery>): ?string {
   let className = null;
@@ -337,6 +340,7 @@ class ParseQuery {
    * @param key
    * @param condition
    * @param value
+   * @returns {Parse.Query}
    */
   _addCondition(key: string, condition: string, value: mixed): ParseQuery {
     if (!this._where[key] || typeof this._where[key] === 'string') {
@@ -350,6 +354,7 @@ class ParseQuery {
    * Converts string for regular expression at the beginning
    *
    * @param string
+   * @returns {string}
    */
   _regexStartWith(string: string): string {
     return '^' + quote(string);

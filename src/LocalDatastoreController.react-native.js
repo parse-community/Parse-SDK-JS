@@ -7,10 +7,12 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  * @flow
+ * @private
+ * @internal
  */
 
-const RNStorage = require('./StorageController.react-native');
 import { isLocalDatastoreKey } from './LocalDatastoreUtils';
+const RNStorage = require('./StorageController.react-native');
 
 const LocalDatastoreController = {
   async fromPinWithName(name: string): Promise<Array<Object>> {

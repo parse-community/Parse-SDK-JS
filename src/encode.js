@@ -17,8 +17,6 @@ import ParseObject from './ParseObject';
 import { Op } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
-const toString = Object.prototype.toString;
-
 function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, seen: Array<mixed>, offline: boolean): any {
   if (value instanceof ParseObject) {
     if (disallowObjects) {
@@ -52,13 +50,13 @@ function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, 
     }
     return value.toJSON();
   }
-  if (toString.call(value) === '[object Date]') {
+  if (Object.prototype.toString.call(value) === '[object Date]') {
     if (isNaN(value)) {
       throw new Error('Tried to encode an invalid date.');
     }
     return { __type: 'Date', iso: (value: any).toJSON() };
   }
-  if (toString.call(value) === '[object RegExp]' &&
+  if (Object.prototype.toString.call(value) === '[object RegExp]' &&
       typeof value.source === 'string') {
     return value.source;
   }

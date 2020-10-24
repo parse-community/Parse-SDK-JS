@@ -8,7 +8,6 @@
  *
  * @flow
  */
-const uuidv4 = require('uuid/v4');
 
 import CoreManager from './CoreManager';
 import canBeSerialized from './canBeSerialized';
@@ -42,6 +41,8 @@ import unsavedChildren from './unsavedChildren';
 
 import type { AttributeMap, OpsMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
+
+const uuidv4 = require('uuid/v4');
 
 export type Pointer = {
   __type: string;
@@ -181,6 +182,8 @@ class ParseObject {
 
   /**
    * Returns a local or server Id used uniquely identify this object
+   *
+   * @returns {string}
    */
   _getId(): string {
     if (typeof this.id === 'string') {

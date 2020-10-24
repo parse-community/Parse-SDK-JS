@@ -9,9 +9,10 @@ const ParseGeoPoint = require('./ParseGeoPoint').default;
  *
  * @param haystack
  * @param needle
+ * @private
+ * @returns {boolean}
  */
 function contains(haystack, needle) {
-
   if (needle && needle.__type && (needle.__type === 'Pointer' || needle.__type === 'Object')) {
     for (const i in haystack) {
       const ptr = haystack[i];
@@ -43,6 +44,8 @@ function transformObject(object) {
  * @param object
  * @param objects
  * @param query
+ * @private
+ * @returns {boolean}
  */
 function matchesQuery(className, object, objects, query) {
   if (object.className !== className) {
@@ -85,6 +88,8 @@ function equalObjectsGeneric(obj, compareTo, eqlFn) {
  * @param objects
  * @param key
  * @param constraints
+ * @private
+ * @returns {boolean}
  */
 function matchesKeyConstraints(className, object, objects, key, constraints) {
   if (constraints === null) {
