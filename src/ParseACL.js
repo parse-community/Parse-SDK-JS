@@ -35,8 +35,7 @@ class ParseACL {
   permissionsById: ByIdMap;
 
   /**
-   * @param {(Parse.User | object)} user The user to initialize the ACL for
-   * @param arg1
+   * @param {(Parse.User | object)} arg1 The user to initialize the ACL for
    */
   constructor(arg1: ParseUser | ByIdMap) {
     this.permissionsById = {};

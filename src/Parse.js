@@ -28,8 +28,8 @@ const Parse = {
    * Call this method first to set up your authentication tokens for Parse.
    *
    * @param {string} applicationId Your Parse Application ID.
-   * @param {string} javaScriptKey (optional) Your Parse JavaScript Key (Not needed for parse-server)
-   * @param {string} masterKey (optional) Your Parse Master Key. (Node.js only!)
+   * @param {string} [javaScriptKey] Your Parse JavaScript Key (Not needed for parse-server)
+   * @param {string} [masterKey] Your Parse Master Key. (Node.js only!)
    * @static
    */
   initialize(applicationId: string, javaScriptKey: string) {
@@ -78,22 +78,22 @@ const Parse = {
    * @member {string} Parse.applicationId
    * @static
    */
-  get applicationId() {
-    return CoreManager.get('APPLICATION_ID');
-  },
   set applicationId(value) {
     CoreManager.set('APPLICATION_ID', value);
+  },
+  get applicationId() {
+    return CoreManager.get('APPLICATION_ID');
   },
 
   /**
    * @member {string} Parse.javaScriptKey
    * @static
    */
-  get javaScriptKey() {
-    return CoreManager.get('JAVASCRIPT_KEY');
-  },
   set javaScriptKey(value) {
     CoreManager.set('JAVASCRIPT_KEY', value);
+  },
+  get javaScriptKey() {
+    return CoreManager.get('JAVASCRIPT_KEY');
   },
 
   /**
@@ -248,6 +248,7 @@ Parse.enableLocalDatastore = function() {
  * Flag that indicates whether Local Datastore is enabled.
  *
  * @static
+ * @returns {boolean}
  */
 Parse.isLocalDatastoreEnabled = function() {
   return Parse.LocalDatastore.isEnabled;
@@ -260,6 +261,7 @@ Parse.isLocalDatastoreEnabled = function() {
  * </pre>
  *
  * @static
+ * @returns {object}
  */
 Parse.dumpLocalDatastore = function() {
   if (!Parse.LocalDatastore.isEnabled) {
@@ -284,6 +286,7 @@ Parse.enableEncryptedUser = function() {
  * Flag that indicates whether Encrypted User is enabled.
  *
  * @static
+ * @returns {boolean}
  */
 Parse.isEncryptedUserEnabled = function() {
   return Parse.encryptedUser;

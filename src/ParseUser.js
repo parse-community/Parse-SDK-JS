@@ -149,6 +149,7 @@ class ParseUser extends ParseObject {
    * @param options
    * @param saveOpts
    * @deprecated since 2.9.0 see {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#linkWith linkWith}
+   * @returns {Promise}
    */
   _linkWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions = {}): Promise<ParseUser> {
     return this.linkWith(provider, options, saveOpts);
@@ -306,7 +307,7 @@ class ParseUser extends ParseObject {
   /**
    * Returns get("username").
    *
-   * @returns {string} User's username
+   * @returns {string}
    */
   getUsername(): ?string {
     const username = this.get('username');
@@ -320,8 +321,6 @@ class ParseUser extends ParseObject {
    * Calls set("username", username, options) and returns the result.
    *
    * @param {string} username
-   * @param {object} options
-   * @returns {boolean}
    */
   setUsername(username: string) {
     // Strip anonymity, even we do not support anonymous user in js SDK, we may
@@ -384,7 +383,7 @@ class ParseUser extends ParseObject {
   /**
    * Checks whether this user is the current user and has been authenticated.
    *
-   * @returns (Boolean) whether this user is the current user and is logged in.
+   * @returns {boolean} whether this user is the current user and is logged in.
    */
   authenticated(): boolean {
     const current = ParseUser.current();
@@ -461,6 +460,7 @@ class ParseUser extends ParseObject {
    * storage if this is current user.
    *
    * @param {...any} args
+   * @returns {Promise}
    */
   save(...args: Array<any>): Promise<ParseUser> {
     return super.save.apply(this, args).then(() => {
@@ -476,6 +476,7 @@ class ParseUser extends ParseObject {
    * the current user when it is destroyed
    *
    * @param {...any} args
+   * @returns {Parse.User}
    */
   destroy(...args: Array<any>): Promise<ParseUser> {
     return super.destroy.apply(this, args).then(() => {
@@ -491,6 +492,7 @@ class ParseUser extends ParseObject {
    * storage if this is current user.
    *
    * @param {...any} args
+   * @returns {Parse.User}
    */
   fetch(...args: Array<any>): Promise<ParseUser> {
     return super.fetch.apply(this, args).then(() => {
@@ -506,6 +508,7 @@ class ParseUser extends ParseObject {
    * storage if this is current user.
    *
    * @param {...any} args
+   * @returns {Parse.User}
    */
   fetchWithInclude(...args: Array<any>): Promise<ParseUser> {
     return super.fetchWithInclude.apply(this, args).then(() => {
@@ -731,8 +734,9 @@ class ParseUser extends ParseObject {
    * @param options
    * @param saveOpts
    * @static
+   * @returns {Promise}
    */
-  static logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions) {
+  static logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions): Promise<ParseUser> {
     const user = new this();
     return user.linkWith(provider, options, saveOpts);
   }
@@ -858,7 +862,7 @@ class ParseUser extends ParseObject {
    * It is not necessary to call this method from cloud code unless you are
    * handling user signup or login from the server side. In a cloud code call,
    * this function will not attempt to upgrade the current token.
-
+   *
    * @param {object} options
    * @static
    * @returns {Promise} A promise that is resolved when the process has
@@ -927,6 +931,7 @@ class ParseUser extends ParseObject {
    * @param saveOpts
    * @deprecated since 2.9.0 see {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#logInWith logInWith}
    * @static
+   * @returns {Promise}
    */
   static _logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions) {
     const user = new this();

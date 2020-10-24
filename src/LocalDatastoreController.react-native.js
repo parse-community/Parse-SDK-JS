@@ -8,7 +8,6 @@
  *
  * @flow
  * @private
- * @internal
  */
 
 import { isLocalDatastoreKey } from './LocalDatastoreUtils';

@@ -38,10 +38,8 @@ class ParseGeoPoint {
   _longitude: number;
 
   /**
-   * @param {(number[] | object | number)} options Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point.
-   * @param {number} longitude The longitude of the GeoPoint
-   * @param arg1
-   * @param arg2
+   * @param {(number[] | object | number)} arg1 Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point.
+   * @param {number} arg2 The longitude of the GeoPoint
    */
   constructor(
     arg1: Array<number> |

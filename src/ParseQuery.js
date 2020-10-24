@@ -224,8 +224,7 @@ function handleOfflineSort(a, b, sorts) {
  */
 class ParseQuery {
   /**
-   * @property className
-   * @type String
+   * @property {string} className
    */
   className: string;
   _where: any;
@@ -1261,7 +1260,7 @@ class ParseQuery {
    * be greater than or equal to the provided value.
    *
    * @param {string} key The key to check.
-   * @param value The value that provides an lower bound.
+   * @param {*} value The value that provides an lower bound.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   greaterThanOrEqualTo(key: string, value: mixed): ParseQuery {
@@ -1273,8 +1272,7 @@ class ParseQuery {
    * be contained in the provided list of values.
    *
    * @param {string} key The key to check.
-   * @param {Array} values The values that will match.
-   * @param value
+   * @param {*} value The values that will match.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   containedIn(key: string, value: mixed): ParseQuery {
@@ -1286,8 +1284,7 @@ class ParseQuery {
    * not be contained in the provided list of values.
    *
    * @param {string} key The key to check.
-   * @param {Array} values The values that will not match.
-   * @param value
+   * @param {*} value The values that will not match.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   notContainedIn(key: string, value: mixed): ParseQuery {
@@ -1300,11 +1297,10 @@ class ParseQuery {
    *
    * @param {string} key The key to check.
    * @param {Array} values The values that will match.
-   * @param value
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  containedBy(key: string, value: Array<mixed>): ParseQuery {
-    return this._addCondition(key, '$containedBy', value);
+  containedBy(key: string, values: Array<mixed>): ParseQuery {
+    return this._addCondition(key, '$containedBy', values);
   }
 
   /**
@@ -1463,14 +1459,13 @@ class ParseQuery {
    *
    * @param {string} key The key that the string to match is stored in.
    * @param {string} substring The substring that the value must contain.
-   * @param value
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  contains(key: string, value: string): ParseQuery {
+  contains(key: string, substring: string): ParseQuery {
     if (typeof value !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this._addCondition(key, '$regex', quote(value));
+    return this._addCondition(key, '$regex', quote(substring));
   }
 
   /**
@@ -1555,14 +1550,13 @@ class ParseQuery {
    *
    * @param {string} key The key that the string to match is stored in.
    * @param {string} prefix The substring that the value must start with.
-   * @param value
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  startsWith(key: string, value: string): ParseQuery {
+  startsWith(key: string, prefix: string): ParseQuery {
     if (typeof value !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this._addCondition(key, '$regex', this._regexStartWith(value));
+    return this._addCondition(key, '$regex', this._regexStartWith(prefix));
   }
 
   /**
@@ -1571,14 +1565,13 @@ class ParseQuery {
    *
    * @param {string} key The key that the string to match is stored in.
    * @param {string} suffix The substring that the value must end with.
-   * @param value
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  endsWith(key: string, value: string): ParseQuery {
+  endsWith(key: string, suffix: string): ParseQuery {
     if (typeof value !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this._addCondition(key, '$regex', quote(value) + '$');
+    return this._addCondition(key, '$regex', quote(suffix) + '$');
   }
 
   /**
@@ -1603,20 +1596,18 @@ class ParseQuery {
    *
    * @param {string} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
-   * @param {number} maxDistance Maximum distance (in radians) of results to
-   * return.
-   * @param distance
+   * @param {number} maxDistance Maximum distance (in radians) of results to return.
    * @param {boolean} sorted A Bool value that is true if results should be
    * sorted by distance ascending, false is no sorting is required,
    * defaults to true.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  withinRadians(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {
+  withinRadians(key: string, point: ParseGeoPoint, maxDistance: number, sorted: boolean): ParseQuery {
     if (sorted || sorted === undefined) {
       this.near(key, point);
-      return this._addCondition(key, '$maxDistance', distance);
+      return this._addCondition(key, '$maxDistance', maxDistance);
     } else {
-      return this._addCondition(key, '$geoWithin', { '$centerSphere': [[point.longitude, point.latitude], distance] });
+      return this._addCondition(key, '$geoWithin', { '$centerSphere': [[point.longitude, point.latitude], maxDistance] });
     }
   }
 
@@ -1627,16 +1618,14 @@ class ParseQuery {
    *
    * @param {string} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
-   * @param {number} maxDistance Maximum distance (in miles) of results to
-   * return.
-   * @param distance
+   * @param {number} maxDistance Maximum distance (in miles) of results to return.
    * @param {boolean} sorted A Bool value that is true if results should be
    * sorted by distance ascending, false is no sorting is required,
    * defaults to true.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  withinMiles(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {
-    return this.withinRadians(key, point, distance / 3958.8, sorted);
+  withinMiles(key: string, point: ParseGeoPoint, maxDistance: number, sorted: boolean): ParseQuery {
+    return this.withinRadians(key, point, maxDistance / 3958.8, sorted);
   }
 
   /**
@@ -1646,16 +1635,14 @@ class ParseQuery {
    *
    * @param {string} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
-   * @param {number} maxDistance Maximum distance (in kilometers) of results
-   * to return.
-   * @param distance
+   * @param {number} maxDistance Maximum distance (in kilometers) of results to return.
    * @param {boolean} sorted A Bool value that is true if results should be
    * sorted by distance ascending, false is no sorting is required,
    * defaults to true.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  withinKilometers(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {
-    return this.withinRadians(key, point, distance / 6371.0, sorted);
+  withinKilometers(key: string, point: ParseGeoPoint, maxDistance: number, sorted: boolean): ParseQuery {
+    return this.withinRadians(key, point, maxDistance / 6371.0, sorted);
   }
 
   /**
@@ -1689,8 +1676,7 @@ class ParseQuery {
    * Polygon must have at least 3 points
    *
    * @param {string} key The key to be constrained.
-   * @param {Array} array of geopoints
-   * @param points
+   * @param {Array} points Array of Coordinates / GeoPoints
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   withinPolygon(key: string, points: Array<Array<number>>): ParseQuery {
@@ -1702,8 +1688,7 @@ class ParseQuery {
    * coordinates that contains a ParseGeoPoint
    *
    * @param {string} key The key to be constrained.
-   * @param {Parse.GeoPoint} GeoPoint
-   * @param point
+   * @param {Parse.GeoPoint} point
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   polygonContains(key: string, point: ParseGeoPoint): ParseQuery {
@@ -1715,9 +1700,8 @@ class ParseQuery {
   /**
    * Sorts the results in ascending order by the given key.
    *
-   * @param {(String|String[]|...String)} key The key to order by, which is a
+   * @param {(string|string[])} keys The key to order by, which is a
    * string of comma separated values, or an Array of keys, or multiple keys.
-   * @param {...any} keys
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   ascending(...keys: Array<string>): ParseQuery {
@@ -1729,9 +1713,8 @@ class ParseQuery {
    * Sorts the results in ascending order by the given key,
    * but can also add secondary sort descriptors without overwriting _order.
    *
-   * @param {(String|String[]|...String)} key The key to order by, which is a
+   * @param {(string|string[])} keys The key to order by, which is a
    * string of comma separated values, or an Array of keys, or multiple keys.
-   * @param {...any} keys
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   addAscending(...keys: Array<string>): ParseQuery {
@@ -1751,9 +1734,8 @@ class ParseQuery {
   /**
    * Sorts the results in descending order by the given key.
    *
-   * @param {(String|String[]|...String)} key The key to order by, which is a
+   * @param {(string|string[])} keys The key to order by, which is a
    * string of comma separated values, or an Array of keys, or multiple keys.
-   * @param {...any} keys
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   descending(...keys: Array<string>): ParseQuery {
@@ -1765,9 +1747,8 @@ class ParseQuery {
    * Sorts the results in descending order by the given key,
    * but can also add secondary sort descriptors without overwriting _order.
    *
-   * @param {(String|String[]|...String)} key The key to order by, which is a
+   * @param {(string|string[])} keys The key to order by, which is a
    * string of comma separated values, or an Array of keys, or multiple keys.
-   * @param {...any} keys
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   addDescending(...keys: Array<string>): ParseQuery {
@@ -1826,8 +1807,7 @@ class ParseQuery {
    * Note that result of this query will be wrapped as an object with
    * `results`: holding {ParseObject} array and `count`: integer holding total number
    *
-   * @param {boolean} b false - disable, true - enable.
-   * @param includeCount
+   * @param {boolean} includeCount false - disable, true - enable.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   withCount(includeCount: boolean = true): ParseQuery {
@@ -1845,8 +1825,7 @@ class ParseQuery {
    * Requires Parse Server 3.0.0+
    * <pre>query.include('*');</pre>
    *
-   * @param {...string | Array<string>} key The name(s) of the key(s) to include.
-   * @param {...any} keys
+   * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   include(...keys: Array<string|Array<string>>): ParseQuery {
@@ -1876,7 +1855,7 @@ class ParseQuery {
    * provided keys.  If this is called multiple times, then all of the keys
    * specified in each of the calls will be included.
    *
-   * @param {...string | Array<string>} keys The name(s) of the key(s) to include.
+   * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   select(...keys: Array<string|Array<string>>): ParseQuery {
@@ -1899,7 +1878,7 @@ class ParseQuery {
    *
    * Requires Parse Server 3.6.0+
    *
-   * @param {...string | Array<string>} keys The name(s) of the key(s) to exclude.
+   * @param {...string|Array<string>} keys The name(s) of the key(s) to exclude.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   exclude(...keys: Array<string|Array<string>>): ParseQuery {
@@ -1958,8 +1937,7 @@ class ParseQuery {
    * will create a compoundQuery that is an or of the query1, query2, and
    * query3.
    *
-   * @param {...Parse.Query} var_args The list of queries to OR.
-   * @param {...any} queries
+   * @param {...Parse.Query} queries The list of queries to OR.
    * @static
    * @returns {Parse.Query} The query that is the OR of the passed in queries.
    */
@@ -1978,8 +1956,7 @@ class ParseQuery {
    * will create a compoundQuery that is an and of the query1, query2, and
    * query3.
    *
-   * @param {...Parse.Query} var_args The list of queries to AND.
-   * @param {...any} queries
+   * @param {...Parse.Query} queries The list of queries to AND.
    * @static
    * @returns {Parse.Query} The query that is the AND of the passed in queries.
    */
@@ -1998,8 +1975,7 @@ class ParseQuery {
    * will create a compoundQuery that is a nor of the query1, query2, and
    * query3.
    *
-   * @param {...Parse.Query} var_args The list of queries to NOR.
-   * @param {...any} queries
+   * @param {...Parse.Query} queries The list of queries to NOR.
    * @static
    * @returns {Parse.Query} The query that is the NOR of the passed in queries.
    */

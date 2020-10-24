@@ -143,8 +143,7 @@ class ParseObject {
   /**
    * The ID of this object, unique within its class.
    *
-   * @property id
-   * @type String
+   * @property {string} id
    */
   id: ?string;
   _localId: ?string;
@@ -161,8 +160,8 @@ class ParseObject {
   /**
    * The first time this object was saved on the server.
    *
-   * @property createdAt
-   * @type Date
+   * @property {Date} createdAt
+   * @returns {Date}
    */
   get createdAt(): ?Date {
     return this._getServerData().createdAt;
@@ -171,8 +170,8 @@ class ParseObject {
   /**
    * The last time this object was updated on the server.
    *
-   * @property updatedAt
-   * @type Date
+   * @property {Date} updatedAt
+   * @returns {Date}
    */
   get updatedAt(): ?Date {
     return this._getServerData().updatedAt;
@@ -199,6 +198,8 @@ class ParseObject {
 
   /**
    * Returns a unique identifier used to pull data from the State Controller.
+   *
+   * @returns {Parse.Object|object}
    */
   _getStateIdentifier(): ParseObject | {id: string, className: string} {
     if (singleInstance) {
@@ -584,6 +585,7 @@ class ParseObject {
    * Gets the value of an attribute.
    *
    * @param {string} attr The string name of an attribute.
+   * @returns {*}
    */
   get(attr: string): mixed {
     return this.attributes[attr];
@@ -592,8 +594,7 @@ class ParseObject {
   /**
    * Gets a relation on the given class for the attribute.
    *
-   * @param String attr The attribute to get the relation for.
-   * @param attr
+   * @param {string} attr The attribute to get the relation for.
    * @returns {Parse.Relation}
    */
   relation(attr: string): ParseRelation {
@@ -612,6 +613,7 @@ class ParseObject {
    * Gets the HTML-escaped value of an attribute.
    *
    * @param {string} attr The string name of an attribute.
+   * @returns {string}
    */
   escape(attr: string): string {
     let val = this.attributes[attr];
@@ -1036,7 +1038,7 @@ class ParseObject {
    * <code>save</code>.  Your implementation should return
    *
    * @param {object} attrs The current data to validate.
-   * @returns {} False if the data is valid.  An error object otherwise.
+   * @returns {Parse.Error|boolean} False if the data is valid.  An error object otherwise.
    * @see Parse.Object#set
    */
   validate(attrs: AttributeMap): ParseError | boolean {
@@ -1215,13 +1217,13 @@ class ParseObject {
    * // The save failed.  Error is an instance of Parse.Error.
    * });</pre>
    *
-   * @param {string | object | null} [attrs]
+   * @param {string | object | null} [arg1]
    * Valid options are:<ul>
    * <li>`Object` - Key/value pairs to update on the object.</li>
    * <li>`String` Key - Key of attribute to update (requires arg2 to also be string)</li>
    * <li>`null` - Passing null for arg1 allows you to save the object with options passed in arg2.</li>
    * </ul>
-   * @param {string | object} [options]
+   * @param {string | object} [arg2]
    * <ul>
    * <li>`String` Value - If arg1 was passed as a key, arg2 is the value that should be set on that key.</li>
    * <li>`Object` Options - Valid options are:
@@ -1235,7 +1237,7 @@ class ParseObject {
    * </ul>
    * </li>
    * </ul>
-   * @param {object} [options]
+   * @param {object} [arg3]
    * Used to pass option parameters to method if arg1 and arg2 were both passed as strings.
    * Valid options are:
    * <ul>
@@ -1246,9 +1248,6 @@ class ParseObject {
    * <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
    * <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
    * </ul>
-   * @param arg1
-   * @param arg2
-   * @param arg3
    * @returns {Promise} A promise that is fulfilled when the save
    * completes.
    */
@@ -1480,6 +1479,7 @@ class ParseObject {
    *       or an array of array of strings.
    * </ul>
    * @static
+   * @returns {Parse.Object[]}
    */
   static fetchAll(list: Array<ParseObject>, options: RequestOptions = {}) {
     const queryOptions = {};
@@ -1526,6 +1526,7 @@ class ParseObject {
    *       behalf of a specific user.
    * </ul>
    * @static
+   * @returns {Parse.Object[]}
    */
   static fetchAllWithInclude(list: Array<ParseObject>, keys: String|Array<string|Array<string>>, options: RequestOptions) {
     options = options || {};
@@ -1561,6 +1562,7 @@ class ParseObject {
    *       behalf of a specific user.
    * </ul>
    * @static
+   * @returns {Parse.Object[]}
    */
   static fetchAllIfNeededWithInclude(list: Array<ParseObject>, keys: String|Array<string|Array<string>>, options: RequestOptions) {
     options = options || {};
@@ -1584,6 +1586,7 @@ class ParseObject {
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {object} options
    * @static
+   * @returns {Parse.Object[]}
    */
   static fetchAllIfNeeded(list: Array<ParseObject>, options) {
     options = options || {};
@@ -1703,6 +1706,7 @@ class ParseObject {
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {object} options
    * @static
+   * @returns {Parse.Object[]}
    */
   static saveAll(list: Array<ParseObject>, options: RequestOptions = {}) {
     const saveOptions = {};
