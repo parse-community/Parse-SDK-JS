@@ -663,7 +663,7 @@ class ParseObject {
    *
    *   game.set("player.score", 10);</pre></p>
    *
-   * @param {(string|object } key The key to set.
+   * @param {(string|object)} key The key to set.
    * @param {(string|object)} value The value to give it.
    * @param {object} options A set of options for the set.
    *     The only supported option is <code>error</code>.
@@ -787,7 +787,7 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param amount {Number} The amount to increment by (optional).
-   * @returns {(ParseObject | boolean)}
+   * @returns {(ParseObject|boolean)}
    */
   increment(attr: string, amount?: number): ParseObject | boolean {
     if (typeof amount === 'undefined') {
