@@ -1462,7 +1462,7 @@ class ParseQuery {
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   contains(key: string, substring: string): ParseQuery {
-    if (typeof value !== 'string') {
+    if (typeof substring !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
     return this._addCondition(key, '$regex', quote(substring));
@@ -1553,7 +1553,7 @@ class ParseQuery {
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   startsWith(key: string, prefix: string): ParseQuery {
-    if (typeof value !== 'string') {
+    if (typeof prefix !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
     return this._addCondition(key, '$regex', this._regexStartWith(prefix));
@@ -1568,7 +1568,7 @@ class ParseQuery {
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   endsWith(key: string, suffix: string): ParseQuery {
-    if (typeof value !== 'string') {
+    if (typeof suffix !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
     return this._addCondition(key, '$regex', quote(suffix) + '$');
