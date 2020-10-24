@@ -6,6 +6,7 @@
  * This source code is licensed under the BSD-style license found in the
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
+ *
  * @flow
  */
 
@@ -19,7 +20,7 @@ export class AuthProvider {
    * Called when _linkWith isn't passed authData.
    * Handle your own authentication here.
    *
-   * @params {Object} options.success(provider, authData) or options.error(provider, error) on completion
+   * @param {object} options options.success(provider, authData) or options.error(provider, error) on completion
    */
   authenticate(options: any): void {}
 
@@ -32,16 +33,16 @@ export class AuthProvider {
   /**
    * Unique identifier for this Auth Provider.
    *
-   * @return {String} identifier
+   * @returns {string} identifier
    */
   getAuthType(): string {}
 
   /**
    * Called when auth data is syncronized.
    * Can be used to determine if authData is still valid
-
-   * @params {Object} authData Data used when register provider
-   * @return {Boolean} Indicate if service should continue to be linked
+   *
+   * @param {object} authData Data used when register provider
+   * @returns {boolean} Indicate if service should continue to be linked
    */
   restoreAuthentication(authData: any): boolean {}
 }

@@ -17,6 +17,7 @@ import RESTController from './RESTController';
 
 /**
  * Contains all Parse API classes and functions.
+ *
  * @static
  * @global
  * @class
@@ -25,9 +26,10 @@ import RESTController from './RESTController';
 const Parse = {
   /**
    * Call this method first to set up your authentication tokens for Parse.
-   * @param {String} applicationId Your Parse Application ID.
-   * @param {String} javaScriptKey (optional) Your Parse JavaScript Key (Not needed for parse-server)
-   * @param {String} masterKey (optional) Your Parse Master Key. (Node.js only!)
+   *
+   * @param {string} applicationId Your Parse Application ID.
+   * @param {string} [javaScriptKey] Your Parse JavaScript Key (Not needed for parse-server)
+   * @param {string} [masterKey] Your Parse Master Key. (Node.js only!)
    * @static
    */
   initialize(applicationId: string, javaScriptKey: string) {
@@ -53,6 +55,7 @@ const Parse = {
    * Call this method to set your AsyncStorage engine
    * Starting Parse@1.11, the ParseSDK do not provide a React AsyncStorage as the ReactNative module
    * is not provided at a stable path and changes over versions.
+   *
    * @param {AsyncStorage} storage a react native async storage.
    * @static
    */
@@ -63,6 +66,7 @@ const Parse = {
   /**
    * Call this method to set your LocalDatastoreStorage engine
    * If using React-Native use {@link Parse.setAsyncStorage Parse.setAsyncStorage()}
+   *
    * @param {LocalDatastoreController} controller a data storage.
    * @static
    */
@@ -74,110 +78,110 @@ const Parse = {
    * @member {string} Parse.applicationId
    * @static
    */
-  get applicationId() {
-    return CoreManager.get('APPLICATION_ID');
-  },
   set applicationId(value) {
     CoreManager.set('APPLICATION_ID', value);
+  },
+  get applicationId() {
+    return CoreManager.get('APPLICATION_ID');
   },
 
   /**
    * @member {string} Parse.javaScriptKey
    * @static
    */
-  get javaScriptKey() {
-    return CoreManager.get('JAVASCRIPT_KEY');
-  },
   set javaScriptKey(value) {
     CoreManager.set('JAVASCRIPT_KEY', value);
+  },
+  get javaScriptKey() {
+    return CoreManager.get('JAVASCRIPT_KEY');
   },
 
   /**
    * @member {string} Parse.masterKey
    * @static
    */
-  get masterKey() {
-    return CoreManager.get('MASTER_KEY');
-  },
   set masterKey(value) {
     CoreManager.set('MASTER_KEY', value);
+  },
+  get masterKey() {
+    return CoreManager.get('MASTER_KEY');
   },
 
   /**
    * @member {string} Parse.serverURL
    * @static
    */
-  get serverURL() {
-    return CoreManager.get('SERVER_URL');
-  },
   set serverURL(value) {
     CoreManager.set('SERVER_URL', value);
+  },
+  get serverURL() {
+    return CoreManager.get('SERVER_URL');
   },
 
   /**
    * @member {string} Parse.serverAuthToken
    * @static
    */
-  get serverAuthToken() {
-    return CoreManager.get('SERVER_AUTH_TOKEN');
-  },
   set serverAuthToken(value) {
     CoreManager.set('SERVER_AUTH_TOKEN', value);
+  },
+  get serverAuthToken() {
+    return CoreManager.get('SERVER_AUTH_TOKEN');
   },
 
   /**
    * @member {string} Parse.serverAuthType
    * @static
    */
-  get serverAuthType() {
-    return CoreManager.get('SERVER_AUTH_TYPE');
-  },
   set serverAuthType(value) {
     CoreManager.set('SERVER_AUTH_TYPE', value);
+  },
+  get serverAuthType() {
+    return CoreManager.get('SERVER_AUTH_TYPE');
   },
 
   /**
    * @member {string} Parse.liveQueryServerURL
    * @static
    */
-  get liveQueryServerURL() {
-    return CoreManager.get('LIVEQUERY_SERVER_URL');
-  },
   set liveQueryServerURL(value) {
     CoreManager.set('LIVEQUERY_SERVER_URL', value);
+  },
+  get liveQueryServerURL() {
+    return CoreManager.get('LIVEQUERY_SERVER_URL');
   },
 
   /**
    * @member {string} Parse.encryptedUser
    * @static
    */
-  get encryptedUser() {
-    return CoreManager.get('ENCRYPTED_USER');
-  },
   set encryptedUser(value) {
     CoreManager.set('ENCRYPTED_USER', value);
+  },
+  get encryptedUser() {
+    return CoreManager.get('ENCRYPTED_USER');
   },
 
   /**
    * @member {string} Parse.secret
    * @static
    */
-  get secret() {
-    return CoreManager.get('ENCRYPTED_KEY');
-  },
   set secret(value) {
     CoreManager.set('ENCRYPTED_KEY', value);
+  },
+  get secret() {
+    return CoreManager.get('ENCRYPTED_KEY');
   },
 
   /**
    * @member {boolean} Parse.idempotency
    * @static
    */
-  get idempotency() {
-    return CoreManager.get('IDEMPOTENCY');
-  },
   set idempotency(value) {
     CoreManager.set('IDEMPOTENCY', value);
+  },
+  get idempotency() {
+    return CoreManager.get('IDEMPOTENCY');
   },
 };
 
@@ -244,6 +248,7 @@ Parse.enableLocalDatastore = function() {
  * Flag that indicates whether Local Datastore is enabled.
  *
  * @static
+ * @returns {boolean}
  */
 Parse.isLocalDatastoreEnabled = function() {
   return Parse.LocalDatastore.isEnabled;
@@ -256,6 +261,7 @@ Parse.isLocalDatastoreEnabled = function() {
  * </pre>
  *
  * @static
+ * @returns {object}
  */
 Parse.dumpLocalDatastore = function() {
   if (!Parse.LocalDatastore.isEnabled) {
@@ -280,6 +286,7 @@ Parse.enableEncryptedUser = function() {
  * Flag that indicates whether Encrypted User is enabled.
  *
  * @static
+ * @returns {boolean}
  */
 Parse.isEncryptedUserEnabled = function() {
   return Parse.encryptedUser;

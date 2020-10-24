@@ -48,15 +48,22 @@ export type QueryJSON = {
  * Converts a string into a regex that matches it.
  * Surrounding with \Q .. \E does this, we just need to escape any \E's in
  * the text separately.
+ *
+ * @param s
  * @private
+ * @returns {string}
  */
-function quote(s: string) {
+function quote(s: string): string {
   return '\\Q' + s.replace('\\E', '\\E\\\\E\\Q') + '\\E';
 }
 
 /**
  * Extracts the class name from queries. If not all queries have the same
  * class name an error will be thrown.
+ *
+ * @param queries
+ * @private
+ * @returns {string}
  */
 function _getClassNameFromQueries(queries: Array<ParseQuery>): ?string {
   let className = null;
@@ -212,12 +219,12 @@ function handleOfflineSort(a, b, sorts) {
  * }).catch((error) => {
  *     // error is an instance of Parse.Error.
  * });</pre></p>
+ *
  * @alias Parse.Query
  */
 class ParseQuery {
   /**
-   * @property className
-   * @type String
+   * @property {string} className
    */
   className: string;
   _where: any;
@@ -239,7 +246,7 @@ class ParseQuery {
   _xhrRequest: any;
 
   /**
-   * @param {(String|Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
+   * @param {(string | Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
    */
   constructor(objectClass: string | ParseObject) {
     if (typeof objectClass === 'string') {
@@ -283,8 +290,9 @@ class ParseQuery {
 
   /**
    * Adds constraint that at least one of the passed in queries matches.
+   *
    * @param {Array} queries
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   _orQuery(queries: Array<ParseQuery>): ParseQuery {
     const queryJSON = queries.map((q) => {
@@ -297,8 +305,9 @@ class ParseQuery {
 
   /**
    * Adds constraint that all of the passed in queries match.
+   *
    * @param {Array} queries
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   _andQuery(queries: Array<ParseQuery>): ParseQuery {
     const queryJSON = queries.map((q) => {
@@ -311,8 +320,9 @@ class ParseQuery {
 
   /**
    * Adds constraint that none of the passed in queries match.
+   *
    * @param {Array} queries
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   _norQuery(queries: Array<ParseQuery>): ParseQuery {
     const queryJSON = queries.map((q) => {
@@ -325,6 +335,11 @@ class ParseQuery {
 
   /**
    * Helper for condition queries
+   *
+   * @param key
+   * @param condition
+   * @param value
+   * @returns {Parse.Query}
    */
   _addCondition(key: string, condition: string, value: mixed): ParseQuery {
     if (!this._where[key] || typeof this._where[key] === 'string') {
@@ -336,6 +351,9 @@ class ParseQuery {
 
   /**
    * Converts string for regular expression at the beginning
+   *
+   * @param string
+   * @returns {string}
    */
   _regexStartWith(string: string): string {
     return '^' + quote(string);
@@ -404,7 +422,8 @@ class ParseQuery {
 
   /**
    * Returns a JSON representation of this query.
-   * @return {Object} The JSON representation of the query.
+   *
+   * @returns {object} The JSON representation of the query.
    */
   toJSON(): QueryJSON {
     const params: QueryJSON = {
@@ -471,8 +490,9 @@ class ParseQuery {
    *
    * and continue to query...
    * query.skip(100).find().then(...);
+   *
    * @param {QueryJSON} json from Parse.Query.toJSON() method
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   withJSON(json: QueryJSON): ParseQuery {
 
@@ -541,12 +561,13 @@ class ParseQuery {
   }
 
   /**
-     * Static method to restore Parse.Query by json representation
-     * Internally calling Parse.Query.withJSON
-     * @param {String} className
-     * @param {QueryJSON} json from Parse.Query.toJSON() method
-     * @returns {Parse.Query} new created query
-     */
+   * Static method to restore Parse.Query by json representation
+   * Internally calling Parse.Query.withJSON
+   *
+   * @param {string} className
+   * @param {QueryJSON} json from Parse.Query.toJSON() method
+   * @returns {Parse.Query} new created query
+   */
   static fromJSON(className: string, json: QueryJSON): ParseQuery {
     const query = new ParseQuery(className);
     return query.withJSON(json);
@@ -556,8 +577,8 @@ class ParseQuery {
    * Constructs a Parse.Object whose id is already known by fetching data from
    * the server. Unlike the <code>first</code> method, it never returns undefined.
    *
-   * @param {String} objectId The id of the object to be fetched.
-   * @param {Object} options
+   * @param {string} objectId The id of the object to be fetched.
+   * @param {object} options
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -566,7 +587,7 @@ class ParseQuery {
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    * </ul>
    *
-   * @return {Promise} A promise that is resolved with the result when
+   * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
   get(objectId: string, options?: FullOptions): Promise<ParseObject> {
@@ -599,7 +620,7 @@ class ParseQuery {
   /**
    * Retrieves a list of ParseObjects that satisfy this query.
    *
-   * @param {Object} options Valid options
+   * @param {object} options Valid options
    * are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -608,7 +629,7 @@ class ParseQuery {
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    * </ul>
    *
-   * @return {Promise} A promise that is resolved with the results when
+   * @returns {Promise} A promise that is resolved with the results when
    * the query completes.
    */
   find(options?: FullOptions): Promise<Array<ParseObject>> {
@@ -674,14 +695,14 @@ class ParseQuery {
    * Retrieves a complete list of ParseObjects that satisfy this query.
    * Using `eachBatch` under the hood to fetch all the valid objects.
    *
-   * @param {Object} options Valid options are:<ul>
+   * @param {object} options Valid options are:<ul>
    *   <li>batchSize: How many objects to yield in each batch (default: 100)
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Promise} A promise that is resolved with the results when
+   * @returns {Promise} A promise that is resolved with the results when
    * the query completes.
    */
   async findAll(options?: BatchOptions): Promise<Array<ParseObject>> {
@@ -695,7 +716,7 @@ class ParseQuery {
   /**
    * Counts the number of objects that match this query.
    *
-   * @param {Object} options
+   * @param {object} options
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -703,7 +724,7 @@ class ParseQuery {
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Promise} A promise that is resolved with the count when
+   * @returns {Promise} A promise that is resolved with the count when
    * the query completes.
    */
   count(options?: FullOptions): Promise<number> {
@@ -736,14 +757,14 @@ class ParseQuery {
   /**
    * Executes a distinct query and returns unique values
    *
-   * @param {String} key A field to find distinct values
-   * @param {Object} options
+   * @param {string} key A field to find distinct values
+   * @param {object} options
    * Valid options are:<ul>
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Promise} A promise that is resolved with the query completes.
+   * @returns {Promise} A promise that is resolved with the query completes.
    */
   distinct(key: string, options?: FullOptions): Promise<Array<mixed>> {
     options = options || {};
@@ -774,13 +795,13 @@ class ParseQuery {
   /**
    * Executes an aggregate query and returns aggregate results
    *
-   * @param {Mixed} pipeline Array or Object of stages to process query
-   * @param {Object} options Valid options are:<ul>
+   * @param {(Array|object)} pipeline Array or Object of stages to process query
+   * @param {object} options Valid options are:<ul>
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
    *
-   * @return {Promise} A promise that is resolved with the query completes.
+   * @returns {Promise} A promise that is resolved with the query completes.
    */
   aggregate(pipeline: mixed, options?: FullOptions): Promise<Array<mixed>> {
     options = options || {};
@@ -823,7 +844,7 @@ class ParseQuery {
    *
    * Returns the object if there is one, otherwise undefined.
    *
-   * @param {Object} options Valid options are:<ul>
+   * @param {object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -831,7 +852,7 @@ class ParseQuery {
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    * </ul>
    *
-   * @return {Promise} A promise that is resolved with the object when
+   * @returns {Promise} A promise that is resolved with the object when
    * the query completes.
    */
   first(options?: FullOptions): Promise<ParseObject | void> {
@@ -896,9 +917,10 @@ class ParseQuery {
    * promise, then iteration will stop with that error. The items are processed
    * in an unspecified order. The query may not have any sort order, and may
    * not use limit or skip.
+   *
    * @param {Function} callback Callback that will be called with each result
    *     of the query.
-   * @param {Object} options Valid options are:<ul>
+   * @param {object} options Valid options are:<ul>
    *   <li>batchSize: How many objects to yield in each batch (default: 100)
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -906,7 +928,7 @@ class ParseQuery {
    *       behalf of a specific user.
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    * </ul>
-   * @return {Promise} A promise that will be fulfilled once the
+   * @returns {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
   eachBatch(callback: (objs: Array<ParseObject>) => Promise<*>, options?: BatchOptions): Promise<void> {
@@ -987,15 +1009,16 @@ class ParseQuery {
    * promise, then iteration will stop with that error. The items are
    * processed in an unspecified order. The query may not have any sort order,
    * and may not use limit or skip.
+   *
    * @param {Function} callback Callback that will be called with each result
    *     of the query.
-   * @param {Object} options Valid options are:<ul>
+   * @param {object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Promise} A promise that will be fulfilled once the
+   * @returns {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
   each(callback: (obj: ParseObject) => any, options?: BatchOptions): Promise<void> {
@@ -1013,8 +1036,8 @@ class ParseQuery {
   /**
    * Adds a hint to force index selection. (https://docs.mongodb.com/manual/reference/operator/meta/hint/)
    *
-   * @param {Mixed} value String or Object of index that should be used when executing query
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @param {(string|object)} value String or Object of index that should be used when executing query
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   hint(value: mixed): ParseQuery {
     if (typeof value === 'undefined') {
@@ -1027,8 +1050,8 @@ class ParseQuery {
   /**
    * Investigates the query execution plan. Useful for optimizing queries. (https://docs.mongodb.com/manual/reference/operator/meta/explain/)
    *
-   * @param {Boolean} explain Used to toggle the information on the query plan.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @param {boolean} explain Used to toggle the information on the query plan.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   explain(explain: boolean = true): ParseQuery {
     if (typeof explain !== 'boolean') {
@@ -1045,19 +1068,20 @@ class ParseQuery {
    * promise, then iteration will stop with that error. The items are
    * processed in an unspecified order. The query may not have any sort order,
    * and may not use limit or skip.
+   *
    * @param {Function} callback Callback <ul>
    *   <li>currentObject: The current Parse.Object being processed in the array.</li>
    *   <li>index: The index of the current Parse.Object being processed in the array.</li>
    *   <li>query: The query map was called upon.</li>
    * </ul>
    *
-   * @param {Object} options Valid options are:<ul>
+   * @param {object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Promise} A promise that will be fulfilled once the
+   * @returns {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
   async map(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any, options?: BatchOptions): Promise<Array<any>> {
@@ -1079,19 +1103,20 @@ class ParseQuery {
    * promise, then iteration will stop with that error. The items are
    * processed in an unspecified order. The query may not have any sort order,
    * and may not use limit or skip.
+   *
    * @param {Function} callback Callback <ul>
    *   <li>accumulator: The accumulator accumulates the callback's return values. It is the accumulated value previously returned in the last invocation of the callback.</li>
    *   <li>currentObject: The current Parse.Object being processed in the array.</li>
    *   <li>index: The index of the current Parse.Object being processed in the array.</li>
    * </ul>
-   * @param {Mixed} initialValue A value to use as the first argument to the first call of the callback. If no initialValue is supplied, the first object in the query will be used and skipped.
-   * @param {Object} options Valid options are:<ul>
+   * @param {*} initialValue A value to use as the first argument to the first call of the callback. If no initialValue is supplied, the first object in the query will be used and skipped.
+   * @param {object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Promise} A promise that will be fulfilled once the
+   * @returns {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
   async reduce(callback: (accumulator: any, currentObject: ParseObject, index: number) => any, initialValue: any, options?: BatchOptions): Promise<Array<any>> {
@@ -1125,19 +1150,20 @@ class ParseQuery {
    * promise, then iteration will stop with that error. The items are
    * processed in an unspecified order. The query may not have any sort order,
    * and may not use limit or skip.
+   *
    * @param {Function} callback Callback <ul>
    *   <li>currentObject: The current Parse.Object being processed in the array.</li>
    *   <li>index: The index of the current Parse.Object being processed in the array.</li>
    *   <li>query: The query filter was called upon.</li>
    * </ul>
    *
-   * @param {Object} options Valid options are:<ul>
+   * @param {object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @return {Promise} A promise that will be fulfilled once the
+   * @returns {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
   async filter(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean, options?: BatchOptions): Promise<Array<ParseObject>> {
@@ -1159,9 +1185,10 @@ class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be equal to the provided value.
-   * @param {String} key The key to check.
+   *
+   * @param {string} key The key to check.
    * @param value The value that the Parse.Object must contain.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   equalTo(key: string | { [key: string]: any }, value: ?mixed): ParseQuery {
     if (key && typeof key === 'object') {
@@ -1179,9 +1206,10 @@ class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be not equal to the provided value.
-   * @param {String} key The key to check.
+   *
+   * @param {string} key The key to check.
    * @param value The value that must not be equalled.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   notEqualTo(key: string | { [key: string]: any }, value: ?mixed): ParseQuery {
     if (key && typeof key === 'object') {
@@ -1194,9 +1222,10 @@ class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be less than the provided value.
-   * @param {String} key The key to check.
+   *
+   * @param {string} key The key to check.
    * @param value The value that provides an upper bound.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   lessThan(key: string, value: mixed): ParseQuery {
     return this._addCondition(key, '$lt', value);
@@ -1205,9 +1234,10 @@ class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be greater than the provided value.
-   * @param {String} key The key to check.
+   *
+   * @param {string} key The key to check.
    * @param value The value that provides an lower bound.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   greaterThan(key: string, value: mixed): ParseQuery {
     return this._addCondition(key, '$gt', value);
@@ -1216,9 +1246,10 @@ class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be less than or equal to the provided value.
-   * @param {String} key The key to check.
+   *
+   * @param {string} key The key to check.
    * @param value The value that provides an upper bound.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   lessThanOrEqualTo(key: string, value: mixed): ParseQuery {
     return this._addCondition(key, '$lte', value);
@@ -1227,9 +1258,10 @@ class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be greater than or equal to the provided value.
-   * @param {String} key The key to check.
-   * @param value The value that provides an lower bound.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   *
+   * @param {string} key The key to check.
+   * @param {*} value The value that provides an lower bound.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   greaterThanOrEqualTo(key: string, value: mixed): ParseQuery {
     return this._addCondition(key, '$gte', value);
@@ -1238,9 +1270,10 @@ class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be contained in the provided list of values.
-   * @param {String} key The key to check.
-   * @param {Array} values The values that will match.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   *
+   * @param {string} key The key to check.
+   * @param {*} value The values that will match.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   containedIn(key: string, value: mixed): ParseQuery {
     return this._addCondition(key, '$in', value);
@@ -1249,9 +1282,10 @@ class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * not be contained in the provided list of values.
-   * @param {String} key The key to check.
-   * @param {Array} values The values that will not match.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   *
+   * @param {string} key The key to check.
+   * @param {*} value The values that will not match.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   notContainedIn(key: string, value: mixed): ParseQuery {
     return this._addCondition(key, '$nin', value);
@@ -1260,20 +1294,22 @@ class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be contained by the provided list of values. Get objects where all array elements match.
-   * @param {String} key The key to check.
+   *
+   * @param {string} key The key to check.
    * @param {Array} values The values that will match.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  containedBy(key: string, value: Array<mixed>): ParseQuery {
-    return this._addCondition(key, '$containedBy', value);
+  containedBy(key: string, values: Array<mixed>): ParseQuery {
+    return this._addCondition(key, '$containedBy', values);
   }
 
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * contain each one of the provided list of values.
-   * @param {String} key The key to check.  This key's value must be an array.
+   *
+   * @param {string} key The key to check.  This key's value must be an array.
    * @param {Array} values The values that will match.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   containsAll(key: string, values: Array<mixed>): ParseQuery {
     return this._addCondition(key, '$all', values);
@@ -1282,9 +1318,10 @@ class ParseQuery {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * contain each one of the provided list of values starting with given strings.
-   * @param {String} key The key to check.  This key's value must be an array.
-   * @param {Array<String>} values The string values that will match as starting string.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   *
+   * @param {string} key The key to check.  This key's value must be an array.
+   * @param {Array<string>} values The string values that will match as starting string.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   containsAllStartingWith(key: string, values: Array<string>): ParseQuery {
     const _this = this;
@@ -1301,8 +1338,9 @@ class ParseQuery {
 
   /**
    * Adds a constraint for finding objects that contain the given key.
-   * @param {String} key The key that should exist.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   *
+   * @param {string} key The key that should exist.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   exists(key: string): ParseQuery {
     return this._addCondition(key, '$exists', true);
@@ -1310,8 +1348,9 @@ class ParseQuery {
 
   /**
    * Adds a constraint for finding objects that do not contain a given key.
-   * @param {String} key The key that should not exist
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   *
+   * @param {string} key The key that should not exist
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   doesNotExist(key: string): ParseQuery {
     return this._addCondition(key, '$exists', false);
@@ -1321,10 +1360,11 @@ class ParseQuery {
    * Adds a regular expression constraint for finding string values that match
    * the provided regular expression.
    * This may be slow for large datasets.
-   * @param {String} key The key that the string to match is stored in.
+   *
+   * @param {string} key The key that the string to match is stored in.
    * @param {RegExp} regex The regular expression pattern to match.
-   * @param {String} modifiers The regular expression mode.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @param {string} modifiers The regular expression mode.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   matches(key: string, regex: RegExp, modifiers: string): ParseQuery {
     this._addCondition(key, '$regex', regex);
@@ -1346,10 +1386,11 @@ class ParseQuery {
   /**
    * Adds a constraint that requires that a key's value matches a Parse.Query
    * constraint.
-   * @param {String} key The key that the contains the object to match the
+   *
+   * @param {string} key The key that the contains the object to match the
    *                     query.
    * @param {Parse.Query} query The query that should match.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   matchesQuery(key: string, query: ParseQuery): ParseQuery {
     const queryJSON = query.toJSON();
@@ -1360,10 +1401,11 @@ class ParseQuery {
   /**
    * Adds a constraint that requires that a key's value not matches a
    * Parse.Query constraint.
-   * @param {String} key The key that the contains the object to match the
+   *
+   * @param {string} key The key that the contains the object to match the
    *                     query.
    * @param {Parse.Query} query The query that should not match.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   doesNotMatchQuery(key: string, query: ParseQuery): ParseQuery {
     const queryJSON = query.toJSON();
@@ -1374,12 +1416,13 @@ class ParseQuery {
   /**
    * Adds a constraint that requires that a key's value matches a value in
    * an object returned by a different Parse.Query.
-   * @param {String} key The key that contains the value that is being
+   *
+   * @param {string} key The key that contains the value that is being
    *                     matched.
-   * @param {String} queryKey The key in the objects returned by the query to
+   * @param {string} queryKey The key in the objects returned by the query to
    *                          match against.
    * @param {Parse.Query} query The query to run.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   matchesKeyInQuery(key: string, queryKey: string, query: ParseQuery): ParseQuery {
     const queryJSON = query.toJSON();
@@ -1393,12 +1436,13 @@ class ParseQuery {
   /**
    * Adds a constraint that requires that a key's value not match a value in
    * an object returned by a different Parse.Query.
-   * @param {String} key The key that contains the value that is being
+   *
+   * @param {string} key The key that contains the value that is being
    *                     excluded.
-   * @param {String} queryKey The key in the objects returned by the query to
+   * @param {string} queryKey The key in the objects returned by the query to
    *                          match against.
    * @param {Parse.Query} query The query to run.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   doesNotMatchKeyInQuery(key: string, queryKey: string, query: ParseQuery): ParseQuery {
     const queryJSON = query.toJSON();
@@ -1412,46 +1456,47 @@ class ParseQuery {
   /**
    * Adds a constraint for finding string values that contain a provided
    * string.  This may be slow for large datasets.
-   * @param {String} key The key that the string to match is stored in.
-   * @param {String} substring The substring that the value must contain.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   *
+   * @param {string} key The key that the string to match is stored in.
+   * @param {string} substring The substring that the value must contain.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  contains(key: string, value: string): ParseQuery {
-    if (typeof value !== 'string') {
+  contains(key: string, substring: string): ParseQuery {
+    if (typeof substring !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this._addCondition(key, '$regex', quote(value));
+    return this._addCondition(key, '$regex', quote(substring));
   }
 
   /**
-  * Adds a constraint for finding string values that contain a provided
-  * string. This may be slow for large datasets. Requires Parse-Server > 2.5.0
-  *
-  * In order to sort you must use select and ascending ($score is required)
-  *  <pre>
-  *   query.fullText('field', 'term');
-  *   query.ascending('$score');
-  *   query.select('$score');
-  *  </pre>
-  *
-  * To retrieve the weight / rank
-  *  <pre>
-  *   object->get('score');
-  *  </pre>
-  *
-  * You can define optionals by providing an object as a third parameter
-  *  <pre>
-  *   query.fullText('field', 'term', { language: 'es', diacriticSensitive: true });
-  *  </pre>
-  *
-  * @param {String} key The key that the string to match is stored in.
-  * @param {String} value The string to search
-  * @param {Object} options (Optional)
-  * @param {String} options.language The language that determines the list of stop words for the search and the rules for the stemmer and tokenizer.
-  * @param {Boolean} options.caseSensitive A boolean flag to enable or disable case sensitive search.
-  * @param {Boolean} options.diacriticSensitive A boolean flag to enable or disable diacritic sensitive search.
-  * @return {Parse.Query} Returns the query, so you can chain this call.
-  */
+   * Adds a constraint for finding string values that contain a provided
+   * string. This may be slow for large datasets. Requires Parse-Server > 2.5.0
+   *
+   * In order to sort you must use select and ascending ($score is required)
+   *  <pre>
+   *   query.fullText('field', 'term');
+   *   query.ascending('$score');
+   *   query.select('$score');
+   *  </pre>
+   *
+   * To retrieve the weight / rank
+   *  <pre>
+   *   object->get('score');
+   *  </pre>
+   *
+   * You can define optionals by providing an object as a third parameter
+   *  <pre>
+   *   query.fullText('field', 'term', { language: 'es', diacriticSensitive: true });
+   *  </pre>
+   *
+   * @param {string} key The key that the string to match is stored in.
+   * @param {string} value The string to search
+   * @param {object} options (Optional)
+   * @param {string} options.language The language that determines the list of stop words for the search and the rules for the stemmer and tokenizer.
+   * @param {boolean} options.caseSensitive A boolean flag to enable or disable case sensitive search.
+   * @param {boolean} options.diacriticSensitive A boolean flag to enable or disable diacritic sensitive search.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
+   */
   fullText(key: string, value: string, options: ?Object): ParseQuery {
     options = options || {};
 
@@ -1490,7 +1535,7 @@ class ParseQuery {
   /**
    * Method to sort the full text search by text score
    *
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   sortByTextScore() {
     this.ascending('$score');
@@ -1502,37 +1547,40 @@ class ParseQuery {
    * Adds a constraint for finding string values that start with a provided
    * string.  This query will use the backend index, so it will be fast even
    * for large datasets.
-   * @param {String} key The key that the string to match is stored in.
-   * @param {String} prefix The substring that the value must start with.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   *
+   * @param {string} key The key that the string to match is stored in.
+   * @param {string} prefix The substring that the value must start with.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  startsWith(key: string, value: string): ParseQuery {
-    if (typeof value !== 'string') {
+  startsWith(key: string, prefix: string): ParseQuery {
+    if (typeof prefix !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this._addCondition(key, '$regex', this._regexStartWith(value));
+    return this._addCondition(key, '$regex', this._regexStartWith(prefix));
   }
 
   /**
    * Adds a constraint for finding string values that end with a provided
    * string.  This will be slow for large datasets.
-   * @param {String} key The key that the string to match is stored in.
-   * @param {String} suffix The substring that the value must end with.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   *
+   * @param {string} key The key that the string to match is stored in.
+   * @param {string} suffix The substring that the value must end with.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  endsWith(key: string, value: string): ParseQuery {
-    if (typeof value !== 'string') {
+  endsWith(key: string, suffix: string): ParseQuery {
+    if (typeof suffix !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this._addCondition(key, '$regex', quote(value) + '$');
+    return this._addCondition(key, '$regex', quote(suffix) + '$');
   }
 
   /**
    * Adds a proximity based constraint for finding objects with key point
    * values near the point given.
-   * @param {String} key The key that the Parse.GeoPoint is stored in.
+   *
+   * @param {string} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   near(key: string, point: ParseGeoPoint): ParseQuery {
     if (!(point instanceof ParseGeoPoint)) {
@@ -1545,21 +1593,21 @@ class ParseQuery {
   /**
    * Adds a proximity based constraint for finding objects with key point
    * values near the point given and within the maximum distance given.
-   * @param {String} key The key that the Parse.GeoPoint is stored in.
+   *
+   * @param {string} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
-   * @param {Number} maxDistance Maximum distance (in radians) of results to
-   *   return.
-   * @param {Boolean} sorted A Bool value that is true if results should be
-   *   sorted by distance ascending, false is no sorting is required,
-   *   defaults to true.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @param {number} maxDistance Maximum distance (in radians) of results to return.
+   * @param {boolean} sorted A Bool value that is true if results should be
+   * sorted by distance ascending, false is no sorting is required,
+   * defaults to true.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  withinRadians(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {
+  withinRadians(key: string, point: ParseGeoPoint, maxDistance: number, sorted: boolean): ParseQuery {
     if (sorted || sorted === undefined) {
       this.near(key, point);
-      return this._addCondition(key, '$maxDistance', distance);
+      return this._addCondition(key, '$maxDistance', maxDistance);
     } else {
-      return this._addCondition(key, '$geoWithin', { '$centerSphere': [[point.longitude, point.latitude], distance] });
+      return this._addCondition(key, '$geoWithin', { '$centerSphere': [[point.longitude, point.latitude], maxDistance] });
     }
   }
 
@@ -1567,46 +1615,47 @@ class ParseQuery {
    * Adds a proximity based constraint for finding objects with key point
    * values near the point given and within the maximum distance given.
    * Radius of earth used is 3958.8 miles.
-   * @param {String} key The key that the Parse.GeoPoint is stored in.
+   *
+   * @param {string} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
-   * @param {Number} maxDistance Maximum distance (in miles) of results to
-   *   return.
-   * @param {Boolean} sorted A Bool value that is true if results should be
-   *   sorted by distance ascending, false is no sorting is required,
-   *   defaults to true.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @param {number} maxDistance Maximum distance (in miles) of results to return.
+   * @param {boolean} sorted A Bool value that is true if results should be
+   * sorted by distance ascending, false is no sorting is required,
+   * defaults to true.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  withinMiles(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {
-    return this.withinRadians(key, point, distance / 3958.8, sorted);
+  withinMiles(key: string, point: ParseGeoPoint, maxDistance: number, sorted: boolean): ParseQuery {
+    return this.withinRadians(key, point, maxDistance / 3958.8, sorted);
   }
 
   /**
    * Adds a proximity based constraint for finding objects with key point
    * values near the point given and within the maximum distance given.
    * Radius of earth used is 6371.0 kilometers.
-   * @param {String} key The key that the Parse.GeoPoint is stored in.
+   *
+   * @param {string} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
-   * @param {Number} maxDistance Maximum distance (in kilometers) of results
-   *   to return.
-   * @param {Boolean} sorted A Bool value that is true if results should be
-   *   sorted by distance ascending, false is no sorting is required,
-   *   defaults to true.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @param {number} maxDistance Maximum distance (in kilometers) of results to return.
+   * @param {boolean} sorted A Bool value that is true if results should be
+   * sorted by distance ascending, false is no sorting is required,
+   * defaults to true.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  withinKilometers(key: string, point: ParseGeoPoint, distance: number, sorted: boolean): ParseQuery {
-    return this.withinRadians(key, point, distance / 6371.0, sorted);
+  withinKilometers(key: string, point: ParseGeoPoint, maxDistance: number, sorted: boolean): ParseQuery {
+    return this.withinRadians(key, point, maxDistance / 6371.0, sorted);
   }
 
   /**
    * Adds a constraint to the query that requires a particular key's
    * coordinates be contained within a given rectangular geographic bounding
    * box.
-   * @param {String} key The key to be constrained.
+   *
+   * @param {string} key The key to be constrained.
    * @param {Parse.GeoPoint} southwest
    *     The lower-left inclusive corner of the box.
    * @param {Parse.GeoPoint} northeast
    *     The upper-right inclusive corner of the box.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   withinGeoBox(key: string, southwest: ParseGeoPoint, northeast: ParseGeoPoint): ParseQuery {
     if (!(southwest instanceof ParseGeoPoint)) {
@@ -1626,9 +1675,9 @@ class ParseQuery {
    *
    * Polygon must have at least 3 points
    *
-   * @param {String} key The key to be constrained.
-   * @param {Array} array of geopoints
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @param {string} key The key to be constrained.
+   * @param {Array} points Array of Coordinates / GeoPoints
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   withinPolygon(key: string, points: Array<Array<number>>): ParseQuery {
     return this._addCondition(key, '$geoWithin', { '$polygon': points });
@@ -1638,9 +1687,9 @@ class ParseQuery {
    * Add a constraint to the query that requires a particular key's
    * coordinates that contains a ParseGeoPoint
    *
-   * @param {String} key The key to be constrained.
-   * @param {Parse.GeoPoint} GeoPoint
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @param {string} key The key to be constrained.
+   * @param {Parse.GeoPoint} point
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   polygonContains(key: string, point: ParseGeoPoint): ParseQuery {
     return this._addCondition(key, '$geoIntersects', { '$point': point });
@@ -1651,9 +1700,9 @@ class ParseQuery {
   /**
    * Sorts the results in ascending order by the given key.
    *
-   * @param {(String|String[]|...String)} key The key to order by, which is a
+   * @param {(string|string[])} keys The key to order by, which is a
    * string of comma separated values, or an Array of keys, or multiple keys.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   ascending(...keys: Array<string>): ParseQuery {
     this._order = [];
@@ -1664,9 +1713,9 @@ class ParseQuery {
    * Sorts the results in ascending order by the given key,
    * but can also add secondary sort descriptors without overwriting _order.
    *
-   * @param {(String|String[]|...String)} key The key to order by, which is a
+   * @param {(string|string[])} keys The key to order by, which is a
    * string of comma separated values, or an Array of keys, or multiple keys.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   addAscending(...keys: Array<string>): ParseQuery {
     if (!this._order) {
@@ -1685,9 +1734,9 @@ class ParseQuery {
   /**
    * Sorts the results in descending order by the given key.
    *
-   * @param {(String|String[]|...String)} key The key to order by, which is a
+   * @param {(string|string[])} keys The key to order by, which is a
    * string of comma separated values, or an Array of keys, or multiple keys.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   descending(...keys: Array<string>): ParseQuery {
     this._order = [];
@@ -1698,9 +1747,9 @@ class ParseQuery {
    * Sorts the results in descending order by the given key,
    * but can also add secondary sort descriptors without overwriting _order.
    *
-   * @param {(String|String[]|...String)} key The key to order by, which is a
+   * @param {(string|string[])} keys The key to order by, which is a
    * string of comma separated values, or an Array of keys, or multiple keys.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   addDescending(...keys: Array<string>): ParseQuery {
     if (!this._order) {
@@ -1726,8 +1775,9 @@ class ParseQuery {
    * Sets the number of results to skip before returning any results.
    * This is useful for pagination.
    * Default is to skip zero results.
-   * @param {Number} n the number of results to skip.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   *
+   * @param {number} n the number of results to skip.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   skip(n: number): ParseQuery {
     if (typeof n !== 'number' || n < 0) {
@@ -1740,8 +1790,8 @@ class ParseQuery {
   /**
    * Sets the limit of the number of results to return. The default limit is 100.
    *
-   * @param {Number} n the number of results to limit to.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @param {number} n the number of results to limit to.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   limit(n: number): ParseQuery {
     if (typeof n !== 'number') {
@@ -1755,9 +1805,10 @@ class ParseQuery {
    * Sets the flag to include with response the total number of objects satisfying this query,
    * despite limits/skip. Might be useful for pagination.
    * Note that result of this query will be wrapped as an object with
-   *`results`: holding {ParseObject} array and `count`: integer holding total number
-   * @param {boolean} b false - disable, true - enable.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * `results`: holding {ParseObject} array and `count`: integer holding total number
+   *
+   * @param {boolean} includeCount false - disable, true - enable.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   withCount(includeCount: boolean = true): ParseQuery {
     if (typeof includeCount !== 'boolean') {
@@ -1774,8 +1825,8 @@ class ParseQuery {
    * Requires Parse Server 3.0.0+
    * <pre>query.include('*');</pre>
    *
-   * @param {...String|Array<String>} key The name(s) of the key(s) to include.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   include(...keys: Array<string|Array<string>>): ParseQuery {
     keys.forEach((key) => {
@@ -1793,7 +1844,7 @@ class ParseQuery {
    *
    * Requires Parse Server 3.0.0+
    *
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   includeAll(): ParseQuery {
     return this.include('*');
@@ -1803,8 +1854,9 @@ class ParseQuery {
    * Restricts the fields of the returned Parse.Objects to include only the
    * provided keys.  If this is called multiple times, then all of the keys
    * specified in each of the calls will be included.
-   * @param {...String|Array<String>} keys The name(s) of the key(s) to include.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   *
+   * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   select(...keys: Array<string|Array<string>>): ParseQuery {
     if (!this._select) {
@@ -1826,8 +1878,8 @@ class ParseQuery {
    *
    * Requires Parse Server 3.6.0+
    *
-   * @param {...String|Array<String>} keys The name(s) of the key(s) to exclude.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @param {...string|Array<string>} keys The name(s) of the key(s) to exclude.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   exclude(...keys: Array<string|Array<string>>): ParseQuery {
     keys.forEach((key) => {
@@ -1842,10 +1894,11 @@ class ParseQuery {
 
   /**
    * Changes the read preference that the backend will use when performing the query to the database.
-   * @param {String} readPreference The read preference for the main query.
-   * @param {String} includeReadPreference The read preference for the queries to include pointers.
-   * @param {String} subqueryReadPreference The read preference for the sub queries.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   *
+   * @param {string} readPreference The read preference for the main query.
+   * @param {string} includeReadPreference The read preference for the queries to include pointers.
+   * @param {string} subqueryReadPreference The read preference for the sub queries.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   readPreference(readPreference: string, includeReadPreference?: string, subqueryReadPreference?: string): ParseQuery {
     this._readPreference = readPreference;
@@ -1857,8 +1910,8 @@ class ParseQuery {
   /**
    * Subscribe this query to get liveQuery updates
    *
-   * @param {String} sessionToken (optional) Defaults to the currentUser
-   * @return {Promise<LiveQuerySubscription>} Returns the liveQuerySubscription, it's an event emitter
+   * @param {string} sessionToken (optional) Defaults to the currentUser
+   * @returns {Promise<LiveQuerySubscription>} Returns the liveQuerySubscription, it's an event emitter
    * which can be used to get liveQuery updates.
    */
   async subscribe(sessionToken?: string): Promise<LiveQuerySubscription> {
@@ -1883,9 +1936,10 @@ class ParseQuery {
    *
    * will create a compoundQuery that is an or of the query1, query2, and
    * query3.
-   * @param {...Parse.Query} var_args The list of queries to OR.
+   *
+   * @param {...Parse.Query} queries The list of queries to OR.
    * @static
-   * @return {Parse.Query} The query that is the OR of the passed in queries.
+   * @returns {Parse.Query} The query that is the OR of the passed in queries.
    */
   static or(...queries: Array<ParseQuery>): ParseQuery {
     const className = _getClassNameFromQueries(queries);
@@ -1901,9 +1955,10 @@ class ParseQuery {
    *
    * will create a compoundQuery that is an and of the query1, query2, and
    * query3.
-   * @param {...Parse.Query} var_args The list of queries to AND.
+   *
+   * @param {...Parse.Query} queries The list of queries to AND.
    * @static
-   * @return {Parse.Query} The query that is the AND of the passed in queries.
+   * @returns {Parse.Query} The query that is the AND of the passed in queries.
    */
   static and(...queries: Array<ParseQuery>): ParseQuery {
     const className = _getClassNameFromQueries(queries);
@@ -1919,9 +1974,10 @@ class ParseQuery {
    *
    * will create a compoundQuery that is a nor of the query1, query2, and
    * query3.
-   * @param {...Parse.Query} var_args The list of queries to NOR.
+   *
+   * @param {...Parse.Query} queries The list of queries to NOR.
    * @static
-   * @return {Parse.Query} The query that is the NOR of the passed in queries.
+   * @returns {Parse.Query} The query that is the NOR of the passed in queries.
    */
   static nor(...queries: Array<ParseQuery>): ParseQuery {
     const className = _getClassNameFromQueries(queries);
@@ -1933,7 +1989,7 @@ class ParseQuery {
   /**
    * Change the source of this query to the server.
    *
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   fromNetwork(): ParseQuery {
     this._queriesLocalDatastore = false;
@@ -1944,7 +2000,7 @@ class ParseQuery {
   /**
    * Changes the source of this query to all pinned objects.
    *
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   fromLocalDatastore(): ParseQuery {
     return this.fromPinWithName(null);
@@ -1953,7 +2009,7 @@ class ParseQuery {
   /**
    * Changes the source of this query to the default group of pinned objects.
    *
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   fromPin(): ParseQuery {
     return this.fromPinWithName(DEFAULT_PIN);
@@ -1962,8 +2018,8 @@ class ParseQuery {
   /**
    * Changes the source of this query to a specific group of pinned objects.
    *
-   * @param {String} name The name of query source.
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @param {string} name The name of query source.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   fromPinWithName(name?: string): ParseQuery {
     const localDatastore = CoreManager.getLocalDatastore();
@@ -1977,7 +2033,7 @@ class ParseQuery {
   /**
    * Cancels the current network request (if any is running).
    *
-   * @return {Parse.Query} Returns the query, so you can chain this call.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   cancel(): ParseQuery {
     if (this._xhrRequest.task && typeof this._xhrRequest.task.abort === 'function') {

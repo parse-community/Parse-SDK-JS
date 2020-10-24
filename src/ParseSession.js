@@ -21,13 +21,13 @@ import type { RequestOptions, FullOptions } from './RESTController';
  * <p>A Parse.Session object is a local representation of a revocable session.
  * This class is a subclass of a Parse.Object, and retains the same
  * functionality of a Parse.Object.</p>
+ *
  * @alias Parse.Session
- * @extends Parse.Object
+ * @augments Parse.Object
  */
 class ParseSession extends ParseObject {
   /**
-   *
-   * @param {Object} attributes The initial set of data to store in the user.
+   * @param {object} attributes The initial set of data to store in the user.
    */
   constructor(attributes: ?AttributeMap) {
     super('_Session');
@@ -40,8 +40,8 @@ class ParseSession extends ParseObject {
 
   /**
    * Returns the session token string.
-
-   * @return {String}
+   *
+   * @returns {string}
    */
   getSessionToken(): string {
     const token = this.get('sessionToken');
@@ -64,11 +64,12 @@ class ParseSession extends ParseObject {
 
   /**
    * Retrieves the Session object for the currently logged in session.
-
+   *
+   * @param {object} options useMasterKey
    * @static
-   * @return {Promise} A promise that is resolved with the Parse.Session
-   *   object after it has been fetched. If there is no current user, the
-   *   promise will be rejected.
+   * @returns {Promise} A promise that is resolved with the Parse.Session
+   * object after it has been fetched. If there is no current user, the
+   * promise will be rejected.
    */
   static current(options: FullOptions) {
     options = options || {};
@@ -93,9 +94,9 @@ class ParseSession extends ParseObject {
    * use revocable sessions. If you are migrating an app that uses the Parse
    * SDK in the browser only, please use Parse.User.enableRevocableSession()
    * instead, so that sessions can be automatically upgraded.
-
+   *
    * @static
-   * @return {Boolean}
+   * @returns {boolean}
    */
   static isCurrentSessionRevocable(): boolean {
     const currentUser = ParseUser.current();

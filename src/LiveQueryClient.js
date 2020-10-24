@@ -111,6 +111,7 @@ const generateInterval = (k) => {
  * client.on('error', (error) => {
  *
  * });</pre>
+ *
  * @alias Parse.LiveQueryClient
  */
 class LiveQueryClient extends EventEmitter {
@@ -130,7 +131,7 @@ class LiveQueryClient extends EventEmitter {
   state: string;
 
   /**
-   * @param {Object} options
+   * @param {object} options
    * @param {string} options.applicationId - applicationId of your Parse app
    * @param {string} options.serverURL - <b>the URL of your LiveQuery server</b>
    * @param {string} options.javascriptKey (optional)
@@ -182,9 +183,9 @@ class LiveQueryClient extends EventEmitter {
    * <a href="https://github.com/parse-community/parse-server/wiki/Parse-LiveQuery-Protocol-Specification">here</a> for more details. The subscription you get is the same subscription you get
    * from our Standard API.
    *
-   * @param {Object} query - the ParseQuery you want to subscribe to
+   * @param {object} query - the ParseQuery you want to subscribe to
    * @param {string} sessionToken (optional)
-   * @return {LiveQuerySubscription} subscription
+   * @returns {LiveQuerySubscription} subscription
    */
   subscribe(query: Object, sessionToken: ?string): LiveQuerySubscription {
     if (!query) {
@@ -221,7 +222,7 @@ class LiveQueryClient extends EventEmitter {
   /**
    * After calling unsubscribe you'll stop receiving events from the subscription object.
    *
-   * @param {Object} subscription - subscription you would like to unsubscribe from.
+   * @param {object} subscription - subscription you would like to unsubscribe from.
    */
   unsubscribe(subscription: Object) {
     if (!subscription) {

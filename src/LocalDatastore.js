@@ -319,7 +319,8 @@ const LocalDatastore = {
    * <pre>
    * await Parse.LocalDatastore.updateFromServer();
    * </pre>
-   * @method updateFromServer
+   *
+   * @function updateFromServer
    * @name Parse.LocalDatastore.updateFromServer
    * @static
    */

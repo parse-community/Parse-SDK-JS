@@ -30,15 +30,16 @@ import type { RequestOptions } from './RESTController';
  */
 
 /**
-  * Makes a call to a cloud function.
-  * @method run
-  * @name Parse.Cloud.run
-  * @param {String} name The function name.
-  * @param {Object} data The parameters to send to the cloud function.
-  * @param {Object} options
-  * @return {Promise} A promise that will be resolved with the result
-  * of the function.
-  */
+ * Makes a call to a cloud function.
+ *
+ * @function run
+ * @name Parse.Cloud.run
+ * @param {string} name The function name.
+ * @param {object} data The parameters to send to the cloud function.
+ * @param {object} options
+ * @returns {Promise} A promise that will be resolved with the result
+ * of the function.
+ */
 export function run(
   name: string,
   data: mixed,
@@ -65,12 +66,13 @@ export function run(
 }
 
 /**
-  * Gets data for the current set of cloud jobs.
-  * @method getJobsData
-  * @name Parse.Cloud.getJobsData
-  * @return {Promise} A promise that will be resolved with the result
-  * of the function.
-  */
+ * Gets data for the current set of cloud jobs.
+ *
+ * @function getJobsData
+ * @name Parse.Cloud.getJobsData
+ * @returns {Promise} A promise that will be resolved with the result
+ * of the function.
+ */
 export function getJobsData(): Promise<Object> {
   const requestOptions = {
     useMasterKey: true
@@ -79,14 +81,15 @@ export function getJobsData(): Promise<Object> {
 }
 
 /**
-  * Starts a given cloud job, which will process asynchronously.
-  * @method startJob
-  * @name Parse.Cloud.startJob
-  * @param {String} name The function name.
-  * @param {Object} data The parameters to send to the cloud function.
-  * @return {Promise} A promise that will be resolved with the jobStatusId
-  * of the job.
-  */
+ * Starts a given cloud job, which will process asynchronously.
+ *
+ * @function startJob
+ * @name Parse.Cloud.startJob
+ * @param {string} name The function name.
+ * @param {object} data The parameters to send to the cloud function.
+ * @returns {Promise} A promise that will be resolved with the jobStatusId
+ * of the job.
+ */
 export function startJob(
   name: string,
   data: mixed,
@@ -102,12 +105,13 @@ export function startJob(
 }
 
 /**
-  * Gets job status by Id
-  * @method getJobStatus
-  * @name Parse.Cloud.getJobStatus
-  * @param {String} jobStatusId The Id of Job Status.
-  * @return {Parse.Object} Status of Job.
-  */
+ * Gets job status by Id
+ *
+ * @function getJobStatus
+ * @name Parse.Cloud.getJobStatus
+ * @param {string} jobStatusId The Id of Job Status.
+ * @returns {Parse.Object} Status of Job.
+ */
 export function getJobStatus(jobStatusId: string): Promise<ParseObject> {
   const query = new ParseQuery('_JobStatus');
   return query.get(jobStatusId, { useMasterKey: true });
