@@ -59,4 +59,13 @@ describe('InstallationController', () => {
       done();
     });
   });
+
+  it('can set installation id', (done) => {
+    const iid = '12345678';
+    InstallationController._setInstallationIdCache(iid);
+    InstallationController.currentInstallationId().then((i) => {
+      expect(i).toBe(iid);
+      done();
+    });
+  });
 });

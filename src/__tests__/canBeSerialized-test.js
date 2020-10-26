@@ -27,6 +27,7 @@ jest.setMock('../ParseFile', mockFile);
 const canBeSerialized = require('../canBeSerialized').default;
 const ParseFile = require('../ParseFile');
 const ParseObject = require('../ParseObject');
+const ParseRelation = require('../ParseRelation').default;
 
 describe('canBeSerialized', () => {
   it('returns true for anything that is not a ParseObject', () => {
@@ -76,6 +77,14 @@ describe('canBeSerialized', () => {
     child.attributes.parent = parent;
     expect(canBeSerialized(parent)).toBe(true);
     expect(canBeSerialized(child)).toBe(false);
+  });
+
+  it('returns true for relations', () => {
+    const relation = new ParseRelation(null, null);
+    const parent = new ParseObject(undefined, {
+      child: relation,
+    });
+    expect(canBeSerialized(parent)).toBe(true);
   });
 
   it('traverses nested arrays and objects', () => {

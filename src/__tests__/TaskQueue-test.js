@@ -127,4 +127,43 @@ describe('TaskQueue', () => {
     await new Promise(r => setImmediate(r));
     expect(q.queue.length).toBe(0);
   });
+
+  it('continues the chain when all tasks errors', async () => {
+    const q = new TaskQueue();
+    const called = [false, false, false];
+    const promises = [resolvingPromise(), resolvingPromise(), resolvingPromise()];
+    q.enqueue(() => {
+      called[0] = true;
+      return promises[0];
+    }).catch(() => {});
+
+    q.enqueue(() => {
+      called[1] = true;
+      return promises[1];
+    }).catch(() => {});
+
+    q.enqueue(() => {
+      called[2] = true;
+      return promises[2];
+    }).catch(() => {});
+
+    expect(called).toEqual([true, false, false]);
+
+    promises[0].catch(() => {});
+    promises[0].reject('1 oops');
+    await new Promise(r => setImmediate(r));
+    expect(called).toEqual([true, true, false]);
+    expect(q.queue.length).toBe(2);
+
+    promises[1].catch(() => {});
+    promises[1].reject('2 oops');
+    await new Promise(r => setImmediate(r));
+    expect(called).toEqual([true, true, true]);
+    expect(q.queue.length).toBe(1);
+
+    promises[2].catch(() => {});
+    promises[2].reject('3 oops');
+    await new Promise(r => setImmediate(r));
+    expect(q.queue.length).toBe(0);
+  });
 });
