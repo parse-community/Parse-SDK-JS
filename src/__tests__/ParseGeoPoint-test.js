@@ -10,6 +10,16 @@
 jest.autoMockOff();
 
 const ParseGeoPoint = require('../ParseGeoPoint').default;
+global.navigator.geolocation = {
+  getCurrentPosition: (cb) => {
+    return cb({
+      coords: {
+        latitude: 10,
+        longitude: 20,
+      }
+    });
+  }
+}
 
 describe('GeoPoint', () => {
   it('can be constructed from various inputs', () => {
@@ -213,5 +223,11 @@ describe('GeoPoint', () => {
     a = new ParseGeoPoint(40, 50);
     expect(a.equals(b)).toBe(false);
     expect(b.equals(a)).toBe(false);
+  });
+
+  it('can get current location', async () => {
+    const geoPoint = ParseGeoPoint.current();
+    expect(geoPoint.latitude).toBe(10);
+    expect(geoPoint.longitude).toBe(20);
   });
 });

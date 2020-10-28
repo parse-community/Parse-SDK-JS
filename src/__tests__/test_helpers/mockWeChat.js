@@ -1,5 +1,9 @@
 let mockStorage = {};
 let progressCallback = () => {};
+let socketOpenCallback = () => {};
+let socketMessageCallback = () => {};
+let socketCloseCallback = () => {};
+let SocketErrorCallback = () => {};
 
 const mockWeChat = {
   getStorageSync(path) {
@@ -41,7 +45,35 @@ const mockWeChat = {
         options.fail();
       }
     }
-  }
+  },
+
+  connectSocket() {},
+
+  onSocketOpen(cb) {
+    socketOpenCallback = cb;
+  },
+
+  onSocketMessage(cb) {
+    socketMessageCallback = cb;
+  },
+
+  onSocketClose(cb) {
+    socketCloseCallback = cb;
+  },
+
+  onSocketError(cb) {
+    SocketErrorCallback = cb;
+  },
+
+  sendSocketMessage(data) {
+    socketOpenCallback();
+    socketMessageCallback(data);
+  },
+
+  closeSocket() {
+    socketCloseCallback();
+    SocketErrorCallback();
+  },
 };
 
 module.exports = mockWeChat;

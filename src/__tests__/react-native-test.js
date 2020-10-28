@@ -1,9 +1,11 @@
-const events = require('events');
-
+/* global WebSocket */
 jest.dontMock('../CoreManager');
+jest.dontMock('../CryptoController');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../EventEmitter');
+jest.dontMock('../ParseObject');
+jest.dontMock('../LiveQueryClient');
 jest.dontMock('../Storage');
 
 jest.mock('../../../../react-native/Libraries/vendor/emitter/EventEmitter', () => {
@@ -15,6 +17,7 @@ jest.mock('../../../../react-native/Libraries/vendor/emitter/EventEmitter', () =
 }, { virtual: true });
 
 const mockEmitter = require('../../../../react-native/Libraries/vendor/emitter/EventEmitter');
+const CoreManager = require('../CoreManager');
 
 describe('React Native', () => {
   beforeEach(() => {
@@ -27,12 +30,20 @@ describe('React Native', () => {
 
   it('load EventEmitter', () => {
     const eventEmitter = require('../EventEmitter');
-    // console.log(eventEmitter);
+    expect(eventEmitter).toEqual(mockEmitter);
   });
 
   it('load CryptoController', () => {
+    const CryptoJS = require('react-native-crypto-js');
+    jest.spyOn(CryptoJS.AES, 'encrypt').mockImplementation(() => {
+      return {
+        toString: () => 'World',
+      };
+    });
     const CryptoController = require('../CryptoController');
-    // console.log(CryptoController);
+    const phrase = CryptoController.encrypt({}, 'salt');
+    expect(phrase).toBe('World');
+    expect(CryptoJS.AES.encrypt).toHaveBeenCalled();
   });
 
   it('load StorageController', () => {
@@ -41,5 +52,15 @@ describe('React Native', () => {
     const storage = require('../Storage');
     storage.setItemAsync('key', 'value');
     expect(StorageController.setItemAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('load WebSocketController', () => {
+    jest.mock('../EventEmitter', () => {
+      return require('events').EventEmitter;
+    });
+    const socket = WebSocket;
+    require('../LiveQueryClient');
+    const websocket = CoreManager.getWebSocketController();
+    expect(websocket).toEqual(socket);
   });
 });

@@ -11,11 +11,13 @@ jest.dontMock('../ParseHooks');
 jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
+jest.dontMock('../ParseError');
 
 const Hooks = require('../ParseHooks');
 const CoreManager = require('../CoreManager');
 
 const defaultController = CoreManager.getHooksController();
+const { sendRequest } = defaultController;
 
 describe('Hooks', () => {
   beforeEach(() => {
@@ -200,5 +202,27 @@ describe('Hooks', () => {
     done();
   })
 
+  it('should sendRequest', async () => {
+    defaultController.sendRequest = sendRequest;
+    const request = function() {
+      return Promise.resolve(12);
+    };
+    CoreManager.setRESTController({ request, ajax: jest.fn() });
+    const decoded = await defaultController.sendRequest('POST', 'hooks/triggers/myhook');
+    expect(decoded).toBe(12);
+  });
 
+  it('handle sendRequest error', async () => {
+    defaultController.sendRequest = sendRequest;
+    const request = function() {
+      return Promise.resolve(undefined);
+    };
+    CoreManager.setRESTController({ request, ajax: jest.fn() });
+    try {
+      await defaultController.sendRequest('POST', 'hooks/triggers/myhook');
+      expect(false).toBe(true);
+    } catch (e) {
+      expect(e.message).toBe('The server returned an invalid response.');
+    }
+  });
 });

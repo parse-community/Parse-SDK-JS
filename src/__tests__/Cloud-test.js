@@ -11,6 +11,8 @@ jest.dontMock('../Cloud');
 jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
+jest.dontMock('../ParseError');
+jest.dontMock('../ParseObject');
 jest.dontMock('../ParseQuery');
 
 const Cloud = require('../Cloud');
@@ -224,23 +226,23 @@ describe('CloudController', () => {
     expect(controller.request.mock.calls[0][3].context).toEqual(context);
   });
 
-  // fit('can get job status', async () => {
-  //   const request = jest.fn();
-  //   request.mockReturnValue(Promise.resolve({ results: [] }));
+  it('can get job status', async () => {
+    const request = jest.fn();
+    request.mockReturnValue(Promise.resolve({
+      results: [{ className: '_JobStatus', objectId: 'jobId1234' }],
+    }));
+    CoreManager.setRESTController({ request: request, ajax: jest.fn() });
 
-  //   const ajax = jest.fn();
-  //   CoreManager.setRESTController({ request: request, ajax: ajax });
-
-  //   await Cloud.getJobStatus('jobId1234');
-  //   const [ method, path, data, options] = CoreManager.getRESTController().request.mock.calls[0];
-  //   expect(method).toBe('GET');
-  //   expect(path).toBe('classes/_JobStatus');
-  //   expect(data).toEqual({
-  //     limit: 1,
-  //     where: {
-  //       objectId: 'jobId1234',
-  //     },
-  //   });
-  //   expect(options.useMasterKey).toBe(true);
-  // });
+    await Cloud.getJobStatus('jobId1234');
+    const [ method, path, data, options] = request.mock.calls[0];
+    expect(method).toBe('GET');
+    expect(path).toBe('classes/_JobStatus');
+    expect(data).toEqual({
+      limit: 1,
+      where: {
+        objectId: 'jobId1234',
+      },
+    });
+    expect(options.useMasterKey).toBe(true);
+  });
 });

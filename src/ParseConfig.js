@@ -116,6 +116,15 @@ class ParseConfig {
       return Promise.reject(error);
     });
   }
+
+  /**
+   * Used for testing
+   *
+   * @private
+   */
+  static _clearCache() {
+    currentConfig = null;
+  }
 }
 
 let currentConfig = null;
@@ -141,9 +150,8 @@ const DefaultController = {
 
     const config = new ParseConfig();
     const storagePath = Storage.generatePath(CURRENT_CONFIG_KEY);
-    let configData;
     if (!Storage.async()) {
-      configData = Storage.getItem(storagePath);
+      const configData = Storage.getItem(storagePath);
 
       if (configData) {
         const attributes = decodePayload(configData);
