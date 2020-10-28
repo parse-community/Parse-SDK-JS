@@ -55,9 +55,21 @@ let ParseObject = require('../ParseObject');
 let ParseQuery = require('../ParseQuery').default;
 const LiveQuerySubscription = require('../LiveQuerySubscription').default;
 
+const MockRESTController = {
+  request: jest.fn(),
+  ajax: jest.fn(),
+};
+
+const QueryController = CoreManager.getQueryController();
+
 import { DEFAULT_PIN } from '../LocalDatastoreUtils';
 
 describe('ParseQuery', () => {
+  beforeEach(() => {
+    CoreManager.setQueryController(QueryController);
+    CoreManager.setRESTController(MockRESTController);
+  });
+
   it('can be constructed from a class name', () => {
     const q = new ParseQuery('Item');
     expect(q.className).toBe('Item');
@@ -71,6 +83,27 @@ describe('ParseQuery', () => {
     const q2 = new ParseQuery(item);
     expect(q2.className).toBe('Item');
     expect(q2.toJSON()).toEqual({
+      where: {}
+    });
+  });
+
+  it('can be constructed from a function constructor', () => {
+    function ObjectFunction() {
+      this.className = 'Item';
+    }
+    const q = new ParseQuery(ObjectFunction);
+    expect(q.className).toBe('Item');
+    expect(q.toJSON()).toEqual({
+      where: {}
+    });
+  });
+
+  it('can be constructed from a function prototype', () => {
+    function ObjectFunction() {}
+    ObjectFunction.className = 'Item';
+    const q = new ParseQuery(ObjectFunction);
+    expect(q.className).toBe('Item');
+    expect(q.toJSON()).toEqual({
       where: {}
     });
   });
@@ -345,6 +378,17 @@ describe('ParseQuery', () => {
           $all: [
             {$regex: '^\\Qsal\\E'},
             {$regex: '^\\Qne\\E'}
+          ]
+        }
+      }
+    });
+
+    q.containsAllStartingWith('tags', 'noArray');
+    expect(q.toJSON()).toEqual({
+      where: {
+        tags: {
+          $all: [
+            { $regex: '^\\QnoArray\\E' },
           ]
         }
       }
@@ -884,6 +928,20 @@ describe('ParseQuery', () => {
       },
       order: '-a,-b'
     });
+
+    const q2 = new ParseQuery('Item');
+    q2.addDescending();
+    expect(q2.toJSON()).toEqual({
+      where: {},
+      order: '',
+    });
+
+    const q3 = new ParseQuery('Item');
+    q3.addAscending();
+    expect(q3.toJSON()).toEqual({
+      where: {},
+      order: '',
+    });
   });
 
   it('can establish skip counts', () => {
@@ -1255,6 +1313,38 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can handle explain query', (done) => {
+    CoreManager.setQueryController({
+      aggregate() {},
+      find(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          explain: true,
+          where: {
+            size: 'small'
+          }
+        });
+        expect(options.requestTask).toBeDefined();
+        return Promise.resolve({
+          results: {
+            objectId: 'I1',
+            size: 'small',
+            name: 'Product 3'
+          },
+        });
+      }
+    });
+
+    const q = new ParseQuery('Item');
+    q.explain();
+    q.equalTo('size', 'small').find().then((result) => {
+      expect(result.objectId).toBe('I1');
+      expect(result.size).toBe('small');
+      expect(result.name).toEqual('Product 3');
+      done();
+    });
+  });
+
   it('can get a single object by id', (done) => {
     CoreManager.setQueryController({
       aggregate() {},
@@ -1563,6 +1653,7 @@ describe('ParseQuery', () => {
         new ParseQuery('Review').equalTo('stars', 5)
       );
       q.equalTo('valid', true);
+      q.equalTo('arrayField', ['a', 'b']);
       q.select('size', 'name');
       q.includeAll();
       q.hint('_id_');
@@ -1579,6 +1670,7 @@ describe('ParseQuery', () => {
         include: '*',
         hint: '_id_',
         where: {
+          arrayField: ['a', 'b'],
           size: {
             $in: ['small', 'medium']
           },
@@ -2496,6 +2588,23 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can issue a query to the controller', () => {
+    const q = new ParseQuery('Item');
+    q.readPreference('PRIMARY', 'SECONDARY', 'SECONDARY_PREFERRED');
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      readPreference: 'PRIMARY',
+      includeReadPreference: 'SECONDARY',
+      subqueryReadPreference: 'SECONDARY_PREFERRED',
+    });
+    const query = ParseQuery.fromJSON('Item', json);
+    expect(query._readPreference).toBe('PRIMARY');
+    expect(query._includeReadPreference).toBe('SECONDARY');
+    expect(query._subqueryReadPreference).toBe('SECONDARY_PREFERRED');
+  });
+
+
   it('can issue an aggregate query with array pipeline', (done) => {
     const pipeline = [
       { group: { objectId: '$name' } }
@@ -2514,6 +2623,40 @@ describe('ParseQuery', () => {
     });
 
     const q = new ParseQuery('Item');
+    q.aggregate(pipeline).then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
+  });
+
+  it('aggregate query array pipeline with equalTo', (done) => {
+    const pipeline = [
+      { group: { objectId: '$name' } }
+    ];
+    MockRESTController.request.mockImplementationOnce(() => {
+      return Promise.resolve({
+        results: [],
+      });
+    });
+    const q = new ParseQuery('Item');
+    q.equalTo('name', 'foo');
+    q.aggregate(pipeline).then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
+  });
+
+  it('aggregate query object pipeline with equalTo', (done) => {
+    const pipeline = {
+      group: { objectId: '$name' }
+    };
+    MockRESTController.request.mockImplementationOnce(() => {
+      return Promise.resolve({
+        results: [],
+      });
+    });
+    const q = new ParseQuery('Item');
+    q.equalTo('name', 'foo');
     q.aggregate(pipeline).then((results) => {
       expect(results).toEqual([]);
       done();
@@ -2828,6 +2971,12 @@ describe('ParseQuery', () => {
     done();
   });
 
+  it('full text search invalid option', (done) => {
+    const query = new ParseQuery('Item');
+    expect(() => query.fullText('size', 'medium', { unknown: 'throwOption' })).toThrow('Unknown option: unknown');
+    done();
+  });
+
   it('full text search with all parameters', () => {
     const query = new ParseQuery('Item');
 
@@ -3117,6 +3266,22 @@ describe('ParseQuery LocalDatastore', () => {
     expect(results[0].get('number')).toEqual(4);
     expect(results[1].get('number')).toEqual(3);
     expect(results[2].get('number')).toEqual(2);
+
+    q = new ParseQuery('Item');
+    q.descending('_created_at');
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results[0].get('number')).toEqual(2);
+    expect(results[1].get('number')).toEqual(3);
+    expect(results[2].get('number')).toEqual(4);
+
+    q = new ParseQuery('Item');
+    q.descending('_updated_at');
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results[0].get('number')).toEqual(2);
+    expect(results[1].get('number')).toEqual(3);
+    expect(results[2].get('number')).toEqual(4);
 
     q = new ParseQuery('Item');
     q.descending('password');

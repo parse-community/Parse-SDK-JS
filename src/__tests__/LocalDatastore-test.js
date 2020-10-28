@@ -427,6 +427,21 @@ describe('LocalDatastore', () => {
     expect(mockLocalStorageController.fromPinWithName).toHaveBeenCalledTimes(3);
   });
 
+  it('_serializeObjectsFromPinName null pin', async () => {
+    const LDS = {
+      [DEFAULT_PIN]: null,
+    };
+
+    mockLocalStorageController
+      .getAllContents
+      .mockImplementationOnce(() => LDS);
+
+    const results = await LocalDatastore._serializeObjectsFromPinName(DEFAULT_PIN);
+    expect(results).toEqual([]);
+
+    expect(mockLocalStorageController.getAllContents).toHaveBeenCalledTimes(1);
+  });
+
   it('_serializeObject no children', async () => {
     const object = new ParseObject('Item');
     object.id = 1234;

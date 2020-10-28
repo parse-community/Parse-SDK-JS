@@ -4,8 +4,9 @@ jest.dontMock('../CryptoController');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../EventEmitter');
-jest.dontMock('../ParseObject');
 jest.dontMock('../LiveQueryClient');
+jest.dontMock('../LocalDatastore');
+jest.dontMock('../ParseObject');
 jest.dontMock('../Storage');
 
 jest.mock('../../../../react-native/Libraries/vendor/emitter/EventEmitter', () => {
@@ -44,6 +45,13 @@ describe('React Native', () => {
     const phrase = CryptoController.encrypt({}, 'salt');
     expect(phrase).toBe('World');
     expect(CryptoJS.AES.encrypt).toHaveBeenCalled();
+  });
+
+  it('load LocalDatastoreController', () => {
+    const LocalDatastoreController = require('../LocalDatastoreController.react-native');
+    require('../LocalDatastore');
+    const LDC = CoreManager.getLocalDatastoreController();
+    expect(LocalDatastoreController).toEqual(LDC);
   });
 
   it('load StorageController', () => {

@@ -167,6 +167,10 @@ class LiveQueryClient extends EventEmitter {
     this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
     this.state = CLIENT_STATE.INITIALIZED;
+
+    // adding listener so process does not crash
+    // best practice is for developer to register their own listener
+    this.on('error', () => {});
   }
 
   shouldOpen(): any {
@@ -447,7 +451,7 @@ class LiveQueryClient extends EventEmitter {
   _handleWebSocketError(error: any) {
     this.emit(CLIENT_EMMITER_TYPES.ERROR, error);
     for (const subscription of this.subscriptions.values()) {
-      subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR);
+      subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, error);
     }
     this._handleReconnect();
   }

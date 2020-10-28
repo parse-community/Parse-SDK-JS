@@ -700,8 +700,8 @@ describe('LiveQueryClient', () => {
     const subscription = new events.EventEmitter();
     liveQueryClient.subscriptions.set(1, subscription);
     const error = {}
-    liveQueryClient.on('error', () => {});
-    subscription.on('error', () => {
+    subscription.on('error', (errorAgain) => {
+      expect(errorAgain).toEqual(error);
       done();
     });
 
