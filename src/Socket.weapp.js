@@ -22,8 +22,8 @@ module.exports = class SocketWeapp {
     });
 
     wx.connectSocket({
-      url: serverURL
-    })
+      url: serverURL,
+    });
   }
 
   send(data) {

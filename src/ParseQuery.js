@@ -820,7 +820,7 @@ class ParseQuery {
     }
 
     if (Object.keys(this._where || {}).length) {
-      if(!Array.isArray(pipeline)) {
+      if (!Array.isArray(pipeline)) {
         pipeline = [pipeline];
       }
       pipeline.unshift({ match: this._where });
