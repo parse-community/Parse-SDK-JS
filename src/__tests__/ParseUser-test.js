@@ -595,6 +595,41 @@ describe('ParseUser', () => {
       expect(u.getUsername()).toBe('bob');
       expect(u.id).toBe('abc');
       expect(u.getSessionToken()).toBe('12345');
+
+      ParseUser._clearCache();
+      const user = ParseUser.current();
+      expect(user instanceof ParseUser).toBe(true);
+      expect(user.getUsername()).toBe('bob');
+      expect(user.id).toBe('abc');
+      expect(user.getSessionToken()).toBe('12345');
+      done();
+    });
+  });
+
+  it('can inflate users stored from previous SDK versions override _id', (done) => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    const path = Storage.generatePath('currentUser');
+    Storage.setItem(path, JSON.stringify({
+      _id: 'abc',
+      _sessionToken: '12345',
+      objectId: 'SET',
+      username: 'bob',
+      count: 12
+    }));
+    ParseUser.currentAsync().then((u) => {
+      expect(u instanceof ParseUser).toBe(true);
+      expect(u.getUsername()).toBe('bob');
+      expect(u.id).toBe('abc');
+      expect(u.getSessionToken()).toBe('12345');
+
+      ParseUser._clearCache();
+      const user = ParseUser.current();
+      expect(user instanceof ParseUser).toBe(true);
+      expect(user.getUsername()).toBe('bob');
+      expect(user.id).toBe('abc');
+      expect(user.getSessionToken()).toBe('12345');
       done();
     });
   });
