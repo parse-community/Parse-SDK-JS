@@ -46,6 +46,11 @@ class ParseACL {
       } else {
         for (const userId in arg1) {
           const accessList = arg1[userId];
+          if (typeof userId !== 'string') {
+            throw new TypeError(
+              'Tried to create an ACL with an invalid user id.'
+            );
+          }
           this.permissionsById[userId] = {};
           for (const permission in accessList) {
             const allowed = accessList[permission];

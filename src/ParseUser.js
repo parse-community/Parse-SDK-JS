@@ -105,7 +105,7 @@ class ParseUser extends ParseObject {
             return authType;
           },
         };
-        authProviders[authType] = authProvider;
+        authProviders[authProvider.getAuthType()] = authProvider;
         provider = authProvider;
       }
     } else {
