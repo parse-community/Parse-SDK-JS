@@ -1228,7 +1228,7 @@ describe('ParseUser', () => {
     user.set('authData', { toRemove: null, test: true });
     user._cleanupAuthData();
     expect(user.get('authData')).toEqual({ toRemove: null, test: true });
- 
+
     ParseUser._setCurrentUserCache(user);
     user._cleanupAuthData();
     expect(user.get('authData')).toEqual({ test: true });
