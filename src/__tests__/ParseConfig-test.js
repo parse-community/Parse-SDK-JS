@@ -18,7 +18,9 @@ jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../RESTController');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
+jest.dontMock('./test_helpers/mockAsyncStorage');
 
+const mockAsyncStorage = require('./test_helpers/mockAsyncStorage');
 const CoreManager = require('../CoreManager');
 const ParseConfig = require('../ParseConfig').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
@@ -28,6 +30,10 @@ CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 
 describe('ParseConfig', () => {
+  beforeEach(() => {
+    ParseConfig._clearCache();
+  });
+
   it('exposes attributes via get()', () => {
     const c = new ParseConfig();
     c.attributes = {
@@ -47,6 +53,7 @@ describe('ParseConfig', () => {
     };
     expect(c.escape('brackets')).toBe('&lt;&gt;');
     expect(c.escape('phone')).toBe('AT&amp;T');
+    expect(c.escape('phone')).toBe('AT&amp;T');
   });
 
   it('can retrieve the current config from disk or cache', () => {
@@ -63,6 +70,40 @@ describe('ParseConfig', () => {
       count: 12,
       point: new ParseGeoPoint(20.02, 30.03)
     });
+    expect(ParseConfig.current().attributes).toEqual({
+      count: 12,
+      point: new ParseGeoPoint(20.02, 30.03)
+    });
+  });
+
+  it('can handle decodedData error', async () => {
+    const currentStorage = CoreManager.getStorageController();
+    CoreManager.setStorageController(mockAsyncStorage);
+    const path = Storage.generatePath('currentConfig');
+    await Storage.setItemAsync(path, {});
+    const config = await ParseConfig.current();
+    expect(config.attributes).toEqual({});
+    CoreManager.setStorageController(currentStorage);
+  });
+
+  it('can retrieve the current config from async storage', async () => {
+    const currentStorage = CoreManager.getStorageController();
+    CoreManager.setStorageController(mockAsyncStorage);
+    const path = Storage.generatePath('currentConfig');
+    await Storage.setItemAsync(path, JSON.stringify({
+      count: 12,
+      point: {
+        __type: 'GeoPoint',
+        latitude: 20.02,
+        longitude: 30.03
+      }
+    }));
+    const config = await ParseConfig.current();
+    expect(config.attributes).toEqual({
+      count: 12,
+      point: new ParseGeoPoint(20.02, 30.03)
+    });
+    CoreManager.setStorageController(currentStorage);
   });
 
   it('can get a config object from the network', (done) => {

@@ -9,6 +9,8 @@
 
 jest.dontMock('../CoreManager');
 jest.dontMock('../CryptoController');
+jest.dontMock('../decode');
+jest.dontMock('../encode');
 jest.dontMock('../Parse');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('crypto-js/aes');
@@ -46,6 +48,14 @@ describe('Parse module', () => {
     Parse.masterKey = '789';
     expect(CoreManager.get('MASTER_KEY')).toBe('789');
     expect(Parse.masterKey).toBe('789');
+
+    Parse.serverURL = 'http://example.com';
+    expect(CoreManager.get('SERVER_URL')).toBe('http://example.com');
+    expect(Parse.serverURL).toBe('http://example.com');
+
+    Parse.liveQueryServerURL = 'https://example.com';
+    expect(CoreManager.get('LIVEQUERY_SERVER_URL')).toBe('https://example.com');
+    expect(Parse.liveQueryServerURL).toBe('https://example.com');
   });
 
   it('can set auth type and token', () => {
@@ -141,5 +151,45 @@ describe('Parse module', () => {
     CoreManager.set('REQUEST_BATCH_SIZE', 4);
     expect(CoreManager.get('REQUEST_BATCH_SIZE')).toBe(4);
     CoreManager.set('REQUEST_BATCH_SIZE', 20);
+  });
+
+  it('_request', () => {
+    const controller = {
+      request: jest.fn(),
+      ajax: jest.fn(),
+    };
+    CoreManager.setRESTController(controller);
+    Parse._request('POST', 'classes/TestObject');
+    const [method, path] = controller.request.mock.calls[0];
+    expect(method).toBe('POST');
+    expect(path).toBe('classes/TestObject');
+  });
+
+  it('_ajax', () => {
+    const controller = {
+      request: jest.fn(),
+      ajax: jest.fn(),
+    };
+    CoreManager.setRESTController(controller);
+    Parse._ajax('POST', 'classes/TestObject');
+    const [method, path] = controller.ajax.mock.calls[0];
+    expect(method).toBe('POST');
+    expect(path).toBe('classes/TestObject');
+  });
+
+  it('_getInstallationId', () => {
+    const controller = {
+      currentInstallationId: () => '1234',
+    };
+    CoreManager.setInstallationController(controller);
+    expect(Parse._getInstallationId()).toBe('1234');
+  });
+
+  it('_decode', () => {
+    expect(Parse._decode(null, 12)).toBe(12);
+  });
+
+  it('_encode', () => {
+    expect(Parse._encode(12)).toBe(12);
   });
 });

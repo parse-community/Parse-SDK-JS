@@ -441,9 +441,9 @@ const DefaultController = {
     const base64Data = await new Promise((res, rej) => {
       // eslint-disable-next-line no-undef
       const reader = new FileReader();
-      reader.readAsDataURL(source.file);
       reader.onload = () => res(reader.result);
       reader.onerror = error => rej(error);
+      reader.readAsDataURL(source.file);
     });
     // we only want the data after the comma
     // For example: "data:application/pdf;base64,JVBERi0xLjQKJ..." we would only want "JVBERi0xLjQKJ..."
@@ -556,8 +556,13 @@ const DefaultController = {
   _setXHR(xhr: any) {
     XHR = xhr;
   },
+
+  _getXHR() {
+    return XHR;
+  },
 };
 
 CoreManager.setFileController(DefaultController);
 
 export default ParseFile;
+exports.b64Digit = b64Digit;

@@ -20,6 +20,7 @@ jest.dontMock('../UniqueInstanceStateController');
 const ParseACL = require('../ParseACL').default;
 const ParseError = require('../ParseError').default;
 const ParseObject = require('../ParseObject').default;
+const ParseRelation = require('../ParseRelation').default;
 const ParseRole = require('../ParseRole').default;
 
 describe('ParseRole', () => {
@@ -36,6 +37,12 @@ describe('ParseRole', () => {
     role = new ParseRole('admin', acl);
     expect(role.getName()).toBe('admin');
     expect(role.getACL()).toBe(acl);
+  });
+
+  it('handle non string name', () => {
+    const role = new ParseRole();
+    role.get = () => 1234;
+    expect(role.getName()).toBe('');
   });
 
   it('can validate attributes', () => {
@@ -68,6 +75,10 @@ describe('ParseRole', () => {
     expect(role.validate({
       name: 'admin'
     })).toBe(false);
+    const result = role.validate({
+      'invalid#field': 'admin'
+    });
+    expect(result.code).toBe(ParseError.INVALID_KEY_NAME);
   });
 
   it('can be constructed from JSON', () => {
@@ -79,5 +90,11 @@ describe('ParseRole', () => {
     expect(role instanceof ParseObject).toBe(true);
     expect(role instanceof ParseRole).toBe(true);
     expect(role.getName()).toBe('admin');
+  });
+
+  it('can get relations', () => {
+    const role = new ParseRole();
+    expect(role.getUsers() instanceof ParseRelation).toBe(true);
+    expect(role.getRoles() instanceof ParseRelation).toBe(true);
   });
 });

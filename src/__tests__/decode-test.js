@@ -10,12 +10,14 @@
 jest.dontMock('../decode');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
+jest.dontMock('../ParsePolygon');
 
 const decode = require('../decode').default;
 
 const ParseFile = require('../ParseFile').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
 const ParseObject = require('../ParseObject').default;
+const ParsePolygon = require('../ParsePolygon').default;
 
 describe('decode', () => {
   it('ignores primitives', () => {
@@ -42,6 +44,16 @@ describe('decode', () => {
     expect(point instanceof ParseGeoPoint).toBe(true);
     expect(point.latitude).toBe(40.5);
     expect(point.longitude).toBe(50.4);
+  });
+
+  it('decodes Polygons', () => {
+    const points = [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]];
+    const polygon = decode({
+      __type: 'Polygon',
+      coordinates: points,
+    });
+    expect(polygon instanceof ParsePolygon).toBe(true);
+    expect(polygon.coordinates).toEqual(points);
   });
 
   it('decodes Files', () => {

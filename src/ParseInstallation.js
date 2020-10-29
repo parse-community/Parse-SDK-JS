@@ -18,7 +18,7 @@ export default class Installation extends ParseObject {
     super('_Installation');
     if (attributes && typeof attributes === 'object'){
       if (!this.set(attributes || {})) {
-        throw new Error('Can\'t create an invalid Session');
+        throw new Error('Can\'t create an invalid Installation');
       }
     }
   }
