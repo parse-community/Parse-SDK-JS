@@ -1257,6 +1257,21 @@ describe('ParseObject', () => {
     expect(controller.ajax).toHaveBeenCalledTimes(0);
   });
 
+  it('fetchAll with null', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: [{}]
+      }])
+    );
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+
+    const results = await ParseObject.fetchAll(null);
+    expect(results).toEqual(undefined);
+    expect(controller.ajax).toHaveBeenCalledTimes(0);
+  });
+
   it('fetchAll unique instance', async () => {
     ParseObject.disableSingleInstance();
     const obj = new ParseObject('Item');
