@@ -1,7 +1,25 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.17.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.18.0...master)
+
+## 2.18.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.17.0...2.18.0)
+
+**Features**
+- Support query.findAll() ([#1233](https://github.com/parse-community/Parse-SDK-JS/pull/1233))
+
+**Improvements**
+- Pass objects into query.equalTo / query.notEqualTo ([#1235](https://github.com/parse-community/Parse-SDK-JS/pull/1235))
+- Improving legacy initialization setters/getters ([#1237](https://github.com/parse-community/Parse-SDK-JS/pull/1237))
+- Remove deprecated backbone options from Parse.Push ([#1238](https://github.com/parse-community/Parse-SDK-JS/pull/1238))
+- Code Coverage and Unit Tests ([#1241](https://github.com/parse-community/Parse-SDK-JS/pull/1241))
+
+**Fixes**
+- Prevent crashing LiveQueryClient if emitter error is not set ([#1241](https://github.com/parse-community/Parse-SDK-JS/pull/1241))
+- Handle LiveQuery subscription socket error ([#1241](https://github.com/parse-community/Parse-SDK-JS/pull/1241))
+- Set WeChat socket handlers before connecting ([#1241](https://github.com/parse-community/Parse-SDK-JS/pull/1241))
+- Parse.Installation validating attribute error ([#1241](https://github.com/parse-community/Parse-SDK-JS/pull/1241))
 
 ## 2.17.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.16.0...2.17.0)
