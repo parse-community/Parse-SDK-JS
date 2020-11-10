@@ -2178,7 +2178,7 @@ const DefaultController = {
         }
         return Promise.resolve(results);
       });
-    } else {
+    } else if (target instanceof ParseObject) {
       if (!target.id) {
         return Promise.reject(new ParseError(
           ParseError.MISSING_OBJECT_ID,
@@ -2196,15 +2196,14 @@ const DefaultController = {
         params,
         options
       ).then(async (response) => {
-        if (target instanceof ParseObject) {
-          target._clearPendingOps();
-          target._clearServerData();
-          target._finishFetch(response);
-        }
+        target._clearPendingOps();
+        target._clearServerData();
+        target._finishFetch(response);
         await localDatastore._updateObjectIfPinned(target);
         return target;
       });
     }
+    return Promise.resolve();
   },
 
   async destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise<Array<void> | ParseObject> {
@@ -2278,7 +2277,6 @@ const DefaultController = {
         return Promise.resolve(target);
       });
     }
-    await localDatastore._destroyObjectIfPinned(target);
     return Promise.resolve(target);
   },
 
