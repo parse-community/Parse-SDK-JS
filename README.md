@@ -40,6 +40,8 @@ To use the npm modules for a browser based application, include it as you normal
 
 ```js
 const Parse = require('parse');
+// ES6 Minimized
+import Parse from 'parse/dist/parse.min.js';
 ```
 
 For server-side applications or Node.js command line tools, include `'parse/node'`:
