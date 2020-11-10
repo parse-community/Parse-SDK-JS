@@ -199,16 +199,14 @@ export class AddUniqueOp extends Op {
       return this._value || [];
     }
     if (Array.isArray(value)) {
-      // copying value lets Flow guarantee the pointer isn't modified elsewhere
-      const valueCopy = value;
       const toAdd = [];
       this._value.forEach((v) => {
         if (v instanceof ParseObject) {
-          if (!arrayContainsObject(valueCopy, v)) {
+          if (!arrayContainsObject(value, v)) {
             toAdd.push(v);
           }
         } else {
-          if (valueCopy.indexOf(v) < 0) {
+          if (value.indexOf(v) < 0) {
             toAdd.push(v);
           }
         }
