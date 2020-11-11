@@ -55,9 +55,21 @@ let ParseObject = require('../ParseObject');
 let ParseQuery = require('../ParseQuery').default;
 const LiveQuerySubscription = require('../LiveQuerySubscription').default;
 
+const MockRESTController = {
+  request: jest.fn(),
+  ajax: jest.fn(),
+};
+
+const QueryController = CoreManager.getQueryController();
+
 import { DEFAULT_PIN } from '../LocalDatastoreUtils';
 
 describe('ParseQuery', () => {
+  beforeEach(() => {
+    CoreManager.setQueryController(QueryController);
+    CoreManager.setRESTController(MockRESTController);
+  });
+
   it('can be constructed from a class name', () => {
     const q = new ParseQuery('Item');
     expect(q.className).toBe('Item');
@@ -71,6 +83,27 @@ describe('ParseQuery', () => {
     const q2 = new ParseQuery(item);
     expect(q2.className).toBe('Item');
     expect(q2.toJSON()).toEqual({
+      where: {}
+    });
+  });
+
+  it('can be constructed from a function constructor', () => {
+    function ObjectFunction() {
+      this.className = 'Item';
+    }
+    const q = new ParseQuery(ObjectFunction);
+    expect(q.className).toBe('Item');
+    expect(q.toJSON()).toEqual({
+      where: {}
+    });
+  });
+
+  it('can be constructed from a function prototype', () => {
+    function ObjectFunction() {}
+    ObjectFunction.className = 'Item';
+    const q = new ParseQuery(ObjectFunction);
+    expect(q.className).toBe('Item');
+    expect(q.toJSON()).toEqual({
       where: {}
     });
   });
@@ -109,6 +142,16 @@ describe('ParseQuery', () => {
         }
       }
     });
+
+    const size = 'medium';
+    const stock = true;
+    q.equalTo({ size, stock });
+    expect(q.toJSON()).toEqual({
+      where: {
+        size: 'medium',
+        stock: true,
+      }
+    });
   });
 
   it('can generate inequality queries', () => {
@@ -127,6 +170,20 @@ describe('ParseQuery', () => {
       where: {
         size: {
           $ne: 'medium'
+        }
+      }
+    });
+
+    const size = 'medium';
+    const stock = true;
+    q.notEqualTo({ size, stock });
+    expect(q.toJSON()).toEqual({
+      where: {
+        size: {
+          $ne: 'medium',
+        },
+        stock: {
+          $ne: true,
         }
       }
     });
@@ -321,6 +378,17 @@ describe('ParseQuery', () => {
           $all: [
             {$regex: '^\\Qsal\\E'},
             {$regex: '^\\Qne\\E'}
+          ]
+        }
+      }
+    });
+
+    q.containsAllStartingWith('tags', 'noArray');
+    expect(q.toJSON()).toEqual({
+      where: {
+        tags: {
+          $all: [
+            { $regex: '^\\QnoArray\\E' },
           ]
         }
       }
@@ -860,6 +928,20 @@ describe('ParseQuery', () => {
       },
       order: '-a,-b'
     });
+
+    const q2 = new ParseQuery('Item');
+    q2.addDescending();
+    expect(q2.toJSON()).toEqual({
+      where: {},
+      order: '',
+    });
+
+    const q3 = new ParseQuery('Item');
+    q3.addAscending();
+    expect(q3.toJSON()).toEqual({
+      where: {},
+      order: '',
+    });
   });
 
   it('can establish skip counts', () => {
@@ -1231,6 +1313,38 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can handle explain query', (done) => {
+    CoreManager.setQueryController({
+      aggregate() {},
+      find(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          explain: true,
+          where: {
+            size: 'small'
+          }
+        });
+        expect(options.requestTask).toBeDefined();
+        return Promise.resolve({
+          results: {
+            objectId: 'I1',
+            size: 'small',
+            name: 'Product 3'
+          },
+        });
+      }
+    });
+
+    const q = new ParseQuery('Item');
+    q.explain();
+    q.equalTo('size', 'small').find().then((result) => {
+      expect(result.objectId).toBe('I1');
+      expect(result.size).toBe('small');
+      expect(result.name).toEqual('Product 3');
+      done();
+    });
+  });
+
   it('can get a single object by id', (done) => {
     CoreManager.setQueryController({
       aggregate() {},
@@ -1539,6 +1653,7 @@ describe('ParseQuery', () => {
         new ParseQuery('Review').equalTo('stars', 5)
       );
       q.equalTo('valid', true);
+      q.equalTo('arrayField', ['a', 'b']);
       q.select('size', 'name');
       q.includeAll();
       q.hint('_id_');
@@ -1555,6 +1670,7 @@ describe('ParseQuery', () => {
         include: '*',
         hint: '_id_',
         where: {
+          arrayField: ['a', 'b'],
           size: {
             $in: ['small', 'medium']
           },
@@ -1635,6 +1751,110 @@ describe('ParseQuery', () => {
         return new Promise(resolve => setImmediate(resolve));
       });
       expect(results).toEqual(['medium', 'small']);
+    });
+  });
+
+  describe('return all objects with .findAll()', () => {
+    let findMock;
+    beforeEach(() => {
+      findMock = jest.fn();
+      findMock.mockReturnValueOnce(Promise.resolve({
+        results: [
+          { objectId: 'I55', size: 'medium', name: 'Product 55' },
+          { objectId: 'I89', size: 'small', name: 'Product 89' },
+        ]
+      }));
+      findMock.mockReturnValueOnce(Promise.resolve({
+        results: [
+          { objectId: 'I91', size: 'small', name: 'Product 91' },
+        ]
+      }));
+      CoreManager.setQueryController({
+        aggregate() {},
+        find: findMock,
+      });
+    });
+
+    it('passes query attributes through to the REST API', async () => {
+      const q = new ParseQuery('Item');
+      q.containedIn('size', ['small', 'medium']);
+      q.matchesKeyInQuery(
+        'name',
+        'productName',
+        new ParseQuery('Review').equalTo('stars', 5)
+      );
+      q.equalTo('valid', true);
+      q.select('size', 'name');
+      q.includeAll();
+      q.hint('_id_');
+
+      await q.findAll();
+      expect(findMock).toHaveBeenCalledTimes(1);
+      const [className, params, options] = findMock.mock.calls[0];
+      expect(className).toBe('Item')
+      expect(params).toEqual({
+        limit: 100,
+        order: 'objectId',
+        keys: 'size,name',
+        include: '*',
+        hint: '_id_',
+        where: {
+          size: {
+            $in: ['small', 'medium']
+          },
+          name: {
+            $select: {
+              key: 'productName',
+              query: {
+                className: 'Review',
+                where: {
+                  stars: 5
+                }
+              }
+            }
+          },
+          valid: true
+        }
+      });
+      expect(options.requestTask).toBeDefined();
+    });
+
+    it('passes options through to the REST API', async () => {
+      const batchOptions = {
+        useMasterKey: true,
+        sessionToken: '1234',
+        batchSize: 50,
+      };
+      const q = new ParseQuery('Item');
+      await q.findAll(batchOptions);
+      expect(findMock).toHaveBeenCalledTimes(1);
+      const [className, params, options] = findMock.mock.calls[0];
+      expect(className).toBe('Item');
+      expect(params).toEqual({
+        limit: 50,
+        order: 'objectId',
+        where: {},
+      });
+      expect(options.useMasterKey).toBe(true);
+      expect(options.sessionToken).toEqual('1234');
+    });
+
+    it('only makes one request when the results fit in one page', async () => {
+      const q = new ParseQuery('Item');
+      await q.findAll();
+      expect(findMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('makes more requests when the results do not fit in one page', async () => {
+      const q = new ParseQuery('Item');
+      await q.findAll({ batchSize: 2 });
+      expect(findMock).toHaveBeenCalledTimes(2);
+    })
+
+    it('Returns all objects', async () => {
+      const q = new ParseQuery('Item');
+      const results = await q.findAll();
+      expect(results.map(obj => obj.attributes.size)).toEqual(['medium', 'small']);
     });
   });
 
@@ -2368,6 +2588,23 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can issue a query to the controller', () => {
+    const q = new ParseQuery('Item');
+    q.readPreference('PRIMARY', 'SECONDARY', 'SECONDARY_PREFERRED');
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      readPreference: 'PRIMARY',
+      includeReadPreference: 'SECONDARY',
+      subqueryReadPreference: 'SECONDARY_PREFERRED',
+    });
+    const query = ParseQuery.fromJSON('Item', json);
+    expect(query._readPreference).toBe('PRIMARY');
+    expect(query._includeReadPreference).toBe('SECONDARY');
+    expect(query._subqueryReadPreference).toBe('SECONDARY_PREFERRED');
+  });
+
+
   it('can issue an aggregate query with array pipeline', (done) => {
     const pipeline = [
       { group: { objectId: '$name' } }
@@ -2386,6 +2623,40 @@ describe('ParseQuery', () => {
     });
 
     const q = new ParseQuery('Item');
+    q.aggregate(pipeline).then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
+  });
+
+  it('aggregate query array pipeline with equalTo', (done) => {
+    const pipeline = [
+      { group: { objectId: '$name' } }
+    ];
+    MockRESTController.request.mockImplementationOnce(() => {
+      return Promise.resolve({
+        results: [],
+      });
+    });
+    const q = new ParseQuery('Item');
+    q.equalTo('name', 'foo');
+    q.aggregate(pipeline).then((results) => {
+      expect(results).toEqual([]);
+      done();
+    });
+  });
+
+  it('aggregate query object pipeline with equalTo', (done) => {
+    const pipeline = {
+      group: { objectId: '$name' }
+    };
+    MockRESTController.request.mockImplementationOnce(() => {
+      return Promise.resolve({
+        results: [],
+      });
+    });
+    const q = new ParseQuery('Item');
+    q.equalTo('name', 'foo');
     q.aggregate(pipeline).then((results) => {
       expect(results).toEqual([]);
       done();
@@ -2700,6 +2971,12 @@ describe('ParseQuery', () => {
     done();
   });
 
+  it('full text search invalid option', (done) => {
+    const query = new ParseQuery('Item');
+    expect(() => query.fullText('size', 'medium', { unknown: 'throwOption' })).toThrow('Unknown option: unknown');
+    done();
+  });
+
   it('full text search with all parameters', () => {
     const query = new ParseQuery('Item');
 
@@ -2989,6 +3266,22 @@ describe('ParseQuery LocalDatastore', () => {
     expect(results[0].get('number')).toEqual(4);
     expect(results[1].get('number')).toEqual(3);
     expect(results[2].get('number')).toEqual(2);
+
+    q = new ParseQuery('Item');
+    q.descending('_created_at');
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results[0].get('number')).toEqual(2);
+    expect(results[1].get('number')).toEqual(3);
+    expect(results[2].get('number')).toEqual(4);
+
+    q = new ParseQuery('Item');
+    q.descending('_updated_at');
+    q.fromLocalDatastore();
+    results = await q.find();
+    expect(results[0].get('number')).toEqual(2);
+    expect(results[1].get('number')).toEqual(3);
+    expect(results[2].get('number')).toEqual(4);
 
     q = new ParseQuery('Item');
     q.descending('password');

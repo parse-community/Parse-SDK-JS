@@ -194,6 +194,12 @@ describe('OfflineQuery', () => {
     json = img.toJSON();
     json.owners[0].objectId = 'U3';
     expect(matchesQuery(json, q)).toBe(false);
+
+    const u3 = new ParseUser();
+    u3.id = 'U3';
+    img = new ParseObject('Image');
+    img.set('owners', [u3]);
+    expect(matchesQuery(q.className, img, [], q)).toBe(false);
   });
 
   it('matches on inequalities', () => {

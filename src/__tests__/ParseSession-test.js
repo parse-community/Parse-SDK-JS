@@ -48,12 +48,19 @@ describe('ParseSession', () => {
   it('can be initialized', () => {
     let session = new ParseSession();
     session.set('someField', 'someValue');
+    expect(session.getSessionToken()).toBe('');
     expect(session.get('someField')).toBe('someValue');
 
     session = new ParseSession({
       someField: 'someValue'
     });
     expect(session.get('someField')).toBe('someValue');
+  });
+
+  it('cannot create schema with invalid fields', () => {
+    expect(() => {
+      new ParseSession({ 'invalid#name' : 'foo'})
+    }).toThrow("Can't create an invalid Session");
   });
 
   it('cannot write to readonly fields', () => {
@@ -93,6 +100,8 @@ describe('ParseSession', () => {
     expect(ParseSession.isCurrentSessionRevocable()).toBe(true);
     mockUser.current = function() { return new mockUser('abc123'); };
     expect(ParseSession.isCurrentSessionRevocable()).toBe(false);
+    mockUser.current = function() { return new mockUser(null); };
+    expect(ParseSession.isCurrentSessionRevocable()).toBe(false);
   });
 
   it('can fetch the full session for the current token', (done) => {
@@ -101,7 +110,8 @@ describe('ParseSession', () => {
         expect(method).toBe('GET');
         expect(path).toBe('sessions/me');
         expect(options).toEqual({
-          sessionToken: 'abc123'
+          sessionToken: 'abc123',
+          useMasterKey: true,
         });
         return Promise.resolve({
           objectId: 'session1',
@@ -114,10 +124,20 @@ describe('ParseSession', () => {
     mockUser.currentAsync = function() {
       return Promise.resolve(new mockUser('abc123'));
     };
-    ParseSession.current().then((session) => {
+    ParseSession.current({ useMasterKey: true }).then((session) => {
       expect(session instanceof ParseSession).toBe(true);
       expect(session.id).toBe('session1');
       expect(session.getSessionToken()).toBe('abc123');
+      done();
+    });
+  });
+
+  it('cannot get current session without current user', (done) => {
+    mockUser.currentAsync = function() {
+      return Promise.resolve(null);
+    };
+    ParseSession.current().catch((error) => {
+      expect(error).toBe('There is no current user.')
       done();
     });
   });

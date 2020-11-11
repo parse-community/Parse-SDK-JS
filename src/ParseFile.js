@@ -62,6 +62,7 @@ function b64Digit(number: number): string {
 /**
  * A Parse.File is a local representation of a file that is saved to the Parse
  * cloud.
+ *
  * @alias Parse.File
  */
 class ParseFile {
@@ -163,7 +164,7 @@ class ParseFile {
    * Data is present if initialized with Byte Array, Base64 or Saved with Uri.
    * Data is cleared if saved with File object selected with a file upload control
    *
-   * @return {Promise} Promise that is resolve with base64 data
+   * @returns {Promise} Promise that is resolve with base64 data
    */
   async getData(): Promise<String> {
     if (this._data) {
@@ -185,7 +186,8 @@ class ParseFile {
    * Gets the name of the file. Before save is called, this is the filename
    * given by the user. After save is called, that name gets prefixed with a
    * unique identifier.
-   * @return {String}
+   *
+   * @returns {string}
    */
   name(): string {
     return this._name;
@@ -194,8 +196,9 @@ class ParseFile {
   /**
    * Gets the url of the file. It is only available after you save the file or
    * after you get the file from a Parse.Object.
-   * @param {Object} options An object to specify url options
-   * @return {String}
+   *
+   * @param {object} options An object to specify url options
+   * @returns {string}
    */
   url(options?: { forceSecure?: boolean }): ?string {
     options = options || {};
@@ -211,7 +214,8 @@ class ParseFile {
 
   /**
    * Gets the metadata of the file.
-   * @return {Object}
+   *
+   * @returns {object}
    */
   metadata(): Object {
     return this._metadata;
@@ -219,7 +223,8 @@ class ParseFile {
 
   /**
    * Gets the tags of the file.
-   * @return {Object}
+   *
+   * @returns {object}
    */
   tags(): Object {
     return this._tags;
@@ -227,7 +232,8 @@ class ParseFile {
 
   /**
    * Saves the file to the Parse cloud.
-   * @param {Object} options
+   *
+   * @param {object} options
    *  * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -245,7 +251,7 @@ class ParseFile {
    * });
    * </pre>
    * </ul>
-   * @return {Promise} Promise that is resolved when the save finishes.
+   * @returns {Promise} Promise that is resolved when the save finishes.
    */
   save(options?: FullOptions) {
     options = options || {};
@@ -310,7 +316,7 @@ class ParseFile {
    * Deletes the file from the Parse cloud.
    * In Cloud Code and Node only with Master Key
    *
-   * @return {Promise} Promise that is resolved when the delete finishes.
+   * @returns {Promise} Promise that is resolved when the delete finishes.
    */
   destroy() {
     if (!this._name) {
@@ -347,7 +353,8 @@ class ParseFile {
 
   /**
    * Sets metadata to be saved with file object. Overwrites existing metadata
-   * @param {Object} metadata Key value pairs to be stored with file object
+   *
+   * @param {object} metadata Key value pairs to be stored with file object
    */
   setMetadata(metadata: any) {
     if (metadata && typeof metadata === 'object') {
@@ -358,9 +365,10 @@ class ParseFile {
   }
 
   /**
-   * Sets metadata to be saved with file object. Adds to existing metadata
-   * @param {String} key
-   * @param {Mixed} value
+   * Sets metadata to be saved with file object. Adds to existing metadata.
+   *
+   * @param {string} key key to store the metadata
+   * @param {*} value metadata
    */
   addMetadata(key: string, value: any) {
     if (typeof key === 'string') {
@@ -370,7 +378,8 @@ class ParseFile {
 
   /**
    * Sets tags to be saved with file object. Overwrites existing tags
-   * @param {Object} tags Key value pairs to be stored with file object
+   *
+   * @param {object} tags Key value pairs to be stored with file object
    */
   setTags(tags: any) {
     if (tags && typeof tags === 'object') {
@@ -381,9 +390,10 @@ class ParseFile {
   }
 
   /**
-   * Sets tags to be saved with file object. Adds to existing tags
-   * @param {String} key
-   * @param {Mixed} value
+   * Sets tags to be saved with file object. Adds to existing tags.
+   *
+   * @param {string} key key to store tags
+   * @param {*} value tag
    */
   addTag(key: string, value: string) {
     if (typeof key === 'string') {
@@ -431,9 +441,9 @@ const DefaultController = {
     const base64Data = await new Promise((res, rej) => {
       // eslint-disable-next-line no-undef
       const reader = new FileReader();
-      reader.readAsDataURL(source.file);
       reader.onload = () => res(reader.result);
       reader.onerror = error => rej(error);
+      reader.readAsDataURL(source.file);
     });
     // we only want the data after the comma
     // For example: "data:application/pdf;base64,JVBERi0xLjQKJ..." we would only want "JVBERi0xLjQKJ..."
@@ -546,8 +556,13 @@ const DefaultController = {
   _setXHR(xhr: any) {
     XHR = xhr;
   },
+
+  _getXHR() {
+    return XHR;
+  },
 };
 
 CoreManager.setFileController(DefaultController);
 
 export default ParseFile;
+exports.b64Digit = b64Digit;

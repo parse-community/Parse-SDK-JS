@@ -17,6 +17,9 @@ jest.mock('uuid/v4', () => {
 const CoreManager = require('../CoreManager');
 const RESTController = require('../RESTController');
 const mockXHR = require('./test_helpers/mockXHR');
+const mockWeChat = require('./test_helpers/mockWeChat');
+
+global.wx = mockWeChat;
 
 CoreManager.setInstallationController({
   currentInstallationId() {
@@ -557,5 +560,69 @@ describe('RESTController', () => {
     expect(xhr.open.mock.calls[0]).toEqual([ 'GET', 'users/me', true ]);
     expect(xhr.send.mock.calls[0][0]).toEqual({});
     CoreManager.set('REQUEST_HEADERS', {});
+  });
+
+  it('can handle installationId option', async () => {
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn()
+    };
+    RESTController._setXHR(function() { return xhr; });
+    RESTController.request('GET', 'classes/MyObject', {}, { sessionToken: '1234', installationId: '5678' });
+    await flushPromises();
+    expect(xhr.open.mock.calls[0]).toEqual(
+      ['POST', 'https://api.parse.com/1/classes/MyObject', true]
+    );
+    expect(JSON.parse(xhr.send.mock.calls[0][0])).toEqual({
+      _method: 'GET',
+      _ApplicationId: 'A',
+      _JavaScriptKey: 'B',
+      _ClientVersion: 'V',
+      _InstallationId: '5678',
+      _SessionToken: '1234',
+    });
+  });
+
+  it('can handle wechat request', async () => {
+    const XHR = require('../Xhr.weapp');
+    const xhr = new XHR();
+    jest.spyOn(xhr, 'open');
+    jest.spyOn(xhr, 'send');
+    RESTController._setXHR(function() { return xhr; });
+    RESTController.request('GET', 'classes/MyObject', {}, { sessionToken: '1234', installationId: '5678' });
+    await flushPromises();
+    expect(xhr.open.mock.calls[0]).toEqual(
+      ['POST', 'https://api.parse.com/1/classes/MyObject', true]
+    );
+    expect(JSON.parse(xhr.send.mock.calls[0][0])).toEqual({
+      _method: 'GET',
+      _ApplicationId: 'A',
+      _JavaScriptKey: 'B',
+      _ClientVersion: 'V',
+      _InstallationId: '5678',
+      _SessionToken: '1234',
+    });
+  });
+
+  it('can handle wechat ajax', async () => {
+    const XHR = require('../Xhr.weapp');
+    const xhr = new XHR();
+    jest.spyOn(xhr, 'open');
+    jest.spyOn(xhr, 'send');
+    jest.spyOn(xhr, 'setRequestHeader');
+    RESTController._setXHR(function() { return xhr; });
+    const headers = { 'X-Parse-Session-Token': '123' };
+    RESTController.ajax('GET', 'users/me', {}, headers);
+    expect(xhr.setRequestHeader.mock.calls[0]).toEqual(
+      [ 'X-Parse-Session-Token', '123' ]
+    );
+    expect(xhr.open.mock.calls[0]).toEqual([ 'GET', 'users/me', true ]);
+    expect(xhr.send.mock.calls[0][0]).toEqual({});
+    xhr.responseHeader = headers;
+    expect(xhr.getAllResponseHeaders().includes('X-Parse-Session-Token')).toBe(true);
+    expect(xhr.getResponseHeader('X-Parse-Session-Token')).toBe('123');
+    xhr.abort();
+    xhr.abort();
   });
 });

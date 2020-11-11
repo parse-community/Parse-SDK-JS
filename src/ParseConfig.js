@@ -36,7 +36,9 @@ class ParseConfig {
 
   /**
    * Gets the value of an attribute.
-   * @param {String} attr The name of an attribute.
+   *
+   * @param {string} attr The name of an attribute.
+   * @returns {*}
    */
   get(attr: string): any {
     return this.attributes[attr];
@@ -44,7 +46,9 @@ class ParseConfig {
 
   /**
    * Gets the HTML-escaped value of an attribute.
-   * @param {String} attr The name of an attribute.
+   *
+   * @param {string} attr The name of an attribute.
+   * @returns {string}
    */
   escape(attr: string): string {
     const html = this._escapedAttributes[attr];
@@ -65,7 +69,7 @@ class ParseConfig {
    * memory or from local storage if necessary.
    *
    * @static
-   * @return {Config} The most recently-fetched Parse.Config if it
+   * @returns {Parse.Config} The most recently-fetched Parse.Config if it
    *     exists, else an empty Parse.Config.
    */
   static current() {
@@ -75,13 +79,14 @@ class ParseConfig {
 
   /**
    * Gets a new configuration object from the server.
+   *
    * @static
-   * @param {Object} options
+   * @param {object} options
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    * </ul>
-   * @return {Promise} A promise that is resolved with a newly-created
+   * @returns {Promise} A promise that is resolved with a newly-created
    *     configuration object when the get completes.
    */
   static get(options: RequestOptions = {}) {
@@ -91,14 +96,15 @@ class ParseConfig {
 
   /**
    * Save value keys to the server.
+   *
    * @static
-   * @param {Object} attrs The config parameters and values.
-   * @param {Object} masterKeyOnlyFlags The flags that define whether config parameters listed
+   * @param {object} attrs The config parameters and values.
+   * @param {object} masterKeyOnlyFlags The flags that define whether config parameters listed
    * in `attrs` should be retrievable only by using the master key.
    * For example: `param1: true` makes `param1` only retrievable by using the master key.
    * If a parameter is not provided or set to `false`, it can be retrieved without
    * using the master key.
-   * @return {Promise} A promise that is resolved with a newly-created
+   * @returns {Promise} A promise that is resolved with a newly-created
    *     configuration object or with the current with the update.
    */
   static save(attrs: { [key: string]: any }, masterKeyOnlyFlags: { [key: string]: any }) {
@@ -109,6 +115,15 @@ class ParseConfig {
     },(error) => {
       return Promise.reject(error);
     });
+  }
+
+  /**
+   * Used for testing
+   *
+   * @private
+   */
+  static _clearCache() {
+    currentConfig = null;
   }
 }
 
@@ -135,9 +150,8 @@ const DefaultController = {
 
     const config = new ParseConfig();
     const storagePath = Storage.generatePath(CURRENT_CONFIG_KEY);
-    let configData;
     if (!Storage.async()) {
-      configData = Storage.getItem(storagePath);
+      const configData = Storage.getItem(storagePath);
 
       if (configData) {
         const attributes = decodePayload(configData);

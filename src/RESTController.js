@@ -24,6 +24,7 @@ export type RequestOptions = {
   include?: any;
   progress?: any;
   context?: any;
+  usePost?: boolean;
 };
 
 export type FullOptions = {
@@ -33,6 +34,7 @@ export type FullOptions = {
   sessionToken?: string;
   installationId?: string;
   progress?: any;
+  usePost?: boolean;
 };
 
 let XHR = null;

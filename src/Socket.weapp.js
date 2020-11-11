@@ -5,10 +5,6 @@ module.exports = class SocketWeapp {
     this.onclose = () => {}
     this.onerror = () => {}
 
-    wx.connectSocket({
-      url: serverURL
-    })
-
     wx.onSocketOpen(() => {
       this.onopen();
     })
@@ -19,11 +15,15 @@ module.exports = class SocketWeapp {
 
     wx.onSocketClose(() => {
       this.onclose();
-    })
+    });
 
     wx.onSocketError((error) => {
       this.onerror(error);
-    })
+    });
+
+    wx.connectSocket({
+      url: serverURL,
+    });
   }
 
   send(data) {
