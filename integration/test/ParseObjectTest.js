@@ -12,7 +12,6 @@ describe('Parse Object', () => {
   beforeEach((done) => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1);
     Parse.Storage._clear();
     clear().then(() => {
       done();
