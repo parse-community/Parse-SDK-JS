@@ -409,10 +409,9 @@ class ParseObject {
       } else if (attr !== 'objectId') {
         const val = decode(response[attr]);
         if (val && Object.getPrototypeOf(val) === Object.prototype) {
-          // Update the object by merging in updates w/ old object
-          changes[attr] = { ...this.attributes[attr], ...val }
+          changes[attr] = { ...this.attributes[attr], ...val };
         } else {
-          changes[attr] = val
+          changes[attr] = val;
         }
         if (changes[attr] instanceof UnsetOp) {
           changes[attr] = undefined;

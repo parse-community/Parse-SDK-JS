@@ -22,6 +22,7 @@ jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
+jest.dontMock('../ParsePolygon');
 jest.dontMock('../ParseRelation');
 jest.dontMock('../RESTController');
 jest.dontMock('../SingleInstanceStateController');
@@ -147,6 +148,7 @@ const ParseACL = require('../ParseACL').default;
 const ParseError = require('../ParseError').default;
 const ParseFile = require('../ParseFile').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
+const ParsePolygon = require('../ParsePolygon').default;
 const ParseObject = require('../ParseObject').default;
 const ParseOp = require('../ParseOp');
 const RESTController = require('../RESTController');
@@ -1102,6 +1104,40 @@ describe('ParseObject', () => {
       age: 24
     });
     expect(p.op('age')).toBe(undefined);
+  });
+
+  it('handle GeoPoint changes for server', () => {
+    const p = new ParseObject('Person');
+    p.id = 'PPoint';
+    const created = new Date();
+    const geopoint = new ParseGeoPoint(0, 0);
+    p._handleSaveResponse({
+      createdAt: created.toISOString(),
+      point: geopoint.toJSON(),
+    });
+    expect(p._getServerData()).toEqual({
+      updatedAt: created,
+      createdAt: created,
+      point: geopoint,
+    });
+    expect(p._getServerData().point instanceof ParseGeoPoint).toBe(true);
+  });
+
+  it('handle Polygon changes for server', () => {
+    const p = new ParseObject('Person');
+    p.id = 'PPolygon';
+    const created = new Date();
+    const polygon = new ParsePolygon([[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]);
+    p._handleSaveResponse({
+      createdAt: created.toISOString(),
+      shape: polygon.toJSON(),
+    });
+    expect(p._getServerData()).toEqual({
+      updatedAt: created,
+      createdAt: created,
+      shape: polygon,
+    });
+    expect(p._getServerData().shape instanceof ParsePolygon).toBe(true);
   });
 
   it('handle createdAt string for server', () => {
