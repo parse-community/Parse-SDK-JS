@@ -125,14 +125,14 @@ describe('ObjectStateMutations', () => {
     expect(ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId')).toEqual({
       objectField: {
         counter: 12,
-        letter: 'a',
+        letter: 'a'
       },
     });
     pendingOps = [{ 'objectField.counter': new ParseOps.SetOp(20) }];
     expect(ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId')).toEqual({
       objectField: {
         counter: 20,
-        letter: 'a',
+        letter: 'a'
       },
     });
   });

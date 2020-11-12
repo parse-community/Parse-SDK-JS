@@ -613,7 +613,7 @@ describe('ParseObject', () => {
       objectId: 'setNested',
       objectField: {
         number: 5,
-        letter: 'a',
+        letter: 'a'
       },
       otherField: {},
     });
