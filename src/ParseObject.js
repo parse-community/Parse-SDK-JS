@@ -18,8 +18,6 @@ import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
 import ParseFile from './ParseFile';
-import ParseGeoPoint from './ParseGeoPoint';
-import ParsePolygon from './ParsePolygon';
 import { when, continueWhile, resolvingPromise } from './promiseUtils';
 import { DEFAULT_PIN, PIN_PREFIX } from './LocalDatastoreUtils';
 
