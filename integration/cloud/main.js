@@ -21,6 +21,11 @@ Parse.Cloud.define('UpdateUser', function (request) {
   return user.save(null, { useMasterKey: true });
 });
 
+Parse.Cloud.define('CloudFunctionIdempotency', function () {
+  const object = new Parse.Object('IdempotencyItem');
+  return object.save(null, { useMasterKey: true });
+});
+
 Parse.Cloud.define('CloudFunctionUndefined', function() {
   return undefined;
 });

@@ -120,17 +120,19 @@ describe('ObjectStateMutations', () => {
   });
 
   it('can estimate attributes for nested documents', () => {
-    const serverData = { objectField: { counter: 10 } };
+    const serverData = { objectField: { counter: 10, letter: 'a' } };
     let pendingOps = [{ 'objectField.counter': new ParseOps.IncrementOp(2) }];
     expect(ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId')).toEqual({
       objectField: {
-        counter: 12
+        counter: 12,
+        letter: 'a'
       },
     });
     pendingOps = [{ 'objectField.counter': new ParseOps.SetOp(20) }];
     expect(ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId')).toEqual({
       objectField: {
-        counter: 20
+        counter: 20,
+        letter: 'a'
       },
     });
   });

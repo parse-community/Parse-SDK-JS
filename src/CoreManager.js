@@ -70,7 +70,7 @@ type ObjectStateController = {
   duplicateState: (source: any, dest: any) => void;
 };
 type PushController = {
-  send: (data: PushData, options: RequestOptions) => Promise;
+  send: (data: PushData) => Promise;
 };
 type QueryController = {
   find: (className: string, params: QueryJSON, options: RequestOptions) => Promise;
@@ -191,7 +191,8 @@ const config: Config & { [key: string]: mixed } = {
   USE_MASTER_KEY: false,
   PERFORM_USER_REWRITE: true,
   FORCE_REVOCABLE_SESSION: false,
-  ENCRYPTED_USER: false
+  ENCRYPTED_USER: false,
+  IDEMPOTENCY: false
 };
 
 function requireMethods(name: string, methods: Array<string>, controller: any) {

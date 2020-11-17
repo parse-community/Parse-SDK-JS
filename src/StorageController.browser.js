@@ -7,8 +7,10 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  * @flow
+ * @private
  */
 /* global localStorage */
+
 const StorageController = {
   async: 0,
 

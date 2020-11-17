@@ -14,6 +14,8 @@ jest.mock('../ParseACL');
 
 const ParseError = require('../ParseError').default;
 const ParseFile = require('../ParseFile').default;
+const b64Digit = require('../ParseFile').b64Digit;
+
 const ParseObject = require('../ParseObject').default;
 const CoreManager = require('../CoreManager');
 const EventEmitter = require('../EventEmitter');
@@ -131,6 +133,12 @@ describe('ParseFile', () => {
     expect(function() {
       new ParseFile('parse.txt', 'string');
     }).toThrow('Cannot create a Parse.File with that data.');
+  });
+
+  it('throws with invalid base64', () => {
+    expect(function() {
+      b64Digit(65);
+    }).toThrow('Tried to encode large digit 65 in base64.');
   });
 
   it('returns secure url when specified', () => {
@@ -531,6 +539,31 @@ describe('FileController', () => {
     expect(data.contentType).toBe('image/png');
   });
 
+  it('download with ajax no response', async () => {
+    const mockXHR = function () {
+      return {
+        DONE: 4,
+        open: jest.fn(),
+        send: jest.fn().mockImplementation(function() {
+          this.response = undefined;
+          this.readyState = 2;
+          this.onreadystatechange();
+          this.readyState = 4;
+          this.onreadystatechange();
+        }),
+        getResponseHeader: function() {
+          return 'image/png';
+        }
+      };
+    };
+    defaultController._setXHR(mockXHR);
+    const options = {
+      requestTask: () => {},
+    };
+    const data = await defaultController.download('https://example.com/image.png', options);
+    expect(data).toEqual({});
+  });
+
   it('download with ajax abort', async () => {
     const mockXHR = function () {
       return {
@@ -831,5 +864,41 @@ describe('FileController', () => {
       "X-Parse-Master-Key": null,
     });
     expect(handleError).not.toHaveBeenCalled();
+  });
+
+
+  it('controller saveFile format errors', async () => {
+    try {
+      await defaultController.saveFile('parse.txt', { format: 'base64'});
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('saveFile can only be used with File-type sources.');
+    }
+  });
+
+  it('controller saveBase64 format errors', async () => {
+    try {
+      await defaultController.saveBase64('parse.txt', { format: 'file'});
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('saveBase64 can only be used with Base64-type sources.');
+    }
+  });
+
+  it('controller saveFile file reader errors', async () => {
+    const fileReader = global.FileReader;
+    class FileReader {
+      readAsDataURL() {
+        this.onerror('Could not load file.');
+      }
+    }
+    global.FileReader = FileReader;
+    try {
+      await defaultController.saveFile('parse.txt', { format: 'file'});
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e).toBe('Could not load file.');
+    }
+    global.FileReader = fileReader;
   });
 });

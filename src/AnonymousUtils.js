@@ -8,9 +8,10 @@
  *
  * @flow-weak
  */
+
 import ParseUser from './ParseUser';
-const uuidv4 = require('uuid/v4');
 import type { RequestOptions } from './RESTController';
+const uuidv4 = require('uuid/v4');
 
 let registered = false;
 
@@ -38,6 +39,7 @@ let registered = false;
  *  <li>Service linking (e.g. Facebook, Twitter) will convert the anonymous user
  *  into a standard user by linking it to the service.</li>
  * </ul>
+ *
  * @class Parse.AnonymousUtils
  * @static
  */
@@ -45,11 +47,11 @@ const AnonymousUtils = {
   /**
    * Gets whether the user has their account linked to anonymous user.
    *
-   * @method isLinked
+   * @function isLinked
    * @name Parse.AnonymousUtils.isLinked
    * @param {Parse.User} user User to check for.
    *     The user must be logged in on this device.
-   * @return {Boolean} <code>true</code> if the user has their account
+   * @returns {boolean} <code>true</code> if the user has their account
    *     linked to an anonymous user.
    * @static
    */
@@ -61,13 +63,13 @@ const AnonymousUtils = {
   /**
    * Logs in a user Anonymously.
    *
-   * @method logIn
+   * @function logIn
    * @name Parse.AnonymousUtils.logIn
-   * @param {Object} options MasterKey / SessionToken.
-   * @returns {Promise}
+   * @param {object} options MasterKey / SessionToken.
+   * @returns {Promise} Logged in user
    * @static
    */
-  logIn(options?: RequestOptions) {
+  logIn(options?: RequestOptions): Promise<ParseUser> {
     const provider = this._getAuthProvider();
     return ParseUser.logInWith(provider.getAuthType(), provider.getAuthData(), options);
   },
@@ -75,14 +77,14 @@ const AnonymousUtils = {
   /**
    * Links Anonymous User to an existing PFUser.
    *
-   * @method link
+   * @function link
    * @name Parse.AnonymousUtils.link
    * @param {Parse.User} user User to link. This must be the current user.
-   * @param {Object} options MasterKey / SessionToken.
-   * @returns {Promise}
+   * @param {object} options MasterKey / SessionToken.
+   * @returns {Promise} Linked with User
    * @static
    */
-  link(user: ParseUser, options?: RequestOptions) {
+  link(user: ParseUser, options?: RequestOptions): Promise<ParseUser> {
     const provider = this._getAuthProvider();
     return user.linkWith(provider.getAuthType(), provider.getAuthData(), options);
   },

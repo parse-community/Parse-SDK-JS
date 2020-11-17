@@ -109,6 +109,16 @@ describe('Parse User', () => {
     });
   });
 
+  it('can log in a user using POST method', (done) => {
+    Parse.User.signUp('asdf', 'zxcv').then(() => {
+      return Parse.User.logIn('asdf', 'zxcv', { usePost: true });
+    }).then((user) => {
+      assert.equal(user.get('username'), 'asdf');
+      expect(user.existed()).toBe(true);
+      done();
+    });
+  });
+
   it('can login users with installationId', async () => {
     Parse.User.enableUnsafeCurrentUser();
     const currentInstallation = await Parse.CoreManager.getInstallationController().currentInstallationId();
@@ -894,8 +904,8 @@ describe('Parse User', () => {
       id: 227463280,
       consumer_key: "5QiVwxr8FQHbo5CMw46Z0jquF",
       consumer_secret: "p05FDlIRAnOtqJtjIt0xcw390jCcjj56QMdE9B52iVgOEb7LuK",
-      auth_token: "227463280-k3XC8S5QzfQlOfEdGN8aHWvhWAUpGoLwzsjYQMnt",
-      auth_token_secret: "uLlXKP6djaP9Fc2IdMcp9QqmsouXvDqcYVdUkWdu6pQpM"
+      auth_token: "227463280-lngpMGXdnG36JiuzGfAYbKcZUPwjmcIV2NqL9hWc",
+      auth_token_secret: "G1tl1R0gaYKTyxw0uYJDKRoVhM16ifyLeMwIaKlFtPkQr"
     };
     const user = new Parse.User();
     user.setUsername('Alice');
@@ -918,8 +928,8 @@ describe('Parse User', () => {
       id: 227463280,
       consumer_key: "5QiVwxr8FQHbo5CMw46Z0jquF",
       consumer_secret: "p05FDlIRAnOtqJtjIt0xcw390jCcjj56QMdE9B52iVgOEb7LuK",
-      auth_token: "227463280-k3XC8S5QzfQlOfEdGN8aHWvhWAUpGoLwzsjYQMnt",
-      auth_token_secret: "uLlXKP6djaP9Fc2IdMcp9QqmsouXvDqcYVdUkWdu6pQpM"
+      auth_token: "227463280-lngpMGXdnG36JiuzGfAYbKcZUPwjmcIV2NqL9hWc",
+      auth_token_secret: "G1tl1R0gaYKTyxw0uYJDKRoVhM16ifyLeMwIaKlFtPkQr"
     };
     const user = new Parse.User();
     user.setUsername('Alice');

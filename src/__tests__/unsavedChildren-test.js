@@ -30,6 +30,7 @@ jest.setMock('../ParseObject', mockObject);
 
 const ParseFile = require('../ParseFile').default;
 const ParseObject = require('../ParseObject');
+const ParseRelation = require('../ParseRelation').default;
 const unsavedChildren = require('../unsavedChildren').default;
 
 describe('unsavedChildren', () => {
@@ -197,5 +198,17 @@ describe('unsavedChildren', () => {
     a.attributes.b.attributes.a = a;
 
     expect(unsavedChildren(a)).toEqual([ a.attributes.b ]);
+  });
+
+  it('skips Relation', () => {
+    const relation = new ParseRelation(null, null);
+    const f = new ParseObject({
+      className: 'Folder',
+      id: '121',
+      attributes: {
+        r: relation,
+      },
+    });
+    expect(unsavedChildren(f)).toEqual([]);
   });
 });

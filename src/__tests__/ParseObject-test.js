@@ -22,6 +22,7 @@ jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
+jest.dontMock('../ParsePolygon');
 jest.dontMock('../ParseRelation');
 jest.dontMock('../RESTController');
 jest.dontMock('../SingleInstanceStateController');
@@ -147,6 +148,7 @@ const ParseACL = require('../ParseACL').default;
 const ParseError = require('../ParseError').default;
 const ParseFile = require('../ParseFile').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
+const ParsePolygon = require('../ParsePolygon').default;
 const ParseObject = require('../ParseObject').default;
 const ParseOp = require('../ParseOp');
 const RESTController = require('../RESTController');
@@ -180,6 +182,7 @@ function flushPromises() {
 describe('ParseObject', () => {
   beforeEach(() => {
     ParseObject.enableSingleInstance();
+    jest.clearAllMocks();
   });
 
   it('is initially created with no Id', () => {
@@ -196,6 +199,45 @@ describe('ParseObject', () => {
     });
     expect(o.className).toBe('Item');
     expect(o.attributes).toEqual({ value: 12 });
+  });
+
+  it('can be created with attributes parameter', () => {
+    const o = new ParseObject('Item', {
+      value: 12,
+    });
+    expect(o.className).toBe('Item');
+    expect(o.attributes).toEqual({ value: 12 });
+  });
+
+  it('can ignore setting invalid key', () => {
+    const o = new ParseObject('Item');
+    const o2 = o.set(1234);
+    expect(o).toEqual(o2);
+  });
+
+  it('can ignore setting createdAt', () => {
+    const o = new ParseObject('Item');
+    o.set('createdAt', '1234');
+    expect(o.get('createdAt')).toEqual(undefined);
+  });
+
+  it('can handle setting relationOp', () => {
+    const child = new ParseObject('Child');
+    child.id = 'child1234';
+    const relationOpJSON = { __op: 'AddRelation', objects: [child] };
+    const o = new ParseObject('Item');
+    o.set('friends', relationOpJSON);
+    o._handleSaveResponse({});
+    expect(o.get('friends').targetClassName).toBe('Child');
+  });
+
+  it('cannot create with invalid attributes', () => {
+    expect(() => {
+      new ParseObject({
+        className: 'Item',
+        'invalid#name' : 'foo',
+      });
+    }).toThrow("Can't create an invalid Parse Object");
   });
 
   it('can ignore validation if ignoreValidation option is provided', () => {
@@ -285,6 +327,16 @@ describe('ParseObject', () => {
     expect(o.updatedAt).toEqual(updated);
   });
 
+  it('fetch ACL from serverData', () => {
+    const ACL = new ParseACL({ 'user1': { read: true } });
+    const o = new ParseObject('Item');
+    o._finishFetch({
+      objectId: 'O1',
+      ACL: { 'user1': { read: true } },
+    });
+    expect(o.getACL()).toEqual(ACL);
+  });
+
   it('can be rendered to JSON', () => {
     let o = new ParseObject('Item');
     o.set({
@@ -338,6 +390,20 @@ describe('ParseObject', () => {
     });
   });
 
+  it('can convert to a offline pointer', () => {
+    const o = new ParseObject('Item');
+    o.id = 'AnObjectId';
+    expect(function() {o.toOfflinePointer();}).toThrow(
+      'Cannot create a offline pointer to a saved ParseObject'
+    );
+    o._localId = 'local1234';
+    expect(o.toOfflinePointer()).toEqual({
+      __type: 'Object',
+      className: 'Item',
+      _localId: 'local1234'
+    });
+  });
+
   it('can test equality against another ParseObject', () => {
     const a = new ParseObject('Item');
     expect(a.equals(a)).toBe(true);
@@ -379,9 +445,11 @@ describe('ParseObject', () => {
     const o = new ParseObject('Person');
     o.set('age', 28);
     o.set('phoneProvider', 'AT&T');
+    o.set('objectField', { toString: 'hacking' });
     expect(o.escape('notSet')).toBe('');
     expect(o.escape('age')).toBe('28');
     expect(o.escape('phoneProvider')).toBe('AT&amp;T');
+    expect(o.escape('objectField')).toBe('');
   });
 
   it('can tell if it has an attribute', () => {
@@ -396,17 +464,21 @@ describe('ParseObject', () => {
     o._finishFetch({
       objectId: 'p99',
       age: 28,
-      human: true
+      human: true,
+      objectField: { foo: 'bar' },
     });
     expect(o.dirty()).toBe(false);
     expect(o.dirty('age')).toBe(false);
     expect(o.dirty('human')).toBe(false);
     expect(o.dirty('unset')).toBe(false);
+    expect(o.dirty('objectField')).toBe(false);
     o.set('human', false);
+    o.set('objectField', { foo: 'baz' });
     expect(o.dirty()).toBe(true);
     expect(o.dirty('age')).toBe(false);
     expect(o.dirty('human')).toBe(true);
     expect(o.dirty('unset')).toBe(false);
+    expect(o.dirty('objectField')).toBe(true);
   })
 
   it('can unset a field', () => {
@@ -540,20 +612,21 @@ describe('ParseObject', () => {
     o._finishFetch({
       objectId: 'setNested',
       objectField: {
-        number: 5
+        number: 5,
+        letter: 'a'
       },
       otherField: {},
     });
 
     expect(o.attributes).toEqual({
-      objectField: { number: 5 },
+      objectField: { number: 5, letter: 'a' },
       otherField: {},
     });
     o.set('otherField', { hello: 'world' });
     o.set('objectField.number', 20);
 
     expect(o.attributes).toEqual({
-      objectField: { number: 20 },
+      objectField: { number: 20, letter: 'a' },
       otherField: { hello: 'world' },
     });
     expect(o.op('objectField.number') instanceof SetOp).toBe(true);
@@ -562,6 +635,44 @@ describe('ParseObject', () => {
       'objectField.number': 20,
       otherField: { hello: 'world' },
     });
+  });
+
+  it('can increment a nested field', () => {
+    const o = new ParseObject('Person');
+    o._finishFetch({
+      objectId: 'incNested',
+      objectField: {
+        number: 5,
+        letter: 'a'
+      },
+    });
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 5, letter: 'a' },
+    });
+    o.increment('objectField.number');
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 6, letter: 'a' },
+    });
+    expect(o.op('objectField.number') instanceof IncrementOp).toBe(true);
+    expect(o.dirtyKeys()).toEqual(['objectField.number', 'objectField']);
+    expect(o._getSaveJSON()).toEqual({
+      'objectField.number': {
+        "__op": "Increment",
+        "amount": 1
+      },
+    });
+
+    // Nested objects only return values changed
+    o._handleSaveResponse({
+      objectId: 'incNested',
+      objectField: {
+        number: 6
+      }
+    })
+    expect(o.get('objectField').number).toEqual(6)
+    expect(o.get('objectField').letter).toEqual('a')
   });
 
   it('ignore set nested field on new object', () => {
@@ -689,6 +800,17 @@ describe('ParseObject', () => {
     });
     const o2 = o.clone();
     expect(o2._getSaveJSON().aRelation).toEqual(relationJSON);
+  });
+
+  it('can get relation from relation field', () => {
+    const relationJSON = {__type: 'Relation', className: 'Bar'};
+    const o = ParseObject.fromJSON({
+      objectId: '999',
+      className: 'Foo',
+      aRelation: relationJSON,
+    });
+    const rel = o.relation('aRelation');
+    expect(rel.toJSON()).toEqual(relationJSON);
   });
 
   it('can detect dirty object children', () => {
@@ -952,12 +1074,19 @@ describe('ParseObject', () => {
   it('updates the existed flag when saved', () => {
     const o = new ParseObject('Item');
     expect(o.existed()).toBe(false);
+    expect(o.isNew()).toBe(true);
     o._handleSaveResponse({
       objectId: 'I2'
     }, 201);
     expect(o.existed()).toBe(false);
     o._handleSaveResponse({}, 200);
     expect(o.existed()).toBe(true);
+  });
+
+  it('check existed without object state', () => {
+    const o = new ParseObject('Item');
+    o.id = 'test890';
+    expect(o.existed()).toBe(false);
   });
 
   it('commits changes to server data when saved', () => {
@@ -975,6 +1104,53 @@ describe('ParseObject', () => {
       age: 24
     });
     expect(p.op('age')).toBe(undefined);
+  });
+
+  it('handle GeoPoint changes for server', () => {
+    const p = new ParseObject('Person');
+    p.id = 'PPoint';
+    const created = new Date();
+    const geopoint = new ParseGeoPoint(0, 0);
+    p._handleSaveResponse({
+      createdAt: created.toISOString(),
+      point: geopoint.toJSON(),
+    });
+    expect(p._getServerData()).toEqual({
+      updatedAt: created,
+      createdAt: created,
+      point: geopoint,
+    });
+    expect(p._getServerData().point instanceof ParseGeoPoint).toBe(true);
+  });
+
+  it('handle Polygon changes for server', () => {
+    const p = new ParseObject('Person');
+    p.id = 'PPolygon';
+    const created = new Date();
+    const polygon = new ParsePolygon([[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]);
+    p._handleSaveResponse({
+      createdAt: created.toISOString(),
+      shape: polygon.toJSON(),
+    });
+    expect(p._getServerData()).toEqual({
+      updatedAt: created,
+      createdAt: created,
+      shape: polygon,
+    });
+    expect(p._getServerData().shape instanceof ParsePolygon).toBe(true);
+  });
+
+  it('handle createdAt string for server', () => {
+    const p = new ParseObject('Person');
+    p.id = 'P9';
+    const created = new Date();
+    p._handleSaveResponse({
+      createdAt: created.toISOString()
+    });
+    expect(p._getServerData()).toEqual({
+      updatedAt: created,
+      createdAt: created,
+    });
   });
 
   it('isDataAvailable', () => {
@@ -1141,6 +1317,92 @@ describe('ParseObject', () => {
     spy.mockRestore();
   });
 
+  it('fetchAll with empty values', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: [{}]
+      }])
+    );
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+
+    const results = await ParseObject.fetchAll([]);
+    expect(results).toEqual([]);
+    expect(controller.ajax).toHaveBeenCalledTimes(0);
+  });
+
+  it('fetchAll with null', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: [{}]
+      }])
+    );
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+
+    const results = await ParseObject.fetchAll(null);
+    expect(results).toEqual(undefined);
+    expect(controller.ajax).toHaveBeenCalledTimes(0);
+  });
+
+  it('fetchAll unique instance', async () => {
+    ParseObject.disableSingleInstance();
+    const obj = new ParseObject('Item');
+    obj.id = 'fetch0';
+    const results = await ParseObject.fetchAll([obj]);
+    expect(results[0].id).toEqual(obj.id);
+  });
+
+  it('fetchAll objects does not exist on server', async () => {
+    jest.spyOn(mockQuery.prototype, 'find').mockImplementationOnce(() => {
+      return Promise.resolve([]);
+    });
+    const obj = new ParseObject('Item');
+    obj.id = 'fetch-1';
+    try {
+      await ParseObject.fetchAll([obj]);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('All objects must exist on the server.');
+    }
+  });
+
+  it('fetchAll unsaved objects', async () => {
+    const obj = new ParseObject('Item');
+    try {
+      await ParseObject.fetchAll([obj]);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('All objects must have an ID');
+    }
+  });
+
+  it('fetchAll objects with different classes', async () => {
+    const obj = new ParseObject('Item');
+    const obj2 = new ParseObject('TestObject');
+    try {
+      await ParseObject.fetchAll([obj, obj2]);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('All objects must have an ID');
+    }
+  });
+
+  it('fetchAll saved objects with different classes', async () => {
+    const obj1 = new ParseObject('Item');
+    const obj2 = new ParseObject('TestObject');
+    obj1.id = 'fetch1';
+    obj2.id = 'fetch2';
+    try {
+      await ParseObject.fetchAll([obj1, obj2]);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('All objects should be of the same class');
+    }
+  });
+
   it('can fetchAllWithInclude', async () => {
     const objectController = CoreManager.getObjectController();
     const spy = jest.spyOn(
@@ -1170,11 +1432,60 @@ describe('ParseObject', () => {
     spy.mockRestore();
   });
 
+  it('can fetchAllIfNeededWithInclude', async () => {
+    const objectController = CoreManager.getObjectController();
+    const spy = jest.spyOn(
+      objectController,
+      'fetch'
+    )
+      .mockImplementationOnce(() => {})
+      .mockImplementationOnce(() => {})
+      .mockImplementationOnce(() => {});
+
+    const parent = new ParseObject('Person');
+    await ParseObject.fetchAllIfNeededWithInclude([parent], 'child', { useMasterKey: true, sessionToken: '123'});
+    await ParseObject.fetchAllIfNeededWithInclude([parent], ['child']);
+    await ParseObject.fetchAllIfNeededWithInclude([parent], [['child']]);
+    expect(objectController.fetch).toHaveBeenCalledTimes(3);
+
+    expect(objectController.fetch.mock.calls[0]).toEqual([
+      [parent], false, { useMasterKey: true, sessionToken: '123', include: ['child'] }
+    ]);
+    expect(objectController.fetch.mock.calls[1]).toEqual([
+      [parent], false, { include: ['child'] }
+    ]);
+    expect(objectController.fetch.mock.calls[2]).toEqual([
+      [parent], false, { include: ['child'] }
+    ]);
+
+    spy.mockRestore();
+  });
+
   it('can check if object exists', async () => {
     const parent = new ParseObject('Person');
     expect(await parent.exists()).toBe(false);
     parent.id = '1234'
     expect(await parent.exists()).toBe(true);
+
+    jest.spyOn(mockQuery.prototype, 'get').mockImplementationOnce(() => {
+      return Promise.reject({
+        code: 101,
+      });
+    });
+    expect(await parent.exists()).toBe(false);
+
+    jest.spyOn(mockQuery.prototype, 'get').mockImplementationOnce(() => {
+      return Promise.reject({
+        code: 1,
+        message: 'Internal Server Error',
+      });
+    });
+    try {
+      await parent.exists();
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.code).toBe(1);
+    }
   });
 
   it('can save the object', (done) => {
@@ -1196,6 +1507,23 @@ describe('ParseObject', () => {
       expect(obj.get('count')).toBe(1);
       expect(obj.op('age')).toBe(undefined);
       expect(obj.dirty()).toBe(false);
+      done();
+    });
+  });
+
+  it('can save the object with key / value', (done) => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: {
+          objectId: 'P8',
+        }
+      }])
+    );
+    const p = new ParseObject('Person');
+    p.save('foo', 'bar').then((obj) => {
+      expect(obj).toBe(p);
+      expect(obj.get('foo')).toBe('bar');
       done();
     });
   });
@@ -1495,6 +1823,17 @@ describe('ParseObject', () => {
       ));
   });
 
+  it('should fail saveAll batch cycle', async () => {
+    const obj = new ParseObject('Item');
+    obj.set('child', obj);
+    try {
+      await ParseObject.saveAll([obj]);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('Tried to save a batch with a cycle.');
+    }
+  });
+
   it('should fail on invalid date', (done) => {
     const obj = new ParseObject('Item');
     obj.set('when', new Date(Date.parse(null)));
@@ -1578,11 +1917,11 @@ describe('ParseObject', () => {
     const controller = CoreManager.getRESTController();
     jest.spyOn(controller, 'ajax');
     // Save object
-    const context = {a: "a"};
+    const context = {a: "saveAll"};
     const obj = new ParseObject('Item');
     obj.id = 'pid';
     obj.set('test', 'value');
-    await ParseObject.saveAll([obj], {context})
+    await ParseObject.saveAll([obj], { context, useMasterKey: true })
     // Validate
     const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
     expect(jsonBody._context).toEqual(context);
@@ -1600,13 +1939,94 @@ describe('ParseObject', () => {
     const controller = CoreManager.getRESTController();
     jest.spyOn(controller, 'ajax');
     // Save object
-    const context = {a: "a"};
+    const context = {a: "b"};
     const obj = new ParseObject('Item');
     obj.id = 'pid';
     await ParseObject.destroyAll([obj], { context: context })
     // Validate
     const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
     expect(jsonBody._context).toEqual(context);
+  });
+
+  it('destroyAll with options', async () => {
+    // Mock XHR
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: [{}]
+      }])
+    );
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+
+    const obj = new ParseObject('Item');
+    obj.id = 'pid';
+    await ParseObject.destroyAll([obj], {
+      useMasterKey: true,
+      sessionToken: 'r:1234',
+      batchSize: 25,
+    });
+
+    const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
+    expect(jsonBody._MasterKey).toBe('C')
+    expect(jsonBody._SessionToken).toBe('r:1234');
+  });
+
+  it('destroyAll with empty values', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: [{}]
+      }])
+    );
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+
+    let results = await ParseObject.destroyAll([]);
+    expect(results).toEqual([]);
+
+    results = await ParseObject.destroyAll(null);
+    expect(results).toEqual(null);
+    expect(controller.ajax).toHaveBeenCalledTimes(0);
+  });
+
+  it('destroyAll unsaved objects', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: [{}]
+      }])
+    );
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+
+    const obj = new ParseObject('Item')
+    const results = await ParseObject.destroyAll([obj]);
+    expect(results).toEqual([obj]);
+    expect(controller.ajax).toHaveBeenCalledTimes(0);
+  });
+
+  it('destroyAll handle error response', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([{
+        status: 200,
+        response: [{
+          error: {
+            code: 101,
+            error: 'Object not found',
+          }
+        }]
+      }])
+    );
+
+    const obj = new ParseObject('Item')
+    obj.id = 'toDelete1';
+    try {
+      await ParseObject.destroyAll([obj]);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.code).toBe(600);
+    }
   });
 
   it('can save a chain of unsaved objects', async () => {
@@ -1796,6 +2216,17 @@ describe('ParseObject', () => {
     // Validate
     const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
     expect(jsonBody._context).toEqual(context);
+  });
+
+  it('handle destroy on new object', async () => {
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+
+    const obj = new ParseObject('Item');
+
+    await obj.destroy({ useMasterKey: true });
+
+    expect(controller.ajax).toHaveBeenCalledTimes(0);
   });
 
   it('can save an array of objects', async (done) => {
@@ -2017,6 +2448,10 @@ describe('ParseObject', () => {
 });
 
 describe('ObjectController', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('can fetch a single object', async (done) => {
     const objectController = CoreManager.getObjectController();
     const xhr = {
@@ -2056,10 +2491,10 @@ describe('ObjectController', () => {
     const controller = CoreManager.getRESTController();
     jest.spyOn(controller, 'ajax');
     // Save object
-    const context = {a: "a"};
+    const context = { a: 'fetch' };
     const obj = new ParseObject('Item');
     obj.id = 'pid';
-    await obj.fetch({context});
+    await obj.fetch({ context });
     // Validate
     const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
     expect(jsonBody._context).toEqual(context);
@@ -2517,6 +2952,12 @@ describe('ObjectController', () => {
 
     expect(o).not.toBe(o2);
   });
+
+  it('cannot create a new instance of an object without className', () => {
+    expect(() => {
+      ParseObject.fromJSON({});
+    }).toThrow('Cannot create an object without a className');
+  });
 });
 
 describe('ParseObject (unique instance mode)', () => {
@@ -2776,6 +3217,20 @@ describe('ParseObject Subclasses', () => {
     );
   });
 
+  it('registerSubclass errors', () => {
+    expect(() => {
+      ParseObject.registerSubclass(1234);
+    }).toThrow('The first argument must be a valid class name.');
+
+    expect(() => {
+      ParseObject.registerSubclass('TestObject', undefined);
+    }).toThrow('You must supply a subclass constructor.');
+
+    expect(() => {
+      ParseObject.registerSubclass('TestObject', {});
+    }).toThrow('You must register the subclass constructor. Did you attempt to register an instance of the subclass?');
+  });
+
   it('can inflate subclasses from server JSON', () => {
     const json = {
       className: 'MyObject',
@@ -2803,6 +3258,21 @@ describe('ParseObject Subclasses', () => {
     });
     expect(o2.id).toBe(undefined);
     expect(o.equals(o2)).toBe(false);
+  });
+
+  it('can be cleared', () => {
+    const o = new MyObject();
+    o.set({
+      size: 'large',
+      count: 7,
+    });
+    jest.spyOn(o, 'set');
+    o.clear();
+    expect(o.set).toHaveBeenCalledWith({
+      count: true, size: true,
+    }, {
+      unset: true,
+    });
   });
 });
 
@@ -2869,6 +3339,34 @@ describe('ParseObject extensions', () => {
 
     const i = new InitObject()
     expect(i.get('field')).toBe(12);
+  });
+
+  it('can handle className parameters', () => {
+    expect(() => {
+      ParseObject.extend();
+    }).toThrow("Parse.Object.extend's first argument should be the className.");
+
+    let CustomObject = ParseObject.extend('Item');
+    expect(CustomObject.className).toBe('Item');
+
+    CustomObject = ParseObject.extend({ className: 'Test' });
+    expect(CustomObject.className).toBe('Test');
+  });
+
+  it('can extend with user rewrite', () => {
+    const CustomObject = ParseObject.extend('User');
+    expect(CustomObject.className).toBe('_User');
+  });
+
+  it('can extend multiple subclasses', () => {
+    const CustomObject = ParseObject.extend('Item');
+    expect(() => {
+      new CustomObject({ 'invalid#name': 'bar' });
+    }).toThrow("Can't create an invalid Parse Object");
+
+    const CustomUserObject = CustomObject.extend('User');
+    const CustomRewrite = CustomUserObject.extend();
+    expect(CustomRewrite.className).toBe('_User');
   });
 });
 

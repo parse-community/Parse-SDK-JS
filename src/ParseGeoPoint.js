@@ -29,6 +29,7 @@
  *   var object = new Parse.Object("PlaceObject");
  *   object.set("location", point);
  *   object.save();</pre></p>
+ *
  * @alias Parse.GeoPoint
  */
 /* global navigator */
@@ -37,8 +38,8 @@ class ParseGeoPoint {
   _longitude: number;
 
   /**
-   * @param {(Number[]|Object|Number)} options Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point.
-   * @param {Number} longitude The longitude of the GeoPoint
+   * @param {(number[] | object | number)} arg1 Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point.
+   * @param {number} arg2 The longitude of the GeoPoint
    */
   constructor(
     arg1: Array<number> |
@@ -66,8 +67,9 @@ class ParseGeoPoint {
   /**
    * North-south portion of the coordinate, in range [-90, 90].
    * Throws an exception if set out of range in a modern browser.
-   * @property latitude
-   * @type Number
+   *
+   * @property {number} latitude
+   * @returns {number}
    */
   get latitude(): number {
     return this._latitude;
@@ -81,8 +83,9 @@ class ParseGeoPoint {
   /**
    * East-west portion of the coordinate, in range [-180, 180].
    * Throws if set out of range in a modern browser.
-   * @property longitude
-   * @type Number
+   *
+   * @property {number} longitude
+   * @returns {number}
    */
   get longitude(): number {
     return this._longitude;
@@ -95,8 +98,8 @@ class ParseGeoPoint {
 
   /**
    * Returns a JSON representation of the GeoPoint, suitable for Parse.
-
-   * @return {Object}
+   *
+   * @returns {object}
    */
   toJSON(): { __type: string; latitude: number; longitude: number } {
     ParseGeoPoint._validate(this._latitude, this._longitude);
@@ -117,9 +120,9 @@ class ParseGeoPoint {
 
   /**
    * Returns the distance from this GeoPoint to another in radians.
-
+   *
    * @param {Parse.GeoPoint} point the other Parse.GeoPoint.
-   * @return {Number}
+   * @returns {number}
    */
   radiansTo(point: ParseGeoPoint): number {
     const d2r = Math.PI / 180.0;
@@ -141,9 +144,9 @@ class ParseGeoPoint {
 
   /**
    * Returns the distance from this GeoPoint to another in kilometers.
-
+   *
    * @param {Parse.GeoPoint} point the other Parse.GeoPoint.
-   * @return {Number}
+   * @returns {number}
    */
   kilometersTo(point: ParseGeoPoint): number {
     return this.radiansTo(point) * 6371.0;
@@ -151,9 +154,9 @@ class ParseGeoPoint {
 
   /**
    * Returns the distance from this GeoPoint to another in miles.
-
+   *
    * @param {Parse.GeoPoint} point the other Parse.GeoPoint.
-   * @return {Number}
+   * @returns {number}
    */
   milesTo(point: ParseGeoPoint): number {
     return this.radiansTo(point) * 3958.8;
@@ -195,8 +198,9 @@ class ParseGeoPoint {
 
   /**
    * Creates a GeoPoint with the user's current location, if available.
-   * Calls options.success with a new GeoPoint instance or calls options.error.
+   *
    * @static
+   * @returns {Parse.GeoPoint} User's current location
    */
   static current() {
     return navigator.geolocation.getCurrentPosition((location) => {

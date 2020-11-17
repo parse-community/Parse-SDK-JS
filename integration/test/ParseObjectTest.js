@@ -255,6 +255,33 @@ describe('Parse Object', () => {
     assert.equal(result.get('objectField').number, 20);
   });
 
+  it('can increment nested field and retain full object', async () => {
+    const obj = new Parse.Object('TestIncrementObject');
+    obj.set('objectField', { number: 5, letter: 'a' });
+    assert.equal(obj.get('objectField').number, 5);
+    assert.equal(obj.get('objectField').letter, 'a');
+    await obj.save();
+    assert.deepStrictEqual(obj.attributes.objectField, { number: 5, letter: 'a' });
+
+    obj.increment('objectField.number', 15);
+    assert.deepStrictEqual(obj.attributes.objectField, { number: 20, letter: 'a' });
+    assert.deepStrictEqual(obj.attributes.objectField, { number: 20, letter: 'a' });
+
+    assert.equal(obj.get('objectField').number, 20);
+    assert.equal(obj.get('objectField').letter, 'a');
+    await obj.save();
+
+    assert.equal(obj.get('objectField').number, 20);
+    assert.equal(obj.get('objectField').letter, 'a');
+    assert.deepStrictEqual(obj.attributes.objectField, { number: 20, letter: 'a' });
+
+    const query = new Parse.Query('TestIncrementObject');
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, 20);
+    assert.equal(result.get('objectField').letter, 'a');
+    assert.deepStrictEqual(result.attributes.objectField, { number: 20, letter: 'a' });
+  });
+
   it('can increment non existing field', async () => {
     const obj = new TestObject();
     obj.set('objectField', { number: 5 });
@@ -300,7 +327,7 @@ describe('Parse Object', () => {
       await obj.save();
       assert.equal(false, true);
     } catch(error) {
-      assert.equal(error.message, "Cannot create property 'dot' on string 'world'");
+      assert.equal(error.message, 'schema mismatch for TestObject.hello; expected String but got Object');
     }
   });
 

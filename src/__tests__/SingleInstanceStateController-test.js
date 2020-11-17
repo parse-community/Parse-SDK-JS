@@ -385,4 +385,23 @@ describe('SingleInstanceStateController', () => {
     });
     expect(SingleInstanceStateController.getState({ className: 'someClass', id: 'P' })).toBe(null);
   });
+
+  it('can duplicate the state of an object', () => {
+    const obj = { className: 'someClass', id: 'someId' };
+    SingleInstanceStateController.setServerData(obj, { counter: 12, name: 'original' });
+    const setCount = new ParseOps.SetOp(44);
+    const setValid = new ParseOps.SetOp(true);
+    SingleInstanceStateController.setPendingOp(obj, 'counter', setCount);
+    SingleInstanceStateController.setPendingOp(obj, 'valid', setValid);
+
+    const duplicate = { className: 'someClass', id: 'dupId' };
+    SingleInstanceStateController.duplicateState(obj, duplicate);
+    expect(SingleInstanceStateController.getState(duplicate)).toEqual({
+      serverData: { counter: 12, name: 'original' },
+      pendingOps: [{ counter: setCount, valid: setValid }],
+      objectCache: {},
+      tasks: new TaskQueue(),
+      existed: false
+    });
+  });
 });

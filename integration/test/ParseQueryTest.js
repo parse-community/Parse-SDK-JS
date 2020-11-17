@@ -362,6 +362,15 @@ describe('Parse Query', () => {
     });
   });
 
+  it('can do equalTo queries with object', (done) => {
+    const query = new Parse.Query('BoxedNumber');
+    query.equalTo({ number: 3 });
+    query.find().then((results) => {
+      assert.equal(results.length, 1);
+      done();
+    });
+  });
+
   it('can test equality with undefined', (done) => {
     const query = new Parse.Query('BoxedNumber');
     query.equalTo('number', undefined);
@@ -430,6 +439,15 @@ describe('Parse Query', () => {
   it('can perform notEqualTo queries', (done) => {
     const query = new Parse.Query('BoxedNumber');
     query.notEqualTo('number', 5);
+    query.find().then((results) => {
+      assert.equal(results.length, 9);
+      done();
+    });
+  });
+
+  it('can perform notEqualTo queries with object', (done) => {
+    const query = new Parse.Query('BoxedNumber');
+    query.notEqualTo({ number: 5 });
     query.find().then((results) => {
       assert.equal(results.length, 9);
       done();
@@ -1223,6 +1241,18 @@ describe('Parse Query', () => {
     });
   });
 
+  it('can return all objects with findAll', async () => {
+    const objs = [...Array(101)].map(() => new Parse.Object('Container'));
+
+    await Parse.Object.saveAll(objs);
+
+    const query = new Parse.Query('Container');
+
+    const result = await query.findAll();
+
+    assert.equal(result.length, 101);
+  });
+
   it('can include nested objects via array', (done) => {
     const child = new TestObject();
     const parent = new Parse.Object('Container');
@@ -1804,12 +1834,12 @@ describe('Parse Query', () => {
     ];
     const objects = [];
     for (const i in subjects) {
-      const obj = new TestObject({ comment: subjects[i] });
+      const obj = new TestObject({ subject: subjects[i] });
       objects.push(obj);
     }
     return Parse.Object.saveAll(objects).then(() => {
       const q = new Parse.Query(TestObject);
-      q.fullText('comment', 'coffee');
+      q.fullText('subject', 'coffee');
       q.ascending('$score');
       q.select('$score');
       return q.find();
@@ -2023,5 +2053,20 @@ describe('Parse Query', () => {
     query.explain();
     const explain = await query.find();
     assert.equal(explain.queryPlanner.winningPlan.inputStage.inputStage.indexName, '_id_');
+  });
+
+  it('can query with select on null field', async () => {
+    const obj1 = new TestObject({ number: 1, arrayField: [] });
+    const obj2 = new TestObject({ number: 2, arrayField: [{ subfield: 1 }] });
+    const obj3 = new TestObject({ number: 3, arrayField: null });
+    await Parse.Object.saveAll([obj1, obj2, obj3]);
+
+    const query = new Parse.Query(TestObject);
+    query.select(['arrayField.subfield']);
+    query.ascending('number');
+    const results = await query.find();
+    expect(results[0].get('arrayField')).toEqual([]);
+    expect(results[1].get('arrayField')).toEqual([{ subfield: 1 }]);
+    expect(results[2].get('arrayField')).toEqual(null);
   });
 });

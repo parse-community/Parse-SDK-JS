@@ -126,8 +126,10 @@ export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<O
         if (attr.includes('.')) {
           // convert a.b.c into { a: { b: { c: value } } }
           const fields = attr.split('.');
+          const first = fields[0];
           const last = fields[fields.length - 1];
-          let object = Object.assign({}, data);
+          data[first] = { ...serverData[first] };
+          let object = { ...data };
           for (let i = 0; i < fields.length - 1; i++) {
             object = object[fields[i]];
           }

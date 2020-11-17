@@ -9,6 +9,8 @@
  * @flow
  */
 /* global XMLHttpRequest, XDomainRequest */
+const uuidv4 = require('uuid/v4');
+
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
 import { resolvingPromise } from './promiseUtils';
@@ -22,6 +24,7 @@ export type RequestOptions = {
   include?: any;
   progress?: any;
   context?: any;
+  usePost?: boolean;
 };
 
 export type FullOptions = {
@@ -31,6 +34,7 @@ export type FullOptions = {
   sessionToken?: string;
   installationId?: string;
   progress?: any;
+  usePost?: boolean;
 };
 
 let XHR = null;
@@ -93,6 +97,8 @@ const RESTController = {
       return ajaxIE9(method, url, data, headers, options);
     }
     const promise = resolvingPromise();
+    const isIdempotent = CoreManager.get('IDEMPOTENCY') && ['POST', 'PUT'].includes(method);
+    const requestId = isIdempotent ? uuidv4() : '';
     let attempts = 0;
 
     const dispatch = function() {
@@ -151,6 +157,9 @@ const RESTController = {
       if (CoreManager.get('IS_NODE')) {
         headers['User-Agent'] = 'Parse/' + CoreManager.get('VERSION') +
           ' (NodeJS ' + process.versions.node + ')';
+      }
+      if (isIdempotent) {
+        headers['X-Parse-Request-Id'] = requestId;
       }
       if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
         headers['Authorization'] = CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
@@ -314,9 +323,10 @@ const RESTController = {
         );
       }
     } else {
+      const message = response.message ? response.message : response;
       error = new ParseError(
         ParseError.CONNECTION_FAILED,
-        'XMLHttpRequest failed: ' + JSON.stringify(response)
+        'XMLHttpRequest failed: ' + JSON.stringify(message)
       );
     }
     return Promise.reject(error);
@@ -324,6 +334,10 @@ const RESTController = {
 
   _setXHR(xhr: any) {
     XHR = xhr;
+  },
+
+  _getXHR() {
+    return XHR;
   }
 }
 

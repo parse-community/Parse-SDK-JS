@@ -70,6 +70,10 @@ describe('ParseACL', () => {
     expect(a.setReadAccess.bind(a, 12, true)).toThrow(
       'userId must be a string.'
     );
+
+    expect(() => {
+      a.getReadAccess(new ParseUser(), true)
+    }).toThrow('Cannot get access for a ParseUser without an ID');
   });
 
   it('throws when setting an invalid access', () => {
@@ -77,6 +81,17 @@ describe('ParseACL', () => {
     expect(a.setReadAccess.bind(a, 'aUserId', 12)).toThrow(
       'allowed must be either true or false.'
     );
+  });
+
+  it('throws when role does not have name', () => {
+    const a = new ParseACL();
+    expect(() => {
+      a.setReadAccess(new ParseRole(), true)
+    }).toThrow('Role must have a name');
+
+    expect(() => {
+      a.getReadAccess(new ParseRole(), true)
+    }).toThrow('Role must have a name');
   });
 
   it('throws when setting an invalid role', () => {
@@ -339,5 +354,13 @@ describe('ParseACL', () => {
     b.setReadAccess('aUserId', true);
     expect(a.equals(b)).toBe(false);
     expect(b.equals(a)).toBe(false);
+    expect(a.equals({})).toBe(false);
+
+    b.setWriteAccess('newUserId', true);
+    expect(a.equals(b)).toBe(false);
+
+    a.setPublicReadAccess(false);
+    a.permissionsById.newUserId = { write: false };
+    expect(a.equals(b)).toBe(false);
   });
 });

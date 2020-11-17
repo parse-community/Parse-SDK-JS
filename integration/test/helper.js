@@ -5,7 +5,7 @@ beforeAll((done) => {
   const { app } = require('../server');
   const httpServer = require('http').createServer(app);
 
-  httpServer.listen(1337, () => {
+  httpServer.on('error', console.log).listen(1337, () => {
     console.log('parse-server running on port 1337.');
     done();
   });
