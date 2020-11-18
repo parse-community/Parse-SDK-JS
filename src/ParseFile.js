@@ -320,7 +320,7 @@ class ParseFile {
    */
   destroy() {
     if (!this._name) {
-      throw new Error('Cannot delete an unsaved ParseFile.');
+      throw new Error('Cannot delete an unnamed file.');
     }
     const controller = CoreManager.getFileController();
     return controller.deleteFile(this._name).then(() => {
