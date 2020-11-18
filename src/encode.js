@@ -32,6 +32,9 @@ function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, 
       if (offline && value._getId().startsWith('local')) {
         return value.toOfflinePointer();
       }
+      if (value.id === undefined){
+        return value._toFullJSON();
+      }
       return value.toPointer();
     }
     seen = seen.concat(seenEntry);

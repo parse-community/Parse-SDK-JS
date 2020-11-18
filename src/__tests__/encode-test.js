@@ -17,6 +17,7 @@ const mockObject = function(className) {
 };
 mockObject.registerSubclass = function() {};
 mockObject.prototype = {
+  id : 'objId123',
   _getServerData() {
     return this._serverData;
   },
@@ -38,6 +39,8 @@ mockObject.prototype = {
       __type: 'Object',
       className: this.className
     };
+    seen = seen || [];
+    offline = offline || false;
     for (const attr in this.attributes) {
       json[attr] = encode(this.attributes[attr], false, false, seen.concat(this), offline);
     }
@@ -164,6 +167,64 @@ describe('encode', () => {
         iso: '2015-02-01T00:00:00.000Z'
       },
       self: 'OFFLINE_POINTER'
+    });
+  });
+
+  it('encodes unsaved ParseObject', () => {
+    const obj = new ParseObject('Item');
+    obj.id = undefined;
+    obj._serverData = {};
+    obj.attributes = {
+      str: 'string',
+      date: new Date(Date.UTC(2015, 1, 1))
+    };
+
+    expect(encode(obj)).toEqual({
+      __type: 'Object',
+      className: 'Item',
+      str: 'string',
+      date: {
+        __type: 'Date',
+        iso: '2015-02-01T00:00:00.000Z'
+      }    
+    });
+
+    const subobj = new ParseObject('Subitem')
+    subobj.id = undefined;
+    subobj._serverData = {};
+    subobj.attributes = {
+      str: 'substring',
+    };
+
+    obj.attributes = {
+      item : subobj
+    };  
+   
+    expect(encode(obj)).toEqual({
+      __type: 'Object',
+      className: 'Item',
+      item: {
+        __type: 'Object',
+        className: 'Subitem',
+        str:'substring'
+      }
+    });
+    
+    obj.attributes = {
+      items : [subobj, subobj]
+    };  
+    expect(encode(obj)).toEqual({
+      __type: 'Object',
+      className: 'Item',
+      items: [{
+        __type: 'Object',
+        className: 'Subitem',
+        str:'substring'
+      },{
+        __type: 'Object',
+        className: 'Subitem',
+        str:'substring'
+      }]
     });
   });
 
