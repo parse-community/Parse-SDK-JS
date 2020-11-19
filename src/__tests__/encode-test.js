@@ -186,7 +186,7 @@ describe('encode', () => {
       date: {
         __type: 'Date',
         iso: '2015-02-01T00:00:00.000Z'
-      }    
+      }
     });
 
     const subobj = new ParseObject('Subitem')
@@ -198,8 +198,8 @@ describe('encode', () => {
 
     obj.attributes = {
       item : subobj
-    };  
-   
+    };
+
     expect(encode(obj)).toEqual({
       __type: 'Object',
       className: 'Item',
@@ -209,10 +209,10 @@ describe('encode', () => {
         str:'substring'
       }
     });
-    
+
     obj.attributes = {
       items : [subobj, subobj]
-    };  
+    };
     expect(encode(obj)).toEqual({
       __type: 'Object',
       className: 'Item',
