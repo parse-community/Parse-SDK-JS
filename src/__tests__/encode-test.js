@@ -17,7 +17,6 @@ const mockObject = function(className) {
 };
 mockObject.registerSubclass = function() {};
 mockObject.prototype = {
-  id : 'objId123',
   _getServerData() {
     return this._serverData;
   },
@@ -118,6 +117,7 @@ describe('encode', () => {
 
   it('encodes ParseObjects', () => {
     const obj = new ParseObject('Item');
+    obj.id = 'objId123';
     obj._serverData = {};
     expect(encode(obj)).toEqual('POINTER');
 
