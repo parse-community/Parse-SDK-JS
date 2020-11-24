@@ -133,4 +133,15 @@ describe('Parse Cloud', () => {
       done();
     });
   });
+
+  it('should transfer unsaved object as full JSON', (done) => {
+    Parse.Cloud.run('getUnsavedObject').then((result) => {
+      expect(result).toBeInstanceOf(Parse.Object);
+      expect(result.get('foo')).toEqual('bar');
+      expect(result.get('child')).toBeInstanceOf(Parse.Object);
+      expect(result.get('child').get('child')).toBeInstanceOf(Parse.Object);
+      expect(result.get('child').get('foz')).toEqual('baz');
+      done();
+    }).catch(done.fail);
+  });
 });

@@ -263,4 +263,15 @@ describe('encode', () => {
       str: 'abc'
     });
   });
+
+  it('should throw an error when recursion is detected in unsaved objects', (done) => {
+    const parent = new ParseObject('Parent');
+    const child = new ParseObject('Child');
+    parent._serverData = {};
+    child._serverData = {};
+    parent.attributes = { child : child};
+    child.attributes  = {parent : parent};
+    expect(function() {encode(parent)}).toThrow("Circular recursion is not allowed on temporary Objects.");
+    done();
+  });
 });
