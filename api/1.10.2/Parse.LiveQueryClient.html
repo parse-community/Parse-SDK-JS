@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: LiveQueryClient</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: LiveQueryClient</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>
+            <span class="ancestors"><a href="Parse.html">Parse</a>.</span>LiveQueryClient<span class="signature">(options)</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">Creates a new LiveQueryClient.
+Extends events.EventEmitter
+<a href="https://nodejs.org/api/events.html#events_class_eventemitter">cloud functions</a>.
+
+A wrapper of a standard WebSocket client. We add several useful methods to 
+help you connect/disconnect to LiveQueryServer, subscribe/unsubscribe a ParseQuery easily.
+
+javascriptKey and masterKey are used for verifying the LiveQueryClient when it tries
+to connect to the LiveQuery server
+
+We expose three events to help you monitor the status of the LiveQueryClient.
+
+<pre>
+let Parse = require('parse/node');
+let LiveQueryClient = Parse.LiveQueryClient;
+let client = new LiveQueryClient({
+  applicationId: '',
+  serverURL: '',
+  javascriptKey: '',
+  masterKey: ''
+ });
+</pre>
+
+Open - When we establish the WebSocket connection to the LiveQuery server, you'll get this event.
+<pre>
+client.on('open', () => {
+
+});</pre>
+
+Close - When we lose the WebSocket connection to the LiveQuery server, you'll get this event.
+<pre>
+client.on('close', () => {
+
+});</pre>
+
+Error - When some network error or LiveQuery server error happens, you'll get this event.
+<pre>
+client.on('error', (error) => {
+
+});</pre></div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="LiveQueryClient"><span class="type-signature"></span>new LiveQueryClient<span class="signature">(options)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>applicationId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">applicationId of your Parse app</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>serverURL</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><b>the URL of your LiveQuery server</b></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>javascriptKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">(optional)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>masterKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">(optional) Your Parse Master Key. (Node.js only!)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sessionToken</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">(optional)</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="close"><span class="type-signature"></span>close<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    This method will close the WebSocket connection to this LiveQueryClient, 
+cancel the auto reconnect and unsubscribe all subscriptions based on it.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="open"><span class="type-signature"></span>open<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    After open is called, the LiveQueryClient will try to send a connect request
+to the LiveQuery server.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="subscribe"><span class="type-signature"></span>subscribe<span class="signature">(query, sessionToken)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Subscribes to a ParseQuery
+
+If you provide the sessionToken, when the LiveQuery server gets ParseObject's 
+updates from parse server, it'll try to check whether the sessionToken fulfills 
+the ParseObject's ACL. The LiveQuery server will only send updates to clients whose 
+sessionToken is fit for the ParseObject's ACL. You can check the LiveQuery protocol
+<a href="https://github.com/ParsePlatform/parse-server/wiki/Parse-LiveQuery-Protocol-Specification">here</a> for more details. The subscription you get is the same subscription you get 
+from our Standard API.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the ParseQuery you want to subscribe to</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sessionToken</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">(optional)</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    subscription
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="unsubscribe"><span class="type-signature"></span>unsubscribe<span class="signature">(subscription)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    After calling unsubscribe you'll stop receiving events from the subscription object.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>subscription</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">subscription you would like to unsubscribe from.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Parse.html">Parse</a></li><li><a href="Parse.ACL.html">ACL</a></li><li><a href="Parse.Analytics.html">Analytics</a></li><li><a href="Parse.Cloud.html">Cloud</a></li><li><a href="Parse.Config.html">Config</a></li><li><a href="Parse.Error.html">Error</a></li><li><a href="Parse.FacebookUtils.html">FacebookUtils</a></li><li><a href="Parse.File.html">File</a></li><li><a href="Parse.GeoPoint.html">GeoPoint</a></li><li><a href="Parse.LiveQuery.html">LiveQuery</a></li><li><a href="Parse.LiveQueryClient.html">LiveQueryClient</a></li><li><a href="Parse.LiveQuerySubscription.html">LiveQuerySubscription</a></li><li><a href="Parse.Object.html">Object</a></li><li><a href="Parse.Polygon.html">Polygon</a></li><li><a href="Parse.Promise.html">Promise</a></li><li><a href="Parse.Push.html">Push</a></li><li><a href="Parse.Query.html">Query</a></li><li><a href="Parse.Relation.html">Relation</a></li><li><a href="Parse.Role.html">Role</a></li><li><a href="Parse.Session.html">Session</a></li><li><a href="Parse.User.html">User</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Nov 27 2017 21:04:38 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

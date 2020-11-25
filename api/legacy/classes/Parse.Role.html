@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Parse.Role - Parse JavaScript SDK</title>
+    <link rel="stylesheet" href="https://yui-s.yahooapis.com/3.8.0pr2/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <script src="https://yui-s.yahooapis.com/combo?3.8.0pr2/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            <h1><a href="../index.html">Parse JavaScript SDK: Parse.Role</a></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: </em>
+        </div>
+    </div>
+    <div class="yui3-g">
+
+        <div id="sidebar" class="yui3-u">
+            <div id="classes" class="sidebox">
+                <div class="hd">
+                    <h2 class="no-toc">Classes</h2>
+                </div>
+                <div class="bd">
+                    <ul>
+                            <li><a href="../classes/Parse.html">Parse</a></li>
+                            <li><a href="../classes/Parse.ACL.html">Parse.ACL</a></li>
+                            <li><a href="../classes/Parse.Analytics.html">Parse.Analytics</a></li>
+                            <li><a href="../classes/Parse.Cloud.html">Parse.Cloud</a></li>
+                            <li><a href="../classes/Parse.Cloud.AfterDeleteRequest.html">Parse.Cloud.AfterDeleteRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.AfterSaveRequest.html">Parse.Cloud.AfterSaveRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.BeforeDeleteRequest.html">Parse.Cloud.BeforeDeleteRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.BeforeDeleteResponse.html">Parse.Cloud.BeforeDeleteResponse</a></li>
+                            <li><a href="../classes/Parse.Cloud.BeforeSaveRequest.html">Parse.Cloud.BeforeSaveRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.BeforeSaveResponse.html">Parse.Cloud.BeforeSaveResponse</a></li>
+                            <li><a href="../classes/Parse.Cloud.Cookie.html">Parse.Cloud.Cookie</a></li>
+                            <li><a href="../classes/Parse.Cloud.CookieOptions.html">Parse.Cloud.CookieOptions</a></li>
+                            <li><a href="../classes/Parse.Cloud.FunctionRequest.html">Parse.Cloud.FunctionRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.FunctionResponse.html">Parse.Cloud.FunctionResponse</a></li>
+                            <li><a href="../classes/Parse.Cloud.HTTPOptions.html">Parse.Cloud.HTTPOptions</a></li>
+                            <li><a href="../classes/Parse.Cloud.HTTPResponse.html">Parse.Cloud.HTTPResponse</a></li>
+                            <li><a href="../classes/Parse.Cloud.JobRequest.html">Parse.Cloud.JobRequest</a></li>
+                            <li><a href="../classes/Parse.Cloud.JobStatus.html">Parse.Cloud.JobStatus</a></li>
+                            <li><a href="../classes/Parse.Config.html">Parse.Config</a></li>
+                            <li><a href="../classes/Parse.Error.html">Parse.Error</a></li>
+                            <li><a href="../classes/Parse.FacebookUtils.html">Parse.FacebookUtils</a></li>
+                            <li><a href="../classes/Parse.File.html">Parse.File</a></li>
+                            <li><a href="../classes/Parse.GeoPoint.html">Parse.GeoPoint</a></li>
+                            <li><a href="../classes/Parse.Object.html">Parse.Object</a></li>
+                            <li><a href="../classes/Parse.Promise.html">Parse.Promise</a></li>
+                            <li><a href="../classes/Parse.Push.html">Parse.Push</a></li>
+                            <li><a href="../classes/Parse.Query.html">Parse.Query</a></li>
+                            <li><a href="../classes/Parse.Relation.html">Parse.Relation</a></li>
+                            <li><a href="../classes/Parse.Role.html">Parse.Role</a></li>
+                            <li><a href="../classes/Parse.Session.html">Parse.Session</a></li>
+                            <li><a href="../classes/Parse.User.html">Parse.User</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div id="methods-on-page" class="sidebox on-page">
+                <div class="hd">
+                    <h2 class="no-toc">Methods On Page</h2>
+                </div>
+                <div class="bd">
+                    <ul>
+                            <li><a href="#methods_getName">getName</a></li>
+                            <li><a href="#methods_getRoles">getRoles</a></li>
+                            <li><a href="#methods_getUsers">getUsers</a></li>
+                            <li><a href="#methods_setName">setName</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            
+            
+        </div>
+
+        <div id="main" class="yui3-u">
+            <div class="content"><h4>Class Parse.Role</h4>
+<div class="intro"><p>Represents a Role on the Parse server. Roles represent groupings of
+Users for the purposes of granting permissions (e.g. specifying an ACL
+for an Object). Roles are specified by their sets of child users and
+child roles, all of which are granted any permissions that the parent
+role has.</p>
+<p>Roles must have a name (which cannot be changed after creation of the
+role), and must specify an ACL.</p></div>
+
+<a name="methods_Parse.Role"></a>
+<div class="method item">
+     <strong class="name"><code>Parse.Role</code></strong>( <code>name, acl </code> ) 
+    <br>
+    
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>name</code> <strong>&lt;String&gt;</strong>
+        <p>The name of the Role to create.</p>
+
+        </li>
+        <li>
+            <code>acl</code> <strong>&lt;<a href="../classes/Parse.ACL.html" class="crosslink">Parse.ACL</a>&gt;</strong>
+        <p>The ACL for this role. Roles must have an ACL.
+A Parse.Role is a local representation of a role persisted to the Parse
+cloud.</p>
+
+        </li>
+    </ul>
+</div>
+
+<div id="classdocs">
+    <ul>
+        <li><a href="#methods">Methods</a></li>
+    </ul>
+    <div>
+            <div id="methods">
+<a name="methods_getName"></a>
+<div class="method item">
+    String <strong class="name"><code>getName</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Gets the name of the role.  You can alternatively call role.get(&quot;name&quot;)</p>
+
+    <br><div class="returns"><strong>Returns:</strong> &lt;String&gt; <p>the name of the role.</p>
+</div>
+</div>
+<a name="methods_getRoles"></a>
+<div class="method item">
+    <a href="../classes/Parse.Relation.html" class="crosslink">Parse.Relation</a> <strong class="name"><code>getRoles</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Gets the Parse.Relation for the Parse.Roles that are direct
+children of this role. These roles' users are granted any privileges that
+this role has been granted (e.g. read or write access through ACLs). You
+can add or remove child roles from this role through this relation.</p>
+<p>This is equivalent to calling role.relation("roles")</p>
+    <br><div class="returns"><strong>Returns:</strong> &lt;<a href="../classes/Parse.Relation.html" class="crosslink">Parse.Relation</a>&gt; <p>the relation for the roles belonging to this
+role.</p>
+</div>
+</div>
+<a name="methods_getUsers"></a>
+<div class="method item">
+    <a href="../classes/Parse.Relation.html" class="crosslink">Parse.Relation</a> <strong class="name"><code>getUsers</code></strong>( <code>  </code> ) 
+    <br>
+    <p>Gets the Parse.Relation for the Parse.Users that are direct
+children of this role. These users are granted any privileges that this
+role has been granted (e.g. read or write access through ACLs). You can
+add or remove users from the role through this relation.</p>
+<p>This is equivalent to calling role.relation("users")</p>
+    <br><div class="returns"><strong>Returns:</strong> &lt;<a href="../classes/Parse.Relation.html" class="crosslink">Parse.Relation</a>&gt; <p>the relation for the users belonging to this
+role.</p>
+</div>
+</div>
+<a name="methods_setName"></a>
+<div class="method item">
+     <strong class="name"><code>setName</code></strong>( <code>name, options </code> ) 
+    <br>
+    <p>Sets the name for a role. This value must be set before the role has
+been saved to the server, and cannot be set once the role has been
+saved.</p>
+<p>
+  A role's name can only contain alphanumeric characters, _, -, and
+  spaces.
+</p>
+<p>This is equivalent to calling role.set("name", name)</p>
+    <strong>Parameters:</strong>
+    <ul class="params">
+        <li>
+            <code>name</code> <strong>&lt;String&gt;</strong>
+        <p>The name of the role.</p>
+
+        </li>
+        <li>
+            <code>options</code> <strong>&lt;Object&gt;</strong>
+        <p>Standard options object with success and error
+callbacks.</p>
+
+        </li>
+    </ul>
+</div>
+            </div>
+    </div>
+</div>
+</div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+</body>
+</html>

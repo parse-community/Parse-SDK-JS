@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: LiveQuerySubscription</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: LiveQuerySubscription</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>
+            <span class="ancestors"><a href="Parse.html">Parse</a>.</span>LiveQuerySubscription<span class="signature">()</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">Creates a new LiveQuery Subscription.
+Extends events.EventEmitter
+<a href="https://nodejs.org/api/events.html#events_class_eventemitter">cloud functions</a>.
+
+
+<p>Open Event - When you call query.subscribe(), we send a subscribe request to 
+the LiveQuery server, when we get the confirmation from the LiveQuery server,
+this event will be emitted. When the client loses WebSocket connection to the
+LiveQuery server, we will try to auto reconnect the LiveQuery server. If we
+reconnect the LiveQuery server and successfully resubscribe the ParseQuery,
+you'll also get this event.
+
+<pre>
+subscription.on('open', () => {
+
+});</pre></p>
+
+<p>Create Event - When a new ParseObject is created and it fulfills the ParseQuery you subscribe,
+you'll get this event. The object is the ParseObject which is created.
+
+<pre>
+subscription.on('create', (object) => {
+
+});</pre></p>
+
+<p>Update Event - When an existing ParseObject which fulfills the ParseQuery you subscribe 
+is updated (The ParseObject fulfills the ParseQuery before and after changes),
+you'll get this event. The object is the ParseObject which is updated.
+Its content is the latest value of the ParseObject.
+
+<pre>
+subscription.on('update', (object) => {
+
+});</pre></p>
+
+<p>Enter Event - When an existing ParseObject's old value doesn't fulfill the ParseQuery
+but its new value fulfills the ParseQuery, you'll get this event. The object is the
+ParseObject which enters the ParseQuery. Its content is the latest value of the ParseObject.
+
+<pre>
+subscription.on('enter', (object) => {
+
+});</pre></p>
+
+
+<p>Update Event - When an existing ParseObject's old value fulfills the ParseQuery but its new value
+doesn't fulfill the ParseQuery, you'll get this event. The object is the ParseObject
+which leaves the ParseQuery. Its content is the latest value of the ParseObject.
+
+<pre>
+subscription.on('leave', (object) => {
+
+});</pre></p>
+
+
+<p>Delete Event - When an existing ParseObject which fulfills the ParseQuery is deleted, you'll
+get this event. The object is the ParseObject which is deleted.
+
+<pre>
+subscription.on('delete', (object) => {
+
+});</pre></p>
+
+
+<p>Close Event - When the client loses the WebSocket connection to the LiveQuery
+server and we stop receiving events, you'll get this event.
+
+<pre>
+subscription.on('close', () => {
+
+});</pre></p></div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="LiveQuerySubscription"><span class="type-signature"></span>new LiveQuerySubscription<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="unsubscribe"><span class="type-signature"></span>unsubscribe<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    closes the subscription
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Parse.html">Parse</a></li><li><a href="Parse.ACL.html">ACL</a></li><li><a href="Parse.Analytics.html">Analytics</a></li><li><a href="Parse.Cloud.html">Cloud</a></li><li><a href="Parse.Config.html">Config</a></li><li><a href="Parse.Error.html">Error</a></li><li><a href="Parse.FacebookUtils.html">FacebookUtils</a></li><li><a href="Parse.File.html">File</a></li><li><a href="Parse.GeoPoint.html">GeoPoint</a></li><li><a href="Parse.LiveQuery.html">LiveQuery</a></li><li><a href="Parse.LiveQueryClient.html">LiveQueryClient</a></li><li><a href="Parse.LiveQuerySubscription.html">LiveQuerySubscription</a></li><li><a href="Parse.Object.html">Object</a></li><li><a href="Parse.Polygon.html">Polygon</a></li><li><a href="Parse.Promise.html">Promise</a></li><li><a href="Parse.Push.html">Push</a></li><li><a href="Parse.Query.html">Query</a></li><li><a href="Parse.Relation.html">Relation</a></li><li><a href="Parse.Role.html">Role</a></li><li><a href="Parse.Session.html">Session</a></li><li><a href="Parse.User.html">User</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Nov 27 2017 21:04:38 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
