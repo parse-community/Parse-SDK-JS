@@ -32,6 +32,18 @@ function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, 
       if (offline && value._getId().startsWith('local')) {
         return value.toOfflinePointer();
       }
+
+      if (value.id === undefined) {
+        if (value._temp) {
+          throw new Error("Circular recursion is not allowed on temporary Objects.");
+        }
+        if (seen.includes(value)) {
+          value._temp = true;
+        }
+        seen = seen.concat(seenEntry);
+        return value._toFullJSON(seen, offline);
+      }
+
       return value.toPointer();
     }
     seen = seen.concat(seenEntry);

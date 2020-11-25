@@ -38,6 +38,8 @@ mockObject.prototype = {
       __type: 'Object',
       className: this.className
     };
+    seen = seen || [];
+    offline = offline || false;
     for (const attr in this.attributes) {
       json[attr] = encode(this.attributes[attr], false, false, seen.concat(this), offline);
     }
@@ -115,6 +117,7 @@ describe('encode', () => {
 
   it('encodes ParseObjects', () => {
     const obj = new ParseObject('Item');
+    obj.id = 'objId123';
     obj._serverData = {};
     expect(encode(obj)).toEqual('POINTER');
 
@@ -167,6 +170,64 @@ describe('encode', () => {
     });
   });
 
+  it('encodes unsaved ParseObject', () => {
+    const obj = new ParseObject('Item');
+    obj.id = undefined;
+    obj._serverData = {};
+    obj.attributes = {
+      str: 'string',
+      date: new Date(Date.UTC(2015, 1, 1))
+    };
+
+    expect(encode(obj)).toEqual({
+      __type: 'Object',
+      className: 'Item',
+      str: 'string',
+      date: {
+        __type: 'Date',
+        iso: '2015-02-01T00:00:00.000Z'
+      }
+    });
+
+    const subobj = new ParseObject('Subitem')
+    subobj.id = undefined;
+    subobj._serverData = {};
+    subobj.attributes = {
+      str: 'substring',
+    };
+
+    obj.attributes = {
+      item : subobj
+    };
+
+    expect(encode(obj)).toEqual({
+      __type: 'Object',
+      className: 'Item',
+      item: {
+        __type: 'Object',
+        className: 'Subitem',
+        str:'substring'
+      }
+    });
+
+    obj.attributes = {
+      items : [subobj, subobj]
+    };
+    expect(encode(obj)).toEqual({
+      __type: 'Object',
+      className: 'Item',
+      items: [{
+        __type: 'Object',
+        className: 'Subitem',
+        str:'substring'
+      },{
+        __type: 'Object',
+        className: 'Subitem',
+        str:'substring'
+      }]
+    });
+  });
+
   it('does not encode ParseObjects when they are disallowed', () => {
     const obj = new ParseObject('Item');
     expect(encode.bind(null, obj, true)).toThrow(
@@ -201,5 +262,16 @@ describe('encode', () => {
       date: { __type: 'Date', iso: '2015-02-01T00:00:00.000Z' },
       str: 'abc'
     });
+  });
+
+  it('should throw an error when recursion is detected in unsaved objects', (done) => {
+    const parent = new ParseObject('Parent');
+    const child = new ParseObject('Child');
+    parent._serverData = {};
+    child._serverData = {};
+    parent.attributes = { child : child};
+    child.attributes  = {parent : parent};
+    expect(function() {encode(parent)}).toThrow("Circular recursion is not allowed on temporary Objects.");
+    done();
   });
 });

@@ -2,5 +2,7 @@
   "jasmineExplorer.config": "jasmine.json",
   "jasmineExplorer.env": {
     "TESTING": "1"
-  }
+  },
+  "flow.useNPMPackagedFlow": true,
+  "javascript.validate.enable": false
 }
