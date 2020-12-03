@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-18.04
+    timeout-minutes: 30
     env:      
       MONGODB_VERSION: 3.6.9
     steps:
