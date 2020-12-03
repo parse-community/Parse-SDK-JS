@@ -16,16 +16,23 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: '10.14'
+    - name: Cache Node.js modules
+      uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+            ${{ runner.os }}-node-
     - name: Get Tag
       id: tag
-      run: |
-        echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
+      uses: dawidd6/action-get-tag@v1
     - name: Generate Docs
       run: |
         echo $SOURCE_TAG
+        npm ci
         npm run release_docs
       env:
-        SOURCE_TAG: ${{ steps.tag.outputs.SOURCE_TAG }}
+        SOURCE_TAG: ${{ steps.tag.outputs.tag }}
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3.7.3
       with:
