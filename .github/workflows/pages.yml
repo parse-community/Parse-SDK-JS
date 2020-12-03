@@ -25,14 +25,22 @@ jobs:
             ${{ runner.os }}-node-
     - name: Get Tag
       id: tag
-      uses: dawidd6/action-get-tag@v1
+      - uses: actions/github-script@v3
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          result-encoding: string
+          script: |
+            const ref = process.env.GITHUB_REF
+            if(!ref.startsWith('refs/tags/'))
+              return ''
+            return ref.replace(/^refs\/tags\//, '')
     - name: Generate Docs
       run: |
         echo $SOURCE_TAG
         npm ci
         npm run release_docs
       env:
-        SOURCE_TAG: ${{ steps.tag.outputs.tag }}
+        SOURCE_TAG: ${{ steps.tag.outputs.result }}
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3.7.3
       with:
