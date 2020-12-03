@@ -24,16 +24,16 @@ jobs:
         restore-keys: |
             ${{ runner.os }}-node-
     - name: Get Tag
+      uses: actions/github-script@v3
       id: tag
-      - uses: actions/github-script@v3
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          result-encoding: string
-          script: |
-            const ref = process.env.GITHUB_REF
-            if(!ref.startsWith('refs/tags/'))
-              return ''
-            return ref.replace(/^refs\/tags\//, '')
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        result-encoding: string
+        script: |
+          const ref = process.env.GITHUB_REF
+          if(!ref.startsWith('refs/tags/'))
+            return ''
+          return ref.replace(/^refs\/tags\//, '')
     - name: Generate Docs
       run: |
         echo $SOURCE_TAG
