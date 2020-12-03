@@ -1,0 +1,28 @@
+name: docs
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '**'
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    timeout-minutes: 30
+    steps:
+    - name: Get Tag
+      id: tag
+      run: |
+        echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
+    - name: Generate Docs
+      run: |
+        echo $SOURCE_TAG
+        npm run release_docs
+      env:
+        SOURCE_TAG: ${{ steps.tag.outputs.SOURCE_TAG }}
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3.7.3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs

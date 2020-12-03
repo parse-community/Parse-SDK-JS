@@ -22,8 +22,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/.npm
-        key: v1-npm-deps-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: v1-npm-deps-
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+            ${{ runner.os }}-node-
     - run: npm ci
     - run: npm install -g mongodb-runner
     - run: mongodb-runner start
