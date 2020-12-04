@@ -452,6 +452,22 @@ ParseError.ACCOUNT_ALREADY_LINKED = 208;
 ParseError.INVALID_SESSION_TOKEN = 209;
 
 /**
+ * Error code indicating an error enabling or verifying MFA
+ *
+ * @property {number} MFA_ERROR
+ * @static
+ */
+ParseError.MFA_ERROR = 210;
+
+/**
+ * Error code indicating that a valid MFA token must be provided
+ *
+ * @property {number} MFA_TOKEN_REQUIRED
+ * @static
+ */
+ParseError.MFA_TOKEN_REQUIRED = 211;
+
+/**
  * Error code indicating that a user cannot be linked to an account because
  * that account's id could not be found.
  *
