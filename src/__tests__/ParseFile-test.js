@@ -820,7 +820,7 @@ describe('FileController', () => {
     try {
       await file.destroy();
     } catch (e) {
-      expect(e.message).toBe('Cannot delete an unsaved ParseFile.');
+      expect(e.code).toBe(ParseError.FILE_DELETE_UNNAMED_ERROR);
       done();
     }
   });
