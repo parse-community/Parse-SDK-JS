@@ -29,11 +29,11 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime-corejs3": "7.12.1",
-    "@babel/runtime": "7.12.1",
+    "@babel/runtime-corejs3": "7.12.5",
+    "@babel/runtime": "7.12.5",
     "react-native-crypto-js": "1.0.0",
     "uuid": "3.4.0",
-    "ws": "7.3.1",
+    "ws": "7.4.0",
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {

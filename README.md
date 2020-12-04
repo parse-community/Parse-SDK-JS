@@ -12,7 +12,7 @@
     <a href="https://twitter.com/intent/follow?screen_name=parseplatform"><img alt="Follow on Twitter" src="https://img.shields.io/twitter/follow/parseplatform?style=social&label=Follow"></a>
     <a href="https://community.parseplatform.org/"><img alt="Join the conversation" src="https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg"></a>
     <a href="https://github.com/parse-community/Parse-SDK-JS/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-BSD-lightgrey.svg"></a>
-    <a href=" https://travis-ci.org/parse-community/Parse-SDK-JS"><img alt="Build status" src="https://travis-ci.org/parse-community/Parse-SDK-JS.svg?branch=master"></a>
+    <a href="https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Amaster"><img alt="Build status" src="https://github.com/parse-community/Parse-SDK-JS/workflows/ci/badge.svg?branch=master"></a>
     <a href="#backers"><img alt="Backers on Open Collective" src="https://opencollective.com/parse-server/backers/badge.svg" /></a>
   <a href="#sponsors"><img alt="Sponsors on Open Collective" src="https://opencollective.com/parse-server/sponsors/badge.svg" /></a>
 </p>
