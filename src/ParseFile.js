@@ -314,7 +314,7 @@ class ParseFile {
 
   /**
    * Deletes the file from the Parse cloud.
-   * In Cloud Code and Node only with Master Key
+   * In Cloud Code and Node only with Master Key.
    *
    * @returns {Promise} Promise that is resolved when the delete finishes.
    */
