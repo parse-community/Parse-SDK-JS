@@ -12,6 +12,8 @@
 import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
 
+const ParseError = require('./ParseError').default;
+
 let XHR = null;
 if (typeof XMLHttpRequest !== 'undefined') {
   XHR = XMLHttpRequest;
