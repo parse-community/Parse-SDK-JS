@@ -3,6 +3,7 @@
 const assert = require('assert');
 const clear = require('./clear');
 const Parse = require('../../node');
+const otplib = require('otplib');
 
 const TestObject = Parse.Object.extend('TestObject');
 
@@ -117,6 +118,79 @@ describe('Parse User', () => {
       expect(user.existed()).toBe(true);
       done();
     });
+  });
+
+  it("can enable MFA", async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    Parse.serverURL = 'http://localhost:1337/mfa'
+    const user = await Parse.User.signUp("asdf", "zxcv");
+    const { secret, qrcodeURL } = await user.enableMfa();
+    expect(qrcodeURL).toBeDefined();
+    expect(qrcodeURL).toContain('otpauth://totp/testApp');
+    expect(qrcodeURL).toContain('secret');
+    expect(qrcodeURL).toContain('asdf');
+    expect(qrcodeURL).toContain('period');
+    expect(qrcodeURL).toContain('digits');
+    expect(qrcodeURL).toContain('algorithm');
+    expect(secret).toBeDefined();
+    // show UI: in order to confirm your MFA, you need to add it to a TPA app, and enter the code below to verify.
+    // Next step is window.open(qrcodeURL) if mobile, or render a QR code pointing to the qrcodeURL.
+    const token = otplib.authenticator.generate(secret);
+    // submit the token generated from TPA app
+    const { recoveryKeys } = await user.verifyMfa(token);
+    // 'great, MFA is enabled. Don't get locked out, here are your recovery keys. Keep them in a safe place offline.'
+    expect(recoveryKeys).toBeDefined();
+    expect(recoveryKeys[0]).toBeDefined();
+    expect(recoveryKeys[1]).toBeDefined();
+    expect(recoveryKeys[0].length).toBe(20);
+    expect(recoveryKeys[1].length).toBe(20);
+    expect(Parse.User.current().get('mfaEnabled')).toBe(true);
+    Parse.serverURL = 'http://localhost:1337/parse'
+  });
+
+  it("can login with MFA", async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    Parse.serverURL = 'http://localhost:1337/mfa'
+    const user = await Parse.User.signUp("asdf", "zxcv");
+    const { secret } = await user.enableMfa();
+    let token = otplib.authenticator.generate(secret);
+    await user.verifyMfa(token);
+    await Parse.User.logOut();
+    token = null;
+    const login = async () => {
+      try {
+        const current = await Parse.User.logIn("asdf", "zxcv", {token});
+        if (!token) {
+          throw 'should not have been able to login without providing a MFA token';
+        }
+        expect(current.get('mfaEnabled')).toBe(true);
+        expect(current.get('username')).toBe('asdf');
+      } catch (e) {
+        if (e.code == Parse.Error.MFA_TOKEN_REQUIRED) {
+          // please enter your TPA code in order to login. Can't access your account? Enter recovery codes.
+          token = otplib.authenticator.generate(secret);
+          await login();
+          return;
+        }
+        throw e;
+      }
+    }
+    await login();
+    Parse.serverURL = 'http://localhost:1337/parse'
+  });
+
+  it("can recover MFA", async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    Parse.serverURL = 'http://localhost:1337/mfa'
+    const user = await Parse.User.signUp("asdf", "zxcv");
+    const { secret } = await user.enableMfa();
+    const token = otplib.authenticator.generate(secret);
+    const {recoveryKeys} = await user.verifyMfa(token);
+    await Parse.User.logOut();
+    const current = await Parse.User.logIn("asdf", "zxcv", {recoveryKeys});
+    expect(current.get('mfaEnabled')).toBe(false);
+    expect(current.get('username')).toBe('asdf');
+    Parse.serverURL = 'http://localhost:1337/parse'
   });
 
   it('can login users with installationId', async () => {

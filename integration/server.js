@@ -42,6 +42,25 @@ const api = new ParseServer({
   },
 });
 
+const mfa = new ParseServer({
+  databaseURI: 'mongodb://localhost:27017/integration',
+  appId: 'integration',
+  masterKey: 'notsosecret',
+  serverURL: 'http://localhost:1337/mfa',
+  multiFactorAuth: {
+    enableMfa: true,
+    encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD',
+  },
+  appName: 'testApp',
+  verbose: false,
+  silent: true,
+  serverStartComplete: () => {
+    /* Ignore ParseError: schema class name does not revalidate */
+  },
+});
+
+app.use('/mfa', mfa);
+
 app.use('/parse', api);
 
 const TestUtils = require('parse-server').TestUtils;

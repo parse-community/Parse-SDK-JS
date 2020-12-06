@@ -370,6 +370,13 @@ class ParseObject {
     }
   }
 
+  _setMfaEnabled() {
+    const serverData = this._getServerData();
+    serverData.mfaEnabled = true;
+    const stateController = CoreManager.getObjectStateController();
+    stateController.setServerData(this._getStateIdentifier(), serverData);
+  }
+
   _migrateId(serverId: string) {
     if (this._localId && serverId) {
       if (singleInstance) {

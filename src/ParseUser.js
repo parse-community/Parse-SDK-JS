@@ -450,9 +450,38 @@ class ParseUser extends ParseObject {
     if (options.hasOwnProperty('usePost')) {
       loginOptions.usePost = options.usePost;
     }
+    if (options.hasOwnProperty('token')) {
+      loginOptions.token = options.token;
+    }
+    if (options.hasOwnProperty('recoveryKeys')) {
+      loginOptions.recoveryKeys = options.recoveryKeys;
+    }
 
     const controller = CoreManager.getUserController();
     return controller.logIn(this, loginOptions);
+  }
+
+  /**
+   * Enables multi-factor authentication. Returns an qrcodeURL and a secret.
+   * Users need to add secret to their third party authenticator app, and validate after using,
+   * <code>user.verifyMfa(token);</code>.
+   *
+   * @returns {Promise} When complete, returns a qrcodeURL that can be rendered in QRCode and scanned, or opened if the device supports it.
+   */
+  enableMfa() {
+    const controller = CoreManager.getUserController();
+    return controller.enableMfa(this);
+  }
+
+  /**
+   * Used to confirm that the user has correctly added the multi-factor secret to their third party authenticator app.
+   *
+   * @param {string} token a short code generated from the third party authenticator app used to verify the request
+   * @returns {Promise} When complete, returns recoveryKeys that can be later used to unlock the account.
+   */
+  verifyMfa(token): Promise<ParseUser> {
+    const controller = CoreManager.getUserController();
+    return controller.verifyMfa(this, token);
   }
 
   /**
@@ -1109,8 +1138,12 @@ const DefaultController = {
     const stateController = CoreManager.getObjectStateController();
     const auth = {
       username: user.get('username'),
-      password: user.get('password')
+      password: user.get('password'),
+      token : options.token,
+      recoveryKeys : options.recoveryKeys
     };
+    delete options.token
+    delete options.recoveryKeys
     return RESTController.request(
       options.usePost ? 'POST' : 'GET', 'login', auth, options
     ).then((response) => {
@@ -1130,6 +1163,23 @@ const DefaultController = {
       }
       return DefaultController.setCurrentUser(user);
     });
+  },
+
+  enableMfa(user): Promise {
+    const RESTController = CoreManager.getRESTController();
+    return RESTController.request(
+      'GET', 'users/me/enableMfa', { _SessionToken: user.getSessionToken() }
+    )
+  },
+
+  verifyMfa(user,token): Promise {
+    const RESTController = CoreManager.getRESTController();
+    return RESTController.request(
+      'POST', 'users/me/verifyMfa', { _SessionToken: user.getSessionToken(), token}
+    ).then((response) => {
+      user._setMfaEnabled();
+      return response;
+    })
   },
 
   become(user: ParseUser, options: RequestOptions): Promise<ParseUser> {
