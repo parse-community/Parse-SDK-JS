@@ -12,6 +12,8 @@
 import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
 
+const ParseError = require('./ParseError').default;
+
 let XHR = null;
 if (typeof XMLHttpRequest !== 'undefined') {
   XHR = XMLHttpRequest;
@@ -314,13 +316,13 @@ class ParseFile {
 
   /**
    * Deletes the file from the Parse cloud.
-   * In Cloud Code and Node only with Master Key
+   * In Cloud Code and Node only with Master Key.
    *
    * @returns {Promise} Promise that is resolved when the delete finishes.
    */
   destroy() {
     if (!this._name) {
-      throw new Error('Cannot delete an unsaved ParseFile.');
+      throw new ParseError(ParseError.FILE_DELETE_UNNAMED_ERROR, 'Cannot delete an unnamed file.');
     }
     const controller = CoreManager.getFileController();
     return controller.deleteFile(this._name).then(() => {

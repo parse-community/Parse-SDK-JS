@@ -344,6 +344,14 @@ ParseError.INVALID_PUSH_TIME_ERROR = 152;
 ParseError.FILE_DELETE_ERROR = 153;
 
 /**
+ * Error code indicating an error deleting an unnamed file.
+ *
+ * @property {number} FILE_DELETE_UNNAMED_ERROR
+ * @static
+ */
+ParseError.FILE_DELETE_UNNAMED_ERROR = 161;
+
+/**
  * Error code indicating that the application has exceeded its request
  * limit.
  *
