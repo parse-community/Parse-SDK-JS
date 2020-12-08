@@ -1766,8 +1766,23 @@ class ParseObject {
     if (!json.className) {
       throw new Error('Cannot create an object without a className');
     }
+
     const constructor = classMap[json.className];
-    const o = constructor ? new constructor() : new ParseObject(json.className);
+
+    // Remove reserved fields
+    const attributes = {}
+    Object.assign({}, json);
+    if(constructor && constructor.readOnlyAttributes) {
+      constructor.readOnlyAttributes().forEach(attr => {
+        try { delete attributes[attr]; }
+        catch { 0; }
+      });
+    }
+    if(attributes && attributes.__type) delete attributes.__type;
+    if(attributes && attributes.className) delete attributes.className;
+
+    const o = constructor ? new constructor(attributes) : new ParseObject(json.className, attributes);
+
     const otherAttributes = {};
     for (const attr in json) {
       if (attr !== 'className' && attr !== '__type') {

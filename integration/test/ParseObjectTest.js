@@ -1801,4 +1801,55 @@ describe('Parse Object', () => {
     const fetched = await query.get(user.id);
     assert.equal(fetched.isDataAvailable(), true);
   });
+
+  it('retrieve subclass objects', async (done) => {
+    try {
+      class MySubclass extends Parse.Object {
+        constructor(attr) {
+          super('MySubclass', attr);
+          this.defaultProp = attr && attr.defaultProp || 'default';
+        }
+        get defaultProp() { return this.get('defaultProp'); }
+        set defaultProp(val) { this.set('defaultProp', val); }
+      }
+      Parse.Object.registerSubclass('MySubclass', MySubclass);
+
+      await new MySubclass({defaultProp: 'foo'}).save();
+      const result = await new Parse.Query(MySubclass).first();
+      expect(result.defaultProp).toBe('foo');
+
+      done();
+    } catch(e) {
+      done.fail(e);
+    }
+  });
+
+  it('conver from JSON', async (done) => {
+    try {
+
+      // Object without constructor
+      const o = Parse.Object.fromJSON({
+        className: 'FooObject',
+        name: 'foo'
+      }, true);
+
+      await o.save();
+      let result = await new Parse.Query('FooObject').first();
+      expect(result.get('name')).toBe('foo');
+
+      // Object with constructor `TestObject`
+      const to = Parse.Object.fromJSON({
+        className: 'TestObject',
+        name: 'foo'
+      }, true);
+
+      await to.save();
+      result = await new Parse.Query('TestObject').first();
+      expect(result.get('name')).toBe('foo');
+
+      done();
+    } catch(e) {
+      done.fail(e);
+    }
+  });
 });
