@@ -1,7 +1,21 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.18.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.19.0...master)
+
+## 2.19.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.18.0...2.19.0)
+
+**Features**
+- New error codes (210 and 211) for MFA ([#1268](https://github.com/parse-community/Parse-SDK-JS/pull/1268))
+
+**Improvements**
+- Parse.File.destroy error message ([#1257](https://github.com/parse-community/Parse-SDK-JS/pull/1257))
+
+**Fixes**
+- Remove unnecessary object reference and comment from AddUniqueOp ([#1253](https://github.com/parse-community/Parse-SDK-JS/pull/1253))
+- Internal Referencing for Increment Dot Notation ([#1255](https://github.com/parse-community/Parse-SDK-JS/pull/1255))
+- Saving for Increment Dot Notation ([#1219](https://github.com/parse-community/Parse-SDK-JS/pull/1219))
 
 ## 2.18.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.17.0...2.18.0)
