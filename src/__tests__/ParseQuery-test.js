@@ -2801,6 +2801,9 @@ describe('ParseQuery', () => {
       aggregate: () => {},
     });
     const query = new ParseQuery('TestCancel');
+    expect(query._xhrRequest).toBeDefined();
+    expect(query._xhrRequest.task).toBe(null);
+    expect(query._xhrRequest.onchange()).toBeUndefined();
 
     jest.spyOn(mockRequestTask, 'abort');
     query.cancel();
