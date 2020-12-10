@@ -1,9 +1,7 @@
 name: release
-
 on:
   release:
     types: [published]
-
 jobs:
   publish-npm:
     runs-on: ubuntu-18.04
