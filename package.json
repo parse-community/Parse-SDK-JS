@@ -65,13 +65,16 @@
     "gulp-rename": "2.0.0",
     "gulp-uglify": "3.0.2",
     "gulp-watch": "5.0.1",
+    "husky": "4.3.5",
     "jasmine": "3.5.0",
     "jasmine-reporters": "2.3.2",
     "jest": "24.9.0",
     "jsdoc": "3.6.3",
     "jsdoc-babel": "0.5.0",
+    "lint-staged": "10.5.3",
     "metro-react-native-babel-preset": "0.59.0",
     "parse-server": "github:parse-community/parse-server#master",
+    "prettier": "2.2.1",
     "regenerator-runtime": "0.13.5",
     "vinyl-source-stream": "2.0.0"
   },
@@ -93,7 +96,19 @@
     "prepare": "npm run build",
     "release_docs": "./release_docs.sh",
     "gulp": "gulp",
+    "prettier": "prettier --write {src,integration}/{**/*,*}.js && npm run lint:fix",
     "cross-env": "cross-env"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "{src,integration}/{**/*,*}.js": [
+      "prettier",
+      "git add"
+    ]
   },
   "jest": {
     "automock": true,

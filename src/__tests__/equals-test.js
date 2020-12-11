@@ -100,12 +100,12 @@ describe('equals', () => {
     a = ParseFile.fromJSON({
       __type: 'File',
       name: 'parse.txt',
-      url: 'http://files.parsetfss.com/a/parse.txt'
+      url: 'http://files.parsetfss.com/a/parse.txt',
     });
     b = ParseFile.fromJSON({
       __type: 'File',
       name: 'parse.txt',
-      url: 'http://files.parsetfss.com/a/parse.txt'
+      url: 'http://files.parsetfss.com/a/parse.txt',
     });
 
     expect(equals(a, b)).toBe(true);

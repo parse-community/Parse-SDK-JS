@@ -15,14 +15,14 @@ import type { Op } from './ParseOp';
 import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
 
 type ObjectIdentifier = {
-  className: string;
-  id: string
+  className: string,
+  id: string,
 };
 
 let objectState: {
   [className: string]: {
-    [id: string]: State
-  }
+    [id: string]: State,
+  },
 } = {};
 
 export function getState(obj: ObjectIdentifier): ?State {
@@ -109,7 +109,13 @@ export function getObjectCache(obj: ObjectIdentifier): ObjectCache {
 export function estimateAttribute(obj: ObjectIdentifier, attr: string): mixed {
   const serverData = getServerData(obj);
   const pendingOps = getPendingOps(obj);
-  return ObjectStateMutations.estimateAttribute(serverData, pendingOps, obj.className, obj.id, attr);
+  return ObjectStateMutations.estimateAttribute(
+    serverData,
+    pendingOps,
+    obj.className,
+    obj.id,
+    attr
+  );
 }
 
 export function estimateAttributes(obj: ObjectIdentifier): AttributeMap {
@@ -132,6 +138,6 @@ export function clearAllState() {
   objectState = {};
 }
 
-export function duplicateState(source: {id: string}, dest: {id: string}) {
+export function duplicateState(source: { id: string }, dest: { id: string }) {
   dest.id = source.id;
 }

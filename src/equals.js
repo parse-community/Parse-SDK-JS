@@ -17,7 +17,7 @@ export default function equals(a, b) {
   if (toString.call(a) === '[object Date]' || toString.call(b) === '[object Date]') {
     const dateA = new Date(a);
     const dateB = new Date(b);
-    return (+dateA === +dateB);
+    return +dateA === +dateB;
   }
 
   if (typeof a !== typeof b) {
@@ -26,7 +26,7 @@ export default function equals(a, b) {
 
   if (!a || typeof a !== 'object') {
     // a is a primitive
-    return (a === b);
+    return a === b;
   }
 
   if (Array.isArray(a) || Array.isArray(b)) {
@@ -44,10 +44,12 @@ export default function equals(a, b) {
     return true;
   }
 
-  if ((a instanceof ParseACL) ||
-      (a instanceof ParseFile) ||
-      (a instanceof ParseGeoPoint) ||
-      (a instanceof ParseObject)) {
+  if (
+    a instanceof ParseACL ||
+    a instanceof ParseFile ||
+    a instanceof ParseGeoPoint ||
+    a instanceof ParseObject
+  ) {
     return a.equals(b);
   }
   if (b instanceof ParseObject) {

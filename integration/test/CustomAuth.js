@@ -1,6 +1,6 @@
 /* eslint-disable */
 function validateAuthData(authData, options) {
-  return Promise.resolve({})
+  return Promise.resolve({});
 }
 
 function validateAppId(appIds, authData, options) {

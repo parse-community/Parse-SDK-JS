@@ -34,32 +34,37 @@ describe('Schema', () => {
     Parse.Storage._clear();
   });
 
-  beforeEach((done) => {
+  beforeEach(done => {
     clear().then(done);
   });
 
-  it('invalid get all no schema', (done) => {
-    Parse.Schema.all().then(() => {}).catch(() => {
-      done();
-    });
+  it('invalid get all no schema', done => {
+    Parse.Schema.all()
+      .then(() => {})
+      .catch(() => {
+        done();
+      });
   });
 
-  it('invalid get no schema', (done) => {
+  it('invalid get no schema', done => {
     const testSchema = new Parse.Schema('SchemaTest');
-    testSchema.get().then(() => {}).catch(() => {
-      done();
-    });
+    testSchema
+      .get()
+      .then(() => {})
+      .catch(() => {
+        done();
+      });
   });
 
-  it('save', (done) => {
+  it('save', done => {
     const testSchema = new Parse.Schema('SchemaTest');
-    testSchema.save().then((result) => {
+    testSchema.save().then(result => {
       assert.equal(result.className, 'SchemaTest');
       done();
     });
   });
 
-  it('get', (done) => {
+  it('get', done => {
     const testSchema = new Parse.Schema('SchemaTest');
     testSchema
       .addField('defaultFieldString')
@@ -75,44 +80,55 @@ describe('Schema', () => {
       .addPointer('pointerField', '_User')
       .addRelation('relationField', '_User');
 
-    testSchema.save().then(() => {
-      return testSchema.get();
-    }).then((result) => {
-      assert.equal(result.fields.defaultFieldString.type, 'String');
-      assert.equal(result.fields.stringField.type, 'String');
-      assert.equal(result.fields.numberField.type, 'Number');
-      assert.equal(result.fields.booleanField.type, 'Boolean');
-      assert.equal(result.fields.dateField.type, 'Date');
-      assert.equal(result.fields.fileField.type, 'File');
-      assert.equal(result.fields.geoPointField.type, 'GeoPoint');
-      assert.equal(result.fields.polygonField.type, 'Polygon');
-      assert.equal(result.fields.arrayField.type, 'Array');
-      assert.equal(result.fields.objectField.type, 'Object');
-      assert.equal(result.fields.pointerField.type, 'Pointer');
-      assert.equal(result.fields.relationField.type, 'Relation');
-      assert.equal(result.fields.pointerField.targetClass, '_User');
-      assert.equal(result.fields.relationField.targetClass, '_User');
-      done();
-    });
+    testSchema
+      .save()
+      .then(() => {
+        return testSchema.get();
+      })
+      .then(result => {
+        assert.equal(result.fields.defaultFieldString.type, 'String');
+        assert.equal(result.fields.stringField.type, 'String');
+        assert.equal(result.fields.numberField.type, 'Number');
+        assert.equal(result.fields.booleanField.type, 'Boolean');
+        assert.equal(result.fields.dateField.type, 'Date');
+        assert.equal(result.fields.fileField.type, 'File');
+        assert.equal(result.fields.geoPointField.type, 'GeoPoint');
+        assert.equal(result.fields.polygonField.type, 'Polygon');
+        assert.equal(result.fields.arrayField.type, 'Array');
+        assert.equal(result.fields.objectField.type, 'Object');
+        assert.equal(result.fields.pointerField.type, 'Pointer');
+        assert.equal(result.fields.relationField.type, 'Relation');
+        assert.equal(result.fields.pointerField.targetClass, '_User');
+        assert.equal(result.fields.relationField.targetClass, '_User');
+        done();
+      });
   });
 
-  it('all', (done) => {
+  it('all', done => {
     const testSchema = new Parse.Schema('SchemaTest');
-    testSchema.save().then(() => {
-      return Parse.Schema.all();
-    }).then((results) => {
-      assert.equal(results.length, 1);
-      done();
-    });
+    testSchema
+      .save()
+      .then(() => {
+        return Parse.Schema.all();
+      })
+      .then(results => {
+        assert.equal(results.length, 1);
+        done();
+      });
   });
 
   it('save required and default values', async () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    testSchema.addField('fieldString', 'String', { required: true, defaultValue: 'Hello World' });
+    testSchema.addField('fieldString', 'String', {
+      required: true,
+      defaultValue: 'Hello World',
+    });
     const schema = await testSchema.save();
     assert.deepEqual(schema.fields.fieldString, {
-      type: 'String', required: true, defaultValue: 'Hello World'
-    })
+      type: 'String',
+      required: true,
+      defaultValue: 'Hello World',
+    });
     const object = new Parse.Object('SchemaTest');
     await object.save();
     assert.equal(object.get('fieldString'), 'Hello World');
@@ -123,8 +139,14 @@ describe('Schema', () => {
     await pointer.save();
     const testSchema = new Parse.Schema('SchemaTest');
     testSchema
-      .addPointer('pointerField', 'TestObject', { required: true, defaultValue: pointer })
-      .addPointer('pointerJSONField', 'TestObject', { required: true, defaultValue: pointer.toPointer() })
+      .addPointer('pointerField', 'TestObject', {
+        required: true,
+        defaultValue: pointer,
+      })
+      .addPointer('pointerJSONField', 'TestObject', {
+        required: true,
+        defaultValue: pointer.toPointer(),
+      });
     const schema = await testSchema.save();
     assert.deepEqual(schema.fields.pointerField, schema.fields.pointerJSONField);
     assert.deepEqual(schema.fields.pointerField.defaultValue, pointer.toPointer());
@@ -133,41 +155,82 @@ describe('Schema', () => {
 
   it('set multiple required and default values', async () => {
     const point = new Parse.GeoPoint(44.0, -11.0);
-    const polygon = new Parse.Polygon([[0,0], [0,1], [1,1], [1,0]]);
+    const polygon = new Parse.Polygon([
+      [0, 0],
+      [0, 1],
+      [1, 1],
+      [1, 0],
+    ]);
     const file = new Parse.File('parse-server-logo', { base64: 'ParseA==' });
     await file.save();
     const testSchema = new Parse.Schema('SchemaFieldTest');
 
     testSchema
-      .addField('defaultFieldString', 'String', { required: true, defaultValue: 'hello' })
+      .addField('defaultFieldString', 'String', {
+        required: true,
+        defaultValue: 'hello',
+      })
       .addString('stringField', { required: true, defaultValue: 'world' })
       .addNumber('numberField', { required: true, defaultValue: 10 })
       .addBoolean('booleanField', { required: true, defaultValue: false })
-      .addDate('dateField', { required: true, defaultValue: new Date('2000-01-01T00:00:00.000Z') })
-      .addDate('dateStringField', { required: true, defaultValue: '2000-01-01T00:00:00.000Z' })
+      .addDate('dateField', {
+        required: true,
+        defaultValue: new Date('2000-01-01T00:00:00.000Z'),
+      })
+      .addDate('dateStringField', {
+        required: true,
+        defaultValue: '2000-01-01T00:00:00.000Z',
+      })
       .addFile('fileField', { required: true, defaultValue: file })
       .addGeoPoint('geoPointField', { required: true, defaultValue: point })
       .addPolygon('polygonField', { required: true, defaultValue: polygon })
       .addArray('arrayField', { required: true, defaultValue: [1, 2, 3] })
-      .addObject('objectField', { required: true, defaultValue: { foo: 'bar' } })
+      .addObject('objectField', {
+        required: true,
+        defaultValue: { foo: 'bar' },
+      });
 
     const schema = await testSchema.save();
     assert.deepEqual(schema.fields, {
       objectId: { type: 'String' },
       updatedAt: { type: 'Date' },
       createdAt: { type: 'Date' },
-      defaultFieldString: { type: 'String', required: true, defaultValue: 'hello' },
+      defaultFieldString: {
+        type: 'String',
+        required: true,
+        defaultValue: 'hello',
+      },
       stringField: { type: 'String', required: true, defaultValue: 'world' },
       numberField: { type: 'Number', required: true, defaultValue: 10 },
       booleanField: { type: 'Boolean', required: true, defaultValue: false },
-      dateField: { type: 'Date', required: true, defaultValue: { __type: 'Date', iso: '2000-01-01T00:00:00.000Z' } },
-      dateStringField: { type: 'Date', required: true, defaultValue: { __type: 'Date', iso: '2000-01-01T00:00:00.000Z' } },
+      dateField: {
+        type: 'Date',
+        required: true,
+        defaultValue: { __type: 'Date', iso: '2000-01-01T00:00:00.000Z' },
+      },
+      dateStringField: {
+        type: 'Date',
+        required: true,
+        defaultValue: { __type: 'Date', iso: '2000-01-01T00:00:00.000Z' },
+      },
       fileField: { type: 'File', required: true, defaultValue: file.toJSON() },
-      geoPointField: { type: 'GeoPoint', required: true, defaultValue: point.toJSON() },
-      polygonField: { type: 'Polygon', required: true, defaultValue: polygon.toJSON() },
+      geoPointField: {
+        type: 'GeoPoint',
+        required: true,
+        defaultValue: point.toJSON(),
+      },
+      polygonField: {
+        type: 'Polygon',
+        required: true,
+        defaultValue: polygon.toJSON(),
+      },
       arrayField: { type: 'Array', required: true, defaultValue: [1, 2, 3] },
-      objectField: { type: 'Object', required: true, defaultValue: { foo: 'bar' } },
-      ACL: { type: 'ACL' }
+      objectField: {
+        type: 'Object',
+        required: true,
+        defaultValue: { foo: 'bar' },
+      },
+      ACL: { type: 'ACL' },
     });
     const object = new Parse.Object('SchemaFieldTest');
     await object.save();
@@ -187,9 +250,15 @@ describe('Schema', () => {
       geoPointField: point.toJSON(),
       polygonField: {
         __type: 'Polygon',
-        coordinates: [ [ 0, 0 ], [ 0, 1 ], [ 1, 1 ], [ 1, 0 ], [ 0, 0 ] ]
+        coordinates: [
+          [0, 0],
+          [0, 1],
+          [1, 1],
+          [1, 0],
+          [0, 0],
+        ],
       },
-      arrayField: [ 1, 2, 3 ],
+      arrayField: [1, 2, 3],
       objectField: { foo: 'bar' },
     };
     assert.deepEqual(json, expected);
@@ -204,7 +273,7 @@ describe('Schema', () => {
       update: { requiresAuthentication: true },
       delete: {},
       addField: {},
-      protectedFields: {}
+      protectedFields: {},
     };
     const testSchema = new Parse.Schema('SchemaTest');
     testSchema.setCLP(clp);
@@ -221,7 +290,7 @@ describe('Schema', () => {
       update: { requiresAuthentication: true },
       delete: {},
       addField: {},
-      protectedFields: {}
+      protectedFields: {},
     };
     const testSchema = new Parse.Schema('SchemaTest');
     let schema = await testSchema.save();
@@ -249,7 +318,7 @@ describe('Schema', () => {
       update: { requiresAuthentication: true },
       delete: {},
       addField: {},
-      protectedFields: {}
+      protectedFields: {},
     };
     const testSchema = new Parse.Schema('SchemaTest');
     testSchema.setCLP(clp);
@@ -263,130 +332,163 @@ describe('Schema', () => {
     assert.deepEqual(schema.classLevelPermissions, clp);
   });
 
-  it('update', (done) => {
+  it('update', done => {
     const testSchema = new Parse.Schema('SchemaTest');
     testSchema.addString('name');
-    testSchema.save().then(() => {
-      testSchema.deleteField('name');
-      testSchema.addNumber('quantity');
-      testSchema.addBoolean('status');
-      return testSchema.update();
-    }).then((result) => {
-      assert.equal(result.fields.status.type, 'Boolean');
-      assert.equal(result.fields.quantity.type, 'Number');
-      assert.equal(result.fields.name, undefined);
-      done();
-    });
+    testSchema
+      .save()
+      .then(() => {
+        testSchema.deleteField('name');
+        testSchema.addNumber('quantity');
+        testSchema.addBoolean('status');
+        return testSchema.update();
+      })
+      .then(result => {
+        assert.equal(result.fields.status.type, 'Boolean');
+        assert.equal(result.fields.quantity.type, 'Number');
+        assert.equal(result.fields.name, undefined);
+        done();
+      });
   });
 
-  it('multiple update', (done) => {
+  it('multiple update', done => {
     const testSchema = new Parse.Schema('SchemaTest');
-    testSchema.save().then(() => {
-      testSchema.addString('name');
-      return testSchema.update();
-    }).then(() => {
-      return testSchema.update();
-    }).then(() => {
-      return testSchema.get();
-    }).then((result) => {
-      assert.equal(Object.keys(result.fields).length, 5);
-      done();
-    });
+    testSchema
+      .save()
+      .then(() => {
+        testSchema.addString('name');
+        return testSchema.update();
+      })
+      .then(() => {
+        return testSchema.update();
+      })
+      .then(() => {
+        return testSchema.get();
+      })
+      .then(result => {
+        assert.equal(Object.keys(result.fields).length, 5);
+        done();
+      });
   });
 
-  it('delete', (done) => {
+  it('delete', done => {
     const testSchema1 = new Parse.Schema('SchemaTest1');
     const testSchema2 = new Parse.Schema('SchemaTest2');
-    testSchema1.save().then(() => {
-      return testSchema2.save();
-    }).then(() => {
-      return Parse.Schema.all();
-    }).then((results) => {
-      assert.equal(results.length, 2);
-      return testSchema1.delete();
-    }).then(() => {
-      return Parse.Schema.all();
-    }).then((results) => {
-      assert.equal(results.length, 1);
-      assert.equal(results[0].className, 'SchemaTest2');
-      done();
-    });
+    testSchema1
+      .save()
+      .then(() => {
+        return testSchema2.save();
+      })
+      .then(() => {
+        return Parse.Schema.all();
+      })
+      .then(results => {
+        assert.equal(results.length, 2);
+        return testSchema1.delete();
+      })
+      .then(() => {
+        return Parse.Schema.all();
+      })
+      .then(results => {
+        assert.equal(results.length, 1);
+        assert.equal(results[0].className, 'SchemaTest2');
+        done();
+      });
   });
 
-  it('purge', (done) => {
+  it('purge', done => {
     const testSchema = new Parse.Schema('SchemaTest');
     const obj = new Parse.Object('SchemaTest');
-    obj.save().then(() => {
-      return testSchema.delete().then(() => {
-        // Should never reach here
-        assert.equal(true, false);
-      }).catch((error) => {
-        assert.equal(error.code, Parse.Error.INVALID_SCHEMA_OPERATION);
-        assert.equal(error.message, 'Class SchemaTest is not empty, contains 1 objects, cannot drop schema.');
-        return Promise.resolve();
+    obj
+      .save()
+      .then(() => {
+        return testSchema
+          .delete()
+          .then(() => {
+            // Should never reach here
+            assert.equal(true, false);
+          })
+          .catch(error => {
+            assert.equal(error.code, Parse.Error.INVALID_SCHEMA_OPERATION);
+            assert.equal(
+              error.message,
+              'Class SchemaTest is not empty, contains 1 objects, cannot drop schema.'
+            );
+            return Promise.resolve();
+          });
+      })
+      .then(() => {
+        return testSchema.purge();
+      })
+      .then(() => {
+        const query = new Parse.Query('SchemaTest');
+        return query.count();
+      })
+      .then(count => {
+        assert.equal(count, 0);
+        // Delete only works on empty schema, extra check
+        return testSchema.delete();
+      })
+      .then(() => {
+        done();
       });
-    }).then(() => {
-      return testSchema.purge();
-    }).then(() => {
-      const query = new Parse.Query('SchemaTest');
-      return query.count();
-    }).then((count) => {
-      assert.equal(count, 0);
-      // Delete only works on empty schema, extra check
-      return testSchema.delete();
-    }).then(() => {
-      done();
-    });
   });
 
-  it('save index', (done) => {
+  it('save index', done => {
     const testSchema = new Parse.Schema('SchemaTest');
     const index = {
-      name: 1
+      name: 1,
     };
     testSchema.addString('name');
     testSchema.addIndex('test_index', index);
-    testSchema.save().then((result) => {
+    testSchema.save().then(result => {
       assert.notEqual(result.indexes.test_index, undefined);
       done();
     });
   });
 
-  it('update index', (done) => {
+  it('update index', done => {
     const testSchema = new Parse.Schema('SchemaTest');
-    testSchema.save().then(() => {
-      const index = {
-        name: 1
-      };
-      testSchema.addString('name');
-      testSchema.addIndex('test_index', index);
-      return testSchema.update();
-    }).then((result) => {
-      assert.notEqual(result.indexes.test_index, undefined);
-      done();
-    });
+    testSchema
+      .save()
+      .then(() => {
+        const index = {
+          name: 1,
+        };
+        testSchema.addString('name');
+        testSchema.addIndex('test_index', index);
+        return testSchema.update();
+      })
+      .then(result => {
+        assert.notEqual(result.indexes.test_index, undefined);
+        done();
+      });
   });
 
-  it('delete index', (done) => {
+  it('delete index', done => {
     const testSchema = new Parse.Schema('SchemaTest');
-    testSchema.save().then(() => {
-      const index = {
-        name: 1
-      };
-      testSchema.addString('name');
-      testSchema.addIndex('test_index', index);
-      return testSchema.update();
-    }).then((result) => {
-      assert.notEqual(result.indexes.test_index, undefined);
-      testSchema.deleteIndex('test_index');
-      return testSchema.update();
-    }).then((result) => {
-      assert.equal(result.indexes.test_index, undefined);
-      done();
-    });
+    testSchema
+      .save()
+      .then(() => {
+        const index = {
+          name: 1,
+        };
+        testSchema.addString('name');
+        testSchema.addIndex('test_index', index);
+        return testSchema.update();
+      })
+      .then(result => {
+        assert.notEqual(result.indexes.test_index, undefined);
+        testSchema.deleteIndex('test_index');
+        return testSchema.update();
+      })
+      .then(result => {
+        assert.equal(result.indexes.test_index, undefined);
+        done();
+      });
   });
 
-  it('invalid field name', (done) => {
+  it('invalid field name', done => {
     const testSchema = new Parse.Schema('SchemaTest');
     try {
       testSchema.addField(null);
@@ -395,7 +497,7 @@ describe('Schema', () => {
     }
   });
 
-  it('invalid field type', (done) => {
+  it('invalid field type', done => {
     const testSchema = new Parse.Schema('SchemaTest');
     try {
       testSchema.addField('name', 'UnknownType');
@@ -404,7 +506,7 @@ describe('Schema', () => {
     }
   });
 
-  it('invalid index name', (done) => {
+  it('invalid index name', done => {
     const testSchema = new Parse.Schema('SchemaTest');
     try {
       testSchema.addIndex(null);
@@ -413,7 +515,7 @@ describe('Schema', () => {
     }
   });
 
-  it('invalid index', (done) => {
+  it('invalid index', done => {
     const testSchema = new Parse.Schema('SchemaTest');
     try {
       testSchema.addIndex('name', null);
@@ -422,7 +524,7 @@ describe('Schema', () => {
     }
   });
 
-  it('invalid pointer name', (done) => {
+  it('invalid pointer name', done => {
     const testSchema = new Parse.Schema('SchemaTest');
     try {
       testSchema.addPointer(null);
@@ -431,7 +533,7 @@ describe('Schema', () => {
     }
   });
 
-  it('invalid pointer class', (done) => {
+  it('invalid pointer class', done => {
     const testSchema = new Parse.Schema('SchemaTest');
     try {
       testSchema.addPointer('name', null);
@@ -440,7 +542,7 @@ describe('Schema', () => {
     }
   });
 
-  it('invalid relation name', (done) => {
+  it('invalid relation name', done => {
     const testSchema = new Parse.Schema('SchemaTest');
     try {
       testSchema.addRelation(null);
@@ -449,7 +551,7 @@ describe('Schema', () => {
     }
   });
 
-  it('invalid relation class', (done) => {
+  it('invalid relation class', done => {
     const testSchema = new Parse.Schema('SchemaTest');
     try {
       testSchema.addRelation('name', null);
@@ -458,7 +560,7 @@ describe('Schema', () => {
     }
   });
 
-  it('assert class name', (done) => {
+  it('assert class name', done => {
     const testSchema = new Parse.Schema();
     try {
       testSchema.assertClassName();

@@ -51,7 +51,7 @@ export default function decode(value: any): any {
   if (value.__type === 'GeoPoint') {
     return new ParseGeoPoint({
       latitude: value.latitude,
-      longitude: value.longitude
+      longitude: value.longitude,
     });
   }
   if (value.__type === 'Polygon') {

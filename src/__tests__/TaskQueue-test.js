@@ -21,7 +21,7 @@ describe('TaskQueue', () => {
   it('runs a single task immediately', async () => {
     const q = new TaskQueue();
     let resolve;
-    const p = new Promise((res) => resolve = res);
+    const p = new Promise(res => (resolve = res));
     let called = false;
     let completed = false;
     q.enqueue(() => {
@@ -33,14 +33,14 @@ describe('TaskQueue', () => {
     expect(called).toBe(true);
     expect(completed).toBe(false);
     resolve();
-    await new Promise((resolve) => setImmediate(resolve));
+    await new Promise(resolve => setImmediate(resolve));
     expect(completed).toBe(true);
   });
 
-  it('rejects the enqueue promise when the task errors', async (done) => {
+  it('rejects the enqueue promise when the task errors', async done => {
     const q = new TaskQueue();
     let reject;
-    const p = new Promise((res, rej) => reject = rej);
+    const p = new Promise((res, rej) => (reject = rej));
     let called = false;
     const t = q.enqueue(() => {
       called = true;
@@ -49,12 +49,12 @@ describe('TaskQueue', () => {
     expect(called).toBe(true);
     reject('error');
     try {
-      await t
+      await t;
       done.fail('should throw');
-    } catch(e) {
+    } catch (e) {
       done();
     }
-  })
+  });
 
   it('can execute a chain of tasks', async () => {
     const q = new TaskQueue();

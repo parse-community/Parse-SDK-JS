@@ -21,7 +21,7 @@ const StorageController = {
 
   getItemAsync(path: string): Promise {
     return new Promise((resolve, reject) => {
-      this.getAsyncStorage().getItem(path, function(err, value) {
+      this.getAsyncStorage().getItem(path, function (err, value) {
         if (err) {
           reject(err);
         } else {
@@ -33,7 +33,7 @@ const StorageController = {
 
   setItemAsync(path: string, value: string): Promise {
     return new Promise((resolve, reject) => {
-      this.getAsyncStorage().setItem(path, value, function(err, value) {
+      this.getAsyncStorage().setItem(path, value, function (err, value) {
         if (err) {
           reject(err);
         } else {
@@ -45,7 +45,7 @@ const StorageController = {
 
   removeItemAsync(path: string): Promise {
     return new Promise((resolve, reject) => {
-      this.getAsyncStorage().removeItem(path, function(err) {
+      this.getAsyncStorage().removeItem(path, function (err) {
         if (err) {
           reject(err);
         } else {
@@ -57,7 +57,7 @@ const StorageController = {
 
   getAllKeysAsync(): Promise {
     return new Promise((resolve, reject) => {
-      this.getAsyncStorage().getAllKeys(function(err, keys) {
+      this.getAsyncStorage().getAllKeys(function (err, keys) {
         if (err) {
           reject(err);
         } else {
@@ -69,7 +69,7 @@ const StorageController = {
 
   multiGet(keys: Array<string>): Promise<Array<Array<string>>> {
     return new Promise((resolve, reject) => {
-      this.getAsyncStorage().multiGet(keys, function(err, result) {
+      this.getAsyncStorage().multiGet(keys, function (err, result) {
         if (err) {
           reject(err);
         } else {
@@ -81,7 +81,7 @@ const StorageController = {
 
   multiRemove(keys: Array<string>): Promise {
     return new Promise((resolve, reject) => {
-      this.getAsyncStorage().multiRemove(keys, function(err) {
+      this.getAsyncStorage().multiRemove(keys, function (err) {
         if (err) {
           reject(err);
         } else {
@@ -93,7 +93,7 @@ const StorageController = {
 
   clear() {
     return this.getAsyncStorage().clear();
-  }
+  },
 };
 
 module.exports = StorageController;

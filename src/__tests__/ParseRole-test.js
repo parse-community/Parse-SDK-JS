@@ -49,34 +49,42 @@ describe('ParseRole', () => {
     const acl = new ParseACL({ aUserId: { read: true, write: true } });
     const role = new ParseRole('admin', acl);
     role.id = '101';
-    expect(role.validate({
-      name: 'author'
-    })).toEqual(new ParseError(
-      ParseError.OTHER_CAUSE,
-      'A role\'s name can only be set before it has been saved.'
-    ));
+    expect(
+      role.validate({
+        name: 'author',
+      })
+    ).toEqual(
+      new ParseError(
+        ParseError.OTHER_CAUSE,
+        "A role's name can only be set before it has been saved."
+      )
+    );
 
     role.id = undefined;
-    expect(role.validate({
-      name: 12
-    })).toEqual(new ParseError(
-      ParseError.OTHER_CAUSE,
-      'A role\'s name must be a String.'
-    ));
+    expect(
+      role.validate({
+        name: 12,
+      })
+    ).toEqual(new ParseError(ParseError.OTHER_CAUSE, "A role's name must be a String."));
 
-    expect(role.validate({
-      name: '$$$'
-    })).toEqual(new ParseError(
-      ParseError.OTHER_CAUSE,
-      'A role\'s name can be only contain alphanumeric characters, _, ' +
-      '-, and spaces.'
-    ));
+    expect(
+      role.validate({
+        name: '$$$',
+      })
+    ).toEqual(
+      new ParseError(
+        ParseError.OTHER_CAUSE,
+        "A role's name can be only contain alphanumeric characters, _, " + '-, and spaces.'
+      )
+    );
 
-    expect(role.validate({
-      name: 'admin'
-    })).toBe(false);
+    expect(
+      role.validate({
+        name: 'admin',
+      })
+    ).toBe(false);
     const result = role.validate({
-      'invalid#field': 'admin'
+      'invalid#field': 'admin',
     });
     expect(result.code).toBe(ParseError.INVALID_KEY_NAME);
   });
@@ -85,7 +93,7 @@ describe('ParseRole', () => {
     const role = ParseObject.fromJSON({
       className: '_Role',
       objectId: '102',
-      name: 'admin'
+      name: 'admin',
     });
     expect(role instanceof ParseObject).toBe(true);
     expect(role instanceof ParseRole).toBe(true);

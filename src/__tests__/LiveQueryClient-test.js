@@ -63,7 +63,7 @@ describe('LiveQueryClient', () => {
     }).toThrow('You need to set a proper Parse LiveQuery server url before using LiveQueryClient');
   });
 
-  it('WebSocketController required', (done) => {
+  it('WebSocketController required', done => {
     const WebSocketImplementation = CoreManager.getWebSocketController();
     CoreManager.setWebSocketController();
     const liveQueryClient = new LiveQueryClient({
@@ -71,13 +71,13 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
-    liveQueryClient.on('error', (error) => {
+    liveQueryClient.on('error', error => {
       expect(error).toBe('Can not find WebSocket implementation');
       CoreManager.setWebSocketController(WebSocketImplementation);
       done();
-    })
+    });
     liveQueryClient.open();
   });
 
@@ -87,14 +87,14 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     liveQueryClient.socket = {
-      send: jest.fn()
+      send: jest.fn(),
     };
     const subscription = {
-      id: 1
-    }
+      id: 1,
+    };
     liveQueryClient.subscriptions.set(1, subscription);
 
     liveQueryClient.unsubscribe(subscription);
@@ -105,7 +105,7 @@ describe('LiveQueryClient', () => {
     const message = JSON.parse(messageStr);
     expect(message).toEqual({
       op: 'unsubscribe',
-      requestId: 1
+      requestId: 1,
     });
   });
 
@@ -115,7 +115,7 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     expect(liveQueryClient.shouldOpen()).toBe(true);
     liveQueryClient.close();
@@ -140,12 +140,12 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     // Mock _getWebSocketImplementation
-    liveQueryClient._getWebSocketImplementation = function() {
+    liveQueryClient._getWebSocketImplementation = function () {
       return jest.fn();
-    }
+    };
     // Mock handlers
     liveQueryClient._handleWebSocketOpen = jest.fn();
     liveQueryClient._handleWebSocketMessage = jest.fn();
@@ -173,10 +173,10 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     liveQueryClient.socket = {
-      send: jest.fn()
+      send: jest.fn(),
     };
 
     liveQueryClient._handleWebSocketOpen();
@@ -197,18 +197,18 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     const data = {
       op: 'connected',
-      clientId: 1
+      clientId: 1,
     };
     const event = {
-      data: JSON.stringify(data)
-    }
+      data: JSON.stringify(data),
+    };
     // Register checked in advance
     let isChecked = false;
-    liveQueryClient.on('open', function() {
+    liveQueryClient.on('open', function () {
       isChecked = true;
     });
 
@@ -226,18 +226,18 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     const data = {
       op: 'connected',
-      clientId: 1
+      clientId: 1,
     };
     const event = {
-      data: JSON.stringify(data)
-    }
+      data: JSON.stringify(data),
+    };
     // Register checked in advance
     let isChecked = false;
-    liveQueryClient.on('open', function() {
+    liveQueryClient.on('open', function () {
       isChecked = true;
     });
     jest.spyOn(liveQueryClient, 'resubscribe');
@@ -257,7 +257,7 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     // Add mock subscription
     const subscription = new events.EventEmitter();
@@ -267,14 +267,14 @@ describe('LiveQueryClient', () => {
     const data = {
       op: 'subscribed',
       clientId: 1,
-      requestId: 1
+      requestId: 1,
     };
     const event = {
-      data: JSON.stringify(data)
-    }
+      data: JSON.stringify(data),
+    };
     // Register checked in advance
     let isChecked = false;
-    subscription.on('open', function() {
+    subscription.on('open', function () {
       isChecked = true;
     });
 
@@ -289,7 +289,7 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     const subscription = new events.EventEmitter();
     subscription.subscribePromise = resolvingPromise();
@@ -298,11 +298,11 @@ describe('LiveQueryClient', () => {
     const data = {
       op: 'unsubscribed',
       clientId: 1,
-      requestId: 1
+      requestId: 1,
     };
     const event = {
-      data: JSON.stringify(data)
-    }
+      data: JSON.stringify(data),
+    };
     liveQueryClient._handleWebSocketMessage(event);
     expect(liveQueryClient.subscriptions.size).toBe(1);
   });
@@ -313,19 +313,19 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     const data = {
       op: 'error',
       clientId: 1,
-      error: 'error'
+      error: 'error',
     };
     const event = {
-      data: JSON.stringify(data)
-    }
+      data: JSON.stringify(data),
+    };
     // Register checked in advance
     let isChecked = false;
-    liveQueryClient.on('error', function(error) {
+    liveQueryClient.on('error', function (error) {
       isChecked = true;
       expect(error).toEqual('error');
     });
@@ -341,7 +341,7 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     const subscription = new events.EventEmitter();
     subscription.subscribePromise = resolvingPromise();
@@ -351,14 +351,14 @@ describe('LiveQueryClient', () => {
       op: 'error',
       clientId: 1,
       requestId: 1,
-      error: 'error thrown'
+      error: 'error thrown',
     };
     const event = {
-      data: JSON.stringify(data)
-    }
+      data: JSON.stringify(data),
+    };
     // Register checked in advance
     let isChecked = false;
-    subscription.on('error', function(error) {
+    subscription.on('error', function (error) {
       isChecked = true;
       expect(error).toEqual('error thrown');
     });
@@ -375,7 +375,7 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     // Add mock subscription
     const subscription = new events.EventEmitter();
@@ -386,14 +386,14 @@ describe('LiveQueryClient', () => {
       op: 'create',
       clientId: 1,
       requestId: 1,
-      object: object._toFullJSON()
+      object: object._toFullJSON(),
     };
     const event = {
-      data: JSON.stringify(data)
-    }
+      data: JSON.stringify(data),
+    };
     // Register checked in advance
     let isChecked = false;
-    subscription.on('create', function(parseObject) {
+    subscription.on('create', function (parseObject) {
       isChecked = true;
       expect(parseObject.get('key')).toEqual('value');
       expect(parseObject.get('className')).toBeUndefined();
@@ -411,7 +411,7 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     const object = new ParseObject('Test');
     object.set('key', 'value');
@@ -419,11 +419,11 @@ describe('LiveQueryClient', () => {
       op: 'create',
       clientId: 1,
       requestId: 1,
-      object: object._toFullJSON()
+      object: object._toFullJSON(),
     };
     const event = {
-      data: JSON.stringify(data)
-    }
+      data: JSON.stringify(data),
+    };
     liveQueryClient._handleWebSocketMessage(event);
   });
 
@@ -433,7 +433,7 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     // Add mock subscription
     const subscription = new events.EventEmitter();
@@ -450,8 +450,8 @@ describe('LiveQueryClient', () => {
       original: original._toFullJSON(),
     };
     const event = {
-      data: JSON.stringify(data)
-    }
+      data: JSON.stringify(data),
+    };
     // Register checked in advance
     let isChecked = false;
     subscription.on('update', (parseObject, parseOriginalObject) => {
@@ -476,7 +476,7 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     // Add mock subscription
     const subscription = new events.EventEmitter();
@@ -493,22 +493,17 @@ describe('LiveQueryClient', () => {
       original: original._toFullJSON(),
     };
     const event = {
-      data: JSON.stringify(data)
-    }
+      data: JSON.stringify(data),
+    };
 
-    jest.spyOn(
-      mockLocalDatastore,
-      '_updateObjectIfPinned'
-    )
+    jest
+      .spyOn(mockLocalDatastore, '_updateObjectIfPinned')
       .mockImplementationOnce(() => Promise.resolve());
 
-    const spy = jest.spyOn(
-      ParseObject,
-      'fromJSON'
-    )
+    const spy = jest
+      .spyOn(ParseObject, 'fromJSON')
       .mockImplementationOnce(() => original)
       .mockImplementationOnce(() => object);
-
 
     mockLocalDatastore.isEnabled = true;
 
@@ -533,7 +528,7 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     // Add mock subscription
     const subscription = new events.EventEmitter();
@@ -552,8 +547,8 @@ describe('LiveQueryClient', () => {
       original: original._toFullJSON(),
     };
     const event = {
-      data: JSON.stringify(data)
-    }
+      data: JSON.stringify(data),
+    };
     let isChecked = false;
     subscription.on('update', (parseObject, parseOriginalObject) => {
       isChecked = true;
@@ -572,18 +567,18 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     // Add mock subscription
     const subscription = new events.EventEmitter();
     liveQueryClient.subscriptions.set(1, subscription);
     // Register checked in advance
     let isChecked = false;
-    subscription.on('close', function() {
+    subscription.on('close', function () {
       isChecked = true;
     });
     let isCheckedAgain = false;
-    liveQueryClient.on('close', function() {
+    liveQueryClient.on('close', function () {
       isCheckedAgain = true;
     });
 
@@ -599,18 +594,18 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     // Add mock subscription
     const subscription = new events.EventEmitter();
     liveQueryClient.subscriptions.set(1, subscription);
     // Register checked in advance
     let isChecked = false;
-    subscription.on('close', function() {
+    subscription.on('close', function () {
       isChecked = true;
     });
     let isCheckedAgain = false;
-    liveQueryClient.on('close', function() {
+    liveQueryClient.on('close', function () {
       isCheckedAgain = true;
     });
     liveQueryClient.open();
@@ -627,7 +622,7 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
 
     liveQueryClient.open = jest.fn();
@@ -648,7 +643,7 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
 
     liveQueryClient.open = jest.fn();
@@ -675,11 +670,11 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     const error = {};
     let isChecked = false;
-    liveQueryClient.on('error', function(errorAgain) {
+    liveQueryClient.on('error', function (errorAgain) {
       isChecked = true;
       expect(errorAgain).toEqual(error);
     });
@@ -689,18 +684,18 @@ describe('LiveQueryClient', () => {
     expect(isChecked).toBe(true);
   });
 
-  it('can handle WebSocket error message with subscriptions', (done) => {
+  it('can handle WebSocket error message with subscriptions', done => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     const subscription = new events.EventEmitter();
     liveQueryClient.subscriptions.set(1, subscription);
-    const error = {}
-    subscription.on('error', (errorAgain) => {
+    const error = {};
+    subscription.on('error', errorAgain => {
       expect(errorAgain).toEqual(error);
       done();
     });
@@ -714,7 +709,7 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     expect(liveQueryClient.additionalProperties).toBe(true);
     const data = {
@@ -724,10 +719,10 @@ describe('LiveQueryClient', () => {
       error: 'Additional properties not allowed',
     };
     const event = {
-      data: JSON.stringify(data)
-    }
+      data: JSON.stringify(data),
+    };
     let isChecked = false;
-    liveQueryClient.on('error', function(error) {
+    liveQueryClient.on('error', function (error) {
       isChecked = true;
       expect(error).toEqual(data.error);
     });
@@ -746,10 +741,10 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     liveQueryClient.socket = {
-      send: jest.fn()
+      send: jest.fn(),
     };
     const query = new ParseQuery('Test');
     query.equalTo('key', 'value');
@@ -771,9 +766,9 @@ describe('LiveQueryClient', () => {
       query: {
         className: 'Test',
         where: {
-          key: 'value'
-        }
-      }
+          key: 'value',
+        },
+      },
     });
   });
 
@@ -783,10 +778,10 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     liveQueryClient.socket = {
-      send: jest.fn()
+      send: jest.fn(),
     };
     const query = new ParseQuery('Test');
     query.equalTo('key', 'value');
@@ -810,9 +805,9 @@ describe('LiveQueryClient', () => {
       query: {
         className: 'Test',
         where: {
-          key: 'value'
-        }
-      }
+          key: 'value',
+        },
+      },
     });
   });
 
@@ -822,14 +817,14 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     liveQueryClient.socket = {
-      send: jest.fn()
+      send: jest.fn(),
     };
     const subscription = {
-      id: 1
-    }
+      id: 1,
+    };
     liveQueryClient.subscriptions.set(1, subscription);
 
     liveQueryClient.unsubscribe(subscription);
@@ -840,7 +835,7 @@ describe('LiveQueryClient', () => {
     const message = JSON.parse(messageStr);
     expect(message).toEqual({
       op: 'unsubscribe',
-      requestId: 1
+      requestId: 1,
     });
   });
 
@@ -850,10 +845,10 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     liveQueryClient.socket = {
-      send: jest.fn()
+      send: jest.fn(),
     };
     liveQueryClient.unsubscribe();
     liveQueryClient.connectPromise.resolve();
@@ -867,10 +862,10 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     liveQueryClient.socket = {
-      send: jest.fn()
+      send: jest.fn(),
     };
     const query = new ParseQuery('Test');
     query.equalTo('key', 'value');
@@ -889,9 +884,9 @@ describe('LiveQueryClient', () => {
       query: {
         className: 'Test',
         where: {
-          key: 'value'
-        }
-      }
+          key: 'value',
+        },
+      },
     });
   });
 
@@ -901,10 +896,10 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     liveQueryClient.socket = {
-      send: jest.fn()
+      send: jest.fn(),
     };
     const query = new ParseQuery('Test');
     query.equalTo('key', 'value');
@@ -924,9 +919,9 @@ describe('LiveQueryClient', () => {
       query: {
         className: 'Test',
         where: {
-          key: 'value'
-        }
-      }
+          key: 'value',
+        },
+      },
     });
   });
 
@@ -936,21 +931,21 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     liveQueryClient.state = 'connected';
     liveQueryClient.socket = {
-      close: jest.fn()
-    }
+      close: jest.fn(),
+    };
     const subscription = new events.EventEmitter();
     liveQueryClient.subscriptions.set(1, subscription);
     // Register checked in advance
     let isChecked = false;
-    subscription.on('close', function() {
+    subscription.on('close', function () {
       isChecked = true;
     });
     let isCheckedAgain = false;
-    liveQueryClient.on('close', function() {
+    liveQueryClient.on('close', function () {
       isCheckedAgain = true;
     });
 
@@ -972,7 +967,7 @@ describe('LiveQueryClient', () => {
       serverURL: 'ws://test',
       javascriptKey: 'javascriptKey',
       masterKey: 'masterKey',
-      sessionToken: 'sessionToken'
+      sessionToken: 'sessionToken',
     });
     // Add mock subscription
     const subscription = new events.EventEmitter();
@@ -986,11 +981,11 @@ describe('LiveQueryClient', () => {
       object: object._toFullJSON(),
     };
     const event = {
-      data: JSON.stringify(data)
-    }
+      data: JSON.stringify(data),
+    };
     // Register checked in advance
     let isChecked = false;
-    subscription.on('create', function(parseObject) {
+    subscription.on('create', function (parseObject) {
       isChecked = true;
       expect(parseObject instanceof MyExtendedClass).toBe(true);
       expect(parseObject.get('key')).toEqual('value');

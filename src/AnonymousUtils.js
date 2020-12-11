@@ -112,7 +112,7 @@ const AnonymousUtils = {
       registered = true;
     }
     return provider;
-  }
+  },
 };
 
 export default AnonymousUtils;

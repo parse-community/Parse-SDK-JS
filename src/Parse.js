@@ -33,11 +33,15 @@ const Parse = {
    * @static
    */
   initialize(applicationId: string, javaScriptKey: string) {
-    if (process.env.PARSE_BUILD === 'browser' && CoreManager.get('IS_NODE') && !process.env.SERVER_RENDERING) {
+    if (
+      process.env.PARSE_BUILD === 'browser' &&
+      CoreManager.get('IS_NODE') &&
+      !process.env.SERVER_RENDERING
+    ) {
       /* eslint-disable no-console */
       console.log(
-        'It looks like you\'re using the browser version of the SDK in a ' +
-        'node.js environment. You should require(\'parse/node\') instead.'
+        "It looks like you're using the browser version of the SDK in a " +
+          "node.js environment. You should require('parse/node') instead."
       );
       /* eslint-enable no-console */
     }
@@ -206,7 +210,7 @@ Parse.Op = {
   Add: ParseOp.AddOp,
   Remove: ParseOp.RemoveOp,
   AddUnique: ParseOp.AddUniqueOp,
-  Relation: ParseOp.RelationOp
+  Relation: ParseOp.RelationOp,
 };
 Parse.Push = require('./Push');
 Parse.Query = require('./ParseQuery').default;
@@ -219,40 +223,40 @@ Parse.User = require('./ParseUser').default;
 Parse.LiveQuery = require('./ParseLiveQuery').default;
 Parse.LiveQueryClient = require('./LiveQueryClient').default;
 
-Parse._request = function(...args) {
+Parse._request = function (...args) {
   return CoreManager.getRESTController().request.apply(null, args);
 };
-Parse._ajax = function(...args) {
+Parse._ajax = function (...args) {
   return CoreManager.getRESTController().ajax.apply(null, args);
 };
 // We attempt to match the signatures of the legacy versions of these methods
-Parse._decode = function(_, value) {
+Parse._decode = function (_, value) {
   return decode(value);
-}
-Parse._encode = function(value, _, disallowObjects) {
+};
+Parse._encode = function (value, _, disallowObjects) {
   return encode(value, disallowObjects);
-}
-Parse._getInstallationId = function() {
+};
+Parse._getInstallationId = function () {
   return CoreManager.getInstallationController().currentInstallationId();
-}
+};
 /**
  * Enable pinning in your application.
  * This must be called before your application can use pinning.
  *
  * @static
  */
-Parse.enableLocalDatastore = function() {
+Parse.enableLocalDatastore = function () {
   Parse.LocalDatastore.isEnabled = true;
-}
+};
 /**
  * Flag that indicates whether Local Datastore is enabled.
  *
  * @static
  * @returns {boolean}
  */
-Parse.isLocalDatastoreEnabled = function() {
+Parse.isLocalDatastoreEnabled = function () {
   return Parse.LocalDatastore.isEnabled;
-}
+};
 /**
  * Gets all contents from Local Datastore
  *
@@ -263,14 +267,14 @@ Parse.isLocalDatastoreEnabled = function() {
  * @static
  * @returns {object}
  */
-Parse.dumpLocalDatastore = function() {
+Parse.dumpLocalDatastore = function () {
   if (!Parse.LocalDatastore.isEnabled) {
     console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
     return Promise.resolve({});
   } else {
     return Parse.LocalDatastore._getAllContents();
   }
-}
+};
 
 /**
  * Enable the current user encryption.
@@ -278,9 +282,9 @@ Parse.dumpLocalDatastore = function() {
  *
  * @static
  */
-Parse.enableEncryptedUser = function() {
+Parse.enableEncryptedUser = function () {
   Parse.encryptedUser = true;
-}
+};
 
 /**
  * Flag that indicates whether Encrypted User is enabled.
@@ -288,9 +292,9 @@ Parse.enableEncryptedUser = function() {
  * @static
  * @returns {boolean}
  */
-Parse.isEncryptedUserEnabled = function() {
+Parse.isEncryptedUserEnabled = function () {
   return Parse.encryptedUser;
-}
+};
 
 CoreManager.setCryptoController(CryptoController);
 CoreManager.setInstallationController(InstallationController);
@@ -299,9 +303,9 @@ CoreManager.setRESTController(RESTController);
 if (process.env.PARSE_BUILD === 'node') {
   Parse.initialize = Parse._initialize;
   Parse.Cloud = Parse.Cloud || {};
-  Parse.Cloud.useMasterKey = function() {
+  Parse.Cloud.useMasterKey = function () {
     CoreManager.set('USE_MASTER_KEY', true);
-  }
+  };
   Parse.Hooks = require('./ParseHooks');
 }
 

@@ -11,16 +11,16 @@ jest.dontMock('../arrayContainsObject');
 jest.dontMock('../unique');
 
 let localCount = 0;
-const mockObject = function(className, id) {
+const mockObject = function (className, id) {
   this.className = className;
   this.id = id;
   if (!id) {
     this._localId = 'local' + localCount++;
   }
-}
-mockObject.prototype._getId = function() {
+};
+mockObject.prototype._getId = function () {
   return this.id || this._localId;
-}
+};
 jest.setMock('../ParseObject', mockObject);
 
 const unique = require('../unique').default;
@@ -39,26 +39,21 @@ describe('unique', () => {
   it('dedups objects by their id', () => {
     const o = new ParseObject('Item');
     expect(unique([o, o, o])).toEqual([o]);
-    expect(unique([
-      new ParseObject('Item'),
-      new ParseObject('Item')
-    ]).length).toBe(2);
-    expect(unique([
-      new ParseObject('Item', 'a'),
-      new ParseObject('Item', 'b'),
-      new ParseObject('Item', 'a')
-    ])).toEqual([
-      new ParseObject('Item', 'a'),
-      new ParseObject('Item', 'b')
-    ]);
-    expect(unique([
-      new ParseObject('Item', 'a'),
-      new ParseObject('Item', 'b'),
-      new ParseObject('Item', 'b'),
-      new ParseObject('Item', 'a')
-    ])).toEqual([
-      new ParseObject('Item', 'a'),
-      new ParseObject('Item', 'b')
-    ]);
+    expect(unique([new ParseObject('Item'), new ParseObject('Item')]).length).toBe(2);
+    expect(
+      unique([
+        new ParseObject('Item', 'a'),
+        new ParseObject('Item', 'b'),
+        new ParseObject('Item', 'a'),
+      ])
+    ).toEqual([new ParseObject('Item', 'a'), new ParseObject('Item', 'b')]);
+    expect(
+      unique([
+        new ParseObject('Item', 'a'),
+        new ParseObject('Item', 'b'),
+        new ParseObject('Item', 'b'),
+        new ParseObject('Item', 'a'),
+      ])
+    ).toEqual([new ParseObject('Item', 'a'), new ParseObject('Item', 'b')]);
   });
 });

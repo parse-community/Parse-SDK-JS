@@ -24,24 +24,24 @@ import type { RequestOptions, FullOptions } from './RESTController';
 type BatchOptions = FullOptions & { batchSize?: number };
 
 export type WhereClause = {
-  [attr: string]: mixed;
+  [attr: string]: mixed,
 };
 
 export type QueryJSON = {
-  where: WhereClause;
-  include?: string;
-  excludeKeys?: string;
-  keys?: string;
-  limit?: number;
-  skip?: number;
-  order?: string;
-  className?: string;
-  count?: number;
-  hint? : mixed;
-  explain? : boolean;
-  readPreference?: string;
-  includeReadPreference?: string;
-  subqueryReadPreference?: string;
+  where: WhereClause,
+  include?: string,
+  excludeKeys?: string,
+  keys?: string,
+  limit?: number,
+  skip?: number,
+  order?: string,
+  className?: string,
+  count?: number,
+  hint?: mixed,
+  explain?: boolean,
+  readPreference?: string,
+  includeReadPreference?: string,
+  subqueryReadPreference?: string,
 };
 
 /**
@@ -67,7 +67,7 @@ function quote(s: string): string {
  */
 function _getClassNameFromQueries(queries: Array<ParseQuery>): ?string {
   let className = null;
-  queries.forEach((q) => {
+  queries.forEach(q => {
     if (!className) {
       className = q.className;
     }
@@ -84,18 +84,18 @@ function _getClassNameFromQueries(queries: Array<ParseQuery>): ?string {
  * making sure that the data object contains keys for all objects that have
  * been requested with a select, so that our cached state updates correctly.
  */
-function handleSelectResult(data: any, select: Array<string>){
+function handleSelectResult(data: any, select: Array<string>) {
   const serverDataMask = {};
 
-  select.forEach((field) => {
-    const hasSubObjectSelect = field.indexOf(".") !== -1;
-    if (!hasSubObjectSelect && !data.hasOwnProperty(field)){
+  select.forEach(field => {
+    const hasSubObjectSelect = field.indexOf('.') !== -1;
+    if (!hasSubObjectSelect && !data.hasOwnProperty(field)) {
       // this field was selected, but is missing from the retrieved data
-      data[field] = undefined
+      data[field] = undefined;
     } else if (hasSubObjectSelect) {
       // this field references a sub-object,
       // so we need to walk down the path components
-      const pathComponents = field.split(".");
+      const pathComponents = field.split('.');
       let obj = data;
       let serverMask = serverDataMask;
 
@@ -125,18 +125,21 @@ function handleSelectResult(data: any, select: Array<string>){
     // missing selected keys to sub-objects, but we still need to add in the
     // data for any previously retrieved sub-objects that were not selected.
 
-    const serverData = CoreManager.getObjectStateController().getServerData({id:data.objectId, className:data.className});
+    const serverData = CoreManager.getObjectStateController().getServerData({
+      id: data.objectId,
+      className: data.className,
+    });
 
     copyMissingDataWithMask(serverData, data, serverDataMask, false);
   }
 }
 
-function copyMissingDataWithMask(src, dest, mask, copyThisLevel){
+function copyMissingDataWithMask(src, dest, mask, copyThisLevel) {
   //copy missing elements at this level
   if (copyThisLevel) {
     for (const key in src) {
       if (src.hasOwnProperty(key) && !dest.hasOwnProperty(key)) {
-        dest[key] = src[key]
+        dest[key] = src[key];
       }
     }
   }
@@ -161,7 +164,7 @@ function handleOfflineSort(a, b, sorts) {
   if (order === '_updated_at') {
     order = 'updatedAt';
   }
-  if (!(/^[A-Za-z][0-9A-Za-z_]*$/).test(order) || order === 'password') {
+  if (!/^[A-Za-z][0-9A-Za-z_]*$/.test(order) || order === 'password') {
     throw new ParseError(ParseError.INVALID_KEY_NAME, `Invalid Key: ${order}`);
   }
   const field1 = a.get(order);
@@ -265,9 +268,7 @@ class ParseQuery {
         this.className = obj.className;
       }
     } else {
-      throw new TypeError(
-        'A ParseQuery must be constructed with a ParseObject or class name.'
-      );
+      throw new TypeError('A ParseQuery must be constructed with a ParseObject or class name.');
     }
 
     this._where = {};
@@ -285,7 +286,7 @@ class ParseQuery {
     this._xhrRequest = {
       task: null,
       onchange: () => {},
-    }
+    };
   }
 
   /**
@@ -295,7 +296,7 @@ class ParseQuery {
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   _orQuery(queries: Array<ParseQuery>): ParseQuery {
-    const queryJSON = queries.map((q) => {
+    const queryJSON = queries.map(q => {
       return q.toJSON().where;
     });
 
@@ -310,7 +311,7 @@ class ParseQuery {
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   _andQuery(queries: Array<ParseQuery>): ParseQuery {
-    const queryJSON = queries.map((q) => {
+    const queryJSON = queries.map(q => {
       return q.toJSON().where;
     });
 
@@ -325,7 +326,7 @@ class ParseQuery {
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   _norQuery(queries: Array<ParseQuery>): ParseQuery {
-    const queryJSON = queries.map((q) => {
+    const queryJSON = queries.map(q => {
       return q.toJSON().where;
     });
 
@@ -363,23 +364,25 @@ class ParseQuery {
     OfflineQuery.validateQuery(this);
     const localDatastore = CoreManager.getLocalDatastore();
     const objects = await localDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
-    let results = objects.map((json, index, arr) => {
-      const object = ParseObject.fromJSON(json, false);
-      if (json._localId && !json.objectId) {
-        object._localId = json._localId;
-      }
-      if (!OfflineQuery.matchesQuery(this.className, object, arr, this)) {
-        return null;
-      }
-      return object;
-    }).filter((object) => object !== null);
+    let results = objects
+      .map((json, index, arr) => {
+        const object = ParseObject.fromJSON(json, false);
+        if (json._localId && !json.objectId) {
+          object._localId = json._localId;
+        }
+        if (!OfflineQuery.matchesQuery(this.className, object, arr, this)) {
+          return null;
+        }
+        return object;
+      })
+      .filter(object => object !== null);
     if (params.keys) {
       let keys = params.keys.split(',');
       const alwaysSelectedKeys = ['className', 'objectId', 'createdAt', 'updatedAt', 'ACL'];
       keys = keys.concat(alwaysSelectedKeys);
-      results = results.map((object) => {
+      results = results.map(object => {
         const json = object._toFullJSON();
-        Object.keys(json).forEach((key) => {
+        Object.keys(json).forEach(key => {
           if (!keys.includes(key)) {
             delete json[key];
           }
@@ -394,8 +397,8 @@ class ParseQuery {
       });
     }
 
-    let count // count total before applying limit/skip
-    if(params.count){
+    let count; // count total before applying limit/skip
+    if (params.count) {
       count = results.length; // total count from response
     }
 
@@ -413,8 +416,8 @@ class ParseQuery {
 
     results = results.splice(0, limit);
 
-    if(typeof count === 'number'){
-      return {results, count};
+    if (typeof count === 'number') {
+      return { results, count };
     }
 
     return results;
@@ -427,7 +430,7 @@ class ParseQuery {
    */
   toJSON(): QueryJSON {
     const params: QueryJSON = {
-      where: this._where
+      where: this._where,
     };
 
     if (this._include.length) {
@@ -495,21 +498,20 @@ class ParseQuery {
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   withJSON(json: QueryJSON): ParseQuery {
-
     if (json.where) {
       this._where = json.where;
     }
 
     if (json.include) {
-      this._include = json.include.split(",");
+      this._include = json.include.split(',');
     }
 
     if (json.keys) {
-      this._select = json.keys.split(",");
+      this._select = json.keys.split(',');
     }
 
     if (json.excludeKeys) {
-      this._exclude = json.excludeKeys.split(",");
+      this._exclude = json.excludeKeys.split(',');
     }
 
     if (json.count) {
@@ -517,7 +519,7 @@ class ParseQuery {
     }
 
     if (json.limit) {
-      this._limit  = json.limit;
+      this._limit = json.limit;
     }
 
     if (json.skip) {
@@ -525,7 +527,7 @@ class ParseQuery {
     }
 
     if (json.order) {
-      this._order = json.order.split(",");
+      this._order = json.order.split(',');
     }
 
     if (json.readPreference) {
@@ -549,15 +551,29 @@ class ParseQuery {
     }
 
     for (const key in json) {
-      if (json.hasOwnProperty(key))  {
-        if (["where", "include", "keys", "count", "limit", "skip", "order", "readPreference", "includeReadPreference", "subqueryReadPreference", "hint", "explain"].indexOf(key) === -1) {
+      if (json.hasOwnProperty(key)) {
+        if (
+          [
+            'where',
+            'include',
+            'keys',
+            'count',
+            'limit',
+            'skip',
+            'order',
+            'readPreference',
+            'includeReadPreference',
+            'subqueryReadPreference',
+            'hint',
+            'explain',
+          ].indexOf(key) === -1
+        ) {
           this._extraOptions[key] = json[key];
         }
       }
     }
 
     return this;
-
   }
 
   /**
@@ -604,15 +620,12 @@ class ParseQuery {
       firstOptions.context = options.context;
     }
 
-    return this.first(firstOptions).then((response) => {
+    return this.first(firstOptions).then(response => {
       if (response) {
         return response;
       }
 
-      const errorObject = new ParseError(
-        ParseError.OBJECT_NOT_FOUND,
-        'Object not found.'
-      );
+      const errorObject = new ParseError(ParseError.OBJECT_NOT_FOUND, 'Object not found.');
       return Promise.reject(errorObject);
     });
   }
@@ -654,16 +667,12 @@ class ParseQuery {
     if (this._queriesLocalDatastore) {
       return this._handleOfflineQuery(this.toJSON());
     }
-    return controller.find(
-      this.className,
-      this.toJSON(),
-      findOptions
-    ).then((response) => {
+    return controller.find(this.className, this.toJSON(), findOptions).then(response => {
       // Return generic object when explain is used
       if (this._explain) {
         return response.results;
       }
-      const results = response.results.map((data) => {
+      const results = response.results.map(data => {
         // In cases of relations, the server may send back a className
         // on the top level of the payload
         const override = response.className || this.className;
@@ -683,8 +692,8 @@ class ParseQuery {
 
       const count = response.count;
 
-      if(typeof count === "number"){
-        return {results, count};
+      if (typeof count === 'number') {
+        return { results, count };
       } else {
         return results;
       }
@@ -745,11 +754,7 @@ class ParseQuery {
     params.limit = 0;
     params.count = 1;
 
-    return controller.find(
-      this.className,
-      params,
-      findOptions
-    ).then((result) => {
+    return controller.find(this.className, params, findOptions).then(result => {
       return result.count;
     });
   }
@@ -783,11 +788,7 @@ class ParseQuery {
       where: this._where,
       hint: this._hint,
     };
-    return controller.aggregate(
-      this.className,
-      params,
-      distinctOptions
-    ).then((results) => {
+    return controller.aggregate(this.className, params, distinctOptions).then(results => {
       return results.results;
     });
   }
@@ -830,13 +831,9 @@ class ParseQuery {
       pipeline,
       hint: this._hint,
       explain: this._explain,
-      readPreference: this._readPreference
+      readPreference: this._readPreference,
     };
-    return controller.aggregate(
-      this.className,
-      params,
-      aggregateOptions,
-    ).then((results) => {
+    return controller.aggregate(this.className, params, aggregateOptions).then(results => {
       return results.results;
     });
   }
@@ -880,7 +877,7 @@ class ParseQuery {
     const select = this._select;
 
     if (this._queriesLocalDatastore) {
-      return this._handleOfflineQuery(params).then((objects) => {
+      return this._handleOfflineQuery(params).then(objects => {
         if (!objects[0]) {
           return undefined;
         }
@@ -888,11 +885,7 @@ class ParseQuery {
       });
     }
 
-    return controller.find(
-      this.className,
-      params,
-      findOptions
-    ).then((response) => {
+    return controller.find(this.className, params, findOptions).then(response => {
       const objects = response.results;
       if (!objects[0]) {
         return undefined;
@@ -933,21 +926,24 @@ class ParseQuery {
    * @returns {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
-  eachBatch(callback: (objs: Array<ParseObject>) => Promise<*>, options?: BatchOptions): Promise<void> {
+  eachBatch(
+    callback: (objs: Array<ParseObject>) => Promise<*>,
+    options?: BatchOptions
+  ): Promise<void> {
     options = options || {};
 
-    if (this._order || this._skip || (this._limit >= 0)) {
+    if (this._order || this._skip || this._limit >= 0) {
       const error = 'Cannot iterate on a query with sort, skip, or limit.';
       return Promise.reject(error);
     }
 
     const query = new ParseQuery(this.className);
     query._limit = options.batchSize || 100;
-    query._include = this._include.map((i) => {
+    query._include = this._include.map(i => {
       return i;
     });
     if (this._select) {
-      query._select = this._select.map((s) => {
+      query._select = this._select.map(s => {
         return s;
       });
     }
@@ -956,7 +952,7 @@ class ParseQuery {
     for (const attr in this._where) {
       const val = this._where[attr];
       if (Array.isArray(val)) {
-        query._where[attr] = val.map((v) => {
+        query._where[attr] = val.map(v => {
           return v;
         });
       } else if (val && typeof val === 'object') {
@@ -985,23 +981,26 @@ class ParseQuery {
 
     let finished = false;
     let previousResults = [];
-    return continueWhile(() => {
-      return !finished;
-    }, async () => {
-      const [results] = await Promise.all([
-        query.find(findOptions),
-        Promise.resolve(previousResults.length > 0 && callback(previousResults))
-      ]);
-      if (results.length >= query._limit) {
-        query.greaterThan('objectId', results[results.length - 1].id);
-        previousResults = results;
-      } else if (results.length > 0) {
-        await Promise.resolve(callback(results));
-        finished = true;
-      } else {
-        finished = true;
+    return continueWhile(
+      () => {
+        return !finished;
+      },
+      async () => {
+        const [results] = await Promise.all([
+          query.find(findOptions),
+          Promise.resolve(previousResults.length > 0 && callback(previousResults)),
+        ]);
+        if (results.length >= query._limit) {
+          query.greaterThan('objectId', results[results.length - 1].id);
+          previousResults = results;
+        } else if (results.length > 0) {
+          await Promise.resolve(callback(results));
+          finished = true;
+        } else {
+          finished = true;
+        }
       }
-    });
+    );
   }
 
   /**
@@ -1024,9 +1023,9 @@ class ParseQuery {
    *     iteration has completed.
    */
   each(callback: (obj: ParseObject) => any, options?: BatchOptions): Promise<void> {
-    return this.eachBatch((results) => {
+    return this.eachBatch(results => {
       let callbacksDone = Promise.resolve();
-      results.forEach((result) => {
+      results.forEach(result => {
         callbacksDone = callbacksDone.then(() => {
           return callback(result);
         });
@@ -1086,11 +1085,14 @@ class ParseQuery {
    * @returns {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
-  async map(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any, options?: BatchOptions): Promise<Array<any>> {
+  async map(
+    callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any,
+    options?: BatchOptions
+  ): Promise<Array<any>> {
     const array = [];
     let index = 0;
-    await this.each((object) => {
-      return Promise.resolve(callback(object, index, this)).then((result) => {
+    await this.each(object => {
+      return Promise.resolve(callback(object, index, this)).then(result => {
         array.push(result);
         index += 1;
       });
@@ -1121,10 +1123,14 @@ class ParseQuery {
    * @returns {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
-  async reduce(callback: (accumulator: any, currentObject: ParseObject, index: number) => any, initialValue: any, options?: BatchOptions): Promise<Array<any>> {
+  async reduce(
+    callback: (accumulator: any, currentObject: ParseObject, index: number) => any,
+    initialValue: any,
+    options?: BatchOptions
+  ): Promise<Array<any>> {
     let accumulator = initialValue;
     let index = 0;
-    await this.each((object) => {
+    await this.each(object => {
       // If no initial value was given, we take the first object from the query
       // as the initial value and don't call the callback with it.
       if (index === 0 && initialValue === undefined) {
@@ -1132,7 +1138,7 @@ class ParseQuery {
         index += 1;
         return;
       }
-      return Promise.resolve(callback(accumulator, object, index)).then((result) => {
+      return Promise.resolve(callback(accumulator, object, index)).then(result => {
         accumulator = result;
         index += 1;
       });
@@ -1140,7 +1146,7 @@ class ParseQuery {
     if (index === 0 && initialValue === undefined) {
       // Match Array.reduce behavior: "Calling reduce() on an empty array
       // without an initialValue will throw a TypeError".
-      throw new TypeError("Reducing empty query result set with no initial value");
+      throw new TypeError('Reducing empty query result set with no initial value');
     }
     return accumulator;
   }
@@ -1168,11 +1174,14 @@ class ParseQuery {
    * @returns {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
-  async filter(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean, options?: BatchOptions): Promise<Array<ParseObject>> {
+  async filter(
+    callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean,
+    options?: BatchOptions
+  ): Promise<Array<ParseObject>> {
     const array = [];
     let index = 0;
-    await this.each((object) => {
-      return Promise.resolve(callback(object, index, this)).then((flag) => {
+    await this.each(object => {
+      return Promise.resolve(callback(object, index, this)).then(flag => {
         if (flag) {
           array.push(object);
         }
@@ -1194,8 +1203,8 @@ class ParseQuery {
    */
   equalTo(key: string | { [key: string]: any }, value: ?mixed): ParseQuery {
     if (key && typeof key === 'object') {
-      Object.entries(key).forEach(([k, val]) => this.equalTo(k, val))
-      return this
+      Object.entries(key).forEach(([k, val]) => this.equalTo(k, val));
+      return this;
     }
     if (typeof value === 'undefined') {
       return this.doesNotExist(key);
@@ -1215,8 +1224,8 @@ class ParseQuery {
    */
   notEqualTo(key: string | { [key: string]: any }, value: ?mixed): ParseQuery {
     if (key && typeof key === 'object') {
-      Object.entries(key).forEach(([k, val]) => this.notEqualTo(k, val))
-      return this
+      Object.entries(key).forEach(([k, val]) => this.notEqualTo(k, val));
+      return this;
     }
     return this._addCondition(key, '$ne', value);
   }
@@ -1331,8 +1340,8 @@ class ParseQuery {
       values = [values];
     }
 
-    const regexObject = values.map((value) => {
-      return { '$regex': _this._regexStartWith(value) };
+    const regexObject = values.map(value => {
+      return { $regex: _this._regexStartWith(value) };
     });
 
     return this.containsAll(key, regexObject);
@@ -1431,7 +1440,7 @@ class ParseQuery {
     queryJSON.className = query.className;
     return this._addCondition(key, '$select', {
       key: queryKey,
-      query: queryJSON
+      query: queryJSON,
     });
   }
 
@@ -1451,7 +1460,7 @@ class ParseQuery {
     queryJSON.className = query.className;
     return this._addCondition(key, '$dontSelect', {
       key: queryKey,
-      query: queryJSON
+      query: queryJSON,
     });
   }
 
@@ -1604,12 +1613,19 @@ class ParseQuery {
    * defaults to true.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  withinRadians(key: string, point: ParseGeoPoint, maxDistance: number, sorted: boolean): ParseQuery {
+  withinRadians(
+    key: string,
+    point: ParseGeoPoint,
+    maxDistance: number,
+    sorted: boolean
+  ): ParseQuery {
     if (sorted || sorted === undefined) {
       this.near(key, point);
       return this._addCondition(key, '$maxDistance', maxDistance);
     } else {
-      return this._addCondition(key, '$geoWithin', { '$centerSphere': [[point.longitude, point.latitude], maxDistance] });
+      return this._addCondition(key, '$geoWithin', {
+        $centerSphere: [[point.longitude, point.latitude], maxDistance],
+      });
     }
   }
 
@@ -1643,7 +1659,12 @@ class ParseQuery {
    * defaults to true.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  withinKilometers(key: string, point: ParseGeoPoint, maxDistance: number, sorted: boolean): ParseQuery {
+  withinKilometers(
+    key: string,
+    point: ParseGeoPoint,
+    maxDistance: number,
+    sorted: boolean
+  ): ParseQuery {
     return this.withinRadians(key, point, maxDistance / 6371.0, sorted);
   }
 
@@ -1666,7 +1687,7 @@ class ParseQuery {
     if (!(northeast instanceof ParseGeoPoint)) {
       northeast = new ParseGeoPoint(northeast);
     }
-    this._addCondition(key, '$within', { '$box': [ southwest, northeast ] });
+    this._addCondition(key, '$within', { $box: [southwest, northeast] });
     return this;
   }
 
@@ -1682,7 +1703,7 @@ class ParseQuery {
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   withinPolygon(key: string, points: Array<Array<number>>): ParseQuery {
-    return this._addCondition(key, '$geoWithin', { '$polygon': points });
+    return this._addCondition(key, '$geoWithin', { $polygon: points });
   }
 
   /**
@@ -1694,7 +1715,7 @@ class ParseQuery {
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   polygonContains(key: string, point: ParseGeoPoint): ParseQuery {
-    return this._addCondition(key, '$geoIntersects', { '$point': point });
+    return this._addCondition(key, '$geoIntersects', { $point: point });
   }
 
   /** Query Orderings **/
@@ -1723,7 +1744,7 @@ class ParseQuery {
     if (!this._order) {
       this._order = [];
     }
-    keys.forEach((key) => {
+    keys.forEach(key => {
       if (Array.isArray(key)) {
         key = key.join();
       }
@@ -1757,14 +1778,17 @@ class ParseQuery {
     if (!this._order) {
       this._order = [];
     }
-    keys.forEach((key) => {
+    keys.forEach(key => {
       if (Array.isArray(key)) {
         key = key.join();
       }
       this._order = this._order.concat(
-        key.replace(/\s/g, '').split(',').map((k) => {
-          return '-' + k;
-        })
+        key
+          .replace(/\s/g, '')
+          .split(',')
+          .map(k => {
+            return '-' + k;
+          })
       );
     });
 
@@ -1830,8 +1854,8 @@ class ParseQuery {
    * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  include(...keys: Array<string|Array<string>>): ParseQuery {
-    keys.forEach((key) => {
+  include(...keys: Array<string | Array<string>>): ParseQuery {
+    keys.forEach(key => {
       if (Array.isArray(key)) {
         this._include = this._include.concat(key);
       } else {
@@ -1860,11 +1884,11 @@ class ParseQuery {
    * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  select(...keys: Array<string|Array<string>>): ParseQuery {
+  select(...keys: Array<string | Array<string>>): ParseQuery {
     if (!this._select) {
       this._select = [];
     }
-    keys.forEach((key) => {
+    keys.forEach(key => {
       if (Array.isArray(key)) {
         this._select = this._select.concat(key);
       } else {
@@ -1883,8 +1907,8 @@ class ParseQuery {
    * @param {...string|Array<string>} keys The name(s) of the key(s) to exclude.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  exclude(...keys: Array<string|Array<string>>): ParseQuery {
-    keys.forEach((key) => {
+  exclude(...keys: Array<string | Array<string>>): ParseQuery {
+    keys.forEach(key => {
       if (Array.isArray(key)) {
         this._exclude = this._exclude.concat(key);
       } else {
@@ -1902,7 +1926,11 @@ class ParseQuery {
    * @param {string} subqueryReadPreference The read preference for the sub queries.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  readPreference(readPreference: string, includeReadPreference?: string, subqueryReadPreference?: string): ParseQuery {
+  readPreference(
+    readPreference: string,
+    includeReadPreference?: string,
+    subqueryReadPreference?: string
+  ): ParseQuery {
     this._readPreference = readPreference;
     this._includeReadPreference = includeReadPreference;
     this._subqueryReadPreference = subqueryReadPreference;
@@ -1919,7 +1947,7 @@ class ParseQuery {
   async subscribe(sessionToken?: string): Promise<LiveQuerySubscription> {
     const currentUser = await CoreManager.getUserController().currentUserAsync();
     if (!sessionToken) {
-      sessionToken =  currentUser ? currentUser.getSessionToken() : undefined;
+      sessionToken = currentUser ? currentUser.getSessionToken() : undefined;
     }
     const liveQueryClient = await CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
     if (liveQueryClient.shouldOpen()) {
@@ -2045,11 +2073,11 @@ class ParseQuery {
       this._xhrRequest.onchange = () => {};
       return this;
     }
-    return this._xhrRequest.onchange = () => this.cancel();
+    return (this._xhrRequest.onchange = () => this.cancel());
   }
 
   _setRequestTask(options) {
-    options.requestTask = (task) => {
+    options.requestTask = task => {
       this._xhrRequest.task = task;
       this._xhrRequest.onchange();
     };
@@ -2059,24 +2087,14 @@ class ParseQuery {
 const DefaultController = {
   find(className: string, params: QueryJSON, options: RequestOptions): Promise<Array<ParseObject>> {
     const RESTController = CoreManager.getRESTController();
-    return RESTController.request(
-      'GET',
-      'classes/' + className,
-      params,
-      options
-    );
+    return RESTController.request('GET', 'classes/' + className, params, options);
   },
 
   aggregate(className: string, params: any, options: RequestOptions): Promise<Array<mixed>> {
     const RESTController = CoreManager.getRESTController();
 
-    return RESTController.request(
-      'GET',
-      'aggregate/' + className,
-      params,
-      options
-    );
-  }
+    return RESTController.request('GET', 'aggregate/' + className, params, options);
+  },
 };
 
 CoreManager.setQueryController(DefaultController);

@@ -5,14 +5,11 @@ const clear = require('./clear');
 const Parse = require('../../node');
 
 function testConfig() {
-  return Parse.Config.save(
-    { internal: "i", string: "s", number: 12 },
-    { internal: true }
-  );
+  return Parse.Config.save({ internal: 'i', string: 's', number: 12 }, { internal: true });
 }
 
 describe('Parse Config', () => {
-  beforeEach((done) => {
+  beforeEach(done => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();

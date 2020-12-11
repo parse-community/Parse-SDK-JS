@@ -186,7 +186,7 @@ const LocalDatastore = {
     if (!Array.isArray(pinned)) {
       return [];
     }
-    const promises = pinned.map((objectKey) => this.fromPinWithName(objectKey));
+    const promises = pinned.map(objectKey => this.fromPinWithName(objectKey));
     let objects = await Promise.all(promises);
     objects = [].concat(...objects);
     return objects.filter(object => object != null);
@@ -211,7 +211,7 @@ const LocalDatastore = {
     meta[uniqueId] = root;
     queue.push(uniqueId);
 
-    while(queue.length !== 0) {
+    while (queue.length !== 0) {
       const nodeId = queue.shift();
       const subTreeRoot = meta[nodeId];
       for (const field in subTreeRoot) {
@@ -258,9 +258,7 @@ const LocalDatastore = {
     if (!pin) {
       return;
     }
-    const promises = [
-      this.unPinWithName(objectKey)
-    ];
+    const promises = [this.unPinWithName(objectKey)];
     delete localDatastore[objectKey];
 
     for (const key in localDatastore) {
@@ -293,10 +291,7 @@ const LocalDatastore = {
     if (!unsaved || unsaved.length === 0) {
       return;
     }
-    const promises = [
-      this.unPinWithName(localKey),
-      this.pinWithName(objectKey, unsaved),
-    ];
+    const promises = [this.unPinWithName(localKey), this.pinWithName(objectKey, unsaved)];
 
     const localDatastore = await this._getAllContents();
     for (const key in localDatastore) {
@@ -342,7 +337,7 @@ const LocalDatastore = {
     const pointersHash = {};
     for (const key of keys) {
       // Ignore the OBJECT_PREFIX
-      let [ , , className, objectId] = key.split('_');
+      let [, , className, objectId] = key.split('_');
 
       // User key is split into [ 'Parse', 'LDS', '', 'User', 'objectId' ]
       if (key.split('_').length === 5 && key.split('_')[3] === 'User') {
@@ -371,13 +366,13 @@ const LocalDatastore = {
     try {
       const responses = await Promise.all(queryPromises);
       const objects = [].concat.apply([], responses);
-      const pinPromises = objects.map((object) => {
+      const pinPromises = objects.map(object => {
         const objectKey = this.getKeyForObject(object);
         return this.pinWithName(objectKey, object._toFullJSON());
       });
       await Promise.all(pinPromises);
       this.isSyncing = false;
-    } catch(error) {
+    } catch (error) {
       console.error('Error syncing LocalDatastore: ', error);
       this.isSyncing = false;
     }
@@ -400,7 +395,7 @@ const LocalDatastore = {
       console.error('Parse.enableLocalDatastore() must be called first');
     }
     return this.isEnabled;
-  }
+  },
 };
 
 module.exports = LocalDatastore;

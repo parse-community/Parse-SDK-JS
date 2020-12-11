@@ -51,10 +51,7 @@ import CoreManager from './CoreManager';
  * @returns {Promise} A promise that is resolved when the round-trip
  * to the server completes.
  */
-export function track(
-  name: string,
-  dimensions: { [key: string]: string }
-): Promise {
+export function track(name: string, dimensions: { [key: string]: string }): Promise {
   name = name || '';
   name = name.replace(/^\s*/, '');
   name = name.replace(/\s*$/, '');
@@ -64,14 +61,11 @@ export function track(
 
   for (const key in dimensions) {
     if (typeof key !== 'string' || typeof dimensions[key] !== 'string') {
-      throw new TypeError(
-        'track() dimensions expects keys and values of type "string".'
-      );
+      throw new TypeError('track() dimensions expects keys and values of type "string".');
     }
   }
 
-  return CoreManager.getAnalyticsController()
-    .track(name, dimensions);
+  return CoreManager.getAnalyticsController().track(name, dimensions);
 }
 
 const DefaultController = {
@@ -79,7 +73,7 @@ const DefaultController = {
     const path = 'events/' + name;
     const RESTController = CoreManager.getRESTController();
     return RESTController.request('POST', path, { dimensions: dimensions });
-  }
+  },
 };
 
 CoreManager.setAnalyticsController(DefaultController);

@@ -38,7 +38,7 @@ class ParseRole extends ParseObject {
    */
   constructor(name: string, acl: ParseACL) {
     super('_Role');
-    if (typeof name === 'string' && (acl instanceof ParseACL)) {
+    if (typeof name === 'string' && acl instanceof ParseACL) {
       this.setName(name);
       this.setACL(acl);
     }
@@ -122,20 +122,16 @@ class ParseRole extends ParseObject {
         // Let the name be set in this case
         return new ParseError(
           ParseError.OTHER_CAUSE,
-          'A role\'s name can only be set before it has been saved.'
+          "A role's name can only be set before it has been saved."
         );
       }
       if (typeof newName !== 'string') {
-        return new ParseError(
-          ParseError.OTHER_CAUSE,
-          'A role\'s name must be a String.'
-        );
+        return new ParseError(ParseError.OTHER_CAUSE, "A role's name must be a String.");
       }
-      if (!(/^[0-9a-zA-Z\-_ ]+$/).test(newName)) {
+      if (!/^[0-9a-zA-Z\-_ ]+$/.test(newName)) {
         return new ParseError(
           ParseError.OTHER_CAUSE,
-          'A role\'s name can be only contain alphanumeric characters, _, ' +
-          '-, and spaces.'
+          "A role's name can be only contain alphanumeric characters, _, " + '-, and spaces.'
         );
       }
     }

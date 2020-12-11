@@ -85,7 +85,7 @@ const DefaultLiveQueryController = {
     }
     const [currentUser, installationId] = await Promise.all([
       CoreManager.getUserController().currentUserAsync(),
-      CoreManager.getInstallationController().currentInstallationId()
+      CoreManager.getInstallationController().currentInstallationId(),
     ]);
     const sessionToken = currentUser ? currentUser.getSessionToken() : undefined;
 
@@ -117,7 +117,7 @@ const DefaultLiveQueryController = {
       sessionToken,
       installationId,
     });
-    defaultLiveQueryClient.on('error', (error) => {
+    defaultLiveQueryClient.on('error', error => {
       LiveQuery.emit('error', error);
     });
     defaultLiveQueryClient.on('open', () => {

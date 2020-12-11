@@ -79,11 +79,11 @@ describe('Parse module', () => {
 
   it('can set LocalDatastoreController', () => {
     const controller = {
-      fromPinWithName: function() {},
-      pinWithName: function() {},
-      unPinWithName: function() {},
-      getAllContents: function() {},
-      clear: function() {}
+      fromPinWithName: function () {},
+      pinWithName: function () {},
+      unPinWithName: function () {},
+      getAllContents: function () {},
+      clear: function () {},
     };
     Parse.setLocalDatastoreController(controller);
     expect(CoreManager.getLocalDatastoreController()).toBe(controller);
@@ -91,13 +91,13 @@ describe('Parse module', () => {
 
   it('can set AsyncStorage', () => {
     const controller = {
-      getItem: function() {},
-      setItem: function() {},
-      removeItem: function() {},
-      getItemAsync: function() {},
-      setItemAsync: function() {},
-      removeItemAsync: function() {},
-      clear: function() {},
+      getItem: function () {},
+      setItem: function () {},
+      removeItem: function () {},
+      getItemAsync: function () {},
+      setItemAsync: function () {},
+      removeItemAsync: function () {},
+      clear: function () {},
     };
 
     Parse.setAsyncStorage(controller);
@@ -118,13 +118,13 @@ describe('Parse module', () => {
     expect(LDS).toEqual({});
     Parse.LocalDatastore.isEnabled = true;
     const controller = {
-      fromPinWithName: function() {},
-      pinWithName: function() {},
-      unPinWithName: function() {},
-      getAllContents: function() {
+      fromPinWithName: function () {},
+      pinWithName: function () {},
+      unPinWithName: function () {},
+      getAllContents: function () {
         return Promise.resolve({ key: 'value' });
       },
-      clear: function() {}
+      clear: function () {},
     };
     Parse.setLocalDatastoreController(controller);
     LDS = await Parse.dumpLocalDatastore();

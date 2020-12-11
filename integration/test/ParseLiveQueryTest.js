@@ -9,7 +9,7 @@ const TestObject = Parse.Object.extend('TestObject');
 const DiffObject = Parse.Object.extend('DiffObject');
 
 describe('Parse LiveQuery', () => {
-  beforeEach((done) => {
+  beforeEach(done => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.User.enableUnsafeCurrentUser();
@@ -17,7 +17,7 @@ describe('Parse LiveQuery', () => {
     clear().then(done).catch(done.fail);
   });
 
-  it('can subscribe to query', async (done) => {
+  it('can subscribe to query', async done => {
     const object = new TestObject();
     await object.save();
     const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
@@ -30,12 +30,12 @@ describe('Parse LiveQuery', () => {
       assert.equal(object.get('foo'), 'bar');
       assert.equal(response.installationId, installationId);
       done();
-    })
+    });
     object.set({ foo: 'bar' });
     await object.save();
   });
 
-  it('can subscribe to query with client', async (done) => {
+  it('can subscribe to query with client', async done => {
     const object = new TestObject();
     await object.save();
     const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
@@ -73,11 +73,11 @@ describe('Parse LiveQuery', () => {
     subscriptionA.on('update', object => {
       count++;
       assert.equal(object.get('foo'), 'bar');
-    })
+    });
     subscriptionB.on('update', object => {
       count++;
       assert.equal(object.get('foo'), 'baz');
-    })
+    });
     await objectA.save({ foo: 'bar' });
     await objectB.save({ foo: 'baz' });
     await sleep(1000);
@@ -99,11 +99,11 @@ describe('Parse LiveQuery', () => {
     subscriptionA.on('update', object => {
       count++;
       assert.equal(object.get('foo'), 'bar');
-    })
+    });
     subscriptionB.on('update', object => {
       count++;
       assert.equal(object.get('foo'), 'baz');
-    })
+    });
     await objectA.save({ foo: 'bar' });
     await objectB.save({ foo: 'baz' });
     await sleep(1000);
@@ -124,11 +124,11 @@ describe('Parse LiveQuery', () => {
     let count = 0;
     subscriptionA.on('update', () => {
       count++;
-    })
+    });
     subscriptionB.on('update', object => {
       count++;
       assert.equal(object.get('foo'), 'baz');
-    })
+    });
     subscriptionA.unsubscribe();
     await objectA.save({ foo: 'bar' });
     await objectB.save({ foo: 'baz' });
@@ -150,11 +150,11 @@ describe('Parse LiveQuery', () => {
     let count = 0;
     subscriptionA.on('update', () => {
       count++;
-    })
+    });
     subscriptionB.on('update', object => {
       count++;
       assert.equal(object.get('foo'), 'baz');
-    })
+    });
     await subscriptionA.unsubscribe();
     await objectA.save({ foo: 'bar' });
     await objectB.save({ foo: 'baz' });
@@ -162,7 +162,7 @@ describe('Parse LiveQuery', () => {
     assert.equal(count, 1);
   });
 
-  it('can subscribe to ACL', async (done) => {
+  it('can subscribe to ACL', async done => {
     const user = await Parse.User.signUp('ooo', 'password');
     const ACL = new Parse.ACL(user);
 
@@ -173,15 +173,15 @@ describe('Parse LiveQuery', () => {
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
     const subscription = await query.subscribe(user.getSessionToken());
-    subscription.on('update', async (object) => {
+    subscription.on('update', async object => {
       assert.equal(object.get('foo'), 'bar');
       await Parse.User.logOut();
       done();
-    })
+    });
     await object.save({ foo: 'bar' });
   });
 
-  it('can subscribe to null sessionToken', async (done) => {
+  it('can subscribe to null sessionToken', async done => {
     const user = await Parse.User.signUp('oooooo', 'password');
 
     const readOnly = Parse.User.readOnlyAttributes();
@@ -195,18 +195,18 @@ describe('Parse LiveQuery', () => {
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
     const subscription = await query.subscribe();
-    subscription.on('update', async (object) => {
+    subscription.on('update', async object => {
       assert.equal(object.get('foo'), 'bar');
-      Parse.User.readOnlyAttributes = function() {
+      Parse.User.readOnlyAttributes = function () {
         return readOnly;
       };
       await Parse.User.logOut();
       done();
-    })
+    });
     await object.save({ foo: 'bar' });
   });
 
-  it('can subscribe with open event', async (done) => {
+  it('can subscribe with open event', async done => {
     const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
     const client = await Parse.CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
     const object = new TestObject();
@@ -215,14 +215,14 @@ describe('Parse LiveQuery', () => {
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
     const subscription = await query.subscribe();
-    subscription.on('open', (response) => {
+    subscription.on('open', response => {
       assert.equal(response.clientId, client.id);
       assert.equal(response.installationId, installationId);
       done();
-    })
+    });
   });
 
-  it('can subscribe to query with fields', async (done) => {
+  it('can subscribe to query with fields', async done => {
     const object = new TestObject();
     await object.save({ name: 'hello', age: 21 });
 
@@ -231,12 +231,12 @@ describe('Parse LiveQuery', () => {
     query.select(['name']);
     const subscription = await query.subscribe();
 
-    subscription.on('update', (object) => {
+    subscription.on('update', object => {
       assert.equal(object.get('name'), 'hello');
-      assert.equal(object.get('age'), undefined)
+      assert.equal(object.get('age'), undefined);
       assert.equal(object.get('foo'), undefined);
       done();
-    })
+    });
     object.set({ foo: 'bar' });
     await object.save();
   });

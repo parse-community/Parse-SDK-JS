@@ -25,22 +25,24 @@ if (process.env.PARSE_BUILD === 'weapp') {
 type Base64 = { base64: string };
 type Uri = { uri: string };
 type FileData = Array<number> | Base64 | Blob | Uri;
-export type FileSource = {
-  format: 'file';
-  file: Blob;
-  type: string
-} | {
-  format: 'base64';
-  base64: string;
-  type: string
-} | {
-  format: 'uri';
-  uri: string;
-  type: string
-};
+export type FileSource =
+  | {
+      format: 'file',
+      file: Blob,
+      type: string,
+    }
+  | {
+      format: 'base64',
+      base64: string,
+      type: string,
+    }
+  | {
+      format: 'uri',
+      uri: string,
+      type: string,
+    };
 
-const dataUriRegexp =
-  /^data:([a-zA-Z]+\/[-a-zA-Z0-9+.]+)(;charset=[a-zA-Z0-9\-\/]*)?;base64,/;
+const dataUriRegexp = /^data:([a-zA-Z]+\/[-a-zA-Z0-9+.]+)(;charset=[a-zA-Z0-9\-\/]*)?;base64,/;
 
 function b64Digit(number: number): string {
   if (number < 26) {
@@ -120,19 +122,19 @@ class ParseFile {
         this._source = {
           format: 'base64',
           base64: this._data,
-          type: specifiedType
+          type: specifiedType,
         };
       } else if (typeof Blob !== 'undefined' && data instanceof Blob) {
         this._source = {
           format: 'file',
           file: data,
-          type: specifiedType
+          type: specifiedType,
         };
       } else if (data && typeof data.uri === 'string' && data.uri !== undefined) {
         this._source = {
           format: 'uri',
           uri: data.uri,
-          type: specifiedType
+          type: specifiedType,
         };
       } else if (data && typeof data.base64 === 'string') {
         const base64 = data.base64;
@@ -145,14 +147,14 @@ class ParseFile {
           this._source = {
             format: 'base64',
             base64: this._data,
-            type: matches[1]
+            type: matches[1],
           };
         } else {
           this._data = base64;
           this._source = {
             format: 'base64',
             base64: base64,
-            type: specifiedType
+            type: specifiedType,
           };
         }
       } else {
@@ -176,7 +178,7 @@ class ParseFile {
       throw new Error('Cannot retrieve data for unsaved ParseFile.');
     }
     const options = {
-      requestTask: (task) => this._requestTask = task,
+      requestTask: task => (this._requestTask = task),
     };
     const controller = CoreManager.getFileController();
     const result = await controller.download(this._url, options);
@@ -257,14 +259,14 @@ class ParseFile {
    */
   save(options?: FullOptions) {
     options = options || {};
-    options.requestTask = (task) => this._requestTask = task;
+    options.requestTask = task => (this._requestTask = task);
     options.metadata = this._metadata;
     options.tags = this._tags;
 
     const controller = CoreManager.getFileController();
     if (!this._previousSave) {
       if (this._source.format === 'file') {
-        this._previousSave = controller.saveFile(this._name, this._source, options).then((res) => {
+        this._previousSave = controller.saveFile(this._name, this._source, options).then(res => {
           this._name = res.name;
           this._url = res.url;
           this._data = null;
@@ -272,26 +274,29 @@ class ParseFile {
           return this;
         });
       } else if (this._source.format === 'uri') {
-        this._previousSave = controller.download(this._source.uri, options).then((result) => {
-          if (!(result && result.base64)) {
-            return {};
-          }
-          const newSource = {
-            format: 'base64',
-            base64: result.base64,
-            type: result.contentType,
-          };
-          this._data = result.base64;
-          this._requestTask = null;
-          return controller.saveBase64(this._name, newSource, options);
-        }).then((res) => {
-          this._name = res.name;
-          this._url = res.url;
-          this._requestTask = null;
-          return this;
-        });
+        this._previousSave = controller
+          .download(this._source.uri, options)
+          .then(result => {
+            if (!(result && result.base64)) {
+              return {};
+            }
+            const newSource = {
+              format: 'base64',
+              base64: result.base64,
+              type: result.contentType,
+            };
+            this._data = result.base64;
+            this._requestTask = null;
+            return controller.saveBase64(this._name, newSource, options);
+          })
+          .then(res => {
+            this._name = res.name;
+            this._url = res.url;
+            this._requestTask = null;
+            return this;
+          });
       } else {
-        this._previousSave = controller.saveBase64(this._name, this._source, options).then((res) => {
+        this._previousSave = controller.saveBase64(this._name, this._source, options).then(res => {
           this._name = res.name;
           this._url = res.url;
           this._requestTask = null;
@@ -336,7 +341,7 @@ class ParseFile {
     return {
       __type: 'File',
       name: this._name,
-      url: this._url
+      url: this._url,
     };
   }
 
@@ -346,7 +351,7 @@ class ParseFile {
     }
     // Unsaved Files are never equal, since they will be saved to different URLs
     return (
-      (other instanceof ParseFile) &&
+      other instanceof ParseFile &&
       this.name() === other.name() &&
       this.url() === other.url() &&
       typeof this.url() !== 'undefined'
@@ -360,7 +365,7 @@ class ParseFile {
    */
   setMetadata(metadata: any) {
     if (metadata && typeof metadata === 'object') {
-      Object.keys(metadata).forEach((key) => {
+      Object.keys(metadata).forEach(key => {
         this.addMetadata(key, metadata[key]);
       });
     }
@@ -385,7 +390,7 @@ class ParseFile {
    */
   setTags(tags: any) {
     if (tags && typeof tags === 'object') {
-      Object.keys(tags).forEach((key) => {
+      Object.keys(tags).forEach(key => {
         this.addTag(key, tags[key]);
       });
     }
@@ -420,14 +425,14 @@ class ParseFile {
       const b2 = bytes[i * 3 + 1] || 0;
       const b3 = bytes[i * 3 + 2] || 0;
 
-      const has2 = (i * 3 + 1) < bytes.length;
-      const has3 = (i * 3 + 2) < bytes.length;
+      const has2 = i * 3 + 1 < bytes.length;
+      const has3 = i * 3 + 2 < bytes.length;
 
       chunks[i] = [
-        b64Digit((b1 >> 2) & 0x3F),
-        b64Digit(((b1 << 4) & 0x30) | ((b2 >> 4) & 0x0F)),
-        has2 ? b64Digit(((b2 << 2) & 0x3C) | ((b3 >> 6) & 0x03)) : '=',
-        has3 ? b64Digit(b3 & 0x3F) : '='
+        b64Digit((b1 >> 2) & 0x3f),
+        b64Digit(((b1 << 4) & 0x30) | ((b2 >> 4) & 0x0f)),
+        has2 ? b64Digit(((b2 << 2) & 0x3c) | ((b3 >> 6) & 0x03)) : '=',
+        has3 ? b64Digit(b3 & 0x3f) : '=',
       ].join('');
     }
 
@@ -436,7 +441,7 @@ class ParseFile {
 }
 
 const DefaultController = {
-  saveFile: async function(name: string, source: FileSource, options?: FullOptions) {
+  saveFile: async function (name: string, source: FileSource, options?: FullOptions) {
     if (source.format !== 'file') {
       throw new Error('saveFile can only be used with File-type sources.');
     }
@@ -461,11 +466,11 @@ const DefaultController = {
     return await DefaultController.saveBase64(name, newSource, options);
   },
 
-  saveBase64: function(name: string, source: FileSource, options?: FullOptions) {
+  saveBase64: function (name: string, source: FileSource, options?: FullOptions) {
     if (source.format !== 'base64') {
       throw new Error('saveBase64 can only be used with Base64-type sources.');
     }
-    const data: { base64: any; _ContentType?: any, fileData: Object } = {
+    const data: { base64: any, _ContentType?: any, fileData: Object } = {
       base64: source.base64,
       fileData: {
         metadata: { ...options.metadata },
@@ -481,18 +486,16 @@ const DefaultController = {
     return CoreManager.getRESTController().request('POST', path, data, options);
   },
 
-  download: function(uri, options) {
+  download: function (uri, options) {
     if (XHR) {
       return this.downloadAjax(uri, options);
     } else if (process.env.PARSE_BUILD === 'node') {
       return new Promise((resolve, reject) => {
-        const client = uri.indexOf('https') === 0
-          ? require('https')
-          : require('http');
-        const req = client.get(uri, (resp) => {
+        const client = uri.indexOf('https') === 0 ? require('https') : require('http');
+        const req = client.get(uri, resp => {
           resp.setEncoding('base64');
           let base64 = '';
-          resp.on('data', (data) => base64 += data);
+          resp.on('data', data => (base64 += data));
           resp.on('end', () => {
             resolve({
               base64,
@@ -511,13 +514,15 @@ const DefaultController = {
     }
   },
 
-  downloadAjax: function(uri, options) {
+  downloadAjax: function (uri, options) {
     return new Promise((resolve, reject) => {
       const xhr = new XHR();
       xhr.open('GET', uri, true);
       xhr.responseType = 'arraybuffer';
-      xhr.onerror = function(e) { reject(e); };
-      xhr.onreadystatechange = function() {
+      xhr.onerror = function (e) {
+        reject(e);
+      };
+      xhr.onreadystatechange = function () {
         if (xhr.readyState !== xhr.DONE) {
           return;
         }
@@ -535,7 +540,7 @@ const DefaultController = {
     });
   },
 
-  deleteFile: function(name) {
+  deleteFile: function (name) {
     const headers = {
       'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
       'X-Parse-Master-Key': CoreManager.get('MASTER_KEY'),
@@ -545,14 +550,16 @@ const DefaultController = {
       url += '/';
     }
     url += 'files/' + name;
-    return CoreManager.getRESTController().ajax('DELETE', url, '', headers).catch(response => {
-      // TODO: return JSON object in server
-      if (!response || response === 'SyntaxError: Unexpected end of JSON input') {
-        return Promise.resolve();
-      } else {
-        return CoreManager.getRESTController().handleError(response);
-      }
-    });
+    return CoreManager.getRESTController()
+      .ajax('DELETE', url, '', headers)
+      .catch(response => {
+        // TODO: return JSON object in server
+        if (!response || response === 'SyntaxError: Unexpected end of JSON input') {
+          return Promise.resolve();
+        } else {
+          return CoreManager.getRESTController().handleError(response);
+        }
+      });
   },
 
   _setXHR(xhr: any) {

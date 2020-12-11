@@ -7,14 +7,23 @@ const Parse = require('../../node');
 const TestObject = Parse.Object.extend('TestObject');
 
 describe('Parse.ACL', () => {
-  beforeEach((done) => {
+  beforeEach(done => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
     Parse.User.enableUnsafeCurrentUser();
-    clear().then(() => {
-      Parse.User.logOut().then(() => { done() }, () => { done() });
-    }).catch(done.fail);
+    clear()
+      .then(() => {
+        Parse.User.logOut().then(
+          () => {
+            done();
+          },
+          () => {
+            done();
+          }
+        );
+      })
+      .catch(done.fail);
   });
 
   it('acl must be valid', () => {
@@ -409,7 +418,7 @@ describe('Parse.ACL', () => {
 
   it('can grant delete access to another user', async () => {
     const object = new TestObject();
-    const user1 = await Parse.User.signUp('ggg', 'password')
+    const user1 = await Parse.User.signUp('ggg', 'password');
     await Parse.User.logOut();
 
     const user2 = await Parse.User.signUp('hhh', 'password');
@@ -517,7 +526,7 @@ describe('Parse.ACL', () => {
   it('allows access with an empty acl', async () => {
     await Parse.User.signUp('tdurden', 'mayhem', {
       ACL: new Parse.ACL(),
-      foo: 'bar'
+      foo: 'bar',
     });
     await Parse.User.logOut();
     const user = await Parse.User.logIn('tdurden', 'mayhem');

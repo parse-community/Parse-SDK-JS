@@ -15,10 +15,10 @@ import ParseQuery from './ParseQuery';
 import type { WhereClause } from './ParseQuery';
 
 export type PushData = {
-  where?: WhereClause | ParseQuery;
-  push_time?: Date | string;
-  expiration_time?: Date | string;
-  expiration_interval?: number;
+  where?: WhereClause | ParseQuery,
+  push_time?: Date | string,
+  expiration_time?: Date | string,
+  expiration_interval?: number,
 };
 
 /**
@@ -66,9 +66,7 @@ export function send(data: PushData): Promise {
   }
 
   if (data.expiration_time && data.expiration_interval) {
-    throw new Error(
-      'expiration_time and expiration_interval cannot both be set.'
-    );
+    throw new Error('expiration_time and expiration_interval cannot both be set.');
   }
 
   return CoreManager.getPushController().send(data);
@@ -76,13 +74,10 @@ export function send(data: PushData): Promise {
 
 const DefaultController = {
   send(data: PushData) {
-    return CoreManager.getRESTController().request(
-      'POST',
-      'push',
-      data,
-      { useMasterKey: true }
-    );
-  }
-}
+    return CoreManager.getRESTController().request('POST', 'push', data, {
+      useMasterKey: true,
+    });
+  },
+};
 
 CoreManager.setPushController(DefaultController);

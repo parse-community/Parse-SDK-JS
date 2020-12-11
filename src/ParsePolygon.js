@@ -36,9 +36,7 @@ class ParsePolygon {
   /**
    * @param {(number[][] | Parse.GeoPoint[])} coordinates An Array of coordinate pairs
    */
-  constructor(
-    coordinates: Array<Array<number>> | Array<ParseGeoPoint>,
-  ) {
+  constructor(coordinates: Array<Array<number>> | Array<ParseGeoPoint>) {
     this._coordinates = ParsePolygon._validate(coordinates);
   }
 
@@ -62,7 +60,7 @@ class ParsePolygon {
    *
    * @returns {object}
    */
-  toJSON(): { __type: string; coordinates: Array<Array<number>>;} {
+  toJSON(): { __type: string, coordinates: Array<Array<number>> } {
     ParsePolygon._validate(this._coordinates);
     return {
       __type: 'Polygon',
@@ -77,14 +75,16 @@ class ParsePolygon {
    * @returns {boolean}
    */
   equals(other: mixed): boolean {
-    if (!(other instanceof ParsePolygon) || (this.coordinates.length !== other.coordinates.length)) {
+    if (!(other instanceof ParsePolygon) || this.coordinates.length !== other.coordinates.length) {
       return false;
     }
     let isEqual = true;
 
     for (let i = 1; i < this._coordinates.length; i += 1) {
-      if (this._coordinates[i][0] != other.coordinates[i][0] ||
-          this._coordinates[i][1] != other.coordinates[i][1]) {
+      if (
+        this._coordinates[i][0] != other.coordinates[i][0] ||
+        this._coordinates[i][1] != other.coordinates[i][1]
+      ) {
         isEqual = false;
         break;
       }
@@ -111,20 +111,25 @@ class ParsePolygon {
       maxY = Math.max(p[1], maxY);
     }
 
-    const outside = (point.latitude < minX || point.latitude > maxX || point.longitude < minY || point.longitude > maxY);
+    const outside =
+      point.latitude < minX ||
+      point.latitude > maxX ||
+      point.longitude < minY ||
+      point.longitude > maxY;
     if (outside) {
       return false;
     }
 
     let inside = false;
-    for (let i = 0, j = this._coordinates.length - 1 ; i < this._coordinates.length; j = i++) {
+    for (let i = 0, j = this._coordinates.length - 1; i < this._coordinates.length; j = i++) {
       const startX = this._coordinates[i][0];
       const startY = this._coordinates[i][1];
       const endX = this._coordinates[j][0];
       const endY = this._coordinates[j][1];
 
-      const intersect = ((startY > point.longitude) != (endY > point.longitude) &&
-          point.latitude < (endX - startX) * (point.longitude - startY) / (endY - startY) + startX);
+      const intersect =
+        startY > point.longitude != endY > point.longitude &&
+        point.latitude < ((endX - startX) * (point.longitude - startY)) / (endY - startY) + startX;
 
       if (intersect) {
         inside = !inside;

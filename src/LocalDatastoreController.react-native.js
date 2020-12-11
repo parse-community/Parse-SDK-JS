@@ -54,7 +54,7 @@ const LocalDatastoreController = {
       console.error('Error getAllContents: ', error);
       return {};
     }
-    results.forEach((pair) => {
+    results.forEach(pair => {
       const [key, value] = pair;
       try {
         LDS[key] = JSON.parse(value);
@@ -70,7 +70,7 @@ const LocalDatastoreController = {
     const keys = await RNStorage.getAllKeysAsync();
     const storage = {};
     const results = await RNStorage.multiGet(keys);
-    results.map((pair) => {
+    results.map(pair => {
       const [key, value] = pair;
       storage[key] = value;
     });
@@ -86,8 +86,10 @@ const LocalDatastoreController = {
         batch.push(key);
       }
     }
-    return RNStorage.multiRemove(batch).catch(error => console.error('Error clearing local datastore: ', error));
-  }
+    return RNStorage.multiRemove(batch).catch(error =>
+      console.error('Error clearing local datastore: ', error)
+    );
+  },
 };
 
 module.exports = LocalDatastoreController;
