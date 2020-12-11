@@ -1133,21 +1133,24 @@ const DefaultController = {
       password: user.get('password'),
       authData: user.get('authData'),
     };
-    return RESTController.request(options.usePost ? 'POST' : 'GET', 'login', auth, options).then(
-      response => {
-        user._migrateId(response.objectId);
-        user._setExisted(true);
-        stateController.setPendingOp(user._getStateIdentifier(), 'username', undefined);
-        stateController.setPendingOp(user._getStateIdentifier(), 'password', undefined);
-        response.password = undefined;
-        user._finishFetch(response);
-        if (!canUseCurrentUser) {
-          // We can't set the current user, so just return the one we logged in
-          return Promise.resolve(user);
-        }
-        return DefaultController.setCurrentUser(user);
+    return RESTController.request(
+      options.usePost || auth.authData ? 'POST' : 'GET',
+      'login',
+      auth,
+      options
+    ).then(response => {
+      user._migrateId(response.objectId);
+      user._setExisted(true);
+      stateController.setPendingOp(user._getStateIdentifier(), 'username', undefined);
+      stateController.setPendingOp(user._getStateIdentifier(), 'password', undefined);
+      response.password = undefined;
+      user._finishFetch(response);
+      if (!canUseCurrentUser) {
+        // We can't set the current user, so just return the one we logged in
+        return Promise.resolve(user);
       }
-    );
+      return DefaultController.setCurrentUser(user);
+    });
   },
 
   become(user: ParseUser, options: RequestOptions): Promise<ParseUser> {
