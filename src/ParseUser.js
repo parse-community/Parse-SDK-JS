@@ -623,7 +623,7 @@ class ParseUser extends ParseObject {
     return user.signUp({}, options);
   }
 
- /**
+  /**
    * Logs in a user with a username (or email) and password. On success, this
    * saves the session to disk, so you can retrieve the currently logged in
    * user using <code>current</code>.
@@ -692,9 +692,9 @@ class ParseUser extends ParseObject {
       usernameIsObject
         ? usernameOrObject
         : {
-            username: usernameOrObject,
-            password: passwordOrOptions,
-          }
+          username: usernameOrObject,
+          password: passwordOrOptions,
+        }
     );
     return user.logIn(options);
   }
