@@ -1721,22 +1721,17 @@ describe('Parse Query', () => {
       });
   });
 
-  it('supports objects with length', done => {
+  it('supports objects with length', async (done) => {
     const obj = new TestObject();
     obj.set('length', 5);
     assert.equal(obj.get('length'), 5);
-    obj
-      .save()
-      .then(() => {
-        const query = new Parse.Query(TestObject);
-        query.equalTo('objectId', obj.id);
-        return query.find();
-      })
-      .then(results => {
-        assert.equal(results.length, 1);
-        assert.equal(results[0].get('length'), 5);
-        done();
-      });
+    try {
+      await obj.save();
+      done.fail();
+    } catch (e) {
+      assert.strictEqual(e.message, 'Invalid field name: length.');
+      done();
+    }
   });
 
   it('can include User fields', done => {

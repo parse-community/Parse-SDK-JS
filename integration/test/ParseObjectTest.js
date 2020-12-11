@@ -268,9 +268,9 @@ describe('Parse Object', () => {
       const startDiff = Math.abs(start.getTime() - object.createdAt.getTime());
       const endDiff = Math.abs(end.getTime() - object.createdAt.getTime());
       expect(startDiff).toBeLessThan(500);
-      expect(startDiff).toBeGreaterThan(0);
+      expect(startDiff).toBeGreaterThanOrEqual(0);
       expect(endDiff).toBeLessThan(500);
-      expect(endDiff).toBeGreaterThan(0);
+      expect(endDiff).toBeGreaterThanOrEqual(0);
       done();
     });
   });
