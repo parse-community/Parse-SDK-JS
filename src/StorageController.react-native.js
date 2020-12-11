@@ -10,7 +10,7 @@
  * @private
  */
 
-import CoreManager from "./CoreManager";
+import CoreManager from './CoreManager';
 
 const StorageController = {
   async: 1,

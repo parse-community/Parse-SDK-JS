@@ -1,4 +1,4 @@
-const Parse = require("../../node");
+const Parse = require('../../node');
 
 /**
  * Destroys all data in the database
@@ -8,5 +8,5 @@ const Parse = require("../../node");
  * @returns {Promise} A promise that is resolved when database is deleted.
  */
 module.exports = function (fast = true) {
-  return Parse._ajax("GET", `http://localhost:1337/clear/${fast}`, "");
+  return Parse._ajax('GET', `http://localhost:1337/clear/${fast}`, '');
 };

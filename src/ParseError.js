@@ -20,14 +20,14 @@ class ParseError extends Error {
   constructor(code, message) {
     super(message);
     this.code = code;
-    Object.defineProperty(this, "message", {
+    Object.defineProperty(this, 'message', {
       enumerable: true,
       value: message,
     });
   }
 
   toString() {
-    return "ParseError: " + this.code + " " + this.message;
+    return 'ParseError: ' + this.code + ' ' + this.message;
   }
 }
 

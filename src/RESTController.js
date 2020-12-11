@@ -9,11 +9,11 @@
  * @flow
  */
 /* global XMLHttpRequest, XDomainRequest */
-const uuidv4 = require("uuid/v4");
+const uuidv4 = require('uuid/v4');
 
-import CoreManager from "./CoreManager";
-import ParseError from "./ParseError";
-import { resolvingPromise } from "./promiseUtils";
+import CoreManager from './CoreManager';
+import ParseError from './ParseError';
+import { resolvingPromise } from './promiseUtils';
 
 export type RequestOptions = {
   useMasterKey?: boolean,
@@ -38,31 +38,22 @@ export type FullOptions = {
 };
 
 let XHR = null;
-if (typeof XMLHttpRequest !== "undefined") {
+if (typeof XMLHttpRequest !== 'undefined') {
   XHR = XMLHttpRequest;
 }
-if (process.env.PARSE_BUILD === "node") {
-  XHR = require("xmlhttprequest").XMLHttpRequest;
+if (process.env.PARSE_BUILD === 'node') {
+  XHR = require('xmlhttprequest').XMLHttpRequest;
 }
-if (process.env.PARSE_BUILD === "weapp") {
-  XHR = require("./Xhr.weapp");
+if (process.env.PARSE_BUILD === 'weapp') {
+  XHR = require('./Xhr.weapp');
 }
 
 let useXDomainRequest = false;
-if (
-  typeof XDomainRequest !== "undefined" &&
-  !("withCredentials" in new XMLHttpRequest())
-) {
+if (typeof XDomainRequest !== 'undefined' && !('withCredentials' in new XMLHttpRequest())) {
   useXDomainRequest = true;
 }
 
-function ajaxIE9(
-  method: string,
-  url: string,
-  data: any,
-  headers?: any,
-  options?: FullOptions
-) {
+function ajaxIE9(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
   return new Promise((resolve, reject) => {
     const xdr = new XDomainRequest();
     xdr.onload = function () {
@@ -87,40 +78,31 @@ function ajaxIE9(
       reject(fakeResponse);
     };
     xdr.onprogress = function () {
-      if (options && typeof options.progress === "function") {
+      if (options && typeof options.progress === 'function') {
         options.progress(xdr.responseText);
       }
     };
     xdr.open(method, url);
     xdr.send(data);
-    if (options && typeof options.requestTask === "function") {
+    if (options && typeof options.requestTask === 'function') {
       options.requestTask(xdr);
     }
   });
 }
 
 const RESTController = {
-  ajax(
-    method: string,
-    url: string,
-    data: any,
-    headers?: any,
-    options?: FullOptions
-  ) {
+  ajax(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
     if (useXDomainRequest) {
       return ajaxIE9(method, url, data, headers, options);
     }
     const promise = resolvingPromise();
-    const isIdempotent =
-      CoreManager.get("IDEMPOTENCY") && ["POST", "PUT"].includes(method);
-    const requestId = isIdempotent ? uuidv4() : "";
+    const isIdempotent = CoreManager.get('IDEMPOTENCY') && ['POST', 'PUT'].includes(method);
+    const requestId = isIdempotent ? uuidv4() : '';
     let attempts = 0;
 
     const dispatch = function () {
       if (XHR == null) {
-        throw new Error(
-          "Cannot make a request: No definition of XMLHttpRequest was found."
-        );
+        throw new Error('Cannot make a request: No definition of XMLHttpRequest was found.');
       }
       let handled = false;
 
@@ -136,13 +118,9 @@ const RESTController = {
           try {
             response = JSON.parse(xhr.responseText);
 
-            if (typeof xhr.getResponseHeader === "function") {
-              if (
-                (xhr.getAllResponseHeaders() || "").includes(
-                  "x-parse-job-status-id: "
-                )
-              ) {
-                response = xhr.getResponseHeader("x-parse-job-status-id");
+            if (typeof xhr.getResponseHeader === 'function') {
+              if ((xhr.getAllResponseHeaders() || '').includes('x-parse-job-status-id: ')) {
+                response = xhr.getResponseHeader('x-parse-job-status-id');
               }
             }
           } catch (e) {
@@ -153,14 +131,12 @@ const RESTController = {
           }
         } else if (xhr.status >= 500 || xhr.status === 0) {
           // retry on 5XX or node-xmlhttprequest error
-          if (++attempts < CoreManager.get("REQUEST_ATTEMPT_LIMIT")) {
+          if (++attempts < CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
             // Exponentially-growing random delay
-            const delay = Math.round(
-              Math.random() * 125 * Math.pow(2, attempts)
-            );
+            const delay = Math.round(Math.random() * 125 * Math.pow(2, attempts));
             setTimeout(dispatch, delay);
           } else if (xhr.status === 0) {
-            promise.reject("Unable to connect to the Parse API");
+            promise.reject('Unable to connect to the Parse API');
           } else {
             // After the retry limit is reached, fail
             promise.reject(xhr);
@@ -171,56 +147,42 @@ const RESTController = {
       };
 
       headers = headers || {};
-      if (typeof headers["Content-Type"] !== "string") {
-        headers["Content-Type"] = "text/plain"; // Avoid pre-flight
+      if (typeof headers['Content-Type'] !== 'string') {
+        headers['Content-Type'] = 'text/plain'; // Avoid pre-flight
       }
-      if (CoreManager.get("IS_NODE")) {
-        headers["User-Agent"] =
-          "Parse/" +
-          CoreManager.get("VERSION") +
-          " (NodeJS " +
-          process.versions.node +
-          ")";
+      if (CoreManager.get('IS_NODE')) {
+        headers['User-Agent'] =
+          'Parse/' + CoreManager.get('VERSION') + ' (NodeJS ' + process.versions.node + ')';
       }
       if (isIdempotent) {
-        headers["X-Parse-Request-Id"] = requestId;
+        headers['X-Parse-Request-Id'] = requestId;
       }
-      if (
-        CoreManager.get("SERVER_AUTH_TYPE") &&
-        CoreManager.get("SERVER_AUTH_TOKEN")
-      ) {
-        headers["Authorization"] =
-          CoreManager.get("SERVER_AUTH_TYPE") +
-          " " +
-          CoreManager.get("SERVER_AUTH_TOKEN");
+      if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
+        headers['Authorization'] =
+          CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
       }
-      const customHeaders = CoreManager.get("REQUEST_HEADERS");
+      const customHeaders = CoreManager.get('REQUEST_HEADERS');
       for (const key in customHeaders) {
         headers[key] = customHeaders[key];
       }
 
       function handleProgress(type, event) {
-        if (options && typeof options.progress === "function") {
+        if (options && typeof options.progress === 'function') {
           if (event.lengthComputable) {
-            options.progress(
-              event.loaded / event.total,
-              event.loaded,
-              event.total,
-              { type }
-            );
+            options.progress(event.loaded / event.total, event.loaded, event.total, { type });
           } else {
             options.progress(null, null, null, { type });
           }
         }
       }
 
-      xhr.onprogress = (event) => {
-        handleProgress("download", event);
+      xhr.onprogress = event => {
+        handleProgress('download', event);
       };
 
       if (xhr.upload) {
-        xhr.upload.onprogress = (event) => {
-          handleProgress("upload", event);
+        xhr.upload.onprogress = event => {
+          handleProgress('upload', event);
         };
       }
 
@@ -238,7 +200,7 @@ const RESTController = {
       };
       xhr.send(data);
 
-      if (options && typeof options.requestTask === "function") {
+      if (options && typeof options.requestTask === 'function') {
         options.requestTask(xhr);
       }
     };
@@ -249,14 +211,14 @@ const RESTController = {
 
   request(method: string, path: string, data: mixed, options?: RequestOptions) {
     options = options || {};
-    let url = CoreManager.get("SERVER_URL");
-    if (url[url.length - 1] !== "/") {
-      url += "/";
+    let url = CoreManager.get('SERVER_URL');
+    if (url[url.length - 1] !== '/') {
+      url += '/';
     }
     url += path;
 
     const payload = {};
-    if (data && typeof data === "object") {
+    if (data && typeof data === 'object') {
       for (const k in data) {
         payload[k] = data[k];
       }
@@ -268,38 +230,38 @@ const RESTController = {
       payload._context = context;
     }
 
-    if (method !== "POST") {
+    if (method !== 'POST') {
       payload._method = method;
-      method = "POST";
+      method = 'POST';
     }
 
-    payload._ApplicationId = CoreManager.get("APPLICATION_ID");
-    const jsKey = CoreManager.get("JAVASCRIPT_KEY");
+    payload._ApplicationId = CoreManager.get('APPLICATION_ID');
+    const jsKey = CoreManager.get('JAVASCRIPT_KEY');
     if (jsKey) {
       payload._JavaScriptKey = jsKey;
     }
-    payload._ClientVersion = CoreManager.get("VERSION");
+    payload._ClientVersion = CoreManager.get('VERSION');
 
     let useMasterKey = options.useMasterKey;
-    if (typeof useMasterKey === "undefined") {
-      useMasterKey = CoreManager.get("USE_MASTER_KEY");
+    if (typeof useMasterKey === 'undefined') {
+      useMasterKey = CoreManager.get('USE_MASTER_KEY');
     }
     if (useMasterKey) {
-      if (CoreManager.get("MASTER_KEY")) {
+      if (CoreManager.get('MASTER_KEY')) {
         delete payload._JavaScriptKey;
-        payload._MasterKey = CoreManager.get("MASTER_KEY");
+        payload._MasterKey = CoreManager.get('MASTER_KEY');
       } else {
-        throw new Error("Cannot use the Master Key, it has not been provided.");
+        throw new Error('Cannot use the Master Key, it has not been provided.');
       }
     }
 
-    if (CoreManager.get("FORCE_REVOCABLE_SESSION")) {
-      payload._RevocableSession = "1";
+    if (CoreManager.get('FORCE_REVOCABLE_SESSION')) {
+      payload._RevocableSession = '1';
     }
 
     const installationId = options.installationId;
     let installationIdPromise;
-    if (installationId && typeof installationId === "string") {
+    if (installationId && typeof installationId === 'string') {
       installationIdPromise = Promise.resolve(installationId);
     } else {
       const installationController = CoreManager.getInstallationController();
@@ -307,13 +269,13 @@ const RESTController = {
     }
 
     return installationIdPromise
-      .then((iid) => {
+      .then(iid => {
         payload._InstallationId = iid;
         const userController = CoreManager.getUserController();
-        if (options && typeof options.sessionToken === "string") {
+        if (options && typeof options.sessionToken === 'string') {
           return Promise.resolve(options.sessionToken);
         } else if (userController) {
-          return userController.currentUserAsync().then((user) => {
+          return userController.currentUserAsync().then(user => {
             if (user) {
               return Promise.resolve(user.getSessionToken());
             }
@@ -322,25 +284,21 @@ const RESTController = {
         }
         return Promise.resolve(null);
       })
-      .then((token) => {
+      .then(token => {
         if (token) {
           payload._SessionToken = token;
         }
 
         const payloadString = JSON.stringify(payload);
-        return RESTController.ajax(
-          method,
-          url,
-          payloadString,
-          {},
-          options
-        ).then(({ response, status }) => {
-          if (options.returnStatus) {
-            return { ...response, _status: status };
-          } else {
-            return response;
+        return RESTController.ajax(method, url, payloadString, {}, options).then(
+          ({ response, status }) => {
+            if (options.returnStatus) {
+              return { ...response, _status: status };
+            } else {
+              return response;
+            }
           }
-        });
+        );
       })
       .catch(RESTController.handleError);
   },
@@ -357,15 +315,14 @@ const RESTController = {
         // If we fail to parse the error text, that's okay.
         error = new ParseError(
           ParseError.INVALID_JSON,
-          "Received an error with invalid JSON from Parse: " +
-            response.responseText
+          'Received an error with invalid JSON from Parse: ' + response.responseText
         );
       }
     } else {
       const message = response.message ? response.message : response;
       error = new ParseError(
         ParseError.CONNECTION_FAILED,
-        "XMLHttpRequest failed: " + JSON.stringify(message)
+        'XMLHttpRequest failed: ' + JSON.stringify(message)
       );
     }
     return Promise.reject(error);

@@ -7,11 +7,11 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-jest.dontMock("../AnonymousUtils");
+jest.dontMock('../AnonymousUtils');
 
 class MockUser {
   constructor() {
-    this.className = "_User";
+    this.className = '_User';
     this.attributes = {};
   }
   _isLinked() {}
@@ -20,7 +20,7 @@ class MockUser {
   static logInWith() {}
 }
 
-jest.setMock("../ParseUser", MockUser);
+jest.setMock('../ParseUser', MockUser);
 
 const mockProvider = {
   restoreAuthentication() {
@@ -28,64 +28,58 @@ const mockProvider = {
   },
 
   getAuthType() {
-    return "anonymous";
+    return 'anonymous';
   },
 
   getAuthData() {
     return {
       authData: {
-        id: "1234",
+        id: '1234',
       },
     };
   },
 };
 
-const AnonymousUtils = require("../AnonymousUtils").default;
+const AnonymousUtils = require('../AnonymousUtils').default;
 
-describe("AnonymousUtils", () => {
+describe('AnonymousUtils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest
-      .spyOn(AnonymousUtils, "_getAuthProvider")
-      .mockImplementation(() => mockProvider);
+    jest.spyOn(AnonymousUtils, '_getAuthProvider').mockImplementation(() => mockProvider);
   });
 
-  it("can register provider", () => {
+  it('can register provider', () => {
     AnonymousUtils._getAuthProvider.mockRestore();
-    jest.spyOn(MockUser, "_registerAuthenticationProvider");
+    jest.spyOn(MockUser, '_registerAuthenticationProvider');
     AnonymousUtils._getAuthProvider();
     AnonymousUtils._getAuthProvider();
     expect(MockUser._registerAuthenticationProvider).toHaveBeenCalledTimes(1);
   });
 
-  it("can check user isLinked", () => {
+  it('can check user isLinked', () => {
     const user = new MockUser();
-    jest.spyOn(user, "_isLinked");
+    jest.spyOn(user, '_isLinked');
     AnonymousUtils.isLinked(user);
     expect(user._isLinked).toHaveBeenCalledTimes(1);
-    expect(user._isLinked).toHaveBeenCalledWith("anonymous");
+    expect(user._isLinked).toHaveBeenCalledWith('anonymous');
     expect(AnonymousUtils._getAuthProvider).toHaveBeenCalledTimes(1);
   });
 
-  it("can link user", () => {
+  it('can link user', () => {
     const user = new MockUser();
-    jest.spyOn(user, "linkWith");
+    jest.spyOn(user, 'linkWith');
     AnonymousUtils.link(user);
     expect(user.linkWith).toHaveBeenCalledTimes(1);
-    expect(user.linkWith).toHaveBeenCalledWith(
-      "anonymous",
-      mockProvider.getAuthData(),
-      undefined
-    );
+    expect(user.linkWith).toHaveBeenCalledWith('anonymous', mockProvider.getAuthData(), undefined);
     expect(AnonymousUtils._getAuthProvider).toHaveBeenCalledTimes(1);
   });
 
-  it("can login user", () => {
-    jest.spyOn(MockUser, "logInWith");
+  it('can login user', () => {
+    jest.spyOn(MockUser, 'logInWith');
     AnonymousUtils.logIn();
     expect(MockUser.logInWith).toHaveBeenCalledTimes(1);
     expect(MockUser.logInWith).toHaveBeenCalledWith(
-      "anonymous",
+      'anonymous',
       mockProvider.getAuthData(),
       undefined
     );

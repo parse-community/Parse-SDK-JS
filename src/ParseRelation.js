@@ -9,9 +9,9 @@
  * @flow
  */
 
-import { RelationOp } from "./ParseOp";
-import ParseObject from "./ParseObject";
-import ParseQuery from "./ParseQuery";
+import { RelationOp } from './ParseOp';
+import ParseObject from './ParseObject';
+import ParseQuery from './ParseQuery';
 
 /**
  * Creates a new Relation for the given parent object and key. This
@@ -47,21 +47,15 @@ class ParseRelation {
   _ensureParentAndKey(parent: ParseObject, key: string) {
     this.key = this.key || key;
     if (this.key !== key) {
-      throw new Error(
-        "Internal Error. Relation retrieved from two different keys."
-      );
+      throw new Error('Internal Error. Relation retrieved from two different keys.');
     }
     if (this.parent) {
       if (this.parent.className !== parent.className) {
-        throw new Error(
-          "Internal Error. Relation retrieved from two different Objects."
-        );
+        throw new Error('Internal Error. Relation retrieved from two different Objects.');
       }
       if (this.parent.id) {
         if (this.parent.id !== parent.id) {
-          throw new Error(
-            "Internal Error. Relation retrieved from two different Objects."
-          );
+          throw new Error('Internal Error. Relation retrieved from two different Objects.');
         }
       } else if (parent.id) {
         this.parent = parent;
@@ -85,7 +79,7 @@ class ParseRelation {
     const change = new RelationOp(objects, []);
     const parent = this.parent;
     if (!parent) {
-      throw new Error("Cannot add to a Relation without a parent");
+      throw new Error('Cannot add to a Relation without a parent');
     }
     if (objects.length === 0) {
       return parent;
@@ -107,7 +101,7 @@ class ParseRelation {
 
     const change = new RelationOp([], objects);
     if (!this.parent) {
-      throw new Error("Cannot remove from a Relation without a parent");
+      throw new Error('Cannot remove from a Relation without a parent');
     }
     if (objects.length === 0) {
       return;
@@ -121,9 +115,9 @@ class ParseRelation {
    *
    * @returns {object} JSON representation of Relation
    */
-  toJSON(): { __type: "Relation", className: ?string } {
+  toJSON(): { __type: 'Relation', className: ?string } {
     return {
-      __type: "Relation",
+      __type: 'Relation',
       className: this.targetClassName,
     };
   }
@@ -138,9 +132,7 @@ class ParseRelation {
     let query;
     const parent = this.parent;
     if (!parent) {
-      throw new Error(
-        "Cannot construct a query for a Relation without a parent"
-      );
+      throw new Error('Cannot construct a query for a Relation without a parent');
     }
     if (!this.targetClassName) {
       query = new ParseQuery(parent.className);
@@ -148,12 +140,12 @@ class ParseRelation {
     } else {
       query = new ParseQuery(this.targetClassName);
     }
-    query._addCondition("$relatedTo", "object", {
-      __type: "Pointer",
+    query._addCondition('$relatedTo', 'object', {
+      __type: 'Pointer',
       className: parent.className,
       objectId: parent.id,
     });
-    query._addCondition("$relatedTo", "key", this.key);
+    query._addCondition('$relatedTo', 'key', this.key);
 
     return query;
   }

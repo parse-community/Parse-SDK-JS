@@ -9,7 +9,7 @@ module.exports = class SocketWeapp {
       this.onopen();
     });
 
-    wx.onSocketMessage((msg) => {
+    wx.onSocketMessage(msg => {
       this.onmessage(msg);
     });
 
@@ -17,7 +17,7 @@ module.exports = class SocketWeapp {
       this.onclose();
     });
 
-    wx.onSocketError((error) => {
+    wx.onSocketError(error => {
       this.onerror(error);
     });
 

@@ -9,13 +9,13 @@
  * @flow
  */
 
-import CoreManager from "./CoreManager";
-import decode from "./decode";
-import encode from "./encode";
-import ParseError from "./ParseError";
-import ParseQuery from "./ParseQuery";
-import ParseObject from "./ParseObject";
-import type { RequestOptions } from "./RESTController";
+import CoreManager from './CoreManager';
+import decode from './decode';
+import encode from './encode';
+import ParseError from './ParseError';
+import ParseQuery from './ParseQuery';
+import ParseObject from './ParseObject';
+import type { RequestOptions } from './RESTController';
 
 /**
  * Contains functions for calling and declaring
@@ -40,15 +40,11 @@ import type { RequestOptions } from "./RESTController";
  * @returns {Promise} A promise that will be resolved with the result
  * of the function.
  */
-export function run(
-  name: string,
-  data: mixed,
-  options: RequestOptions
-): Promise<mixed> {
+export function run(name: string, data: mixed, options: RequestOptions): Promise<mixed> {
   options = options || {};
 
-  if (typeof name !== "string" || name.length === 0) {
-    throw new TypeError("Cloud function name must be a string.");
+  if (typeof name !== 'string' || name.length === 0) {
+    throw new TypeError('Cloud function name must be a string.');
   }
 
   const requestOptions = {};
@@ -58,7 +54,7 @@ export function run(
   if (options.sessionToken) {
     requestOptions.sessionToken = options.sessionToken;
   }
-  if (options.context && typeof options.context === "object") {
+  if (options.context && typeof options.context === 'object') {
     requestOptions.context = options.context;
   }
 
@@ -91,8 +87,8 @@ export function getJobsData(): Promise<Object> {
  * of the job.
  */
 export function startJob(name: string, data: mixed): Promise<string> {
-  if (typeof name !== "string" || name.length === 0) {
-    throw new TypeError("Cloud job name must be a string.");
+  if (typeof name !== 'string' || name.length === 0) {
+    throw new TypeError('Cloud job name must be a string.');
   }
   const requestOptions = {
     useMasterKey: true,
@@ -109,7 +105,7 @@ export function startJob(name: string, data: mixed): Promise<string> {
  * @returns {Parse.Object} Status of Job.
  */
 export function getJobStatus(jobStatusId: string): Promise<ParseObject> {
-  const query = new ParseQuery("_JobStatus");
+  const query = new ParseQuery('_JobStatus');
   return query.get(jobStatusId, { useMasterKey: true });
 }
 
@@ -119,26 +115,14 @@ const DefaultController = {
 
     const payload = encode(data, true);
 
-    const request = RESTController.request(
-      "POST",
-      "functions/" + name,
-      payload,
-      options
-    );
+    const request = RESTController.request('POST', 'functions/' + name, payload, options);
 
-    return request.then((res) => {
-      if (
-        typeof res === "object" &&
-        Object.keys(res).length > 0 &&
-        !res.hasOwnProperty("result")
-      ) {
-        throw new ParseError(
-          ParseError.INVALID_JSON,
-          "The server returned an invalid response."
-        );
+    return request.then(res => {
+      if (typeof res === 'object' && Object.keys(res).length > 0 && !res.hasOwnProperty('result')) {
+        throw new ParseError(ParseError.INVALID_JSON, 'The server returned an invalid response.');
       }
       const decoded = decode(res);
-      if (decoded && decoded.hasOwnProperty("result")) {
+      if (decoded && decoded.hasOwnProperty('result')) {
         return Promise.resolve(decoded.result);
       }
       return Promise.resolve(undefined);
@@ -148,7 +132,7 @@ const DefaultController = {
   getJobsData(options: RequestOptions) {
     const RESTController = CoreManager.getRESTController();
 
-    return RESTController.request("GET", "cloud_code/jobs/data", null, options);
+    return RESTController.request('GET', 'cloud_code/jobs/data', null, options);
   },
 
   startJob(name, data, options: RequestOptions) {
@@ -156,7 +140,7 @@ const DefaultController = {
 
     const payload = encode(data, true);
 
-    return RESTController.request("POST", "jobs/" + name, payload, options);
+    return RESTController.request('POST', 'jobs/' + name, payload, options);
   },
 };
 

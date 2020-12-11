@@ -1,9 +1,9 @@
 jest.autoMockOff();
 
-const { when } = require("../promiseUtils");
+const { when } = require('../promiseUtils');
 
-describe("promiseUtils", () => {
-  it("when", async () => {
+describe('promiseUtils', () => {
+  it('when', async () => {
     const promise1 = Promise.resolve(1);
     const promise2 = Promise.resolve(2);
 
@@ -13,7 +13,7 @@ describe("promiseUtils", () => {
     result = await when(promise1, promise2);
     expect(result).toEqual([1, 2]);
 
-    result = await when(promise1, "not a promise");
-    expect(result).toEqual([1, "not a promise"]);
+    result = await when(promise1, 'not a promise');
+    expect(result).toEqual([1, 'not a promise']);
   });
 });

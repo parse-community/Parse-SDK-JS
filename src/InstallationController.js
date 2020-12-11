@@ -9,18 +9,18 @@
  * @flow
  */
 
-import Storage from "./Storage";
-const uuidv4 = require("uuid/v4");
+import Storage from './Storage';
+const uuidv4 = require('uuid/v4');
 
 let iidCache = null;
 
 const InstallationController = {
   currentInstallationId(): Promise<string> {
-    if (typeof iidCache === "string") {
+    if (typeof iidCache === 'string') {
       return Promise.resolve(iidCache);
     }
-    const path = Storage.generatePath("installationId");
-    return Storage.getItemAsync(path).then((iid) => {
+    const path = Storage.generatePath('installationId');
+    return Storage.getItemAsync(path).then(iid => {
       if (!iid) {
         iid = uuidv4();
         return Storage.setItemAsync(path, iid).then(() => {

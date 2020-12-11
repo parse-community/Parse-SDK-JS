@@ -9,9 +9,9 @@
 
 jest.autoMockOff();
 
-const ParseGeoPoint = require("../ParseGeoPoint").default;
+const ParseGeoPoint = require('../ParseGeoPoint').default;
 global.navigator.geolocation = {
-  getCurrentPosition: (cb) => {
+  getCurrentPosition: cb => {
     return cb({
       coords: {
         latitude: 10,
@@ -21,8 +21,8 @@ global.navigator.geolocation = {
   },
 };
 
-describe("GeoPoint", () => {
-  it("can be constructed from various inputs", () => {
+describe('GeoPoint', () => {
+  it('can be constructed from various inputs', () => {
     let point = new ParseGeoPoint();
     expect(point.latitude).toBe(0);
     expect(point.longitude).toBe(0);
@@ -40,23 +40,23 @@ describe("GeoPoint", () => {
     expect(point.longitude).toBe(88);
   });
 
-  it("throws when created with non numbers values", () => {
+  it('throws when created with non numbers values', () => {
     [
       [NaN, NaN],
       [false, true],
-      ["29", "10"],
-      [29, "10"],
-      ["29", 10],
-      [["29", "10"]],
-      [{ latitude: "29", longitude: "10" }],
-    ].forEach((case_test) => {
+      ['29', '10'],
+      [29, '10'],
+      ['29', 10],
+      [['29', '10']],
+      [{ latitude: '29', longitude: '10' }],
+    ].forEach(case_test => {
       expect(function () {
         new ParseGeoPoint(...case_test);
-      }).toThrow("GeoPoint latitude and longitude must be valid numbers");
+      }).toThrow('GeoPoint latitude and longitude must be valid numbers');
     });
   });
 
-  it("can set latitude and longitude", () => {
+  it('can set latitude and longitude', () => {
     const point = new ParseGeoPoint();
     expect(point.latitude).toBe(0);
     expect(point.longitude).toBe(0);
@@ -74,7 +74,7 @@ describe("GeoPoint", () => {
     expect(point.longitude).toBe(14.9);
   });
 
-  it("throws for points out of bounds", () => {
+  it('throws for points out of bounds', () => {
     expect(() => {
       new ParseGeoPoint(90.01, 0.0);
     }).toThrow();
@@ -92,7 +92,7 @@ describe("GeoPoint", () => {
     }).toThrow();
   });
 
-  it("can calculate distance in radians", () => {
+  it('can calculate distance in radians', () => {
     const d2r = Math.PI / 180.0;
     const pointA = new ParseGeoPoint();
     const pointB = new ParseGeoPoint();
@@ -149,7 +149,7 @@ describe("GeoPoint", () => {
     expect(pointB.radiansTo(pointA)).toBeCloseTo(1.85, 2);
   });
 
-  it("can calculate distances in mi and km", () => {
+  it('can calculate distances in mi and km', () => {
     // [SAC]  38.52  -121.50  Sacramento,CA
     const sacramento = new ParseGeoPoint(38.52, -121.5);
 
@@ -199,7 +199,7 @@ describe("GeoPoint", () => {
     expect(sacramento.milesTo(vorkuta)).toBeCloseTo(5159.7, -3);
   });
 
-  it("can test equality against another GeoPoint", () => {
+  it('can test equality against another GeoPoint', () => {
     let a = new ParseGeoPoint(40, 40);
     expect(a.equals(a)).toBe(true);
 
@@ -225,7 +225,7 @@ describe("GeoPoint", () => {
     expect(b.equals(a)).toBe(false);
   });
 
-  it("can get current location", async () => {
+  it('can get current location', async () => {
     const geoPoint = ParseGeoPoint.current();
     expect(geoPoint.latitude).toBe(10);
     expect(geoPoint.longitude).toBe(20);
