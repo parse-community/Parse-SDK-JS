@@ -1131,6 +1131,7 @@ const DefaultController = {
     const auth = {
       username: user.get('username'),
       password: user.get('password'),
+      authData: user.get('authData'),
     };
     return RESTController.request(options.usePost ? 'POST' : 'GET', 'login', auth, options).then(
       response => {
