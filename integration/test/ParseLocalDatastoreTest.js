@@ -2375,22 +2375,6 @@ function runTest(controller) {
       assert(['Billy', 'Tom'].includes(results[1].get('name')));
     });
 
-    it(`${controller.name} supports objects with length`, async () => {
-      const obj = new TestObject();
-      obj.set('length', 5);
-      assert.equal(obj.get('length'), 5);
-      await obj.save();
-      await obj.pin();
-
-      const query = new Parse.Query(TestObject);
-      query.equalTo('objectId', obj.id);
-      query.fromLocalDatastore();
-      const results = await query.find();
-
-      assert.equal(results.length, 1);
-      assert.equal(results[0].get('length'), 5);
-    });
-
     it(`${controller.name} can include User fields`, async () => {
       const user = await Parse.User.signUp('bob', 'password', { age: 21 });
       const obj = new TestObject();
