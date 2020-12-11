@@ -325,24 +325,6 @@ describe('ParseUser', () => {
     ParseUser.logIn(undefined, 'password')
       .then(null, err => {
         expect(err.code).toBe(ParseError.OTHER_CAUSE);
-        expect(err.message).toBe('Username must be a string.');
-
-        return ParseUser.logIn('username', undefined);
-      })
-      .then(null, err => {
-        expect(err.code).toBe(ParseError.OTHER_CAUSE);
-        expect(err.message).toBe('Password must be a string.');
-
-        done();
-      });
-  });
-
-  it('fail login when invalid username or password is used', done => {
-    ParseUser.enableUnsafeCurrentUser();
-    ParseUser._clearCache();
-    ParseUser.logIn(undefined, 'password')
-      .then(null, err => {
-        expect(err.code).toBe(ParseError.OTHER_CAUSE);
         expect(err.message).toBe(
           'Username must be a string or an object with username and password keys.'
         );
