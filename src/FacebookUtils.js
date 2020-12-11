@@ -9,18 +9,18 @@
  * @flow-weak
  */
 /* global FB */
-import ParseUser from "./ParseUser";
+import ParseUser from './ParseUser';
 
 let initialized = false;
 let requestedPermissions;
 let initOptions;
 const provider = {
   authenticate(options) {
-    if (typeof FB === "undefined") {
-      options.error(this, "Facebook SDK not found.");
+    if (typeof FB === 'undefined') {
+      options.error(this, 'Facebook SDK not found.');
     }
     FB.login(
-      (response) => {
+      response => {
         if (response.authResponse) {
           if (options.success) {
             options.success(this, {
@@ -69,7 +69,7 @@ const provider = {
   },
 
   getAuthType() {
-    return "facebook";
+    return 'facebook';
   },
 
   deauthenticate() {
@@ -104,10 +104,8 @@ const FacebookUtils = {
    *   explicitly if this behavior is required by your application.
    */
   init(options) {
-    if (typeof FB === "undefined") {
-      throw new Error(
-        "The Facebook JavaScript SDK must be loaded before calling init."
-      );
+    if (typeof FB === 'undefined') {
+      throw new Error('The Facebook JavaScript SDK must be loaded before calling init.');
     }
     initOptions = {};
     if (options) {
@@ -115,14 +113,14 @@ const FacebookUtils = {
         initOptions[key] = options[key];
       }
     }
-    if (initOptions.status && typeof console !== "undefined") {
+    if (initOptions.status && typeof console !== 'undefined') {
       const warn = console.warn || console.log || function () {}; // eslint-disable-line no-console
       warn.call(
         console,
         'The "status" flag passed into' +
-          " FB.init, when set to true, can interfere with Parse Facebook" +
-          " integration, so it has been suppressed. Please call" +
-          " FB.getLoginStatus() explicitly if you require this behavior."
+          ' FB.init, when set to true, can interfere with Parse Facebook' +
+          ' integration, so it has been suppressed. Please call' +
+          ' FB.getLoginStatus() explicitly if you require this behavior.'
       );
     }
     initOptions.status = false;
@@ -142,7 +140,7 @@ const FacebookUtils = {
    *     linked to Facebook.
    */
   isLinked(user) {
-    return user._isLinked("facebook");
+    return user._isLinked('facebook');
   },
 
   /**
@@ -170,17 +168,15 @@ const FacebookUtils = {
    * @returns {Promise}
    */
   logIn(permissions, options) {
-    if (!permissions || typeof permissions === "string") {
+    if (!permissions || typeof permissions === 'string') {
       if (!initialized) {
-        throw new Error(
-          "You must initialize FacebookUtils before calling logIn."
-        );
+        throw new Error('You must initialize FacebookUtils before calling logIn.');
       }
       requestedPermissions = permissions;
-      return ParseUser.logInWith("facebook", options);
+      return ParseUser.logInWith('facebook', options);
     }
     const authData = { authData: permissions };
-    return ParseUser.logInWith("facebook", authData, options);
+    return ParseUser.logInWith('facebook', authData, options);
   },
 
   /**
@@ -210,17 +206,15 @@ const FacebookUtils = {
    * @returns {Promise}
    */
   link(user, permissions, options) {
-    if (!permissions || typeof permissions === "string") {
+    if (!permissions || typeof permissions === 'string') {
       if (!initialized) {
-        throw new Error(
-          "You must initialize FacebookUtils before calling link."
-        );
+        throw new Error('You must initialize FacebookUtils before calling link.');
       }
       requestedPermissions = permissions;
-      return user.linkWith("facebook", options);
+      return user.linkWith('facebook', options);
     }
     const authData = { authData: permissions };
-    return user.linkWith("facebook", authData, options);
+    return user.linkWith('facebook', authData, options);
   },
 
   /**
@@ -236,11 +230,9 @@ const FacebookUtils = {
    */
   unlink: function (user, options) {
     if (!initialized) {
-      throw new Error(
-        "You must initialize FacebookUtils before calling unlink."
-      );
+      throw new Error('You must initialize FacebookUtils before calling unlink.');
     }
-    return user._unlinkFrom("facebook", options);
+    return user._unlinkFrom('facebook', options);
   },
 
   // Used for testing purposes

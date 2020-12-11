@@ -7,34 +7,34 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-jest.dontMock("../CoreManager");
+jest.dontMock('../CoreManager');
 
-const CoreManager = require("../CoreManager");
+const CoreManager = require('../CoreManager');
 
-describe("CoreManager", () => {
-  it("is initialized with default values", () => {
-    expect(CoreManager.get("SERVER_URL")).toBe("https://api.parse.com/1");
+describe('CoreManager', () => {
+  it('is initialized with default values', () => {
+    expect(CoreManager.get('SERVER_URL')).toBe('https://api.parse.com/1');
   });
 
-  it("pulls the version string from package.json", () => {
-    expect(CoreManager.get("VERSION").length).toBeGreaterThan(0);
+  it('pulls the version string from package.json', () => {
+    expect(CoreManager.get('VERSION').length).toBeGreaterThan(0);
   });
 
-  it("detects when running in node", () => {
-    expect(CoreManager.get("IS_NODE")).toBe(true);
+  it('detects when running in node', () => {
+    expect(CoreManager.get('IS_NODE')).toBe(true);
   });
 
-  it("can set and retrieve arbitrary values", () => {
-    expect(CoreManager.get.bind(null, "something")).toThrow(
-      "Configuration key not found: something"
+  it('can set and retrieve arbitrary values', () => {
+    expect(CoreManager.get.bind(null, 'something')).toThrow(
+      'Configuration key not found: something'
     );
-    CoreManager.set("something", "a string");
-    expect(CoreManager.get("something")).toBe("a string");
+    CoreManager.set('something', 'a string');
+    expect(CoreManager.get('something')).toBe('a string');
   });
 
-  it("requires AnalyticsController to implement certain functionality", () => {
+  it('requires AnalyticsController to implement certain functionality', () => {
     expect(CoreManager.setAnalyticsController.bind(null, {})).toThrow(
-      "AnalyticsController must implement track()"
+      'AnalyticsController must implement track()'
     );
 
     expect(
@@ -44,7 +44,7 @@ describe("CoreManager", () => {
     ).not.toThrow();
   });
 
-  it("can set and get AnalyticsController", () => {
+  it('can set and get AnalyticsController', () => {
     const controller = {
       track: function () {},
     };
@@ -53,9 +53,9 @@ describe("CoreManager", () => {
     expect(CoreManager.getAnalyticsController()).toBe(controller);
   });
 
-  it("requires CloudController to implement certain functionality", () => {
+  it('requires CloudController to implement certain functionality', () => {
     expect(CoreManager.setCloudController.bind(null, {})).toThrow(
-      "CloudController must implement run()"
+      'CloudController must implement run()'
     );
 
     expect(
@@ -68,7 +68,7 @@ describe("CoreManager", () => {
     ).not.toThrow();
   });
 
-  it("can set and get CloudController", () => {
+  it('can set and get CloudController', () => {
     const controller = {
       run: function () {},
       getJobsData: function () {},
@@ -80,16 +80,16 @@ describe("CoreManager", () => {
     expect(CoreManager.getCloudController()).toBe(controller);
   });
 
-  it("requires ConfigController to implement certain functionality", () => {
+  it('requires ConfigController to implement certain functionality', () => {
     expect(CoreManager.setConfigController.bind(null, {})).toThrow(
-      "ConfigController must implement current()"
+      'ConfigController must implement current()'
     );
 
     expect(
       CoreManager.setConfigController.bind(null, {
         current: function () {},
       })
-    ).toThrow("ConfigController must implement get()");
+    ).toThrow('ConfigController must implement get()');
 
     expect(
       CoreManager.setConfigController.bind(null, {
@@ -100,7 +100,7 @@ describe("CoreManager", () => {
     ).not.toThrow();
   });
 
-  it("can set and get ConfigController", () => {
+  it('can set and get ConfigController', () => {
     const controller = {
       current: function () {},
       get: function () {},
@@ -111,16 +111,16 @@ describe("CoreManager", () => {
     expect(CoreManager.getConfigController()).toBe(controller);
   });
 
-  it("requires FileController to implement certain functionality", () => {
+  it('requires FileController to implement certain functionality', () => {
     expect(CoreManager.setFileController.bind(null, {})).toThrow(
-      "FileController must implement saveFile()"
+      'FileController must implement saveFile()'
     );
 
     expect(
       CoreManager.setFileController.bind(null, {
         saveFile: function () {},
       })
-    ).toThrow("FileController must implement saveBase64()");
+    ).toThrow('FileController must implement saveBase64()');
 
     expect(
       CoreManager.setFileController.bind(null, {
@@ -130,7 +130,7 @@ describe("CoreManager", () => {
     ).not.toThrow();
   });
 
-  it("can set and get FileController", () => {
+  it('can set and get FileController', () => {
     const controller = {
       saveFile: function () {},
       saveBase64: function () {},
@@ -140,9 +140,9 @@ describe("CoreManager", () => {
     expect(CoreManager.getFileController()).toBe(controller);
   });
 
-  it("requires InstallationController to implement certain functionality", () => {
+  it('requires InstallationController to implement certain functionality', () => {
     expect(CoreManager.setInstallationController.bind(null, {})).toThrow(
-      "InstallationController must implement currentInstallationId()"
+      'InstallationController must implement currentInstallationId()'
     );
 
     expect(
@@ -152,7 +152,7 @@ describe("CoreManager", () => {
     ).not.toThrow();
   });
 
-  it("can set and get InstallationController", () => {
+  it('can set and get InstallationController', () => {
     const controller = {
       currentInstallationId: function () {},
     };
@@ -161,9 +161,9 @@ describe("CoreManager", () => {
     expect(CoreManager.getInstallationController()).toBe(controller);
   });
 
-  it("requires PushController to implement certain functionality", () => {
+  it('requires PushController to implement certain functionality', () => {
     expect(CoreManager.setPushController.bind(null, {})).toThrow(
-      "PushController must implement send()"
+      'PushController must implement send()'
     );
 
     expect(
@@ -173,7 +173,7 @@ describe("CoreManager", () => {
     ).not.toThrow();
   });
 
-  it("can set and get PushController", () => {
+  it('can set and get PushController', () => {
     const controller = {
       send: function () {},
     };
@@ -182,23 +182,23 @@ describe("CoreManager", () => {
     expect(CoreManager.getPushController()).toBe(controller);
   });
 
-  it("requires ObjectController to implement certain functionality", () => {
+  it('requires ObjectController to implement certain functionality', () => {
     expect(CoreManager.setObjectController.bind(null, {})).toThrow(
-      "ObjectController must implement save()"
+      'ObjectController must implement save()'
     );
 
     expect(
       CoreManager.setObjectController.bind(null, {
         save: function () {},
       })
-    ).toThrow("ObjectController must implement fetch()");
+    ).toThrow('ObjectController must implement fetch()');
 
     expect(
       CoreManager.setObjectController.bind(null, {
         save: function () {},
         fetch: function () {},
       })
-    ).toThrow("ObjectController must implement destroy()");
+    ).toThrow('ObjectController must implement destroy()');
 
     expect(
       CoreManager.setObjectController.bind(null, {
@@ -209,7 +209,7 @@ describe("CoreManager", () => {
     ).not.toThrow();
   });
 
-  it("can set and get ObjectController", () => {
+  it('can set and get ObjectController', () => {
     const controller = {
       save: function () {},
       fetch: function () {},
@@ -220,7 +220,7 @@ describe("CoreManager", () => {
     expect(CoreManager.getObjectController()).toBe(controller);
   });
 
-  it("can set and get ObjectStateController", () => {
+  it('can set and get ObjectStateController', () => {
     const controller = {
       getState: function () {},
       initializeState: function () {},
@@ -244,9 +244,9 @@ describe("CoreManager", () => {
     expect(CoreManager.getObjectStateController()).toBe(controller);
   });
 
-  it("requires QueryController to implement certain functionality", () => {
+  it('requires QueryController to implement certain functionality', () => {
     expect(CoreManager.setQueryController.bind(null, {})).toThrow(
-      "QueryController must implement find()"
+      'QueryController must implement find()'
     );
 
     expect(
@@ -257,7 +257,7 @@ describe("CoreManager", () => {
     ).not.toThrow();
   });
 
-  it("can set and get QueryController", () => {
+  it('can set and get QueryController', () => {
     const controller = {
       find: function () {},
       aggregate: function () {},
@@ -267,16 +267,16 @@ describe("CoreManager", () => {
     expect(CoreManager.getQueryController()).toBe(controller);
   });
 
-  it("requires RESTController to implement certain functionality", () => {
+  it('requires RESTController to implement certain functionality', () => {
     expect(CoreManager.setRESTController.bind(null, {})).toThrow(
-      "RESTController must implement request()"
+      'RESTController must implement request()'
     );
 
     expect(
       CoreManager.setRESTController.bind(null, {
         request: function () {},
       })
-    ).toThrow("RESTController must implement ajax()");
+    ).toThrow('RESTController must implement ajax()');
 
     expect(
       CoreManager.setRESTController.bind(null, {
@@ -286,7 +286,7 @@ describe("CoreManager", () => {
     ).not.toThrow();
   });
 
-  it("can set and get RESTController", () => {
+  it('can set and get RESTController', () => {
     const controller = {
       request: function () {},
       ajax: function () {},
@@ -296,9 +296,9 @@ describe("CoreManager", () => {
     expect(CoreManager.getRESTController()).toBe(controller);
   });
 
-  it("requires StorageController to implement certain functionality", () => {
+  it('requires StorageController to implement certain functionality', () => {
     expect(CoreManager.setStorageController.bind(null, { async: 0 })).toThrow(
-      "A synchronous StorageController must implement getItem()"
+      'A synchronous StorageController must implement getItem()'
     );
 
     expect(
@@ -306,7 +306,7 @@ describe("CoreManager", () => {
         async: 0,
         getItem: function () {},
       })
-    ).toThrow("A synchronous StorageController must implement setItem()");
+    ).toThrow('A synchronous StorageController must implement setItem()');
 
     expect(
       CoreManager.setStorageController.bind(null, {
@@ -314,7 +314,7 @@ describe("CoreManager", () => {
         getItem: function () {},
         setItem: function () {},
       })
-    ).toThrow("A synchronous StorageController must implement removeItem()");
+    ).toThrow('A synchronous StorageController must implement removeItem()');
 
     expect(
       CoreManager.setStorageController.bind(null, {
@@ -327,7 +327,7 @@ describe("CoreManager", () => {
     ).not.toThrow();
 
     expect(CoreManager.setStorageController.bind(null, { async: 1 })).toThrow(
-      "An async StorageController must implement getItemAsync()"
+      'An async StorageController must implement getItemAsync()'
     );
 
     expect(
@@ -335,7 +335,7 @@ describe("CoreManager", () => {
         async: 1,
         getItemAsync: function () {},
       })
-    ).toThrow("An async StorageController must implement setItemAsync()");
+    ).toThrow('An async StorageController must implement setItemAsync()');
 
     expect(
       CoreManager.setStorageController.bind(null, {
@@ -343,7 +343,7 @@ describe("CoreManager", () => {
         getItemAsync: function () {},
         setItemAsync: function () {},
       })
-    ).toThrow("An async StorageController must implement removeItemAsync()");
+    ).toThrow('An async StorageController must implement removeItemAsync()');
 
     expect(
       CoreManager.setStorageController.bind(null, {
@@ -356,7 +356,7 @@ describe("CoreManager", () => {
     ).not.toThrow();
   });
 
-  it("can set and get StorageController", () => {
+  it('can set and get StorageController', () => {
     const controller = {
       async: 0,
       getItem: function () {},
@@ -369,9 +369,9 @@ describe("CoreManager", () => {
     expect(CoreManager.getStorageController()).toBe(controller);
   });
 
-  it("requires SchemaController to implement certain functionality", () => {
+  it('requires SchemaController to implement certain functionality', () => {
     expect(CoreManager.setSchemaController.bind(null, {})).toThrow(
-      "SchemaController must implement get()"
+      'SchemaController must implement get()'
     );
 
     expect(
@@ -386,7 +386,7 @@ describe("CoreManager", () => {
     ).not.toThrow();
   });
 
-  it("can set and get SchemaController", () => {
+  it('can set and get SchemaController', () => {
     const controller = {
       send: function () {},
       get: function () {},
@@ -400,9 +400,9 @@ describe("CoreManager", () => {
     expect(CoreManager.getSchemaController()).toBe(controller);
   });
 
-  it("requires LocalDatastoreController to implement certain functionality", () => {
+  it('requires LocalDatastoreController to implement certain functionality', () => {
     expect(CoreManager.setLocalDatastoreController.bind(null, {})).toThrow(
-      "LocalDatastoreController must implement pinWithName()"
+      'LocalDatastoreController must implement pinWithName()'
     );
 
     expect(
@@ -416,7 +416,7 @@ describe("CoreManager", () => {
     ).not.toThrow();
   });
 
-  it("can set and get setLocalDatastoreController", () => {
+  it('can set and get setLocalDatastoreController', () => {
     const controller = {
       fromPinWithName: function () {},
       pinWithName: function () {},
@@ -429,7 +429,7 @@ describe("CoreManager", () => {
     expect(CoreManager.getLocalDatastoreController()).toBe(controller);
   });
 
-  it("can set and get WebSocketController", () => {
+  it('can set and get WebSocketController', () => {
     const controller = {
       onopen: function () {},
       onmessage: function () {},

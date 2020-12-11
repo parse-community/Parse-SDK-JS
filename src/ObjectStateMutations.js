@@ -9,14 +9,14 @@
  * @flow
  */
 
-import encode from "./encode";
-import ParseFile from "./ParseFile";
-import ParseObject from "./ParseObject";
-import ParseRelation from "./ParseRelation";
-import TaskQueue from "./TaskQueue";
-import { RelationOp } from "./ParseOp";
+import encode from './encode';
+import ParseFile from './ParseFile';
+import ParseObject from './ParseObject';
+import ParseRelation from './ParseRelation';
+import TaskQueue from './TaskQueue';
+import { RelationOp } from './ParseOp';
 
-import type { Op } from "./ParseOp";
+import type { Op } from './ParseOp';
 
 export type AttributeMap = { [attr: string]: any };
 export type OpsMap = { [attr: string]: Op };
@@ -40,12 +40,9 @@ export function defaultState(): State {
   };
 }
 
-export function setServerData(
-  serverData: AttributeMap,
-  attributes: AttributeMap
-) {
+export function setServerData(serverData: AttributeMap, attributes: AttributeMap) {
   for (const attr in attributes) {
-    if (typeof attributes[attr] !== "undefined") {
+    if (typeof attributes[attr] !== 'undefined') {
       serverData[attr] = attributes[attr];
     } else {
       delete serverData[attr];
@@ -101,11 +98,7 @@ export function estimateAttribute(
     if (pendingOps[i][attr]) {
       if (pendingOps[i][attr] instanceof RelationOp) {
         if (id) {
-          value = pendingOps[i][attr].applyTo(
-            value,
-            { className: className, id: id },
-            attr
-          );
+          value = pendingOps[i][attr].applyTo(value, { className: className, id: id }, attr);
         }
       } else {
         value = pendingOps[i][attr].applyTo(value);
@@ -137,9 +130,9 @@ export function estimateAttributes(
           );
         }
       } else {
-        if (attr.includes(".")) {
+        if (attr.includes('.')) {
           // convert a.b.c into { a: { b: { c: value } } }
-          const fields = attr.split(".");
+          const fields = attr.split('.');
           const first = fields[0];
           const last = fields[fields.length - 1];
           data[first] = { ...serverData[first] };
@@ -167,7 +160,7 @@ export function commitServerChanges(
     serverData[attr] = val;
     if (
       val &&
-      typeof val === "object" &&
+      typeof val === 'object' &&
       !(val instanceof ParseObject) &&
       !(val instanceof ParseFile) &&
       !(val instanceof ParseRelation)

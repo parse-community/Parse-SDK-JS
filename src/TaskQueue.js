@@ -8,7 +8,7 @@
  *
  * @flow
  */
-import { resolvingPromise } from "./promiseUtils";
+import { resolvingPromise } from './promiseUtils';
 
 type Task = {
   task: () => Promise,
@@ -34,7 +34,7 @@ class TaskQueue {
           this._dequeue();
           taskComplete.resolve();
         },
-        (error) => {
+        error => {
           this._dequeue();
           taskComplete.reject(error);
         }
@@ -52,7 +52,7 @@ class TaskQueue {
           this._dequeue();
           next._completion.resolve();
         },
-        (error) => {
+        error => {
           this._dequeue();
           next._completion.reject(error);
         }

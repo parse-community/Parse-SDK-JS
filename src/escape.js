@@ -10,12 +10,12 @@
  */
 
 const encoded = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  "/": "&#x2F;",
-  "'": "&#x27;",
-  '"': "&quot;",
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '/': '&#x2F;',
+  "'": '&#x27;',
+  '"': '&quot;',
 };
 
 export default function escape(str: string): string {

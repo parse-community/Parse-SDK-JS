@@ -7,17 +7,14 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-import ParseACL from "./ParseACL";
-import ParseFile from "./ParseFile";
-import ParseGeoPoint from "./ParseGeoPoint";
-import ParseObject from "./ParseObject";
+import ParseACL from './ParseACL';
+import ParseFile from './ParseFile';
+import ParseGeoPoint from './ParseGeoPoint';
+import ParseObject from './ParseObject';
 
 export default function equals(a, b) {
   const toString = Object.prototype.toString;
-  if (
-    toString.call(a) === "[object Date]" ||
-    toString.call(b) === "[object Date]"
-  ) {
+  if (toString.call(a) === '[object Date]' || toString.call(b) === '[object Date]') {
     const dateA = new Date(a);
     const dateB = new Date(b);
     return +dateA === +dateB;
@@ -27,7 +24,7 @@ export default function equals(a, b) {
     return false;
   }
 
-  if (!a || typeof a !== "object") {
+  if (!a || typeof a !== 'object') {
     // a is a primitive
     return a === b;
   }
@@ -56,7 +53,7 @@ export default function equals(a, b) {
     return a.equals(b);
   }
   if (b instanceof ParseObject) {
-    if (a.__type === "Object" || a.__type === "Pointer") {
+    if (a.__type === 'Object' || a.__type === 'Pointer') {
       return a.objectId === b.id && a.className === b.className;
     }
   }

@@ -1,7 +1,7 @@
 jest.autoMockOff();
 
-const ParseGeoPoint = require("../ParseGeoPoint").default;
-const ParsePolygon = require("../ParsePolygon").default;
+const ParseGeoPoint = require('../ParseGeoPoint').default;
+const ParsePolygon = require('../ParsePolygon').default;
 
 const points = [
   [0, 0],
@@ -11,13 +11,13 @@ const points = [
   [0, 0],
 ];
 
-describe("Polygon", () => {
-  it("can initialize with points", () => {
+describe('Polygon', () => {
+  it('can initialize with points', () => {
     const polygon = new ParsePolygon(points);
     expect(polygon.coordinates).toEqual(points);
   });
 
-  it("can initialize with geopoints", () => {
+  it('can initialize with geopoints', () => {
     const geopoints = [
       new ParseGeoPoint(0, 0),
       new ParseGeoPoint(0, 1),
@@ -29,7 +29,7 @@ describe("Polygon", () => {
     expect(polygon.coordinates).toEqual(points);
   });
 
-  it("can set points", () => {
+  it('can set points', () => {
     const newPoints = [
       [0, 0],
       [0, 10],
@@ -45,15 +45,15 @@ describe("Polygon", () => {
     expect(polygon.coordinates).toEqual(newPoints);
   });
 
-  it("toJSON", () => {
+  it('toJSON', () => {
     const polygon = new ParsePolygon(points);
     expect(polygon.toJSON()).toEqual({
-      __type: "Polygon",
+      __type: 'Polygon',
       coordinates: points,
     });
   });
 
-  it("equals", () => {
+  it('equals', () => {
     const polygon1 = new ParsePolygon(points);
     const polygon2 = new ParsePolygon(points);
     const geopoint = new ParseGeoPoint(0, 0);
@@ -72,7 +72,7 @@ describe("Polygon", () => {
     expect(polygon1.equals(polygon2)).toBe(false);
   });
 
-  it("containsPoint", () => {
+  it('containsPoint', () => {
     const polygon = new ParsePolygon(points);
     const outside = new ParseGeoPoint(10, 10);
     const inside = new ParseGeoPoint(0.5, 0.5);
@@ -81,17 +81,17 @@ describe("Polygon", () => {
     expect(polygon.containsPoint(outside)).toBe(false);
   });
 
-  it("throws error on invalid input", () => {
+  it('throws error on invalid input', () => {
     expect(() => {
       new ParsePolygon();
-    }).toThrow("Coordinates must be an Array");
+    }).toThrow('Coordinates must be an Array');
 
     expect(() => {
       new ParsePolygon([]);
-    }).toThrow("Polygon must have at least 3 GeoPoints or Points");
+    }).toThrow('Polygon must have at least 3 GeoPoints or Points');
 
     expect(() => {
       new ParsePolygon([1, 2, 3]);
-    }).toThrow("Coordinates must be an Array of GeoPoints or Points");
+    }).toThrow('Coordinates must be an Array of GeoPoints or Points');
   });
 });

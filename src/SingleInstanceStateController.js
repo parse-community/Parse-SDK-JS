@@ -9,15 +9,10 @@
  * @flow
  */
 
-import * as ObjectStateMutations from "./ObjectStateMutations";
+import * as ObjectStateMutations from './ObjectStateMutations';
 
-import type { Op } from "./ParseOp";
-import type {
-  AttributeMap,
-  ObjectCache,
-  OpsMap,
-  State,
-} from "./ObjectStateMutations";
+import type { Op } from './ParseOp';
+import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
 
 type ObjectIdentifier = {
   className: string,
@@ -126,30 +121,15 @@ export function estimateAttribute(obj: ObjectIdentifier, attr: string): mixed {
 export function estimateAttributes(obj: ObjectIdentifier): AttributeMap {
   const serverData = getServerData(obj);
   const pendingOps = getPendingOps(obj);
-  return ObjectStateMutations.estimateAttributes(
-    serverData,
-    pendingOps,
-    obj.className,
-    obj.id
-  );
+  return ObjectStateMutations.estimateAttributes(serverData, pendingOps, obj.className, obj.id);
 }
 
-export function commitServerChanges(
-  obj: ObjectIdentifier,
-  changes: AttributeMap
-) {
+export function commitServerChanges(obj: ObjectIdentifier, changes: AttributeMap) {
   const state = initializeState(obj);
-  ObjectStateMutations.commitServerChanges(
-    state.serverData,
-    state.objectCache,
-    changes
-  );
+  ObjectStateMutations.commitServerChanges(state.serverData, state.objectCache, changes);
 }
 
-export function enqueueTask(
-  obj: ObjectIdentifier,
-  task: () => Promise
-): Promise {
+export function enqueueTask(obj: ObjectIdentifier, task: () => Promise): Promise {
   const state = initializeState(obj);
   return state.tasks.enqueue(task);
 }

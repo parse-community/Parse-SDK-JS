@@ -46,7 +46,7 @@ export function when(promises) {
   };
 
   const chain = function (object, index) {
-    if (object && typeof object.then === "function") {
+    if (object && typeof object.then === 'function') {
       object.then(
         function (result) {
           results[index] = result;

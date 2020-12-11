@@ -7,77 +7,77 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-jest.dontMock("../CoreManager");
-jest.dontMock("../CryptoController");
-jest.dontMock("../decode");
-jest.dontMock("../encode");
-jest.dontMock("../Parse");
-jest.dontMock("../LocalDatastore");
-jest.dontMock("crypto-js/aes");
+jest.dontMock('../CoreManager');
+jest.dontMock('../CryptoController');
+jest.dontMock('../decode');
+jest.dontMock('../encode');
+jest.dontMock('../Parse');
+jest.dontMock('../LocalDatastore');
+jest.dontMock('crypto-js/aes');
 
-const CoreManager = require("../CoreManager");
-const Parse = require("../Parse");
+const CoreManager = require('../CoreManager');
+const Parse = require('../Parse');
 
-describe("Parse module", () => {
-  it("can be initialized with keys", () => {
-    Parse.initialize("A", "B");
-    expect(CoreManager.get("APPLICATION_ID")).toBe("A");
-    expect(CoreManager.get("JAVASCRIPT_KEY")).toBe("B");
+describe('Parse module', () => {
+  it('can be initialized with keys', () => {
+    Parse.initialize('A', 'B');
+    expect(CoreManager.get('APPLICATION_ID')).toBe('A');
+    expect(CoreManager.get('JAVASCRIPT_KEY')).toBe('B');
 
-    Parse._initialize("A", "B", "C");
-    expect(CoreManager.get("APPLICATION_ID")).toBe("A");
-    expect(CoreManager.get("JAVASCRIPT_KEY")).toBe("B");
-    expect(CoreManager.get("MASTER_KEY")).toBe("C");
+    Parse._initialize('A', 'B', 'C');
+    expect(CoreManager.get('APPLICATION_ID')).toBe('A');
+    expect(CoreManager.get('JAVASCRIPT_KEY')).toBe('B');
+    expect(CoreManager.get('MASTER_KEY')).toBe('C');
   });
 
-  it("enables master key use in the node build", () => {
-    expect(typeof Parse.Cloud.useMasterKey).toBe("function");
+  it('enables master key use in the node build', () => {
+    expect(typeof Parse.Cloud.useMasterKey).toBe('function');
     Parse.Cloud.useMasterKey();
-    expect(CoreManager.get("USE_MASTER_KEY")).toBe(true);
+    expect(CoreManager.get('USE_MASTER_KEY')).toBe(true);
   });
 
-  it("exposes certain keys as properties", () => {
-    Parse.applicationId = "123";
-    expect(CoreManager.get("APPLICATION_ID")).toBe("123");
-    expect(Parse.applicationId).toBe("123");
+  it('exposes certain keys as properties', () => {
+    Parse.applicationId = '123';
+    expect(CoreManager.get('APPLICATION_ID')).toBe('123');
+    expect(Parse.applicationId).toBe('123');
 
-    Parse.javaScriptKey = "456";
-    expect(CoreManager.get("JAVASCRIPT_KEY")).toBe("456");
-    expect(Parse.javaScriptKey).toBe("456");
+    Parse.javaScriptKey = '456';
+    expect(CoreManager.get('JAVASCRIPT_KEY')).toBe('456');
+    expect(Parse.javaScriptKey).toBe('456');
 
-    Parse.masterKey = "789";
-    expect(CoreManager.get("MASTER_KEY")).toBe("789");
-    expect(Parse.masterKey).toBe("789");
+    Parse.masterKey = '789';
+    expect(CoreManager.get('MASTER_KEY')).toBe('789');
+    expect(Parse.masterKey).toBe('789');
 
-    Parse.serverURL = "http://example.com";
-    expect(CoreManager.get("SERVER_URL")).toBe("http://example.com");
-    expect(Parse.serverURL).toBe("http://example.com");
+    Parse.serverURL = 'http://example.com';
+    expect(CoreManager.get('SERVER_URL')).toBe('http://example.com');
+    expect(Parse.serverURL).toBe('http://example.com');
 
-    Parse.liveQueryServerURL = "https://example.com";
-    expect(CoreManager.get("LIVEQUERY_SERVER_URL")).toBe("https://example.com");
-    expect(Parse.liveQueryServerURL).toBe("https://example.com");
+    Parse.liveQueryServerURL = 'https://example.com';
+    expect(CoreManager.get('LIVEQUERY_SERVER_URL')).toBe('https://example.com');
+    expect(Parse.liveQueryServerURL).toBe('https://example.com');
   });
 
-  it("can set auth type and token", () => {
-    Parse.serverAuthType = "bearer";
-    expect(CoreManager.get("SERVER_AUTH_TYPE")).toBe("bearer");
-    expect(Parse.serverAuthType).toBe("bearer");
+  it('can set auth type and token', () => {
+    Parse.serverAuthType = 'bearer';
+    expect(CoreManager.get('SERVER_AUTH_TYPE')).toBe('bearer');
+    expect(Parse.serverAuthType).toBe('bearer');
 
-    Parse.serverAuthToken = "some_token";
-    expect(CoreManager.get("SERVER_AUTH_TOKEN")).toBe("some_token");
-    expect(Parse.serverAuthToken).toBe("some_token");
+    Parse.serverAuthToken = 'some_token';
+    expect(CoreManager.get('SERVER_AUTH_TOKEN')).toBe('some_token');
+    expect(Parse.serverAuthToken).toBe('some_token');
   });
 
-  it("can set idempotency", () => {
+  it('can set idempotency', () => {
     expect(Parse.idempotency).toBe(false);
     Parse.idempotency = true;
-    expect(CoreManager.get("IDEMPOTENCY")).toBe(true);
+    expect(CoreManager.get('IDEMPOTENCY')).toBe(true);
     expect(Parse.idempotency).toBe(true);
     Parse.idempotency = false;
     expect(Parse.idempotency).toBe(false);
   });
 
-  it("can set LocalDatastoreController", () => {
+  it('can set LocalDatastoreController', () => {
     const controller = {
       fromPinWithName: function () {},
       pinWithName: function () {},
@@ -89,7 +89,7 @@ describe("Parse module", () => {
     expect(CoreManager.getLocalDatastoreController()).toBe(controller);
   });
 
-  it("can set AsyncStorage", () => {
+  it('can set AsyncStorage', () => {
     const controller = {
       getItem: function () {},
       setItem: function () {},
@@ -104,15 +104,15 @@ describe("Parse module", () => {
     expect(CoreManager.getAsyncStorage()).toBe(controller);
   });
 
-  it("can enable LocalDatastore", () => {
-    jest.spyOn(console, "log").mockImplementationOnce(() => {});
+  it('can enable LocalDatastore', () => {
+    jest.spyOn(console, 'log').mockImplementationOnce(() => {});
     Parse.LocalDatastore.isEnabled = false;
     Parse.enableLocalDatastore();
     expect(Parse.LocalDatastore.isEnabled).toBe(true);
     expect(Parse.isLocalDatastoreEnabled()).toBe(true);
   });
 
-  it("can dump LocalDatastore", async () => {
+  it('can dump LocalDatastore', async () => {
     Parse.LocalDatastore.isEnabled = false;
     let LDS = await Parse.dumpLocalDatastore();
     expect(LDS).toEqual({});
@@ -122,74 +122,74 @@ describe("Parse module", () => {
       pinWithName: function () {},
       unPinWithName: function () {},
       getAllContents: function () {
-        return Promise.resolve({ key: "value" });
+        return Promise.resolve({ key: 'value' });
       },
       clear: function () {},
     };
     Parse.setLocalDatastoreController(controller);
     LDS = await Parse.dumpLocalDatastore();
-    expect(LDS).toEqual({ key: "value" });
+    expect(LDS).toEqual({ key: 'value' });
   });
 
-  it("can enable encrypter CurrentUser", () => {
-    jest.spyOn(console, "log").mockImplementationOnce(() => {});
-    process.env.PARSE_BUILD = "browser";
+  it('can enable encrypter CurrentUser', () => {
+    jest.spyOn(console, 'log').mockImplementationOnce(() => {});
+    process.env.PARSE_BUILD = 'browser';
     Parse.encryptedUser = false;
     Parse.enableEncryptedUser();
     expect(Parse.encryptedUser).toBe(true);
     expect(Parse.isEncryptedUserEnabled()).toBe(true);
   });
 
-  it("can set an encrypt token as String", () => {
-    Parse.secret = "My Super secret key";
-    expect(CoreManager.get("ENCRYPTED_KEY")).toBe("My Super secret key");
-    expect(Parse.secret).toBe("My Super secret key");
+  it('can set an encrypt token as String', () => {
+    Parse.secret = 'My Super secret key';
+    expect(CoreManager.get('ENCRYPTED_KEY')).toBe('My Super secret key');
+    expect(Parse.secret).toBe('My Super secret key');
   });
 
-  it("can set and get request batch size", () => {
-    expect(CoreManager.get("REQUEST_BATCH_SIZE")).toBe(20);
-    CoreManager.set("REQUEST_BATCH_SIZE", 4);
-    expect(CoreManager.get("REQUEST_BATCH_SIZE")).toBe(4);
-    CoreManager.set("REQUEST_BATCH_SIZE", 20);
+  it('can set and get request batch size', () => {
+    expect(CoreManager.get('REQUEST_BATCH_SIZE')).toBe(20);
+    CoreManager.set('REQUEST_BATCH_SIZE', 4);
+    expect(CoreManager.get('REQUEST_BATCH_SIZE')).toBe(4);
+    CoreManager.set('REQUEST_BATCH_SIZE', 20);
   });
 
-  it("_request", () => {
+  it('_request', () => {
     const controller = {
       request: jest.fn(),
       ajax: jest.fn(),
     };
     CoreManager.setRESTController(controller);
-    Parse._request("POST", "classes/TestObject");
+    Parse._request('POST', 'classes/TestObject');
     const [method, path] = controller.request.mock.calls[0];
-    expect(method).toBe("POST");
-    expect(path).toBe("classes/TestObject");
+    expect(method).toBe('POST');
+    expect(path).toBe('classes/TestObject');
   });
 
-  it("_ajax", () => {
+  it('_ajax', () => {
     const controller = {
       request: jest.fn(),
       ajax: jest.fn(),
     };
     CoreManager.setRESTController(controller);
-    Parse._ajax("POST", "classes/TestObject");
+    Parse._ajax('POST', 'classes/TestObject');
     const [method, path] = controller.ajax.mock.calls[0];
-    expect(method).toBe("POST");
-    expect(path).toBe("classes/TestObject");
+    expect(method).toBe('POST');
+    expect(path).toBe('classes/TestObject');
   });
 
-  it("_getInstallationId", () => {
+  it('_getInstallationId', () => {
     const controller = {
-      currentInstallationId: () => "1234",
+      currentInstallationId: () => '1234',
     };
     CoreManager.setInstallationController(controller);
-    expect(Parse._getInstallationId()).toBe("1234");
+    expect(Parse._getInstallationId()).toBe('1234');
   });
 
-  it("_decode", () => {
+  it('_decode', () => {
     expect(Parse._decode(null, 12)).toBe(12);
   });
 
-  it("_encode", () => {
+  it('_encode', () => {
     expect(Parse._encode(12)).toBe(12);
   });
 });

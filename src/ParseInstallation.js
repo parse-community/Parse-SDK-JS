@@ -9,14 +9,14 @@
  * @flow
  */
 
-import ParseObject from "./ParseObject";
+import ParseObject from './ParseObject';
 
-import type { AttributeMap } from "./ObjectStateMutations";
+import type { AttributeMap } from './ObjectStateMutations';
 
 export default class Installation extends ParseObject {
   constructor(attributes: ?AttributeMap) {
-    super("_Installation");
-    if (attributes && typeof attributes === "object") {
+    super('_Installation');
+    if (attributes && typeof attributes === 'object') {
       if (!this.set(attributes || {})) {
         throw new Error("Can't create an invalid Installation");
       }
@@ -24,4 +24,4 @@ export default class Installation extends ParseObject {
   }
 }
 
-ParseObject.registerSubclass("_Installation", Installation);
+ParseObject.registerSubclass('_Installation', Installation);

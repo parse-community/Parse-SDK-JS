@@ -9,9 +9,9 @@
  * @flow
  */
 
-import EventEmitter from "./EventEmitter";
-import LiveQueryClient from "./LiveQueryClient";
-import CoreManager from "./CoreManager";
+import EventEmitter from './EventEmitter';
+import LiveQueryClient from './LiveQueryClient';
+import CoreManager from './CoreManager';
 
 function getLiveQueryClient(): LiveQueryClient {
   return CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
@@ -68,7 +68,7 @@ LiveQuery.close = async () => {
 };
 
 // Register a default onError callback to make sure we do not crash on error
-LiveQuery.on("error", () => {});
+LiveQuery.on('error', () => {});
 
 export default LiveQuery;
 
@@ -87,29 +87,27 @@ const DefaultLiveQueryController = {
       CoreManager.getUserController().currentUserAsync(),
       CoreManager.getInstallationController().currentInstallationId(),
     ]);
-    const sessionToken = currentUser
-      ? currentUser.getSessionToken()
-      : undefined;
+    const sessionToken = currentUser ? currentUser.getSessionToken() : undefined;
 
-    let liveQueryServerURL = CoreManager.get("LIVEQUERY_SERVER_URL");
-    if (liveQueryServerURL && liveQueryServerURL.indexOf("ws") !== 0) {
+    let liveQueryServerURL = CoreManager.get('LIVEQUERY_SERVER_URL');
+    if (liveQueryServerURL && liveQueryServerURL.indexOf('ws') !== 0) {
       throw new Error(
-        "You need to set a proper Parse LiveQuery server url before using LiveQueryClient"
+        'You need to set a proper Parse LiveQuery server url before using LiveQueryClient'
       );
     }
 
     // If we can not find Parse.liveQueryServerURL, we try to extract it from Parse.serverURL
     if (!liveQueryServerURL) {
-      const serverURL = CoreManager.get("SERVER_URL");
-      const protocol = serverURL.indexOf("https") === 0 ? "wss://" : "ws://";
-      const host = serverURL.replace(/^https?:\/\//, "");
+      const serverURL = CoreManager.get('SERVER_URL');
+      const protocol = serverURL.indexOf('https') === 0 ? 'wss://' : 'ws://';
+      const host = serverURL.replace(/^https?:\/\//, '');
       liveQueryServerURL = protocol + host;
-      CoreManager.set("LIVEQUERY_SERVER_URL", liveQueryServerURL);
+      CoreManager.set('LIVEQUERY_SERVER_URL', liveQueryServerURL);
     }
 
-    const applicationId = CoreManager.get("APPLICATION_ID");
-    const javascriptKey = CoreManager.get("JAVASCRIPT_KEY");
-    const masterKey = CoreManager.get("MASTER_KEY");
+    const applicationId = CoreManager.get('APPLICATION_ID');
+    const javascriptKey = CoreManager.get('JAVASCRIPT_KEY');
+    const masterKey = CoreManager.get('MASTER_KEY');
 
     defaultLiveQueryClient = new LiveQueryClient({
       applicationId,
@@ -119,14 +117,14 @@ const DefaultLiveQueryController = {
       sessionToken,
       installationId,
     });
-    defaultLiveQueryClient.on("error", (error) => {
-      LiveQuery.emit("error", error);
+    defaultLiveQueryClient.on('error', error => {
+      LiveQuery.emit('error', error);
     });
-    defaultLiveQueryClient.on("open", () => {
-      LiveQuery.emit("open");
+    defaultLiveQueryClient.on('open', () => {
+      LiveQuery.emit('open');
     });
-    defaultLiveQueryClient.on("close", () => {
-      LiveQuery.emit("close");
+    defaultLiveQueryClient.on('close', () => {
+      LiveQuery.emit('close');
     });
     return defaultLiveQueryClient;
   },

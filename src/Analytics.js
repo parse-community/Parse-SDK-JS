@@ -9,7 +9,7 @@
  * @flow
  */
 
-import CoreManager from "./CoreManager";
+import CoreManager from './CoreManager';
 
 /**
  * Parse.Analytics provides an interface to Parse's logging and analytics
@@ -51,22 +51,17 @@ import CoreManager from "./CoreManager";
  * @returns {Promise} A promise that is resolved when the round-trip
  * to the server completes.
  */
-export function track(
-  name: string,
-  dimensions: { [key: string]: string }
-): Promise {
-  name = name || "";
-  name = name.replace(/^\s*/, "");
-  name = name.replace(/\s*$/, "");
+export function track(name: string, dimensions: { [key: string]: string }): Promise {
+  name = name || '';
+  name = name.replace(/^\s*/, '');
+  name = name.replace(/\s*$/, '');
   if (name.length === 0) {
-    throw new TypeError("A name for the custom event must be provided");
+    throw new TypeError('A name for the custom event must be provided');
   }
 
   for (const key in dimensions) {
-    if (typeof key !== "string" || typeof dimensions[key] !== "string") {
-      throw new TypeError(
-        'track() dimensions expects keys and values of type "string".'
-      );
+    if (typeof key !== 'string' || typeof dimensions[key] !== 'string') {
+      throw new TypeError('track() dimensions expects keys and values of type "string".');
     }
   }
 
@@ -75,9 +70,9 @@ export function track(
 
 const DefaultController = {
   track(name, dimensions) {
-    const path = "events/" + name;
+    const path = 'events/' + name;
     const RESTController = CoreManager.getRESTController();
-    return RESTController.request("POST", path, { dimensions: dimensions });
+    return RESTController.request('POST', path, { dimensions: dimensions });
   },
 };
 

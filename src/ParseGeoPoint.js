@@ -49,7 +49,7 @@ class ParseGeoPoint {
       ParseGeoPoint._validate(arg1[0], arg1[1]);
       this._latitude = arg1[0];
       this._longitude = arg1[1];
-    } else if (typeof arg1 === "object") {
+    } else if (typeof arg1 === 'object') {
       ParseGeoPoint._validate(arg1.latitude, arg1.longitude);
       this._latitude = arg1.latitude;
       this._longitude = arg1.longitude;
@@ -103,7 +103,7 @@ class ParseGeoPoint {
   toJSON(): { __type: string, latitude: number, longitude: number } {
     ParseGeoPoint._validate(this._latitude, this._longitude);
     return {
-      __type: "GeoPoint",
+      __type: 'GeoPoint',
       latitude: this._latitude,
       longitude: this._longitude,
     };
@@ -136,10 +136,7 @@ class ParseGeoPoint {
     // Square of half the straight line chord distance between both points.
     let a =
       sinDeltaLatDiv2 * sinDeltaLatDiv2 +
-      Math.cos(lat1rad) *
-        Math.cos(lat2rad) *
-        sinDeltaLongDiv2 *
-        sinDeltaLongDiv2;
+      Math.cos(lat1rad) * Math.cos(lat2rad) * sinDeltaLongDiv2 * sinDeltaLongDiv2;
     a = Math.min(1.0, a);
     return 2 * Math.asin(Math.sqrt(a));
   }
@@ -171,32 +168,22 @@ class ParseGeoPoint {
     if (
       isNaN(latitude) ||
       isNaN(longitude) ||
-      typeof latitude !== "number" ||
-      typeof longitude !== "number"
+      typeof latitude !== 'number' ||
+      typeof longitude !== 'number'
     ) {
-      throw new TypeError(
-        "GeoPoint latitude and longitude must be valid numbers"
-      );
+      throw new TypeError('GeoPoint latitude and longitude must be valid numbers');
     }
     if (latitude < -90.0) {
-      throw new TypeError(
-        "GeoPoint latitude out of bounds: " + latitude + " < -90.0."
-      );
+      throw new TypeError('GeoPoint latitude out of bounds: ' + latitude + ' < -90.0.');
     }
     if (latitude > 90.0) {
-      throw new TypeError(
-        "GeoPoint latitude out of bounds: " + latitude + " > 90.0."
-      );
+      throw new TypeError('GeoPoint latitude out of bounds: ' + latitude + ' > 90.0.');
     }
     if (longitude < -180.0) {
-      throw new TypeError(
-        "GeoPoint longitude out of bounds: " + longitude + " < -180.0."
-      );
+      throw new TypeError('GeoPoint longitude out of bounds: ' + longitude + ' < -180.0.');
     }
     if (longitude > 180.0) {
-      throw new TypeError(
-        "GeoPoint longitude out of bounds: " + longitude + " > 180.0."
-      );
+      throw new TypeError('GeoPoint longitude out of bounds: ' + longitude + ' > 180.0.');
     }
   }
 
@@ -207,11 +194,8 @@ class ParseGeoPoint {
    * @returns {Parse.GeoPoint} User's current location
    */
   static current() {
-    return navigator.geolocation.getCurrentPosition((location) => {
-      return new ParseGeoPoint(
-        location.coords.latitude,
-        location.coords.longitude
-      );
+    return navigator.geolocation.getCurrentPosition(location => {
+      return new ParseGeoPoint(location.coords.latitude, location.coords.longitude);
     });
   }
 }

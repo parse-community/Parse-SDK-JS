@@ -8,9 +8,9 @@
  *
  */
 
-import EventEmitter from "./EventEmitter";
-import CoreManager from "./CoreManager";
-import { resolvingPromise } from "./promiseUtils";
+import EventEmitter from './EventEmitter';
+import CoreManager from './CoreManager';
+import { resolvingPromise } from './promiseUtils';
 
 /**
  * Creates a new LiveQuery Subscription.
@@ -113,7 +113,7 @@ class Subscription extends EventEmitter {
 
     // adding listener so process does not crash
     // best practice is for developer to register their own listener
-    this.on("error", () => {});
+    this.on('error', () => {});
   }
 
   /**
@@ -124,9 +124,9 @@ class Subscription extends EventEmitter {
   unsubscribe(): Promise {
     return CoreManager.getLiveQueryController()
       .getDefaultLiveQueryClient()
-      .then((liveQueryClient) => {
+      .then(liveQueryClient => {
         liveQueryClient.unsubscribe(this);
-        this.emit("close");
+        this.emit('close');
       });
   }
 }

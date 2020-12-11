@@ -8,8 +8,8 @@
  *
  * @flow
  */
-import { isLocalDatastoreKey } from "./LocalDatastoreUtils";
-import Storage from "./Storage";
+import { isLocalDatastoreKey } from './LocalDatastoreUtils';
+import Storage from './Storage';
 
 const LocalDatastoreController = {
   async fromPinWithName(name: string): Array<Object> {
@@ -39,7 +39,7 @@ const LocalDatastoreController = {
         try {
           LDS[key] = JSON.parse(value);
         } catch (error) {
-          console.error("Error getAllContents: ", error);
+          console.error('Error getAllContents: ', error);
         }
       }
       return LDS;

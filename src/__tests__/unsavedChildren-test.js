@@ -7,8 +7,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-jest.dontMock("../ParseFile");
-jest.dontMock("../unsavedChildren");
+jest.dontMock('../ParseFile');
+jest.dontMock('../unsavedChildren');
 
 function mockObject({ className, localId, id, attributes, dirty }) {
   this.className = className;
@@ -26,24 +26,24 @@ mockObject.prototype = {
     return this._dirty;
   },
 };
-jest.setMock("../ParseObject", mockObject);
+jest.setMock('../ParseObject', mockObject);
 
-const ParseFile = require("../ParseFile").default;
-const ParseObject = require("../ParseObject");
-const ParseRelation = require("../ParseRelation").default;
-const unsavedChildren = require("../unsavedChildren").default;
+const ParseFile = require('../ParseFile').default;
+const ParseObject = require('../ParseObject');
+const ParseRelation = require('../ParseRelation').default;
+const unsavedChildren = require('../unsavedChildren').default;
 
-describe("unsavedChildren", () => {
-  it("finds unsaved files", () => {
+describe('unsavedChildren', () => {
+  it('finds unsaved files', () => {
     const files = [
-      new ParseFile("parse1.txt", [61, 170, 236, 120]),
-      new ParseFile("parse2.txt", [61, 170, 236, 120]),
-      new ParseFile("parse3.txt", [61, 170, 236, 120]),
+      new ParseFile('parse1.txt', [61, 170, 236, 120]),
+      new ParseFile('parse2.txt', [61, 170, 236, 120]),
+      new ParseFile('parse3.txt', [61, 170, 236, 120]),
     ];
 
     const f = new ParseObject({
-      className: "Folder",
-      id: "121",
+      className: 'Folder',
+      id: '121',
       attributes: {
         a: files[0],
         b: files[1],
@@ -67,11 +67,11 @@ describe("unsavedChildren", () => {
     expect(unsavedChildren(f)).toEqual([files[0], files[1], files[2]]);
   });
 
-  it("only returns unique files", () => {
-    const file = new ParseFile("parse1.txt", [61, 170, 236, 120]);
+  it('only returns unique files', () => {
+    const file = new ParseFile('parse1.txt', [61, 170, 236, 120]);
     const f = new ParseObject({
-      className: "Folder",
-      id: "121",
+      className: 'Folder',
+      id: '121',
       attributes: {
         a: file,
         b: file,
@@ -81,22 +81,22 @@ describe("unsavedChildren", () => {
     expect(unsavedChildren(f)).toEqual([file]);
   });
 
-  it("finds unsaved child objects", () => {
+  it('finds unsaved child objects', () => {
     const a = new ParseObject({
-      className: "File",
-      localId: "local0",
+      className: 'File',
+      localId: 'local0',
       attributes: {},
       dirty: true,
     });
     const b = new ParseObject({
-      className: "File",
-      localId: "local1",
+      className: 'File',
+      localId: 'local1',
       attributes: {},
       dirty: true,
     });
     const f = new ParseObject({
-      className: "Folder",
-      id: "121",
+      className: 'Folder',
+      id: '121',
       attributes: {
         a: a,
         b: b,
@@ -121,50 +121,48 @@ describe("unsavedChildren", () => {
     expect(unsavedChildren(f)).toEqual([a, b]);
   });
 
-  it("throws on nested objects without ids", () => {
+  it('throws on nested objects without ids', () => {
     const a = new ParseObject({
-      className: "File",
-      localId: "local0",
+      className: 'File',
+      localId: 'local0',
       attributes: {},
       dirty: true,
     });
     const b = new ParseObject({
-      className: "File",
-      localId: "local1",
+      className: 'File',
+      localId: 'local1',
       attributes: {
         a: a,
       },
       dirty: true,
     });
     const f = new ParseObject({
-      className: "Folder",
-      id: "121",
+      className: 'Folder',
+      id: '121',
       attributes: {
         b: b,
       },
     });
 
-    expect(unsavedChildren.bind(null, f)).toThrow(
-      "Cannot create a pointer to an unsaved Object."
-    );
+    expect(unsavedChildren.bind(null, f)).toThrow('Cannot create a pointer to an unsaved Object.');
   });
 
-  it("can explicitly allow nested objects without ids", () => {
+  it('can explicitly allow nested objects without ids', () => {
     const a = new ParseObject({
-      className: "Folder",
-      localId: "local0",
+      className: 'Folder',
+      localId: 'local0',
       dirty: true,
       attributes: {},
     });
     const b = new ParseObject({
-      className: "Folder",
-      localId: "local1",
+      className: 'Folder',
+      localId: 'local1',
       dirty: true,
       attributes: {},
     });
     const c = new ParseObject({
-      className: "File",
-      localId: "local2",
+      className: 'File',
+      localId: 'local2',
       dirty: true,
       attributes: {},
     });
@@ -175,14 +173,14 @@ describe("unsavedChildren", () => {
     expect(unsavedChildren(a, true)).toEqual([b, c]);
   });
 
-  it("does not revisit objects", () => {
+  it('does not revisit objects', () => {
     const a = new ParseObject({
-      className: "File",
-      id: "130",
+      className: 'File',
+      id: '130',
       attributes: {
         b: new ParseObject({
-          className: "File",
-          localId: "131",
+          className: 'File',
+          localId: '131',
           attributes: {},
           dirty: true,
         }),
@@ -194,11 +192,11 @@ describe("unsavedChildren", () => {
     expect(unsavedChildren(a)).toEqual([a.attributes.b]);
   });
 
-  it("skips Relation", () => {
+  it('skips Relation', () => {
     const relation = new ParseRelation(null, null);
     const f = new ParseObject({
-      className: "Folder",
-      id: "121",
+      className: 'Folder',
+      id: '121',
       attributes: {
         r: relation,
       },

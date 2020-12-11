@@ -9,9 +9,9 @@
  * @flow-weak
  */
 
-import ParseUser from "./ParseUser";
-import type { RequestOptions } from "./RESTController";
-const uuidv4 = require("uuid/v4");
+import ParseUser from './ParseUser';
+import type { RequestOptions } from './RESTController';
+const uuidv4 = require('uuid/v4');
 
 let registered = false;
 
@@ -71,11 +71,7 @@ const AnonymousUtils = {
    */
   logIn(options?: RequestOptions): Promise<ParseUser> {
     const provider = this._getAuthProvider();
-    return ParseUser.logInWith(
-      provider.getAuthType(),
-      provider.getAuthData(),
-      options
-    );
+    return ParseUser.logInWith(provider.getAuthType(), provider.getAuthData(), options);
   },
 
   /**
@@ -90,11 +86,7 @@ const AnonymousUtils = {
    */
   link(user: ParseUser, options?: RequestOptions): Promise<ParseUser> {
     const provider = this._getAuthProvider();
-    return user.linkWith(
-      provider.getAuthType(),
-      provider.getAuthData(),
-      options
-    );
+    return user.linkWith(provider.getAuthType(), provider.getAuthData(), options);
   },
 
   _getAuthProvider() {
@@ -104,7 +96,7 @@ const AnonymousUtils = {
       },
 
       getAuthType() {
-        return "anonymous";
+        return 'anonymous';
       },
 
       getAuthData() {

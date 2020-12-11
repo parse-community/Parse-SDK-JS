@@ -9,9 +9,9 @@
  * @flow
  */
 
-import ParseFile from "./ParseFile";
-import ParseObject from "./ParseObject";
-import ParseRelation from "./ParseRelation";
+import ParseFile from './ParseFile';
+import ParseObject from './ParseObject';
+import ParseRelation from './ParseRelation';
 
 export default function canBeSerialized(obj: ParseObject): boolean {
   if (!(obj instanceof ParseObject)) {
@@ -28,7 +28,7 @@ export default function canBeSerialized(obj: ParseObject): boolean {
 }
 
 function canBeSerializedHelper(value: any): boolean {
-  if (typeof value !== "object") {
+  if (typeof value !== 'object') {
     return true;
   }
   if (value instanceof ParseRelation) {

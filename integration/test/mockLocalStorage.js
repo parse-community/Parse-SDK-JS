@@ -25,7 +25,7 @@ const mockLocalStorage = {
     return Object.keys(mockStorage).length;
   },
 
-  key: (i) => {
+  key: i => {
     const keys = Object.keys(mockStorage);
     return keys[i] || null;
   },

@@ -1,23 +1,23 @@
-const assert = require("assert");
-const clear = require("./clear");
-const Parse = require("../../node");
+const assert = require('assert');
+const clear = require('./clear');
+const Parse = require('../../node');
 
-const TestObject = Parse.Object.extend("TestObject");
+const TestObject = Parse.Object.extend('TestObject');
 
-describe("Polygon", () => {
+describe('Polygon', () => {
   beforeAll(() => {
-    Parse.initialize("integration");
-    Parse.CoreManager.set("SERVER_URL", "http://localhost:1337/parse");
+    Parse.initialize('integration');
+    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
   });
 
-  beforeEach((done) => {
+  beforeEach(done => {
     clear().then(() => {
       done();
     });
   });
 
-  it("can save polygon with points", (done) => {
+  it('can save polygon with points', done => {
     const openPoints = [
       [0, 0],
       [0, 1],
@@ -37,25 +37,25 @@ describe("Polygon", () => {
       .save()
       .then(() => {
         const query = new Parse.Query(TestObject);
-        query.equalTo("polygon", polygon);
+        query.equalTo('polygon', polygon);
         return query.find();
       })
-      .then((results) => {
+      .then(results => {
         assert.equal(results.length, 1);
-        assert.deepEqual(results[0].get("polygon").coordinates, closedPoints);
+        assert.deepEqual(results[0].get('polygon').coordinates, closedPoints);
         const closedPolygon = new Parse.Polygon(closedPoints);
         const query = new Parse.Query(TestObject);
-        query.equalTo("polygon", closedPolygon);
+        query.equalTo('polygon', closedPolygon);
         return query.find();
       })
-      .then((results) => {
+      .then(results => {
         assert.equal(results.length, 1);
-        assert.deepEqual(results[0].get("polygon").coordinates, closedPoints);
+        assert.deepEqual(results[0].get('polygon').coordinates, closedPoints);
         done();
       }, done.fail);
   });
 
-  it("can save polygon with GeoPoints", (done) => {
+  it('can save polygon with GeoPoints', done => {
     const p1 = new Parse.GeoPoint(0, 0);
     const p2 = new Parse.GeoPoint(0, 1);
     const p3 = new Parse.GeoPoint(1, 1);
@@ -74,24 +74,24 @@ describe("Polygon", () => {
       .save()
       .then(() => {
         const query = new Parse.Query(TestObject);
-        query.equalTo("polygon", polygon);
+        query.equalTo('polygon', polygon);
         return query.find();
       })
-      .then((results) => {
+      .then(results => {
         assert.equal(results.length, 1);
-        assert.deepEqual(results[0].get("polygon").coordinates, closedPoints);
+        assert.deepEqual(results[0].get('polygon').coordinates, closedPoints);
         const closedPolygon = new Parse.Polygon(closedPoints);
         const query = new Parse.Query(TestObject);
-        query.equalTo("polygon", closedPolygon);
+        query.equalTo('polygon', closedPolygon);
         return query.find();
       })
-      .then((results) => {
-        assert.deepEqual(results[0].get("polygon").coordinates, closedPoints);
+      .then(results => {
+        assert.deepEqual(results[0].get('polygon').coordinates, closedPoints);
         done();
       }, done.fail);
   });
 
-  it("fail save with 3 point minumum", (done) => {
+  it('fail save with 3 point minumum', done => {
     try {
       new Parse.Polygon([[0, 0]]);
     } catch (e) {
@@ -99,7 +99,7 @@ describe("Polygon", () => {
     }
   });
 
-  it("fail save with non array", (done) => {
+  it('fail save with non array', done => {
     try {
       new Parse.Polygon(123);
     } catch (e) {
@@ -107,15 +107,15 @@ describe("Polygon", () => {
     }
   });
 
-  it("fail save with invalid array", (done) => {
+  it('fail save with invalid array', done => {
     try {
-      new Parse.Polygon([["str1"], ["str2"], ["str3"]]);
+      new Parse.Polygon([['str1'], ['str2'], ['str3']]);
     } catch (e) {
       done();
     }
   });
 
-  it("containsPoint", (done) => {
+  it('containsPoint', done => {
     const points = [
       [0, 0],
       [0, 1],
@@ -131,7 +131,7 @@ describe("Polygon", () => {
     done();
   });
 
-  it("equality", (done) => {
+  it('equality', done => {
     const points = [
       [0, 0],
       [0, 1],
@@ -159,7 +159,7 @@ describe("Polygon", () => {
     done();
   });
 
-  it("supports polygonContains", (done) => {
+  it('supports polygonContains', done => {
     const p1 = [
       [0, 0],
       [0, 1],
@@ -192,16 +192,16 @@ describe("Polygon", () => {
       .then(() => {
         const point = new Parse.GeoPoint(0.5, 0.5);
         const query = new Parse.Query(TestObject);
-        query.polygonContains("polygon", point);
+        query.polygonContains('polygon', point);
         return query.find();
       })
-      .then((results) => {
+      .then(results => {
         assert.equal(results.length, 2);
         done();
       }, done.fail);
   });
 
-  it("polygonContains invalid input", (done) => {
+  it('polygonContains invalid input', done => {
     const points = [
       [0, 0],
       [0, 1],
@@ -214,7 +214,7 @@ describe("Polygon", () => {
       .save()
       .then(() => {
         const query = new Parse.Query(TestObject);
-        query.polygonContains("polygon", 1234);
+        query.polygonContains('polygon', 1234);
         return query.find();
       })
       .then(() => {
