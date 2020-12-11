@@ -623,26 +623,79 @@ class ParseUser extends ParseObject {
     return user.signUp({}, options);
   }
 
-  /**
+ /**
    * Logs in a user with a username (or email) and password. On success, this
    * saves the session to disk, so you can retrieve the currently logged in
    * user using <code>current</code>.
    *
-   * @param {string} username The username (or email) to log in with.
-   * @param {string} password The password to log in with.
+   * @param {string | object} usernameOrObject The username (or email) to log in with or an object with auth fields.
+   * @param {string | object} passwordOrOptions The password to log in with or options if usernameOrObject is an object.
    * @param {object} options
    * @static
    * @returns {Promise} A promise that is fulfilled with the user when
    *     the login completes.
    */
-  static logIn(username: string, password: string, options?: FullOptions) {
-    if (typeof username !== 'string') {
-      return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Username must be a string.'));
-    } else if (typeof password !== 'string') {
+  static logIn(
+    usernameOrObject: string | Object,
+    passwordOrOptions: string | FullOptions,
+    options?: FullOptions
+  ) {
+    const usernameIsObject = typeof usernameOrObject === 'object';
+    if (typeof usernameOrObject !== 'string') {
+      if (!usernameIsObject) {
+        return Promise.reject(
+          new ParseError(
+            ParseError.OTHER_CAUSE,
+            'Username must be a string or an object with username and password keys.'
+          )
+        );
+      }
+      if (typeof usernameOrObject.username !== 'string') {
+        return Promise.reject(
+          new ParseError(
+            ParseError.OTHER_CAUSE,
+            'Auth payload should contain username key with string value'
+          )
+        );
+      }
+      if (typeof usernameOrObject.password !== 'string') {
+        return Promise.reject(
+          new ParseError(
+            ParseError.OTHER_CAUSE,
+            'Auth payload should contain password key with string value'
+          )
+        );
+      }
+      if (usernameOrObject.authData && typeof usernameOrObject.authData !== 'object') {
+        return Promise.reject(
+          new ParseError(ParseError.OTHER_CAUSE, 'authData should be an object')
+        );
+      }
+      if (
+        Object.keys(usernameOrObject).some(
+          key => !['authData', 'username', 'password'].includes(key)
+        )
+      ) {
+        return Promise.reject(
+          new ParseError(
+            ParseError.OTHER_CAUSE,
+            'This operation only support authData, username and password keys'
+          )
+        );
+      }
+    }
+    if (typeof passwordOrOptions !== 'string' && !usernameIsObject) {
       return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Password must be a string.'));
     }
     const user = new this();
-    user._finishFetch({ username: username, password: password });
+    user._finishFetch(
+      usernameIsObject
+        ? usernameOrObject
+        : {
+            username: usernameOrObject,
+            password: passwordOrOptions,
+          }
+    );
     return user.logIn(options);
   }
 
