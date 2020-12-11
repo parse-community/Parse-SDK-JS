@@ -1,11 +1,7 @@
 {
   "spec_dir": "integration/test",
-  "helpers": [
-    "helper.js"
-  ],
-  "spec_files": [
-    "*Test.js"
-  ],
+  "helpers": ["helper.js"],
+  "spec_files": ["*Test.js"],
   "random": false,
   "timeout": 5000
 }
