@@ -1,30 +1,42 @@
 jest.autoMockOff();
 
-const ParseGeoPoint = require('../ParseGeoPoint').default;
-const ParsePolygon = require('../ParsePolygon').default;
+const ParseGeoPoint = require("../ParseGeoPoint").default;
+const ParsePolygon = require("../ParsePolygon").default;
 
-const points = [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]];
+const points = [
+  [0, 0],
+  [0, 1],
+  [1, 1],
+  [1, 0],
+  [0, 0],
+];
 
-describe('Polygon', () => {
-  it('can initialize with points', () => {
+describe("Polygon", () => {
+  it("can initialize with points", () => {
     const polygon = new ParsePolygon(points);
     expect(polygon.coordinates).toEqual(points);
   });
 
-  it('can initialize with geopoints', () => {
+  it("can initialize with geopoints", () => {
     const geopoints = [
       new ParseGeoPoint(0, 0),
       new ParseGeoPoint(0, 1),
       new ParseGeoPoint(1, 1),
       new ParseGeoPoint(1, 0),
-      new ParseGeoPoint(0, 0)
+      new ParseGeoPoint(0, 0),
     ];
     const polygon = new ParsePolygon(geopoints);
     expect(polygon.coordinates).toEqual(points);
   });
 
-  it('can set points', () => {
-    const newPoints = [[0, 0], [0, 10], [10, 10], [10, 0], [0, 0]];
+  it("can set points", () => {
+    const newPoints = [
+      [0, 0],
+      [0, 10],
+      [10, 10],
+      [10, 0],
+      [0, 0],
+    ];
 
     const polygon = new ParsePolygon(points);
     expect(polygon.coordinates).toEqual(points);
@@ -33,15 +45,15 @@ describe('Polygon', () => {
     expect(polygon.coordinates).toEqual(newPoints);
   });
 
-  it('toJSON', () => {
+  it("toJSON", () => {
     const polygon = new ParsePolygon(points);
     expect(polygon.toJSON()).toEqual({
-      __type: 'Polygon',
+      __type: "Polygon",
       coordinates: points,
     });
   });
 
-  it('equals', () => {
+  it("equals", () => {
     const polygon1 = new ParsePolygon(points);
     const polygon2 = new ParsePolygon(points);
     const geopoint = new ParseGeoPoint(0, 0);
@@ -49,31 +61,37 @@ describe('Polygon', () => {
     expect(polygon1.equals(polygon2)).toBe(true);
     expect(polygon1.equals(geopoint)).toBe(false);
 
-    const newPoints = [[0, 0], [0, 10], [10, 10], [10, 0], [0, 0]];
+    const newPoints = [
+      [0, 0],
+      [0, 10],
+      [10, 10],
+      [10, 0],
+      [0, 0],
+    ];
     polygon1.coordinates = newPoints;
     expect(polygon1.equals(polygon2)).toBe(false);
   });
 
-  it('containsPoint', () => {
+  it("containsPoint", () => {
     const polygon = new ParsePolygon(points);
     const outside = new ParseGeoPoint(10, 10);
-    const inside = new ParseGeoPoint(.5, .5);
+    const inside = new ParseGeoPoint(0.5, 0.5);
 
     expect(polygon.containsPoint(inside)).toBe(true);
     expect(polygon.containsPoint(outside)).toBe(false);
   });
 
-  it('throws error on invalid input', () => {
+  it("throws error on invalid input", () => {
     expect(() => {
-      new ParsePolygon()
-    }).toThrow('Coordinates must be an Array');
+      new ParsePolygon();
+    }).toThrow("Coordinates must be an Array");
 
     expect(() => {
-      new ParsePolygon([])
-    }).toThrow('Polygon must have at least 3 GeoPoints or Points');
+      new ParsePolygon([]);
+    }).toThrow("Polygon must have at least 3 GeoPoints or Points");
 
     expect(() => {
-      new ParsePolygon([1, 2, 3])
-    }).toThrow('Coordinates must be an Array of GeoPoints or Points');
+      new ParsePolygon([1, 2, 3]);
+    }).toThrow("Coordinates must be an Array of GeoPoints or Points");
   });
 });

@@ -9,11 +9,11 @@
  * @flow
  */
 
-import CoreManager from './CoreManager';
+import CoreManager from "./CoreManager";
 
-import type ParseObject from './ParseObject';
-import ParseQuery from './ParseQuery';
-import { DEFAULT_PIN, PIN_PREFIX, OBJECT_PREFIX } from './LocalDatastoreUtils';
+import type ParseObject from "./ParseObject";
+import ParseQuery from "./ParseQuery";
+import { DEFAULT_PIN, PIN_PREFIX, OBJECT_PREFIX } from "./LocalDatastoreUtils";
 
 /**
  * Provides a local datastore which can be used to store and retrieve <code>Parse.Object</code>. <br />
@@ -72,7 +72,10 @@ const LocalDatastore = {
 
   // Pin the object and children recursively
   // Saves the object and children key to Pin Name
-  async _handlePinAllWithName(name: string, objects: Array<ParseObject>): Promise<void> {
+  async _handlePinAllWithName(
+    name: string,
+    objects: Array<ParseObject>
+  ): Promise<void> {
     const pinName = this.getPinName(name);
     const toPinPromises = [];
     const objectKeys = [];
@@ -110,7 +113,7 @@ const LocalDatastore = {
     objectKeys = [...new Set(objectKeys)];
 
     let pinned = localDatastore[pinName] || [];
-    pinned = pinned.filter(item => !objectKeys.includes(item));
+    pinned = pinned.filter((item) => !objectKeys.includes(item));
     if (pinned.length == 0) {
       promises.push(this.unPinWithName(pinName));
       delete localDatastore[pinName];
@@ -141,7 +144,7 @@ const LocalDatastore = {
     const encountered = {};
     const json = object._toFullJSON(undefined, true);
     for (const key in json) {
-      if (json[key] && json[key].__type && json[key].__type === 'Object') {
+      if (json[key] && json[key].__type && json[key].__type === "Object") {
         this._traverse(json[key], encountered);
       }
     }
@@ -163,7 +166,7 @@ const LocalDatastore = {
       if (!object[key]) {
         json = object;
       }
-      if (json.__type && json.__type === 'Object') {
+      if (json.__type && json.__type === "Object") {
         this._traverse(json, encountered);
       }
     }
@@ -189,7 +192,7 @@ const LocalDatastore = {
     const promises = pinned.map((objectKey) => this.fromPinWithName(objectKey));
     let objects = await Promise.all(promises);
     objects = [].concat(...objects);
-    return objects.filter(object => object != null);
+    return objects.filter((object) => object != null);
   },
 
   // Replaces object pointers with pinned pointers
@@ -211,12 +214,12 @@ const LocalDatastore = {
     meta[uniqueId] = root;
     queue.push(uniqueId);
 
-    while(queue.length !== 0) {
+    while (queue.length !== 0) {
       const nodeId = queue.shift();
       const subTreeRoot = meta[nodeId];
       for (const field in subTreeRoot) {
         const value = subTreeRoot[field];
-        if (value.__type && value.__type === 'Object') {
+        if (value.__type && value.__type === "Object") {
           const key = this.getKeyForObject(value);
           if (LDS[key] && LDS[key].length > 0) {
             const pointer = LDS[key][0];
@@ -258,16 +261,14 @@ const LocalDatastore = {
     if (!pin) {
       return;
     }
-    const promises = [
-      this.unPinWithName(objectKey)
-    ];
+    const promises = [this.unPinWithName(objectKey)];
     delete localDatastore[objectKey];
 
     for (const key in localDatastore) {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
         let pinned = localDatastore[key] || [];
         if (pinned.includes(objectKey)) {
-          pinned = pinned.filter(item => item !== objectKey);
+          pinned = pinned.filter((item) => item !== objectKey);
           if (pinned.length == 0) {
             promises.push(this.unPinWithName(key));
             delete localDatastore[key];
@@ -303,7 +304,7 @@ const LocalDatastore = {
       if (key === DEFAULT_PIN || key.startsWith(PIN_PREFIX)) {
         let pinned = localDatastore[key] || [];
         if (pinned.includes(localKey)) {
-          pinned = pinned.filter(item => item !== localKey);
+          pinned = pinned.filter((item) => item !== localKey);
           pinned.push(objectKey);
           promises.push(this.pinWithName(key, pinned));
           localDatastore[key] = pinned;
@@ -342,14 +343,14 @@ const LocalDatastore = {
     const pointersHash = {};
     for (const key of keys) {
       // Ignore the OBJECT_PREFIX
-      let [ , , className, objectId] = key.split('_');
+      let [, , className, objectId] = key.split("_");
 
       // User key is split into [ 'Parse', 'LDS', '', 'User', 'objectId' ]
-      if (key.split('_').length === 5 && key.split('_')[3] === 'User') {
-        className = '_User';
-        objectId = key.split('_')[4];
+      if (key.split("_").length === 5 && key.split("_")[3] === "User") {
+        className = "_User";
+        objectId = key.split("_")[4];
       }
-      if (objectId.startsWith('local')) {
+      if (objectId.startsWith("local")) {
         continue;
       }
       if (!(className in pointersHash)) {
@@ -357,14 +358,14 @@ const LocalDatastore = {
       }
       pointersHash[className].add(objectId);
     }
-    const queryPromises = Object.keys(pointersHash).map(className => {
+    const queryPromises = Object.keys(pointersHash).map((className) => {
       const objectIds = Array.from(pointersHash[className]);
       const query = new ParseQuery(className);
       query.limit(objectIds.length);
       if (objectIds.length === 1) {
-        query.equalTo('objectId', objectIds[0]);
+        query.equalTo("objectId", objectIds[0]);
       } else {
-        query.containedIn('objectId', objectIds);
+        query.containedIn("objectId", objectIds);
       }
       return query.find();
     });
@@ -377,8 +378,8 @@ const LocalDatastore = {
       });
       await Promise.all(pinPromises);
       this.isSyncing = false;
-    } catch(error) {
-      console.error('Error syncing LocalDatastore: ', error);
+    } catch (error) {
+      console.error("Error syncing LocalDatastore: ", error);
       this.isSyncing = false;
     }
   },
@@ -397,17 +398,21 @@ const LocalDatastore = {
 
   checkIfEnabled() {
     if (!this.isEnabled) {
-      console.error('Parse.enableLocalDatastore() must be called first');
+      console.error("Parse.enableLocalDatastore() must be called first");
     }
     return this.isEnabled;
-  }
+  },
 };
 
 module.exports = LocalDatastore;
 
-if (process.env.PARSE_BUILD === 'react-native') {
-  CoreManager.setLocalDatastoreController(require('./LocalDatastoreController.react-native'));
+if (process.env.PARSE_BUILD === "react-native") {
+  CoreManager.setLocalDatastoreController(
+    require("./LocalDatastoreController.react-native")
+  );
 } else {
-  CoreManager.setLocalDatastoreController(require('./LocalDatastoreController'));
+  CoreManager.setLocalDatastoreController(
+    require("./LocalDatastoreController")
+  );
 }
 CoreManager.setLocalDatastore(LocalDatastore);

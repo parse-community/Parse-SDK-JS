@@ -9,7 +9,7 @@
  * @flow
  */
 
-import ParseGeoPoint from './ParseGeoPoint';
+import ParseGeoPoint from "./ParseGeoPoint";
 
 /**
  * Creates a new Polygon with any of the following forms:<br>
@@ -36,9 +36,7 @@ class ParsePolygon {
   /**
    * @param {(number[][] | Parse.GeoPoint[])} coordinates An Array of coordinate pairs
    */
-  constructor(
-    coordinates: Array<Array<number>> | Array<ParseGeoPoint>,
-  ) {
+  constructor(coordinates: Array<Array<number>> | Array<ParseGeoPoint>) {
     this._coordinates = ParsePolygon._validate(coordinates);
   }
 
@@ -62,10 +60,10 @@ class ParsePolygon {
    *
    * @returns {object}
    */
-  toJSON(): { __type: string; coordinates: Array<Array<number>>;} {
+  toJSON(): { __type: string, coordinates: Array<Array<number>> } {
     ParsePolygon._validate(this._coordinates);
     return {
-      __type: 'Polygon',
+      __type: "Polygon",
       coordinates: this._coordinates,
     };
   }
@@ -77,14 +75,19 @@ class ParsePolygon {
    * @returns {boolean}
    */
   equals(other: mixed): boolean {
-    if (!(other instanceof ParsePolygon) || (this.coordinates.length !== other.coordinates.length)) {
+    if (
+      !(other instanceof ParsePolygon) ||
+      this.coordinates.length !== other.coordinates.length
+    ) {
       return false;
     }
     let isEqual = true;
 
     for (let i = 1; i < this._coordinates.length; i += 1) {
-      if (this._coordinates[i][0] != other.coordinates[i][0] ||
-          this._coordinates[i][1] != other.coordinates[i][1]) {
+      if (
+        this._coordinates[i][0] != other.coordinates[i][0] ||
+        this._coordinates[i][1] != other.coordinates[i][1]
+      ) {
         isEqual = false;
         break;
       }
@@ -111,20 +114,31 @@ class ParsePolygon {
       maxY = Math.max(p[1], maxY);
     }
 
-    const outside = (point.latitude < minX || point.latitude > maxX || point.longitude < minY || point.longitude > maxY);
+    const outside =
+      point.latitude < minX ||
+      point.latitude > maxX ||
+      point.longitude < minY ||
+      point.longitude > maxY;
     if (outside) {
       return false;
     }
 
     let inside = false;
-    for (let i = 0, j = this._coordinates.length - 1 ; i < this._coordinates.length; j = i++) {
+    for (
+      let i = 0, j = this._coordinates.length - 1;
+      i < this._coordinates.length;
+      j = i++
+    ) {
       const startX = this._coordinates[i][0];
       const startY = this._coordinates[i][1];
       const endX = this._coordinates[j][0];
       const endY = this._coordinates[j][1];
 
-      const intersect = ((startY > point.longitude) != (endY > point.longitude) &&
-          point.latitude < (endX - startX) * (point.longitude - startY) / (endY - startY) + startX);
+      const intersect =
+        startY > point.longitude != endY > point.longitude &&
+        point.latitude <
+          ((endX - startX) * (point.longitude - startY)) / (endY - startY) +
+            startX;
 
       if (intersect) {
         inside = !inside;
@@ -140,12 +154,14 @@ class ParsePolygon {
    * @throws {TypeError}
    * @returns {number[][]} Array of coordinates if validated.
    */
-  static _validate(coords: Array<Array<number>> | Array<ParseGeoPoint>): Array<Array<number>> {
+  static _validate(
+    coords: Array<Array<number>> | Array<ParseGeoPoint>
+  ): Array<Array<number>> {
     if (!Array.isArray(coords)) {
-      throw new TypeError('Coordinates must be an Array');
+      throw new TypeError("Coordinates must be an Array");
     }
     if (coords.length < 3) {
-      throw new TypeError('Polygon must have at least 3 GeoPoints or Points');
+      throw new TypeError("Polygon must have at least 3 GeoPoints or Points");
     }
     const points = [];
     for (let i = 0; i < coords.length; i += 1) {
@@ -156,7 +172,9 @@ class ParsePolygon {
       } else if (Array.isArray(coord) && coord.length === 2) {
         geoPoint = new ParseGeoPoint(coord[0], coord[1]);
       } else {
-        throw new TypeError('Coordinates must be an Array of GeoPoints or Points');
+        throw new TypeError(
+          "Coordinates must be an Array of GeoPoints or Points"
+        );
       }
       points.push([geoPoint.latitude, geoPoint.longitude]);
     }

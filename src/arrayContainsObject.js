@@ -9,7 +9,7 @@
  * @flow
  */
 
-import ParseObject from './ParseObject';
+import ParseObject from "./ParseObject";
 
 export default function arrayContainsObject(
   array: Array<any>,
@@ -19,7 +19,8 @@ export default function arrayContainsObject(
     return true;
   }
   for (let i = 0; i < array.length; i++) {
-    if ((array[i] instanceof ParseObject) &&
+    if (
+      array[i] instanceof ParseObject &&
       array[i].className === object.className &&
       array[i]._getId() === object._getId()
     ) {

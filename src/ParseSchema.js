@@ -9,14 +9,26 @@
  * @flow
  */
 
-import CoreManager from './CoreManager';
-import ParseObject from './ParseObject';
+import CoreManager from "./CoreManager";
+import ParseObject from "./ParseObject";
 
-const FIELD_TYPES = ['String', 'Number', 'Boolean', 'Date', 'File', 'GeoPoint', 'Polygon', 'Array', 'Object', 'Pointer', 'Relation'];
+const FIELD_TYPES = [
+  "String",
+  "Number",
+  "Boolean",
+  "Date",
+  "File",
+  "GeoPoint",
+  "Polygon",
+  "Array",
+  "Object",
+  "Pointer",
+  "Relation",
+];
 
 type FieldOptions = {
-  required: boolean;
-  defaultValue: mixed;
+  required: boolean,
+  defaultValue: mixed,
 };
 
 /**
@@ -46,9 +58,9 @@ class ParseSchema {
    * @param {string} className Parse Class string.
    */
   constructor(className: string) {
-    if (typeof className === 'string') {
-      if (className === 'User' && CoreManager.get('PERFORM_USER_REWRITE')) {
-        this.className = '_User';
+    if (typeof className === "string") {
+      if (className === "User" && CoreManager.get("PERFORM_USER_REWRITE")) {
+        this.className = "_User";
       } else {
         this.className = className;
       }
@@ -66,13 +78,12 @@ class ParseSchema {
    */
   static all() {
     const controller = CoreManager.getSchemaController();
-    return controller.get('')
-      .then((response) => {
-        if (response.results.length === 0) {
-          throw new Error('Schema not found.');
-        }
-        return response.results;
-      });
+    return controller.get("").then((response) => {
+      if (response.results.length === 0) {
+        throw new Error("Schema not found.");
+      }
+      return response.results;
+    });
   }
 
   /**
@@ -85,13 +96,12 @@ class ParseSchema {
     this.assertClassName();
 
     const controller = CoreManager.getSchemaController();
-    return controller.get(this.className)
-      .then((response) => {
-        if (!response) {
-          throw new Error('Schema not found.');
-        }
-        return response;
-      });
+    return controller.get(this.className).then((response) => {
+      if (!response) {
+        throw new Error("Schema not found.");
+      }
+      return response;
+    });
   }
 
   /**
@@ -172,7 +182,7 @@ class ParseSchema {
    */
   assertClassName() {
     if (!this.className) {
-      throw new Error('You must set a Class Name before making any request.');
+      throw new Error("You must set a Class Name before making any request.");
     }
   }
 
@@ -201,17 +211,17 @@ class ParseSchema {
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addField(name: string, type: string, options: FieldOptions = {}) {
-    type = type || 'String';
+    type = type || "String";
 
     if (!name) {
-      throw new Error('field name may not be null.');
+      throw new Error("field name may not be null.");
     }
     if (FIELD_TYPES.indexOf(type) === -1) {
       throw new Error(`${type} is not a valid type.`);
     }
     const fieldOptions = { type };
 
-    if (typeof options.required === 'boolean') {
+    if (typeof options.required === "boolean") {
       fieldOptions.required = options.required;
     }
     if (options.defaultValue !== undefined) {
@@ -234,10 +244,10 @@ class ParseSchema {
    */
   addIndex(name: string, index: any) {
     if (!name) {
-      throw new Error('index name may not be null.');
+      throw new Error("index name may not be null.");
     }
     if (!index) {
-      throw new Error('index may not be null.');
+      throw new Error("index may not be null.");
     }
 
     this._indexes[name] = index;
@@ -253,7 +263,7 @@ class ParseSchema {
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addString(name: string, options: FieldOptions) {
-    return this.addField(name, 'String', options);
+    return this.addField(name, "String", options);
   }
 
   /**
@@ -264,7 +274,7 @@ class ParseSchema {
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addNumber(name: string, options: FieldOptions) {
-    return this.addField(name, 'Number', options);
+    return this.addField(name, "Number", options);
   }
 
   /**
@@ -275,7 +285,7 @@ class ParseSchema {
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addBoolean(name: string, options: FieldOptions) {
-    return this.addField(name, 'Boolean', options);
+    return this.addField(name, "Boolean", options);
   }
 
   /**
@@ -287,9 +297,12 @@ class ParseSchema {
    */
   addDate(name: string, options: FieldOptions) {
     if (options && options.defaultValue) {
-      options.defaultValue = { __type: 'Date', iso: new Date(options.defaultValue) }
+      options.defaultValue = {
+        __type: "Date",
+        iso: new Date(options.defaultValue),
+      };
     }
-    return this.addField(name, 'Date', options);
+    return this.addField(name, "Date", options);
   }
 
   /**
@@ -300,7 +313,7 @@ class ParseSchema {
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addFile(name: string, options: FieldOptions) {
-    return this.addField(name, 'File', options);
+    return this.addField(name, "File", options);
   }
 
   /**
@@ -311,7 +324,7 @@ class ParseSchema {
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addGeoPoint(name: string, options: FieldOptions) {
-    return this.addField(name, 'GeoPoint', options);
+    return this.addField(name, "GeoPoint", options);
   }
 
   /**
@@ -322,7 +335,7 @@ class ParseSchema {
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addPolygon(name: string, options: FieldOptions) {
-    return this.addField(name, 'Polygon', options);
+    return this.addField(name, "Polygon", options);
   }
 
   /**
@@ -333,7 +346,7 @@ class ParseSchema {
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addArray(name: string, options: FieldOptions) {
-    return this.addField(name, 'Array', options);
+    return this.addField(name, "Array", options);
   }
 
   /**
@@ -344,7 +357,7 @@ class ParseSchema {
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addObject(name: string, options: FieldOptions) {
-    return this.addField(name, 'Object', options);
+    return this.addField(name, "Object", options);
   }
 
   /**
@@ -357,14 +370,14 @@ class ParseSchema {
    */
   addPointer(name: string, targetClass: string, options: FieldOptions = {}) {
     if (!name) {
-      throw new Error('field name may not be null.');
+      throw new Error("field name may not be null.");
     }
     if (!targetClass) {
-      throw new Error('You need to set the targetClass of the Pointer.');
+      throw new Error("You need to set the targetClass of the Pointer.");
     }
-    const fieldOptions = { type: 'Pointer', targetClass };
+    const fieldOptions = { type: "Pointer", targetClass };
 
-    if (typeof options.required === 'boolean') {
+    if (typeof options.required === "boolean") {
       fieldOptions.required = options.required;
     }
     if (options.defaultValue !== undefined) {
@@ -386,15 +399,15 @@ class ParseSchema {
    */
   addRelation(name: string, targetClass: string) {
     if (!name) {
-      throw new Error('field name may not be null.');
+      throw new Error("field name may not be null.");
     }
     if (!targetClass) {
-      throw new Error('You need to set the targetClass of the Relation.');
+      throw new Error("You need to set the targetClass of the Relation.");
     }
 
     this._fields[name] = {
-      type: 'Relation',
-      targetClass
+      type: "Relation",
+      targetClass,
     };
 
     return this;
@@ -407,7 +420,7 @@ class ParseSchema {
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   deleteField(name: string) {
-    this._fields[name] = { __op: 'Delete'};
+    this._fields[name] = { __op: "Delete" };
     return this;
   }
 
@@ -418,7 +431,7 @@ class ParseSchema {
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   deleteIndex(name: string) {
-    this._indexes[name] = { __op: 'Delete'};
+    this._indexes[name] = { __op: "Delete" };
     return this;
   }
 }
@@ -426,39 +439,36 @@ class ParseSchema {
 const DefaultController = {
   send(className: string, method: string, params: any = {}): Promise {
     const RESTController = CoreManager.getRESTController();
-    return RESTController.request(
-      method,
-      `schemas/${className}`,
-      params,
-      { useMasterKey: true }
-    );
+    return RESTController.request(method, `schemas/${className}`, params, {
+      useMasterKey: true,
+    });
   },
 
   get(className: string): Promise {
-    return this.send(className, 'GET');
+    return this.send(className, "GET");
   },
 
   create(className: string, params: any): Promise {
-    return this.send(className, 'POST', params);
+    return this.send(className, "POST", params);
   },
 
   update(className: string, params: any): Promise {
-    return this.send(className, 'PUT', params);
+    return this.send(className, "PUT", params);
   },
 
   delete(className: string): Promise {
-    return this.send(className, 'DELETE');
+    return this.send(className, "DELETE");
   },
 
   purge(className: string): Promise {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request(
-      'DELETE',
+      "DELETE",
       `purge/${className}`,
       {},
       { useMasterKey: true }
     );
-  }
+  },
 };
 
 CoreManager.setSchemaController(DefaultController);

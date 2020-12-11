@@ -36,7 +36,7 @@ const StorageController = {
 
   clear() {
     wx.clearStorageSync();
-  }
+  },
 };
 
 module.exports = StorageController;

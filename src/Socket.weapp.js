@@ -1,13 +1,13 @@
 module.exports = class SocketWeapp {
   constructor(serverURL) {
-    this.onopen = () => {}
-    this.onmessage = () => {}
-    this.onclose = () => {}
-    this.onerror = () => {}
+    this.onopen = () => {};
+    this.onmessage = () => {};
+    this.onclose = () => {};
+    this.onerror = () => {};
 
     wx.onSocketOpen(() => {
       this.onopen();
-    })
+    });
 
     wx.onSocketMessage((msg) => {
       this.onmessage(msg);
@@ -33,4 +33,4 @@ module.exports = class SocketWeapp {
   close() {
     wx.closeSocket();
   }
-}
+};

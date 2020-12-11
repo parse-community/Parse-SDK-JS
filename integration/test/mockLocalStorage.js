@@ -9,7 +9,6 @@
 
 let mockStorage = {};
 const mockLocalStorage = {
-
   getItem(path) {
     return mockStorage[path] || null;
   },

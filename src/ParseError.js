@@ -20,14 +20,14 @@ class ParseError extends Error {
   constructor(code, message) {
     super(message);
     this.code = code;
-    Object.defineProperty(this, 'message', {
+    Object.defineProperty(this, "message", {
       enumerable: true,
-      value: message
+      value: message,
     });
   }
 
   toString() {
-    return 'ParseError: ' + this.code + ' ' + this.message;
+    return "ParseError: " + this.code + " " + this.message;
   }
 }
 
@@ -309,7 +309,7 @@ ParseError.SCRIPT_FAILED = 141;
  * @property {number} VALIDATION_ERROR
  * @static
  */
-ParseError.VALIDATION_ERROR = 142
+ParseError.VALIDATION_ERROR = 142;
 
 /**
  * Error code indicating that invalid image data was provided.

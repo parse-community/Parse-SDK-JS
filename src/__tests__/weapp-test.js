@@ -1,65 +1,65 @@
-jest.dontMock('../CoreManager');
-jest.dontMock('../CryptoController');
-jest.dontMock('../decode');
-jest.dontMock('../encode');
-jest.dontMock('../EventEmitter');
-jest.dontMock('../LiveQueryClient');
-jest.dontMock('../Parse');
-jest.dontMock('../ParseFile');
-jest.dontMock('../ParseObject');
-jest.dontMock('../RESTController');
-jest.dontMock('../Socket.weapp');
-jest.dontMock('../Storage');
-jest.dontMock('crypto-js/aes');
-jest.dontMock('./test_helpers/mockWeChat');
+jest.dontMock("../CoreManager");
+jest.dontMock("../CryptoController");
+jest.dontMock("../decode");
+jest.dontMock("../encode");
+jest.dontMock("../EventEmitter");
+jest.dontMock("../LiveQueryClient");
+jest.dontMock("../Parse");
+jest.dontMock("../ParseFile");
+jest.dontMock("../ParseObject");
+jest.dontMock("../RESTController");
+jest.dontMock("../Socket.weapp");
+jest.dontMock("../Storage");
+jest.dontMock("crypto-js/aes");
+jest.dontMock("./test_helpers/mockWeChat");
 
-const CoreManager = require('../CoreManager');
-const mockWeChat = require('./test_helpers/mockWeChat');
+const CoreManager = require("../CoreManager");
+const mockWeChat = require("./test_helpers/mockWeChat");
 
 global.wx = mockWeChat;
 
-describe('WeChat', () => {
+describe("WeChat", () => {
   beforeEach(() => {
-    process.env.PARSE_BUILD = 'weapp';
+    process.env.PARSE_BUILD = "weapp";
   });
 
   afterEach(() => {
-    process.env.PARSE_BUILD = 'node';
+    process.env.PARSE_BUILD = "node";
   });
 
-  it('load StorageController', () => {
-    const StorageController = require('../StorageController.weapp');
-    jest.spyOn(StorageController, 'setItem');
-    const storage = require('../Storage');
-    storage.setItem('key', 'value');
+  it("load StorageController", () => {
+    const StorageController = require("../StorageController.weapp");
+    jest.spyOn(StorageController, "setItem");
+    const storage = require("../Storage");
+    storage.setItem("key", "value");
     expect(StorageController.setItem).toHaveBeenCalledTimes(1);
   });
 
-  it('load RESTController', () => {
-    const XHR = require('../Xhr.weapp');
-    const RESTController = require('../RESTController');
+  it("load RESTController", () => {
+    const XHR = require("../Xhr.weapp");
+    const RESTController = require("../RESTController");
     expect(RESTController._getXHR()).toEqual(XHR);
   });
 
-  it('load ParseFile', () => {
-    const XHR = require('../Xhr.weapp');
-    require('../ParseFile');
+  it("load ParseFile", () => {
+    const XHR = require("../Xhr.weapp");
+    require("../ParseFile");
     const fileController = CoreManager.getFileController();
     expect(fileController._getXHR()).toEqual(XHR);
   });
 
-  it('load WebSocketController', () => {
-    const socket = require('../Socket.weapp');
-    require('../LiveQueryClient');
+  it("load WebSocketController", () => {
+    const socket = require("../Socket.weapp");
+    require("../LiveQueryClient");
     const websocket = CoreManager.getWebSocketController();
     expect(websocket).toEqual(socket);
   });
 
-  describe('Socket', () => {
-    it('send', () => {
-      const Websocket = require('../Socket.weapp');
-      jest.spyOn(mockWeChat, 'connectSocket');
-      const socket = new Websocket('wss://examples.com');
+  describe("Socket", () => {
+    it("send", () => {
+      const Websocket = require("../Socket.weapp");
+      jest.spyOn(mockWeChat, "connectSocket");
+      const socket = new Websocket("wss://examples.com");
       socket.onopen();
       socket.onmessage();
       socket.onclose();
@@ -71,7 +71,7 @@ describe('WeChat', () => {
 
       expect(mockWeChat.connectSocket).toHaveBeenCalled();
 
-      socket.send('{}');
+      socket.send("{}");
       expect(socket.onopen).toHaveBeenCalled();
       expect(socket.onmessage).toHaveBeenCalled();
 

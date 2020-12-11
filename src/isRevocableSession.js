@@ -10,5 +10,5 @@
  */
 
 export default function isRevocableSession(token: string): boolean {
-  return token.indexOf('r:') > -1;
+  return token.indexOf("r:") > -1;
 }

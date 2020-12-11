@@ -9,25 +9,25 @@
  * @flow
  */
 
-import encode from './encode';
-import ParseFile from './ParseFile';
-import ParseObject from './ParseObject';
-import ParseRelation from './ParseRelation';
-import TaskQueue from './TaskQueue';
-import { RelationOp } from './ParseOp';
+import encode from "./encode";
+import ParseFile from "./ParseFile";
+import ParseObject from "./ParseObject";
+import ParseRelation from "./ParseRelation";
+import TaskQueue from "./TaskQueue";
+import { RelationOp } from "./ParseOp";
 
-import type { Op } from './ParseOp';
+import type { Op } from "./ParseOp";
 
 export type AttributeMap = { [attr: string]: any };
 export type OpsMap = { [attr: string]: Op };
 export type ObjectCache = { [attr: string]: string };
 
 export type State = {
-  serverData: AttributeMap;
-  pendingOps: Array<OpsMap>;
-  objectCache: ObjectCache;
-  tasks: TaskQueue;
-  existed: boolean
+  serverData: AttributeMap,
+  pendingOps: Array<OpsMap>,
+  objectCache: ObjectCache,
+  tasks: TaskQueue,
+  existed: boolean,
 };
 
 export function defaultState(): State {
@@ -36,13 +36,16 @@ export function defaultState(): State {
     pendingOps: [{}],
     objectCache: {},
     tasks: new TaskQueue(),
-    existed: false
+    existed: false,
   };
 }
 
-export function setServerData(serverData: AttributeMap, attributes: AttributeMap) {
+export function setServerData(
+  serverData: AttributeMap,
+  attributes: AttributeMap
+) {
   for (const attr in attributes) {
-    if (typeof attributes[attr] !== 'undefined') {
+    if (typeof attributes[attr] !== "undefined") {
       serverData[attr] = attributes[attr];
     } else {
       delete serverData[attr];
@@ -86,7 +89,13 @@ export function mergeFirstPendingState(pendingOps: Array<OpsMap>) {
   }
 }
 
-export function estimateAttribute(serverData: AttributeMap, pendingOps: Array<OpsMap>, className: string, id: ?string, attr: string): mixed {
+export function estimateAttribute(
+  serverData: AttributeMap,
+  pendingOps: Array<OpsMap>,
+  className: string,
+  id: ?string,
+  attr: string
+): mixed {
   let value = serverData[attr];
   for (let i = 0; i < pendingOps.length; i++) {
     if (pendingOps[i][attr]) {
@@ -106,7 +115,12 @@ export function estimateAttribute(serverData: AttributeMap, pendingOps: Array<Op
   return value;
 }
 
-export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<OpsMap>, className: string, id: ?string): AttributeMap {
+export function estimateAttributes(
+  serverData: AttributeMap,
+  pendingOps: Array<OpsMap>,
+  className: string,
+  id: ?string
+): AttributeMap {
   const data = {};
   let attr;
   for (attr in serverData) {
@@ -123,9 +137,9 @@ export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<O
           );
         }
       } else {
-        if (attr.includes('.')) {
+        if (attr.includes(".")) {
           // convert a.b.c into { a: { b: { c: value } } }
-          const fields = attr.split('.');
+          const fields = attr.split(".");
           const first = fields[0];
           const last = fields[fields.length - 1];
           data[first] = { ...serverData[first] };
@@ -143,12 +157,17 @@ export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<O
   return data;
 }
 
-export function commitServerChanges(serverData: AttributeMap, objectCache: ObjectCache, changes: AttributeMap) {
+export function commitServerChanges(
+  serverData: AttributeMap,
+  objectCache: ObjectCache,
+  changes: AttributeMap
+) {
   for (const attr in changes) {
     const val = changes[attr];
     serverData[attr] = val;
-    if (val &&
-      typeof val === 'object' &&
+    if (
+      val &&
+      typeof val === "object" &&
       !(val instanceof ParseObject) &&
       !(val instanceof ParseFile) &&
       !(val instanceof ParseRelation)

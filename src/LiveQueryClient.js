@@ -9,66 +9,65 @@
  */
 /* global WebSocket */
 
-import CoreManager from './CoreManager';
-import EventEmitter from './EventEmitter';
-import ParseObject from './ParseObject';
-import LiveQuerySubscription from './LiveQuerySubscription';
-import { resolvingPromise } from './promiseUtils';
+import CoreManager from "./CoreManager";
+import EventEmitter from "./EventEmitter";
+import ParseObject from "./ParseObject";
+import LiveQuerySubscription from "./LiveQuerySubscription";
+import { resolvingPromise } from "./promiseUtils";
 
 // The LiveQuery client inner state
 const CLIENT_STATE = {
-  INITIALIZED: 'initialized',
-  CONNECTING: 'connecting',
-  CONNECTED: 'connected',
-  CLOSED: 'closed',
-  RECONNECTING: 'reconnecting',
-  DISCONNECTED: 'disconnected'
+  INITIALIZED: "initialized",
+  CONNECTING: "connecting",
+  CONNECTED: "connected",
+  CLOSED: "closed",
+  RECONNECTING: "reconnecting",
+  DISCONNECTED: "disconnected",
 };
 
 // The event type the LiveQuery client should sent to server
 const OP_TYPES = {
-  CONNECT: 'connect',
-  SUBSCRIBE: 'subscribe',
-  UNSUBSCRIBE: 'unsubscribe',
-  ERROR: 'error'
+  CONNECT: "connect",
+  SUBSCRIBE: "subscribe",
+  UNSUBSCRIBE: "unsubscribe",
+  ERROR: "error",
 };
 
 // The event we get back from LiveQuery server
 const OP_EVENTS = {
-  CONNECTED: 'connected',
-  SUBSCRIBED: 'subscribed',
-  UNSUBSCRIBED: 'unsubscribed',
-  ERROR: 'error',
-  CREATE: 'create',
-  UPDATE: 'update',
-  ENTER: 'enter',
-  LEAVE: 'leave',
-  DELETE: 'delete'
+  CONNECTED: "connected",
+  SUBSCRIBED: "subscribed",
+  UNSUBSCRIBED: "unsubscribed",
+  ERROR: "error",
+  CREATE: "create",
+  UPDATE: "update",
+  ENTER: "enter",
+  LEAVE: "leave",
+  DELETE: "delete",
 };
 
 // The event the LiveQuery client should emit
 const CLIENT_EMMITER_TYPES = {
-  CLOSE: 'close',
-  ERROR: 'error',
-  OPEN: 'open'
+  CLOSE: "close",
+  ERROR: "error",
+  OPEN: "open",
 };
 
 // The event the LiveQuery subscription should emit
 const SUBSCRIPTION_EMMITER_TYPES = {
-  OPEN: 'open',
-  CLOSE: 'close',
-  ERROR: 'error',
-  CREATE: 'create',
-  UPDATE: 'update',
-  ENTER: 'enter',
-  LEAVE: 'leave',
-  DELETE: 'delete'
+  OPEN: "open",
+  CLOSE: "close",
+  ERROR: "error",
+  CREATE: "create",
+  UPDATE: "update",
+  ENTER: "enter",
+  LEAVE: "leave",
+  DELETE: "delete",
 };
 
-
 const generateInterval = (k) => {
-  return Math.random() * Math.min(30, (Math.pow(2, k) - 1)) * 1000;
-}
+  return Math.random() * Math.min(30, Math.pow(2, k) - 1) * 1000;
+};
 
 /**
  * Creates a new LiveQueryClient.
@@ -149,8 +148,10 @@ class LiveQueryClient extends EventEmitter {
   }) {
     super();
 
-    if (!serverURL || serverURL.indexOf('ws') !== 0) {
-      throw new Error('You need to set a proper Parse LiveQuery server url before using LiveQueryClient');
+    if (!serverURL || serverURL.indexOf("ws") !== 0) {
+      throw new Error(
+        "You need to set a proper Parse LiveQuery server url before using LiveQueryClient"
+      );
     }
 
     this.reconnectHandle = null;
@@ -170,11 +171,14 @@ class LiveQueryClient extends EventEmitter {
 
     // adding listener so process does not crash
     // best practice is for developer to register their own listener
-    this.on('error', () => {});
+    this.on("error", () => {});
   }
 
   shouldOpen(): any {
-    return this.state === CLIENT_STATE.INITIALIZED || this.state === CLIENT_STATE.DISCONNECTED;
+    return (
+      this.state === CLIENT_STATE.INITIALIZED ||
+      this.state === CLIENT_STATE.DISCONNECTED
+    );
   }
 
   /**
@@ -198,22 +202,26 @@ class LiveQueryClient extends EventEmitter {
     const className = query.className;
     const queryJSON = query.toJSON();
     const where = queryJSON.where;
-    const fields = queryJSON.keys ? queryJSON.keys.split(',') : undefined;
+    const fields = queryJSON.keys ? queryJSON.keys.split(",") : undefined;
     const subscribeRequest = {
       op: OP_TYPES.SUBSCRIBE,
       requestId: this.requestId,
       query: {
         className,
         where,
-        fields
-      }
+        fields,
+      },
     };
 
     if (sessionToken) {
       subscribeRequest.sessionToken = sessionToken;
     }
 
-    const subscription = new LiveQuerySubscription(this.requestId, query, sessionToken);
+    const subscription = new LiveQuerySubscription(
+      this.requestId,
+      query,
+      sessionToken
+    );
     this.subscriptions.set(this.requestId, subscription);
     this.requestId += 1;
     this.connectPromise.then(() => {
@@ -236,8 +244,8 @@ class LiveQueryClient extends EventEmitter {
     this.subscriptions.delete(subscription.id);
     const unsubscribeRequest = {
       op: OP_TYPES.UNSUBSCRIBE,
-      requestId: subscription.id
-    }
+      requestId: subscription.id,
+    };
     this.connectPromise.then(() => {
       this.socket.send(JSON.stringify(unsubscribeRequest));
     });
@@ -251,7 +259,10 @@ class LiveQueryClient extends EventEmitter {
   open() {
     const WebSocketImplementation = CoreManager.getWebSocketController();
     if (!WebSocketImplementation) {
-      this.emit(CLIENT_EMMITER_TYPES.ERROR, 'Can not find WebSocket implementation');
+      this.emit(
+        CLIENT_EMMITER_TYPES.ERROR,
+        "Can not find WebSocket implementation"
+      );
       return;
     }
 
@@ -284,7 +295,7 @@ class LiveQueryClient extends EventEmitter {
       const query = subscription.query;
       const queryJSON = query.toJSON();
       const where = queryJSON.where;
-      const fields = queryJSON.keys ? queryJSON.keys.split(',') : undefined;
+      const fields = queryJSON.keys ? queryJSON.keys.split(",") : undefined;
       const className = query.className;
       const sessionToken = subscription.sessionToken;
       const subscribeRequest = {
@@ -293,8 +304,8 @@ class LiveQueryClient extends EventEmitter {
         query: {
           className,
           where,
-          fields
-        }
+          fields,
+        },
       };
 
       if (sessionToken) {
@@ -313,7 +324,10 @@ class LiveQueryClient extends EventEmitter {
    *
    */
   close() {
-    if (this.state === CLIENT_STATE.INITIALIZED || this.state === CLIENT_STATE.DISCONNECTED) {
+    if (
+      this.state === CLIENT_STATE.INITIALIZED ||
+      this.state === CLIENT_STATE.DISCONNECTED
+    ) {
       return;
     }
     this.state = CLIENT_STATE.DISCONNECTED;
@@ -343,7 +357,7 @@ class LiveQueryClient extends EventEmitter {
       applicationId: this.applicationId,
       javascriptKey: this.javascriptKey,
       masterKey: this.masterKey,
-      sessionToken: this.sessionToken
+      sessionToken: this.sessionToken,
     };
     if (this.additionalProperties) {
       connectRequest.installationId = this.installationId;
@@ -353,19 +367,18 @@ class LiveQueryClient extends EventEmitter {
 
   _handleWebSocketMessage(event: any) {
     let data = event.data;
-    if (typeof data === 'string') {
+    if (typeof data === "string") {
       data = JSON.parse(data);
     }
     let subscription = null;
     if (data.requestId) {
-      subscription =
-       this.subscriptions.get(data.requestId);
+      subscription = this.subscriptions.get(data.requestId);
     }
     const response = {
       clientId: data.clientId,
       installationId: data.installationId,
     };
-    switch(data.op) {
+    switch (data.op) {
     case OP_EVENTS.CONNECTED:
       if (this.state === CLIENT_STATE.RECONNECTING) {
         this.resubscribe();
@@ -379,19 +392,26 @@ class LiveQueryClient extends EventEmitter {
       if (subscription) {
         subscription.subscribed = true;
         subscription.subscribePromise.resolve();
-        setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN, response), 200);
+        setTimeout(
+          () => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN, response),
+          200
+        );
       }
       break;
     case OP_EVENTS.ERROR:
       if (data.requestId) {
         if (subscription) {
           subscription.subscribePromise.resolve();
-          setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, data.error), 200);
+          setTimeout(
+            () =>
+              subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, data.error),
+            200
+          );
         }
       } else {
         this.emit(CLIENT_EMMITER_TYPES.ERROR, data.error);
       }
-      if (data.error === 'Additional properties not allowed') {
+      if (data.error === "Additional properties not allowed") {
         this.additionalProperties = false;
       }
       if (data.reconnect) {
@@ -474,21 +494,28 @@ class LiveQueryClient extends EventEmitter {
       clearTimeout(this.reconnectHandle);
     }
 
-    this.reconnectHandle = setTimeout((() => {
-      this.attempts++;
-      this.connectPromise = resolvingPromise();
-      this.open();
-    }).bind(this), time);
+    this.reconnectHandle = setTimeout(
+      (() => {
+        this.attempts++;
+        this.connectPromise = resolvingPromise();
+        this.open();
+      }).bind(this),
+      time
+    );
   }
 }
 
-if (process.env.PARSE_BUILD === 'node') {
-  CoreManager.setWebSocketController(require('ws'));
-} else if (process.env.PARSE_BUILD === 'browser') {
-  CoreManager.setWebSocketController(typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null);
-} else if (process.env.PARSE_BUILD === 'weapp') {
-  CoreManager.setWebSocketController(require('./Socket.weapp'));
-} else if (process.env.PARSE_BUILD === 'react-native') {
+if (process.env.PARSE_BUILD === "node") {
+  CoreManager.setWebSocketController(require("ws"));
+} else if (process.env.PARSE_BUILD === "browser") {
+  CoreManager.setWebSocketController(
+    typeof WebSocket === "function" || typeof WebSocket === "object"
+      ? WebSocket
+      : null
+  );
+} else if (process.env.PARSE_BUILD === "weapp") {
+  CoreManager.setWebSocketController(require("./Socket.weapp"));
+} else if (process.env.PARSE_BUILD === "react-native") {
   CoreManager.setWebSocketController(WebSocket);
 }
 

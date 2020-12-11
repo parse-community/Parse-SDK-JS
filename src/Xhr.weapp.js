@@ -9,12 +9,12 @@ module.exports = class XhrWeapp {
     this.header = {};
     this.readyState = this.DONE;
     this.status = 0;
-    this.response = '';
-    this.responseType = '';
-    this.responseText = '';
+    this.response = "";
+    this.responseType = "";
+    this.responseText = "";
     this.responseHeader = {};
-    this.method = '';
-    this.url = '';
+    this.method = "";
+    this.url = "";
     this.onabort = () => {};
     this.onprogress = () => {};
     this.onerror = () => {};
@@ -23,9 +23,9 @@ module.exports = class XhrWeapp {
   }
 
   getAllResponseHeaders() {
-    let header = '';
-    for(const key in this.responseHeader){
-      header += key + ':' + this.getResponseHeader(key) + '\r\n'
+    let header = "";
+    for (const key in this.responseHeader) {
+      header += key + ":" + this.getResponseHeader(key) + "\r\n";
     }
     return header;
   }
@@ -72,11 +72,11 @@ module.exports = class XhrWeapp {
       fail: (err) => {
         this.requestTask = null;
         this.onerror(err);
-      }
+      },
     });
     this.requestTask.onProgressUpdate((res) => {
       const event = {
-        lengthComputable: (res.totalBytesExpectedToWrite !== 0),
+        lengthComputable: res.totalBytesExpectedToWrite !== 0,
         loaded: res.totalBytesWritten,
         total: res.totalBytesExpectedToWrite,
       };

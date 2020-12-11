@@ -40,7 +40,7 @@ const StorageController = {
         delete memMap[key];
       }
     }
-  }
+  },
 };
 
 module.exports = StorageController;

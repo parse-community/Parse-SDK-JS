@@ -9,13 +9,13 @@
  * @flow
  */
 
-import CoreManager from './CoreManager';
-import isRevocableSession from './isRevocableSession';
-import ParseObject from './ParseObject';
-import ParseUser from './ParseUser';
+import CoreManager from "./CoreManager";
+import isRevocableSession from "./isRevocableSession";
+import ParseObject from "./ParseObject";
+import ParseUser from "./ParseUser";
 
-import type { AttributeMap } from './ObjectStateMutations';
-import type { RequestOptions, FullOptions } from './RESTController';
+import type { AttributeMap } from "./ObjectStateMutations";
+import type { RequestOptions, FullOptions } from "./RESTController";
 
 /**
  * <p>A Parse.Session object is a local representation of a revocable session.
@@ -30,10 +30,10 @@ class ParseSession extends ParseObject {
    * @param {object} attributes The initial set of data to store in the user.
    */
   constructor(attributes: ?AttributeMap) {
-    super('_Session');
-    if (attributes && typeof attributes === 'object'){
+    super("_Session");
+    if (attributes && typeof attributes === "object") {
       if (!this.set(attributes || {})) {
-        throw new Error('Can\'t create an invalid Session');
+        throw new Error("Can't create an invalid Session");
       }
     }
   }
@@ -44,21 +44,21 @@ class ParseSession extends ParseObject {
    * @returns {string}
    */
   getSessionToken(): string {
-    const token = this.get('sessionToken');
-    if (typeof token === 'string') {
+    const token = this.get("sessionToken");
+    if (typeof token === "string") {
       return token;
     }
-    return '';
+    return "";
   }
 
   static readOnlyAttributes() {
     return [
-      'createdWith',
-      'expiresAt',
-      'installationId',
-      'restricted',
-      'sessionToken',
-      'user'
+      "createdWith",
+      "expiresAt",
+      "installationId",
+      "restricted",
+      "sessionToken",
+      "user",
     ];
   }
 
@@ -76,12 +76,12 @@ class ParseSession extends ParseObject {
     const controller = CoreManager.getSessionController();
 
     const sessionOptions = {};
-    if (options.hasOwnProperty('useMasterKey')) {
+    if (options.hasOwnProperty("useMasterKey")) {
       sessionOptions.useMasterKey = options.useMasterKey;
     }
     return ParseUser.currentAsync().then((user) => {
       if (!user) {
-        return Promise.reject('There is no current user.');
+        return Promise.reject("There is no current user.");
       }
       sessionOptions.sessionToken = user.getSessionToken();
       return controller.getSession(sessionOptions);
@@ -101,27 +101,27 @@ class ParseSession extends ParseObject {
   static isCurrentSessionRevocable(): boolean {
     const currentUser = ParseUser.current();
     if (currentUser) {
-      return isRevocableSession(currentUser.getSessionToken() || '');
+      return isRevocableSession(currentUser.getSessionToken() || "");
     }
     return false;
   }
 }
 
-ParseObject.registerSubclass('_Session', ParseSession);
+ParseObject.registerSubclass("_Session", ParseSession);
 
 const DefaultController = {
   getSession(options: RequestOptions): Promise<ParseSession> {
     const RESTController = CoreManager.getRESTController();
     const session = new ParseSession();
 
-    return RESTController.request(
-      'GET', 'sessions/me', {}, options
-    ).then((sessionData) => {
-      session._finishFetch(sessionData);
-      session._setExisted(true);
-      return session;
-    });
-  }
+    return RESTController.request("GET", "sessions/me", {}, options).then(
+      (sessionData) => {
+        session._finishFetch(sessionData);
+        session._setExisted(true);
+        return session;
+      }
+    );
+  },
 };
 
 CoreManager.setSessionController(DefaultController);

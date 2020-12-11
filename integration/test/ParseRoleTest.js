@@ -1,11 +1,11 @@
-'use strict';
+"use strict";
 
 /* eslint-disable no-unused-vars */
-const assert = require('assert');
-const clear = require('./clear');
-const Parse = require('../../node');
+const assert = require("assert");
+const clear = require("./clear");
+const Parse = require("../../node");
 
-const TestObject = Parse.Object.extend('TestObject');
+const TestObject = Parse.Object.extend("TestObject");
 
 function privateTo(someone) {
   const acl = new Parse.ACL();
@@ -23,12 +23,12 @@ function publicAccess() {
 
 function createUser(username) {
   const user = new Parse.User();
-  user.set('username', username);
-  user.set('password', username);
+  user.set("username", username);
+  user.set("password", username);
   return user;
 }
 
-describe('Parse Role', () => {
+describe("Parse Role", () => {
   /** TODO: Implement these. There was some bugginess related to parse-server. **/
 });
 

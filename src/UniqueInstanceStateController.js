@@ -9,12 +9,17 @@
  * @flow
  */
 
-import * as ObjectStateMutations from './ObjectStateMutations';
-import TaskQueue from './TaskQueue';
+import * as ObjectStateMutations from "./ObjectStateMutations";
+import TaskQueue from "./TaskQueue";
 
-import type { Op } from './ParseOp';
-import type ParseObject from './ParseObject';
-import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
+import type { Op } from "./ParseOp";
+import type ParseObject from "./ParseObject";
+import type {
+  AttributeMap,
+  ObjectCache,
+  OpsMap,
+  State,
+} from "./ObjectStateMutations";
 
 let objectState = new WeakMap();
 
@@ -34,7 +39,7 @@ export function initializeState(obj: ParseObject, initial?: State): State {
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     };
   }
   state = initial;
@@ -103,18 +108,33 @@ export function getObjectCache(obj: ParseObject): ObjectCache {
 export function estimateAttribute(obj: ParseObject, attr: string): mixed {
   const serverData = getServerData(obj);
   const pendingOps = getPendingOps(obj);
-  return ObjectStateMutations.estimateAttribute(serverData, pendingOps, obj.className, obj.id, attr);
+  return ObjectStateMutations.estimateAttribute(
+    serverData,
+    pendingOps,
+    obj.className,
+    obj.id,
+    attr
+  );
 }
 
 export function estimateAttributes(obj: ParseObject): AttributeMap {
   const serverData = getServerData(obj);
   const pendingOps = getPendingOps(obj);
-  return ObjectStateMutations.estimateAttributes(serverData, pendingOps, obj.className, obj.id);
+  return ObjectStateMutations.estimateAttributes(
+    serverData,
+    pendingOps,
+    obj.className,
+    obj.id
+  );
 }
 
 export function commitServerChanges(obj: ParseObject, changes: AttributeMap) {
   const state = initializeState(obj);
-  ObjectStateMutations.commitServerChanges(state.serverData, state.objectCache, changes);
+  ObjectStateMutations.commitServerChanges(
+    state.serverData,
+    state.objectCache,
+    changes
+  );
 }
 
 export function enqueueTask(obj: ParseObject, task: () => Promise): Promise {

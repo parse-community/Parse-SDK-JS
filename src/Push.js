@@ -9,16 +9,16 @@
  * @flow
  */
 
-import CoreManager from './CoreManager';
-import ParseQuery from './ParseQuery';
+import CoreManager from "./CoreManager";
+import ParseQuery from "./ParseQuery";
 
-import type { WhereClause } from './ParseQuery';
+import type { WhereClause } from "./ParseQuery";
 
 export type PushData = {
-  where?: WhereClause | ParseQuery;
-  push_time?: Date | string;
-  expiration_time?: Date | string;
-  expiration_interval?: number;
+  where?: WhereClause | ParseQuery,
+  push_time?: Date | string,
+  expiration_time?: Date | string,
+  expiration_interval?: number,
 };
 
 /**
@@ -57,17 +57,17 @@ export function send(data: PushData): Promise {
     data.where = data.where.toJSON().where;
   }
 
-  if (data.push_time && typeof data.push_time === 'object') {
+  if (data.push_time && typeof data.push_time === "object") {
     data.push_time = data.push_time.toJSON();
   }
 
-  if (data.expiration_time && typeof data.expiration_time === 'object') {
+  if (data.expiration_time && typeof data.expiration_time === "object") {
     data.expiration_time = data.expiration_time.toJSON();
   }
 
   if (data.expiration_time && data.expiration_interval) {
     throw new Error(
-      'expiration_time and expiration_interval cannot both be set.'
+      "expiration_time and expiration_interval cannot both be set."
     );
   }
 
@@ -76,13 +76,10 @@ export function send(data: PushData): Promise {
 
 const DefaultController = {
   send(data: PushData) {
-    return CoreManager.getRESTController().request(
-      'POST',
-      'push',
-      data,
-      { useMasterKey: true }
-    );
-  }
-}
+    return CoreManager.getRESTController().request("POST", "push", data, {
+      useMasterKey: true,
+    });
+  },
+};
 
 CoreManager.setPushController(DefaultController);

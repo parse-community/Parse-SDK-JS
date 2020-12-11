@@ -210,7 +210,6 @@
  * ```
  */
 
-
 /**
  * Makes an HTTP Request.
  *

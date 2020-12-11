@@ -9,12 +9,12 @@
  * @flow
  */
 
-import ParseACL from './ParseACL';
-import ParseError from './ParseError';
-import ParseObject from './ParseObject';
+import ParseACL from "./ParseACL";
+import ParseError from "./ParseError";
+import ParseObject from "./ParseObject";
 
-import type { AttributeMap } from './ObjectStateMutations';
-import type ParseRelation from './ParseRelation';
+import type { AttributeMap } from "./ObjectStateMutations";
+import type ParseRelation from "./ParseRelation";
 
 /**
  * Represents a Role on the Parse server. Roles represent groupings of
@@ -37,8 +37,8 @@ class ParseRole extends ParseObject {
    * cloud.
    */
   constructor(name: string, acl: ParseACL) {
-    super('_Role');
-    if (typeof name === 'string' && (acl instanceof ParseACL)) {
+    super("_Role");
+    if (typeof name === "string" && acl instanceof ParseACL) {
       this.setName(name);
       this.setACL(acl);
     }
@@ -50,11 +50,11 @@ class ParseRole extends ParseObject {
    * @returns {string} the name of the role.
    */
   getName(): ?string {
-    const name = this.get('name');
-    if (name == null || typeof name === 'string') {
+    const name = this.get("name");
+    if (name == null || typeof name === "string") {
       return name;
     }
-    return '';
+    return "";
   }
 
   /**
@@ -75,7 +75,7 @@ class ParseRole extends ParseObject {
    * @returns {(ParseObject|boolean)} true if the set succeeded.
    */
   setName(name: string, options?: mixed): ParseObject | boolean {
-    return this.set('name', name, options);
+    return this.set("name", name, options);
   }
 
   /**
@@ -90,7 +90,7 @@ class ParseRole extends ParseObject {
    *     role.
    */
   getUsers(): ParseRelation {
-    return this.relation('users');
+    return this.relation("users");
   }
 
   /**
@@ -105,7 +105,7 @@ class ParseRole extends ParseObject {
    *     role.
    */
   getRoles(): ParseRelation {
-    return this.relation('roles');
+    return this.relation("roles");
   }
 
   validate(attrs: AttributeMap, options?: mixed): ParseError | boolean {
@@ -114,7 +114,7 @@ class ParseRole extends ParseObject {
       return isInvalid;
     }
 
-    if ('name' in attrs && attrs.name !== this.getName()) {
+    if ("name" in attrs && attrs.name !== this.getName()) {
       const newName = attrs.name;
       if (this.id && this.id !== attrs.objectId) {
         // Check to see if the objectId being set matches this.id
@@ -122,20 +122,20 @@ class ParseRole extends ParseObject {
         // Let the name be set in this case
         return new ParseError(
           ParseError.OTHER_CAUSE,
-          'A role\'s name can only be set before it has been saved.'
+          "A role's name can only be set before it has been saved."
         );
       }
-      if (typeof newName !== 'string') {
+      if (typeof newName !== "string") {
         return new ParseError(
           ParseError.OTHER_CAUSE,
-          'A role\'s name must be a String.'
+          "A role's name must be a String."
         );
       }
-      if (!(/^[0-9a-zA-Z\-_ ]+$/).test(newName)) {
+      if (!/^[0-9a-zA-Z\-_ ]+$/.test(newName)) {
         return new ParseError(
           ParseError.OTHER_CAUSE,
-          'A role\'s name can be only contain alphanumeric characters, _, ' +
-          '-, and spaces.'
+          "A role's name can be only contain alphanumeric characters, _, " +
+            "-, and spaces."
         );
       }
     }
@@ -143,6 +143,6 @@ class ParseRole extends ParseObject {
   }
 }
 
-ParseObject.registerSubclass('_Role', ParseRole);
+ParseObject.registerSubclass("_Role", ParseRole);
 
 export default ParseRole;
