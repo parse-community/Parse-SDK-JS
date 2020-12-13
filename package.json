@@ -96,7 +96,7 @@
     "prepare": "npm run build",
     "release_docs": "./release_docs.sh",
     "gulp": "gulp",
-    "prettier": "prettier --write {src,integration}/{**/*,*}.js && npm run lint:fix",
+    "prettier": "prettier --write '{src,integration}/{**/*,*}.js' && npm run lint:fix",
     "cross-env": "cross-env"
   },
   "husky": {
@@ -106,7 +106,8 @@
   },
   "lint-staged": {
     "{src,integration}/{**/*,*}.js": [
-      "prettier",
+      "prettier --write",
+      "eslint --fix --cache",
       "git add"
     ]
   },

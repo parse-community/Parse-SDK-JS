@@ -1721,7 +1721,7 @@ describe('Parse Query', () => {
       });
   });
 
-  it('supports objects with length', async (done) => {
+  it('supports objects with length', async done => {
     const obj = new TestObject();
     obj.set('length', 5);
     assert.equal(obj.get('length'), 5);

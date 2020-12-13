@@ -30,7 +30,7 @@ const mockWeChat = {
 
   request(options) {
     return {
-      onProgressUpdate: (cb) => {
+      onProgressUpdate: cb => {
         progressCallback = cb;
       },
       abort: () => {
@@ -43,8 +43,8 @@ const mockWeChat = {
           data: {},
         });
         options.fail();
-      }
-    }
+      },
+    };
   },
 
   connectSocket() {},
