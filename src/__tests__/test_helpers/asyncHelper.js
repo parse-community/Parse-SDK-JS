@@ -10,17 +10,17 @@
 // We need this until Jest finishes upgrading to Jasmine 2.0
 module.exports = function asyncHelper(fn) {
   let finished = false;
-  const done = function() {
+  const done = function () {
     finished = true;
   };
 
-  return function() {
-    runs(function() {
+  return function () {
+    runs(function () {
       fn(done);
     });
 
-    waitsFor(function() {
+    waitsFor(function () {
       return finished;
     });
   };
-}
+};

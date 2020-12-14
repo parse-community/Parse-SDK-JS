@@ -17,19 +17,19 @@
  * `upload` can be provided to mock the XMLHttpRequest.upload property.
  */
 function mockXHR(results, options = {}) {
-  const XHR = function() { };
+  const XHR = function () {};
   let attempts = 0;
   const headers = {};
   XHR.prototype = {
-    open: function() { },
+    open: function () {},
     setRequestHeader: jest.fn((key, value) => {
       headers[key] = value;
     }),
-    getRequestHeader: function(key) {
+    getRequestHeader: function (key) {
       return headers[key];
     },
-    upload: function() { },
-    send: function() {
+    upload: function () {},
+    send: function () {
       this.status = results[attempts].status;
       this.responseText = JSON.stringify(results[attempts].response || {});
       this.readyState = 4;
@@ -37,7 +37,7 @@ function mockXHR(results, options = {}) {
       this.onreadystatechange();
       this.onprogress(options.progress);
       this.upload.onprogress(options.progress);
-    }
+    },
   };
   return XHR;
 }
