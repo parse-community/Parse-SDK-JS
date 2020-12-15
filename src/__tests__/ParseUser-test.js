@@ -1881,4 +1881,49 @@ describe('ParseUser', () => {
     const user = new CustomUser();
     expect(user.test).toBe(true);
   });
+
+  it('should return challenge', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body) {
+        expect(method).toBe('POST');
+        expect(path).toBe('challenge');
+        expect(body.username).toBe('username');
+        expect(body.password).toBe('password');
+        expect(body.challengeData).toEqual({ test: { data: true } });
+
+        return Promise.resolve(
+          {
+            challengeData: { test: { token: true } },
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+
+    try {
+      await ParseUser.challenge({
+        username: 'username',
+        challengeData: { test: { data: true } },
+      });
+    } catch (e) {
+      expect(e.message).toContain('Running challenge via username require password.');
+    }
+
+    try {
+      await ParseUser.challenge({});
+    } catch (e) {
+      expect(e.message).toContain('challengeData is required for the challenge.');
+    }
+
+    const res = await ParseUser.challenge({
+      username: 'username',
+      password: 'password',
+      challengeData: { test: { data: true } },
+    });
+
+    expect(res.challengeData).toEqual({ test: { token: true } });
+  });
 });

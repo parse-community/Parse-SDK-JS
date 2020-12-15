@@ -783,6 +783,32 @@ class ParseUser extends ParseObject {
   }
 
   /**
+   * Ask Parse server for an auth challenge (ex: WebAuthn login/signup)
+   *
+   * @param data
+   * @static
+   * @returns {Promise}
+   */
+  static challenge(data: {
+    authData?: AuthData,
+    username?: string,
+    password?: string,
+    challengeData: any,
+  }): Promise<{ challengeData: any }> {
+    if (!data.challengeData) {
+      return Promise.reject(
+        new ParseError(ParseError.OTHER_CAUSE, 'challengeData is required for the challenge.')
+      );
+    }
+    if (data.username && !data.password) {
+      return Promise.reject(
+        new ParseError(ParseError.OTHER_CAUSE, 'Running challenge via username require password.')
+      );
+    }
+    return CoreManager.getUserController().challenge(data);
+  }
+
+  /**
    * Logs out the currently logged in user session. This will remove the
    * session from disk, log out of linked services, and future calls to
    * <code>current</code> will return <code>null</code>.
@@ -1151,6 +1177,10 @@ const DefaultController = {
       }
       return DefaultController.setCurrentUser(user);
     });
+  },
+
+  challenge(data: any): Promise<{ challengeData: any }> {
+    return CoreManager.getRESTController().request('POST', 'challenge', data);
   },
 
   become(user: ParseUser, options: RequestOptions): Promise<ParseUser> {
