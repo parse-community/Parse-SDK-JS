@@ -37,14 +37,16 @@ describe('CoreManager', () => {
       'AnalyticsController must implement track()'
     );
 
-    expect(CoreManager.setAnalyticsController.bind(null, {
-      track: function() {}
-    })).not.toThrow();
+    expect(
+      CoreManager.setAnalyticsController.bind(null, {
+        track: function () {},
+      })
+    ).not.toThrow();
   });
 
   it('can set and get AnalyticsController', () => {
     const controller = {
-      track: function() {}
+      track: function () {},
     };
 
     CoreManager.setAnalyticsController(controller);
@@ -56,20 +58,22 @@ describe('CoreManager', () => {
       'CloudController must implement run()'
     );
 
-    expect(CoreManager.setCloudController.bind(null, {
-      run: function() {},
-      getJobsData: function() {},
-      startJob: function() {},
-      getJobStatus: function() {}
-    })).not.toThrow();
+    expect(
+      CoreManager.setCloudController.bind(null, {
+        run: function () {},
+        getJobsData: function () {},
+        startJob: function () {},
+        getJobStatus: function () {},
+      })
+    ).not.toThrow();
   });
 
   it('can set and get CloudController', () => {
     const controller = {
-      run: function() {},
-      getJobsData: function() {},
-      startJob: function() {},
-      getJobStatus: function() {}
+      run: function () {},
+      getJobsData: function () {},
+      startJob: function () {},
+      getJobStatus: function () {},
     };
 
     CoreManager.setCloudController(controller);
@@ -81,22 +85,26 @@ describe('CoreManager', () => {
       'ConfigController must implement current()'
     );
 
-    expect(CoreManager.setConfigController.bind(null, {
-      current: function() {}
-    })).toThrow('ConfigController must implement get()');
+    expect(
+      CoreManager.setConfigController.bind(null, {
+        current: function () {},
+      })
+    ).toThrow('ConfigController must implement get()');
 
-    expect(CoreManager.setConfigController.bind(null, {
-      current: function() {},
-      get: function() {},
-      save : function() {}
-    })).not.toThrow();
+    expect(
+      CoreManager.setConfigController.bind(null, {
+        current: function () {},
+        get: function () {},
+        save: function () {},
+      })
+    ).not.toThrow();
   });
 
   it('can set and get ConfigController', () => {
     const controller = {
-      current: function() {},
-      get: function() {},
-      save : function() {}
+      current: function () {},
+      get: function () {},
+      save: function () {},
     };
 
     CoreManager.setConfigController(controller);
@@ -108,20 +116,24 @@ describe('CoreManager', () => {
       'FileController must implement saveFile()'
     );
 
-    expect(CoreManager.setFileController.bind(null, {
-      saveFile: function() {}
-    })).toThrow('FileController must implement saveBase64()');
+    expect(
+      CoreManager.setFileController.bind(null, {
+        saveFile: function () {},
+      })
+    ).toThrow('FileController must implement saveBase64()');
 
-    expect(CoreManager.setFileController.bind(null, {
-      saveFile: function() {},
-      saveBase64: function() {}
-    })).not.toThrow();
+    expect(
+      CoreManager.setFileController.bind(null, {
+        saveFile: function () {},
+        saveBase64: function () {},
+      })
+    ).not.toThrow();
   });
 
   it('can set and get FileController', () => {
     const controller = {
-      saveFile: function() {},
-      saveBase64: function() {}
+      saveFile: function () {},
+      saveBase64: function () {},
     };
 
     CoreManager.setFileController(controller);
@@ -133,14 +145,16 @@ describe('CoreManager', () => {
       'InstallationController must implement currentInstallationId()'
     );
 
-    expect(CoreManager.setInstallationController.bind(null, {
-      currentInstallationId: function() {}
-    })).not.toThrow();
+    expect(
+      CoreManager.setInstallationController.bind(null, {
+        currentInstallationId: function () {},
+      })
+    ).not.toThrow();
   });
 
   it('can set and get InstallationController', () => {
     const controller = {
-      currentInstallationId: function() {}
+      currentInstallationId: function () {},
     };
 
     CoreManager.setInstallationController(controller);
@@ -152,14 +166,16 @@ describe('CoreManager', () => {
       'PushController must implement send()'
     );
 
-    expect(CoreManager.setPushController.bind(null, {
-      send: function() {}
-    })).not.toThrow();
+    expect(
+      CoreManager.setPushController.bind(null, {
+        send: function () {},
+      })
+    ).not.toThrow();
   });
 
   it('can set and get PushController', () => {
     const controller = {
-      send: function() {}
+      send: function () {},
     };
 
     CoreManager.setPushController(controller);
@@ -171,27 +187,33 @@ describe('CoreManager', () => {
       'ObjectController must implement save()'
     );
 
-    expect(CoreManager.setObjectController.bind(null, {
-      save: function() {}
-    })).toThrow('ObjectController must implement fetch()');
+    expect(
+      CoreManager.setObjectController.bind(null, {
+        save: function () {},
+      })
+    ).toThrow('ObjectController must implement fetch()');
 
-    expect(CoreManager.setObjectController.bind(null, {
-      save: function() {},
-      fetch: function() {}
-    })).toThrow('ObjectController must implement destroy()');
+    expect(
+      CoreManager.setObjectController.bind(null, {
+        save: function () {},
+        fetch: function () {},
+      })
+    ).toThrow('ObjectController must implement destroy()');
 
-    expect(CoreManager.setObjectController.bind(null, {
-      save: function() {},
-      fetch: function() {},
-      destroy: function() {}
-    })).not.toThrow();
+    expect(
+      CoreManager.setObjectController.bind(null, {
+        save: function () {},
+        fetch: function () {},
+        destroy: function () {},
+      })
+    ).not.toThrow();
   });
 
   it('can set and get ObjectController', () => {
     const controller = {
-      save: function() {},
-      fetch: function() {},
-      destroy: function() {}
+      save: function () {},
+      fetch: function () {},
+      destroy: function () {},
     };
 
     CoreManager.setObjectController(controller);
@@ -200,22 +222,22 @@ describe('CoreManager', () => {
 
   it('can set and get ObjectStateController', () => {
     const controller = {
-      getState: function() {},
-      initializeState: function() {},
-      removeState: function() {},
-      getServerData: function() {},
-      setServerData: function() {},
-      getPendingOps: function() {},
-      setPendingOp: function() {},
-      pushPendingState: function() {},
-      popPendingState: function() {},
-      mergeFirstPendingState: function() {},
-      getObjectCache: function() {},
-      estimateAttribute: function() {},
-      estimateAttributes: function() {},
-      commitServerChanges: function() {},
-      enqueueTask: function() {},
-      clearAllState: function() {},
+      getState: function () {},
+      initializeState: function () {},
+      removeState: function () {},
+      getServerData: function () {},
+      setServerData: function () {},
+      getPendingOps: function () {},
+      setPendingOp: function () {},
+      pushPendingState: function () {},
+      popPendingState: function () {},
+      mergeFirstPendingState: function () {},
+      getObjectCache: function () {},
+      estimateAttribute: function () {},
+      estimateAttributes: function () {},
+      commitServerChanges: function () {},
+      enqueueTask: function () {},
+      clearAllState: function () {},
     };
 
     CoreManager.setObjectStateController(controller);
@@ -227,16 +249,18 @@ describe('CoreManager', () => {
       'QueryController must implement find()'
     );
 
-    expect(CoreManager.setQueryController.bind(null, {
-      find: function() {},
-      aggregate: function() {}
-    })).not.toThrow();
+    expect(
+      CoreManager.setQueryController.bind(null, {
+        find: function () {},
+        aggregate: function () {},
+      })
+    ).not.toThrow();
   });
 
   it('can set and get QueryController', () => {
     const controller = {
-      find: function() {},
-      aggregate: function() {}
+      find: function () {},
+      aggregate: function () {},
     };
 
     CoreManager.setQueryController(controller);
@@ -248,20 +272,24 @@ describe('CoreManager', () => {
       'RESTController must implement request()'
     );
 
-    expect(CoreManager.setRESTController.bind(null, {
-      request: function() {}
-    })).toThrow('RESTController must implement ajax()');
+    expect(
+      CoreManager.setRESTController.bind(null, {
+        request: function () {},
+      })
+    ).toThrow('RESTController must implement ajax()');
 
-    expect(CoreManager.setRESTController.bind(null, {
-      request: function() {},
-      ajax: function() {}
-    })).not.toThrow();
+    expect(
+      CoreManager.setRESTController.bind(null, {
+        request: function () {},
+        ajax: function () {},
+      })
+    ).not.toThrow();
   });
 
   it('can set and get RESTController', () => {
     const controller = {
-      request: function() {},
-      ajax: function() {}
+      request: function () {},
+      ajax: function () {},
     };
 
     CoreManager.setRESTController(controller);
@@ -273,56 +301,68 @@ describe('CoreManager', () => {
       'A synchronous StorageController must implement getItem()'
     );
 
-    expect(CoreManager.setStorageController.bind(null, {
-      async: 0,
-      getItem: function() {}
-    })).toThrow('A synchronous StorageController must implement setItem()');
+    expect(
+      CoreManager.setStorageController.bind(null, {
+        async: 0,
+        getItem: function () {},
+      })
+    ).toThrow('A synchronous StorageController must implement setItem()');
 
-    expect(CoreManager.setStorageController.bind(null, {
-      async: 0,
-      getItem: function() {},
-      setItem: function() {}
-    })).toThrow('A synchronous StorageController must implement removeItem()');
+    expect(
+      CoreManager.setStorageController.bind(null, {
+        async: 0,
+        getItem: function () {},
+        setItem: function () {},
+      })
+    ).toThrow('A synchronous StorageController must implement removeItem()');
 
-    expect(CoreManager.setStorageController.bind(null, {
-      async: 0,
-      getItem: function() {},
-      setItem: function() {},
-      removeItem: function() {},
-      getAllKeys: function() {}
-    })).not.toThrow();
+    expect(
+      CoreManager.setStorageController.bind(null, {
+        async: 0,
+        getItem: function () {},
+        setItem: function () {},
+        removeItem: function () {},
+        getAllKeys: function () {},
+      })
+    ).not.toThrow();
 
     expect(CoreManager.setStorageController.bind(null, { async: 1 })).toThrow(
       'An async StorageController must implement getItemAsync()'
     );
 
-    expect(CoreManager.setStorageController.bind(null, {
-      async: 1,
-      getItemAsync: function() {}
-    })).toThrow('An async StorageController must implement setItemAsync()');
+    expect(
+      CoreManager.setStorageController.bind(null, {
+        async: 1,
+        getItemAsync: function () {},
+      })
+    ).toThrow('An async StorageController must implement setItemAsync()');
 
-    expect(CoreManager.setStorageController.bind(null, {
-      async: 1,
-      getItemAsync: function() {},
-      setItemAsync: function() {}
-    })).toThrow('An async StorageController must implement removeItemAsync()');
+    expect(
+      CoreManager.setStorageController.bind(null, {
+        async: 1,
+        getItemAsync: function () {},
+        setItemAsync: function () {},
+      })
+    ).toThrow('An async StorageController must implement removeItemAsync()');
 
-    expect(CoreManager.setStorageController.bind(null, {
-      async: 1,
-      getItemAsync: function() {},
-      setItemAsync: function() {},
-      removeItemAsync: function() {},
-      getAllKeysAsync: function() {}
-    })).not.toThrow();
+    expect(
+      CoreManager.setStorageController.bind(null, {
+        async: 1,
+        getItemAsync: function () {},
+        setItemAsync: function () {},
+        removeItemAsync: function () {},
+        getAllKeysAsync: function () {},
+      })
+    ).not.toThrow();
   });
 
   it('can set and get StorageController', () => {
     const controller = {
       async: 0,
-      getItem: function() {},
-      setItem: function() {},
-      removeItem: function() {},
-      getAllKeys: function() {}
+      getItem: function () {},
+      setItem: function () {},
+      removeItem: function () {},
+      getAllKeys: function () {},
     };
 
     CoreManager.setStorageController(controller);
@@ -334,24 +374,26 @@ describe('CoreManager', () => {
       'SchemaController must implement get()'
     );
 
-    expect(CoreManager.setSchemaController.bind(null, {
-      send: function() {},
-      get: function() {},
-      create: function() {},
-      update: function() {},
-      delete: function() {},
-      purge: function() {},
-    })).not.toThrow();
+    expect(
+      CoreManager.setSchemaController.bind(null, {
+        send: function () {},
+        get: function () {},
+        create: function () {},
+        update: function () {},
+        delete: function () {},
+        purge: function () {},
+      })
+    ).not.toThrow();
   });
 
   it('can set and get SchemaController', () => {
     const controller = {
-      send: function() {},
-      get: function() {},
-      create: function() {},
-      update: function() {},
-      delete: function() {},
-      purge: function() {},
+      send: function () {},
+      get: function () {},
+      create: function () {},
+      update: function () {},
+      delete: function () {},
+      purge: function () {},
     };
 
     CoreManager.setSchemaController(controller);
@@ -363,22 +405,24 @@ describe('CoreManager', () => {
       'LocalDatastoreController must implement pinWithName()'
     );
 
-    expect(CoreManager.setLocalDatastoreController.bind(null, {
-      fromPinWithName: function() {},
-      pinWithName: function() {},
-      unPinWithName: function() {},
-      getAllContents: function() {},
-      clear: function() {}
-    })).not.toThrow();
+    expect(
+      CoreManager.setLocalDatastoreController.bind(null, {
+        fromPinWithName: function () {},
+        pinWithName: function () {},
+        unPinWithName: function () {},
+        getAllContents: function () {},
+        clear: function () {},
+      })
+    ).not.toThrow();
   });
 
   it('can set and get setLocalDatastoreController', () => {
     const controller = {
-      fromPinWithName: function() {},
-      pinWithName: function() {},
-      unPinWithName: function() {},
-      getAllContents: function() {},
-      clear: function() {}
+      fromPinWithName: function () {},
+      pinWithName: function () {},
+      unPinWithName: function () {},
+      getAllContents: function () {},
+      clear: function () {},
     };
 
     CoreManager.setLocalDatastoreController(controller);
@@ -387,12 +431,12 @@ describe('CoreManager', () => {
 
   it('can set and get WebSocketController', () => {
     const controller = {
-      onopen: function() {},
-      onmessage: function() {},
-      onclose: function() {},
-      onerror: function() {},
-      send: function() {},
-      close: function() {},
+      onopen: function () {},
+      onmessage: function () {},
+      onclose: function () {},
+      onerror: function () {},
+      send: function () {},
+      close: function () {},
     };
 
     CoreManager.setWebSocketController(controller);

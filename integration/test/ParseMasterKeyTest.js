@@ -7,7 +7,7 @@ const Parse = require('../../node');
 const TestObject = Parse.Object.extend('TestObject');
 
 describe('Master Key', () => {
-  beforeEach((done) => {
+  beforeEach(done => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
@@ -16,7 +16,7 @@ describe('Master Key', () => {
     });
   });
 
-  it('can perform a simple save', (done) => {
+  it('can perform a simple save', done => {
     const object = new TestObject();
     object.set('color', 'purple');
     object.save(null, { useMasterKey: true }).then(() => {
@@ -25,21 +25,25 @@ describe('Master Key', () => {
     });
   });
 
-  it('can perform a save without permissions', (done) => {
+  it('can perform a save without permissions', done => {
     let object;
-    Parse.User.signUp('andrew', 'password').then((user) => {
-      object = new TestObject({ ACL: new Parse.ACL(user) });
-      return object.save();
-    }).then(() => {
-      Parse.User.logOut();
-      return object.save(null, { useMasterKey: true });
-    }).then(() => {
-      // expect success
-      done();
-    }).catch((e) => console.log(e));
+    Parse.User.signUp('andrew', 'password')
+      .then(user => {
+        object = new TestObject({ ACL: new Parse.ACL(user) });
+        return object.save();
+      })
+      .then(() => {
+        Parse.User.logOut();
+        return object.save(null, { useMasterKey: true });
+      })
+      .then(() => {
+        // expect success
+        done();
+      })
+      .catch(e => console.log(e));
   });
 
-  it('throws when no master key is provided', (done) => {
+  it('throws when no master key is provided', done => {
     Parse.CoreManager.set('MASTER_KEY', null);
     const object = new TestObject();
     object.save(null, { useMasterKey: true }).catch(() => {

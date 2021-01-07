@@ -17,30 +17,40 @@ import ParseObject from './ParseObject';
 import { Op } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
-const toString = Object.prototype.toString;
-
-function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, seen: Array<mixed>): any {
+function encode(
+  value: mixed,
+  disallowObjects: boolean,
+  forcePointers: boolean,
+  seen: Array<mixed>,
+  offline: boolean
+): any {
   if (value instanceof ParseObject) {
     if (disallowObjects) {
       throw new Error('Parse Objects not allowed here');
     }
     const seenEntry = value.id ? value.className + ':' + value.id : value;
-    if (forcePointers ||
+    if (
+      forcePointers ||
       !seen ||
       seen.indexOf(seenEntry) > -1 ||
       value.dirty() ||
       Object.keys(value._getServerData()).length < 1
     ) {
+      if (offline && value._getId().startsWith('local')) {
+        return value.toOfflinePointer();
+      }
       return value.toPointer();
     }
     seen = seen.concat(seenEntry);
-    return value._toFullJSON(seen);
+    return value._toFullJSON(seen, offline);
   }
-  if (value instanceof Op ||
-      value instanceof ParseACL ||
-      value instanceof ParseGeoPoint ||
-      value instanceof ParsePolygon ||
-      value instanceof ParseRelation) {
+  if (
+    value instanceof Op ||
+    value instanceof ParseACL ||
+    value instanceof ParseGeoPoint ||
+    value instanceof ParsePolygon ||
+    value instanceof ParseRelation
+  ) {
     return value.toJSON();
   }
   if (value instanceof ParseFile) {
@@ -49,27 +59,29 @@ function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, 
     }
     return value.toJSON();
   }
-  if (toString.call(value) === '[object Date]') {
+  if (Object.prototype.toString.call(value) === '[object Date]') {
     if (isNaN(value)) {
       throw new Error('Tried to encode an invalid date.');
     }
     return { __type: 'Date', iso: (value: any).toJSON() };
   }
-  if (toString.call(value) === '[object RegExp]' &&
-      typeof value.source === 'string') {
+  if (
+    Object.prototype.toString.call(value) === '[object RegExp]' &&
+    typeof value.source === 'string'
+  ) {
     return value.source;
   }
 
   if (Array.isArray(value)) {
-    return value.map((v) => {
-      return encode(v, disallowObjects, forcePointers, seen);
+    return value.map(v => {
+      return encode(v, disallowObjects, forcePointers, seen, offline);
     });
   }
 
   if (value && typeof value === 'object') {
     const output = {};
     for (const k in value) {
-      output[k] = encode(value[k], disallowObjects, forcePointers, seen);
+      output[k] = encode(value[k], disallowObjects, forcePointers, seen, offline);
     }
     return output;
   }
@@ -77,6 +89,12 @@ function encode(value: mixed, disallowObjects: boolean, forcePointers: boolean, 
   return value;
 }
 
-export default function(value: mixed, disallowObjects?: boolean, forcePointers?: boolean, seen?: Array<mixed>): any {
-  return encode(value, !!disallowObjects, !!forcePointers, seen || []);
+export default function (
+  value: mixed,
+  disallowObjects?: boolean,
+  forcePointers?: boolean,
+  seen?: Array<mixed>,
+  offline?: boolean
+): any {
+  return encode(value, !!disallowObjects, !!forcePointers, seen || [], offline);
 }

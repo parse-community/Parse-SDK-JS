@@ -21,27 +21,27 @@ import type { RequestOptions, FullOptions } from './RESTController';
  * <p>A Parse.Session object is a local representation of a revocable session.
  * This class is a subclass of a Parse.Object, and retains the same
  * functionality of a Parse.Object.</p>
+ *
  * @alias Parse.Session
- * @extends Parse.Object
+ * @augments Parse.Object
  */
 class ParseSession extends ParseObject {
   /**
-   *
-   * @param {Object} attributes The initial set of data to store in the user.
+   * @param {object} attributes The initial set of data to store in the user.
    */
   constructor(attributes: ?AttributeMap) {
     super('_Session');
-    if (attributes && typeof attributes === 'object'){
+    if (attributes && typeof attributes === 'object') {
       if (!this.set(attributes || {})) {
-        throw new Error('Can\'t create an invalid Session');
+        throw new Error("Can't create an invalid Session");
       }
     }
   }
 
   /**
    * Returns the session token string.
-
-   * @return {String}
+   *
+   * @returns {string}
    */
   getSessionToken(): string {
     const token = this.get('sessionToken');
@@ -52,23 +52,17 @@ class ParseSession extends ParseObject {
   }
 
   static readOnlyAttributes() {
-    return [
-      'createdWith',
-      'expiresAt',
-      'installationId',
-      'restricted',
-      'sessionToken',
-      'user'
-    ];
+    return ['createdWith', 'expiresAt', 'installationId', 'restricted', 'sessionToken', 'user'];
   }
 
   /**
    * Retrieves the Session object for the currently logged in session.
-
+   *
+   * @param {object} options useMasterKey
    * @static
-   * @return {Promise} A promise that is resolved with the Parse.Session
-   *   object after it has been fetched. If there is no current user, the
-   *   promise will be rejected.
+   * @returns {Promise} A promise that is resolved with the Parse.Session
+   * object after it has been fetched. If there is no current user, the
+   * promise will be rejected.
    */
   static current(options: FullOptions) {
     options = options || {};
@@ -78,7 +72,7 @@ class ParseSession extends ParseObject {
     if (options.hasOwnProperty('useMasterKey')) {
       sessionOptions.useMasterKey = options.useMasterKey;
     }
-    return ParseUser.currentAsync().then((user) => {
+    return ParseUser.currentAsync().then(user => {
       if (!user) {
         return Promise.reject('There is no current user.');
       }
@@ -93,9 +87,9 @@ class ParseSession extends ParseObject {
    * use revocable sessions. If you are migrating an app that uses the Parse
    * SDK in the browser only, please use Parse.User.enableRevocableSession()
    * instead, so that sessions can be automatically upgraded.
-
+   *
    * @static
-   * @return {Boolean}
+   * @returns {boolean}
    */
   static isCurrentSessionRevocable(): boolean {
     const currentUser = ParseUser.current();
@@ -113,14 +107,12 @@ const DefaultController = {
     const RESTController = CoreManager.getRESTController();
     const session = new ParseSession();
 
-    return RESTController.request(
-      'GET', 'sessions/me', {}, options
-    ).then((sessionData) => {
+    return RESTController.request('GET', 'sessions/me', {}, options).then(sessionData => {
       session._finishFetch(sessionData);
       session._setExisted(true);
       return session;
     });
-  }
+  },
 };
 
 CoreManager.setSessionController(DefaultController);

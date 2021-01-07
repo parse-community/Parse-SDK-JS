@@ -10,7 +10,10 @@
 jest.autoMockOff();
 
 const mockRNStorageInterface = require('./test_helpers/mockRNStorage');
+const mockWeChat = require('./test_helpers/mockWeChat');
 const CoreManager = require('../CoreManager');
+
+global.wx = mockWeChat;
 
 let mockStorage = {};
 const mockStorageInterface = {
@@ -40,8 +43,8 @@ const mockStorageInterface = {
 
   clear() {
     mockStorage = {};
-  }
-}
+  },
+};
 
 global.localStorage = mockStorageInterface;
 
@@ -88,91 +91,101 @@ describe('React Native StorageController', () => {
     expect(typeof RNStorageController.removeItemAsync).toBe('function');
   });
 
-  it('can store and retrieve values', (done) => {
-    RNStorageController.getItemAsync('myKey').then((result) => {
-      expect(result).toBe(null);
-      return RNStorageController.setItemAsync('myKey', 'myValue');
-    }).then(() => {
-      return RNStorageController.getItemAsync('myKey');
-    }).then((result) => {
-      expect(result).toBe('myValue');
-      done();
-    });
+  it('can store and retrieve values', done => {
+    RNStorageController.getItemAsync('myKey')
+      .then(result => {
+        expect(result).toBe(null);
+        return RNStorageController.setItemAsync('myKey', 'myValue');
+      })
+      .then(() => {
+        return RNStorageController.getItemAsync('myKey');
+      })
+      .then(result => {
+        expect(result).toBe('myValue');
+        done();
+      });
   });
 
-  it('can remove values', (done) => {
-    RNStorageController.setItemAsync('myKey', 'myValue').then(() => {
-      return RNStorageController.getItemAsync('myKey');
-    }).then((result) => {
-      expect(result).toBe('myValue');
-      return RNStorageController.removeItemAsync('myKey');
-    }).then(() => {
-      return RNStorageController.getItemAsync('myKey');
-    }).then((result) => {
-      expect(result).toBe(null);
-      done();
-    });
+  it('can remove values', done => {
+    RNStorageController.setItemAsync('myKey', 'myValue')
+      .then(() => {
+        return RNStorageController.getItemAsync('myKey');
+      })
+      .then(result => {
+        expect(result).toBe('myValue');
+        return RNStorageController.removeItemAsync('myKey');
+      })
+      .then(() => {
+        return RNStorageController.getItemAsync('myKey');
+      })
+      .then(result => {
+        expect(result).toBe(null);
+        done();
+      });
   });
 
-  it('can getAllKeys', (done) => {
-    RNStorageController.setItemAsync('myKey', 'myValue').then(() => {
-      return RNStorageController.getItemAsync('myKey');
-    }).then((result) => {
-      expect(result).toBe('myValue');
-      return RNStorageController.getAllKeysAsync();
-    }).then((keys) => {
-      expect(keys[0]).toBe('myKey');
-      done();
-    });
+  it('can getAllKeys', done => {
+    RNStorageController.setItemAsync('myKey', 'myValue')
+      .then(() => {
+        return RNStorageController.getItemAsync('myKey');
+      })
+      .then(result => {
+        expect(result).toBe('myValue');
+        return RNStorageController.getAllKeysAsync();
+      })
+      .then(keys => {
+        expect(keys[0]).toBe('myKey');
+        done();
+      });
   });
 
-  it('can handle set error', (done) => {
+  it('can handle set error', done => {
     const mockRNError = {
       setItem(path, value, cb) {
         cb('Error Thrown', undefined);
       },
     };
     CoreManager.setAsyncStorage(mockRNError);
-    RNStorageController.setItemAsync('myKey', 'myValue').catch((error) => {
+    RNStorageController.setItemAsync('myKey', 'myValue').catch(error => {
       expect(error).toBe('Error Thrown');
       done();
     });
   });
 
-  it('can handle get error', (done) => {
+  it('can handle get error', done => {
     const mockRNError = {
       getItem(path, cb) {
         cb('Error Thrown', undefined);
       },
     };
     CoreManager.setAsyncStorage(mockRNError);
-    RNStorageController.getItemAsync('myKey').catch((error) => {
+    RNStorageController.getItemAsync('myKey').catch(error => {
       expect(error).toBe('Error Thrown');
       done();
     });
   });
 
-  it('can handle remove error', (done) => {
+  it('can handle remove error', done => {
     const mockRNError = {
       removeItem(path, cb) {
         cb('Error Thrown', undefined);
       },
     };
     CoreManager.setAsyncStorage(mockRNError);
-    RNStorageController.removeItemAsync('myKey').catch((error) => {
+    RNStorageController.removeItemAsync('myKey').catch(error => {
       expect(error).toBe('Error Thrown');
       done();
     });
   });
 
-  it('can handle getAllKeys error', (done) => {
+  it('can handle getAllKeys error', done => {
     const mockRNError = {
       getAllKeys(cb) {
         cb('Error Thrown', undefined);
       },
     };
     CoreManager.setAsyncStorage(mockRNError);
-    RNStorageController.getAllKeysAsync().catch((error) => {
+    RNStorageController.getAllKeysAsync().catch(error => {
       expect(error).toBe('Error Thrown');
       done();
     });
@@ -207,6 +220,35 @@ describe('Default StorageController', () => {
   });
 });
 
+const WeappStorageController = require('../StorageController.weapp');
+
+describe('WeChat StorageController', () => {
+  beforeEach(() => {
+    WeappStorageController.clear();
+  });
+
+  it('is synchronous', () => {
+    expect(WeappStorageController.async).toBe(0);
+    expect(typeof WeappStorageController.getItem).toBe('function');
+    expect(typeof WeappStorageController.setItem).toBe('function');
+    expect(typeof WeappStorageController.removeItem).toBe('function');
+  });
+
+  it('can store and retrieve values', () => {
+    expect(WeappStorageController.getItem('myKey')).toBe(undefined);
+    WeappStorageController.setItem('myKey', 'myValue');
+    expect(WeappStorageController.getItem('myKey')).toBe('myValue');
+    expect(WeappStorageController.getAllKeys()).toEqual(['myKey']);
+  });
+
+  it('can remove values', () => {
+    WeappStorageController.setItem('myKey', 'myValue');
+    expect(WeappStorageController.getItem('myKey')).toBe('myValue');
+    WeappStorageController.removeItem('myKey');
+    expect(WeappStorageController.getItem('myKey')).toBe(undefined);
+  });
+});
+
 const Storage = require('../Storage');
 
 describe('Storage (Default StorageController)', () => {
@@ -228,20 +270,25 @@ describe('Storage (Default StorageController)', () => {
     expect(Storage.getItem('myKey')).toBe(null);
   });
 
-  it('wraps synchronous methods in async wrappers', (done) => {
-    Storage.getItemAsync('myKey').then((result) => {
-      expect(result).toBe(null);
-      return Storage.setItemAsync('myKey', 'myValue');
-    }).then(() => {
-      return Storage.getItemAsync('myKey');
-    }).then((result) => {
-      expect(result).toBe('myValue');
-      return Storage.removeItemAsync('myKey');
-    }).then(() => {
-      return Storage.getItemAsync('myKey');
-    }).then(() => {
-      done();
-    });
+  it('wraps synchronous methods in async wrappers', done => {
+    Storage.getItemAsync('myKey')
+      .then(result => {
+        expect(result).toBe(null);
+        return Storage.setItemAsync('myKey', 'myValue');
+      })
+      .then(() => {
+        return Storage.getItemAsync('myKey');
+      })
+      .then(result => {
+        expect(result).toBe('myValue');
+        return Storage.removeItemAsync('myKey');
+      })
+      .then(() => {
+        return Storage.getItemAsync('myKey');
+      })
+      .then(() => {
+        done();
+      });
   });
 
   it('can generate a unique storage path', () => {
@@ -255,14 +302,22 @@ describe('Storage (Default StorageController)', () => {
     expect(Storage.generatePath('hello')).toBe('Parse/appid/hello');
     expect(Storage.generatePath('/hello')).toBe('Parse/appid/hello');
   });
+
+  it('can clear if controller does not implement clear', () => {
+    CoreManager.setStorageController({
+      getItem: () => {},
+      setItem: () => {},
+      removeItem: () => {},
+      getAllKeys: () => {},
+    });
+    Storage._clear();
+  });
 });
 
 describe('Storage (Async StorageController)', () => {
   beforeEach(() => {
     CoreManager.setAsyncStorage(mockRNStorageInterface);
-    CoreManager.setStorageController(
-      require('../StorageController.react-native')
-    );
+    CoreManager.setStorageController(require('../StorageController.react-native'));
   });
 
   it('throws when using a synchronous method', () => {
@@ -280,22 +335,28 @@ describe('Storage (Async StorageController)', () => {
     );
   });
 
-  it('wraps synchronous methods in async wrappers', (done) => {
-    Storage.getItemAsync('myKey').then((result) => {
-      expect(result).toBe(null);
-      return Storage.setItemAsync('myKey', 'myValue');
-    }).then(() => {
-      return Storage.getItemAsync('myKey');
-    }).then((result) => {
-      expect(result).toBe('myValue');
-      return Storage.getAllKeysAsync();
-    }).then((result) => {
-      expect(result).toEqual(['myKey']);
-      return Storage.removeItemAsync('myKey');
-    }).then(() => {
-      return Storage.getItemAsync('myKey');
-    }).then(() => {
-      done();
-    });
+  it('wraps synchronous methods in async wrappers', done => {
+    Storage.getItemAsync('myKey')
+      .then(result => {
+        expect(result).toBe(null);
+        return Storage.setItemAsync('myKey', 'myValue');
+      })
+      .then(() => {
+        return Storage.getItemAsync('myKey');
+      })
+      .then(result => {
+        expect(result).toBe('myValue');
+        return Storage.getAllKeysAsync();
+      })
+      .then(result => {
+        expect(result).toEqual(['myKey']);
+        return Storage.removeItemAsync('myKey');
+      })
+      .then(() => {
+        return Storage.getItemAsync('myKey');
+      })
+      .then(() => {
+        done();
+      });
   });
 });

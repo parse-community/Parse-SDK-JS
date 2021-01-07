@@ -28,13 +28,14 @@ const PUBLIC_KEY = '*';
  * <p>An ACL, or Access Control List can be added to any
  * <code>Parse.Object</code> to restrict access to only a subset of users
  * of your application.</p>
+ *
  * @alias Parse.ACL
  */
 class ParseACL {
   permissionsById: ByIdMap;
 
   /**
-   * @param {(Parse.User|Object)} user The user to initialize the ACL for
+   * @param {(Parse.User | object)} arg1 The user to initialize the ACL for
    */
   constructor(arg1: ParseUser | ByIdMap) {
     this.permissionsById = {};
@@ -45,38 +46,28 @@ class ParseACL {
       } else {
         for (const userId in arg1) {
           const accessList = arg1[userId];
-          if (typeof userId !== 'string') {
-            throw new TypeError(
-              'Tried to create an ACL with an invalid user id.'
-            );
-          }
           this.permissionsById[userId] = {};
           for (const permission in accessList) {
             const allowed = accessList[permission];
             if (permission !== 'read' && permission !== 'write') {
-              throw new TypeError(
-                'Tried to create an ACL with an invalid permission type.'
-              );
+              throw new TypeError('Tried to create an ACL with an invalid permission type.');
             }
             if (typeof allowed !== 'boolean') {
-              throw new TypeError(
-                'Tried to create an ACL with an invalid permission value.'
-              );
+              throw new TypeError('Tried to create an ACL with an invalid permission value.');
             }
             this.permissionsById[userId][permission] = allowed;
           }
         }
       }
     } else if (typeof arg1 === 'function') {
-      throw new TypeError(
-        'ParseACL constructed with a function. Did you forget ()?'
-      );
+      throw new TypeError('ParseACL constructed with a function. Did you forget ()?');
     }
   }
 
   /**
    * Returns a JSON-encoded version of the ACL.
-   * @return {Object}
+   *
+   * @returns {object}
    */
   toJSON(): ByIdMap {
     const permissions = {};
@@ -88,8 +79,9 @@ class ParseACL {
 
   /**
    * Returns whether this ACL is equal to another object
+   *
    * @param other The other object to compare to
-   * @return {Boolean}
+   * @returns {boolean}
    */
   equals(other: ParseACL): boolean {
     if (!(other instanceof ParseACL)) {
@@ -151,10 +143,7 @@ class ParseACL {
     }
   }
 
-  _getAccess(
-    accessType: string,
-    userId: ParseUser | ParseRole | string
-  ): boolean {
+  _getAccess(accessType: string, userId: ParseUser | ParseRole | string): boolean {
     if (userId instanceof ParseUser) {
       userId = userId.id;
       if (!userId) {
@@ -176,8 +165,9 @@ class ParseACL {
 
   /**
    * Sets whether the given user is allowed to read this object.
+   *
    * @param userId An instance of Parse.User or its objectId.
-   * @param {Boolean} allowed Whether that user should have read access.
+   * @param {boolean} allowed Whether that user should have read access.
    */
   setReadAccess(userId: ParseUser | ParseRole | string, allowed: boolean) {
     this._setAccess('read', userId, allowed);
@@ -188,8 +178,9 @@ class ParseACL {
    * Even if this returns false, the user may still be able to access it if
    * getPublicReadAccess returns true or a role that the user belongs to has
    * write access.
+   *
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
-   * @return {Boolean}
+   * @returns {boolean}
    */
   getReadAccess(userId: ParseUser | ParseRole | string): boolean {
     return this._getAccess('read', userId);
@@ -197,8 +188,9 @@ class ParseACL {
 
   /**
    * Sets whether the given user id is allowed to write this object.
+   *
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role..
-   * @param {Boolean} allowed Whether that user should have write access.
+   * @param {boolean} allowed Whether that user should have write access.
    */
   setWriteAccess(userId: ParseUser | ParseRole | string, allowed: boolean) {
     this._setAccess('write', userId, allowed);
@@ -209,8 +201,9 @@ class ParseACL {
    * Even if this returns false, the user may still be able to write it if
    * getPublicWriteAccess returns true or a role that the user belongs to has
    * write access.
+   *
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
-   * @return {Boolean}
+   * @returns {boolean}
    */
   getWriteAccess(userId: ParseUser | ParseRole | string): boolean {
     return this._getAccess('write', userId);
@@ -218,7 +211,8 @@ class ParseACL {
 
   /**
    * Sets whether the public is allowed to read this object.
-   * @param {Boolean} allowed
+   *
+   * @param {boolean} allowed
    */
   setPublicReadAccess(allowed: boolean) {
     this.setReadAccess(PUBLIC_KEY, allowed);
@@ -226,7 +220,8 @@ class ParseACL {
 
   /**
    * Gets whether the public is allowed to read this object.
-   * @return {Boolean}
+   *
+   * @returns {boolean}
    */
   getPublicReadAccess(): boolean {
     return this.getReadAccess(PUBLIC_KEY);
@@ -234,7 +229,8 @@ class ParseACL {
 
   /**
    * Sets whether the public is allowed to write this object.
-   * @param {Boolean} allowed
+   *
+   * @param {boolean} allowed
    */
   setPublicWriteAccess(allowed: boolean) {
     this.setWriteAccess(PUBLIC_KEY, allowed);
@@ -242,7 +238,8 @@ class ParseACL {
 
   /**
    * Gets whether the public is allowed to write this object.
-   * @return {Boolean}
+   *
+   * @returns {boolean}
    */
   getPublicWriteAccess(): boolean {
     return this.getWriteAccess(PUBLIC_KEY);
@@ -254,7 +251,7 @@ class ParseACL {
    * still be able to write it if a parent role has read access.
    *
    * @param role The name of the role, or a Parse.Role object.
-   * @return {Boolean} true if the role has read access. false otherwise.
+   * @returns {boolean} true if the role has read access. false otherwise.
    * @throws {TypeError} If role is neither a Parse.Role nor a String.
    */
   getRoleReadAccess(role: ParseRole | string): boolean {
@@ -263,9 +260,7 @@ class ParseACL {
       role = role.getName();
     }
     if (typeof role !== 'string') {
-      throw new TypeError(
-        'role must be a ParseRole or a String'
-      );
+      throw new TypeError('role must be a ParseRole or a String');
     }
     return this.getReadAccess('role:' + role);
   }
@@ -276,7 +271,7 @@ class ParseACL {
    * still be able to write it if a parent role has write access.
    *
    * @param role The name of the role, or a Parse.Role object.
-   * @return {Boolean} true if the role has write access. false otherwise.
+   * @returns {boolean} true if the role has write access. false otherwise.
    * @throws {TypeError} If role is neither a Parse.Role nor a String.
    */
   getRoleWriteAccess(role: ParseRole | string): boolean {
@@ -285,9 +280,7 @@ class ParseACL {
       role = role.getName();
     }
     if (typeof role !== 'string') {
-      throw new TypeError(
-        'role must be a ParseRole or a String'
-      );
+      throw new TypeError('role must be a ParseRole or a String');
     }
     return this.getWriteAccess('role:' + role);
   }
@@ -297,7 +290,7 @@ class ParseACL {
    * to read this object.
    *
    * @param role The name of the role, or a Parse.Role object.
-   * @param {Boolean} allowed Whether the given role can read this object.
+   * @param {boolean} allowed Whether the given role can read this object.
    * @throws {TypeError} If role is neither a Parse.Role nor a String.
    */
   setRoleReadAccess(role: ParseRole | string, allowed: boolean) {
@@ -306,9 +299,7 @@ class ParseACL {
       role = role.getName();
     }
     if (typeof role !== 'string') {
-      throw new TypeError(
-        'role must be a ParseRole or a String'
-      );
+      throw new TypeError('role must be a ParseRole or a String');
     }
     this.setReadAccess('role:' + role, allowed);
   }
@@ -318,7 +309,7 @@ class ParseACL {
    * to write this object.
    *
    * @param role The name of the role, or a Parse.Role object.
-   * @param {Boolean} allowed Whether the given role can write this object.
+   * @param {boolean} allowed Whether the given role can write this object.
    * @throws {TypeError} If role is neither a Parse.Role nor a String.
    */
   setRoleWriteAccess(role: ParseRole | string, allowed: boolean) {
@@ -327,9 +318,7 @@ class ParseACL {
       role = role.getName();
     }
     if (typeof role !== 'string') {
-      throw new TypeError(
-        'role must be a ParseRole or a String'
-      );
+      throw new TypeError('role must be a ParseRole or a String');
     }
     this.setWriteAccess('role:' + role, allowed);
   }

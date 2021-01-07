@@ -14,7 +14,7 @@ import ParseObject from './ParseObject';
 
 export default function unique<T>(arr: Array<T>): Array<T> {
   const uniques = [];
-  arr.forEach((value) => {
+  arr.forEach(value => {
     if (value instanceof ParseObject) {
       if (!arrayContainsObject(uniques, value)) {
         uniques.push(value);

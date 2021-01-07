@@ -34,7 +34,7 @@ export function initializeState(obj: ParseObject, initial?: State): State {
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     };
   }
   state = initial;
@@ -103,7 +103,13 @@ export function getObjectCache(obj: ParseObject): ObjectCache {
 export function estimateAttribute(obj: ParseObject, attr: string): mixed {
   const serverData = getServerData(obj);
   const pendingOps = getPendingOps(obj);
-  return ObjectStateMutations.estimateAttribute(serverData, pendingOps, obj.className, obj.id, attr);
+  return ObjectStateMutations.estimateAttribute(
+    serverData,
+    pendingOps,
+    obj.className,
+    obj.id,
+    attr
+  );
 }
 
 export function estimateAttributes(obj: ParseObject): AttributeMap {

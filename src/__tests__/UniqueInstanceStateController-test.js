@@ -18,10 +18,10 @@ jest.dontMock('../TaskQueue');
 jest.dontMock('../promiseUtils');
 jest.useFakeTimers();
 
-const mockObject = function(className) {
+const mockObject = function (className) {
   this.className = className;
 };
-mockObject.registerSubclass = function() {};
+mockObject.registerSubclass = function () {};
 jest.setMock('../ParseObject', mockObject);
 
 const ParseFile = require('../ParseFile').default;
@@ -57,7 +57,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
   });
 
@@ -69,7 +69,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     UniqueInstanceStateController.clearAllState();
     expect(UniqueInstanceStateController.getState(obj)).toEqual(null);
@@ -85,7 +85,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{ counter: op }],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
   });
 
@@ -97,7 +97,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     UniqueInstanceStateController.setServerData(obj, { valid: true });
     expect(UniqueInstanceStateController.getState(obj)).toEqual({
@@ -105,7 +105,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     UniqueInstanceStateController.setServerData(obj, { counter: 0 });
     expect(UniqueInstanceStateController.getState(obj)).toEqual({
@@ -113,7 +113,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
   });
 
@@ -125,7 +125,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     UniqueInstanceStateController.setServerData(obj, { counter: undefined });
     expect(UniqueInstanceStateController.getState(obj)).toEqual({
@@ -133,7 +133,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
   });
 
@@ -148,7 +148,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{ counter: op, valid: op2 }],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     const op3 = new ParseOps.UnsetOp();
     UniqueInstanceStateController.setPendingOp(obj, 'valid', op3);
@@ -157,7 +157,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{ counter: op, valid: op3 }],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
   });
 
@@ -170,7 +170,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{ counter: op }],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     UniqueInstanceStateController.setPendingOp(obj, 'counter', null);
     expect(UniqueInstanceStateController.getState(obj)).toEqual({
@@ -178,7 +178,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
   });
 
@@ -191,7 +191,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{ counter: op }],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     UniqueInstanceStateController.pushPendingState(obj);
     expect(UniqueInstanceStateController.getState(obj)).toEqual({
@@ -199,7 +199,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{ counter: op }, {}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     const op2 = new ParseOps.SetOp(true);
     UniqueInstanceStateController.setPendingOp(obj, 'valid', op2);
@@ -208,7 +208,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{ counter: op }, { valid: op2 }],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
   });
 
@@ -222,17 +222,17 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{ counter: op }, {}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     expect(UniqueInstanceStateController.popPendingState(obj)).toEqual({
-      counter: op
+      counter: op,
     });
     expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
   });
 
@@ -244,7 +244,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{}, {}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     UniqueInstanceStateController.popPendingState(obj);
     UniqueInstanceStateController.popPendingState(obj);
@@ -253,14 +253,13 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
   });
 
   it('can estimate a single attribute', () => {
     const obj = new ParseObject();
-    expect(UniqueInstanceStateController.estimateAttribute(obj, 'unset'))
-      .toBe(undefined);
+    expect(UniqueInstanceStateController.estimateAttribute(obj, 'unset')).toBe(undefined);
     UniqueInstanceStateController.setServerData(obj, { counter: 11 });
     expect(UniqueInstanceStateController.estimateAttribute(obj, 'counter')).toBe(11);
     const op = new ParseOps.IncrementOp(1);
@@ -282,13 +281,13 @@ describe('UniqueInstanceStateController', () => {
     UniqueInstanceStateController.setPendingOp(obj, 'valid', op2);
     expect(UniqueInstanceStateController.estimateAttributes(obj)).toEqual({
       counter: 12,
-      valid: false
+      valid: false,
     });
     UniqueInstanceStateController.pushPendingState(obj);
     const op3 = new ParseOps.UnsetOp();
     UniqueInstanceStateController.setPendingOp(obj, 'valid', op3);
     expect(UniqueInstanceStateController.estimateAttributes(obj)).toEqual({
-      counter: 12
+      counter: 12,
     });
   });
 
@@ -296,15 +295,15 @@ describe('UniqueInstanceStateController', () => {
     const obj = new ParseObject();
     UniqueInstanceStateController.setServerData(obj, { counter: 11 });
     expect(UniqueInstanceStateController.estimateAttributes(obj)).toEqual({
-      counter: 11
+      counter: 11,
     });
     UniqueInstanceStateController.commitServerChanges(obj, {
       counter: 12,
-      valid: true
+      valid: true,
     });
     expect(UniqueInstanceStateController.estimateAttributes(obj)).toEqual({
       counter: 12,
-      valid: true
+      valid: true,
     });
   });
 
@@ -353,14 +352,16 @@ describe('UniqueInstanceStateController', () => {
     UniqueInstanceStateController.mergeFirstPendingState(obj);
     expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: {},
-      pendingOps: [{
-        counter: new ParseOps.SetOp(44),
-        name: new ParseOps.SetOp('demo'),
-        valid: new ParseOps.SetOp(true),
-      }],
+      pendingOps: [
+        {
+          counter: new ParseOps.SetOp(44),
+          name: new ParseOps.SetOp('demo'),
+          valid: new ParseOps.SetOp(true),
+        },
+      ],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
   });
 
@@ -375,8 +376,8 @@ describe('UniqueInstanceStateController', () => {
       file: ParseFile.fromJSON({
         __type: 'File',
         name: 'parse.txt',
-        url: 'http://files.parsetfss.com/a/parse.txt'
-      })
+        url: 'http://files.parsetfss.com/a/parse.txt',
+      }),
     });
     cache = UniqueInstanceStateController.getObjectCache(obj);
     expect(cache.name).toBe(undefined);
@@ -385,7 +386,7 @@ describe('UniqueInstanceStateController', () => {
     expect(JSON.parse(cache.location)).toEqual({
       __type: 'GeoPoint',
       latitude: 20,
-      longitude: 20
+      longitude: 20,
     });
   });
 
@@ -398,7 +399,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     const state = UniqueInstanceStateController.removeState(obj);
     expect(state).toEqual({
@@ -406,13 +407,13 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{}],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     expect(UniqueInstanceStateController.getState(obj)).toBe(null);
   });
 
   it('can allocate many objects without running out of memory', () => {
-    const closure = function() {
+    const closure = function () {
       const obj = new ParseObject();
       UniqueInstanceStateController.setServerData(obj, { spacious: true });
     };
@@ -423,7 +424,10 @@ describe('UniqueInstanceStateController', () => {
 
   it('can duplicate the state of an object', () => {
     const obj = new ParseObject();
-    UniqueInstanceStateController.setServerData(obj, { counter: 12, name: 'original' });
+    UniqueInstanceStateController.setServerData(obj, {
+      counter: 12,
+      name: 'original',
+    });
     const setCount = new ParseOps.SetOp(44);
     const setValid = new ParseOps.SetOp(true);
     UniqueInstanceStateController.setPendingOp(obj, 'counter', setCount);
@@ -436,23 +440,25 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{ counter: setCount, valid: setValid }],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
 
-    UniqueInstanceStateController.setServerData(duplicate, { name: 'duplicate' });
+    UniqueInstanceStateController.setServerData(duplicate, {
+      name: 'duplicate',
+    });
     expect(UniqueInstanceStateController.getState(obj)).toEqual({
       serverData: { counter: 12, name: 'original' },
       pendingOps: [{ counter: setCount, valid: setValid }],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     expect(UniqueInstanceStateController.getState(duplicate)).toEqual({
       serverData: { counter: 12, name: 'duplicate' },
       pendingOps: [{ counter: setCount, valid: setValid }],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
 
     UniqueInstanceStateController.commitServerChanges(obj, { o: { a: 12 } });
@@ -461,14 +467,14 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{ counter: setCount, valid: setValid }],
       objectCache: { o: '{"a":12}' },
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
     expect(UniqueInstanceStateController.getState(duplicate)).toEqual({
       serverData: { counter: 12, name: 'duplicate' },
       pendingOps: [{ counter: setCount, valid: setValid }],
       objectCache: {},
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
 
     const otherDup = new ParseObject();
@@ -478,7 +484,7 @@ describe('UniqueInstanceStateController', () => {
       pendingOps: [{ counter: setCount, valid: setValid }],
       objectCache: { o: '{"a":12}' },
       tasks: new TaskQueue(),
-      existed: false
+      existed: false,
     });
   });
 });

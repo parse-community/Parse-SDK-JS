@@ -36,7 +36,9 @@ class ParseConfig {
 
   /**
    * Gets the value of an attribute.
-   * @param {String} attr The name of an attribute.
+   *
+   * @param {string} attr The name of an attribute.
+   * @returns {*}
    */
   get(attr: string): any {
     return this.attributes[attr];
@@ -44,7 +46,9 @@ class ParseConfig {
 
   /**
    * Gets the HTML-escaped value of an attribute.
-   * @param {String} attr The name of an attribute.
+   *
+   * @param {string} attr The name of an attribute.
+   * @returns {string}
    */
   escape(attr: string): string {
     const html = this._escapedAttributes[attr];
@@ -65,7 +69,7 @@ class ParseConfig {
    * memory or from local storage if necessary.
    *
    * @static
-   * @return {Config} The most recently-fetched Parse.Config if it
+   * @returns {Parse.Config} The most recently-fetched Parse.Config if it
    *     exists, else an empty Parse.Config.
    */
   static current() {
@@ -75,13 +79,14 @@ class ParseConfig {
 
   /**
    * Gets a new configuration object from the server.
+   *
    * @static
-   * @param {Object} options
+   * @param {object} options
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    * </ul>
-   * @return {Promise} A promise that is resolved with a newly-created
+   * @returns {Promise} A promise that is resolved with a newly-created
    *     configuration object when the get completes.
    */
   static get(options: RequestOptions = {}) {
@@ -91,24 +96,37 @@ class ParseConfig {
 
   /**
    * Save value keys to the server.
+   *
    * @static
-   * @param {Object} attrs The config parameters and values.
-   * @param {Object} masterKeyOnlyFlags The flags that define whether config parameters listed
+   * @param {object} attrs The config parameters and values.
+   * @param {object} masterKeyOnlyFlags The flags that define whether config parameters listed
    * in `attrs` should be retrievable only by using the master key.
    * For example: `param1: true` makes `param1` only retrievable by using the master key.
    * If a parameter is not provided or set to `false`, it can be retrieved without
    * using the master key.
-   * @return {Promise} A promise that is resolved with a newly-created
+   * @returns {Promise} A promise that is resolved with a newly-created
    *     configuration object or with the current with the update.
    */
   static save(attrs: { [key: string]: any }, masterKeyOnlyFlags: { [key: string]: any }) {
     const controller = CoreManager.getConfigController();
     //To avoid a mismatch with the local and the cloud config we get a new version
-    return controller.save(attrs, masterKeyOnlyFlags).then(() => {
-      return controller.get({ useMasterKey: true });
-    },(error) => {
-      return Promise.reject(error);
-    });
+    return controller.save(attrs, masterKeyOnlyFlags).then(
+      () => {
+        return controller.get({ useMasterKey: true });
+      },
+      error => {
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  /**
+   * Used for testing
+   *
+   * @private
+   */
+  static _clearCache() {
+    currentConfig = null;
   }
 }
 
@@ -122,7 +140,7 @@ function decodePayload(data) {
     if (json && typeof json === 'object') {
       return decode(json);
     }
-  } catch(e) {
+  } catch (e) {
     return null;
   }
 }
@@ -135,9 +153,8 @@ const DefaultController = {
 
     const config = new ParseConfig();
     const storagePath = Storage.generatePath(CURRENT_CONFIG_KEY);
-    let configData;
     if (!Storage.async()) {
-      configData = Storage.getItem(storagePath);
+      const configData = Storage.getItem(storagePath);
 
       if (configData) {
         const attributes = decodePayload(configData);
@@ -149,7 +166,7 @@ const DefaultController = {
       return config;
     }
     // Return a promise for async storage controllers
-    return Storage.getItemAsync(storagePath).then((configData) => {
+    return Storage.getItemAsync(storagePath).then(configData => {
       if (configData) {
         const attributes = decodePayload(configData);
         if (attributes) {
@@ -164,14 +181,9 @@ const DefaultController = {
   get(options: RequestOptions = {}) {
     const RESTController = CoreManager.getRESTController();
 
-    return RESTController.request(
-      'GET', 'config', {}, options
-    ).then((response) => {
+    return RESTController.request('GET', 'config', {}, options).then(response => {
       if (!response || !response.params) {
-        const error = new ParseError(
-          ParseError.INVALID_JSON,
-          'Config JSON response invalid.'
-        );
+        const error = new ParseError(ParseError.INVALID_JSON, 'Config JSON response invalid.');
         return Promise.reject(error);
       }
 
@@ -193,8 +205,8 @@ const DefaultController = {
   save(attrs: { [key: string]: any }, masterKeyOnlyFlags: { [key: string]: any }) {
     const RESTController = CoreManager.getRESTController();
     const encodedAttrs = {};
-    for(const key in attrs){
-      encodedAttrs[key] = encode(attrs[key])
+    for (const key in attrs) {
+      encodedAttrs[key] = encode(attrs[key]);
     }
     return RESTController.request(
       'PUT',
@@ -202,17 +214,17 @@ const DefaultController = {
       { params: encodedAttrs, masterKeyOnly: masterKeyOnlyFlags },
       { useMasterKey: true }
     ).then(response => {
-      if(response && response.result){
-        return Promise.resolve()
+      if (response && response.result) {
+        return Promise.resolve();
       } else {
         const error = new ParseError(
           ParseError.INTERNAL_SERVER_ERROR,
           'Error occured updating Config.'
         );
-        return Promise.reject(error)
+        return Promise.reject(error);
       }
-    })
-  }
+    });
+  },
 };
 
 CoreManager.setConfigController(DefaultController);

@@ -22,6 +22,7 @@ jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseOp');
+jest.dontMock('../ParsePolygon');
 jest.dontMock('../ParseRelation');
 jest.dontMock('../RESTController');
 jest.dontMock('../SingleInstanceStateController');
@@ -40,7 +41,7 @@ jest.dontMock('./test_helpers/mockXHR');
 
 jest.useFakeTimers();
 
-const mockRelation = function(parent, key) {
+const mockRelation = function (parent, key) {
   // The parent and key fields will be populated by the parent
   if (parent) {
     this.parentClass = parent.className;
@@ -48,33 +49,27 @@ const mockRelation = function(parent, key) {
   }
   this.key = key;
 };
-mockRelation.prototype.add = function(obj) {
+mockRelation.prototype.add = function (obj) {
   this.targetClassName = obj.className;
 };
-mockRelation.prototype.toJSON = function() {
+mockRelation.prototype.toJSON = function () {
   return {
     __type: 'Relation',
-    className: this.targetClassName
+    className: this.targetClassName,
   };
 };
-mockRelation.prototype._ensureParentAndKey = function(parent, key) {
+mockRelation.prototype._ensureParentAndKey = function (parent, key) {
   this.key = this.key || key;
   if (this.key !== key) {
-    throw new Error(
-      'Internal Error. Relation retrieved from two different keys.'
-    );
+    throw new Error('Internal Error. Relation retrieved from two different keys.');
   }
   if (this.parent) {
     if (this.parent.className !== parent.className) {
-      throw new Error(
-        'Internal Error. Relation retrieved from two different Objects.'
-      );
+      throw new Error('Internal Error. Relation retrieved from two different Objects.');
     }
     if (this.parent.id) {
       if (this.parent.id !== parent.id) {
-        throw new Error(
-          'Internal Error. Relation retrieved from two different Objects.'
-        );
+        throw new Error('Internal Error. Relation retrieved from two different Objects.');
       }
     } else if (parent.id) {
       this.parent = parent;
@@ -85,30 +80,32 @@ mockRelation.prototype._ensureParentAndKey = function(parent, key) {
 };
 jest.setMock('../ParseRelation', mockRelation);
 
-const mockQuery = function(className) {
+const mockQuery = function (className) {
   this.className = className;
 };
-mockQuery.prototype.containedIn = function(field, ids) {
+mockQuery.prototype.containedIn = function (field, ids) {
   this.results = [];
-  ids.forEach((id) => {
-    this.results.push(ParseObject.fromJSON({
-      className: this.className,
-      objectId: id
-    }));
+  ids.forEach(id => {
+    this.results.push(
+      ParseObject.fromJSON({
+        className: this.className,
+        objectId: id,
+      })
+    );
   });
 };
 
-mockQuery.prototype.include = function(keys) {
+mockQuery.prototype.include = function (keys) {
   this._include = keys;
 };
 
-mockQuery.prototype.find = function() {
+mockQuery.prototype.find = function () {
   return Promise.resolve(this.results);
 };
-mockQuery.prototype.get = function(id) {
+mockQuery.prototype.get = function (id) {
   const object = ParseObject.fromJSON({
     className: this.className,
-    objectId: id
+    objectId: id,
   });
   return Promise.resolve(object);
 };
@@ -147,6 +144,7 @@ const ParseACL = require('../ParseACL').default;
 const ParseError = require('../ParseError').default;
 const ParseFile = require('../ParseFile').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
+const ParsePolygon = require('../ParsePolygon').default;
 const ParseObject = require('../ParseObject').default;
 const ParseOp = require('../ParseOp');
 const RESTController = require('../RESTController');
@@ -160,18 +158,14 @@ CoreManager.setRESTController(RESTController);
 CoreManager.setInstallationController({
   currentInstallationId() {
     return Promise.resolve('iid');
-  }
+  },
 });
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 CoreManager.set('MASTER_KEY', 'C');
 CoreManager.set('VERSION', 'V');
 
-const {
-  SetOp,
-  UnsetOp,
-  IncrementOp
-} = require('../ParseOp');
+const { SetOp, UnsetOp, IncrementOp } = require('../ParseOp');
 
 function flushPromises() {
   return new Promise(resolve => setImmediate(resolve));
@@ -180,6 +174,7 @@ function flushPromises() {
 describe('ParseObject', () => {
   beforeEach(() => {
     ParseObject.enableSingleInstance();
+    jest.clearAllMocks();
   });
 
   it('is initially created with no Id', () => {
@@ -192,10 +187,49 @@ describe('ParseObject', () => {
   it('can be created with initial attributes', () => {
     const o = new ParseObject({
       className: 'Item',
-      value: 12
+      value: 12,
     });
     expect(o.className).toBe('Item');
     expect(o.attributes).toEqual({ value: 12 });
+  });
+
+  it('can be created with attributes parameter', () => {
+    const o = new ParseObject('Item', {
+      value: 12,
+    });
+    expect(o.className).toBe('Item');
+    expect(o.attributes).toEqual({ value: 12 });
+  });
+
+  it('can ignore setting invalid key', () => {
+    const o = new ParseObject('Item');
+    const o2 = o.set(1234);
+    expect(o).toEqual(o2);
+  });
+
+  it('can ignore setting createdAt', () => {
+    const o = new ParseObject('Item');
+    o.set('createdAt', '1234');
+    expect(o.get('createdAt')).toEqual(undefined);
+  });
+
+  it('can handle setting relationOp', () => {
+    const child = new ParseObject('Child');
+    child.id = 'child1234';
+    const relationOpJSON = { __op: 'AddRelation', objects: [child] };
+    const o = new ParseObject('Item');
+    o.set('friends', relationOpJSON);
+    o._handleSaveResponse({});
+    expect(o.get('friends').targetClassName).toBe('Child');
+  });
+
+  it('cannot create with invalid attributes', () => {
+    expect(() => {
+      new ParseObject({
+        className: 'Item',
+        'invalid#name': 'foo',
+      });
+    }).toThrow("Can't create an invalid Parse Object");
   });
 
   it('can ignore validation if ignoreValidation option is provided', () => {
@@ -207,11 +241,14 @@ describe('ParseObject', () => {
       }
     }
 
-    const o = new ValidatedObject({
-      className: 'Item',
-      value: 12,
-      badAttr: true
-    }, { ignoreValidation: true });
+    const o = new ValidatedObject(
+      {
+        className: 'Item',
+        value: 12,
+        badAttr: true,
+      },
+      { ignoreValidation: true }
+    );
 
     expect(o.attributes.value).toBe(12);
     expect(o.attributes.badAttr).toBe(true);
@@ -222,7 +259,7 @@ describe('ParseObject', () => {
       className: 'Item',
       createdAt: '2013-12-14T04:51:19Z',
       objectId: 'I1',
-      size: 'medium'
+      size: 'medium',
     };
     const o = ParseObject.fromJSON(json);
     expect(o.className).toBe('Item');
@@ -230,7 +267,7 @@ describe('ParseObject', () => {
     expect(o.attributes).toEqual({
       size: 'medium',
       createdAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
-      updatedAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19))
+      updatedAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
     });
     expect(o.dirty()).toBe(false);
   });
@@ -239,14 +276,17 @@ describe('ParseObject', () => {
     const o = ParseObject.fromJSON({
       className: 'Item',
       objectId: 'I01',
-      size: 'small'
+      size: 'small',
     });
     expect(o.get('size')).toBe('small');
-    const o2 = ParseObject.fromJSON({
-      className: 'Item',
-      objectId: 'I01',
-      disabled: true
-    }, true);
+    const o2 = ParseObject.fromJSON(
+      {
+        className: 'Item',
+        objectId: 'I01',
+        disabled: true,
+      },
+      true
+    );
     expect(o.get('disabled')).toBe(true);
     expect(o.get('size')).toBe(undefined);
     expect(o.has('size')).toBe(false);
@@ -265,7 +305,9 @@ describe('ParseObject', () => {
   it('has a read-only attributes property', () => {
     const o = new ParseObject('Item');
     o.set('size', 'small');
-    expect(function() { o.attributes.size = 'large'; }).toThrow();
+    expect(function () {
+      o.attributes.size = 'large';
+    }).toThrow();
   });
 
   it('exposes read-only createdAt and updatedAt', () => {
@@ -277,7 +319,7 @@ describe('ParseObject', () => {
     o._finishFetch({
       objectId: 'O1',
       createdAt: { __type: 'Date', iso: created.toISOString() },
-      updatedAt: { __type: 'Date', iso: updated.toISOString() }
+      updatedAt: { __type: 'Date', iso: updated.toISOString() },
     });
     expect(o.get('createdAt')).toEqual(created);
     expect(o.get('updatedAt')).toEqual(updated);
@@ -285,27 +327,37 @@ describe('ParseObject', () => {
     expect(o.updatedAt).toEqual(updated);
   });
 
+  it('fetch ACL from serverData', () => {
+    const ACL = new ParseACL({ user1: { read: true } });
+    const o = new ParseObject('Item');
+    o._finishFetch({
+      objectId: 'O1',
+      ACL: { user1: { read: true } },
+    });
+    expect(o.getACL()).toEqual(ACL);
+  });
+
   it('can be rendered to JSON', () => {
     let o = new ParseObject('Item');
     o.set({
       size: 'large',
-      inStock: 18
+      inStock: 18,
     });
     expect(o.toJSON()).toEqual({
       size: 'large',
-      inStock: 18
+      inStock: 18,
     });
     o = new ParseObject('Item');
     o._finishFetch({
       objectId: 'O2',
       size: 'medium',
-      inStock: 12
+      inStock: 12,
     });
     expect(o.id).toBe('O2');
     expect(o.toJSON()).toEqual({
       objectId: 'O2',
       size: 'medium',
-      inStock: 12
+      inStock: 12,
     });
   });
 
@@ -313,28 +365,48 @@ describe('ParseObject', () => {
     const o = ParseObject.fromJSON({
       id: 'hasDates',
       className: 'Item',
-      createdAt: { __type: 'Date', iso: new Date(Date.UTC(2015, 0, 1)).toJSON() },
-      updatedAt: { __type: 'Date', iso: new Date(Date.UTC(2015, 0, 1)).toJSON() },
-      foo: 'bar'
+      createdAt: {
+        __type: 'Date',
+        iso: new Date(Date.UTC(2015, 0, 1)).toJSON(),
+      },
+      updatedAt: {
+        __type: 'Date',
+        iso: new Date(Date.UTC(2015, 0, 1)).toJSON(),
+      },
+      foo: 'bar',
     });
     expect(o.toJSON()).toEqual({
       id: 'hasDates',
       createdAt: '2015-01-01T00:00:00.000Z',
       updatedAt: '2015-01-01T00:00:00.000Z',
-      foo: 'bar'
+      foo: 'bar',
     });
   });
 
   it('can convert to a pointer', () => {
     const o = new ParseObject('Item');
-    expect(function() {o.toPointer();}).toThrow(
-      'Cannot create a pointer to an unsaved ParseObject'
-    );
+    expect(function () {
+      o.toPointer();
+    }).toThrow('Cannot create a pointer to an unsaved ParseObject');
     o.id = 'anObjectId';
     expect(o.toPointer()).toEqual({
       __type: 'Pointer',
       className: 'Item',
-      objectId: 'anObjectId'
+      objectId: 'anObjectId',
+    });
+  });
+
+  it('can convert to a offline pointer', () => {
+    const o = new ParseObject('Item');
+    o.id = 'AnObjectId';
+    expect(function () {
+      o.toOfflinePointer();
+    }).toThrow('Cannot create a offline pointer to a saved ParseObject');
+    o._localId = 'local1234';
+    expect(o.toOfflinePointer()).toEqual({
+      __type: 'Object',
+      className: 'Item',
+      _localId: 'local1234',
     });
   });
 
@@ -379,9 +451,11 @@ describe('ParseObject', () => {
     const o = new ParseObject('Person');
     o.set('age', 28);
     o.set('phoneProvider', 'AT&T');
+    o.set('objectField', { toString: 'hacking' });
     expect(o.escape('notSet')).toBe('');
     expect(o.escape('age')).toBe('28');
     expect(o.escape('phoneProvider')).toBe('AT&amp;T');
+    expect(o.escape('objectField')).toBe('');
   });
 
   it('can tell if it has an attribute', () => {
@@ -396,18 +470,22 @@ describe('ParseObject', () => {
     o._finishFetch({
       objectId: 'p99',
       age: 28,
-      human: true
+      human: true,
+      objectField: { foo: 'bar' },
     });
     expect(o.dirty()).toBe(false);
     expect(o.dirty('age')).toBe(false);
     expect(o.dirty('human')).toBe(false);
     expect(o.dirty('unset')).toBe(false);
+    expect(o.dirty('objectField')).toBe(false);
     o.set('human', false);
+    o.set('objectField', { foo: 'baz' });
     expect(o.dirty()).toBe(true);
     expect(o.dirty('age')).toBe(false);
     expect(o.dirty('human')).toBe(true);
     expect(o.dirty('unset')).toBe(false);
-  })
+    expect(o.dirty('objectField')).toBe(true);
+  });
 
   it('can unset a field', () => {
     const o = new ParseObject('Person');
@@ -424,7 +502,7 @@ describe('ParseObject', () => {
     const o2 = new ParseObject('Person');
     o2._finishFetch({
       objectId: 'P1',
-      name: 'Will'
+      name: 'Will',
     });
     expect(o2.attributes).toEqual({ name: 'Will' });
     o2.unset('name');
@@ -455,21 +533,17 @@ describe('ParseObject', () => {
     expect(o.op('age') instanceof IncrementOp).toBe(true);
     expect(o.dirtyKeys()).toEqual(['age']);
     expect(o._getSaveJSON()).toEqual({
-      age: { __op: 'Increment', amount: 1 }
+      age: { __op: 'Increment', amount: 1 },
     });
 
     o.increment('age', 4);
     expect(o.attributes).toEqual({ age: 5 });
     expect(o._getSaveJSON()).toEqual({
-      age: { __op: 'Increment', amount: 5 }
+      age: { __op: 'Increment', amount: 5 },
     });
 
-    expect(o.increment.bind(o, 'age', 'four')).toThrow(
-      'Cannot increment by a non-numeric amount.'
-    );
-    expect(o.increment.bind(o, 'age', null)).toThrow(
-      'Cannot increment by a non-numeric amount.'
-    );
+    expect(o.increment.bind(o, 'age', 'four')).toThrow('Cannot increment by a non-numeric amount.');
+    expect(o.increment.bind(o, 'age', null)).toThrow('Cannot increment by a non-numeric amount.');
     expect(o.increment.bind(o, 'age', { amount: 4 })).toThrow(
       'Cannot increment by a non-numeric amount.'
     );
@@ -478,19 +552,18 @@ describe('ParseObject', () => {
     o.increment('age');
     expect(o.attributes).toEqual({ age: 31 });
     expect(o._getSaveJSON()).toEqual({
-      age: 31
+      age: 31,
     });
 
     const o2 = new ParseObject('Person');
     o2._finishFetch({
       objectId: 'P2',
-      age: 40
+      age: 40,
     });
     expect(o2.attributes).toEqual({ age: 40 });
     o2.increment('age');
     expect(o2.attributes).toEqual({ age: 41 });
   });
-
 
   it('can decrement a field', () => {
     const o = new ParseObject('Person');
@@ -499,21 +572,17 @@ describe('ParseObject', () => {
     expect(o.op('age') instanceof IncrementOp).toBe(true);
     expect(o.dirtyKeys()).toEqual(['age']);
     expect(o._getSaveJSON()).toEqual({
-      age: { __op: 'Increment', amount: -1 }
+      age: { __op: 'Increment', amount: -1 },
     });
 
     o.decrement('age', 4);
     expect(o.attributes).toEqual({ age: -5 });
     expect(o._getSaveJSON()).toEqual({
-      age: { __op: 'Increment', amount: -5 }
+      age: { __op: 'Increment', amount: -5 },
     });
 
-    expect(o.decrement.bind(o, 'age', 'four')).toThrow(
-      'Cannot decrement by a non-numeric amount.'
-    );
-    expect(o.decrement.bind(o, 'age', null)).toThrow(
-      'Cannot decrement by a non-numeric amount.'
-    );
+    expect(o.decrement.bind(o, 'age', 'four')).toThrow('Cannot decrement by a non-numeric amount.');
+    expect(o.decrement.bind(o, 'age', null)).toThrow('Cannot decrement by a non-numeric amount.');
     expect(o.decrement.bind(o, 'age', { amount: 4 })).toThrow(
       'Cannot decrement by a non-numeric amount.'
     );
@@ -522,13 +591,13 @@ describe('ParseObject', () => {
     o.decrement('age');
     expect(o.attributes).toEqual({ age: 29 });
     expect(o._getSaveJSON()).toEqual({
-      age: 29
+      age: 29,
     });
 
     const o2 = new ParseObject('Person');
     o2._finishFetch({
       objectId: 'ABC123',
-      age: 40
+      age: 40,
     });
     expect(o2.attributes).toEqual({ age: 40 });
     o2.decrement('age');
@@ -540,20 +609,21 @@ describe('ParseObject', () => {
     o._finishFetch({
       objectId: 'setNested',
       objectField: {
-        number: 5
+        number: 5,
+        letter: 'a',
       },
       otherField: {},
     });
 
     expect(o.attributes).toEqual({
-      objectField: { number: 5 },
+      objectField: { number: 5, letter: 'a' },
       otherField: {},
     });
     o.set('otherField', { hello: 'world' });
     o.set('objectField.number', 20);
 
     expect(o.attributes).toEqual({
-      objectField: { number: 20 },
+      objectField: { number: 20, letter: 'a' },
       otherField: { hello: 'world' },
     });
     expect(o.op('objectField.number') instanceof SetOp).toBe(true);
@@ -562,6 +632,44 @@ describe('ParseObject', () => {
       'objectField.number': 20,
       otherField: { hello: 'world' },
     });
+  });
+
+  it('can increment a nested field', () => {
+    const o = new ParseObject('Person');
+    o._finishFetch({
+      objectId: 'incNested',
+      objectField: {
+        number: 5,
+        letter: 'a',
+      },
+    });
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 5, letter: 'a' },
+    });
+    o.increment('objectField.number');
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 6, letter: 'a' },
+    });
+    expect(o.op('objectField.number') instanceof IncrementOp).toBe(true);
+    expect(o.dirtyKeys()).toEqual(['objectField.number', 'objectField']);
+    expect(o._getSaveJSON()).toEqual({
+      'objectField.number': {
+        __op: 'Increment',
+        amount: 1,
+      },
+    });
+
+    // Nested objects only return values changed
+    o._handleSaveResponse({
+      objectId: 'incNested',
+      objectField: {
+        number: 6,
+      },
+    });
+    expect(o.get('objectField').number).toEqual(6);
+    expect(o.get('objectField').letter).toEqual('a');
   });
 
   it('ignore set nested field on new object', () => {
@@ -587,7 +695,7 @@ describe('ParseObject', () => {
     o._handleSaveResponse({
       objectId: 'S1',
       available: ['Monday', 'Wednesday'],
-      colors: ['red', 'green', 'blue']
+      colors: ['red', 'green', 'blue'],
     });
 
     o.addUnique('available', 'Thursday');
@@ -607,7 +715,7 @@ describe('ParseObject', () => {
     o._handleSaveResponse({
       objectId: 'S1',
       available: ['Monday', 'Wednesday'],
-      colors: ['red', 'green', 'blue']
+      colors: ['red', 'green', 'blue'],
     });
 
     o.addAllUnique('available', ['Thursday', 'Monday']);
@@ -623,7 +731,7 @@ describe('ParseObject', () => {
 
     o._handleSaveResponse({
       objectId: 'S2',
-      available: ['Monday']
+      available: ['Monday'],
     });
 
     o.remove('available', 'Monday');
@@ -639,7 +747,7 @@ describe('ParseObject', () => {
 
     o._handleSaveResponse({
       objectId: 'S2',
-      available: ['Monday']
+      available: ['Monday'],
     });
 
     o.removeAll('available', ['Monday', 'Tuesday']);
@@ -651,7 +759,7 @@ describe('ParseObject', () => {
     o.set('developer', true).set('platform', 'web');
     expect(o.attributes).toEqual({
       developer: true,
-      platform: 'web'
+      platform: 'web',
     });
   });
 
@@ -667,9 +775,7 @@ describe('ParseObject', () => {
     const o = new ParseObject('Person');
     o.id = 'AA';
     o.set('age', 38);
-    expect(o.relation.bind(o, 'age')).toThrow(
-      'Called relation() on non-relation field age'
-    );
+    expect(o.relation.bind(o, 'age')).toThrow('Called relation() on non-relation field age');
     const rel = o.relation('friends');
     expect(rel.parentClass).toBe('Person');
     expect(rel.parentId).toBe('AA');
@@ -681,7 +787,7 @@ describe('ParseObject', () => {
   });
 
   it('can be cloned with relation (#381)', () => {
-    const relationJSON = {__type: 'Relation', className: 'Bar'};
+    const relationJSON = { __type: 'Relation', className: 'Bar' };
     const o = ParseObject.fromJSON({
       objectId: '7777777777',
       className: 'Foo',
@@ -689,6 +795,17 @@ describe('ParseObject', () => {
     });
     const o2 = o.clone();
     expect(o2._getSaveJSON().aRelation).toEqual(relationJSON);
+  });
+
+  it('can get relation from relation field', () => {
+    const relationJSON = { __type: 'Relation', className: 'Bar' };
+    const o = ParseObject.fromJSON({
+      objectId: '999',
+      className: 'Foo',
+      aRelation: relationJSON,
+    });
+    const rel = o.relation('aRelation');
+    expect(rel.toJSON()).toEqual(relationJSON);
   });
 
   it('can detect dirty object children', () => {
@@ -699,22 +816,22 @@ describe('ParseObject', () => {
       location: {
         __type: 'GeoPoint',
         latitude: 20,
-        longitude: 20
-      }
+        longitude: 20,
+      },
     });
     expect(o.dirty()).toBe(false);
     o.get('obj').b = 21;
     expect(o.get('obj')).toEqual({
       a: 12,
-      b: 21
+      b: 21,
     });
     expect(o.dirty()).toBe(true);
     expect(o.dirtyKeys()).toEqual(['obj']);
     expect(o._getSaveJSON()).toEqual({
       obj: {
         a: 12,
-        b: 21
-      }
+        b: 21,
+      },
     });
     delete o.get('obj').b;
     expect(o.dirty()).toBe(false);
@@ -735,25 +852,29 @@ describe('ParseObject', () => {
 
   it('can validate attributes', () => {
     const o = new ParseObject('Listing');
-    expect(o.validate({
-      ACL: 'not an acl'
-    })).toEqual(
-      new ParseError(ParseError.OTHER_CAUSE, 'ACL must be a Parse ACL.')
-    );
+    expect(
+      o.validate({
+        ACL: 'not an acl',
+      })
+    ).toEqual(new ParseError(ParseError.OTHER_CAUSE, 'ACL must be a Parse ACL.'));
 
-    expect(o.validate({
-      'invalid!key': 12
-    })).toEqual(
-      new ParseError(ParseError.INVALID_KEY_NAME)
-    );
+    expect(
+      o.validate({
+        'invalid!key': 12,
+      })
+    ).toEqual(new ParseError(ParseError.INVALID_KEY_NAME));
 
-    expect(o.validate({
-      noProblem: 'here'
-    })).toBe(false);
+    expect(
+      o.validate({
+        noProblem: 'here',
+      })
+    ).toBe(false);
 
-    expect(o.validate({
-      'dot.field': 'here'
-    })).toBe(false);
+    expect(
+      o.validate({
+        'dot.field': 'here',
+      })
+    ).toBe(false);
   });
 
   it('validates attributes on set()', () => {
@@ -762,10 +883,12 @@ describe('ParseObject', () => {
     expect(o.set('ACL', { '*': { read: true, write: false } })).toBe(o);
     expect(o.set('$$$', 'o_O')).toBe(false);
 
-    o.set('$$$', 'o_O', { error: function(obj, err) {
-      expect(obj).toBe(o);
-      expect(err.code).toBe(105);
-    }});
+    o.set('$$$', 'o_O', {
+      error: function (obj, err) {
+        expect(obj).toBe(o);
+        expect(err.code).toBe(105);
+      },
+    });
   });
 
   it('ignores validation if ignoreValidation option is passed to set()', () => {
@@ -782,7 +905,7 @@ describe('ParseObject', () => {
     expect(o.isValid()).toBe(true);
     o._finishFetch({
       objectId: 'O3',
-      'invalid!key': 'oops'
+      'invalid!key': 'oops',
     });
     expect(o.isValid()).toBe(false);
   });
@@ -805,16 +928,16 @@ describe('ParseObject', () => {
       child: {
         __type: 'Pointer',
         className: 'Item',
-        objectId: 'recurChild'
-      }
+        objectId: 'recurChild',
+      },
     });
     expect(o.toJSON()).toEqual({
       objectId: 'recurParent',
       child: {
         __type: 'Pointer',
         className: 'Item',
-        objectId: 'recurChild'
-      }
+        objectId: 'recurChild',
+      },
     });
 
     ParseObject.fromJSON({
@@ -824,8 +947,8 @@ describe('ParseObject', () => {
       parent: {
         __type: 'Pointer',
         className: 'Item',
-        objectId: 'recurParent'
-      }
+        objectId: 'recurParent',
+      },
     });
 
     expect(o.toJSON()).toEqual({
@@ -837,9 +960,9 @@ describe('ParseObject', () => {
         parent: {
           __type: 'Pointer',
           className: 'Item',
-          objectId: 'recurParent'
-        }
-      }
+          objectId: 'recurParent',
+        },
+      },
     });
   });
 
@@ -852,13 +975,13 @@ describe('ParseObject', () => {
       updatedAt: '1970-01-01T00:00:00.000Z',
       aDate: {
         __type: 'Date',
-        iso: '1970-01-01T00:00:00.000Z'
+        iso: '1970-01-01T00:00:00.000Z',
       },
       child: {
         __type: 'Pointer',
         className: 'Item',
-        objectId: 'recurChild'
-      }
+        objectId: 'recurChild',
+      },
     });
     expect(o.createdAt.getTime()).toBe(new Date(0).getTime());
     expect(o.updatedAt.getTime()).toBe(new Date(0).getTime());
@@ -873,8 +996,8 @@ describe('ParseObject', () => {
       parent: {
         __type: 'Pointer',
         className: 'Item',
-        objectId: 'recurParent'
-      }
+        objectId: 'recurParent',
+      },
     });
 
     expect(o.toJSON()).toEqual({
@@ -883,7 +1006,7 @@ describe('ParseObject', () => {
       updatedAt: '1970-01-01T00:00:00.000Z',
       aDate: {
         __type: 'Date',
-        iso: '1970-01-01T00:00:00.000Z'
+        iso: '1970-01-01T00:00:00.000Z',
       },
       child: {
         __type: 'Object',
@@ -894,9 +1017,9 @@ describe('ParseObject', () => {
         parent: {
           __type: 'Pointer',
           className: 'Item',
-          objectId: 'recurParent'
-        }
-      }
+          objectId: 'recurParent',
+        },
+      },
     });
   });
 
@@ -908,8 +1031,8 @@ describe('ParseObject', () => {
       child: {
         __type: 'Pointer',
         className: 'Item',
-        objectId: 'nestedParent'
-      }
+        objectId: 'nestedParent',
+      },
     });
 
     const parent = ParseObject.fromJSON({
@@ -919,15 +1042,15 @@ describe('ParseObject', () => {
       child: {
         __type: 'Pointer',
         className: 'Item',
-        objectId: 'nestedChild'
-      }
+        objectId: 'nestedChild',
+      },
     });
 
     const child = ParseObject.fromJSON({
       __type: 'Object',
       className: 'Item',
       objectId: 'nestedChild',
-      count: 12
+      count: 12,
     });
 
     expect(grandparent.get('child').id).toBe(parent.id);
@@ -943,21 +1066,31 @@ describe('ParseObject', () => {
           __type: 'Object',
           className: 'Item',
           objectId: 'nestedChild',
-          count: 12
-        }
-      }
+          count: 12,
+        },
+      },
     });
   });
 
   it('updates the existed flag when saved', () => {
     const o = new ParseObject('Item');
     expect(o.existed()).toBe(false);
-    o._handleSaveResponse({
-      objectId: 'I2'
-    }, 201);
+    expect(o.isNew()).toBe(true);
+    o._handleSaveResponse(
+      {
+        objectId: 'I2',
+      },
+      201
+    );
     expect(o.existed()).toBe(false);
     o._handleSaveResponse({}, 200);
     expect(o.existed()).toBe(true);
+  });
+
+  it('check existed without object state', () => {
+    const o = new ParseObject('Item');
+    o.id = 'test890';
+    expect(o.existed()).toBe(false);
   });
 
   it('commits changes to server data when saved', () => {
@@ -968,13 +1101,66 @@ describe('ParseObject', () => {
     expect(p.op('age') instanceof SetOp).toBe(true);
     const updated = new Date();
     p._handleSaveResponse({
-      updatedAt: { __type: 'Date', iso: updated.toISOString() }
+      updatedAt: { __type: 'Date', iso: updated.toISOString() },
     });
     expect(p._getServerData()).toEqual({
       updatedAt: updated,
-      age: 24
+      age: 24,
     });
     expect(p.op('age')).toBe(undefined);
+  });
+
+  it('handle GeoPoint changes for server', () => {
+    const p = new ParseObject('Person');
+    p.id = 'PPoint';
+    const created = new Date();
+    const geopoint = new ParseGeoPoint(0, 0);
+    p._handleSaveResponse({
+      createdAt: created.toISOString(),
+      point: geopoint.toJSON(),
+    });
+    expect(p._getServerData()).toEqual({
+      updatedAt: created,
+      createdAt: created,
+      point: geopoint,
+    });
+    expect(p._getServerData().point instanceof ParseGeoPoint).toBe(true);
+  });
+
+  it('handle Polygon changes for server', () => {
+    const p = new ParseObject('Person');
+    p.id = 'PPolygon';
+    const created = new Date();
+    const polygon = new ParsePolygon([
+      [0, 0],
+      [0, 1],
+      [1, 1],
+      [1, 0],
+      [0, 0],
+    ]);
+    p._handleSaveResponse({
+      createdAt: created.toISOString(),
+      shape: polygon.toJSON(),
+    });
+    expect(p._getServerData()).toEqual({
+      updatedAt: created,
+      createdAt: created,
+      shape: polygon,
+    });
+    expect(p._getServerData().shape instanceof ParsePolygon).toBe(true);
+  });
+
+  it('handle createdAt string for server', () => {
+    const p = new ParseObject('Person');
+    p.id = 'P9';
+    const created = new Date();
+    p._handleSaveResponse({
+      createdAt: created.toISOString(),
+    });
+    expect(p._getServerData()).toEqual({
+      updatedAt: created,
+      createdAt: created,
+    });
   });
 
   it('isDataAvailable', () => {
@@ -984,7 +1170,7 @@ describe('ParseObject', () => {
     expect(p.isDataAvailable()).toBe(false);
     const updated = new Date();
     p._handleSaveResponse({
-      updatedAt: { __type: 'Date', iso: updated.toISOString() }
+      updatedAt: { __type: 'Date', iso: updated.toISOString() },
     });
     expect(p.isDataAvailable()).toBe(true);
   });
@@ -992,9 +1178,12 @@ describe('ParseObject', () => {
   it('handles ACL when saved', () => {
     const p = new ParseObject('Person');
 
-    p._handleSaveResponse({
-      ACL: {}
-    }, 201);
+    p._handleSaveResponse(
+      {
+        ACL: {},
+      },
+      201
+    );
 
     const acl = p.getACL();
     expect(acl).not.toEqual(null);
@@ -1006,13 +1195,19 @@ describe('ParseObject', () => {
     p.set('age', 34);
     expect(p._localId).toBeTruthy();
     expect(p.id).toBe(undefined);
-    const oldState = SingleInstanceStateController.getState({ className: 'Person', id: p._localId });
+    const oldState = SingleInstanceStateController.getState({
+      className: 'Person',
+      id: p._localId,
+    });
     p._handleSaveResponse({
-      objectId: 'P4'
+      objectId: 'P4',
     });
     expect(p._localId).toBe(undefined);
     expect(p.id).toBe('P4');
-    const newState = SingleInstanceStateController.getState({ className: 'Person', id: 'P4' });
+    const newState = SingleInstanceStateController.getState({
+      className: 'Person',
+      id: 'P4',
+    });
     expect(oldState.serverData).toBe(newState.serverData);
     expect(oldState.pendingOps).toBe(newState.pendingOps);
     expect(oldState.tasks).toBe(newState.tasks);
@@ -1022,7 +1217,7 @@ describe('ParseObject', () => {
     const o = ParseObject.fromJSON({
       className: 'Item',
       objectId: 'iexist',
-      count: 7
+      count: 7,
     });
     expect(o.existed()).toBe(true);
   });
@@ -1031,7 +1226,7 @@ describe('ParseObject', () => {
     const o = ParseObject.fromJSON({
       className: 'Item',
       objectId: 'canrevert',
-      count: 5
+      count: 5,
     });
     o.set({ cool: true });
     o.increment('count');
@@ -1048,7 +1243,7 @@ describe('ParseObject', () => {
     const o = ParseObject.fromJSON({
       className: 'Item',
       objectId: 'canrevertspecific',
-      count: 5
+      count: 5,
     });
     o.set({ cool: true });
     o.increment('count');
@@ -1067,7 +1262,7 @@ describe('ParseObject', () => {
       objectId: 'canrevertmultiple',
       count: 5,
       age: 18,
-      gender: 'female'
+      gender: 'female',
     });
     o.set({ cool: true, gender: 'male' });
     o.increment('count');
@@ -1093,79 +1288,195 @@ describe('ParseObject', () => {
       objectId: 'throwforarray',
       count: 5,
       age: 18,
-      gender: 'female'
+      gender: 'female',
     });
     o.set({ cool: true, gender: 'male' });
 
-    const err = "Parse.Object#revert expects either no, or a list of string, arguments.";
+    const err = 'Parse.Object#revert expects either no, or a list of string, arguments.';
 
-    expect(function() {
-      o.revert(['age'])
+    expect(function () {
+      o.revert(['age']);
     }).toThrow(err);
 
-    expect(function() {
-      o.revert([])
+    expect(function () {
+      o.revert([]);
     }).toThrow(err);
 
-    expect(function() {
-      o.revert('gender', ['age'])
+    expect(function () {
+      o.revert('gender', ['age']);
     }).toThrow(err);
   });
 
   it('can fetchWithInclude', async () => {
     const objectController = CoreManager.getObjectController();
-    const spy = jest.spyOn(
-      objectController,
-      'fetch'
-    )
+    const spy = jest
+      .spyOn(objectController, 'fetch')
       .mockImplementationOnce(() => {})
       .mockImplementationOnce(() => {})
       .mockImplementationOnce(() => {});
 
     const parent = new ParseObject('Person');
-    await parent.fetchWithInclude('child', { useMasterKey: true, sessionToken: '123'});
+    await parent.fetchWithInclude('child', {
+      useMasterKey: true,
+      sessionToken: '123',
+    });
     await parent.fetchWithInclude(['child']);
     await parent.fetchWithInclude([['child']]);
     expect(objectController.fetch).toHaveBeenCalledTimes(3);
 
     expect(objectController.fetch.mock.calls[0]).toEqual([
-      parent, true, { useMasterKey: true, sessionToken: '123', include: ['child'] }
+      parent,
+      true,
+      { useMasterKey: true, sessionToken: '123', include: ['child'] },
     ]);
-    expect(objectController.fetch.mock.calls[1]).toEqual([
-      parent, true, { include: ['child'] }
-    ]);
-    expect(objectController.fetch.mock.calls[2]).toEqual([
-      parent, true, { include: ['child'] }
-    ]);
+    expect(objectController.fetch.mock.calls[1]).toEqual([parent, true, { include: ['child'] }]);
+    expect(objectController.fetch.mock.calls[2]).toEqual([parent, true, { include: ['child'] }]);
 
     spy.mockRestore();
   });
 
+  it('fetchAll with empty values', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{}],
+        },
+      ])
+    );
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+
+    const results = await ParseObject.fetchAll([]);
+    expect(results).toEqual([]);
+    expect(controller.ajax).toHaveBeenCalledTimes(0);
+  });
+
+  it('fetchAll with null', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{}],
+        },
+      ])
+    );
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+
+    const results = await ParseObject.fetchAll(null);
+    expect(results).toEqual(undefined);
+    expect(controller.ajax).toHaveBeenCalledTimes(0);
+  });
+
+  it('fetchAll unique instance', async () => {
+    ParseObject.disableSingleInstance();
+    const obj = new ParseObject('Item');
+    obj.id = 'fetch0';
+    const results = await ParseObject.fetchAll([obj]);
+    expect(results[0].id).toEqual(obj.id);
+  });
+
+  it('fetchAll objects does not exist on server', async () => {
+    jest.spyOn(mockQuery.prototype, 'find').mockImplementationOnce(() => {
+      return Promise.resolve([]);
+    });
+    const obj = new ParseObject('Item');
+    obj.id = 'fetch-1';
+    try {
+      await ParseObject.fetchAll([obj]);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('All objects must exist on the server.');
+    }
+  });
+
+  it('fetchAll unsaved objects', async () => {
+    const obj = new ParseObject('Item');
+    try {
+      await ParseObject.fetchAll([obj]);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('All objects must have an ID');
+    }
+  });
+
+  it('fetchAll objects with different classes', async () => {
+    const obj = new ParseObject('Item');
+    const obj2 = new ParseObject('TestObject');
+    try {
+      await ParseObject.fetchAll([obj, obj2]);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('All objects must have an ID');
+    }
+  });
+
+  it('fetchAll saved objects with different classes', async () => {
+    const obj1 = new ParseObject('Item');
+    const obj2 = new ParseObject('TestObject');
+    obj1.id = 'fetch1';
+    obj2.id = 'fetch2';
+    try {
+      await ParseObject.fetchAll([obj1, obj2]);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('All objects should be of the same class');
+    }
+  });
+
   it('can fetchAllWithInclude', async () => {
     const objectController = CoreManager.getObjectController();
-    const spy = jest.spyOn(
-      objectController,
-      'fetch'
-    )
+    const spy = jest
+      .spyOn(objectController, 'fetch')
       .mockImplementationOnce(() => {})
       .mockImplementationOnce(() => {})
       .mockImplementationOnce(() => {});
 
     const parent = new ParseObject('Person');
-    await ParseObject.fetchAllWithInclude([parent], 'child', { useMasterKey: true, sessionToken: '123'});
+    await ParseObject.fetchAllWithInclude([parent], 'child', {
+      useMasterKey: true,
+      sessionToken: '123',
+    });
     await ParseObject.fetchAllWithInclude([parent], ['child']);
     await ParseObject.fetchAllWithInclude([parent], [['child']]);
     expect(objectController.fetch).toHaveBeenCalledTimes(3);
 
     expect(objectController.fetch.mock.calls[0]).toEqual([
-      [parent], true, { useMasterKey: true, sessionToken: '123', include: ['child'] }
+      [parent],
+      true,
+      { useMasterKey: true, sessionToken: '123', include: ['child'] },
     ]);
-    expect(objectController.fetch.mock.calls[1]).toEqual([
-      [parent], true, { include: ['child'] }
+    expect(objectController.fetch.mock.calls[1]).toEqual([[parent], true, { include: ['child'] }]);
+    expect(objectController.fetch.mock.calls[2]).toEqual([[parent], true, { include: ['child'] }]);
+
+    spy.mockRestore();
+  });
+
+  it('can fetchAllIfNeededWithInclude', async () => {
+    const objectController = CoreManager.getObjectController();
+    const spy = jest
+      .spyOn(objectController, 'fetch')
+      .mockImplementationOnce(() => {})
+      .mockImplementationOnce(() => {})
+      .mockImplementationOnce(() => {});
+
+    const parent = new ParseObject('Person');
+    await ParseObject.fetchAllIfNeededWithInclude([parent], 'child', {
+      useMasterKey: true,
+      sessionToken: '123',
+    });
+    await ParseObject.fetchAllIfNeededWithInclude([parent], ['child']);
+    await ParseObject.fetchAllIfNeededWithInclude([parent], [['child']]);
+    expect(objectController.fetch).toHaveBeenCalledTimes(3);
+
+    expect(objectController.fetch.mock.calls[0]).toEqual([
+      [parent],
+      false,
+      { useMasterKey: true, sessionToken: '123', include: ['child'] },
     ]);
-    expect(objectController.fetch.mock.calls[2]).toEqual([
-      [parent], true, { include: ['child'] }
-    ]);
+    expect(objectController.fetch.mock.calls[1]).toEqual([[parent], false, { include: ['child'] }]);
+    expect(objectController.fetch.mock.calls[2]).toEqual([[parent], false, { include: ['child'] }]);
 
     spy.mockRestore();
   });
@@ -1173,24 +1484,46 @@ describe('ParseObject', () => {
   it('can check if object exists', async () => {
     const parent = new ParseObject('Person');
     expect(await parent.exists()).toBe(false);
-    parent.id = '1234'
+    parent.id = '1234';
     expect(await parent.exists()).toBe(true);
+
+    jest.spyOn(mockQuery.prototype, 'get').mockImplementationOnce(() => {
+      return Promise.reject({
+        code: 101,
+      });
+    });
+    expect(await parent.exists()).toBe(false);
+
+    jest.spyOn(mockQuery.prototype, 'get').mockImplementationOnce(() => {
+      return Promise.reject({
+        code: 1,
+        message: 'Internal Server Error',
+      });
+    });
+    try {
+      await parent.exists();
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.code).toBe(1);
+    }
   });
 
-  it('can save the object', (done) => {
+  it('can save the object', done => {
     CoreManager.getRESTController()._setXHR(
-      mockXHR([{
-        status: 200,
-        response: {
-          objectId: 'P5',
-          count: 1
-        }
-      }])
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            objectId: 'P5',
+            count: 1,
+          },
+        },
+      ])
     );
     const p = new ParseObject('Person');
     p.set('age', 38);
     p.increment('count');
-    p.save().then((obj) => {
+    p.save().then(obj => {
       expect(obj).toBe(p);
       expect(obj.get('age')).toBe(38);
       expect(obj.get('count')).toBe(1);
@@ -1200,31 +1533,81 @@ describe('ParseObject', () => {
     });
   });
 
-  it('accepts attribute changes on save', (done) => {
+  it('can save the object with key / value', done => {
     CoreManager.getRESTController()._setXHR(
-      mockXHR([{
-        status: 200,
-        response: { objectId: 'newattributes' }
-      }])
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            objectId: 'P8',
+          },
+        },
+      ])
     );
-    let o = new ParseObject('Item');
-    o.save({ key: 'value' }).then(() => {
-      expect(o.get('key')).toBe('value');
-
-      o = new ParseObject('Item');
-      return o.save({ ACL: 'not an acl' });
-    }).then(null, (error) => {
-      expect(error.code).toBe(-1);
+    const p = new ParseObject('Person');
+    p.save('foo', 'bar').then(obj => {
+      expect(obj).toBe(p);
+      expect(obj.get('foo')).toBe('bar');
       done();
     });
   });
 
-  it('interpolates delete operations', (done) => {
+  it('accepts attribute changes on save', done => {
     CoreManager.getRESTController()._setXHR(
-      mockXHR([{
-        status: 200,
-        response: { objectId: 'newattributes', deletedKey: {__op: 'Delete'} }
-      }])
+      mockXHR([
+        {
+          status: 200,
+          response: { objectId: 'newattributes' },
+        },
+      ])
+    );
+    let o = new ParseObject('Item');
+    o.save({ key: 'value' })
+      .then(() => {
+        expect(o.get('key')).toBe('value');
+
+        o = new ParseObject('Item');
+        return o.save({ ACL: 'not an acl' });
+      })
+      .then(null, error => {
+        expect(error.code).toBe(-1);
+        done();
+      });
+  });
+
+  it('accepts context on save', async () => {
+    // Mock XHR
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: { objectId: 'newattributes' },
+        },
+      ])
+    );
+    // Spy on REST controller
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+    // Save object
+    const context = { a: 'a' };
+    const obj = new ParseObject('Item');
+    await obj.save(null, { context });
+    // Validate
+    const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
+    expect(jsonBody._context).toEqual(context);
+  });
+
+  it('interpolates delete operations', done => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            objectId: 'newattributes',
+            deletedKey: { __op: 'Delete' },
+          },
+        },
+      ])
     );
     const o = new ParseObject('Item');
     o.save({ key: 'value', deletedKey: 'keyToDelete' }).then(() => {
@@ -1238,9 +1621,11 @@ describe('ParseObject', () => {
     const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
-      send: jest.fn()
+      send: jest.fn(),
     };
-    RESTController._setXHR(function() { return xhr; });
+    RESTController._setXHR(function () {
+      return xhr;
+    });
     const p = new ParseObject('Person');
     p.set('age', 38);
     const result = p.save().then(() => {
@@ -1263,11 +1648,11 @@ describe('ParseObject', () => {
 
   it('will queue save operations', async () => {
     const xhrs = [];
-    RESTController._setXHR(function() {
+    RESTController._setXHR(function () {
       const xhr = {
         setRequestHeader: jest.fn(),
         open: jest.fn(),
-        send: jest.fn()
+        send: jest.fn(),
       };
       xhrs.push(xhr);
       return xhr;
@@ -1305,13 +1690,15 @@ describe('ParseObject', () => {
     const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
-      send: jest.fn()
+      send: jest.fn(),
     };
-    RESTController._setXHR(function() { return xhr; });
+    RESTController._setXHR(function () {
+      return xhr;
+    });
     const p = new ParseObject('Per$on');
     expect(p._getPendingOps().length).toBe(1);
     p.increment('updates');
-    const result = p.save().then(null, (err) => {
+    const result = p.save().then(null, err => {
       expect(err.code).toBe(103);
       expect(err.message).toBe('Invalid class name');
       expect(p._getPendingOps().length).toBe(1);
@@ -1322,7 +1709,10 @@ describe('ParseObject', () => {
     await flushPromises();
 
     xhr.status = 404;
-    xhr.responseText = JSON.stringify({ code: 103, error: 'Invalid class name' });
+    xhr.responseText = JSON.stringify({
+      code: 103,
+      error: 'Invalid class name',
+    });
     xhr.readyState = 4;
     xhr.onreadystatechange();
     await result;
@@ -1330,11 +1720,11 @@ describe('ParseObject', () => {
 
   it('will merge pending Ops when a save fails and others are pending', async () => {
     const xhrs = [];
-    RESTController._setXHR(function() {
+    RESTController._setXHR(function () {
       const xhr = {
         setRequestHeader: jest.fn(),
         open: jest.fn(),
-        send: jest.fn()
+        send: jest.fn(),
       };
       xhrs.push(xhr);
       return xhr;
@@ -1354,26 +1744,29 @@ describe('ParseObject', () => {
     expect(p._getPendingOps().length).toBe(3);
 
     xhrs[0].status = 404;
-    xhrs[0].responseText = JSON.stringify({ code: 103, error: 'Invalid class name' });
+    xhrs[0].responseText = JSON.stringify({
+      code: 103,
+      error: 'Invalid class name',
+    });
     xhrs[0].readyState = 4;
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
     await flushPromises();
     expect(p._getPendingOps().length).toBe(2);
     expect(p._getPendingOps()[0]).toEqual({
-      updates: new ParseOp.SetOp(12)
+      updates: new ParseOp.SetOp(12),
     });
   });
 
   it('will deep-save the children of an object', async () => {
     const xhrs = [];
-    RESTController._setXHR(function() {
+    RESTController._setXHR(function () {
       const xhr = {
         setRequestHeader: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
-        readyState: 4
+        readyState: 4,
       };
       xhrs.push(xhr);
       return xhr;
@@ -1391,10 +1784,8 @@ describe('ParseObject', () => {
     await flushPromises();
 
     expect(xhrs.length).toBe(1);
-    expect(xhrs[0].open.mock.calls[0]).toEqual(
-      ['POST', 'https://api.parse.com/1/batch', true]
-    );
-    xhrs[0].responseText = JSON.stringify([ { success: { objectId: 'child' } } ]);
+    expect(xhrs[0].open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
+    xhrs[0].responseText = JSON.stringify([{ success: { objectId: 'child' } }]);
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
     await flushPromises();
@@ -1411,9 +1802,7 @@ describe('ParseObject', () => {
     const child = new ParseObject('Item');
     parent.set('child', child);
     child.set('parent', parent);
-    expect(parent.save.bind(parent)).toThrow(
-      'Cannot create a pointer to an unsaved Object.'
-    );
+    expect(parent.save.bind(parent)).toThrow('Cannot create a pointer to an unsaved Object.');
   });
 
   it('will fail for deeper unsaved objects', () => {
@@ -1423,9 +1812,7 @@ describe('ParseObject', () => {
     parent.set('child', child);
     child.set('child', grandchild);
 
-    expect(parent.save.bind(parent)).toThrow(
-      'Cannot create a pointer to an unsaved Object.'
-    );
+    expect(parent.save.bind(parent)).toThrow('Cannot create a pointer to an unsaved Object.');
   });
 
   it('does not mark shallow objects as dirty', () => {
@@ -1440,16 +1827,18 @@ describe('ParseObject', () => {
 
   it('can fetch an object given an id', async () => {
     CoreManager.getRESTController()._setXHR(
-      mockXHR([{
-        status: 200,
-        response: {
-          count: 10
-        }
-      }])
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            count: 10,
+          },
+        },
+      ])
     );
     const p = new ParseObject('Person');
     p.id = 'P55';
-    await p.fetch().then((res) => {
+    await p.fetch().then(res => {
       expect(p).toBe(res);
       expect(p.attributes).toEqual({ count: 10 });
     });
@@ -1458,45 +1847,57 @@ describe('ParseObject', () => {
   it('throw for fetch with empty string as ID', async () => {
     expect.assertions(1);
     CoreManager.getRESTController()._setXHR(
-      mockXHR([{
-        status: 200,
-        response: {
-          count: 10
-        }
-      }])
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            count: 10,
+          },
+        },
+      ])
     );
     const p = new ParseObject('Person');
     p.id = '';
-    await expect(p.fetch())
-      .rejects
-      .toThrowError(new ParseError(
-        ParseError.MISSING_OBJECT_ID,
-        'Object does not have an ID'
-      ));
+    await expect(p.fetch()).rejects.toThrowError(
+      new ParseError(ParseError.MISSING_OBJECT_ID, 'Object does not have an ID')
+    );
   });
 
-  it('should fail on invalid date', (done) => {
+  it('should fail saveAll batch cycle', async () => {
+    const obj = new ParseObject('Item');
+    obj.set('child', obj);
+    try {
+      await ParseObject.saveAll([obj]);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('Tried to save a batch with a cycle.');
+    }
+  });
+
+  it('should fail on invalid date', done => {
     const obj = new ParseObject('Item');
     obj.set('when', new Date(Date.parse(null)));
-    ParseObject.saveAll([obj]).then(() => {
-      done.fail('Expected invalid date to fail');
-    }).catch((error) => {
-      expect(error[0].code).toEqual(ParseError.INCORRECT_TYPE);
-      expect(error[0].message).toEqual('Tried to encode an invalid date.');
-      done();
-    });
+    ParseObject.saveAll([obj])
+      .then(() => {
+        done.fail('Expected invalid date to fail');
+      })
+      .catch(error => {
+        expect(error[0].code).toEqual(ParseError.INCORRECT_TYPE);
+        expect(error[0].message).toEqual('Tried to encode an invalid date.');
+        done();
+      });
     jest.runAllTicks();
   });
 
   it('can save a ring of objects, given one exists', async () => {
     const xhrs = [];
-    RESTController._setXHR(function() {
+    RESTController._setXHR(function () {
       const xhr = {
         setRequestHeader: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
-        readyState: 4
+        readyState: 4,
       };
       xhrs.push(xhr);
       return xhr;
@@ -1515,23 +1916,21 @@ describe('ParseObject', () => {
     await flushPromises();
 
     expect(xhrs.length).toBe(1);
-    expect(xhrs[0].open.mock.calls[0]).toEqual(
-      ['POST', 'https://api.parse.com/1/batch', true]
-    );
-    expect(JSON.parse(xhrs[0].send.mock.calls[0]).requests).toEqual(
-      [{
+    expect(xhrs[0].open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
+    expect(JSON.parse(xhrs[0].send.mock.calls[0]).requests).toEqual([
+      {
         method: 'POST',
         path: '/1/classes/Item',
         body: {
           child: {
             __type: 'Pointer',
             className: 'Item',
-            objectId: 'child'
-          }
-        }
-      }]
-    );
-    xhrs[0].responseText = JSON.stringify([ { success: { objectId: 'parent' } } ]);
+            objectId: 'child',
+          },
+        },
+      },
+    ]);
+    xhrs[0].responseText = JSON.stringify([{ success: { objectId: 'parent' } }]);
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
     await flushPromises();
@@ -1539,22 +1938,160 @@ describe('ParseObject', () => {
     expect(parent.id).toBe('parent');
 
     expect(xhrs.length).toBe(2);
-    xhrs[1].responseText = JSON.stringify([ { success: {} } ]);
+    xhrs[1].responseText = JSON.stringify([{ success: {} }]);
     xhrs[1].onreadystatechange();
     jest.runAllTicks();
 
     await result;
   });
 
+  it('accepts context on saveAll', async () => {
+    // Mock XHR
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{}],
+        },
+      ])
+    );
+    // Spy on REST controller
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+    // Save object
+    const context = { a: 'saveAll' };
+    const obj = new ParseObject('Item');
+    obj.id = 'pid';
+    obj.set('test', 'value');
+    await ParseObject.saveAll([obj], { context, useMasterKey: true });
+    // Validate
+    const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
+    expect(jsonBody._context).toEqual(context);
+  });
+
+  it('accepts context on destroyAll', async () => {
+    // Mock XHR
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{}],
+        },
+      ])
+    );
+    // Spy on REST controller
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+    // Save object
+    const context = { a: 'b' };
+    const obj = new ParseObject('Item');
+    obj.id = 'pid';
+    await ParseObject.destroyAll([obj], { context: context });
+    // Validate
+    const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
+    expect(jsonBody._context).toEqual(context);
+  });
+
+  it('destroyAll with options', async () => {
+    // Mock XHR
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{}],
+        },
+      ])
+    );
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+
+    const obj = new ParseObject('Item');
+    obj.id = 'pid';
+    await ParseObject.destroyAll([obj], {
+      useMasterKey: true,
+      sessionToken: 'r:1234',
+      batchSize: 25,
+    });
+
+    const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
+    expect(jsonBody._MasterKey).toBe('C');
+    expect(jsonBody._SessionToken).toBe('r:1234');
+  });
+
+  it('destroyAll with empty values', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{}],
+        },
+      ])
+    );
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+
+    let results = await ParseObject.destroyAll([]);
+    expect(results).toEqual([]);
+
+    results = await ParseObject.destroyAll(null);
+    expect(results).toEqual(null);
+    expect(controller.ajax).toHaveBeenCalledTimes(0);
+  });
+
+  it('destroyAll unsaved objects', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{}],
+        },
+      ])
+    );
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+
+    const obj = new ParseObject('Item');
+    const results = await ParseObject.destroyAll([obj]);
+    expect(results).toEqual([obj]);
+    expect(controller.ajax).toHaveBeenCalledTimes(0);
+  });
+
+  it('destroyAll handle error response', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [
+            {
+              error: {
+                code: 101,
+                error: 'Object not found',
+              },
+            },
+          ],
+        },
+      ])
+    );
+
+    const obj = new ParseObject('Item');
+    obj.id = 'toDelete1';
+    try {
+      await ParseObject.destroyAll([obj]);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.code).toBe(600);
+    }
+  });
+
   it('can save a chain of unsaved objects', async () => {
     const xhrs = [];
-    RESTController._setXHR(function() {
+    RESTController._setXHR(function () {
       const xhr = {
         setRequestHeader: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
-        readyState: 4
+        readyState: 4,
       };
       xhrs.push(xhr);
       return xhr;
@@ -1576,108 +2113,109 @@ describe('ParseObject', () => {
     await flushPromises();
 
     expect(xhrs.length).toBe(1);
-    expect(xhrs[0].open.mock.calls[0]).toEqual(
-      ['POST', 'https://api.parse.com/1/batch', true]
-    );
-    expect(JSON.parse(xhrs[0].send.mock.calls[0]).requests).toEqual(
-      [{
+    expect(xhrs[0].open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
+    expect(JSON.parse(xhrs[0].send.mock.calls[0]).requests).toEqual([
+      {
         method: 'POST',
         path: '/1/classes/Item',
-        body: {}
-      }]
-    );
-    xhrs[0].responseText = JSON.stringify([ { success: { objectId: 'grandchild' } } ]);
+        body: {},
+      },
+    ]);
+    xhrs[0].responseText = JSON.stringify([{ success: { objectId: 'grandchild' } }]);
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
     await flushPromises();
 
     expect(xhrs.length).toBe(2);
-    expect(xhrs[1].open.mock.calls[0]).toEqual(
-      ['POST', 'https://api.parse.com/1/batch', true]
-    );
-    expect(JSON.parse(xhrs[1].send.mock.calls[0]).requests).toEqual(
-      [{
+    expect(xhrs[1].open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
+    expect(JSON.parse(xhrs[1].send.mock.calls[0]).requests).toEqual([
+      {
         method: 'POST',
         path: '/1/classes/Item',
         body: {
           child: {
             __type: 'Pointer',
             className: 'Item',
-            objectId: 'grandchild'
-          }
-        }
-      }]
-    );
-    xhrs[1].responseText = JSON.stringify([ { success: { objectId: 'child' } } ]);
+            objectId: 'grandchild',
+          },
+        },
+      },
+    ]);
+    xhrs[1].responseText = JSON.stringify([{ success: { objectId: 'child' } }]);
     xhrs[1].onreadystatechange();
     jest.runAllTicks();
     await flushPromises();
 
     expect(xhrs.length).toBe(3);
-    expect(xhrs[2].open.mock.calls[0]).toEqual(
-      ['POST', 'https://api.parse.com/1/batch', true]
-    );
-    expect(JSON.parse(xhrs[2].send.mock.calls[0]).requests).toEqual(
-      [{
+    expect(xhrs[2].open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
+    expect(JSON.parse(xhrs[2].send.mock.calls[0]).requests).toEqual([
+      {
         method: 'POST',
         path: '/1/classes/Item',
         body: {
           child: {
             __type: 'Pointer',
             className: 'Item',
-            objectId: 'child'
-          }
-        }
-      }]
-    );
-    xhrs[2].responseText = JSON.stringify([ { success: { objectId: 'parent' } } ]);
+            objectId: 'child',
+          },
+        },
+      },
+    ]);
+    xhrs[2].responseText = JSON.stringify([{ success: { objectId: 'parent' } }]);
     xhrs[2].onreadystatechange();
     jest.runAllTicks();
     await result;
   });
 
-  it('can update fields via a fetch() call', (done) => {
+  it('can update fields via a fetch() call', done => {
     CoreManager.getRESTController()._setXHR(
-      mockXHR([{
-        status: 200,
-        response: {
-          count: 11
-        }
-      }, {
-        status: 200,
-        response: {
-          count: 20
-        }
-      }])
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            count: 11,
+          },
+        },
+        {
+          status: 200,
+          response: {
+            count: 20,
+          },
+        },
+      ])
     );
     const p = new ParseObject('Person');
     p.id = 'P55';
     p.increment('count');
-    p.save().then(() => {
-      expect(p.get('count')).toBe(11);
-      return p.fetch();
-    }).then(() => {
-      expect(p.get('count')).toBe(20);
-      expect(p.dirty()).toBe(false);
-      done();
-    });
+    p.save()
+      .then(() => {
+        expect(p.get('count')).toBe(11);
+        return p.fetch();
+      })
+      .then(() => {
+        expect(p.get('count')).toBe(20);
+        expect(p.dirty()).toBe(false);
+        done();
+      });
   });
 
-  it('replaces old data when fetch() is called', (done) => {
+  it('replaces old data when fetch() is called', done => {
     CoreManager.getRESTController()._setXHR(
-      mockXHR([{
-        status: 200,
-        response: {
-          count: 10
-        }
-      }])
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            count: 10,
+          },
+        },
+      ])
     );
 
     const p = ParseObject.fromJSON({
       className: 'Person',
       objectId: 'P200',
       name: 'Fred',
-      count: 0
+      count: 0,
     });
     expect(p.get('name')).toBe('Fred');
     expect(p.get('count')).toBe(0);
@@ -1693,15 +2231,19 @@ describe('ParseObject', () => {
     const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
-      send: jest.fn()
+      send: jest.fn(),
     };
-    RESTController._setXHR(function() { return xhr; });
+    RESTController._setXHR(function () {
+      return xhr;
+    });
     const p = new ParseObject('Person');
     p.id = 'pid';
     const result = p.destroy().then(() => {
-      expect(xhr.open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/classes/Person/pid', true]
-      );
+      expect(xhr.open.mock.calls[0]).toEqual([
+        'POST',
+        'https://api.parse.com/1/classes/Person/pid',
+        true,
+      ]);
       expect(JSON.parse(xhr.send.mock.calls[0])._method).toBe('DELETE');
     });
     jest.runAllTicks();
@@ -1714,25 +2256,59 @@ describe('ParseObject', () => {
     await result;
   });
 
-  it('can save an array of objects', async (done) => {
+  it('accepts context on destroy', async () => {
+    // Mock XHR
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: {},
+        },
+      ])
+    );
+    // Spy on REST controller
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+    // Save object
+    const context = { a: 'a' };
+    const obj = new ParseObject('Item');
+    obj.id = 'pid';
+    await obj.destroy({ context });
+    // Validate
+    const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
+    expect(jsonBody._context).toEqual(context);
+  });
+
+  it('handle destroy on new object', async () => {
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+
+    const obj = new ParseObject('Item');
+
+    await obj.destroy({ useMasterKey: true });
+
+    expect(controller.ajax).toHaveBeenCalledTimes(0);
+  });
+
+  it('can save an array of objects', async done => {
     const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
-      send: jest.fn()
+      send: jest.fn(),
     };
-    RESTController._setXHR(function() { return xhr; });
+    RESTController._setXHR(function () {
+      return xhr;
+    });
     const objects = [];
     for (let i = 0; i < 5; i++) {
       objects[i] = new ParseObject('Person');
     }
     ParseObject.saveAll(objects).then(() => {
-      expect(xhr.open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/batch', true]
-      );
+      expect(xhr.open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
       expect(JSON.parse(xhr.send.mock.calls[0]).requests[0]).toEqual({
         method: 'POST',
         path: '/1/classes/Person',
-        body: {}
+        body: {},
       });
       done();
     });
@@ -1751,7 +2327,7 @@ describe('ParseObject', () => {
     jest.runAllTicks();
   });
 
-  it('can saveAll with batchSize', async (done) => {
+  it('can saveAll with batchSize', async done => {
     const xhrs = [];
     for (let i = 0; i < 2; i++) {
       xhrs[i] = {
@@ -1759,22 +2335,20 @@ describe('ParseObject', () => {
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
-        readyState: 4
+        readyState: 4,
       };
     }
     let current = 0;
-    RESTController._setXHR(function() { return xhrs[current++]; });
+    RESTController._setXHR(function () {
+      return xhrs[current++];
+    });
     const objects = [];
     for (let i = 0; i < 22; i++) {
       objects[i] = new ParseObject('Person');
     }
     ParseObject.saveAll(objects, { batchSize: 20 }).then(() => {
-      expect(xhrs[0].open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/batch', true]
-      );
-      expect(xhrs[1].open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/batch', true]
-      );
+      expect(xhrs[0].open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
+      expect(xhrs[1].open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
       done();
     });
     jest.runAllTicks();
@@ -1814,7 +2388,7 @@ describe('ParseObject', () => {
     jest.runAllTicks();
   });
 
-  it('can saveAll with global batchSize', async (done) => {
+  it('can saveAll with global batchSize', async done => {
     const xhrs = [];
     for (let i = 0; i < 2; i++) {
       xhrs[i] = {
@@ -1822,22 +2396,20 @@ describe('ParseObject', () => {
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
-        readyState: 4
+        readyState: 4,
       };
     }
     let current = 0;
-    RESTController._setXHR(function() { return xhrs[current++]; });
+    RESTController._setXHR(function () {
+      return xhrs[current++];
+    });
     const objects = [];
     for (let i = 0; i < 22; i++) {
       objects[i] = new ParseObject('Person');
     }
     ParseObject.saveAll(objects).then(() => {
-      expect(xhrs[0].open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/batch', true]
-      );
-      expect(xhrs[1].open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/batch', true]
-      );
+      expect(xhrs[0].open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
+      expect(xhrs[1].open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
       done();
     });
     jest.runAllTicks();
@@ -1877,7 +2449,7 @@ describe('ParseObject', () => {
     jest.runAllTicks();
   });
 
-  it('returns the first error when saving an array of objects', async (done) => {
+  it('returns the first error when saving an array of objects', async done => {
     const xhrs = [];
     for (let i = 0; i < 2; i++) {
       xhrs[i] = {
@@ -1885,16 +2457,18 @@ describe('ParseObject', () => {
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
-        readyState: 4
+        readyState: 4,
       };
     }
     let current = 0;
-    RESTController._setXHR(function() { return xhrs[current++]; });
+    RESTController._setXHR(function () {
+      return xhrs[current++];
+    });
     const objects = [];
     for (let i = 0; i < 22; i++) {
       objects[i] = new ParseObject('Person');
     }
-    ParseObject.saveAll(objects).then(null, (error) => {
+    ParseObject.saveAll(objects).then(null, error => {
       // The second batch never ran
       expect(xhrs[1].open.mock.calls.length).toBe(0);
       expect(objects[19].dirty()).toBe(false);
@@ -1933,20 +2507,28 @@ describe('ParseObject', () => {
 });
 
 describe('ObjectController', () => {
-  it('can fetch a single object', async (done) => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('can fetch a single object', async done => {
     const objectController = CoreManager.getObjectController();
     const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
-      send: jest.fn()
+      send: jest.fn(),
     };
-    RESTController._setXHR(function() { return xhr; });
+    RESTController._setXHR(function () {
+      return xhr;
+    });
     const o = new ParseObject('Person');
     o.id = 'pid';
     objectController.fetch(o).then(() => {
-      expect(xhr.open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/classes/Person/pid', true]
-      );
+      expect(xhr.open.mock.calls[0]).toEqual([
+        'POST',
+        'https://api.parse.com/1/classes/Person/pid',
+        true,
+      ]);
       const body = JSON.parse(xhr.send.mock.calls[0]);
       expect(body._method).toBe('GET');
       done();
@@ -1960,14 +2542,37 @@ describe('ObjectController', () => {
     jest.runAllTicks();
   });
 
-  it('can fetch an array of objects', (done) => {
+  it('accepts context on fetch', async () => {
+    // Mock XHR
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: {},
+        },
+      ])
+    );
+    // Spy on REST controller
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'ajax');
+    // Save object
+    const context = { a: 'fetch' };
+    const obj = new ParseObject('Item');
+    obj.id = 'pid';
+    await obj.fetch({ context });
+    // Validate
+    const jsonBody = JSON.parse(controller.ajax.mock.calls[0][2]);
+    expect(jsonBody._context).toEqual(context);
+  });
+
+  it('can fetch an array of objects', done => {
     const objectController = CoreManager.getObjectController();
     const objects = [];
     for (let i = 0; i < 5; i++) {
       objects[i] = new ParseObject('Person');
       objects[i].id = 'pid' + i;
     }
-    objectController.fetch(objects).then((results) => {
+    objectController.fetch(objects).then(results => {
       expect(results.length).toBe(5);
       expect(results[0] instanceof ParseObject).toBe(true);
       expect(results[0].id).toBe('pid0');
@@ -1976,20 +2581,24 @@ describe('ObjectController', () => {
     });
   });
 
-  it('can fetch a single object with include', async (done) => {
+  it('can fetch a single object with include', async done => {
     const objectController = CoreManager.getObjectController();
     const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
-      send: jest.fn()
+      send: jest.fn(),
     };
-    RESTController._setXHR(function() { return xhr; });
+    RESTController._setXHR(function () {
+      return xhr;
+    });
     const o = new ParseObject('Person');
     o.id = 'pid';
     objectController.fetch(o, false, { include: ['child'] }).then(() => {
-      expect(xhr.open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/classes/Person/pid', true]
-      );
+      expect(xhr.open.mock.calls[0]).toEqual([
+        'POST',
+        'https://api.parse.com/1/classes/Person/pid',
+        true,
+      ]);
       const body = JSON.parse(xhr.send.mock.calls[0]);
       expect(body._method).toBe('GET');
       done();
@@ -2010,7 +2619,9 @@ describe('ObjectController', () => {
       objects[i] = new ParseObject('Person');
       objects[i].id = 'pid' + i;
     }
-    const results = await objectController.fetch(objects, false, { include: ['child'] });
+    const results = await objectController.fetch(objects, false, {
+      include: ['child'],
+    });
     expect(results.length).toBe(5);
     expect(results[0] instanceof ParseObject).toBe(true);
     expect(results[0].id).toBe('pid0');
@@ -2022,34 +2633,43 @@ describe('ObjectController', () => {
     const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
-      send: jest.fn()
+      send: jest.fn(),
     };
-    RESTController._setXHR(function() { return xhr; });
+    RESTController._setXHR(function () {
+      return xhr;
+    });
     const p = new ParseObject('Person');
     p.id = 'pid';
-    const result = objectController.destroy(p, {}).then(async () => {
-      expect(xhr.open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/classes/Person/pid', true]
-      );
-      expect(JSON.parse(xhr.send.mock.calls[0])._method).toBe('DELETE');
-      const p2 = new ParseObject('Person');
-      p2.id = 'pid2';
-      const destroy = objectController.destroy(p2, {
-        useMasterKey: true
+    const result = objectController
+      .destroy(p, {})
+      .then(async () => {
+        expect(xhr.open.mock.calls[0]).toEqual([
+          'POST',
+          'https://api.parse.com/1/classes/Person/pid',
+          true,
+        ]);
+        expect(JSON.parse(xhr.send.mock.calls[0])._method).toBe('DELETE');
+        const p2 = new ParseObject('Person');
+        p2.id = 'pid2';
+        const destroy = objectController.destroy(p2, {
+          useMasterKey: true,
+        });
+        jest.runAllTicks();
+        await flushPromises();
+        xhr.onreadystatechange();
+        jest.runAllTicks();
+        return destroy;
+      })
+      .then(() => {
+        expect(xhr.open.mock.calls[1]).toEqual([
+          'POST',
+          'https://api.parse.com/1/classes/Person/pid2',
+          true,
+        ]);
+        const body = JSON.parse(xhr.send.mock.calls[1]);
+        expect(body._method).toBe('DELETE');
+        expect(body._MasterKey).toBe('C');
       });
-      jest.runAllTicks();
-      await flushPromises();
-      xhr.onreadystatechange();
-      jest.runAllTicks();
-      return destroy;
-    }).then(() => {
-      expect(xhr.open.mock.calls[1]).toEqual(
-        ['POST', 'https://api.parse.com/1/classes/Person/pid2', true]
-      );
-      const body = JSON.parse(xhr.send.mock.calls[1]);
-      expect(body._method).toBe('DELETE');
-      expect(body._MasterKey).toBe('C');
-    });
     jest.runAllTicks();
     await flushPromises();
     xhr.status = 200;
@@ -2067,66 +2687,73 @@ describe('ObjectController', () => {
       xhrs[i] = {
         setRequestHeader: jest.fn(),
         open: jest.fn(),
-        send: jest.fn()
+        send: jest.fn(),
       };
       xhrs[i].status = 200;
       xhrs[i].responseText = JSON.stringify({});
       xhrs[i].readyState = 4;
     }
     let current = 0;
-    RESTController._setXHR(function() { return xhrs[current++]; });
+    RESTController._setXHR(function () {
+      return xhrs[current++];
+    });
     let objects = [];
     for (let i = 0; i < 5; i++) {
       objects[i] = new ParseObject('Person');
       objects[i].id = 'pid' + i;
     }
-    const result = objectController.destroy(objects, { batchSize: 20}).then(async () => {
-      expect(xhrs[0].open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/batch', true]
-      );
-      expect(JSON.parse(xhrs[0].send.mock.calls[0]).requests).toEqual([
-        {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid0',
-          body: {}
-        }, {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid1',
-          body: {}
-        }, {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid2',
-          body: {}
-        }, {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid3',
-          body: {}
-        }, {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid4',
-          body: {}
-        }
-      ]);
+    const result = objectController
+      .destroy(objects, { batchSize: 20 })
+      .then(async () => {
+        expect(xhrs[0].open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
+        expect(JSON.parse(xhrs[0].send.mock.calls[0]).requests).toEqual([
+          {
+            method: 'DELETE',
+            path: '/1/classes/Person/pid0',
+            body: {},
+          },
+          {
+            method: 'DELETE',
+            path: '/1/classes/Person/pid1',
+            body: {},
+          },
+          {
+            method: 'DELETE',
+            path: '/1/classes/Person/pid2',
+            body: {},
+          },
+          {
+            method: 'DELETE',
+            path: '/1/classes/Person/pid3',
+            body: {},
+          },
+          {
+            method: 'DELETE',
+            path: '/1/classes/Person/pid4',
+            body: {},
+          },
+        ]);
 
-      objects = [];
-      for (let i = 0; i < 22; i++) {
-        objects[i] = new ParseObject('Person');
-        objects[i].id = 'pid' + i;
-      }
-      const destroy = objectController.destroy(objects, { batchSize: 20 });
-      jest.runAllTicks();
-      await flushPromises();
-      xhrs[1].onreadystatechange();
-      jest.runAllTicks();
-      await flushPromises();
-      expect(xhrs[1].open.mock.calls.length).toBe(1);
-      xhrs[2].onreadystatechange();
-      jest.runAllTicks();
-      return destroy;
-    }).then(() => {
-      expect(JSON.parse(xhrs[1].send.mock.calls[0]).requests.length).toBe(20);
-      expect(JSON.parse(xhrs[2].send.mock.calls[0]).requests.length).toBe(2);
-    });
+        objects = [];
+        for (let i = 0; i < 22; i++) {
+          objects[i] = new ParseObject('Person');
+          objects[i].id = 'pid' + i;
+        }
+        const destroy = objectController.destroy(objects, { batchSize: 20 });
+        jest.runAllTicks();
+        await flushPromises();
+        xhrs[1].onreadystatechange();
+        jest.runAllTicks();
+        await flushPromises();
+        expect(xhrs[1].open.mock.calls.length).toBe(1);
+        xhrs[2].onreadystatechange();
+        jest.runAllTicks();
+        return destroy;
+      })
+      .then(() => {
+        expect(JSON.parse(xhrs[1].send.mock.calls[0]).requests.length).toBe(20);
+        expect(JSON.parse(xhrs[2].send.mock.calls[0]).requests.length).toBe(2);
+      });
     jest.runAllTicks();
     await flushPromises();
 
@@ -2142,66 +2769,73 @@ describe('ObjectController', () => {
       xhrs[i] = {
         setRequestHeader: jest.fn(),
         open: jest.fn(),
-        send: jest.fn()
+        send: jest.fn(),
       };
       xhrs[i].status = 200;
       xhrs[i].responseText = JSON.stringify({});
       xhrs[i].readyState = 4;
     }
     let current = 0;
-    RESTController._setXHR(function() { return xhrs[current++]; });
+    RESTController._setXHR(function () {
+      return xhrs[current++];
+    });
     let objects = [];
     for (let i = 0; i < 5; i++) {
       objects[i] = new ParseObject('Person');
       objects[i].id = 'pid' + i;
     }
-    const result = objectController.destroy(objects, {}).then(async () => {
-      expect(xhrs[0].open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/batch', true]
-      );
-      expect(JSON.parse(xhrs[0].send.mock.calls[0]).requests).toEqual([
-        {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid0',
-          body: {}
-        }, {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid1',
-          body: {}
-        }, {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid2',
-          body: {}
-        }, {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid3',
-          body: {}
-        }, {
-          method: 'DELETE',
-          path: '/1/classes/Person/pid4',
-          body: {}
-        }
-      ]);
+    const result = objectController
+      .destroy(objects, {})
+      .then(async () => {
+        expect(xhrs[0].open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
+        expect(JSON.parse(xhrs[0].send.mock.calls[0]).requests).toEqual([
+          {
+            method: 'DELETE',
+            path: '/1/classes/Person/pid0',
+            body: {},
+          },
+          {
+            method: 'DELETE',
+            path: '/1/classes/Person/pid1',
+            body: {},
+          },
+          {
+            method: 'DELETE',
+            path: '/1/classes/Person/pid2',
+            body: {},
+          },
+          {
+            method: 'DELETE',
+            path: '/1/classes/Person/pid3',
+            body: {},
+          },
+          {
+            method: 'DELETE',
+            path: '/1/classes/Person/pid4',
+            body: {},
+          },
+        ]);
 
-      objects = [];
-      for (let i = 0; i < 22; i++) {
-        objects[i] = new ParseObject('Person');
-        objects[i].id = 'pid' + i;
-      }
-      const destroy = objectController.destroy(objects, {});
-      jest.runAllTicks();
-      await flushPromises();
-      xhrs[1].onreadystatechange();
-      jest.runAllTicks();
-      await flushPromises();
-      expect(xhrs[1].open.mock.calls.length).toBe(1);
-      xhrs[2].onreadystatechange();
-      jest.runAllTicks();
-      return destroy;
-    }).then(() => {
-      expect(JSON.parse(xhrs[1].send.mock.calls[0]).requests.length).toBe(20);
-      expect(JSON.parse(xhrs[2].send.mock.calls[0]).requests.length).toBe(2);
-    });
+        objects = [];
+        for (let i = 0; i < 22; i++) {
+          objects[i] = new ParseObject('Person');
+          objects[i].id = 'pid' + i;
+        }
+        const destroy = objectController.destroy(objects, {});
+        jest.runAllTicks();
+        await flushPromises();
+        xhrs[1].onreadystatechange();
+        jest.runAllTicks();
+        await flushPromises();
+        expect(xhrs[1].open.mock.calls.length).toBe(1);
+        xhrs[2].onreadystatechange();
+        jest.runAllTicks();
+        return destroy;
+      })
+      .then(() => {
+        expect(JSON.parse(xhrs[1].send.mock.calls[0]).requests.length).toBe(20);
+        expect(JSON.parse(xhrs[2].send.mock.calls[0]).requests.length).toBe(2);
+      });
     jest.runAllTicks();
     await flushPromises();
 
@@ -2215,16 +2849,20 @@ describe('ObjectController', () => {
     const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
-      send: jest.fn()
+      send: jest.fn(),
     };
-    RESTController._setXHR(function() { return xhr; });
+    RESTController._setXHR(function () {
+      return xhr;
+    });
     const p = new ParseObject('Person');
     p.id = 'pid';
     p.set('key', 'value');
     const result = objectController.save(p, {}).then(() => {
-      expect(xhr.open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/classes/Person/pid', true]
-      );
+      expect(xhr.open.mock.calls[0]).toEqual([
+        'POST',
+        'https://api.parse.com/1/classes/Person/pid',
+        true,
+      ]);
       const body = JSON.parse(xhr.send.mock.calls[0]);
       expect(body.key).toBe('value');
     });
@@ -2238,7 +2876,7 @@ describe('ObjectController', () => {
     await result;
   });
 
-  it('returns an empty promise from an empty save', (done) => {
+  it('returns an empty promise from an empty save', done => {
     const objectController = CoreManager.getObjectController();
     objectController.save().then(() => {
       done();
@@ -2255,26 +2893,22 @@ describe('ObjectController', () => {
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
-        readyState: 4
+        readyState: 4,
       };
     }
     let current = 0;
-    RESTController._setXHR(function() { return xhrs[current++]; });
+    RESTController._setXHR(function () {
+      return xhrs[current++];
+    });
     const files = [
       new ParseFile('parse.txt', { base64: 'ParseA==' }),
       new ParseFile('parse2.txt', { base64: 'ParseA==' }),
-      new ParseFile('parse3.txt', { base64: 'ParseA==' })
+      new ParseFile('parse3.txt', { base64: 'ParseA==' }),
     ];
     const result = objectController.save(files, {}).then(() => {
-      expect(files[0].url()).toBe(
-        'http://files.parsetfss.com/a/parse.txt'
-      );
-      expect(files[1].url()).toBe(
-        'http://files.parsetfss.com/a/parse2.txt'
-      );
-      expect(files[2].url()).toBe(
-        'http://files.parsetfss.com/a/parse3.txt'
-      );
+      expect(files[0].url()).toBe('http://files.parsetfss.com/a/parse.txt');
+      expect(files[1].url()).toBe('http://files.parsetfss.com/a/parse2.txt');
+      expect(files[2].url()).toBe('http://files.parsetfss.com/a/parse3.txt');
     });
     jest.runAllTicks();
     await flushPromises();
@@ -2282,7 +2916,7 @@ describe('ObjectController', () => {
     for (let i = 0; i < 3; i++) {
       xhrs[i].responseText = JSON.stringify({
         name: 'parse.txt',
-        url: 'http://files.parsetfss.com/a/' + names[i]
+        url: 'http://files.parsetfss.com/a/' + names[i],
       });
       await flushPromises();
       xhrs[i].onreadystatechange();
@@ -2300,61 +2934,69 @@ describe('ObjectController', () => {
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
-        readyState: 4
+        readyState: 4,
       };
     }
     let current = 0;
-    RESTController._setXHR(function() { return xhrs[current++]; });
+    RESTController._setXHR(function () {
+      return xhrs[current++];
+    });
     const objects = [];
     for (let i = 0; i < 5; i++) {
       objects[i] = new ParseObject('Person');
     }
-    const result = objectController.save(objects, {}).then(async (results) => {
-      expect(results.length).toBe(5);
-      expect(results[0].id).toBe('pid0');
-      expect(results[0].get('index')).toBe(0);
-      expect(results[0].dirty()).toBe(false);
+    const result = objectController
+      .save(objects, {})
+      .then(async results => {
+        expect(results.length).toBe(5);
+        expect(results[0].id).toBe('pid0');
+        expect(results[0].get('index')).toBe(0);
+        expect(results[0].dirty()).toBe(false);
 
-      const response = [];
-      for (let i = 0; i < 22; i++) {
-        objects[i] = new ParseObject('Person');
-        objects[i].set('index', i);
-        response.push({
-          success: { objectId: 'pid' + i }
-        });
-      }
-      const save = objectController.save(objects, {});
-      jest.runAllTicks();
-      await flushPromises();
+        const response = [];
+        for (let i = 0; i < 22; i++) {
+          objects[i] = new ParseObject('Person');
+          objects[i].set('index', i);
+          response.push({
+            success: { objectId: 'pid' + i },
+          });
+        }
+        const save = objectController.save(objects, {});
+        jest.runAllTicks();
+        await flushPromises();
 
-      xhrs[1].responseText = JSON.stringify(response.slice(0, 20));
-      xhrs[2].responseText = JSON.stringify(response.slice(20));
+        xhrs[1].responseText = JSON.stringify(response.slice(0, 20));
+        xhrs[2].responseText = JSON.stringify(response.slice(20));
 
-      // Objects in the second batch will not be prepared for save yet
-      // This means they can also be modified before the first batch returns
-      expect(
-        SingleInstanceStateController.getState({ className: 'Person', id: objects[20]._getId() }).pendingOps.length
-      ).toBe(1);
-      objects[20].set('index', 0);
+        // Objects in the second batch will not be prepared for save yet
+        // This means they can also be modified before the first batch returns
+        expect(
+          SingleInstanceStateController.getState({
+            className: 'Person',
+            id: objects[20]._getId(),
+          }).pendingOps.length
+        ).toBe(1);
+        objects[20].set('index', 0);
 
-      xhrs[1].onreadystatechange();
-      jest.runAllTicks();
-      await flushPromises();
-      expect(objects[0].dirty()).toBe(false);
-      expect(objects[0].id).toBe('pid0');
-      expect(objects[20].dirty()).toBe(true);
-      expect(objects[20].id).toBe(undefined);
+        xhrs[1].onreadystatechange();
+        jest.runAllTicks();
+        await flushPromises();
+        expect(objects[0].dirty()).toBe(false);
+        expect(objects[0].id).toBe('pid0');
+        expect(objects[20].dirty()).toBe(true);
+        expect(objects[20].id).toBe(undefined);
 
-      xhrs[2].onreadystatechange();
-      jest.runAllTicks();
-      await flushPromises();
-      expect(objects[20].dirty()).toBe(false);
-      expect(objects[20].get('index')).toBe(0);
-      expect(objects[20].id).toBe('pid20');
-      return save;
-    }).then((results) => {
-      expect(results.length).toBe(22);
-    });
+        xhrs[2].onreadystatechange();
+        jest.runAllTicks();
+        await flushPromises();
+        expect(objects[20].dirty()).toBe(false);
+        expect(objects[20].get('index')).toBe(0);
+        expect(objects[20].id).toBe('pid20');
+        return save;
+      })
+      .then(results => {
+        expect(results.length).toBe(22);
+      });
     jest.runAllTicks();
     await flushPromises();
     xhrs[0].responseText = JSON.stringify([
@@ -2377,23 +3019,27 @@ describe('ObjectController', () => {
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
-        readyState: 4
+        readyState: 4,
       };
     }
     let current = 0;
-    RESTController._setXHR(function() { return xhrs[current++]; });
+    RESTController._setXHR(function () {
+      return xhrs[current++];
+    });
     xhrs[0].responseText = JSON.stringify([{ success: { objectId: 'i333' } }]);
     xhrs[1].responseText = JSON.stringify({});
     const brand = ParseObject.fromJSON({
       className: 'Brand',
       objectId: 'b123',
-      items: [{ __type: 'Pointer', objectId: 'i222', className: 'Item' }]
+      items: [{ __type: 'Pointer', objectId: 'i222', className: 'Item' }],
     });
     expect(brand._getSaveJSON()).toEqual({});
     const items = brand.get('items');
     items.push(new ParseObject('Item'));
     brand.set('items', items);
-    expect(function() { brand.save(); }).not.toThrow();
+    expect(function () {
+      brand.save();
+    }).not.toThrow();
     jest.runAllTicks();
     await flushPromises();
     xhrs[0].onreadystatechange();
@@ -2412,6 +3058,12 @@ describe('ObjectController', () => {
 
     expect(o).not.toBe(o2);
   });
+
+  it('cannot create a new instance of an object without className', () => {
+    expect(() => {
+      ParseObject.fromJSON({});
+    }).toThrow('Cannot create an object without a className');
+  });
 });
 
 describe('ParseObject (unique instance mode)', () => {
@@ -2422,7 +3074,7 @@ describe('ParseObject (unique instance mode)', () => {
   it('can be created with initial attributes', () => {
     const o = new ParseObject({
       className: 'Item',
-      value: 12
+      value: 12,
     });
     expect(o.className).toBe('Item');
     expect(o.attributes).toEqual({ value: 12 });
@@ -2433,7 +3085,7 @@ describe('ParseObject (unique instance mode)', () => {
       className: 'Item',
       createdAt: '2013-12-14T04:51:19Z',
       objectId: 'I1',
-      size: 'medium'
+      size: 'medium',
     };
     const o = ParseObject.fromJSON(json);
     expect(o.className).toBe('Item');
@@ -2441,7 +3093,7 @@ describe('ParseObject (unique instance mode)', () => {
     expect(o.attributes).toEqual({
       size: 'medium',
       createdAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
-      updatedAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19))
+      updatedAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
     });
     expect(o.dirty()).toBe(false);
   });
@@ -2450,23 +3102,23 @@ describe('ParseObject (unique instance mode)', () => {
     let o = new ParseObject('Item');
     o.set({
       size: 'large',
-      inStock: 18
+      inStock: 18,
     });
     expect(o.toJSON()).toEqual({
       size: 'large',
-      inStock: 18
+      inStock: 18,
     });
     o = new ParseObject('Item');
     o._finishFetch({
       objectId: 'O2',
       size: 'medium',
-      inStock: 12
+      inStock: 12,
     });
     expect(o.id).toBe('O2');
     expect(o.toJSON()).toEqual({
       objectId: 'O2',
       size: 'medium',
-      inStock: 12
+      inStock: 12,
     });
   });
 
@@ -2475,7 +3127,7 @@ describe('ParseObject (unique instance mode)', () => {
       className: 'Item',
       objectId: 'anObjectId',
       value: 12,
-      valid: true
+      valid: true,
     });
     o.set({ value: 14 });
     expect(o.get('value')).toBe(14);
@@ -2490,7 +3142,7 @@ describe('ParseObject (unique instance mode)', () => {
 
     const o2 = ParseObject.fromJSON({
       className: 'Item',
-      tags: ['#tbt']
+      tags: ['#tbt'],
     });
 
     o2.add('tags', '#nofilter');
@@ -2505,20 +3157,22 @@ describe('ParseObject (unique instance mode)', () => {
     expect(o2.get('tags')).toEqual([]);
   });
 
-  it('can save the object', (done) => {
+  it('can save the object', done => {
     CoreManager.getRESTController()._setXHR(
-      mockXHR([{
-        status: 200,
-        response: {
-          objectId: 'P1',
-          count: 1
-        }
-      }])
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            objectId: 'P1',
+            count: 1,
+          },
+        },
+      ])
     );
     const p = new ParseObject('Person');
     p.set('age', 38);
     p.increment('count');
-    p.save().then((obj) => {
+    p.save().then(obj => {
       expect(obj).toBe(p);
       expect(obj.get('age')).toBe(38);
       expect(obj.get('count')).toBe(1);
@@ -2532,21 +3186,21 @@ describe('ParseObject (unique instance mode)', () => {
     const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
-      send: jest.fn()
+      send: jest.fn(),
     };
-    RESTController._setXHR(function() { return xhr; });
+    RESTController._setXHR(function () {
+      return xhr;
+    });
     const objects = [];
     for (let i = 0; i < 5; i++) {
       objects[i] = new ParseObject('Person');
     }
     const result = ParseObject.saveAll(objects).then(() => {
-      expect(xhr.open.mock.calls[0]).toEqual(
-        ['POST', 'https://api.parse.com/1/batch', true]
-      );
+      expect(xhr.open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
       expect(JSON.parse(xhr.send.mock.calls[0]).requests[0]).toEqual({
         method: 'POST',
         path: '/1/classes/Person',
-        body: {}
+        body: {},
       });
     });
     jest.runAllTicks();
@@ -2570,7 +3224,7 @@ describe('ParseObject (unique instance mode)', () => {
     const o = new ParseObject({
       className: 'Item',
       objectId: 'anObjectId',
-      value: 12
+      value: 12,
     });
     o.id = 'otherId';
     expect(o.get('value')).toBe(12);
@@ -2580,12 +3234,12 @@ describe('ParseObject (unique instance mode)', () => {
     const o = new ParseObject({
       className: 'Item',
       objectId: 'anObjectId',
-      value: 12
+      value: 12,
     });
     const o2 = new ParseObject({
       className: 'Item',
       objectId: 'anObjectId',
-      value: 12
+      value: 12,
     });
     o.set({ value: 100 });
     expect(o.get('value')).toBe(100);
@@ -2641,7 +3295,7 @@ describe('ParseObject Subclasses', () => {
     expect(o.toPointer()).toEqual({
       __type: 'Pointer',
       className: 'MyObject',
-      objectId: 'anObjectId'
+      objectId: 'anObjectId',
     });
 
     expect(o.doSomething()).toBe(5);
@@ -2652,7 +3306,7 @@ describe('ParseObject Subclasses', () => {
     expect(o2.toPointer()).toEqual({
       __type: 'Pointer',
       className: 'MyObject',
-      objectId: 'otherId'
+      objectId: 'otherId',
     });
     expect(o2.doSomething()).toBe(5);
   });
@@ -2660,21 +3314,31 @@ describe('ParseObject Subclasses', () => {
   it('respects readonly attributes of subclasses', () => {
     const o = new MyObject();
     o.set('readwrite', true);
-    expect(o.set.bind(o, 'readonly')).toThrow(
-      'Cannot modify readonly attribute: readonly'
-    );
-    expect(o.set.bind(o, 'static')).toThrow(
-      'Cannot modify readonly attribute: static'
-    );
-    expect(o.set.bind(o, 'frozen')).toThrow(
-      'Cannot modify readonly attribute: frozen'
+    expect(o.set.bind(o, 'readonly')).toThrow('Cannot modify readonly attribute: readonly');
+    expect(o.set.bind(o, 'static')).toThrow('Cannot modify readonly attribute: static');
+    expect(o.set.bind(o, 'frozen')).toThrow('Cannot modify readonly attribute: frozen');
+  });
+
+  it('registerSubclass errors', () => {
+    expect(() => {
+      ParseObject.registerSubclass(1234);
+    }).toThrow('The first argument must be a valid class name.');
+
+    expect(() => {
+      ParseObject.registerSubclass('TestObject', undefined);
+    }).toThrow('You must supply a subclass constructor.');
+
+    expect(() => {
+      ParseObject.registerSubclass('TestObject', {});
+    }).toThrow(
+      'You must register the subclass constructor. Did you attempt to register an instance of the subclass?'
     );
   });
 
   it('can inflate subclasses from server JSON', () => {
     const json = {
       className: 'MyObject',
-      objectId: 'anotherId'
+      objectId: 'anotherId',
     };
     const o = ParseObject.fromJSON(json);
     expect(o instanceof ParseObject).toBe(true);
@@ -2687,17 +3351,36 @@ describe('ParseObject Subclasses', () => {
     const o = new MyObject();
     o.set({
       size: 'large',
-      count: 7
+      count: 7,
     });
     const o2 = o.clone();
     expect(o2 instanceof MyObject).toBe(true);
     expect(o2.className).toBe('MyObject');
     expect(o2.attributes).toEqual({
       size: 'large',
-      count: 7
+      count: 7,
     });
     expect(o2.id).toBe(undefined);
     expect(o.equals(o2)).toBe(false);
+  });
+
+  it('can be cleared', () => {
+    const o = new MyObject();
+    o.set({
+      size: 'large',
+      count: 7,
+    });
+    jest.spyOn(o, 'set');
+    o.clear();
+    expect(o.set).toHaveBeenCalledWith(
+      {
+        count: true,
+        size: true,
+      },
+      {
+        unset: true,
+      }
+    );
   });
 });
 
@@ -2715,7 +3398,7 @@ describe('ParseObject extensions', () => {
     yo.set('greeting', 'yo');
     expect(yo.get('greeting')).toBe('yo');
     expect(yo.attributes).toEqual({
-      greeting: 'yo'
+      greeting: 'yo',
     });
 
     const yo2 = YourObject.createWithoutData('otherId');
@@ -2724,16 +3407,24 @@ describe('ParseObject extensions', () => {
     expect(yo2.toPointer()).toEqual({
       __type: 'Pointer',
       className: 'YourObject',
-      objectId: 'otherId'
+      objectId: 'otherId',
     });
   });
 
   it('can extend the prototype and statics of ParseObject', () => {
-    const ExtendedObject = ParseObject.extend('ExtendedObject', {
-      getFoo() { return 12; }
-    }, {
-      isFoo(value) { return value === 'foo'; }
-    });
+    const ExtendedObject = ParseObject.extend(
+      'ExtendedObject',
+      {
+        getFoo() {
+          return 12;
+        },
+      },
+      {
+        isFoo(value) {
+          return value === 'foo';
+        },
+      }
+    );
     const e = new ExtendedObject();
     expect(e instanceof ParseObject).toBe(true);
     expect(e instanceof ExtendedObject).toBe(true);
@@ -2744,12 +3435,16 @@ describe('ParseObject extensions', () => {
 
   it('can extend a previous extension', () => {
     let FeatureObject = ParseObject.extend('FeatureObject', {
-      foo() { return 'F'; }
+      foo() {
+        return 'F';
+      },
     });
     let f = new FeatureObject();
     expect(f.foo()).toBe('F');
     FeatureObject = ParseObject.extend('FeatureObject', {
-      bar() { return 'B'; }
+      bar() {
+        return 'B';
+      },
     });
     f = new FeatureObject();
     expect(f.foo() + f.bar()).toBe('FB');
@@ -2757,13 +3452,41 @@ describe('ParseObject extensions', () => {
 
   it('can specify a custom initializer', () => {
     const InitObject = ParseObject.extend('InitObject', {
-      initialize: function() {
+      initialize: function () {
         this.set('field', 12);
-      }
+      },
     });
 
-    const i = new InitObject()
+    const i = new InitObject();
     expect(i.get('field')).toBe(12);
+  });
+
+  it('can handle className parameters', () => {
+    expect(() => {
+      ParseObject.extend();
+    }).toThrow("Parse.Object.extend's first argument should be the className.");
+
+    let CustomObject = ParseObject.extend('Item');
+    expect(CustomObject.className).toBe('Item');
+
+    CustomObject = ParseObject.extend({ className: 'Test' });
+    expect(CustomObject.className).toBe('Test');
+  });
+
+  it('can extend with user rewrite', () => {
+    const CustomObject = ParseObject.extend('User');
+    expect(CustomObject.className).toBe('_User');
+  });
+
+  it('can extend multiple subclasses', () => {
+    const CustomObject = ParseObject.extend('Item');
+    expect(() => {
+      new CustomObject({ 'invalid#name': 'bar' });
+    }).toThrow("Can't create an invalid Parse Object");
+
+    const CustomUserObject = CustomObject.extend('User');
+    const CustomRewrite = CustomUserObject.extend();
+    expect(CustomRewrite.className).toBe('_User');
   });
 });
 
@@ -2805,8 +3528,7 @@ describe('ParseObject pin', () => {
   it('can check if pinned', async () => {
     const object = new ParseObject('Item');
     object.id = '1234';
-    mockLocalDatastore
-      .fromPinWithName
+    mockLocalDatastore.fromPinWithName
       .mockImplementationOnce(() => {
         return [object._toFullJSON()];
       })
@@ -2821,13 +3543,9 @@ describe('ParseObject pin', () => {
   it('can fetchFromLocalDatastore', async () => {
     const object = new ParseObject('Item');
     object.id = '123';
-    mockLocalDatastore
-      .getKeyForObject
-      .mockImplementationOnce(() => 'Item_123');
+    mockLocalDatastore.getKeyForObject.mockImplementationOnce(() => 'Item_123');
 
-    mockLocalDatastore
-      ._serializeObject
-      .mockImplementationOnce(() => object._toFullJSON());
+    mockLocalDatastore._serializeObject.mockImplementationOnce(() => object._toFullJSON());
 
     await object.fetchFromLocalDatastore();
     expect(mockLocalDatastore._serializeObject).toHaveBeenCalledTimes(1);
@@ -2848,7 +3566,10 @@ describe('ParseObject pin', () => {
     const obj2 = new ParseObject('Item');
     await ParseObject.pinAll([obj1, obj2]);
     expect(mockLocalDatastore._handlePinAllWithName).toHaveBeenCalledTimes(1);
-    expect(mockLocalDatastore._handlePinAllWithName.mock.calls[0]).toEqual([DEFAULT_PIN, [obj1, obj2]]);
+    expect(mockLocalDatastore._handlePinAllWithName.mock.calls[0]).toEqual([
+      DEFAULT_PIN,
+      [obj1, obj2],
+    ]);
   });
 
   it('can unPinAll', async () => {
@@ -2856,7 +3577,10 @@ describe('ParseObject pin', () => {
     const obj2 = new ParseObject('Item');
     await ParseObject.unPinAll([obj1, obj2]);
     expect(mockLocalDatastore._handleUnPinAllWithName).toHaveBeenCalledTimes(1);
-    expect(mockLocalDatastore._handleUnPinAllWithName.mock.calls[0]).toEqual([DEFAULT_PIN, [obj1, obj2]]);
+    expect(mockLocalDatastore._handleUnPinAllWithName.mock.calls[0]).toEqual([
+      DEFAULT_PIN,
+      [obj1, obj2],
+    ]);
   });
 
   it('can unPinAllObjects', async () => {
@@ -2936,21 +3660,23 @@ describe('ParseObject pin', () => {
       expect(error).toBe('Parse.enableLocalDatastore() must be called first');
     }
   });
-  it('gets id for new object when cascadeSave = false and singleInstance = false', (done) => {
+  it('gets id for new object when cascadeSave = false and singleInstance = false', done => {
     ParseObject.disableSingleInstance();
     CoreManager.getRESTController()._setXHR(
-      mockXHR([{
-        status: 200,
-        response: {
-          objectId: 'P5',
-        }
-      }])
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            objectId: 'P5',
+          },
+        },
+      ])
     );
     const p = new ParseObject('Person');
-    p.save(null, {cascadeSave: false}).then((obj) => {
+    p.save(null, { cascadeSave: false }).then(obj => {
       expect(obj).toBe(p);
       expect(obj.id).toBe('P5');
       done();
     });
-  })
+  });
 });

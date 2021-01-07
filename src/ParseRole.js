@@ -25,19 +25,20 @@ import type ParseRelation from './ParseRelation';
  *
  * <p>Roles must have a name (which cannot be changed after creation of the
  * role), and must specify an ACL.</p>
+ *
  * @alias Parse.Role
- * @extends Parse.Object
+ * @augments Parse.Object
  */
 class ParseRole extends ParseObject {
   /**
-   * @param {String} name The name of the Role to create.
+   * @param {string} name The name of the Role to create.
    * @param {Parse.ACL} acl The ACL for this role. Roles must have an ACL.
    * A Parse.Role is a local representation of a role persisted to the Parse
    * cloud.
    */
   constructor(name: string, acl: ParseACL) {
     super('_Role');
-    if (typeof name === 'string' && (acl instanceof ParseACL)) {
+    if (typeof name === 'string' && acl instanceof ParseACL) {
       this.setName(name);
       this.setACL(acl);
     }
@@ -46,8 +47,7 @@ class ParseRole extends ParseObject {
   /**
    * Gets the name of the role.  You can alternatively call role.get("name")
    *
-
-   * @return {String} the name of the role.
+   * @returns {string} the name of the role.
    */
   getName(): ?string {
     const name = this.get('name');
@@ -69,10 +69,10 @@ class ParseRole extends ParseObject {
    *
    * <p>This is equivalent to calling role.set("name", name)</p>
    *
-
-   * @param {String} name The name of the role.
-   * @param {Object} options Standard options object with success and error
+   * @param {string} name The name of the role.
+   * @param {object} options Standard options object with success and error
    *     callbacks.
+   * @returns {(ParseObject|boolean)} true if the set succeeded.
    */
   setName(name: string, options?: mixed): ParseObject | boolean {
     return this.set('name', name, options);
@@ -86,8 +86,7 @@ class ParseRole extends ParseObject {
    *
    * <p>This is equivalent to calling role.relation("users")</p>
    *
-
-   * @return {Parse.Relation} the relation for the users belonging to this
+   * @returns {Parse.Relation} the relation for the users belonging to this
    *     role.
    */
   getUsers(): ParseRelation {
@@ -102,8 +101,7 @@ class ParseRole extends ParseObject {
    *
    * <p>This is equivalent to calling role.relation("roles")</p>
    *
-
-   * @return {Parse.Relation} the relation for the roles belonging to this
+   * @returns {Parse.Relation} the relation for the roles belonging to this
    *     role.
    */
   getRoles(): ParseRelation {
@@ -124,20 +122,16 @@ class ParseRole extends ParseObject {
         // Let the name be set in this case
         return new ParseError(
           ParseError.OTHER_CAUSE,
-          'A role\'s name can only be set before it has been saved.'
+          "A role's name can only be set before it has been saved."
         );
       }
       if (typeof newName !== 'string') {
-        return new ParseError(
-          ParseError.OTHER_CAUSE,
-          'A role\'s name must be a String.'
-        );
+        return new ParseError(ParseError.OTHER_CAUSE, "A role's name must be a String.");
       }
-      if (!(/^[0-9a-zA-Z\-_ ]+$/).test(newName)) {
+      if (!/^[0-9a-zA-Z\-_ ]+$/.test(newName)) {
         return new ParseError(
           ParseError.OTHER_CAUSE,
-          'A role\'s name can be only contain alphanumeric characters, _, ' +
-          '-, and spaces.'
+          "A role's name can be only contain alphanumeric characters, _, " + '-, and spaces.'
         );
       }
     }

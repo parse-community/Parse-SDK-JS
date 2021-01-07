@@ -13,11 +13,11 @@ jest.dontMock('../ParseOp');
 jest.dontMock('../unique');
 
 const mockStore = {};
-const mockObject = function(className) {
+const mockObject = function (className) {
   this.className = className;
   this.ops = {};
 };
-mockObject.registerSubclass = function() {};
+mockObject.registerSubclass = function () {};
 mockObject.prototype = {
   _getId() {
     return this.id;
@@ -38,11 +38,7 @@ mockObject.prototype = {
     return new ParseRelation(this, key);
   },
   get(key) {
-    return this.op(key).applyTo(
-      null,
-      { className: this.className, id: this.id },
-      key
-    );
+    return this.op(key).applyTo(null, { className: this.className, id: this.id }, key);
   },
   op(key) {
     let finalOp = undefined;
@@ -50,11 +46,11 @@ mockObject.prototype = {
       finalOp = mockStore[this.id][key][i].mergeWith(finalOp);
     }
     return finalOp;
-  }
+  },
 };
 jest.setMock('../ParseObject', mockObject);
 
-const mockQuery = function(className) {
+const mockQuery = function (className) {
   this.className = className;
   this.where = {};
   this._extraOptions = {};
@@ -63,7 +59,7 @@ mockQuery.prototype = {
   _addCondition(key, comparison, value) {
     this.where[key] = this.where[key] || {};
     this.where[key][comparison] = value;
-  }
+  },
 };
 jest.setMock('../ParseQuery', mockQuery);
 
@@ -90,13 +86,11 @@ describe('ParseRelation', () => {
     expect(p).toBeTruthy();
     expect(r.toJSON()).toEqual({
       __type: 'Relation',
-      className: 'Delivery'
+      className: 'Delivery',
     });
     expect(parent.op('shipments').toJSON()).toEqual({
       __op: 'AddRelation',
-      objects: [
-        { __type: 'Pointer', objectId: 'D1', className: 'Delivery' }
-      ]
+      objects: [{ __type: 'Pointer', objectId: 'D1', className: 'Delivery' }],
     });
 
     const o2 = new ParseObject('Delivery');
@@ -106,7 +100,7 @@ describe('ParseRelation', () => {
     r.add([o2, o3]);
     expect(r.toJSON()).toEqual({
       __type: 'Relation',
-      className: 'Delivery'
+      className: 'Delivery',
     });
     expect(parent.op('shipments').toJSON()).toEqual({
       __op: 'AddRelation',
@@ -114,8 +108,57 @@ describe('ParseRelation', () => {
         { __type: 'Pointer', objectId: 'D1', className: 'Delivery' },
         { __type: 'Pointer', objectId: 'D2', className: 'Delivery' },
         { __type: 'Pointer', objectId: 'D3', className: 'Delivery' },
-      ]
+      ],
     });
+  });
+
+  it('can add empty array to a relation', () => {
+    const parent = new ParseObject('Item');
+    parent.id = 'I1234';
+    const r = new ParseRelation(parent, 'shipments');
+    const o = new ParseObject('Delivery');
+    o.id = 'D1234';
+    const p = r.add(o);
+    expect(p).toBeTruthy();
+    expect(r.toJSON()).toEqual({
+      __type: 'Relation',
+      className: 'Delivery',
+    });
+    expect(parent.op('shipments').toJSON()).toEqual({
+      __op: 'AddRelation',
+      objects: [{ __type: 'Pointer', objectId: 'D1234', className: 'Delivery' }],
+    });
+    // Adding empty array shouldn't change the relation
+    r.add([]);
+    expect(r.toJSON()).toEqual({
+      __type: 'Relation',
+      className: 'Delivery',
+    });
+    expect(parent.op('shipments').toJSON()).toEqual({
+      __op: 'AddRelation',
+      objects: [{ __type: 'Pointer', objectId: 'D1234', className: 'Delivery' }],
+    });
+  });
+
+  it('cannot add to relation without parent', () => {
+    const relation = new ParseRelation();
+    expect(() => {
+      relation.add([]);
+    }).toThrow('Cannot add to a Relation without a parent');
+  });
+
+  it('cannot remove from relation without parent', () => {
+    const relation = new ParseRelation();
+    expect(() => {
+      relation.remove([]);
+    }).toThrow('Cannot remove from a Relation without a parent');
+  });
+
+  it('cannot construct query from relation without parent', () => {
+    const relation = new ParseRelation();
+    expect(() => {
+      relation.query();
+    }).toThrow('Cannot construct a query for a Relation without a parent');
   });
 
   it('can remove objects from a relation', () => {
@@ -127,13 +170,11 @@ describe('ParseRelation', () => {
     r.remove(o);
     expect(r.toJSON()).toEqual({
       __type: 'Relation',
-      className: 'Delivery'
+      className: 'Delivery',
     });
     expect(parent.op('shipments').toJSON()).toEqual({
       __op: 'RemoveRelation',
-      objects: [
-        { __type: 'Pointer', objectId: 'D1', className: 'Delivery' }
-      ]
+      objects: [{ __type: 'Pointer', objectId: 'D1', className: 'Delivery' }],
     });
 
     const o2 = new ParseObject('Delivery');
@@ -143,7 +184,7 @@ describe('ParseRelation', () => {
     r.remove([o2, o3]);
     expect(r.toJSON()).toEqual({
       __type: 'Relation',
-      className: 'Delivery'
+      className: 'Delivery',
     });
     expect(parent.op('shipments').toJSON()).toEqual({
       __op: 'RemoveRelation',
@@ -151,7 +192,34 @@ describe('ParseRelation', () => {
         { __type: 'Pointer', objectId: 'D1', className: 'Delivery' },
         { __type: 'Pointer', objectId: 'D2', className: 'Delivery' },
         { __type: 'Pointer', objectId: 'D3', className: 'Delivery' },
-      ]
+      ],
+    });
+  });
+
+  it('can remove empty array from a relation', () => {
+    const parent = new ParseObject('Item');
+    parent.id = 'I5678';
+    const r = new ParseRelation(parent, 'shipments');
+    const o = new ParseObject('Delivery');
+    o.id = 'D5678';
+    r.remove(o);
+    expect(r.toJSON()).toEqual({
+      __type: 'Relation',
+      className: 'Delivery',
+    });
+    expect(parent.op('shipments').toJSON()).toEqual({
+      __op: 'RemoveRelation',
+      objects: [{ __type: 'Pointer', objectId: 'D5678', className: 'Delivery' }],
+    });
+    // Removing empty array shouldn't change the relation
+    r.remove([]);
+    expect(r.toJSON()).toEqual({
+      __type: 'Relation',
+      className: 'Delivery',
+    });
+    expect(parent.op('shipments').toJSON()).toEqual({
+      __op: 'RemoveRelation',
+      objects: [{ __type: 'Pointer', objectId: 'D5678', className: 'Delivery' }],
     });
   });
 
@@ -162,17 +230,17 @@ describe('ParseRelation', () => {
     let q = r.query();
     expect(q.className).toBe('Item');
     expect(q._extraOptions).toEqual({
-      redirectClassNameForKey: 'shipments'
+      redirectClassNameForKey: 'shipments',
     });
     expect(q.where).toEqual({
       $relatedTo: {
         object: {
           __type: 'Pointer',
           objectId: 'I1',
-          className: 'Item'
+          className: 'Item',
         },
-        key: 'shipments'
-      }
+        key: 'shipments',
+      },
     });
 
     r = new ParseRelation(parent, 'shipments');
@@ -186,10 +254,10 @@ describe('ParseRelation', () => {
         object: {
           __type: 'Pointer',
           className: 'Item',
-          objectId: 'I1'
+          objectId: 'I1',
         },
-        key: 'shipments'
-      }
+        key: 'shipments',
+      },
     });
   });
 
@@ -197,10 +265,27 @@ describe('ParseRelation', () => {
     const parent = new ParseObject('Item');
     parent.id = 'I3';
     const r = new ParseRelation(parent, 'shipments');
-    expect(r._ensureParentAndKey.bind(r, new ParseObject('Item'), 'shipments'))
-      .toThrow('Internal Error. Relation retrieved from two different Objects.');
-    expect(r._ensureParentAndKey.bind(r, parent, 'partners'))
-      .toThrow('Internal Error. Relation retrieved from two different keys.');
+    expect(r._ensureParentAndKey.bind(r, new ParseObject('Item'), 'shipments')).toThrow(
+      'Internal Error. Relation retrieved from two different Objects.'
+    );
+    expect(() => {
+      r._ensureParentAndKey(new ParseObject('TestObject'), 'shipments');
+    }).toThrow('Internal Error. Relation retrieved from two different Objects.');
+    expect(r._ensureParentAndKey.bind(r, parent, 'partners')).toThrow(
+      'Internal Error. Relation retrieved from two different keys.'
+    );
     expect(r._ensureParentAndKey.bind(r, parent, 'shipments')).not.toThrow();
+
+    const noParent = new ParseRelation(null, null);
+    noParent._ensureParentAndKey(parent);
+    expect(noParent.parent).toEqual(parent);
+
+    const noIdParent = new ParseObject('Item');
+    const newParent = new ParseObject('Item');
+    newParent.id = 'newId';
+
+    const hasParent = new ParseRelation(noIdParent);
+    hasParent._ensureParentAndKey(newParent);
+    expect(hasParent.parent).toEqual(newParent);
   });
 });

@@ -19,24 +19,28 @@ const provider = {
     if (typeof FB === 'undefined') {
       options.error(this, 'Facebook SDK not found.');
     }
-    FB.login((response) => {
-      if (response.authResponse) {
-        if (options.success) {
-          options.success(this, {
-            id: response.authResponse.userID,
-            access_token: response.authResponse.accessToken,
-            expiration_date: new Date(response.authResponse.expiresIn * 1000 +
-                (new Date()).getTime()).toJSON()
-          });
+    FB.login(
+      response => {
+        if (response.authResponse) {
+          if (options.success) {
+            options.success(this, {
+              id: response.authResponse.userID,
+              access_token: response.authResponse.accessToken,
+              expiration_date: new Date(
+                response.authResponse.expiresIn * 1000 + new Date().getTime()
+              ).toJSON(),
+            });
+          }
+        } else {
+          if (options.error) {
+            options.error(this, response);
+          }
         }
-      } else {
-        if (options.error) {
-          options.error(this, response);
-        }
+      },
+      {
+        scope: requestedPermissions,
       }
-    }, {
-      scope: requestedPermissions
-    });
+    );
   },
 
   restoreAuthentication(authData) {
@@ -55,8 +59,7 @@ const provider = {
       // the FB SDK knows of a different user than the one being restored
       // from a Parse User that logged in with username/password.
       const existingResponse = FB.getAuthResponse();
-      if (existingResponse &&
-          existingResponse.userID !== authData.id) {
+      if (existingResponse && existingResponse.userID !== authData.id) {
         FB.logout();
       }
 
@@ -71,11 +74,12 @@ const provider = {
 
   deauthenticate() {
     this.restoreAuthentication(null);
-  }
+  },
 };
 
 /**
  * Provides a set of utilities for using Parse with Facebook.
+ *
  * @class Parse.FacebookUtils
  * @static
  * @hideconstructor
@@ -90,9 +94,9 @@ const FacebookUtils = {
    * FB.init()</a></code>.  Parse.FacebookUtils will invoke FB.init() for you
    * with these arguments.
    *
-   * @method init
+   * @function init
    * @name Parse.FacebookUtils.init
-   * @param {Object} options Facebook options argument as described here:
+   * @param {object} options Facebook options argument as described here:
    *   <a href=
    *   "https://developers.facebook.com/docs/reference/javascript/FB.init/">
    *   FB.init()</a>. The status flag will be coerced to 'false' because it
@@ -101,9 +105,7 @@ const FacebookUtils = {
    */
   init(options) {
     if (typeof FB === 'undefined') {
-      throw new Error(
-        'The Facebook JavaScript SDK must be loaded before calling init.'
-      );
+      throw new Error('The Facebook JavaScript SDK must be loaded before calling init.');
     }
     initOptions = {};
     if (options) {
@@ -112,11 +114,14 @@ const FacebookUtils = {
       }
     }
     if (initOptions.status && typeof console !== 'undefined') {
-      const warn = console.warn || console.log || function() {}; // eslint-disable-line no-console
-      warn.call(console, 'The "status" flag passed into' +
-        ' FB.init, when set to true, can interfere with Parse Facebook' +
-        ' integration, so it has been suppressed. Please call' +
-        ' FB.getLoginStatus() explicitly if you require this behavior.');
+      const warn = console.warn || console.log || function () {}; // eslint-disable-line no-console
+      warn.call(
+        console,
+        'The "status" flag passed into' +
+          ' FB.init, when set to true, can interfere with Parse Facebook' +
+          ' integration, so it has been suppressed. Please call' +
+          ' FB.getLoginStatus() explicitly if you require this behavior.'
+      );
     }
     initOptions.status = false;
     FB.init(initOptions);
@@ -127,11 +132,11 @@ const FacebookUtils = {
   /**
    * Gets whether the user has their account linked to Facebook.
    *
-   * @method isLinked
+   * @function isLinked
    * @name Parse.FacebookUtils.isLinked
    * @param {Parse.User} user User to check for a facebook link.
    *     The user must be logged in on this device.
-   * @return {Boolean} <code>true</code> if the user has their account
+   * @returns {boolean} <code>true</code> if the user has their account
    *     linked to Facebook.
    */
   isLinked(user) {
@@ -152,22 +157,20 @@ const FacebookUtils = {
    *
    * <code>logIn(authData: Object, options?: Object);</code>
    *
-   * @method logIn
+   * @function logIn
    * @name Parse.FacebookUtils.logIn
-   * @param {(String|Object)} permissions The permissions required for Facebook
+   * @param {(string | object)} permissions The permissions required for Facebook
    *    log in.  This is a comma-separated string of permissions.
    *    Alternatively, supply a Facebook authData object as described in our
    *    REST API docs if you want to handle getting facebook auth tokens
    *    yourself.
-   * @param {Object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
+   * @param {object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
    * @returns {Promise}
    */
   logIn(permissions, options) {
     if (!permissions || typeof permissions === 'string') {
       if (!initialized) {
-        throw new Error(
-          'You must initialize FacebookUtils before calling logIn.'
-        );
+        throw new Error('You must initialize FacebookUtils before calling logIn.');
       }
       requestedPermissions = permissions;
       return ParseUser.logInWith('facebook', options);
@@ -190,24 +193,22 @@ const FacebookUtils = {
    *
    * <code>link(user: Parse.User, authData: Object, options?: FullOptions);</code>
    *
-   * @method link
+   * @function link
    * @name Parse.FacebookUtils.link
    * @param {Parse.User} user User to link to Facebook. This must be the
    *     current user.
-   * @param {(String|Object)} permissions The permissions required for Facebook
+   * @param {(string | object)} permissions The permissions required for Facebook
    *    log in.  This is a comma-separated string of permissions.
    *    Alternatively, supply a Facebook authData object as described in our
    *    REST API docs if you want to handle getting facebook auth tokens
    *    yourself.
-   * @param {Object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
+   * @param {object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
    * @returns {Promise}
    */
   link(user, permissions, options) {
     if (!permissions || typeof permissions === 'string') {
       if (!initialized) {
-        throw new Error(
-          'You must initialize FacebookUtils before calling link.'
-        );
+        throw new Error('You must initialize FacebookUtils before calling link.');
       }
       requestedPermissions = permissions;
       return user.linkWith('facebook', options);
@@ -219,19 +220,17 @@ const FacebookUtils = {
   /**
    * Unlinks the Parse.User from a Facebook account.
    *
-   * @method unlink
+   * @function unlink
    * @name Parse.FacebookUtils.unlink
    * @param {Parse.User} user User to unlink from Facebook. This must be the
    *     current user.
-   * @param {Object} options Standard options object with success and error
+   * @param {object} options Standard options object with success and error
    *    callbacks.
    * @returns {Promise}
    */
-  unlink: function(user, options) {
+  unlink: function (user, options) {
     if (!initialized) {
-      throw new Error(
-        'You must initialize FacebookUtils before calling unlink.'
-      );
+      throw new Error('You must initialize FacebookUtils before calling unlink.');
     }
     return user._unlinkFrom('facebook', options);
   },
@@ -239,7 +238,7 @@ const FacebookUtils = {
   // Used for testing purposes
   _getAuthProvider() {
     return provider;
-  }
+  },
 };
 
 export default FacebookUtils;

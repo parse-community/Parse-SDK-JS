@@ -16,9 +16,9 @@ import type { AttributeMap } from './ObjectStateMutations';
 export default class Installation extends ParseObject {
   constructor(attributes: ?AttributeMap) {
     super('_Installation');
-    if (attributes && typeof attributes === 'object'){
+    if (attributes && typeof attributes === 'object') {
       if (!this.set(attributes || {})) {
-        throw new Error('Can\'t create an invalid Session');
+        throw new Error("Can't create an invalid Installation");
       }
     }
   }

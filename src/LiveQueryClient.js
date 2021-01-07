@@ -22,7 +22,7 @@ const CLIENT_STATE = {
   CONNECTED: 'connected',
   CLOSED: 'closed',
   RECONNECTING: 'reconnecting',
-  DISCONNECTED: 'disconnected'
+  DISCONNECTED: 'disconnected',
 };
 
 // The event type the LiveQuery client should sent to server
@@ -30,7 +30,7 @@ const OP_TYPES = {
   CONNECT: 'connect',
   SUBSCRIBE: 'subscribe',
   UNSUBSCRIBE: 'unsubscribe',
-  ERROR: 'error'
+  ERROR: 'error',
 };
 
 // The event we get back from LiveQuery server
@@ -43,14 +43,14 @@ const OP_EVENTS = {
   UPDATE: 'update',
   ENTER: 'enter',
   LEAVE: 'leave',
-  DELETE: 'delete'
+  DELETE: 'delete',
 };
 
 // The event the LiveQuery client should emit
 const CLIENT_EMMITER_TYPES = {
   CLOSE: 'close',
   ERROR: 'error',
-  OPEN: 'open'
+  OPEN: 'open',
 };
 
 // The event the LiveQuery subscription should emit
@@ -62,13 +62,12 @@ const SUBSCRIPTION_EMMITER_TYPES = {
   UPDATE: 'update',
   ENTER: 'enter',
   LEAVE: 'leave',
-  DELETE: 'delete'
+  DELETE: 'delete',
 };
 
-
-const generateInterval = (k) => {
-  return Math.random() * Math.min(30, (Math.pow(2, k) - 1)) * 1000;
-}
+const generateInterval = k => {
+  return Math.random() * Math.min(30, Math.pow(2, k) - 1) * 1000;
+};
 
 /**
  * Creates a new LiveQueryClient.
@@ -111,6 +110,7 @@ const generateInterval = (k) => {
  * client.on('error', (error) => {
  *
  * });</pre>
+ *
  * @alias Parse.LiveQueryClient
  */
 class LiveQueryClient extends EventEmitter {
@@ -130,7 +130,7 @@ class LiveQueryClient extends EventEmitter {
   state: string;
 
   /**
-   * @param {Object} options
+   * @param {object} options
    * @param {string} options.applicationId - applicationId of your Parse app
    * @param {string} options.serverURL - <b>the URL of your LiveQuery server</b>
    * @param {string} options.javascriptKey (optional)
@@ -149,7 +149,9 @@ class LiveQueryClient extends EventEmitter {
     super();
 
     if (!serverURL || serverURL.indexOf('ws') !== 0) {
-      throw new Error('You need to set a proper Parse LiveQuery server url before using LiveQueryClient');
+      throw new Error(
+        'You need to set a proper Parse LiveQuery server url before using LiveQueryClient'
+      );
     }
 
     this.reconnectHandle = null;
@@ -166,6 +168,10 @@ class LiveQueryClient extends EventEmitter {
     this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
     this.state = CLIENT_STATE.INITIALIZED;
+
+    // adding listener so process does not crash
+    // best practice is for developer to register their own listener
+    this.on('error', () => {});
   }
 
   shouldOpen(): any {
@@ -182,9 +188,9 @@ class LiveQueryClient extends EventEmitter {
    * <a href="https://github.com/parse-community/parse-server/wiki/Parse-LiveQuery-Protocol-Specification">here</a> for more details. The subscription you get is the same subscription you get
    * from our Standard API.
    *
-   * @param {Object} query - the ParseQuery you want to subscribe to
+   * @param {object} query - the ParseQuery you want to subscribe to
    * @param {string} sessionToken (optional)
-   * @return {LiveQuerySubscription} subscription
+   * @returns {LiveQuerySubscription} subscription
    */
   subscribe(query: Object, sessionToken: ?string): LiveQuerySubscription {
     if (!query) {
@@ -200,8 +206,8 @@ class LiveQueryClient extends EventEmitter {
       query: {
         className,
         where,
-        fields
-      }
+        fields,
+      },
     };
 
     if (sessionToken) {
@@ -221,7 +227,7 @@ class LiveQueryClient extends EventEmitter {
   /**
    * After calling unsubscribe you'll stop receiving events from the subscription object.
    *
-   * @param {Object} subscription - subscription you would like to unsubscribe from.
+   * @param {object} subscription - subscription you would like to unsubscribe from.
    */
   unsubscribe(subscription: Object) {
     if (!subscription) {
@@ -231,8 +237,8 @@ class LiveQueryClient extends EventEmitter {
     this.subscriptions.delete(subscription.id);
     const unsubscribeRequest = {
       op: OP_TYPES.UNSUBSCRIBE,
-      requestId: subscription.id
-    }
+      requestId: subscription.id,
+    };
     this.connectPromise.then(() => {
       this.socket.send(JSON.stringify(unsubscribeRequest));
     });
@@ -261,7 +267,7 @@ class LiveQueryClient extends EventEmitter {
       this._handleWebSocketOpen();
     };
 
-    this.socket.onmessage = (event) => {
+    this.socket.onmessage = event => {
       this._handleWebSocketMessage(event);
     };
 
@@ -269,7 +275,7 @@ class LiveQueryClient extends EventEmitter {
       this._handleWebSocketClose();
     };
 
-    this.socket.onerror = (error) => {
+    this.socket.onerror = error => {
       this._handleWebSocketError(error);
     };
   }
@@ -288,8 +294,8 @@ class LiveQueryClient extends EventEmitter {
         query: {
           className,
           where,
-          fields
-        }
+          fields,
+        },
       };
 
       if (sessionToken) {
@@ -338,7 +344,7 @@ class LiveQueryClient extends EventEmitter {
       applicationId: this.applicationId,
       javascriptKey: this.javascriptKey,
       masterKey: this.masterKey,
-      sessionToken: this.sessionToken
+      sessionToken: this.sessionToken,
     };
     if (this.additionalProperties) {
       connectRequest.installationId = this.installationId;
@@ -353,14 +359,13 @@ class LiveQueryClient extends EventEmitter {
     }
     let subscription = null;
     if (data.requestId) {
-      subscription =
-       this.subscriptions.get(data.requestId);
+      subscription = this.subscriptions.get(data.requestId);
     }
     const response = {
       clientId: data.clientId,
       installationId: data.installationId,
     };
-    switch(data.op) {
+    switch (data.op) {
     case OP_EVENTS.CONNECTED:
       if (this.state === CLIENT_STATE.RECONNECTING) {
         this.resubscribe();
@@ -374,14 +379,14 @@ class LiveQueryClient extends EventEmitter {
       if (subscription) {
         subscription.subscribed = true;
         subscription.subscribePromise.resolve();
-        subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN, response);
+        setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN, response), 200);
       }
       break;
     case OP_EVENTS.ERROR:
       if (data.requestId) {
         if (subscription) {
           subscription.subscribePromise.resolve();
-          subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, data.error);
+          setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, data.error), 200);
         }
       } else {
         this.emit(CLIENT_EMMITER_TYPES.ERROR, data.error);
@@ -446,7 +451,7 @@ class LiveQueryClient extends EventEmitter {
   _handleWebSocketError(error: any) {
     this.emit(CLIENT_EMMITER_TYPES.ERROR, error);
     for (const subscription of this.subscriptions.values()) {
-      subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR);
+      subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, error);
     }
     this._handleReconnect();
   }
@@ -469,18 +474,23 @@ class LiveQueryClient extends EventEmitter {
       clearTimeout(this.reconnectHandle);
     }
 
-    this.reconnectHandle = setTimeout((() => {
-      this.attempts++;
-      this.connectPromise = resolvingPromise();
-      this.open();
-    }).bind(this), time);
+    this.reconnectHandle = setTimeout(
+      (() => {
+        this.attempts++;
+        this.connectPromise = resolvingPromise();
+        this.open();
+      }).bind(this),
+      time
+    );
   }
 }
 
 if (process.env.PARSE_BUILD === 'node') {
   CoreManager.setWebSocketController(require('ws'));
 } else if (process.env.PARSE_BUILD === 'browser') {
-  CoreManager.setWebSocketController(typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null);
+  CoreManager.setWebSocketController(
+    typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null
+  );
 } else if (process.env.PARSE_BUILD === 'weapp') {
   CoreManager.setWebSocketController(require('./Socket.weapp'));
 } else if (process.env.PARSE_BUILD === 'react-native') {

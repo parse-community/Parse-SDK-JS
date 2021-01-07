@@ -12,11 +12,23 @@
 import CoreManager from './CoreManager';
 import ParseObject from './ParseObject';
 
-const FIELD_TYPES = ['String', 'Number', 'Boolean', 'Date', 'File', 'GeoPoint', 'Polygon', 'Array', 'Object', 'Pointer', 'Relation'];
+const FIELD_TYPES = [
+  'String',
+  'Number',
+  'Boolean',
+  'Date',
+  'File',
+  'GeoPoint',
+  'Polygon',
+  'Array',
+  'Object',
+  'Pointer',
+  'Relation',
+];
 
 type FieldOptions = {
-  required: boolean;
-  defaultValue: mixed;
+  required: boolean,
+  defaultValue: mixed,
 };
 
 /**
@@ -33,6 +45,7 @@ type FieldOptions = {
  * schema.save();
  * </pre>
  * </p>
+ *
  * @alias Parse.Schema
  */
 class ParseSchema {
@@ -42,7 +55,7 @@ class ParseSchema {
   _clp: { [key: string]: mixed };
 
   /**
-   * @param {String} className Parse Class string.
+   * @param {string} className Parse Class string.
    */
   constructor(className: string) {
     if (typeof className === 'string') {
@@ -60,43 +73,41 @@ class ParseSchema {
   /**
    * Static method to get all schemas
    *
-   * @return {Promise} A promise that is resolved with the result when
+   * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
   static all() {
     const controller = CoreManager.getSchemaController();
-    return controller.get('')
-      .then((response) => {
-        if (response.results.length === 0) {
-          throw new Error('Schema not found.');
-        }
-        return response.results;
-      });
+    return controller.get('').then(response => {
+      if (response.results.length === 0) {
+        throw new Error('Schema not found.');
+      }
+      return response.results;
+    });
   }
 
   /**
    * Get the Schema from Parse
    *
-   * @return {Promise} A promise that is resolved with the result when
+   * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
   get() {
     this.assertClassName();
 
     const controller = CoreManager.getSchemaController();
-    return controller.get(this.className)
-      .then((response) => {
-        if (!response) {
-          throw new Error('Schema not found.');
-        }
-        return response;
-      });
+    return controller.get(this.className).then(response => {
+      if (!response) {
+        throw new Error('Schema not found.');
+      }
+      return response;
+    });
   }
 
   /**
    * Create a new Schema on Parse
    *
-   * @return {Promise} A promise that is resolved with the result when
+   * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
   save() {
@@ -116,7 +127,7 @@ class ParseSchema {
   /**
    * Update a Schema on Parse
    *
-   * @return {Promise} A promise that is resolved with the result when
+   * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
   update() {
@@ -140,7 +151,7 @@ class ParseSchema {
    * Removing a Schema from Parse
    * Can only be used on Schema without objects
    *
-   * @return {Promise} A promise that is resolved with the result when
+   * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
   delete() {
@@ -153,7 +164,8 @@ class ParseSchema {
   /**
    * Removes all objects from a Schema (class) in Parse.
    * EXERCISE CAUTION, running this will delete all objects for this schema and cannot be reversed
-   * @return {Promise} A promise that is resolved with the result when
+   *
+   * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
   purge() {
@@ -165,6 +177,7 @@ class ParseSchema {
 
   /**
    * Assert if ClassName has been filled
+   *
    * @private
    */
   assertClassName() {
@@ -177,8 +190,8 @@ class ParseSchema {
    * Sets Class Level Permissions when creating / updating a Schema.
    * EXERCISE CAUTION, running this may override CLP for this schema and cannot be reversed
    *
-   * @param {Object} clp Class Level Permissions
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {object} clp Class Level Permissions
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   setCLP(clp: { [key: string]: mixed }) {
     this._clp = clp;
@@ -188,14 +201,14 @@ class ParseSchema {
   /**
    * Adding a Field to Create / Update a Schema
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {String} type Can be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)
-   * @param {Object} options
+   * @param {string} name Name of the field that will be created on Parse
+   * @param {string} type Can be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)
+   * @param {object} options
    * Valid options are:<ul>
    *   <li>required: If field is not set, save operation fails (Requires Parse Server 3.7.0+)
    *   <li>defaultValue: If field is not set, a default value is selected (Requires Parse Server 3.7.0+)
    * </ul>
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addField(name: string, type: string, options: FieldOptions = {}) {
     type = type || 'String';
@@ -221,9 +234,9 @@ class ParseSchema {
   /**
    * Adding an Index to Create / Update a Schema
    *
-   * @param {String} name Name of the index
-   * @param {Object} index { field: value }
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the index
+   * @param {object} index { field: value }
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    *
    * <pre>
    * schema.addIndex('index_name', { 'field': 1 });
@@ -245,9 +258,9 @@ class ParseSchema {
   /**
    * Adding String Field
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the field that will be created on Parse
+   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addString(name: string, options: FieldOptions) {
     return this.addField(name, 'String', options);
@@ -256,9 +269,9 @@ class ParseSchema {
   /**
    * Adding Number Field
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the field that will be created on Parse
+   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addNumber(name: string, options: FieldOptions) {
     return this.addField(name, 'Number', options);
@@ -267,9 +280,9 @@ class ParseSchema {
   /**
    * Adding Boolean Field
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the field that will be created on Parse
+   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addBoolean(name: string, options: FieldOptions) {
     return this.addField(name, 'Boolean', options);
@@ -278,13 +291,16 @@ class ParseSchema {
   /**
    * Adding Date Field
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the field that will be created on Parse
+   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addDate(name: string, options: FieldOptions) {
     if (options && options.defaultValue) {
-      options.defaultValue = { __type: 'Date', iso: new Date(options.defaultValue) }
+      options.defaultValue = {
+        __type: 'Date',
+        iso: new Date(options.defaultValue),
+      };
     }
     return this.addField(name, 'Date', options);
   }
@@ -292,9 +308,9 @@ class ParseSchema {
   /**
    * Adding File Field
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the field that will be created on Parse
+   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addFile(name: string, options: FieldOptions) {
     return this.addField(name, 'File', options);
@@ -303,9 +319,9 @@ class ParseSchema {
   /**
    * Adding GeoPoint Field
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the field that will be created on Parse
+   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addGeoPoint(name: string, options: FieldOptions) {
     return this.addField(name, 'GeoPoint', options);
@@ -314,9 +330,9 @@ class ParseSchema {
   /**
    * Adding Polygon Field
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the field that will be created on Parse
+   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addPolygon(name: string, options: FieldOptions) {
     return this.addField(name, 'Polygon', options);
@@ -325,9 +341,9 @@ class ParseSchema {
   /**
    * Adding Array Field
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the field that will be created on Parse
+   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addArray(name: string, options: FieldOptions) {
     return this.addField(name, 'Array', options);
@@ -336,9 +352,9 @@ class ParseSchema {
   /**
    * Adding Object Field
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the field that will be created on Parse
+   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addObject(name: string, options: FieldOptions) {
     return this.addField(name, 'Object', options);
@@ -347,10 +363,10 @@ class ParseSchema {
   /**
    * Adding Pointer Field
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {String} targetClass Name of the target Pointer Class
-   * @param {Object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the field that will be created on Parse
+   * @param {string} targetClass Name of the target Pointer Class
+   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addPointer(name: string, targetClass: string, options: FieldOptions = {}) {
     if (!name) {
@@ -377,9 +393,9 @@ class ParseSchema {
   /**
    * Adding Relation Field
    *
-   * @param {String} name Name of the field that will be created on Parse
-   * @param {String} targetClass Name of the target Pointer Class
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the field that will be created on Parse
+   * @param {string} targetClass Name of the target Pointer Class
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addRelation(name: string, targetClass: string) {
     if (!name) {
@@ -391,7 +407,7 @@ class ParseSchema {
 
     this._fields[name] = {
       type: 'Relation',
-      targetClass
+      targetClass,
     };
 
     return this;
@@ -400,22 +416,22 @@ class ParseSchema {
   /**
    * Deleting a Field to Update on a Schema
    *
-   * @param {String} name Name of the field
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the field
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   deleteField(name: string) {
-    this._fields[name] = { __op: 'Delete'};
+    this._fields[name] = { __op: 'Delete' };
     return this;
   }
 
   /**
    * Deleting an Index to Update on a Schema
    *
-   * @param {String} name Name of the field
-   * @return {Parse.Schema} Returns the schema, so you can chain this call.
+   * @param {string} name Name of the field
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   deleteIndex(name: string) {
-    this._indexes[name] = { __op: 'Delete'};
+    this._indexes[name] = { __op: 'Delete' };
     return this;
   }
 }
@@ -423,12 +439,9 @@ class ParseSchema {
 const DefaultController = {
   send(className: string, method: string, params: any = {}): Promise {
     const RESTController = CoreManager.getRESTController();
-    return RESTController.request(
-      method,
-      `schemas/${className}`,
-      params,
-      { useMasterKey: true }
-    );
+    return RESTController.request(method, `schemas/${className}`, params, {
+      useMasterKey: true,
+    });
   },
 
   get(className: string): Promise {
@@ -449,13 +462,8 @@ const DefaultController = {
 
   purge(className: string): Promise {
     const RESTController = CoreManager.getRESTController();
-    return RESTController.request(
-      'DELETE',
-      `purge/${className}`,
-      {},
-      { useMasterKey: true }
-    );
-  }
+    return RESTController.request('DELETE', `purge/${className}`, {}, { useMasterKey: true });
+  },
 };
 
 CoreManager.setSchemaController(DefaultController);

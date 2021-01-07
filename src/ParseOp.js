@@ -84,8 +84,8 @@ export class SetOp extends Op {
     return new SetOp(this._value);
   }
 
-  toJSON() {
-    return encode(this._value, false, true);
+  toJSON(offline?: boolean) {
+    return encode(this._value, false, true, undefined, offline);
   }
 }
 
@@ -109,9 +109,7 @@ export class IncrementOp extends Op {
   constructor(amount: number) {
     super();
     if (typeof amount !== 'number') {
-      throw new TypeError(
-        'Increment Op must be initialized with a numeric amount.'
-      );
+      throw new TypeError('Increment Op must be initialized with a numeric amount.');
     }
     this._amount = amount;
   }
@@ -142,7 +140,7 @@ export class IncrementOp extends Op {
     throw new Error('Cannot merge Increment Op with the previous Op');
   }
 
-  toJSON(): { __op: string; amount: number } {
+  toJSON(): { __op: string, amount: number } {
     return { __op: 'Increment', amount: this._amount };
   }
 }
@@ -152,7 +150,7 @@ export class AddOp extends Op {
 
   constructor(value: mixed | Array<mixed>) {
     super();
-    this._value = (Array.isArray(value) ? value : [value]);
+    this._value = Array.isArray(value) ? value : [value];
   }
 
   applyTo(value: mixed): Array<mixed> {
@@ -181,7 +179,7 @@ export class AddOp extends Op {
     throw new Error('Cannot merge Add Op with the previous Op');
   }
 
-  toJSON(): { __op: string; objects: mixed } {
+  toJSON(): { __op: string, objects: mixed } {
     return { __op: 'Add', objects: encode(this._value, false, true) };
   }
 }
@@ -199,20 +197,18 @@ export class AddUniqueOp extends Op {
       return this._value || [];
     }
     if (Array.isArray(value)) {
-      // copying value lets Flow guarantee the pointer isn't modified elsewhere
-      const valueCopy = value;
       const toAdd = [];
-      this._value.forEach((v) => {
+      this._value.forEach(v => {
         if (v instanceof ParseObject) {
-          if (!arrayContainsObject(valueCopy, v)) {
+          if (!arrayContainsObject(value, v)) {
             toAdd.push(v);
           }
         } else {
-          if (valueCopy.indexOf(v) < 0) {
+          if (value.indexOf(v) < 0) {
             toAdd.push(v);
           }
         }
-      })
+      });
       return value.concat(toAdd);
     }
     throw new Error('Cannot add elements to a non-array value');
@@ -234,7 +230,7 @@ export class AddUniqueOp extends Op {
     throw new Error('Cannot merge AddUnique Op with the previous Op');
   }
 
-  toJSON(): { __op: string; objects: mixed } {
+  toJSON(): { __op: string, objects: mixed } {
     return { __op: 'AddUnique', objects: encode(this._value, false, true) };
   }
 }
@@ -262,9 +258,7 @@ export class RemoveOp extends Op {
         }
         if (this._value[i] instanceof ParseObject && this._value[i].id) {
           for (let j = 0; j < removed.length; j++) {
-            if (removed[j] instanceof ParseObject &&
-              this._value[i].id === removed[j].id
-            ) {
+            if (removed[j] instanceof ParseObject && this._value[i].id === removed[j].id) {
               removed.splice(j, 1);
               j--;
             }
@@ -304,7 +298,7 @@ export class RemoveOp extends Op {
     throw new Error('Cannot merge Remove Op with the previous Op');
   }
 
-  toJSON(): { __op: string; objects: mixed } {
+  toJSON(): { __op: string, objects: mixed } {
     return { __op: 'Remove', objects: encode(this._value, false, true) };
   }
 }
@@ -314,10 +308,7 @@ export class RelationOp extends Op {
   relationsToAdd: Array<string>;
   relationsToRemove: Array<string>;
 
-  constructor(
-    adds: Array<ParseObject | string>,
-    removes: Array<ParseObject | string>
-  ) {
+  constructor(adds: Array<ParseObject | string>, removes: Array<ParseObject | string>) {
     super();
     this._targetClassName = null;
 
@@ -335,9 +326,7 @@ export class RelationOp extends Op {
       return obj;
     }
     if (!obj.id) {
-      throw new Error(
-        'You cannot add or remove an unsaved Parse Object from a relation'
-      );
+      throw new Error('You cannot add or remove an unsaved Parse Object from a relation');
     }
     if (!this._targetClassName) {
       this._targetClassName = obj.className;
@@ -345,7 +334,10 @@ export class RelationOp extends Op {
     if (this._targetClassName !== obj.className) {
       throw new Error(
         'Tried to create a Relation with 2 different object types: ' +
-        this._targetClassName + ' and ' + obj.className + '.'
+          this._targetClassName +
+          ' and ' +
+          obj.className +
+          '.'
       );
     }
     return obj.id;
@@ -354,7 +346,9 @@ export class RelationOp extends Op {
   applyTo(value: mixed, object?: { className: string, id: ?string }, key?: string): ?ParseRelation {
     if (!value) {
       if (!object || !key) {
-        throw new Error('Cannot apply a RelationOp without either a previous value, or an object and a key');
+        throw new Error(
+          'Cannot apply a RelationOp without either a previous value, or an object and a key'
+        );
       }
       const parent = new ParseObject(object.className);
       if (object.id && object.id.indexOf('local') === 0) {
@@ -371,8 +365,11 @@ export class RelationOp extends Op {
         if (value.targetClassName) {
           if (this._targetClassName !== value.targetClassName) {
             throw new Error(
-              'Related object must be a ' + value.targetClassName +
-              ', but a ' + this._targetClassName + ' was passed in.'
+              'Related object must be a ' +
+                value.targetClassName +
+                ', but a ' +
+                this._targetClassName +
+                ' was passed in.'
             );
           }
         } else {
@@ -381,9 +378,7 @@ export class RelationOp extends Op {
       }
       return value;
     } else {
-      throw new Error(
-        'Relation cannot be applied to a non-relation field'
-      );
+      throw new Error('Relation cannot be applied to a non-relation field');
     }
   }
 
@@ -395,21 +390,23 @@ export class RelationOp extends Op {
     } else if (previous instanceof SetOp && previous._value instanceof ParseRelation) {
       return this;
     } else if (previous instanceof RelationOp) {
-      if (previous._targetClassName &&
-        previous._targetClassName !== this._targetClassName) {
+      if (previous._targetClassName && previous._targetClassName !== this._targetClassName) {
         throw new Error(
-          'Related object must be of class ' + previous._targetClassName + ', but ' +
-          (this._targetClassName || 'null') + ' was passed in.'
+          'Related object must be of class ' +
+            previous._targetClassName +
+            ', but ' +
+            (this._targetClassName || 'null') +
+            ' was passed in.'
         );
       }
       const newAdd = previous.relationsToAdd.concat([]);
-      this.relationsToRemove.forEach((r) => {
+      this.relationsToRemove.forEach(r => {
         const index = newAdd.indexOf(r);
         if (index > -1) {
           newAdd.splice(index, 1);
         }
       });
-      this.relationsToAdd.forEach((r) => {
+      this.relationsToAdd.forEach(r => {
         const index = newAdd.indexOf(r);
         if (index < 0) {
           newAdd.push(r);
@@ -417,13 +414,13 @@ export class RelationOp extends Op {
       });
 
       const newRemove = previous.relationsToRemove.concat([]);
-      this.relationsToAdd.forEach((r) => {
+      this.relationsToAdd.forEach(r => {
         const index = newRemove.indexOf(r);
         if (index > -1) {
           newRemove.splice(index, 1);
         }
       });
-      this.relationsToRemove.forEach((r) => {
+      this.relationsToRemove.forEach(r => {
         const index = newRemove.indexOf(r);
         if (index < 0) {
           newRemove.push(r);
@@ -437,12 +434,12 @@ export class RelationOp extends Op {
     throw new Error('Cannot merge Relation Op with the previous Op');
   }
 
-  toJSON(): { __op?: string; objects?: mixed; ops?: mixed } {
-    const idToPointer = (id) => {
+  toJSON(): { __op?: string, objects?: mixed, ops?: mixed } {
+    const idToPointer = id => {
       return {
         __type: 'Pointer',
         className: this._targetClassName,
-        objectId: id
+        objectId: id,
       };
     };
 

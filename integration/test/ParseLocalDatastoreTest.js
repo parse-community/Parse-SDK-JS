@@ -139,15 +139,11 @@ function runTest(controller) {
       assert.equal(pinnedObject._localId, undefined);
     });
 
-    it(`${controller.name} cannot pin unsaved pointer`, async () => {
-      try {
-        const object = new TestObject();
-        const pointer = new Item();
-        object.set('child', pointer);
-        await object.pin();
-      } catch (e) {
-        assert.equal(e.message, 'Cannot create a pointer to an unsaved ParseObject');
-      }
+    it(`${controller.name} can pin unsaved pointer`, async () => {
+      const object = new TestObject();
+      const pointer = new Item();
+      object.set('child', pointer);
+      await object.pin();
     });
 
     it(`${controller.name} can pin user (unsaved)`, async () => {
@@ -173,7 +169,7 @@ function runTest(controller) {
       user.set('field', 'test');
       user.setPassword('asdf');
       user.setUsername('zxcv');
-      await user.signUp()
+      await user.signUp();
       await user.pin();
 
       const json = user._toFullJSON();
@@ -335,7 +331,11 @@ function runTest(controller) {
 
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
-      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
+      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [
+        LDS_KEY(obj1),
+        LDS_KEY(obj2),
+        LDS_KEY(obj3),
+      ]);
       assert.deepEqual(localDatastore[LDS_KEY(obj1)], [LDS_FULL_JSON(obj1)]);
       assert.deepEqual(localDatastore[LDS_KEY(obj2)], [LDS_FULL_JSON(obj2)]);
       assert.deepEqual(localDatastore[LDS_KEY(obj3)], [LDS_FULL_JSON(obj3)]);
@@ -344,7 +344,11 @@ function runTest(controller) {
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
-      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
+      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [
+        LDS_KEY(obj1),
+        LDS_KEY(obj2),
+        LDS_KEY(obj3),
+      ]);
       assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
       assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
       assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
@@ -360,7 +364,11 @@ function runTest(controller) {
       await Parse.Object.pinAllWithName('test_pin', objects);
       const localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
-      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
+      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_pin'], [
+        LDS_KEY(obj1),
+        LDS_KEY(obj2),
+        LDS_KEY(obj3),
+      ]);
       assert.deepEqual(localDatastore[LDS_KEY(obj1)], [obj1._toFullJSON()]);
       assert.deepEqual(localDatastore[LDS_KEY(obj2)], [obj2._toFullJSON()]);
       assert.deepEqual(localDatastore[LDS_KEY(obj3)], [obj3._toFullJSON()]);
@@ -637,7 +645,11 @@ function runTest(controller) {
 
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert(Object.keys(localDatastore).length === 4);
-      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
+      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [
+        LDS_KEY(obj1),
+        LDS_KEY(obj2),
+        LDS_KEY(obj3),
+      ]);
       assert.deepEqual(localDatastore[LDS_KEY(obj1)], [LDS_FULL_JSON(obj1)]);
       assert.deepEqual(localDatastore[LDS_KEY(obj2)], [LDS_FULL_JSON(obj2)]);
       assert.deepEqual(localDatastore[LDS_KEY(obj3)], [LDS_FULL_JSON(obj3)]);
@@ -667,7 +679,11 @@ function runTest(controller) {
 
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
-      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
+      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [
+        LDS_KEY(obj1),
+        LDS_KEY(obj2),
+        LDS_KEY(obj3),
+      ]);
       assert.deepEqual(localDatastore[LDS_KEY(obj1)], [LDS_FULL_JSON(obj1)]);
       assert.deepEqual(localDatastore[LDS_KEY(obj2)], [LDS_FULL_JSON(obj2)]);
       assert.deepEqual(localDatastore[LDS_KEY(obj3)], [LDS_FULL_JSON(obj3)]);
@@ -691,7 +707,11 @@ function runTest(controller) {
 
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert(Object.keys(localDatastore).length === 4);
-      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
+      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [
+        LDS_KEY(obj1),
+        LDS_KEY(obj2),
+        LDS_KEY(obj3),
+      ]);
       assert.deepEqual(localDatastore[LDS_KEY(obj1)], [LDS_FULL_JSON(obj1)]);
       assert.deepEqual(localDatastore[LDS_KEY(obj2)], [LDS_FULL_JSON(obj2)]);
       assert.deepEqual(localDatastore[LDS_KEY(obj3)], [LDS_FULL_JSON(obj3)]);
@@ -723,7 +743,11 @@ function runTest(controller) {
 
       let localDatastore = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(localDatastore).length, 4);
-      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [LDS_KEY(obj1), LDS_KEY(obj2), LDS_KEY(obj3)]);
+      assert.deepEqual(localDatastore[PIN_PREFIX + 'test_unpin'], [
+        LDS_KEY(obj1),
+        LDS_KEY(obj2),
+        LDS_KEY(obj3),
+      ]);
       assert.deepEqual(localDatastore[LDS_KEY(obj1)], [LDS_FULL_JSON(obj1)]);
       assert.deepEqual(localDatastore[LDS_KEY(obj2)], [LDS_FULL_JSON(obj2)]);
       assert.deepEqual(localDatastore[LDS_KEY(obj3)], [LDS_FULL_JSON(obj3)]);
@@ -869,11 +893,11 @@ function runTest(controller) {
     });
 
     it(`${controller.name} can fetchFromLocalDatastore break multiple cycle`, async () => {
-      const A = new TestObject({ value: 'A'});
-      const B = new TestObject({ value: 'B'});
-      const C = new TestObject({ value: 'C'});
-      const D = new TestObject({ value: 'D'});
-      const E = new TestObject({ value: 'E'});
+      const A = new TestObject({ value: 'A' });
+      const B = new TestObject({ value: 'B' });
+      const C = new TestObject({ value: 'C' });
+      const D = new TestObject({ value: 'D' });
+      const E = new TestObject({ value: 'E' });
 
       await Parse.Object.saveAll([A, B, C, D, E]);
       /*
@@ -1153,9 +1177,9 @@ function runTest(controller) {
 
     it('can do containedBy queries with numbers', async () => {
       const objects = [
-        new TestObject({ containedBy:true, numbers: [0, 1, 2] }),
-        new TestObject({ containedBy:true, numbers: [2, 0] }),
-        new TestObject({ containedBy:true, numbers: [1, 2, 3, 4] }),
+        new TestObject({ containedBy: true, numbers: [0, 1, 2] }),
+        new TestObject({ containedBy: true, numbers: [2, 0] }),
+        new TestObject({ containedBy: true, numbers: [1, 2, 3, 4] }),
       ];
 
       await Parse.Object.saveAll(objects);
@@ -1170,7 +1194,7 @@ function runTest(controller) {
     });
 
     it('can do containedBy queries with pointer', async () => {
-      const objects = Array.from(Array(10).keys()).map((idx) => {
+      const objects = Array.from(Array(10).keys()).map(idx => {
         const obj = new Parse.Object('Object');
         obj.set('key', idx);
         return obj;
@@ -1273,7 +1297,7 @@ function runTest(controller) {
 
     it(`${controller.name} can perform containedIn queries`, async () => {
       const query = new Parse.Query('BoxedNumber');
-      query.containedIn('number', [3,5,7,9,11]);
+      query.containedIn('number', [3, 5, 7, 9, 11]);
       query.fromLocalDatastore();
       const results = await query.find();
       assert.equal(results.length, 4);
@@ -1281,7 +1305,7 @@ function runTest(controller) {
 
     it(`${controller.name} can perform notContainedIn queries`, async () => {
       const query = new Parse.Query('BoxedNumber');
-      query.notContainedIn('number', [3,5,7,9,11]);
+      query.notContainedIn('number', [3, 5, 7, 9, 11]);
       query.fromLocalDatastore();
       const results = await query.find();
       assert.equal(results.length, 6);
@@ -1356,7 +1380,7 @@ function runTest(controller) {
       try {
         await query.get(undefined);
         assert.equal(false, true);
-      } catch(e) {
+      } catch (e) {
         assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
       }
     });
@@ -1378,7 +1402,7 @@ function runTest(controller) {
     });
 
     it(`${controller.name} can query for the first with two results`, async () => {
-      const objects = [new TestObject({x: 44}), new TestObject({x: 44})];
+      const objects = [new TestObject({ x: 44 }), new TestObject({ x: 44 })];
       await Parse.Object.saveAll(objects);
       await Parse.Object.pinAll(objects);
       const query = new Parse.Query(TestObject);
@@ -1404,8 +1428,14 @@ function runTest(controller) {
     it(`${controller.name} can test object inequality`, async () => {
       const item1 = new TestObject();
       const item2 = new TestObject();
-      const container1 = new Parse.Object({className: 'CoolContainer', item: item1});
-      const container2 = new Parse.Object({className: 'CoolContainer', item: item2});
+      const container1 = new Parse.Object({
+        className: 'CoolContainer',
+        item: item1,
+      });
+      const container2 = new Parse.Object({
+        className: 'CoolContainer',
+        item: item2,
+      });
       const objects = [item1, item2, container1, container2];
       await Parse.Object.saveAll(objects);
       await Parse.Object.pinAll(objects);
@@ -1444,7 +1474,7 @@ function runTest(controller) {
       await Parse.Object.saveAll([
         new TestObject({ skipCount: true }),
         new TestObject({ skipCount: true }),
-        new TestObject({ skipCount: true })
+        new TestObject({ skipCount: true }),
       ]);
       let query = new Parse.Query(TestObject);
       query.equalTo('skipCount', true);
@@ -1471,7 +1501,7 @@ function runTest(controller) {
       const query = new Parse.Query('BoxedNumber');
       query.greaterThan('number', 1);
       query.fromLocalDatastore();
-      const count = await query.count()
+      const count = await query.count();
       assert.equal(count, 8);
     });
 
@@ -1622,7 +1652,6 @@ function runTest(controller) {
       assert.equal(results[3].get('string'), 'b');
     });
 
-
     it(`${controller.name} can not order by password`, async () => {
       const query = new Parse.Query('BoxedNumber');
       query.ascending('_password');
@@ -1636,10 +1665,22 @@ function runTest(controller) {
     });
 
     it(`${controller.name} can order by _created_at`, async () => {
-      const obj1 = await new Parse.Object({className: 'TestObject', orderedDate: true}).save();
-      const obj2 = await new Parse.Object({className: 'TestObject', orderedDate: true}).save();
-      const obj3 = await new Parse.Object({className: 'TestObject', orderedDate: true}).save();
-      const obj4 = await new Parse.Object({className: 'TestObject', orderedDate: true}).save();
+      const obj1 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate: true,
+      }).save();
+      const obj2 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate: true,
+      }).save();
+      const obj3 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate: true,
+      }).save();
+      const obj4 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate: true,
+      }).save();
 
       await Parse.Object.pinAll([obj1, obj2, obj3, obj4]);
 
@@ -1655,10 +1696,22 @@ function runTest(controller) {
     });
 
     it(`${controller.name} can order by createdAt`, async () => {
-      const obj1 = await new Parse.Object({className: 'TestObject', orderedDate2: true}).save();
-      const obj2 = await new Parse.Object({className: 'TestObject', orderedDate2: true}).save();
-      const obj3 = await new Parse.Object({className: 'TestObject', orderedDate2: true}).save();
-      const obj4 = await new Parse.Object({className: 'TestObject', orderedDate2: true}).save();
+      const obj1 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate2: true,
+      }).save();
+      const obj2 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate2: true,
+      }).save();
+      const obj3 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate2: true,
+      }).save();
+      const obj4 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate2: true,
+      }).save();
 
       await Parse.Object.pinAll([obj1, obj2, obj3, obj4]);
 
@@ -1674,10 +1727,22 @@ function runTest(controller) {
     });
 
     it(`${controller.name} can order by _updated_at`, async () => {
-      const obj1 = await new Parse.Object({className: 'TestObject', orderedDate3: true}).save();
-      const obj2 = await new Parse.Object({className: 'TestObject', orderedDate3: true}).save();
-      const obj3 = await new Parse.Object({className: 'TestObject', orderedDate3: true}).save();
-      const obj4 = await new Parse.Object({className: 'TestObject', orderedDate3: true}).save();
+      const obj1 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate3: true,
+      }).save();
+      const obj2 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate3: true,
+      }).save();
+      const obj3 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate3: true,
+      }).save();
+      const obj4 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate3: true,
+      }).save();
 
       await Parse.Object.pinAll([obj1, obj2, obj3, obj4]);
 
@@ -1693,10 +1758,22 @@ function runTest(controller) {
     });
 
     it(`${controller.name} can order by updatedAt`, async () => {
-      const obj1 = await new Parse.Object({className: 'TestObject', orderedDate4: true}).save();
-      const obj2 = await new Parse.Object({className: 'TestObject', orderedDate4: true}).save();
-      const obj3 = await new Parse.Object({className: 'TestObject', orderedDate4: true}).save();
-      const obj4 = await new Parse.Object({className: 'TestObject', orderedDate4: true}).save();
+      const obj1 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate4: true,
+      }).save();
+      const obj2 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate4: true,
+      }).save();
+      const obj3 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate4: true,
+      }).save();
+      const obj4 = await new Parse.Object({
+        className: 'TestObject',
+        orderedDate4: true,
+      }).save();
 
       await Parse.Object.pinAll([obj1, obj2, obj3, obj4]);
 
@@ -1712,10 +1789,26 @@ function runTest(controller) {
     });
 
     it(`${controller.name} can test time equality`, async () => {
-      const obj1 = await new Parse.Object({className: 'TestObject', timed: true, name: 'item2'}).save();
-      const obj2 = await new Parse.Object({className: 'TestObject', timed: true, name: 'item1'}).save();
-      const obj3 = await new Parse.Object({className: 'TestObject', timed: true, name: 'item3'}).save();
-      const last = await new Parse.Object({className: 'TestObject', timed: true, name: 'item4'}).save();
+      const obj1 = await new Parse.Object({
+        className: 'TestObject',
+        timed: true,
+        name: 'item2',
+      }).save();
+      const obj2 = await new Parse.Object({
+        className: 'TestObject',
+        timed: true,
+        name: 'item1',
+      }).save();
+      const obj3 = await new Parse.Object({
+        className: 'TestObject',
+        timed: true,
+        name: 'item3',
+      }).save();
+      const last = await new Parse.Object({
+        className: 'TestObject',
+        timed: true,
+        name: 'item4',
+      }).save();
 
       await Parse.Object.pinAll([obj1, obj2, obj3, last]);
 
@@ -1730,10 +1823,26 @@ function runTest(controller) {
     });
 
     it(`${controller.name} can test time inequality`, async () => {
-      const obj1 = await new Parse.Object({className: 'TestObject', timed2: true, name: 'item1'}).save();
-      const obj2 = await new Parse.Object({className: 'TestObject', timed2: true, name: 'item2'}).save();
-      const obj3 = await new Parse.Object({className: 'TestObject', timed2: true, name: 'item3'}).save();
-      const obj4 = await new Parse.Object({className: 'TestObject', timed2: true, name: 'item4'}).save();
+      const obj1 = await new Parse.Object({
+        className: 'TestObject',
+        timed2: true,
+        name: 'item1',
+      }).save();
+      const obj2 = await new Parse.Object({
+        className: 'TestObject',
+        timed2: true,
+        name: 'item2',
+      }).save();
+      const obj3 = await new Parse.Object({
+        className: 'TestObject',
+        timed2: true,
+        name: 'item3',
+      }).save();
+      const obj4 = await new Parse.Object({
+        className: 'TestObject',
+        timed2: true,
+        name: 'item4',
+      }).save();
 
       await Parse.Object.pinAll([obj1, obj2, obj3, obj4]);
 
@@ -1812,7 +1921,7 @@ function runTest(controller) {
       await obj.pin();
 
       const query = new Parse.Query(TestObject);
-      query.matches('website',/parse\.com/,'mixs');
+      query.matches('website', /parse\.com/, 'mixs');
       query.fromLocalDatastore();
       const results = await query.find();
       assert.equal(results.length, 1);
@@ -1825,20 +1934,21 @@ function runTest(controller) {
       await obj.pin();
 
       const query = new Parse.Query(TestObject);
-      query.matches('website', /parse\.com/mi);
+      query.matches('website', /parse\.com/im);
       query.fromLocalDatastore();
       const results = await query.find();
       assert.equal(results.length, 1);
     });
 
     it(`${controller.name} can test contains`, async () => {
-      const someAscii = "\\E' !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTU" +
-                      "VWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'";
+      const someAscii =
+        "\\E' !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTU" +
+        "VWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'";
       const objects = [
-        new TestObject({contains: true, myString: 'zax' + someAscii + 'qub'}),
-        new TestObject({contains: true, myString: 'start' + someAscii}),
-        new TestObject({contains: true, myString: someAscii + 'end'}),
-        new TestObject({contains: true, myString: someAscii})
+        new TestObject({ contains: true, myString: 'zax' + someAscii + 'qub' }),
+        new TestObject({ contains: true, myString: 'start' + someAscii }),
+        new TestObject({ contains: true, myString: someAscii + 'end' }),
+        new TestObject({ contains: true, myString: someAscii }),
       ];
       await Parse.Object.saveAll(objects);
       await Parse.Object.pinAll(objects);
@@ -1910,7 +2020,9 @@ function runTest(controller) {
     it(`${controller.name} can test if a relation exists`, async () => {
       const objects = [];
       for (let i = 0; i < 10; i++) {
-        const container = new Parse.Object('Container', { relation_exists: true });
+        const container = new Parse.Object('Container', {
+          relation_exists: true,
+        });
         if (i % 2) {
           container.set('y', i);
         } else {
@@ -2043,7 +2155,7 @@ function runTest(controller) {
       query.equalTo('objectId', parent.id);
       query.includeAll();
       query.fromLocalDatastore();
-      await query.each((obj) => {
+      await query.each(obj => {
         assert.equal(obj.get('child1').get('foo'), 'bar');
         assert.equal(obj.get('child2').get('foo'), 'baz');
         assert.equal(obj.get('child3').get('foo'), 'bin');
@@ -2084,7 +2196,7 @@ function runTest(controller) {
           parent: new Parent({
             y: i,
             child: new Child({
-              x: i
+              x: i,
             }),
           }),
         });
@@ -2102,7 +2214,7 @@ function runTest(controller) {
       const results = await q.find();
 
       assert.equal(results.length, 5);
-      results.forEach((o) => {
+      results.forEach(o => {
         assert.equal(o.get('z'), o.get('parent').get('y'));
         assert.equal(o.get('z'), o.get('parent').get('child').get('x'));
       });
@@ -2138,7 +2250,7 @@ function runTest(controller) {
       let ChildObject = Parse.Object.extend('ChildObject', {
         foo() {
           return 'foo';
-        }
+        },
       });
 
       const parent = new ParentObject();
@@ -2149,7 +2261,7 @@ function runTest(controller) {
       ChildObject = Parse.Object.extend('ChildObject', {
         bar() {
           return 'bar';
-        }
+        },
       });
 
       const query = new Parse.Query(ParentObject);
@@ -2170,10 +2282,12 @@ function runTest(controller) {
       const ChildObject = Parse.Object.extend('ChildObject');
       const objects = [];
       for (let i = 0; i < 10; i++) {
-        objects.push(new ParentObject({
-          child: new ChildObject({x: i, qtest: true}),
-          x: 10 + i,
-        }));
+        objects.push(
+          new ParentObject({
+            child: new ChildObject({ x: i, qtest: true }),
+            x: 10 + i,
+          })
+        );
       }
       await Parse.Object.saveAll(objects);
       await Parse.Object.pinAll(objects);
@@ -2187,7 +2301,7 @@ function runTest(controller) {
       const results = await q.find();
 
       assert.equal(results.length, 4);
-      results.forEach((o) => {
+      results.forEach(o => {
         assert(o.get('x') > 15);
       });
     });
@@ -2197,11 +2311,13 @@ function runTest(controller) {
       const ChildObject = Parse.Object.extend('ChildObject');
       const objects = [];
       for (let i = 0; i < 10; i++) {
-        objects.push(new ParentObject({
-          child: new ChildObject({x: i, dneqtest: true}),
-          dneqtest: true,
-          x: 10 + i,
-        }));
+        objects.push(
+          new ParentObject({
+            child: new ChildObject({ x: i, dneqtest: true }),
+            dneqtest: true,
+            x: 10 + i,
+          })
+        );
       }
       await Parse.Object.saveAll(objects);
       await Parse.Object.pinAll(objects);
@@ -2216,7 +2332,7 @@ function runTest(controller) {
       const results = await q.find();
 
       assert.equal(results.length, 6);
-      results.forEach((o) => {
+      results.forEach(o => {
         assert(o.get('x') >= 10);
         assert(o.get('x') <= 15);
       });
@@ -2259,22 +2375,6 @@ function runTest(controller) {
       assert(['Billy', 'Tom'].includes(results[1].get('name')));
     });
 
-    it(`${controller.name} supports objects with length`, async () => {
-      const obj = new TestObject();
-      obj.set('length', 5);
-      assert.equal(obj.get('length'), 5);
-      await obj.save();
-      await obj.pin();
-
-      const query = new Parse.Query(TestObject);
-      query.equalTo('objectId', obj.id);
-      query.fromLocalDatastore();
-      const results = await query.find();
-
-      assert.equal(results.length, 1);
-      assert.equal(results[0].get('length'), 5);
-    });
-
     it(`${controller.name} can include User fields`, async () => {
       const user = await Parse.User.signUp('bob', 'password', { age: 21 });
       const obj = new TestObject();
@@ -2290,7 +2390,9 @@ function runTest(controller) {
       assert.equal(objAgain.get('owner').get('age'), 21);
       try {
         await Parse.User.logOut();
-      } catch(e) { /* */ }
+      } catch (e) {
+        /* */
+      }
     });
 
     it(`${controller.name} can build OR queries`, async () => {
@@ -2315,7 +2417,7 @@ function runTest(controller) {
       orQuery.fromLocalDatastore();
       const results = await orQuery.find();
       assert.equal(results.length, 6);
-      results.forEach((number) => {
+      results.forEach(number => {
         assert(number.get('x') < 2 || number.get('x') > 5);
       });
     });
@@ -2348,7 +2450,7 @@ function runTest(controller) {
 
       const orQuery = Parse.Query.or(q1, q2);
       orQuery.fromLocalDatastore();
-      const results = await  orQuery.find();
+      const results = await orQuery.find();
       assert.equal(results.length, 3);
     });
 
@@ -2374,7 +2476,7 @@ function runTest(controller) {
       andQuery.fromLocalDatastore();
       const results = await andQuery.find();
       assert.equal(results.length, 2);
-      results.forEach((number) => {
+      results.forEach(number => {
         assert(number.get('x') > 2 && number.get('x') < 5);
       });
     });
@@ -2430,7 +2532,7 @@ function runTest(controller) {
       const results = await norQuery.find();
 
       assert.equal(results.length, 3);
-      results.forEach((number) => {
+      results.forEach(number => {
         assert(number.get('x') >= 3 && number.get('x') <= 5);
       });
     });
@@ -2459,7 +2561,7 @@ function runTest(controller) {
       const results = await norQuery.find();
 
       assert.equal(results.length, 8);
-      results.forEach((number) => {
+      results.forEach(number => {
         assert(number.get('x') !== 4 || number.get('x') !== 5);
       });
     });
@@ -2477,7 +2579,7 @@ function runTest(controller) {
       query.equalTo('eachtest', true);
       query.lessThan('x', 25);
       query.fromLocalDatastore();
-      await query.each((obj) => {
+      await query.each(obj => {
         seen[obj.get('x')] = (seen[obj.get('x')] || 0) + 1;
       });
       assert.equal(seen.length, 25);
@@ -2501,7 +2603,7 @@ function runTest(controller) {
       query.ascending('x');
       query.fromLocalDatastore();
       try {
-        await query.each((obj) => {
+        await query.each(obj => {
           seen[obj.get('x')] = (seen[obj.get('x')] || 0) + 1;
         });
       } catch (e) {
@@ -2524,7 +2626,7 @@ function runTest(controller) {
       query.limit(20);
       query.fromLocalDatastore();
       try {
-        await query.each((obj) => {
+        await query.each(obj => {
           seen[obj.get('x')] = (seen[obj.get('x')] || 0) + 1;
         });
       } catch (e) {
@@ -2547,7 +2649,7 @@ function runTest(controller) {
       query.skip(20);
       query.fromLocalDatastore();
       try {
-        await query.each((obj) => {
+        await query.each(obj => {
           seen[obj.get('x')] = (seen[obj.get('x')] || 0) + 1;
         });
       } catch (e) {
@@ -2583,7 +2685,7 @@ function runTest(controller) {
       q.equalTo('objectId', obj.id);
       q.select('foo');
       q.fromLocalDatastore();
-      await q.each((o) => {
+      await q.each(o => {
         assert(o.id);
         assert.equal(o.get('foo'), 'baz');
         assert.equal(o.get('bar'), undefined);
@@ -2631,7 +2733,7 @@ function runTest(controller) {
 
     it(`${controller.name} supports withinPolygon`, async () => {
       const sacramento = new TestObject();
-      sacramento.set('location', new Parse.GeoPoint(38.52, -121.50));
+      sacramento.set('location', new Parse.GeoPoint(38.52, -121.5));
       sacramento.set('name', 'Sacramento');
 
       const honolulu = new TestObject();
@@ -2647,9 +2749,9 @@ function runTest(controller) {
 
       const points = [
         new Parse.GeoPoint(37.85, -122.33),
-        new Parse.GeoPoint(37.85, -122.90),
-        new Parse.GeoPoint(37.68, -122.90),
-        new Parse.GeoPoint(37.68, -122.33)
+        new Parse.GeoPoint(37.85, -122.9),
+        new Parse.GeoPoint(37.68, -122.9),
+        new Parse.GeoPoint(37.68, -122.33),
       ];
       const query = new Parse.Query(TestObject);
       query.withinPolygon('location', points);
@@ -2659,9 +2761,25 @@ function runTest(controller) {
     });
 
     it(`${controller.name} supports polygonContains`, async () => {
-      const p1 = [[0,0], [0,1], [1,1], [1,0]];
-      const p2 = [[0,0], [0,2], [2,2], [2,0]];
-      const p3 = [[10,10], [10,15], [15,15], [15,10], [10,10]];
+      const p1 = [
+        [0, 0],
+        [0, 1],
+        [1, 1],
+        [1, 0],
+      ];
+      const p2 = [
+        [0, 0],
+        [0, 2],
+        [2, 2],
+        [2, 0],
+      ];
+      const p3 = [
+        [10, 10],
+        [10, 15],
+        [15, 15],
+        [15, 10],
+        [10, 10],
+      ];
 
       const polygon1 = new Parse.Polygon(p1);
       const polygon2 = new Parse.Polygon(p2);
@@ -2681,11 +2799,71 @@ function runTest(controller) {
       const results = await query.find();
       assert.equal(results.length, 2);
     });
+
+    it(`${controller.name} can query from pin subclass`, async () => {
+      class ClassA extends Parse.Object {
+        constructor() {
+          super('ClassA');
+        }
+        get name() {
+          return this.get('name');
+        }
+        set name(value) {
+          this.set('name', value);
+        }
+      }
+      Parse.Object.registerSubclass('ClassA', ClassA);
+
+      class ClassB extends Parse.Object {
+        constructor() {
+          super('ClassB');
+        }
+        get name() {
+          return this.get('name');
+        }
+        set name(value) {
+          this.set('name', value);
+        }
+
+        get classA() {
+          return this.get('classA');
+        }
+        set classA(value) {
+          this.set('classA', value);
+        }
+      }
+      Parse.Object.registerSubclass('ClassB', ClassB);
+
+      const testClassA = new ClassA();
+      testClassA.name = 'ABC';
+      await testClassA.pin();
+
+      const query = new Parse.Query(ClassA);
+      query.fromLocalDatastore();
+      query.equalTo('name', 'ABC');
+      const result = await query.first();
+      expect(result.get('name')).toBe('ABC');
+
+      const testClassB = new ClassB();
+      testClassB.name = 'XYZ';
+      testClassB.classA = testClassA;
+      await testClassB.pin();
+
+      let localDatastore = await Parse.LocalDatastore._getAllContents();
+      expect(localDatastore[LDS_KEY(testClassB)][0].classA).toEqual(testClassA.toOfflinePointer());
+
+      await testClassB.save();
+      expect(testClassB.classA).toBe(testClassA);
+      expect(testClassA.id).toBeDefined();
+
+      localDatastore = await Parse.LocalDatastore._getAllContents();
+      expect(localDatastore[LDS_KEY(testClassB)][0].classA.objectId).toEqual(testClassA.id);
+    });
   });
 }
 
 describe('Parse LocalDatastore', () => {
-  beforeEach((done) => {
+  beforeEach(done => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.CoreManager.getInstallationController()._setInstallationIdCache('1234');
@@ -2693,13 +2871,16 @@ describe('Parse LocalDatastore', () => {
     Parse.User.enableUnsafeCurrentUser();
     Parse.Storage._clear();
     clear().then(() => {
-      done()
+      done();
     });
   });
 
   const controllers = [
     { name: 'Default', file: '../../lib/node/LocalDatastoreController' },
-    { name: 'React-Native', file: '../../lib/node/LocalDatastoreController.react-native' },
+    {
+      name: 'React-Native',
+      file: '../../lib/node/LocalDatastoreController.react-native',
+    },
   ];
 
   for (let i = 0; i < controllers.length; i += 1) {

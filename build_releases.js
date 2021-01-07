@@ -1,14 +1,14 @@
 const pkg = require('./package.json');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { exec } = require('child_process');
 
 const rmDir = function(dirPath) {
-  if(fs.existsSync(dirPath)) {
+  if (fs.existsSync(dirPath)) {
     const files = fs.readdirSync(dirPath);
     files.forEach(function(file) {
       const curPath = path.join(dirPath, file);
-      if(fs.lstatSync(curPath).isDirectory()) { 
+      if (fs.lstatSync(curPath).isDirectory()) {
         rmDir(curPath);
       } else {
         fs.unlinkSync(curPath);
@@ -18,8 +18,18 @@ const rmDir = function(dirPath) {
   }
 };
 
-const exec = function(cmd) {
-  execSync(cmd, { stdio: 'inherit' });
+const execCommand = function(cmd) {
+  return new Promise((resolve, reject) => {
+    exec(cmd, (error, stdout, stderr) => {
+      if (error) {
+        console.warn(error);
+        return reject(error);
+      }
+      const output = stdout ? stdout : stderr;
+      console.log(output);
+      resolve(output);
+    });
+  });
 };
 
 console.log(`Building JavaScript SDK v${pkg.version}...\n`)
@@ -32,20 +42,25 @@ rmDir(path.join(__dirname, 'lib'));
 const crossEnv = 'npm run cross-env';
 const gulp = 'npm run gulp';
 
-console.log('Browser Release:');
-exec(`${crossEnv} PARSE_BUILD=browser ${gulp} compile`);
+(async function() {
+  console.log('Browser Release:');
+  console.log('Weapp Release:');
+  console.log('Node.js Release:');
+  console.log('React Native Release:');
+  await Promise.all([
+    execCommand(`${crossEnv} PARSE_BUILD=browser ${gulp} compile`),
+    execCommand(`${crossEnv} PARSE_BUILD=weapp ${gulp} compile`),
+    execCommand(`${crossEnv} PARSE_BUILD=node ${gulp} compile`),
+    execCommand(`${crossEnv} PARSE_BUILD=react-native ${gulp} compile`),
+  ]);
 
-console.log('Weapp Release:');
-exec(`${crossEnv} PARSE_BUILD=weapp ${gulp} compile`);
-
-console.log('Node.js Release:');
-exec(`${crossEnv} PARSE_BUILD=node ${gulp} compile`);
-
-console.log('React Native Release:');
-exec(`${crossEnv} PARSE_BUILD=react-native ${gulp} compile`);
-
-console.log('Bundling and minifying for CDN distribution:');
-exec(`${gulp} browserify`);
-exec(`${gulp} browserify-weapp`);
-exec(`${gulp} minify`);
-exec(`${gulp} minify-weapp`);
+  console.log('Bundling and minifying for CDN distribution:');
+  await Promise.all([
+    execCommand(`${gulp} browserify`),
+    execCommand(`${gulp} browserify-weapp`),
+  ]);
+  await Promise.all([
+    execCommand(`${gulp} minify`),
+    execCommand(`${gulp} minify-weapp`),
+  ]);
+}());

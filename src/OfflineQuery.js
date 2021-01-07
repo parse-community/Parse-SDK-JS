@@ -6,9 +6,13 @@ const ParseGeoPoint = require('./ParseGeoPoint').default;
 
 /**
  * contains -- Determines if an object is contained in a list with special handling for Parse pointers.
+ *
+ * @param haystack
+ * @param needle
+ * @private
+ * @returns {boolean}
  */
 function contains(haystack, needle) {
-
   if (needle && needle.__type && (needle.__type === 'Pointer' || needle.__type === 'Object')) {
     for (const i in haystack) {
       const ptr = haystack[i];
@@ -35,6 +39,13 @@ function transformObject(object) {
  * It's a lightweight, where-clause only implementation of a full query engine.
  * Since we find queries that match objects, rather than objects that match
  * queries, we can avoid building a full-blown query tool.
+ *
+ * @param className
+ * @param object
+ * @param objects
+ * @param query
+ * @private
+ * @returns {boolean}
  */
 function matchesQuery(className, object, objects, query) {
   if (object.className !== className) {
@@ -71,6 +82,14 @@ function equalObjectsGeneric(obj, compareTo, eqlFn) {
 
 /**
  * Determines whether an object matches a single key's constraints
+ *
+ * @param className
+ * @param object
+ * @param objects
+ * @param key
+ * @param constraints
+ * @private
+ * @returns {boolean}
  */
 function matchesKeyConstraints(className, object, objects, key, constraints) {
   if (constraints === null) {
@@ -81,7 +100,13 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
     const keyComponents = key.split('.');
     const subObjectKey = keyComponents[0];
     const keyRemainder = keyComponents.slice(1).join('.');
-    return matchesKeyConstraints(className, object[subObjectKey] || {}, objects, keyRemainder, constraints);
+    return matchesKeyConstraints(
+      className,
+      object[subObjectKey] || {},
+      objects,
+      keyRemainder,
+      constraints
+    );
   }
   let i;
   if (key === '$or') {
@@ -112,7 +137,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
     // Bail! We can't handle relational queries locally
     return false;
   }
-  if (!(/^[A-Za-z][0-9A-Za-z_]*$/).test(key)) {
+  if (!/^[A-Za-z][0-9A-Za-z_]*$/.test(key)) {
     throw new ParseError(ParseError.INVALID_KEY_NAME, `Invalid Key: ${key}`);
   }
   // Equality (or Array contains) cases
@@ -126,7 +151,11 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
   if (constraints.__type) {
     if (constraints.__type === 'Pointer') {
       return equalObjectsGeneric(object[key], constraints, function (obj, ptr) {
-        return typeof obj !== 'undefined' && ptr.className === obj.className && ptr.objectId === obj.objectId;
+        return (
+          typeof obj !== 'undefined' &&
+          ptr.className === obj.className &&
+          ptr.objectId === obj.objectId
+        );
       });
     }
     return equalObjectsGeneric(decode(object[key]), decode(constraints), equalObjects);
@@ -138,10 +167,12 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
       compareTo = decode(compareTo);
     }
     // Compare Date Object or Date String
-    if (toString.call(compareTo) === '[object Date]' ||
-       (typeof compareTo === 'string' &&
-       new Date(compareTo) !== 'Invalid Date' &&
-       !isNaN(new Date(compareTo)))) {
+    if (
+      toString.call(compareTo) === '[object Date]' ||
+      (typeof compareTo === 'string' &&
+        new Date(compareTo) !== 'Invalid Date' &&
+        !isNaN(new Date(compareTo)))
+    ) {
       object[key] = new Date(object[key].iso ? object[key].iso : object[key]);
     }
     switch (condition) {
@@ -187,8 +218,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
         }
       }
       break;
-    case '$exists':
-    {
+    case '$exists': {
       const propertyExists = typeof object[key] !== 'undefined';
       const existenceIsRequired = constraints['$exists'];
       if (typeof constraints['$exists'] !== 'boolean') {
@@ -196,7 +226,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
         // tries to submit a non-boolean for $exits outside the SDKs, just ignore it.
         break;
       }
-      if (!propertyExists && existenceIsRequired || propertyExists && !existenceIsRequired) {
+      if ((!propertyExists && existenceIsRequired) || (propertyExists && !existenceIsRequired)) {
         return false;
       }
       break;
@@ -214,14 +244,17 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
         expString += compareTo.substring(escapeEnd + 2, escapeStart);
         escapeEnd = compareTo.indexOf('\\E', escapeStart);
         if (escapeEnd > -1) {
-          expString += compareTo.substring(escapeStart + 2, escapeEnd).replace(/\\\\\\\\E/g, '\\E').replace(/\W/g, '\\$&');
+          expString += compareTo
+            .substring(escapeStart + 2, escapeEnd)
+            .replace(/\\\\\\\\E/g, '\\E')
+            .replace(/\W/g, '\\$&');
         }
 
         escapeStart = compareTo.indexOf('\\Q', escapeEnd);
       }
       expString += compareTo.substring(Math.max(escapeStart, escapeEnd + 2));
       let modifiers = constraints.$options || '';
-      modifiers = modifiers.replace('x', '').replace('s', '')
+      modifiers = modifiers.replace('x', '').replace('s', '');
       // Parse Server / Mongo support x and s modifiers but JS RegExp doesn't
       const exp = new RegExp(expString, modifiers);
       if (!exp.test(object[key])) {
@@ -247,7 +280,12 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
         // Invalid box, crosses the date line
         return false;
       }
-      return object[key].latitude > southWest.latitude && object[key].latitude < northEast.latitude && object[key].longitude > southWest.longitude && object[key].longitude < northEast.longitude;
+      return (
+        object[key].latitude > southWest.latitude &&
+          object[key].latitude < northEast.latitude &&
+          object[key].longitude > southWest.longitude &&
+          object[key].longitude < northEast.longitude
+      );
     }
     case '$options':
       // Not a query type, but a way to add options to $regex. Ignore and
@@ -284,8 +322,10 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
 
       for (let i = 0; i < subQueryObjects.length; i += 1) {
         const subObject = transformObject(subQueryObjects[i]);
-        if (object[key].className === subObject.className &&
-            object[key].objectId === subObject.objectId) {
+        if (
+          object[key].className === subObject.className &&
+            object[key].objectId === subObject.objectId
+        ) {
           return true;
         }
       }
@@ -298,8 +338,10 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
 
       for (let i = 0; i < subQueryObjects.length; i += 1) {
         const subObject = transformObject(subQueryObjects[i]);
-        if (object[key].className === subObject.className &&
-            object[key].objectId === subObject.objectId) {
+        if (
+          object[key].className === subObject.className &&
+            object[key].objectId === subObject.objectId
+        ) {
           return false;
         }
       }
@@ -314,7 +356,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
       return true;
     }
     case '$geoWithin': {
-      const points = compareTo.$polygon.map((geoPoint) => [geoPoint.latitude, geoPoint.longitude]);
+      const points = compareTo.$polygon.map(geoPoint => [geoPoint.latitude, geoPoint.longitude]);
       const polygon = new ParsePolygon(points);
       return polygon.containsPoint(object[key]);
     }
@@ -336,13 +378,27 @@ function validateQuery(query: any) {
   if (query.toJSON) {
     q = query.toJSON().where;
   }
-  const specialQuerykeys = ['$and', '$or', '$nor', '_rperm', '_wperm', '_perishable_token', '_email_verify_token', '_email_verify_token_expires_at', '_account_lockout_expires_at', '_failed_login_count'];
+  const specialQuerykeys = [
+    '$and',
+    '$or',
+    '$nor',
+    '_rperm',
+    '_wperm',
+    '_perishable_token',
+    '_email_verify_token',
+    '_email_verify_token_expires_at',
+    '_account_lockout_expires_at',
+    '_failed_login_count',
+  ];
 
   Object.keys(q).forEach(key => {
     if (q && q[key] && q[key].$regex) {
       if (typeof q[key].$options === 'string') {
         if (!q[key].$options.match(/^[imxs]+$/)) {
-          throw new ParseError(ParseError.INVALID_QUERY, `Bad $options value for query: ${q[key].$options}`);
+          throw new ParseError(
+            ParseError.INVALID_QUERY,
+            `Bad $options value for query: ${q[key].$options}`
+          );
         }
       }
     }

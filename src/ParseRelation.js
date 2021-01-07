@@ -23,6 +23,7 @@ import ParseQuery from './ParseQuery';
  * relationship.  Each instance of Parse.Relation is associated with a
  * particular parent object and key.
  * </p>
+ *
  * @alias Parse.Relation
  */
 class ParseRelation {
@@ -32,7 +33,7 @@ class ParseRelation {
 
   /**
    * @param {Parse.Object} parent The parent of this relation.
-   * @param {String} key The key for this relation on the parent.
+   * @param {string} key The key for this relation on the parent.
    */
   constructor(parent: ?ParseObject, key: ?string) {
     this.parent = parent;
@@ -46,21 +47,15 @@ class ParseRelation {
   _ensureParentAndKey(parent: ParseObject, key: string) {
     this.key = this.key || key;
     if (this.key !== key) {
-      throw new Error(
-        'Internal Error. Relation retrieved from two different keys.'
-      );
+      throw new Error('Internal Error. Relation retrieved from two different keys.');
     }
     if (this.parent) {
       if (this.parent.className !== parent.className) {
-        throw new Error(
-          'Internal Error. Relation retrieved from two different Objects.'
-        );
+        throw new Error('Internal Error. Relation retrieved from two different Objects.');
       }
       if (this.parent.id) {
         if (this.parent.id !== parent.id) {
-          throw new Error(
-            'Internal Error. Relation retrieved from two different Objects.'
-          );
+          throw new Error('Internal Error. Relation retrieved from two different Objects.');
         }
       } else if (parent.id) {
         this.parent = parent;
@@ -72,8 +67,9 @@ class ParseRelation {
 
   /**
    * Adds a Parse.Object or an array of Parse.Objects to the relation.
-
-   * @param {} objects The item or items to add.
+   *
+   * @param {(Parse.Object|Array)} objects The item or items to add.
+   * @returns {Parse.Object} The parent of the relation.
    */
   add(objects: ParseObject | Array<ParseObject | string>): ParseObject {
     if (!Array.isArray(objects)) {
@@ -85,6 +81,9 @@ class ParseRelation {
     if (!parent) {
       throw new Error('Cannot add to a Relation without a parent');
     }
+    if (objects.length === 0) {
+      return parent;
+    }
     parent.set(this.key, change);
     this.targetClassName = change._targetClassName;
     return parent;
@@ -92,8 +91,8 @@ class ParseRelation {
 
   /**
    * Removes a Parse.Object or an array of Parse.Objects from this relation.
-
-   * @param {} objects The item or items to remove.
+   *
+   * @param {(Parse.Object|Array)} objects The item or items to remove.
    */
   remove(objects: ParseObject | Array<ParseObject | string>) {
     if (!Array.isArray(objects)) {
@@ -104,27 +103,30 @@ class ParseRelation {
     if (!this.parent) {
       throw new Error('Cannot remove from a Relation without a parent');
     }
+    if (objects.length === 0) {
+      return;
+    }
     this.parent.set(this.key, change);
     this.targetClassName = change._targetClassName;
   }
 
   /**
    * Returns a JSON version of the object suitable for saving to disk.
-
-   * @return {Object}
+   *
+   * @returns {object} JSON representation of Relation
    */
   toJSON(): { __type: 'Relation', className: ?string } {
     return {
       __type: 'Relation',
-      className: this.targetClassName
+      className: this.targetClassName,
     };
   }
 
   /**
    * Returns a Parse.Query that is limited to objects in this
    * relation.
-
-   * @return {Parse.Query}
+   *
+   * @returns {Parse.Query} Relation Query
    */
   query(): ParseQuery {
     let query;
@@ -136,12 +138,12 @@ class ParseRelation {
       query = new ParseQuery(parent.className);
       query._extraOptions.redirectClassNameForKey = this.key;
     } else {
-      query = new ParseQuery(this.targetClassName)
+      query = new ParseQuery(this.targetClassName);
     }
     query._addCondition('$relatedTo', 'object', {
       __type: 'Pointer',
       className: parent.className,
-      objectId: parent.id
+      objectId: parent.id,
     });
     query._addCondition('$relatedTo', 'key', this.key);
 

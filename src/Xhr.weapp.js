@@ -24,8 +24,8 @@ module.exports = class XhrWeapp {
 
   getAllResponseHeaders() {
     let header = '';
-    for(const key in this.responseHeader){
-      header += key + ':' + this.getResponseHeader(key) + '\r\n'
+    for (const key in this.responseHeader) {
+      header += key + ':' + this.getResponseHeader(key) + '\r\n';
     }
     return header;
   }
@@ -61,7 +61,7 @@ module.exports = class XhrWeapp {
       data: data,
       header: this.header,
       responseType: this.responseType,
-      success: (res) => {
+      success: res => {
         this.status = res.statusCode;
         this.response = res.data;
         this.responseHeader = res.header;
@@ -69,14 +69,14 @@ module.exports = class XhrWeapp {
         this.requestTask = null;
         this.onreadystatechange();
       },
-      fail: (err) => {
+      fail: err => {
         this.requestTask = null;
         this.onerror(err);
-      }
+      },
     });
-    this.requestTask.onProgressUpdate((res) => {
+    this.requestTask.onProgressUpdate(res => {
       const event = {
-        lengthComputable: (res.totalBytesExpectedToWrite !== 0),
+        lengthComputable: res.totalBytesExpectedToWrite !== 0,
         loaded: res.totalBytesWritten,
         total: res.totalBytesExpectedToWrite,
       };

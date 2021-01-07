@@ -7,7 +7,9 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  * @flow
+ * @private
  */
+
 const StorageController = {
   async: 0,
 
@@ -34,7 +36,7 @@ const StorageController = {
 
   clear() {
     wx.clearStorageSync();
-  }
+  },
 };
 
 module.exports = StorageController;

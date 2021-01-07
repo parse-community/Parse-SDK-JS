@@ -10,12 +10,14 @@
 jest.dontMock('../decode');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
+jest.dontMock('../ParsePolygon');
 
 const decode = require('../decode').default;
 
 const ParseFile = require('../ParseFile').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
 const ParseObject = require('../ParseObject').default;
+const ParsePolygon = require('../ParsePolygon').default;
 
 describe('decode', () => {
   it('ignores primitives', () => {
@@ -27,28 +29,46 @@ describe('decode', () => {
   });
 
   it('decodes dates', () => {
-    expect(decode({
-      __type: 'Date',
-      iso: '2015-02-01T00:00:00.000Z'
-    })).toEqual(new Date(Date.UTC(2015, 1)));
+    expect(
+      decode({
+        __type: 'Date',
+        iso: '2015-02-01T00:00:00.000Z',
+      })
+    ).toEqual(new Date(Date.UTC(2015, 1)));
   });
 
   it('decodes GeoPoints', () => {
     const point = decode({
       __type: 'GeoPoint',
       latitude: 40.5,
-      longitude: 50.4
+      longitude: 50.4,
     });
     expect(point instanceof ParseGeoPoint).toBe(true);
     expect(point.latitude).toBe(40.5);
     expect(point.longitude).toBe(50.4);
   });
 
+  it('decodes Polygons', () => {
+    const points = [
+      [0, 0],
+      [0, 1],
+      [1, 1],
+      [1, 0],
+      [0, 0],
+    ];
+    const polygon = decode({
+      __type: 'Polygon',
+      coordinates: points,
+    });
+    expect(polygon instanceof ParsePolygon).toBe(true);
+    expect(polygon.coordinates).toEqual(points);
+  });
+
   it('decodes Files', () => {
     const file = decode({
       __type: 'File',
       name: 'parse.txt',
-      url: 'https://files.parsetfss.com/a/parse.txt'
+      url: 'https://files.parsetfss.com/a/parse.txt',
     });
     expect(file instanceof ParseFile).toBe(true);
     expect(file.name()).toBe('parse.txt');
@@ -58,12 +78,9 @@ describe('decode', () => {
   it('decodes Relations', () => {
     const obj = decode({
       __type: 'Relation',
-      className: 'Delivery'
+      className: 'Delivery',
     });
-    expect(obj.constructor.mock.calls[0]).toEqual([
-      null,
-      null
-    ]);
+    expect(obj.constructor.mock.calls[0]).toEqual([null, null]);
     expect(obj.targetClassName).toBe('Delivery');
   });
 
@@ -71,7 +88,7 @@ describe('decode', () => {
     const data = {
       __type: 'Pointer',
       className: 'Item',
-      objectId: '1001'
+      objectId: '1001',
     };
     decode(data);
     expect(ParseObject.fromJSON.mock.calls[0][0]).toEqual(data);
@@ -81,33 +98,31 @@ describe('decode', () => {
     const data = {
       __type: 'Object',
       className: 'Item',
-      objectId: '1001'
+      objectId: '1001',
     };
     decode(data);
     expect(ParseObject.fromJSON.mock.calls[1][0]).toEqual(data);
   });
 
   it('iterates over arrays', () => {
-    expect(decode([
-      { __type: 'Date', iso: '2015-02-01T00:00:00.000Z' },
-      12,
-      'string'
-    ])).toEqual([
+    expect(decode([{ __type: 'Date', iso: '2015-02-01T00:00:00.000Z' }, 12, 'string'])).toEqual([
       new Date(Date.UTC(2015, 1)),
       12,
-      'string'
+      'string',
     ]);
   });
 
   it('iterates over objects', () => {
-    expect(decode({
-      empty: null,
-      when: { __type: 'Date', iso: '2015-04-01T00:00:00.000Z' },
-      count: 15
-    })).toEqual({
+    expect(
+      decode({
+        empty: null,
+        when: { __type: 'Date', iso: '2015-04-01T00:00:00.000Z' },
+        count: 15,
+      })
+    ).toEqual({
       empty: null,
       when: new Date(Date.UTC(2015, 3)),
-      count: 15
+      count: 15,
     });
   });
 });
