@@ -121,7 +121,7 @@ describe('ParseCLP', () => {
     }).toThrow('ParseCLP constructed with a function. Did you forget ()?');
   });
 
-  it('throws when setting an invalid user id', () => {
+  it('throws when setting an invalid input', () => {
     const a = new ParseCLP();
     expect(a.setReadAccess.bind(a, 12, true)).toThrow('userId must be a string.');
   });
@@ -142,6 +142,17 @@ describe('ParseCLP', () => {
     expect(a.setRoleReadAccess.bind(a, 12, true)).toThrow('role must be a ParseRole or a String');
     expect(a.setRoleWriteAccess.bind(a, 12, true)).toThrow('role must be a ParseRole or a String');
   });
+  it('throws when setting an invalid protectedFields', () => {
+    const a = new ParseCLP();
+    const u = new ParseUser();
+    const r = new ParseRole();
+    expect(a.setProtectedFields.bind(a, 12)).toThrow('userId must be a string.');
+    expect(a.setProtectedFields.bind(a, u)).toThrow('userId must be a string.');
+    expect(a.setProtectedFields.bind(a, r)).toThrow('role must be a ParseRole or a String');
+    expect(a.setProtectedFields.bind(a, new ParseRole('admin'), 'not_field_array')).toThrow(
+      'fields must be an array or undefined.'
+    );
+  });
 
   it('can be rendered to JSON format', () => {
     const permissionsMap = {
@@ -156,6 +167,40 @@ describe('ParseCLP', () => {
     };
     const a = new ParseCLP(permissionsMap);
     expect(a.toJSON()).toEqual(permissionsMap);
+  });
+
+  it('can set protectedFields', () => {
+    const a = new ParseCLP();
+    const r = new ParseRole('admin');
+
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
+
+    a.setProtectedFields('uid', ['admin']);
+    a.setPublicProtectedFields(['foo']);
+    a.setRoleProtectedFields(r, ['bar']);
+
+    expect(a.toJSON()).toEqual({
+      get: {},
+      find: {},
+      count: {},
+      create: {},
+      update: {},
+      delete: {},
+      addField: {},
+      protectedFields: {
+        uid: ['admin'],
+        '*': ['foo'],
+        'role:admin': ['bar'],
+      },
+    });
+    expect(a.getProtectedFields('uid')).toEqual(['admin']);
+    expect(a.getPublicProtectedFields()).toEqual(['foo']);
+    expect(a.getRoleProtectedFields(r)).toEqual(['bar']);
+
+    a.setProtectedFields('uid', undefined);
+    a.setPublicProtectedFields(undefined);
+    a.setRoleProtectedFields(r, undefined);
+    expect(a.toJSON()).toEqual(DEFAULT_CLP);
   });
 
   it('can set read access', () => {

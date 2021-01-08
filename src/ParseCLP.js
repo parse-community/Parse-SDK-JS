@@ -176,7 +176,11 @@ class ParseCLP {
     }
   }
 
-  _getAccess(permission: string, userId: ParseUser | ParseRole | string): boolean {
+  _getAccess(
+    permission: string,
+    userId: ParseUser | ParseRole | string,
+    returnBoolean = true
+  ): boolean | string[] {
     if (userId instanceof ParseUser) {
       userId = userId.id;
       if (!userId) {
@@ -187,10 +191,52 @@ class ParseCLP {
     }
 
     const permissions = this.permissionsMap[permission][userId];
-    if (!permissions) {
-      return false;
+    if (returnBoolean) {
+      if (!permissions) {
+        return false;
+      }
+      return !!this.permissionsMap[permission][userId];
     }
-    return !!this.permissionsMap[permission][userId];
+    return permissions;
+  }
+
+  /**
+   * Sets whether the given user is allowed to retrieve fields from this class.
+   *
+   * @param userId An instance of Parse.User or its objectId.
+   * @param {string[]} fields fields to be protected
+   */
+  setProtectedFields(userId: ParseUser | ParseRole | string, fields: string[]) {
+    if (userId instanceof ParseUser) {
+      userId = userId.id;
+    } else if (userId instanceof ParseRole) {
+      userId = this._getRoleName(userId);
+    }
+    if (typeof userId !== 'string') {
+      throw new TypeError('userId must be a string.');
+    }
+    const permissions = this.permissionsMap.protectedFields[userId];
+    if (!permissions) {
+      this.permissionsMap.protectedFields[userId] = [];
+    }
+
+    if (!fields) {
+      delete this.permissionsMap.protectedFields[userId];
+    } else if (Array.isArray(fields)) {
+      this.permissionsMap.protectedFields[userId] = fields;
+    } else {
+      throw new TypeError('fields must be an array or undefined.');
+    }
+  }
+
+  /**
+   * Returns array of fields are accessable to this user.
+   *
+   * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
+   * @returns {string[]}
+   */
+  getProtectedFields(userId: ParseUser | ParseRole | string): string[] {
+    return this._getAccess('protectedFields', userId, false);
   }
 
   /**
@@ -577,6 +623,24 @@ class ParseCLP {
   }
 
   /**
+   * Sets whether the public is allowed to protect fields in this class.
+   *
+   * @param {string[]} fields
+   */
+  setPublicProtectedFields(fields: string[]) {
+    this.setProtectedFields(PUBLIC_KEY, fields);
+  }
+
+  /**
+   * Gets whether the public is allowed to read fields from this class.
+   *
+   * @returns {string[]}
+   */
+  getPublicProtectedFields(): string[] {
+    return this.getProtectedFields(PUBLIC_KEY);
+  }
+
+  /**
    * Gets whether users belonging to the given role are allowed
    * to read from this class. Even if this returns false, the role may
    * still be able to write it if a parent role has read access.
@@ -799,6 +863,31 @@ class ParseCLP {
    */
   setRoleAddFieldAccess(role: ParseRole | string, allowed: boolean) {
     this.setAddFieldAccess(this._getRoleName(role), allowed);
+  }
+
+  /**
+   * Gets whether users belonging to the given role are allowed
+   * to count to this user. Even if this returns false, the role may
+   * still be able to count it if a parent role has count access.
+   *
+   * @param role The name of the role, or a Parse.Role object.
+   * @returns {string[]}
+   * @throws {TypeError} If role is neither a Parse.Role nor a String.
+   */
+  getRoleProtectedFields(role: ParseRole | string): string[] {
+    return this.getProtectedFields(this._getRoleName(role));
+  }
+
+  /**
+   * Sets whether users belonging to the given role are allowed
+   * to set access field in this class.
+   *
+   * @param role The name of the role, or a Parse.Role object.
+   * @param {string[]} fields Fields to be protected by Role.
+   * @throws {TypeError} If role is neither a Parse.Role nor a String.
+   */
+  setRoleProtectedFields(role: ParseRole | string, fields: string[]) {
+    this.setProtectedFields(this._getRoleName(role), fields);
   }
 }
 
