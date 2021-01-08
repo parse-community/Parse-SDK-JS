@@ -142,6 +142,7 @@ describe('ParseCLP', () => {
     expect(a.setRoleReadAccess.bind(a, 12, true)).toThrow('role must be a ParseRole or a String');
     expect(a.setRoleWriteAccess.bind(a, 12, true)).toThrow('role must be a ParseRole or a String');
   });
+
   it('throws when setting an invalid protectedFields', () => {
     const a = new ParseCLP();
     const u = new ParseUser();
@@ -150,8 +151,34 @@ describe('ParseCLP', () => {
     expect(a.setProtectedFields.bind(a, u)).toThrow('userId must be a string.');
     expect(a.setProtectedFields.bind(a, r)).toThrow('role must be a ParseRole or a String');
     expect(a.setProtectedFields.bind(a, new ParseRole('admin'), 'not_field_array')).toThrow(
-      'fields must be an array or undefined.'
+      'fields must be an array of strings or undefined.'
     );
+  });
+
+  it('throws when setting an invalid group pointer permissions', () => {
+    const a = new ParseCLP();
+    expect(a.setReadUserFields.bind(a, 12)).toThrow(
+      'readUserFields.pointerFields must be an array of strings or undefined.'
+    );
+    expect(a.setWriteUserFields.bind(a, 12)).toThrow(
+      'writeUserFields.pointerFields must be an array of strings or undefined.'
+    );
+
+    const clp = {
+      get: {},
+      find: {},
+      count: {},
+      create: {},
+      update: {},
+      delete: {},
+      addField: {},
+      protectedFields: {},
+      readUserFields: [1234],
+      writeUserFields: ['owner'],
+    };
+    expect(function () {
+      new ParseCLP(clp);
+    }).toThrow('Tried to create an CLP with an invalid permission value.');
   });
 
   it('can be rendered to JSON format', () => {
@@ -200,6 +227,76 @@ describe('ParseCLP', () => {
     a.setProtectedFields('uid', undefined);
     a.setPublicProtectedFields(undefined);
     a.setRoleProtectedFields(r, undefined);
+    expect(a.toJSON()).toEqual(DEFAULT_CLP);
+  });
+
+  it('can get and set requiresAuthentication', () => {
+    const a = new ParseCLP();
+    a.setGetRequiresAuthentication(true);
+    expect(a.toJSON()).toEqual({
+      get: { requiresAuthentication: true },
+      find: {},
+      count: {},
+      create: {},
+      update: {},
+      delete: {},
+      addField: {},
+      protectedFields: {},
+    });
+    expect(a.getGetRequiresAuthentication()).toBe(true);
+    a.setGetRequiresAuthentication(false);
+    expect(a.toJSON()).toEqual(DEFAULT_CLP);
+  });
+
+  it('can get and set pointerFields', () => {
+    const testCLP = {
+      get: { pointerFields: ['owner'] },
+      find: {},
+      count: {},
+      create: {},
+      update: {},
+      delete: {},
+      addField: {},
+      protectedFields: {},
+    };
+    const pointerCLP = new ParseCLP(testCLP);
+    expect(pointerCLP.toJSON()).toEqual(testCLP);
+
+    const a = new ParseCLP();
+    a.setGetPointerFields(['owner']);
+    expect(a.toJSON()).toEqual(testCLP);
+    expect(a.getGetPointerFields()).toEqual(['owner']);
+
+    a.setGetPointerFields(undefined);
+    expect(a.toJSON()).toEqual(DEFAULT_CLP);
+    expect(a.getGetPointerFields()).toEqual(undefined);
+  });
+
+  it('can get and set group pointer permissions', () => {
+    const testCLP = {
+      get: {},
+      find: {},
+      count: {},
+      create: {},
+      update: {},
+      delete: {},
+      addField: {},
+      protectedFields: {},
+      readUserFields: ['parent'],
+      writeUserFields: ['owner'],
+    };
+    const groupCLP = new ParseCLP(testCLP);
+    expect(groupCLP.toJSON()).toEqual(testCLP);
+
+    const a = new ParseCLP();
+    a.setWriteUserFields(['owner']);
+    a.setReadUserFields(['parent']);
+    expect(a.toJSON()).toEqual(testCLP);
+    expect(a.getWriteUserFields()).toEqual(['owner']);
+    expect(a.getReadUserFields()).toEqual(['parent']);
+
+    a.setWriteUserFields(undefined);
+    a.setReadUserFields(undefined);
     expect(a.toJSON()).toEqual(DEFAULT_CLP);
   });
 

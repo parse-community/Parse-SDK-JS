@@ -12,6 +12,7 @@
 import ParseRole from './ParseRole';
 import ParseUser from './ParseUser';
 
+type Entity = Entity;
 type UsersMap = { [userId: string]: boolean | any };
 export type PermissionsMap = { [permission: string]: UsersMap };
 
@@ -32,14 +33,48 @@ VALID_PERMISSIONS_EXTENDED.set('protectedFields', {});
 /**
  * Creates a new CLP.
  * If no argument is given, the CLP has no permissions for anyone.
- * If the argument is a Parse.User, the CLP will have read and write
- *   permission for only that user.
+ * If the argument is a Parse.User or Parse.Role, the CLP will have read and write
+ *   permission for only that user or role.
  * If the argument is any other JSON object, that object will be interpretted
  *   as a serialized CLP created with toJSON().
  *
  * <p>A CLP, or Class Level Permissions can be added to any
  * <code>Parse.Schema</code> to restrict access to only a subset of users
  * of your application.</p>
+ *
+ * <p>
+ * For get/count/find/create/update/delete/addField you can set the
+ * requiresAuthentication and pointerFields using the following functions:
+ *
+ * getGetRequiresAuthentication()
+ * setGetRequiresAuthentication()
+ * getGetPointerFields()
+ * setGetPointerFields()
+ * getFindRequiresAuthentication()
+ * setFindRequiresAuthentication()
+ * getFindPointerFields()
+ * setFindPointerFields()
+ * getCountRequiresAuthentication()
+ * setCountRequiresAuthentication()
+ * getCountPointerFields()
+ * setCountPointerFields()
+ * getCreateRequiresAuthentication()
+ * setCreateRequiresAuthentication()
+ * getCreatePointerFields()
+ * setCreatePointerFields()
+ * getUpdateRequiresAuthentication()
+ * setUpdateRequiresAuthentication()
+ * getUpdatePointerFields()
+ * setUpdatePointerFields()
+ * getDeleteRequiresAuthentication()
+ * setDeleteRequiresAuthentication()
+ * getDeletePointerFields()
+ * setDeletePointerFields()
+ * getAddFieldRequiresAuthentication()
+ * setAddFieldRequiresAuthentication()
+ * getAddFieldPointerFields()
+ * setAddFieldPointerFields()
+ * </p>
  *
  * @alias Parse.CLP
  */
@@ -52,12 +87,29 @@ class ParseCLP {
   constructor(userId: ParseUser | ParseRole | PermissionsMap) {
     this.permissionsMap = {};
     // Initialize permissions Map with default permissions
-    for (const permission of VALID_PERMISSIONS.entries()) {
-      this.permissionsMap[permission[0]] = Object.assign({}, permission[1]);
+    for (const [operation, group] of VALID_PERMISSIONS.entries()) {
+      this.permissionsMap[operation] = Object.assign({}, group);
+      const action = operation.charAt(0).toUpperCase() + operation.slice(1);
+
+      // Create setters and getters for requiredAuthentication
+      this[`get${action}RequiresAuthentication`] = function () {
+        return this._getAccess(operation, 'requiresAuthentication');
+      };
+      this[`set${action}RequiresAuthentication`] = function (allowed) {
+        this._setAccess(operation, 'requiresAuthentication', allowed);
+      };
+
+      // Create setters and getters for pointerFields
+      this[`get${action}PointerFields`] = function () {
+        return this._getAccess(operation, 'pointerFields', false);
+      };
+      this[`set${action}PointerFields`] = function (pointerFields) {
+        this._setArrayAccess(operation, 'pointerFields', pointerFields);
+      };
     }
     // Initialize permissions Map with default extended permissions
-    for (const permission of VALID_PERMISSIONS_EXTENDED.entries()) {
-      this.permissionsMap[permission[0]] = Object.assign({}, permission[1]);
+    for (const [operation, group] of VALID_PERMISSIONS_EXTENDED.entries()) {
+      this.permissionsMap[operation] = Object.assign({}, group);
     }
     if (userId && typeof userId === 'object') {
       if (userId instanceof ParseUser) {
@@ -71,12 +123,28 @@ class ParseCLP {
           const users = userId[permission];
           const isValidPermission = !!VALID_PERMISSIONS.get(permission);
           const isValidPermissionExtended = !!VALID_PERMISSIONS_EXTENDED.get(permission);
-          if (typeof permission !== 'string' || !(isValidPermission || isValidPermissionExtended)) {
+          const isValidGroupPermission = ['readUserFields', 'writeUserFields'].includes(permission);
+          if (
+            typeof permission !== 'string' ||
+            !(isValidPermission || isValidPermissionExtended || isValidGroupPermission)
+          ) {
             throw new TypeError('Tried to create an CLP with an invalid permission type.');
+          }
+          if (isValidGroupPermission) {
+            if (users.every(pointer => typeof pointer === 'string')) {
+              this.permissionsMap[permission] = users;
+              continue;
+            } else {
+              throw new TypeError('Tried to create an CLP with an invalid permission value.');
+            }
           }
           for (const user in users) {
             const allowed = users[user];
-            if (typeof allowed !== 'boolean' && !isValidPermissionExtended) {
+            if (
+              typeof allowed !== 'boolean' &&
+              !isValidPermissionExtended &&
+              user !== 'pointerFields'
+            ) {
               throw new TypeError('Tried to create an CLP with an invalid permission value.');
             }
             this.permissionsMap[permission][user] = allowed;
@@ -147,7 +215,7 @@ class ParseCLP {
     return `role:${name}`;
   }
 
-  _setAccess(permission: string, userId: ParseUser | ParseRole | string, allowed: boolean) {
+  _setAccess(permission: string, userId: Entity, allowed: boolean) {
     if (userId instanceof ParseUser) {
       userId = userId.id;
     } else if (userId instanceof ParseRole) {
@@ -176,11 +244,7 @@ class ParseCLP {
     }
   }
 
-  _getAccess(
-    permission: string,
-    userId: ParseUser | ParseRole | string,
-    returnBoolean = true
-  ): boolean | string[] {
+  _getAccess(permission: string, userId: Entity, returnBoolean = true): boolean | string[] {
     if (userId instanceof ParseUser) {
       userId = userId.id;
       if (!userId) {
@@ -200,13 +264,7 @@ class ParseCLP {
     return permissions;
   }
 
-  /**
-   * Sets whether the given user is allowed to retrieve fields from this class.
-   *
-   * @param userId An instance of Parse.User or its objectId.
-   * @param {string[]} fields fields to be protected
-   */
-  setProtectedFields(userId: ParseUser | ParseRole | string, fields: string[]) {
+  _setArrayAccess(permission: string, userId: Entity, fields: string) {
     if (userId instanceof ParseUser) {
       userId = userId.id;
     } else if (userId instanceof ParseRole) {
@@ -215,18 +273,80 @@ class ParseCLP {
     if (typeof userId !== 'string') {
       throw new TypeError('userId must be a string.');
     }
-    const permissions = this.permissionsMap.protectedFields[userId];
+    const permissions = this.permissionsMap[permission][userId];
     if (!permissions) {
-      this.permissionsMap.protectedFields[userId] = [];
+      this.permissionsMap[permission][userId] = [];
     }
-
-    if (!fields) {
-      delete this.permissionsMap.protectedFields[userId];
-    } else if (Array.isArray(fields)) {
-      this.permissionsMap.protectedFields[userId] = fields;
+    if (!fields || (Array.isArray(fields) && fields.length === 0)) {
+      delete this.permissionsMap[permission][userId];
+    } else if (Array.isArray(fields) && fields.every(field => typeof field === 'string')) {
+      this.permissionsMap[permission][userId] = fields;
     } else {
-      throw new TypeError('fields must be an array or undefined.');
+      throw new TypeError('fields must be an array of strings or undefined.');
     }
+  }
+
+  _setGroupPointerPermission(operation: string, pointerFields: string[]) {
+    const fields = this.permissionsMap[operation];
+    if (!fields) {
+      this.permissionsMap[operation] = [];
+    }
+    if (!pointerFields || (Array.isArray(pointerFields) && pointerFields.length === 0)) {
+      delete this.permissionsMap[operation];
+    } else if (
+      Array.isArray(pointerFields) &&
+      pointerFields.every(field => typeof field === 'string')
+    ) {
+      this.permissionsMap[operation] = pointerFields;
+    } else {
+      throw new TypeError(`${operation}.pointerFields must be an array of strings or undefined.`);
+    }
+  }
+
+  _getGroupPointerPermissions(operation: string): string[] {
+    return this.permissionsMap[operation];
+  }
+
+  /**
+   * Sets user pointer fields to allow permission for get/count/find operations.
+   *
+   * @param {string[]} pointerFields User pointer fields
+   */
+  setReadUserFields(pointerFields: string[]) {
+    this._setGroupPointerPermission('readUserFields', pointerFields);
+  }
+
+  /**
+   * @returns {string[]} User pointer fields
+   */
+  getReadUserFields(): string[] {
+    return this._getGroupPointerPermissions('readUserFields');
+  }
+
+  /**
+   * Sets user pointer fields to allow permission for create/delete/update/addField operations
+   *
+   * @param {string[]} pointerFields User pointer fields
+   */
+  setWriteUserFields(pointerFields: string[]) {
+    this._setGroupPointerPermission('writeUserFields', pointerFields);
+  }
+
+  /**
+   * @returns {string[]} User pointer fields
+   */
+  getWriteUserFields(): string[] {
+    return this._getGroupPointerPermissions('writeUserFields');
+  }
+
+  /**
+   * Sets whether the given user is allowed to retrieve fields from this class.
+   *
+   * @param userId An instance of Parse.User or its objectId.
+   * @param {string[]} fields fields to be protected
+   */
+  setProtectedFields(userId: Entity, fields: string[]) {
+    this._setArrayAccess('protectedFields', userId, fields);
   }
 
   /**
@@ -235,7 +355,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
    * @returns {string[]}
    */
-  getProtectedFields(userId: ParseUser | ParseRole | string): string[] {
+  getProtectedFields(userId: Entity): string[] {
     return this._getAccess('protectedFields', userId, false);
   }
 
@@ -245,7 +365,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId.
    * @param {boolean} allowed whether that user should have read access.
    */
-  setReadAccess(userId: ParseUser | ParseRole | string, allowed: boolean) {
+  setReadAccess(userId: Entity, allowed: boolean) {
     this._setAccess('find', userId, allowed);
     this._setAccess('get', userId, allowed);
     this._setAccess('count', userId, allowed);
@@ -260,7 +380,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
    * @returns {boolean}
    */
-  getReadAccess(userId: ParseUser | ParseRole | string): boolean {
+  getReadAccess(userId: Entity): boolean {
     return (
       this._getAccess('find', userId) &&
       this._getAccess('get', userId) &&
@@ -274,7 +394,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId.
    * @param {boolean} allowed whether that user should have read access.
    */
-  setFindAccess(userId: ParseUser | ParseRole | string, allowed: boolean) {
+  setFindAccess(userId: Entity, allowed: boolean) {
     this._setAccess('find', userId, allowed);
   }
 
@@ -287,7 +407,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
    * @returns {boolean}
    */
-  getFindAccess(userId: ParseUser | ParseRole | string): boolean {
+  getFindAccess(userId: Entity): boolean {
     return this._getAccess('find', userId);
   }
 
@@ -297,7 +417,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId.
    * @param {boolean} allowed whether that user should have read access.
    */
-  setGetAccess(userId: ParseUser | ParseRole | string, allowed: boolean) {
+  setGetAccess(userId: Entity, allowed: boolean) {
     this._setAccess('get', userId, allowed);
   }
 
@@ -310,7 +430,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
    * @returns {boolean}
    */
-  getGetAccess(userId: ParseUser | ParseRole | string): boolean {
+  getGetAccess(userId: Entity): boolean {
     return this._getAccess('get', userId);
   }
 
@@ -320,7 +440,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId.
    * @param {boolean} allowed whether that user should have read access.
    */
-  setCountAccess(userId: ParseUser | ParseRole | string, allowed: boolean) {
+  setCountAccess(userId: Entity, allowed: boolean) {
     this._setAccess('count', userId, allowed);
   }
 
@@ -333,7 +453,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
    * @returns {boolean}
    */
-  getCountAccess(userId: ParseUser | ParseRole | string): boolean {
+  getCountAccess(userId: Entity): boolean {
     return this._getAccess('count', userId);
   }
 
@@ -343,7 +463,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role..
    * @param {boolean} allowed Whether that user should have write access.
    */
-  setWriteAccess(userId: ParseUser | ParseRole | string, allowed: boolean) {
+  setWriteAccess(userId: Entity, allowed: boolean) {
     this._setAccess('create', userId, allowed);
     this._setAccess('update', userId, allowed);
     this._setAccess('delete', userId, allowed);
@@ -359,7 +479,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
    * @returns {boolean}
    */
-  getWriteAccess(userId: ParseUser | ParseRole | string): boolean {
+  getWriteAccess(userId: Entity): boolean {
     return (
       this._getAccess('create', userId) &&
       this._getAccess('update', userId) &&
@@ -374,7 +494,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role..
    * @param {boolean} allowed Whether that user should have write access.
    */
-  setCreateAccess(userId: ParseUser | ParseRole | string, allowed: boolean) {
+  setCreateAccess(userId: Entity, allowed: boolean) {
     this._setAccess('create', userId, allowed);
   }
 
@@ -387,7 +507,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
    * @returns {boolean}
    */
-  getCreateAccess(userId: ParseUser | ParseRole | string): boolean {
+  getCreateAccess(userId: Entity): boolean {
     return this._getAccess('create', userId);
   }
 
@@ -397,7 +517,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role..
    * @param {boolean} allowed Whether that user should have write access.
    */
-  setUpdateAccess(userId: ParseUser | ParseRole | string, allowed: boolean) {
+  setUpdateAccess(userId: Entity, allowed: boolean) {
     this._setAccess('update', userId, allowed);
   }
 
@@ -410,7 +530,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
    * @returns {boolean}
    */
-  getUpdateAccess(userId: ParseUser | ParseRole | string): boolean {
+  getUpdateAccess(userId: Entity): boolean {
     return this._getAccess('update', userId);
   }
 
@@ -420,7 +540,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role..
    * @param {boolean} allowed Whether that user should have write access.
    */
-  setDeleteAccess(userId: ParseUser | ParseRole | string, allowed: boolean) {
+  setDeleteAccess(userId: Entity, allowed: boolean) {
     this._setAccess('delete', userId, allowed);
   }
 
@@ -433,7 +553,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
    * @returns {boolean}
    */
-  getDeleteAccess(userId: ParseUser | ParseRole | string): boolean {
+  getDeleteAccess(userId: Entity): boolean {
     return this._getAccess('delete', userId);
   }
 
@@ -443,7 +563,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role..
    * @param {boolean} allowed Whether that user should have write access.
    */
-  setAddFieldAccess(userId: ParseUser | ParseRole | string, allowed: boolean) {
+  setAddFieldAccess(userId: Entity, allowed: boolean) {
     this._setAccess('addField', userId, allowed);
   }
 
@@ -456,7 +576,7 @@ class ParseCLP {
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
    * @returns {boolean}
    */
-  getAddFieldAccess(userId: ParseUser | ParseRole | string): boolean {
+  getAddFieldAccess(userId: Entity): boolean {
     return this._getAccess('addField', userId);
   }
 
