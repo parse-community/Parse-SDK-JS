@@ -22,7 +22,16 @@ const mockObject = function (className, id) {
 };
 jest.setMock('../ParseObject', mockObject);
 
+const mockCLP = function (clp) {
+  this.permissionsMap = clp;
+  this.toJSON = function () {
+    return { ...this.permissionsMap };
+  };
+};
+jest.setMock('../ParseCLP', mockCLP);
+
 const ParseObject = require('../ParseObject');
+const ParseCLP = require('../ParseCLP');
 const ParseSchema = require('../ParseSchema').default;
 const CoreManager = require('../CoreManager');
 
@@ -148,6 +157,10 @@ describe('ParseSchema', () => {
     };
     schema.setCLP(clp);
     expect(schema._clp).toEqual(clp);
+
+    const clpObj = new ParseCLP(clp);
+    schema.setCLP(clpObj);
+    expect(schema._clp).toEqual(clpObj.toJSON());
     done();
   });
 
