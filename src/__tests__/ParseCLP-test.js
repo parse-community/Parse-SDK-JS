@@ -139,8 +139,8 @@ describe('ParseCLP', () => {
 
   it('throws when setting an invalid role', () => {
     const a = new ParseCLP();
-    expect(a.setRoleReadAccess.bind(a, 12, true)).toThrow('role must be a ParseRole or a String');
-    expect(a.setRoleWriteAccess.bind(a, 12, true)).toThrow('role must be a ParseRole or a String');
+    expect(a.setRoleReadAccess.bind(a, 12, true)).toThrow('role must be a Parse.Role or a String');
+    expect(a.setRoleWriteAccess.bind(a, 12, true)).toThrow('role must be a Parse.Role or a String');
   });
 
   it('throws when setting an invalid protectedFields', () => {
@@ -148,8 +148,10 @@ describe('ParseCLP', () => {
     const u = new ParseUser();
     const r = new ParseRole();
     expect(a.setProtectedFields.bind(a, 12)).toThrow('userId must be a string.');
-    expect(a.setProtectedFields.bind(a, u)).toThrow('userId must be a string.');
-    expect(a.setProtectedFields.bind(a, r)).toThrow('role must be a ParseRole or a String');
+    expect(a.setProtectedFields.bind(a, u)).toThrow(
+      'Cannot get access for a Parse.User without an id.'
+    );
+    expect(a.setProtectedFields.bind(a, r)).toThrow('role must be a Parse.Role or a String');
     expect(a.setProtectedFields.bind(a, new ParseRole('admin'), 'not_field_array')).toThrow(
       'fields must be an array of strings or undefined.'
     );

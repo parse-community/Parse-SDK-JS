@@ -43,37 +43,81 @@ VALID_PERMISSIONS_EXTENDED.set('protectedFields', {});
  * of your application.</p>
  *
  * <p>
- * For get/count/find/create/update/delete/addField you can set the
- * requiresAuthentication and pointerFields using the following functions:
+ * For get/count/find/create/update/delete/addField using the following functions:
+ *
+ * Entity is type Parse.User or Parse.Role or string
+ * Role is type Parse.Role or Name of Parse.Role
  *
  * getGetRequiresAuthentication()
- * setGetRequiresAuthentication()
+ * setGetRequiresAuthentication(allowed: boolean)
  * getGetPointerFields()
- * setGetPointerFields()
+ * setGetPointerFields(pointerFields: string[])
+ * getGetAccess(entity: Entity)
+ * setGetAccess(entity: Entity, allowed: boolean)
+ * getPublicGetAccess()
+ * setPublicGetAccess(allowed: boolean)
+ * getRoleGetAccess(role: Role)
+ * setRoleGetAccess(role: Role, allowed: boolean)
  * getFindRequiresAuthentication()
- * setFindRequiresAuthentication()
+ * setFindRequiresAuthentication(allowed: boolean)
  * getFindPointerFields()
- * setFindPointerFields()
+ * setFindPointerFields(pointerFields: string[])
+ * getFindAccess(entity: Entity)
+ * setFindAccess(entity: Entity, allowed: boolean)
+ * getPublicFindAccess()
+ * setPublicFindAccess(allowed: boolean)
+ * getRoleFindAccess(role: Role)
+ * setRoleFindAccess(role: Role, allowed: boolean)
  * getCountRequiresAuthentication()
- * setCountRequiresAuthentication()
+ * setCountRequiresAuthentication(allowed: boolean)
  * getCountPointerFields()
- * setCountPointerFields()
+ * setCountPointerFields(pointerFields: string[])
+ * getCountAccess(entity: Entity)
+ * setCountAccess(entity: Entity, allowed: boolean)
+ * getPublicCountAccess()
+ * setPublicCountAccess(allowed: boolean)
+ * getRoleCountAccess(role: Role)
+ * setRoleCountAccess(role: Role, allowed: boolean)
  * getCreateRequiresAuthentication()
- * setCreateRequiresAuthentication()
+ * setCreateRequiresAuthentication(allowed: boolean)
  * getCreatePointerFields()
- * setCreatePointerFields()
+ * setCreatePointerFields(pointerFields: string[])
+ * getCreateAccess(entity: Entity)
+ * setCreateAccess(entity: Entity, allowed: boolean)
+ * getPublicCreateAccess()
+ * setPublicCreateAccess(allowed: Boolean)
+ * getRoleCreateAccess(role: Role)
+ * setRoleCreateAccess(role: Role, allowed: boolean)
  * getUpdateRequiresAuthentication()
- * setUpdateRequiresAuthentication()
+ * setUpdateRequiresAuthentication(allowed: boolean)
  * getUpdatePointerFields()
- * setUpdatePointerFields()
+ * setUpdatePointerFields(pointerFields: string[])
+ * getUpdateAccess(entity: Entity)
+ * setUpdateAccess(entity: Entity, allowed: boolean)
+ * getPublicUpdateAccess()
+ * setPublicUpdateAccess(allowed: boolean)
+ * getRoleUpdateAccess(role: Role)
+ * setRoleUpdateAccess(role: Role, allowed: boolean)
  * getDeleteRequiresAuthentication()
- * setDeleteRequiresAuthentication()
+ * setDeleteRequiresAuthentication(allowed: boolean)
  * getDeletePointerFields()
- * setDeletePointerFields()
+ * setDeletePointerFields(pointerFields: string[])
+ * getDeleteAccess(entity: Entity)
+ * setDeleteAccess(entity: Entity, allowed: boolean)
+ * getPublicDeleteAccess()
+ * setPublicDeleteAccess(allowed: boolean)
+ * getRoleDeleteAccess(role: Role)
+ * setRoleDeleteAccess(role: Role, allowed: boolean)
  * getAddFieldRequiresAuthentication()
- * setAddFieldRequiresAuthentication()
+ * setAddFieldRequiresAuthentication(allowed: boolean)
  * getAddFieldPointerFields()
- * setAddFieldPointerFields()
+ * setAddFieldPointerFields(pointerFields: string[])
+ * getAddFieldAccess(entity: Entity)
+ * setAddFieldAccess(entity: Entity, allowed: boolean)
+ * getPublicAddFieldAccess()
+ * setPublicAddFieldAccess(allowed: boolean)
+ * getRoleAddFieldAccess(role: Role)
+ * setRoleAddFieldAccess(role: Role, allowed: boolean)
  * </p>
  *
  * @alias Parse.CLP
@@ -91,7 +135,6 @@ class ParseCLP {
       this.permissionsMap[operation] = Object.assign({}, group);
       const action = operation.charAt(0).toUpperCase() + operation.slice(1);
 
-      // Create setters and getters for requiredAuthentication
       this[`get${action}RequiresAuthentication`] = function () {
         return this._getAccess(operation, 'requiresAuthentication');
       };
@@ -99,12 +142,32 @@ class ParseCLP {
         this._setAccess(operation, 'requiresAuthentication', allowed);
       };
 
-      // Create setters and getters for pointerFields
       this[`get${action}PointerFields`] = function () {
         return this._getAccess(operation, 'pointerFields', false);
       };
       this[`set${action}PointerFields`] = function (pointerFields) {
         this._setArrayAccess(operation, 'pointerFields', pointerFields);
+      };
+
+      this[`get${action}Access`] = function (entity) {
+        return this._getAccess(operation, entity);
+      };
+      this[`set${action}Access`] = function (entity, allowed) {
+        this._setAccess(operation, entity, allowed);
+      };
+
+      this[`getPublic${action}Access`] = function () {
+        return this[`get${action}Access`](PUBLIC_KEY);
+      };
+      this[`setPublic${action}Access`] = function (allowed) {
+        this[`set${action}Access`](PUBLIC_KEY, allowed);
+      };
+
+      this[`getRole${action}Access`] = function (role) {
+        return this[`get${action}Access`](this._getRoleName(role));
+      };
+      this[`setRole${action}Access`] = function (role, allowed) {
+        this[`set${action}Access`](this._getRoleName(role), allowed);
       };
     }
     // Initialize permissions Map with default extended permissions
@@ -210,20 +273,30 @@ class ParseCLP {
       name = role.getName();
     }
     if (typeof name !== 'string') {
-      throw new TypeError('role must be a ParseRole or a String');
+      throw new TypeError('role must be a Parse.Role or a String');
     }
     return `role:${name}`;
   }
 
-  _setAccess(permission: string, userId: Entity, allowed: boolean) {
+  _parseEntity(entity: Entity) {
+    let userId = entity;
     if (userId instanceof ParseUser) {
       userId = userId.id;
+      if (!userId) {
+        throw new Error('Cannot get access for a Parse.User without an id.');
+      }
     } else if (userId instanceof ParseRole) {
       userId = this._getRoleName(userId);
     }
     if (typeof userId !== 'string') {
       throw new TypeError('userId must be a string.');
     }
+    return userId;
+  }
+
+  _setAccess(permission: string, userId: Entity, allowed: boolean) {
+    userId = this._parseEntity(userId);
+
     if (typeof allowed !== 'boolean') {
       throw new TypeError('allowed must be either true or false.');
     }
@@ -245,14 +318,7 @@ class ParseCLP {
   }
 
   _getAccess(permission: string, userId: Entity, returnBoolean = true): boolean | string[] {
-    if (userId instanceof ParseUser) {
-      userId = userId.id;
-      if (!userId) {
-        throw new Error('Cannot get access for a Parse.User without an id.');
-      }
-    } else if (userId instanceof ParseRole) {
-      userId = this._getRoleName(userId);
-    }
+    userId = this._parseEntity(userId);
 
     const permissions = this.permissionsMap[permission][userId];
     if (returnBoolean) {
@@ -265,14 +331,8 @@ class ParseCLP {
   }
 
   _setArrayAccess(permission: string, userId: Entity, fields: string) {
-    if (userId instanceof ParseUser) {
-      userId = userId.id;
-    } else if (userId instanceof ParseRole) {
-      userId = this._getRoleName(userId);
-    }
-    if (typeof userId !== 'string') {
-      throw new TypeError('userId must be a string.');
-    }
+    userId = this._parseEntity(userId);
+
     const permissions = this.permissionsMap[permission][userId];
     if (!permissions) {
       this.permissionsMap[permission][userId] = [];
@@ -389,75 +449,6 @@ class ParseCLP {
   }
 
   /**
-   * Sets whether the given user is allowed to find from this class.
-   *
-   * @param userId An instance of Parse.User or its objectId.
-   * @param {boolean} allowed whether that user should have read access.
-   */
-  setFindAccess(userId: Entity, allowed: boolean) {
-    this._setAccess('find', userId, allowed);
-  }
-
-  /**
-   * Get whether the given user id is *explicitly* allowed to find from this class.
-   * Even if this returns false, the user may still be able to access it if
-   * getPublicFindAccess returns true or a role that the user belongs to has
-   * write access.
-   *
-   * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
-   * @returns {boolean}
-   */
-  getFindAccess(userId: Entity): boolean {
-    return this._getAccess('find', userId);
-  }
-
-  /**
-   * Sets whether the given user is allowed to get from this class.
-   *
-   * @param userId An instance of Parse.User or its objectId.
-   * @param {boolean} allowed whether that user should have read access.
-   */
-  setGetAccess(userId: Entity, allowed: boolean) {
-    this._setAccess('get', userId, allowed);
-  }
-
-  /**
-   * Get whether the given user id is *explicitly* allowed to get from this class.
-   * Even if this returns false, the user may still be able to access it if
-   * getPublicGetAccess returns true or a role that the user belongs to has
-   * write access.
-   *
-   * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
-   * @returns {boolean}
-   */
-  getGetAccess(userId: Entity): boolean {
-    return this._getAccess('get', userId);
-  }
-
-  /**
-   * Sets whether the given user is allowed to count from this class.
-   *
-   * @param userId An instance of Parse.User or its objectId.
-   * @param {boolean} allowed whether that user should have read access.
-   */
-  setCountAccess(userId: Entity, allowed: boolean) {
-    this._setAccess('count', userId, allowed);
-  }
-
-  /**
-   * Get whether the given user id is *explicitly* allowed to count from this class.
-   * Even if this returns false, the user may still be able to access it if
-   * getPublicCountAccess returns true or a role that the user belongs to has
-   * write access.
-   *
-   * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
-   * @returns {boolean}
-   */
-  getCountAccess(userId: Entity): boolean {
-    return this._getAccess('count', userId);
-  }
-
-  /**
    * Sets whether the given user id is allowed to write to this class.
    *
    * @param userId An instance of Parse.User or its objectId, or a Parse.Role..
@@ -489,98 +480,6 @@ class ParseCLP {
   }
 
   /**
-   * Sets whether the given user id is allowed to create field to this class.
-   *
-   * @param userId An instance of Parse.User or its objectId, or a Parse.Role..
-   * @param {boolean} allowed Whether that user should have write access.
-   */
-  setCreateAccess(userId: Entity, allowed: boolean) {
-    this._setAccess('create', userId, allowed);
-  }
-
-  /**
-   * Get whether the given user id is *explicitly* allowed to create field to this class.
-   * Even if this returns false, the user may still be able to access it if
-   * getPublicCreateAccess returns true or a role that the user belongs to has
-   * write access.
-   *
-   * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
-   * @returns {boolean}
-   */
-  getCreateAccess(userId: Entity): boolean {
-    return this._getAccess('create', userId);
-  }
-
-  /**
-   * Sets whether the given user id is allowed to update field to this class.
-   *
-   * @param userId An instance of Parse.User or its objectId, or a Parse.Role..
-   * @param {boolean} allowed Whether that user should have write access.
-   */
-  setUpdateAccess(userId: Entity, allowed: boolean) {
-    this._setAccess('update', userId, allowed);
-  }
-
-  /**
-   * Get whether the given user id is *explicitly* allowed to update field to this class.
-   * Even if this returns false, the user may still be able to access it if
-   * getPublicUpdateAccess returns true or a role that the user belongs to has
-   * write access.
-   *
-   * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
-   * @returns {boolean}
-   */
-  getUpdateAccess(userId: Entity): boolean {
-    return this._getAccess('update', userId);
-  }
-
-  /**
-   * Sets whether the given user id is allowed to delete field to this class.
-   *
-   * @param userId An instance of Parse.User or its objectId, or a Parse.Role..
-   * @param {boolean} allowed Whether that user should have write access.
-   */
-  setDeleteAccess(userId: Entity, allowed: boolean) {
-    this._setAccess('delete', userId, allowed);
-  }
-
-  /**
-   * Get whether the given user id is *explicitly* allowed to delete field to this class.
-   * Even if this returns false, the user may still be able to access it if
-   * getPublicDeleteAccess returns true or a role that the user belongs to has
-   * write access.
-   *
-   * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
-   * @returns {boolean}
-   */
-  getDeleteAccess(userId: Entity): boolean {
-    return this._getAccess('delete', userId);
-  }
-
-  /**
-   * Sets whether the given user id is allowed to add field to this class.
-   *
-   * @param userId An instance of Parse.User or its objectId, or a Parse.Role..
-   * @param {boolean} allowed Whether that user should have write access.
-   */
-  setAddFieldAccess(userId: Entity, allowed: boolean) {
-    this._setAccess('addField', userId, allowed);
-  }
-
-  /**
-   * Get whether the given user id is *explicitly* allowed to add field to this class.
-   * Even if this returns false, the user may still be able to access it if
-   * getPublicReadAccess returns true or a role that the user belongs to has
-   * write access.
-   *
-   * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
-   * @returns {boolean}
-   */
-  getAddFieldAccess(userId: Entity): boolean {
-    return this._getAccess('addField', userId);
-  }
-
-  /**
    * Sets whether the public is allowed to read from this class.
    *
    * @param {boolean} allowed
@@ -599,60 +498,6 @@ class ParseCLP {
   }
 
   /**
-   * Sets whether the public is allowed to find from this class.
-   *
-   * @param {boolean} allowed
-   */
-  setPublicFindAccess(allowed: boolean) {
-    this.setFindAccess(PUBLIC_KEY, allowed);
-  }
-
-  /**
-   * Gets whether the public is allowed to find from this class.
-   *
-   * @returns {boolean}
-   */
-  getPublicFindAccess(): boolean {
-    return this.getFindAccess(PUBLIC_KEY);
-  }
-
-  /**
-   * Sets whether the public is allowed to get from this class.
-   *
-   * @param {boolean} allowed
-   */
-  setPublicGetAccess(allowed: boolean) {
-    this.setGetAccess(PUBLIC_KEY, allowed);
-  }
-
-  /**
-   * Gets whether the public is allowed to get from this class.
-   *
-   * @returns {boolean}
-   */
-  getPublicGetAccess(): boolean {
-    return this.getGetAccess(PUBLIC_KEY);
-  }
-
-  /**
-   * Sets whether the public is allowed to count from this class.
-   *
-   * @param {boolean} allowed
-   */
-  setPublicCountAccess(allowed: boolean) {
-    this.setCountAccess(PUBLIC_KEY, allowed);
-  }
-
-  /**
-   * Gets whether the public is allowed to count from this class.
-   *
-   * @returns {boolean}
-   */
-  getPublicCountAccess(): boolean {
-    return this.getCountAccess(PUBLIC_KEY);
-  }
-
-  /**
    * Sets whether the public is allowed to write to this class.
    *
    * @param {boolean} allowed
@@ -668,78 +513,6 @@ class ParseCLP {
    */
   getPublicWriteAccess(): boolean {
     return this.getWriteAccess(PUBLIC_KEY);
-  }
-
-  /**
-   * Sets whether the public is allowed to create to this class.
-   *
-   * @param {boolean} allowed
-   */
-  setPublicCreateAccess(allowed: boolean) {
-    this.setCreateAccess(PUBLIC_KEY, allowed);
-  }
-
-  /**
-   * Gets whether the public is allowed to create to this class.
-   *
-   * @returns {boolean}
-   */
-  getPublicCreateAccess(): boolean {
-    return this.getCreateAccess(PUBLIC_KEY);
-  }
-
-  /**
-   * Sets whether the public is allowed to update to this class.
-   *
-   * @param {boolean} allowed
-   */
-  setPublicUpdateAccess(allowed: boolean) {
-    this.setUpdateAccess(PUBLIC_KEY, allowed);
-  }
-
-  /**
-   * Gets whether the public is allowed to update to this class.
-   *
-   * @returns {boolean}
-   */
-  getPublicUpdateAccess(): boolean {
-    return this.getUpdateAccess(PUBLIC_KEY);
-  }
-
-  /**
-   * Sets whether the public is allowed to delete to this class.
-   *
-   * @param {boolean} allowed
-   */
-  setPublicDeleteAccess(allowed: boolean) {
-    this.setDeleteAccess(PUBLIC_KEY, allowed);
-  }
-
-  /**
-   * Gets whether the public is allowed to delete to this class.
-   *
-   * @returns {boolean}
-   */
-  getPublicDeleteAccess(): boolean {
-    return this.getDeleteAccess(PUBLIC_KEY);
-  }
-
-  /**
-   * Sets whether the public is allowed to add fields to this class.
-   *
-   * @param {boolean} allowed
-   */
-  setPublicAddFieldAccess(allowed: boolean) {
-    this.setAddFieldAccess(PUBLIC_KEY, allowed);
-  }
-
-  /**
-   * Gets whether the public is allowed to add fields to this class.
-   *
-   * @returns {boolean}
-   */
-  getPublicAddFieldAccess(): boolean {
-    return this.getAddFieldAccess(PUBLIC_KEY);
   }
 
   /**
@@ -808,181 +581,6 @@ class ParseCLP {
    */
   setRoleWriteAccess(role: ParseRole | string, allowed: boolean) {
     this.setWriteAccess(this._getRoleName(role), allowed);
-  }
-
-  /**
-   * Gets whether users belonging to the given role are allowed
-   * to find to this user. Even if this returns false, the role may
-   * still be able to find it if a parent role has find access.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @returns {boolean} true if the role has find access. false otherwise.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  getRoleFindAccess(role: ParseRole | string): boolean {
-    return this.getFindAccess(this._getRoleName(role));
-  }
-
-  /**
-   * Sets whether users belonging to the given role are allowed
-   * to find field to this class.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @param {boolean} allowed Whether the given role can write this object.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  setRoleFindAccess(role: ParseRole | string, allowed: boolean) {
-    this.setFindAccess(this._getRoleName(role), allowed);
-  }
-
-  /**
-   * Gets whether users belonging to the given role are allowed
-   * to get to this user. Even if this returns false, the role may
-   * still be able to get it if a parent role has get access.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @returns {boolean} true if the role has get access. false otherwise.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  getRoleGetAccess(role: ParseRole | string): boolean {
-    return this.getGetAccess(this._getRoleName(role));
-  }
-
-  /**
-   * Sets whether users belonging to the given role are allowed
-   * to get field to this class.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @param {boolean} allowed Whether the given role can write this object.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  setRoleGetAccess(role: ParseRole | string, allowed: boolean) {
-    this.setGetAccess(this._getRoleName(role), allowed);
-  }
-
-  /**
-   * Gets whether users belonging to the given role are allowed
-   * to count to this user. Even if this returns false, the role may
-   * still be able to count it if a parent role has count access.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @returns {boolean} true if the role has count access. false otherwise.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  getRoleCountAccess(role: ParseRole | string): boolean {
-    return this.getCountAccess(this._getRoleName(role));
-  }
-
-  /**
-   * Sets whether users belonging to the given role are allowed
-   * to count field to this class.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @param {boolean} allowed Whether the given role can write this object.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  setRoleCountAccess(role: ParseRole | string, allowed: boolean) {
-    this.setCountAccess(this._getRoleName(role), allowed);
-  }
-
-  /**
-   * Gets whether users belonging to the given role are allowed
-   * to create to this user. Even if this returns false, the role may
-   * still be able to create it if a parent role has create access.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @returns {boolean} true if the role has create access. false otherwise.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  getRoleCreateAccess(role: ParseRole | string): boolean {
-    return this.getCreateAccess(this._getRoleName(role));
-  }
-
-  /**
-   * Sets whether users belonging to the given role are allowed
-   * to create field to this class.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @param {boolean} allowed Whether the given role can write this object.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  setRoleCreateAccess(role: ParseRole | string, allowed: boolean) {
-    this.setCreateAccess(this._getRoleName(role), allowed);
-  }
-
-  /**
-   * Gets whether users belonging to the given role are allowed
-   * to update to this user. Even if this returns false, the role may
-   * still be able to update it if a parent role has update access.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @returns {boolean} true if the role has update access. false otherwise.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  getRoleUpdateAccess(role: ParseRole | string): boolean {
-    return this.getUpdateAccess(this._getRoleName(role));
-  }
-
-  /**
-   * Sets whether users belonging to the given role are allowed
-   * to update field to this class.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @param {boolean} allowed Whether the given role can write this object.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  setRoleUpdateAccess(role: ParseRole | string, allowed: boolean) {
-    this.setUpdateAccess(this._getRoleName(role), allowed);
-  }
-
-  /**
-   * Gets whether users belonging to the given role are allowed
-   * to delete to this user. Even if this returns false, the role may
-   * still be able to delete it if a parent role has delete access.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @returns {boolean} true if the role has delete access. false otherwise.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  getRoleDeleteAccess(role: ParseRole | string): boolean {
-    return this.getDeleteAccess(this._getRoleName(role));
-  }
-
-  /**
-   * Sets whether users belonging to the given role are allowed
-   * to delete field to this class.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @param {boolean} allowed Whether the given role can write this object.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  setRoleDeleteAccess(role: ParseRole | string, allowed: boolean) {
-    this.setDeleteAccess(this._getRoleName(role), allowed);
-  }
-
-  /**
-   * Gets whether users belonging to the given role are allowed
-   * to add to this user. Even if this returns false, the role may
-   * still be able to add it if a parent role has add access.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @returns {boolean} true if the role has add access. false otherwise.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  getRoleAddFieldAccess(role: ParseRole | string): boolean {
-    return this.getAddFieldAccess(this._getRoleName(role));
-  }
-
-  /**
-   * Sets whether users belonging to the given role are allowed
-   * to add field to this class.
-   *
-   * @param role The name of the role, or a Parse.Role object.
-   * @param {boolean} allowed Whether the given role can write this object.
-   * @throws {TypeError} If role is neither a Parse.Role nor a String.
-   */
-  setRoleAddFieldAccess(role: ParseRole | string, allowed: boolean) {
-    this.setAddFieldAccess(this._getRoleName(role), allowed);
   }
 
   /**
