@@ -9,11 +9,11 @@
 
 jest.dontMock('../ParseCLP');
 
-const mockRole = function(name) {
+const mockRole = function (name) {
   this.name = name;
 };
 
-mockRole.prototype.getName = function() {
+mockRole.prototype.getName = function () {
   return this.name;
 };
 
@@ -23,74 +23,113 @@ const ParseCLP = require('../ParseCLP').default;
 const ParseUser = require('../ParseUser').default;
 const ParseRole = require('../ParseRole');
 
+function generateReadCLP(key) {
+  return {
+    get: { [key]: true },
+    find: { [key]: true },
+    count: { [key]: true },
+    create: {},
+    update: {},
+    delete: {},
+    addField: {},
+    protectedFields: {},
+  };
+}
+
+function generateWriteCLP(key) {
+  return {
+    get: {},
+    find: {},
+    count: {},
+    create: { [key]: true },
+    update: { [key]: true },
+    delete: { [key]: true },
+    addField: { [key]: true },
+    protectedFields: {},
+  };
+}
+
+const DEFAULT_CLP = {
+  get: {},
+  find: {},
+  count: {},
+  create: {},
+  update: {},
+  delete: {},
+  addField: {},
+  protectedFields: {},
+};
+
+const READ_CLP = generateReadCLP('uid');
+const WRITE_CLP = generateWriteCLP('uid');
+const PUBLIC_READ_CLP = generateReadCLP('*');
+const PUBLIC_WRITE_CLP = generateWriteCLP('*');
+const ROLE_READ_CLP = generateReadCLP('role:admin');
+const ROLE_WRITE_CLP = generateWriteCLP('role:admin');
+
 describe('ParseCLP', () => {
   it('can be constructed with no arguments', () => {
     const a = new ParseCLP();
-    expect(a.permissionsMap).toEqual(
-      {
-        get: {},
-        find: {},
-        count: {},
-        create: {},
-        update: {},
-        delete: {},
-        addField: {},
-        protectedFields: []
-      });
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
   });
 
   it('can be constructed with a ParseUser', () => {
     const u = new ParseUser();
     u.id = 'uid';
     const a = new ParseCLP(u);
-    expect(a.permissionsMap).toEqual(
-      {
-        get: { uid: true},
-        find: { uid: true },
-        count: { uid: true },
-        create: { uid: true },
-        update: { uid: true },
-        delete: { uid: true },
-        addField: { uid: true },
-        protectedFields: []
-      });
+    expect(a.permissionsMap).toEqual({
+      get: { uid: true },
+      find: { uid: true },
+      count: { uid: true },
+      create: { uid: true },
+      update: { uid: true },
+      delete: { uid: true },
+      addField: { uid: true },
+      protectedFields: {},
+    });
   });
 
   it('can be constructed with a map of user IDs', () => {
-    const permissionsMap = {
-      get: { uid: true},
+    const userCLP = {
+      get: { uid: true },
       find: { uid: true },
-      count: { uid: true, admin: true },
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
+      count: { uid: true },
+      create: { uid: true },
+      update: { uid: true },
+      delete: { uid: true },
+      addField: { uid: true },
+      protectedFields: {},
     };
-    const a = new ParseCLP(permissionsMap);
-    expect(a.permissionsMap).toEqual(permissionsMap);
+    const a = new ParseCLP(userCLP);
+    expect(a.permissionsMap).toEqual(userCLP);
   });
 
   it('throws when constructed with an invalid permissions map', () => {
-    let err = function() {
+    let err = function () {
       new ParseCLP({ foobar: { foo: true, bar: false } });
     };
     expect(err).toThrow('Tried to create an CLP with an invalid permission type.');
-    err = function() {
+    err = function () {
       new ParseCLP({ get: { uid: 12 } });
     };
     expect(err).toThrow('Tried to create an CLP with an invalid permission value.');
   });
 
   it('throws a helpful error when constructed with a function', () => {
-    expect(function() {
-      new ParseCLP(function() { });
+    expect(function () {
+      new ParseCLP(function () {});
     }).toThrow('ParseCLP constructed with a function. Did you forget ()?');
   });
 
   it('throws when setting an invalid user id', () => {
     const a = new ParseCLP();
     expect(a.setReadAccess.bind(a, 12, true)).toThrow('userId must be a string.');
+  });
+
+  it('throws when getting an invalid user id', () => {
+    const u = new ParseUser();
+    const a = new ParseCLP();
+    expect(a.getReadAccess.bind(a, u)).toThrow('Cannot get access for a Parse.User without an id.');
   });
 
   it('throws when setting an invalid access', () => {
@@ -101,278 +140,199 @@ describe('ParseCLP', () => {
   it('throws when setting an invalid role', () => {
     const a = new ParseCLP();
     expect(a.setRoleReadAccess.bind(a, 12, true)).toThrow('role must be a ParseRole or a String');
-
     expect(a.setRoleWriteAccess.bind(a, 12, true)).toThrow('role must be a ParseRole or a String');
   });
 
   it('can be rendered to JSON format', () => {
     const permissionsMap = {
-      get: { uid: true},
+      get: { uid: true },
       find: { uid: true },
       count: { uid: true },
       create: { admin: true },
       update: { admin: true },
       delete: { admin: true },
       addField: { admin: true },
-      protectedFields: [ { admin: [ "objectId", "field1" ] } ]
+      protectedFields: { admin: ['objectId', 'field1'] },
     };
     const a = new ParseCLP(permissionsMap);
     expect(a.toJSON()).toEqual(permissionsMap);
   });
 
-  it('can set read access for a user', () => {
+  it('can set read access', () => {
     const a = new ParseCLP();
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
 
-    // removing a permission that doesn't exist does nothing
     a.setReadAccess('uid', false);
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
+    expect(a.getReadAccess('uid')).toBe(false);
 
     a.setReadAccess('uid', true);
-    expect(a.permissionsMap).toEqual({
-      get: { uid: true },
-      find: { uid: true },
-      count: { uid: true },
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
+    expect(a.permissionsMap).toEqual(READ_CLP);
+    expect(a.getReadAccess('uid')).toBe(true);
 
     a.setReadAccess('uid', false);
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
-  });
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
+    expect(a.getReadAccess('uid')).toBe(false);
 
-  it('can get read access for a user', () => {
-    const a = new ParseCLP({
-      get: { uid: true },
-      find: { uid: true },
-      count: { uid: true },
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
-
-    expect(a.getReadAccess('uid')).toBe(true);
-  });
-
-  it('can set write access for a user', () => {
-    const a = new ParseCLP();
     const u = new ParseUser();
     u.id = 'uid';
 
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
+    a.setReadAccess(u, false);
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
+    expect(a.getReadAccess(u)).toBe(false);
 
-    // removing a permission that doesn't exist does nothing
-    a.setWriteAccess('uid', false);
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
+    a.setReadAccess(u, true);
+    expect(a.permissionsMap).toEqual(READ_CLP);
+    expect(a.getReadAccess(u)).toBe(true);
 
-    a.setWriteAccess(u, false);
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
-
-    a.setWriteAccess('uid', true);
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: { uid: true },
-      update: { uid: true },
-      delete: { uid: true },
-      addField: { uid: true },
-      protectedFields: []
-    });
-
-    a.setWriteAccess('uid', false);
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
-
-    a.setWriteAccess(u, true);
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: { uid: true },
-      update: { uid: true },
-      delete: { uid: true },
-      addField: { uid: true },
-      protectedFields: []
-    });
-
-    a.setWriteAccess(u, false);
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
+    a.setReadAccess(u, false);
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
+    expect(a.getReadAccess(u)).toBe(false);
   });
 
-  it('can get write access for a user', () => {
-    const a = new ParseCLP({
-      get: {},
-      find: {},
-      count: {},
-      create: { uid: true },
-      update: { uid: true },
-      delete: { uid:true },
-      addField: { uid: true },
-      protectedFields: []
-    });
+  it('can get read access', () => {
+    const a = new ParseCLP();
+    a.setGetAccess('uid', true);
+    a.setFindAccess('uid', true);
+    a.setCountAccess('uid', true);
+    expect(a.toJSON()).toEqual(READ_CLP);
+    expect(a.getReadAccess('uid')).toBe(true);
+    expect(a.getGetAccess('uid')).toBe(true);
+    expect(a.getFindAccess('uid')).toBe(true);
+    expect(a.getCountAccess('uid')).toBe(true);
+    a.setGetAccess('uid', false);
+    a.setFindAccess('uid', false);
+    a.setCountAccess('uid', false);
+    expect(a.getReadAccess('uid')).toBe(false);
+    expect(a.getGetAccess('uid')).toBe(false);
+    expect(a.getFindAccess('uid')).toBe(false);
+    expect(a.getCountAccess('uid')).toBe(false);
+    expect(a.toJSON()).toEqual(DEFAULT_CLP);
+  });
+
+  it('can set write access', () => {
+    const a = new ParseCLP();
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
+
+    a.setWriteAccess('uid', false);
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
+    expect(a.getWriteAccess('uid')).toBe(false);
+
+    a.setWriteAccess('uid', true);
+    expect(a.permissionsMap).toEqual(WRITE_CLP);
+    expect(a.getWriteAccess('uid')).toBe(true);
+
+    a.setWriteAccess('uid', false);
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
+    expect(a.getWriteAccess('uid')).toBe(false);
 
     const u = new ParseUser();
-    u.id = 'aUserId';
+    u.id = 'uid';
 
-    expect(a.getWriteAccess('aUserId')).toBe(false);
+    a.setWriteAccess(u, false);
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
+    expect(a.getWriteAccess(u)).toBe(false);
+
+    a.setWriteAccess(u, true);
+    expect(a.permissionsMap).toEqual(WRITE_CLP);
+    expect(a.getWriteAccess(u)).toBe(true);
+
+    a.setWriteAccess(u, false);
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
     expect(a.getWriteAccess(u)).toBe(false);
   });
 
-  it('can set public read access', () => {
+  it('can get write access', () => {
     const a = new ParseCLP();
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
-    expect(a.getPublicReadAccess()).toBe(false);
-
-    a.setPublicReadAccess(true);
-    expect(a.permissionsMap).toEqual({
-      get: { '*': true },
-      find: { '*': true },
-      count: { '*': true },
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
-    expect(a.getPublicReadAccess()).toBe(true);
-
-    a.setPublicReadAccess(false);
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
+    a.setCreateAccess('uid', true);
+    a.setDeleteAccess('uid', true);
+    a.setUpdateAccess('uid', true);
+    a.setAddFieldAccess('uid', true);
+    expect(a.toJSON()).toEqual(WRITE_CLP);
+    expect(a.getWriteAccess('uid')).toBe(true);
+    expect(a.getCreateAccess('uid')).toBe(true);
+    expect(a.getDeleteAccess('uid')).toBe(true);
+    expect(a.getUpdateAccess('uid')).toBe(true);
+    expect(a.getAddFieldAccess('uid')).toBe(true);
+    a.setCreateAccess('uid', false);
+    a.setDeleteAccess('uid', false);
+    a.setUpdateAccess('uid', false);
+    a.setAddFieldAccess('uid', false);
+    expect(a.getWriteAccess('uid')).toBe(false);
+    expect(a.getCreateAccess('uid')).toBe(false);
+    expect(a.getDeleteAccess('uid')).toBe(false);
+    expect(a.getUpdateAccess('uid')).toBe(false);
+    expect(a.getAddFieldAccess('uid')).toBe(false);
+    expect(a.toJSON()).toEqual(DEFAULT_CLP);
   });
 
-  it('can set public write access', () => {
+  it('can handle public access', () => {
     const a = new ParseCLP();
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
-    });
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
+    expect(a.getPublicReadAccess()).toBe(false);
     expect(a.getPublicWriteAccess()).toBe(false);
 
-    a.setPublicWriteAccess(true);
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: { '*': true},
-      update: { '*': true},
-      delete: { '*': true},
-      addField: { '*': true },
-      protectedFields: []
-    });
+    a.setPublicGetAccess(true);
+    a.setPublicFindAccess(true);
+    a.setPublicCountAccess(true);
+    expect(a.toJSON()).toEqual(PUBLIC_READ_CLP);
+    expect(a.getPublicReadAccess()).toBe(true);
+    expect(a.getPublicGetAccess()).toBe(true);
+    expect(a.getPublicFindAccess()).toBe(true);
+    expect(a.getPublicCountAccess()).toBe(true);
+
+    a.setPublicReadAccess(false);
+    expect(a.toJSON()).toEqual(DEFAULT_CLP);
+    expect(a.getPublicReadAccess()).toBe(false);
+    expect(a.getPublicGetAccess()).toBe(false);
+    expect(a.getPublicFindAccess()).toBe(false);
+    expect(a.getPublicCountAccess()).toBe(false);
+
+    a.setPublicCreateAccess(true);
+    a.setPublicDeleteAccess(true);
+    a.setPublicUpdateAccess(true);
+    a.setPublicAddFieldAccess(true);
+    expect(a.toJSON()).toEqual(PUBLIC_WRITE_CLP);
     expect(a.getPublicWriteAccess()).toBe(true);
+    expect(a.getPublicCreateAccess()).toBe(true);
+    expect(a.getPublicDeleteAccess()).toBe(true);
+    expect(a.getPublicUpdateAccess()).toBe(true);
+    expect(a.getPublicAddFieldAccess()).toBe(true);
 
     a.setPublicWriteAccess(false);
-    expect(a.permissionsMap).toEqual({
-      get: {},
-      find: {},
-      count: {},
-      create: {},
-      update: {},
-      delete: {},
-      addField: {},
-      protectedFields: []
+    expect(a.toJSON()).toEqual(DEFAULT_CLP);
+    expect(a.getPublicWriteAccess()).toBe(false);
+    expect(a.getPublicCreateAccess()).toBe(false);
+    expect(a.getPublicDeleteAccess()).toBe(false);
+    expect(a.getPublicUpdateAccess()).toBe(false);
+    expect(a.getPublicAddFieldAccess()).toBe(false);
+
+    const w = new ParseCLP();
+    w.setPublicWriteAccess(true);
+    expect(w.toJSON()).toEqual(PUBLIC_WRITE_CLP);
+
+    const r = new ParseCLP();
+    r.setPublicReadAccess(true);
+    expect(r.toJSON()).toEqual(PUBLIC_READ_CLP);
+  });
+
+  it('can get clp with role', () => {
+    const role = new ParseRole('admin');
+    const a = new ParseCLP(role);
+
+    expect(a.toJSON()).toEqual({
+      get: { 'role:admin': true },
+      find: { 'role:admin': true },
+      count: { 'role:admin': true },
+      create: { 'role:admin': true },
+      update: { 'role:admin': true },
+      delete: { 'role:admin': true },
+      addField: { 'role:admin': true },
+      protectedFields: {},
     });
+    expect(a.getRoleReadAccess('admin')).toBe(true);
+    expect(a.getRoleReadAccess(role)).toBe(true);
+    expect(a.getReadAccess(role)).toBe(true);
   });
 
   it('can get role read access', () => {
@@ -384,7 +344,7 @@ describe('ParseCLP', () => {
       update: { 'role:admin': true },
       delete: { 'role:admin': true },
       addField: { 'role:admin': true },
-      protectedFields: { 'role:admin': [] }
+      protectedFields: { 'role:admin': [] },
     });
 
     expect(a.getRoleReadAccess('admin')).toBe(true);
@@ -401,7 +361,7 @@ describe('ParseCLP', () => {
       update: { 'role:admin': true },
       delete: { 'role:admin': true },
       addField: { 'role:admin': true },
-      protectedFields: { 'role:admin': [] }
+      protectedFields: { 'role:admin': [] },
     });
 
     expect(a.getRoleWriteAccess('admin')).toBe(true);
@@ -409,27 +369,22 @@ describe('ParseCLP', () => {
     expect(a.getWriteAccess(new ParseRole('admin'))).toBe(true);
   });
 
-  it('throws when fetching an invalid role', () => {
-    const a = new ParseCLP();
-    expect(a.getRoleReadAccess.bind(null, 5)).toThrow('role must be a ParseRole or a String');
-    expect(a.getRoleWriteAccess.bind(null, 5)).toThrow('role must be a ParseRole or a String');
-  });
-
   it('can set role read access', () => {
     const a = new ParseCLP();
+    const adminRole = new ParseRole('admin');
 
     expect(a.getRoleReadAccess('admin')).toBe(false);
-    expect(a.getRoleReadAccess(new ParseRole('admin'))).toBe(false);
+    expect(a.getRoleReadAccess(adminRole)).toBe(false);
 
     a.setRoleReadAccess('admin', true);
     expect(a.getRoleReadAccess('admin')).toBe(true);
     expect(a.getRoleWriteAccess('admin')).toBe(false);
 
-    a.setRoleReadAccess(new ParseRole('admin'), false);
-    expect(a.getRoleReadAccess(new ParseRole('admin'))).toBe(false);
+    a.setRoleReadAccess(adminRole, false);
+    expect(a.getRoleReadAccess(adminRole)).toBe(false);
 
-    a.setReadAccess(new ParseRole('admin'), true);
-    expect(a.getReadAccess(new ParseRole('admin'))).toBe(true);
+    a.setReadAccess(adminRole, true);
+    expect(a.getReadAccess(adminRole)).toBe(true);
   });
 
   it('can set role write access', () => {
@@ -449,12 +404,63 @@ describe('ParseCLP', () => {
     expect(a.getWriteAccess(new ParseRole('admin'))).toBe(true);
   });
 
-  it('can test equality against another ACL', () => {
+  it('can handle role access', () => {
+    const a = new ParseCLP();
+    const r = new ParseRole('admin');
+
+    expect(a.permissionsMap).toEqual(DEFAULT_CLP);
+    expect(a.getRoleReadAccess(r)).toBe(false);
+    expect(a.getRoleWriteAccess(r)).toBe(false);
+
+    a.setRoleGetAccess(r, true);
+    a.setRoleFindAccess(r, true);
+    a.setRoleCountAccess(r, true);
+    expect(a.toJSON()).toEqual(ROLE_READ_CLP);
+    expect(a.getRoleReadAccess(r)).toBe(true);
+    expect(a.getRoleGetAccess(r)).toBe(true);
+    expect(a.getRoleFindAccess(r)).toBe(true);
+    expect(a.getRoleCountAccess(r)).toBe(true);
+
+    a.setRoleReadAccess(r, false);
+    expect(a.toJSON()).toEqual(DEFAULT_CLP);
+    expect(a.getRoleReadAccess(r)).toBe(false);
+    expect(a.getRoleGetAccess(r)).toBe(false);
+    expect(a.getRoleFindAccess(r)).toBe(false);
+    expect(a.getRoleCountAccess(r)).toBe(false);
+
+    a.setRoleCreateAccess(r, true);
+    a.setRoleDeleteAccess(r, true);
+    a.setRoleUpdateAccess(r, true);
+    a.setRoleAddFieldAccess(r, true);
+    expect(a.toJSON()).toEqual(ROLE_WRITE_CLP);
+    expect(a.getRoleWriteAccess(r)).toBe(true);
+    expect(a.getRoleCreateAccess(r)).toBe(true);
+    expect(a.getRoleDeleteAccess(r)).toBe(true);
+    expect(a.getRoleUpdateAccess(r)).toBe(true);
+    expect(a.getRoleAddFieldAccess(r)).toBe(true);
+
+    a.setRoleWriteAccess(r, false);
+    expect(a.toJSON()).toEqual(DEFAULT_CLP);
+    expect(a.getRoleWriteAccess(r)).toBe(false);
+    expect(a.getRoleCreateAccess(r)).toBe(false);
+    expect(a.getRoleDeleteAccess(r)).toBe(false);
+    expect(a.getRoleUpdateAccess(r)).toBe(false);
+    expect(a.getRoleAddFieldAccess(r)).toBe(false);
+
+    const b = new ParseCLP();
+    b.setRoleWriteAccess(r, true);
+    expect(b.toJSON()).toEqual(ROLE_WRITE_CLP);
+
+    const c = new ParseCLP();
+    c.setRoleReadAccess(r, true);
+    expect(c.toJSON()).toEqual(ROLE_READ_CLP);
+  });
+
+  it('can test equality against another CLP', () => {
     const a = new ParseCLP();
     const b = new ParseCLP();
 
     expect(a.equals(a)).toBe(true);
-
     expect(a.equals(b)).toBe(true);
     expect(b.equals(a)).toBe(true);
 
@@ -504,5 +510,27 @@ describe('ParseCLP', () => {
     b.setReadAccess('uid', true);
     expect(a.equals(b)).toBe(false);
     expect(b.equals(a)).toBe(false);
+
+    b.setReadAccess('uid2', true);
+    expect(a.equals(b)).toBe(false);
+    expect(b.equals(a)).toBe(false);
+
+    b.setReadAccess('uid2', false);
+    b.setPublicReadAccess(true);
+    b.permissionsMap.get['*'] = 'HACKED';
+    expect(a.equals(b)).toBe(false);
+    expect(b.equals(a)).toBe(false);
+
+    const r = new ParseRole('admin');
+    expect(a.equals(r)).toBe(false);
+
+    const hacked = new ParseCLP();
+    delete hacked.permissionsMap.get;
+    expect(a.equals(hacked)).toBe(false);
+    expect(hacked.equals(a)).toBe(false);
+
+    hacked.permissionsMap.newPermission = {};
+    expect(a.equals(hacked)).toBe(false);
+    expect(hacked.equals(a)).toBe(false);
   });
 });
