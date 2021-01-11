@@ -821,16 +821,31 @@ describe('FileController', () => {
     }
   });
 
+  it('should delete file with masterKey', async () => {
+    const file = new ParseFile('filename', [1, 2, 3]);
+    const ajax = jest.fn().mockResolvedValueOnce({ foo: 'bar' });
+    CoreManager.setRESTController({ ajax, request: () => {} });
+    CoreManager.set('MASTER_KEY', 'masterKey');
+    const result = await file.destroy({ useMasterKey: true });
+    expect(result).toEqual(file);
+    expect(ajax).toHaveBeenCalledWith('DELETE', 'https://api.parse.com/1/files/filename', '', {
+      'X-Parse-Application-ID': null,
+      'X-Parse-Master-Key': 'masterKey',
+    });
+    CoreManager.set('MASTER_KEY', null);
+  });
+
   it('should delete file', async () => {
     const file = new ParseFile('filename', [1, 2, 3]);
     const ajax = jest.fn().mockResolvedValueOnce({ foo: 'bar' });
     CoreManager.setRESTController({ ajax, request: () => {} });
-    const result = await file.destroy();
+    CoreManager.set('MASTER_KEY', 'masterKey');
+    const result = await file.destroy({ useMasterKey: false });
     expect(result).toEqual(file);
     expect(ajax).toHaveBeenCalledWith('DELETE', 'https://api.parse.com/1/files/filename', '', {
       'X-Parse-Application-ID': null,
-      'X-Parse-Master-Key': null,
     });
+    CoreManager.set('MASTER_KEY', null);
   });
 
   it('should handle delete file error', async () => {
