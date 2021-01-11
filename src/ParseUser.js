@@ -436,7 +436,7 @@ class ParseUser extends ParseObject {
   logIn(options?: FullOptions): Promise<ParseUser> {
     options = options || {};
 
-    const loginOptions = {};
+    const loginOptions = { usePost: true };
     if (options.hasOwnProperty('useMasterKey')) {
       loginOptions.useMasterKey = options.useMasterKey;
     }
