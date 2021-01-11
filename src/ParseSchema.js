@@ -11,6 +11,9 @@
 
 import CoreManager from './CoreManager';
 import ParseObject from './ParseObject';
+import ParseCLP from './ParseCLP';
+
+import type { PermissionsMap } from './ParseCLP';
 
 const FIELD_TYPES = [
   'String',
@@ -190,11 +193,15 @@ class ParseSchema {
    * Sets Class Level Permissions when creating / updating a Schema.
    * EXERCISE CAUTION, running this may override CLP for this schema and cannot be reversed
    *
-   * @param {object} clp Class Level Permissions
+   * @param {object | Parse.CLP} clp Class Level Permissions
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  setCLP(clp: { [key: string]: mixed }) {
-    this._clp = clp;
+  setCLP(clp: PermissionsMap | ParseCLP) {
+    if (clp instanceof ParseCLP) {
+      this._clp = clp.toJSON();
+    } else {
+      this._clp = clp;
+    }
     return this;
   }
 

@@ -264,7 +264,7 @@ describe('Schema', () => {
     assert.deepEqual(json, expected);
   });
 
-  it('save class level permissions', async () => {
+  it('save class level permissions json', async () => {
     const clp = {
       get: { requiresAuthentication: true },
       find: {},
@@ -279,6 +279,25 @@ describe('Schema', () => {
     testSchema.setCLP(clp);
     const schema = await testSchema.save();
     assert.deepEqual(schema.classLevelPermissions, clp);
+  });
+
+  it('save class level permissions object', async () => {
+    const permissionsMap = {
+      get: { '*': true },
+      find: {},
+      count: {},
+      create: { '*': true },
+      update: { '*': true },
+      delete: {},
+      addField: {},
+      protectedFields: {},
+    };
+    const clp = new Parse.CLP(permissionsMap);
+    const testSchema = new Parse.Schema('SchemaTest');
+    testSchema.setCLP(clp);
+    const schema = await testSchema.save();
+    assert.deepEqual(schema.classLevelPermissions, permissionsMap);
+    assert.deepEqual(schema.classLevelPermissions, clp.toJSON());
   });
 
   it('update class level permissions', async () => {

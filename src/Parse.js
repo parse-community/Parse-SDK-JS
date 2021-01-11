@@ -193,6 +193,7 @@ Parse.ACL = require('./ParseACL').default;
 Parse.Analytics = require('./Analytics');
 Parse.AnonymousUtils = require('./AnonymousUtils').default;
 Parse.Cloud = require('./Cloud');
+Parse.CLP = require('./ParseCLP').default;
 Parse.CoreManager = require('./CoreManager');
 Parse.Config = require('./ParseConfig').default;
 Parse.Error = require('./ParseError').default;
