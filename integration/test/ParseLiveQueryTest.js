@@ -58,6 +58,32 @@ describe('Parse LiveQuery', () => {
     await object.save();
   });
 
+  it('can subscribe to query with null connect fields', async done => {
+    const client = new Parse.LiveQueryClient({
+      applicationId: 'integration',
+      serverURL: 'ws://localhost:1337',
+      javascriptKey: null,
+      masterKey: null,
+      sessionToken: null,
+      installationId: null,
+    });
+    client.open();
+    const object = new TestObject();
+    await object.save();
+
+    const query = new Parse.Query(TestObject);
+    query.equalTo('objectId', object.id);
+    const subscription = await client.subscribe(query);
+    subscription.on('update', async object => {
+      assert.equal(object.get('foo'), 'bar');
+      client.close();
+      done();
+    });
+    await subscription.subscribePromise;
+    object.set({ foo: 'bar' });
+    await object.save();
+  });
+
   it('can subscribe to multiple queries', async () => {
     const objectA = new TestObject();
     const objectB = new TestObject();
