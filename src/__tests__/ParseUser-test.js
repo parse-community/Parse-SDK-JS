@@ -223,7 +223,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     CoreManager.setRESTController({
       request(method, path, body) {
-        expect(method).toBe('GET');
+        expect(method).toBe('POST');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
@@ -259,7 +259,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     CoreManager.setRESTController({
       request(method, path, body, options) {
-        expect(method).toBe('GET');
+        expect(method).toBe('POST');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
@@ -288,7 +288,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     CoreManager.setRESTController({
       request(method, path, body) {
-        expect(method).toBe('POST');
+        expect(method).toBe('GET');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
@@ -304,7 +304,7 @@ describe('ParseUser', () => {
       },
       ajax() {},
     });
-    ParseUser.logIn('username', 'password', { usePost: true }).then(u => {
+    ParseUser.logIn('username', 'password', { usePost: false }).then(u => {
       expect(u.id).toBe('uid2');
       expect(u.getSessionToken()).toBe('123abc');
       expect(u.isCurrent()).toBe(true);
@@ -342,7 +342,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     CoreManager.setRESTController({
       request(method, path, body) {
-        expect(method).toBe('GET');
+        expect(method).toBe('POST');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
@@ -1469,7 +1469,7 @@ describe('ParseUser', () => {
     let u = null;
     CoreManager.setRESTController({
       request(method, path, body) {
-        expect(method).toBe('GET');
+        expect(method).toBe('POST');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
@@ -1524,7 +1524,7 @@ describe('ParseUser', () => {
     let u = null;
     CoreManager.setRESTController({
       request(method, path, body) {
-        expect(method).toBe('GET');
+        expect(method).toBe('POST');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
