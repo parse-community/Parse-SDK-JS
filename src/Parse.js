@@ -197,6 +197,7 @@ Parse.CLP = require('./ParseCLP').default;
 Parse.CoreManager = require('./CoreManager');
 Parse.Config = require('./ParseConfig').default;
 Parse.Error = require('./ParseError').default;
+Parse.EventuallyQueue = require('./EventuallyQueue');
 Parse.FacebookUtils = require('./FacebookUtils').default;
 Parse.File = require('./ParseFile').default;
 Parse.GeoPoint = require('./ParseGeoPoint').default;
