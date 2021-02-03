@@ -75,12 +75,6 @@ const reconfigureServer = changedConfiguration => {
           res.send('{}');
         });
       });
-      app.get('/shutdown', async (req, res) => {
-        server.close(() => {
-          console.log('didclose');
-          res.send('{}');
-        });
-      });
       server = parseServer.server;
       server.on('connection', connection => {
         const key = `${connection.remoteAddress}:${connection.remotePort}`;
