@@ -1,4 +1,3 @@
-/* global Parse */
 Parse.Cloud.define('bar', function (request) {
   if (request.params.key2 === 'value1') {
     return 'Foo';
@@ -22,6 +21,7 @@ Parse.Cloud.define('UpdateUser', function (request) {
 });
 
 Parse.Cloud.define('CloudFunctionIdempotency', function () {
+  console.log(Parse.Diamond);
   const object = new Parse.Object('IdempotencyItem');
   return object.save(null, { useMasterKey: true });
 });
