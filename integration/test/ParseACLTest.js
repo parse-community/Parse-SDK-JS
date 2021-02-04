@@ -251,7 +251,7 @@ describe('Parse.ACL', () => {
     object.getACL().setPublicReadAccess(true);
     await object.save();
 
-    Parse.User.logOut();
+    await Parse.User.logOut();
     object.set('score', 10);
     try {
       await object.save();

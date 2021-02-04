@@ -1,3 +1,5 @@
+'use strict';
+
 const assert = require('assert');
 const clear = require('./clear');
 const Parse = require('../../node');
