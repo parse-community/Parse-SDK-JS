@@ -1,38 +1,18 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
-const TestObject = Parse.Object.extend('TestObject');
-
 describe('Parse Query', () => {
-  beforeEach(done => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear()
-      .then(() => {
-        const numbers = [];
-        for (let i = 0; i < 10; i++) {
-          numbers[i] = new Parse.Object({
-            className: 'BoxedNumber',
-            number: i,
-          });
-        }
-        return Parse.Object.saveAll(numbers);
-      })
-      .then(() => {
-        return Parse.User.logOut();
-      })
-      .then(
-        () => {
-          done();
-        },
-        () => {
-          done();
-        }
-      );
+  beforeEach(async () => {
+    const numbers = [];
+    for (let i = 0; i < 10; i++) {
+      numbers[i] = new Parse.Object({
+        className: 'BoxedNumber',
+        number: i,
+      });
+    }
+    await Parse.Object.saveAll(numbers);
   });
 
   it('can do basic queries', done => {

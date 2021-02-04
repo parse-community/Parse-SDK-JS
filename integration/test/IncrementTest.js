@@ -1,23 +1,9 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
-const TestObject = Parse.Object.extend('TestObject');
-
 describe('Increment', () => {
-  beforeEach(done => {
-    Parse.initialize('integration');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear()
-      .then(() => {
-        done();
-      })
-      .catch(done.fail);
-  });
-
   it('can increment a field', done => {
     const object = new TestObject();
     object.set('score', 1);

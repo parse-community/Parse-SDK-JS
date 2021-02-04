@@ -1,21 +1,9 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
-const TestObject = Parse.Object.extend('TestObject');
-
 describe('Parse Relation', () => {
-  beforeEach(done => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear().then(() => {
-      done();
-    });
-  });
-
   it('can do a simple add and remove', done => {
     const ChildObject = Parse.Object.extend('ChildObject');
     const childObjects = [];

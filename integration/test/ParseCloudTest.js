@@ -1,25 +1,10 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 const sleep = require('./sleep');
 
 describe('Parse Cloud', () => {
-  beforeAll(done => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear().then(
-      () => {
-        done();
-      },
-      () => {
-        done();
-      }
-    );
-  });
-
   it('run function', done => {
     const params = { key1: 'value2', key2: 'value1' };
     Parse.Cloud.run('bar', params)

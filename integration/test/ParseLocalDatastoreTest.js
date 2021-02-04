@@ -1,17 +1,13 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
-const TestObject = Parse.Object.extend('TestObject');
-const Item = Parse.Object.extend('Item');
 
 global.localStorage = require('./mockLocalStorage');
 const mockRNStorage = require('./mockRNStorage');
 const LocalDatastoreUtils = require('../../lib/node/LocalDatastoreUtils');
 
-const DEFAULT_PIN = LocalDatastoreUtils.DEFAULT_PIN;
-const PIN_PREFIX = LocalDatastoreUtils.PIN_PREFIX;
+const { DEFAULT_PIN, PIN_PREFIX, isLocalDatastoreKey } = LocalDatastoreUtils;
 
 function LDS_KEY(object) {
   return Parse.LocalDatastore.getKeyForObject(object);
@@ -32,7 +28,9 @@ function runTest(controller) {
       Parse.enableLocalDatastore();
       await Parse.LocalDatastore._clear();
     });
-
+    function getStorageCount(storage) {
+      return Object.keys(storage).reduce((acc, key) => acc + (isLocalDatastoreKey(key) ? 1 : 0), 1);
+    }
     it(`${controller.name} can clear localDatastore`, async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
@@ -45,12 +43,12 @@ function runTest(controller) {
       await Parse.LocalDatastore.pinWithName('DO_NOT_CLEAR', {});
 
       let storage = await Parse.LocalDatastore._getRawStorage();
-      assert.equal(Object.keys(storage).length, 6);
+      assert.equal(getStorageCount(storage), 6);
 
       await Parse.LocalDatastore._clear();
 
       storage = await Parse.LocalDatastore._getRawStorage();
-      assert.equal(Object.keys(storage).length, 1);
+      assert.equal(getStorageCount(storage), 1);
       assert.equal(storage['DO_NOT_CLEAR'], '{}');
       await Parse.LocalDatastore.unPinWithName('DO_NOT_CLEAR');
     });
@@ -67,7 +65,7 @@ function runTest(controller) {
       await Parse.LocalDatastore.pinWithName('DO_NOT_FETCH', {});
 
       const storage = await Parse.LocalDatastore._getRawStorage();
-      assert.equal(Object.keys(storage).length, 6);
+      assert.equal(getStorageCount(storage), 6);
 
       const LDS = await Parse.LocalDatastore._getAllContents();
       assert.equal(Object.keys(LDS).length, 5);
@@ -2863,16 +2861,10 @@ function runTest(controller) {
 }
 
 describe('Parse LocalDatastore', () => {
-  beforeEach(done => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
+  beforeEach(() => {
     Parse.CoreManager.getInstallationController()._setInstallationIdCache('1234');
     Parse.enableLocalDatastore();
     Parse.User.enableUnsafeCurrentUser();
-    Parse.Storage._clear();
-    clear().then(() => {
-      done();
-    });
   });
 
   const controllers = [
