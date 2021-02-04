@@ -1,6 +1,5 @@
 'use strict';
 
-const clear = require('./clear');
 const Parse = require('../../node');
 
 const Item = Parse.Object.extend('IdempotencyItem');
@@ -21,14 +20,8 @@ function DuplicateXHR(requestId) {
 }
 
 describe('Idempotency', () => {
-  beforeEach(done => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
+  beforeEach(() => {
     RESTController._setXHR(XHR);
-    clear().then(() => {
-      done();
-    });
   });
 
   it('handle duplicate cloud code function request', async () => {

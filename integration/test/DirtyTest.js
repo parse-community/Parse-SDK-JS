@@ -1,25 +1,9 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
-const TestObject = Parse.Object.extend('TestObject');
-const Parent = Parse.Object.extend('Parent');
-const Child = Parse.Object.extend('Child');
-
 describe('Dirty Objects', () => {
-  beforeEach(done => {
-    Parse.initialize('integration');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear()
-      .then(() => {
-        done();
-      })
-      .catch(done.fail);
-  });
-
   it('tracks dirty arrays', done => {
     const array = [1];
     const object = new TestObject();

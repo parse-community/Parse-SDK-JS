@@ -1,20 +1,12 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 const sleep = require('./sleep');
 
-const TestObject = Parse.Object.extend('TestObject');
-const DiffObject = Parse.Object.extend('DiffObject');
-
 describe('Parse LiveQuery', () => {
-  beforeEach(done => {
-    Parse.initialize('integration');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
+  beforeEach(() => {
     Parse.User.enableUnsafeCurrentUser();
-    Parse.Storage._clear();
-    clear().then(done).catch(done.fail);
   });
 
   it('can subscribe to query', async done => {
@@ -233,8 +225,6 @@ describe('Parse LiveQuery', () => {
   });
 
   it('can subscribe with open event', async done => {
-    const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
-    const client = await Parse.CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
     const object = new TestObject();
     await object.save();
 
@@ -242,8 +232,8 @@ describe('Parse LiveQuery', () => {
     query.equalTo('objectId', object.id);
     const subscription = await query.subscribe();
     subscription.on('open', response => {
-      assert.equal(response.clientId, client.id);
-      assert.equal(response.installationId, installationId);
+      assert(response.clientId);
+      assert(response.installationId);
       done();
     });
   });
