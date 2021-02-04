@@ -1,29 +1,11 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
-const TestObject = Parse.Object.extend('TestObject');
-
 describe('Parse.ACL', () => {
-  beforeEach(done => {
-    Parse.initialize('integration');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
+  beforeEach(() => {
     Parse.User.enableUnsafeCurrentUser();
-    clear()
-      .then(() => {
-        Parse.User.logOut().then(
-          () => {
-            done();
-          },
-          () => {
-            done();
-          }
-        );
-      })
-      .catch(done.fail);
   });
 
   it('acl must be valid', () => {

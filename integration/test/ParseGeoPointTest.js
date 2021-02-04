@@ -1,46 +1,25 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
-const TestObject = Parse.Object.extend('TestObject');
-const TestPoint = Parse.Object.extend('TestPoint');
-const Container = Parse.Object.extend('Container');
-
 describe('Geo Point', () => {
-  beforeEach(done => {
-    Parse.initialize('integration');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
+  beforeEach(async () => {
     Parse.CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1);
-    Parse.Storage._clear();
-    clear()
-      .then(() => {
-        const sacramento = new TestPoint();
-        sacramento.set('location', new Parse.GeoPoint(38.52, -121.5));
-        sacramento.set('name', 'Sacramento');
 
-        const honolulu = new TestPoint();
-        honolulu.set('location', new Parse.GeoPoint(21.35, -157.93));
-        honolulu.set('name', 'Honolulu');
+    const sacramento = new TestPoint();
+    sacramento.set('location', new Parse.GeoPoint(38.52, -121.5));
+    sacramento.set('name', 'Sacramento');
 
-        const sf = new TestPoint();
-        sf.set('location', new Parse.GeoPoint(37.75, -122.68));
-        sf.set('name', 'San Francisco');
+    const honolulu = new TestPoint();
+    honolulu.set('location', new Parse.GeoPoint(21.35, -157.93));
+    honolulu.set('name', 'Honolulu');
 
-        return Parse.Object.saveAll([sacramento, honolulu, sf]);
-      })
-      .then(() => {
-        return Parse.User.logOut();
-      })
-      .then(
-        () => {
-          done();
-        },
-        () => {
-          done();
-        }
-      );
+    const sf = new TestPoint();
+    sf.set('location', new Parse.GeoPoint(37.75, -122.68));
+    sf.set('name', 'San Francisco');
+
+    await Parse.Object.saveAll([sacramento, honolulu, sf]);
   });
 
   it('can save geo points', done => {

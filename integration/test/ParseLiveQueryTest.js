@@ -1,20 +1,12 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 const sleep = require('./sleep');
 
-const TestObject = Parse.Object.extend('TestObject');
-const DiffObject = Parse.Object.extend('DiffObject');
-
 describe('Parse LiveQuery', () => {
-  beforeEach(done => {
-    Parse.initialize('integration');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
+  beforeEach(() => {
     Parse.User.enableUnsafeCurrentUser();
-    Parse.Storage._clear();
-    clear().then(done).catch(done.fail);
   });
 
   it('can subscribe to query', async done => {

@@ -1,10 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
-
-const TestObject = Parse.Object.extend('TestObject');
 
 class CustomUser extends Parse.User {
   constructor(attributes) {
@@ -45,24 +42,8 @@ global.FB = {
 };
 
 describe('Parse User', () => {
-  beforeEach(done => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
+  beforeEach(() => {
     Parse.Object.registerSubclass('_User', Parse.User);
-    let promise = Promise.resolve();
-    try {
-      promise = Parse.User.logOut();
-    } catch (e) {
-      /**/
-    } // eslint-disable-line no-unused-vars
-    promise
-      .then(() => {
-        return clear();
-      })
-      .then(() => {
-        done();
-      });
   });
 
   it('can sign up users via static method', done => {
@@ -1072,7 +1053,7 @@ describe('Parse User', () => {
   it('fix GHSA-wvh7-5p38-2qfc', async () => {
     Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
-    user.setUsername('username');
+    user.setUsername('GHSA-wvh7-5p38-2qfc');
     user.setPassword('password');
     await user.signUp();
 

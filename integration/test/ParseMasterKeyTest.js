@@ -1,21 +1,9 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
-const TestObject = Parse.Object.extend('TestObject');
-
 describe('Master Key', () => {
-  beforeEach(done => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear().then(() => {
-      done();
-    });
-  });
-
   it('can perform a simple save', done => {
     const object = new TestObject();
     object.set('color', 'purple');
@@ -39,6 +27,7 @@ describe('Master Key', () => {
     const object = new TestObject();
     object.save(null, { useMasterKey: true }).catch(() => {
       // should fail
+      Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
       done();
     });
   });

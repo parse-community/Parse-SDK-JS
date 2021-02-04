@@ -1,17 +1,7 @@
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
-const TestObject = Parse.Object.extend('TestObject');
-
 describe('Polygon', () => {
-  beforeEach(done => {
-    Parse.initialize('integration');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear().then(done);
-  });
-
   it('can save polygon with points', done => {
     const openPoints = [
       [0, 0],

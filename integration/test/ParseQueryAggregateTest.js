@@ -1,35 +1,15 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
-const TestObject = Parse.Object.extend('TestObject');
-
 describe('Parse Aggregate Query', () => {
-  beforeEach(done => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear()
-      .then(() => {
-        const obj1 = new TestObject({ score: 10, name: 'foo' });
-        const obj2 = new TestObject({ score: 10, name: 'foo' });
-        const obj3 = new TestObject({ score: 10, name: 'bar' });
-        const obj4 = new TestObject({ score: 20, name: 'dpl' });
-        return Parse.Object.saveAll([obj1, obj2, obj3, obj4]);
-      })
-      .then(() => {
-        return Parse.User.logOut();
-      })
-      .then(
-        () => {
-          done();
-        },
-        () => {
-          done();
-        }
-      );
+  beforeEach(async () => {
+    const obj1 = new TestObject({ score: 10, name: 'foo' });
+    const obj2 = new TestObject({ score: 10, name: 'foo' });
+    const obj3 = new TestObject({ score: 10, name: 'bar' });
+    const obj4 = new TestObject({ score: 20, name: 'dpl' });
+    await Parse.Object.saveAll([obj1, obj2, obj3, obj4]);
   });
 
   it('aggregate pipeline object query', done => {

@@ -1,17 +1,9 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
 describe('Array Operations', () => {
-  beforeEach(done => {
-    Parse.initialize('integration');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear().then(done).catch(done.fail);
-  });
-
   it('initializes a field', done => {
     const object = new Parse.Object('TestObject');
     object.set('strings', ['foo', 'bar', 'baz']);

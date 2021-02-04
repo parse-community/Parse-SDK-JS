@@ -1,7 +1,6 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
 const emptyCLPS = {
@@ -26,17 +25,7 @@ const defaultCLPS = {
   protectedFields: { '*': [] },
 };
 
-const TestObject = Parse.Object.extend('TestObject');
-
 describe('Schema', () => {
-  beforeEach(done => {
-    Parse.initialize('integration');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
-    Parse.Storage._clear();
-    clear().then(done);
-  });
-
   it('invalid get all no schema', done => {
     Parse.Schema.all()
       .then(() => {})

@@ -4,6 +4,7 @@ const ParseServer = require('parse-server').default;
 const CustomAuth = require('./CustomAuth');
 const sleep = require('./sleep');
 const { TestUtils } = require('parse-server');
+const Parse = require('../../node');
 
 const port = 1337;
 const mountPath = '/parse';
@@ -44,6 +45,7 @@ const defaultConfiguration = {
     enableForAnonymousUser: true,
     enableForAuthenticatedUser: true,
   },
+  revokeSessionOnPasswordReset: false,
 };
 
 const openConnections = {};
@@ -104,6 +106,7 @@ const reconfigureServer = changedConfiguration => {
     }
   });
 };
+global.DiffObject = Parse.Object.extend('DiffObject');
 global.Item = Parse.Object.extend('Item');
 global.Parent = Parse.Object.extend('Parent');
 global.Child = Parse.Object.extend('Child');
@@ -114,10 +117,16 @@ global.reconfigureServer = reconfigureServer;
 
 beforeAll(async done => {
   await reconfigureServer();
+  Parse.initialize('integration');
+  Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
+  Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
   done();
 });
 
 afterEach(async done => {
+  await Parse.User.logOut();
+  Parse.Storage._clear();
+  await TestUtils.destroyAllDataPermanently(true);
   destroyAliveConnections();
   // Connection close events are not immediate on node 10+... wait a bit
   await sleep(0);

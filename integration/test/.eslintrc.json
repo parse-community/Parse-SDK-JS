@@ -5,6 +5,7 @@
   "globals": {
     "Child": true,
     "Container": true,
+    "DiffObject": true,
     "Item": true,
     "Parse": true,
     "Parent": true,

@@ -1,23 +1,9 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
-const TestObject = Parse.Object.extend('TestObject');
-const Item = Parse.Object.extend('Item');
-const Container = Parse.Object.extend('Container');
-
 describe('Parse Object', () => {
-  beforeEach(done => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear().then(() => {
-      done();
-    });
-  });
-
   it('can create objects', done => {
     const object = new TestObject({ test: 'test' });
     object.save().then(o => {
