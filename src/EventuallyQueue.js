@@ -13,20 +13,22 @@ const EventuallyQueue = {
   localStorageKey: 'Parse.Eventually.Queue',
   polling: undefined,
 
-  save(object) {
-    return this.enqueue('save', object);
+  save(object, serverOptions = {}) {
+    return this.enqueue('save', object, serverOptions);
   },
 
-  destroy(object) {
-    return this.enqueue('delete', object);
+  destroy(object, serverOptions = {}) {
+    return this.enqueue('destroy', object, serverOptions);
   },
-
-  async enqueue(action, object) {
-    const queueData = await this.getQueue();
+  generateQueueId(action, object) {
     object._getId();
     const { className, id, _localId } = object;
-    const hash = object.get('hash') || _localId;
-    const queueId = [action, className, id, hash].join('_');
+    const uniqueId = object.get('hash') || _localId;
+    return [action, className, id, uniqueId].join('_');
+  },
+  async enqueue(action, object, serverOptions) {
+    const queueData = await this.getQueue();
+    const queueId = this.generateQueueId(action, object);
 
     let index = this.queueItemExists(queueData, queueId);
     if (index > -1) {
@@ -40,11 +42,12 @@ const EventuallyQueue = {
       index = queueData.length;
     }
     queueData[index] = {
-      id,
       queueId,
-      className,
       action,
       object,
+      serverOptions,
+      id: object.id,
+      className: object.className,
       hash: object.get('hash'),
       createdAt: new Date(),
     };
@@ -85,7 +88,7 @@ const EventuallyQueue = {
     return queueData.length;
   },
 
-  async sendQueue(sessionToken) {
+  async sendQueue() {
     const queueData = await this.getQueue();
     if (queueData.length === 0) {
       return false;
@@ -93,17 +96,17 @@ const EventuallyQueue = {
     for (let i = 0; i < queueData.length; i += 1) {
       const ObjectType = ParseObject.extend(queueData[i].className);
       if (queueData[i].id) {
-        await this.reprocess.byId(ObjectType, queueData[i], sessionToken);
+        await this.reprocess.byId(ObjectType, queueData[i]);
       } else if (queueData[i].hash) {
-        await this.reprocess.byHash(ObjectType, queueData[i], sessionToken);
+        await this.reprocess.byHash(ObjectType, queueData[i]);
       } else {
-        await this.reprocess.create(ObjectType, queueData[i], sessionToken);
+        await this.reprocess.create(ObjectType, queueData[i]);
       }
     }
     return true;
   },
 
-  async sendQueueCallback(object, queueObject, sessionToken) {
+  async sendQueueCallback(object, queueObject) {
     if (!object) {
       return this.remove(queueObject.queueId);
     }
@@ -117,63 +120,67 @@ const EventuallyQueue = {
         return this.remove(queueObject.queueId);
       }
       try {
-        await object.save(queueObject.object, { sessionToken });
+        await object.save(queueObject.object, queueObject.serverOptions);
         await this.remove(queueObject.queueId);
       } catch (e) {
-        // Do Nothing
+        if (e.message !== 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+          await this.remove(queueObject.queueId);
+        }
       }
       break;
-    case 'delete':
+    case 'destroy':
       try {
-        await object.destroy({ sessionToken });
+        await object.destroy(queueObject.serverOptions);
+        await this.remove(queueObject.queueId);
       } catch (e) {
-        // Do Nothing
+        if (e.message !== 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+          await this.remove(queueObject.queueId);
+        }
       }
-      await this.remove(queueObject.queueId);
       break;
     }
   },
 
-  poll(sessionToken) {
+  poll() {
     if (this.polling) {
       return;
     }
     this.polling = setInterval(() => {
-      let url = CoreManager.get('SERVER_URL');
-      url += url[url.length - 1] !== '/' ? '/health' : 'health';
-
       const RESTController = CoreManager.getRESTController();
-      RESTController.ajax('GET', url)
-        .then(async () => {
+      RESTController.ajax('GET', CoreManager.get('SERVER_URL')).catch(error => {
+        if (error !== 'Unable to connect to the Parse API') {
           clearInterval(this.polling);
-          delete this.polling;
-          await this.sendQueue(sessionToken);
-        })
-        .catch(() => {
-          // Can't connect to server, continue
-        });
+          this.polling = undefined;
+          return this.sendQueue();
+        }
+      });
     }, 2000);
   },
-
+  stopPoll() {
+    clearInterval(this.polling);
+    this.polling = undefined;
+  },
   reprocess: {
-    create(ObjectType, queueObject, sessionToken) {
+    create(ObjectType, queueObject) {
       const newObject = new ObjectType();
-      return EventuallyQueue.sendQueueCallback(newObject, queueObject, sessionToken);
+      return EventuallyQueue.sendQueueCallback(newObject, queueObject);
     },
-    async byId(ObjectType, queueObject, sessionToken) {
+    async byId(ObjectType, queueObject) {
+      const { sessionToken } = queueObject.serverOptions;
       const query = new ParseQuery(ObjectType);
       query.equalTo('objectId', queueObject.id);
       const results = await query.find({ sessionToken });
-      return EventuallyQueue.sendQueueCallback(results[0], queueObject, sessionToken);
+      return EventuallyQueue.sendQueueCallback(results[0], queueObject);
     },
-    async byHash(ObjectType, queueObject, sessionToken) {
+    async byHash(ObjectType, queueObject) {
+      const { sessionToken } = queueObject.serverOptions;
       const query = new ParseQuery(ObjectType);
       query.equalTo('hash', queueObject.hash);
       const results = await query.find({ sessionToken });
       if (results.length > 0) {
-        return EventuallyQueue.sendQueueCallback(results[0], queueObject, sessionToken);
+        return EventuallyQueue.sendQueueCallback(results[0], queueObject);
       }
-      return EventuallyQueue.reprocess.create(ObjectType, queueObject, sessionToken);
+      return EventuallyQueue.reprocess.create(ObjectType, queueObject);
     },
   },
 };

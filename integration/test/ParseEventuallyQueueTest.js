@@ -1,22 +1,10 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 const sleep = require('./sleep');
 
-const TestObject = Parse.Object.extend('TestObject');
-
 describe('Parse EventuallyQueue', () => {
-  beforeEach(done => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear().then(() => {
-      done();
-    });
-  });
-
   it('can queue save object', async () => {
     const object = new TestObject({ test: 'test' });
     await object.save();
@@ -174,5 +162,56 @@ describe('Parse EventuallyQueue', () => {
     await Parse.EventuallyQueue.clear();
     const length = await Parse.EventuallyQueue.length();
     assert.strictEqual(length, 0);
+  });
+
+  it('can saveEventually', async done => {
+    const parseServer = await reconfigureServer();
+    const object = new TestObject({ hash: 'saveSecret' });
+    await parseServer.handleShutdown();
+    parseServer.server.close(async () => {
+      await object.saveEventually();
+      let length = await Parse.EventuallyQueue.length();
+      assert(Parse.EventuallyQueue.polling);
+      assert.strictEqual(length, 1);
+
+      await reconfigureServer({});
+      await sleep(3000); // Wait for polling
+
+      assert.strictEqual(Parse.EventuallyQueue.polling, undefined);
+      length = await Parse.EventuallyQueue.length();
+      assert.strictEqual(length, 0);
+
+      const query = new Parse.Query(TestObject);
+      query.equalTo('hash', 'saveSecret');
+      const results = await query.find();
+      assert.strictEqual(results.length, 1);
+      done();
+    });
+  });
+
+  it('can destroyEventually', async done => {
+    const parseServer = await reconfigureServer();
+    const object = new TestObject({ hash: 'deleteSecret' });
+    await object.save();
+    await parseServer.handleShutdown();
+    parseServer.server.close(async () => {
+      await object.destroyEventually();
+      let length = await Parse.EventuallyQueue.length();
+      assert(Parse.EventuallyQueue.polling);
+      assert.strictEqual(length, 1);
+
+      await reconfigureServer({});
+      await sleep(3000); // Wait for polling
+
+      assert.strictEqual(Parse.EventuallyQueue.polling, undefined);
+      length = await Parse.EventuallyQueue.length();
+      assert.strictEqual(length, 0);
+
+      const query = new Parse.Query(TestObject);
+      query.equalTo('hash', 'deleteSecret');
+      const results = await query.find();
+      assert.strictEqual(results.length, 0);
+      done();
+    });
   });
 });

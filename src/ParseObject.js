@@ -14,6 +14,7 @@ import canBeSerialized from './canBeSerialized';
 import decode from './decode';
 import encode from './encode';
 import escape from './escape';
+import EventuallyQueue from './EventuallyQueue';
 import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
@@ -1201,6 +1202,42 @@ class ParseObject {
   }
 
   /**
+   * Saves this object to the server at some unspecified time in the future,
+   * even if Parse is currently inaccessible.
+   *
+   * Use this when you may not have a solid network connection, and don't need to know when the save completes.
+   * If there is some problem with the object such that it can't be saved, it will be silently discarded.
+   *
+   * Objects saved with this method will be stored locally in an on-disk cache until they can be delivered to Parse.
+   * They will be sent immediately if possible. Otherwise, they will be sent the next time a network connection is
+   * available. Objects saved this way will persist even after the app is closed, in which case they will be sent the
+   * next time the app is opened.
+   *
+   * @param {object} [options]
+   * Used to pass option parameters to method if arg1 and arg2 were both passed as strings.
+   * Valid options are:
+   * <ul>
+   * <li>sessionToken: A valid session token, used for making a request on
+   * behalf of a specific user.
+   * <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
+   * <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
+   * </ul>
+   * @returns {Promise} A promise that is fulfilled when the save
+   * completes.
+   */
+  async saveEventually(options: SaveOptions): Promise {
+    try {
+      await this.save(null, options);
+    } catch (e) {
+      if (e.message === 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+        await EventuallyQueue.save(this, options);
+        EventuallyQueue.poll();
+      }
+    }
+    return this;
+  }
+
+  /**
    * Set a hash of model attributes, and save the model to the server.
    * updatedAt will be updated when the request returns.
    * You can either call it as:<pre>
@@ -1303,6 +1340,40 @@ class ParseObject {
     return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
     });
+  }
+
+  /**
+   * Deletes this object from the server at some unspecified time in the future,
+   * even if Parse is currently inaccessible.
+   *
+   * Use this when you may not have a solid network connection,
+   * and don't need to know when the delete completes. If there is some problem with the object
+   * such that it can't be deleted, the request will be silently discarded.
+   *
+   * Delete instructions made with this method will be stored locally in an on-disk cache until they can be transmitted
+   * to Parse. They will be sent immediately if possible. Otherwise, they will be sent the next time a network connection
+   * is available. Delete requests will persist even after the app is closed, in which case they will be sent the
+   * next time the app is opened.
+   *
+   * @param {object} [options]
+   * Valid options are:<ul>
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
+   * </ul>
+   * @returns {Promise} A promise that is fulfilled when the destroy
+   *     completes.
+   */
+  async destroyEventually(options: RequestOptions): Promise {
+    try {
+      await this.destroy(options);
+    } catch (e) {
+      if (e.message === 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+        await EventuallyQueue.destroy(this, options);
+        EventuallyQueue.poll();
+      }
+    }
+    return this;
   }
 
   /**

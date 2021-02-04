@@ -43,6 +43,7 @@ jest.mock('../ParseQuery', () => {
 const mockRNStorageInterface = require('./test_helpers/mockRNStorage');
 const CoreManager = require('../CoreManager');
 const EventuallyQueue = require('../EventuallyQueue');
+const ParseError = require('../ParseError').default;
 const ParseObject = require('../ParseObject');
 const RESTController = require('../RESTController');
 const Storage = require('../Storage');
@@ -58,7 +59,7 @@ describe('EventuallyQueue', () => {
     CoreManager.setAsyncStorage(mockRNStorageInterface);
     CoreManager.setStorageController(require('../StorageController.react-native'));
     CoreManager.setRESTController(RESTController);
-    EventuallyQueue.polling = undefined;
+    EventuallyQueue.stopPoll();
     await EventuallyQueue.clear();
   });
 
@@ -79,19 +80,44 @@ describe('EventuallyQueue', () => {
 
   it('can queue object', async () => {
     const object = new ParseObject('TestObject');
-    await EventuallyQueue.save(object);
+    await EventuallyQueue.save(object, { sessionToken: 'token' });
     let length = await EventuallyQueue.length();
     expect(length).toBe(1);
 
-    await EventuallyQueue.destroy(object);
+    await EventuallyQueue.destroy(object, { sessionToken: 'secret' });
     length = await EventuallyQueue.length();
     expect(length).toBe(2);
+
+    const [savedObject, deleteObject] = await EventuallyQueue.getQueue();
+    expect(savedObject.id).toEqual(object.id);
+    expect(savedObject.action).toEqual('save');
+    expect(savedObject.object).toEqual(object);
+    expect(savedObject.className).toEqual(object.className);
+    expect(savedObject.serverOptions).toEqual({ sessionToken: 'token' });
+    expect(savedObject.createdAt).toBeDefined();
+    expect(savedObject.queueId).toEqual(EventuallyQueue.generateQueueId('save', object));
+
+    expect(deleteObject.id).toEqual(object.id);
+    expect(deleteObject.action).toEqual('destroy');
+    expect(deleteObject.object).toEqual(object);
+    expect(deleteObject.className).toEqual(object.className);
+    expect(deleteObject.serverOptions).toEqual({ sessionToken: 'secret' });
+    expect(deleteObject.createdAt).toBeDefined();
+    expect(deleteObject.queueId).toEqual(EventuallyQueue.generateQueueId('destroy', object));
   });
 
-  it('can queue same object', async () => {
+  it('can queue same save object', async () => {
     const object = new ParseObject('TestObject');
     await EventuallyQueue.save(object);
     await EventuallyQueue.save(object);
+    const length = await EventuallyQueue.length();
+    expect(length).toBe(1);
+  });
+
+  it('can queue same destroy object', async () => {
+    const object = new ParseObject('TestObject');
+    await EventuallyQueue.destroy(object);
+    await EventuallyQueue.destroy(object);
     const length = await EventuallyQueue.length();
     expect(length).toBe(1);
   });
@@ -175,17 +201,54 @@ describe('EventuallyQueue', () => {
     const object = new ParseObject('TestObject');
     jest.spyOn(object, 'destroy').mockImplementationOnce(() => {});
     jest.spyOn(EventuallyQueue, 'remove').mockImplementationOnce(() => {});
-    await EventuallyQueue.save(object);
-
     const queueObject = {
-      action: 'delete',
+      action: 'destroy',
       queueId: 'queue1',
+      serverOptions: { sessionToken: 'token' },
     };
-    await EventuallyQueue.sendQueueCallback(object, queueObject, 'token');
+    await EventuallyQueue.sendQueueCallback(object, queueObject);
     expect(object.destroy).toHaveBeenCalledTimes(1);
     expect(EventuallyQueue.remove).toHaveBeenCalledTimes(1);
     expect(object.destroy).toHaveBeenCalledWith({ sessionToken: 'token' });
     expect(EventuallyQueue.remove).toHaveBeenCalledWith('queue1');
+  });
+
+  it('should remove if queue destroy callback fails', async () => {
+    const object = new ParseObject('TestObject');
+    jest.spyOn(object, 'destroy').mockImplementationOnce(() => {
+      return Promise.reject('Unable to delete object.');
+    });
+    jest.spyOn(EventuallyQueue, 'remove').mockImplementationOnce(() => {});
+    const queueObject = {
+      action: 'destroy',
+      queueId: 'queue1',
+      serverOptions: {},
+    };
+    await EventuallyQueue.sendQueueCallback(object, queueObject);
+    expect(object.destroy).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.remove).toHaveBeenCalledTimes(1);
+    expect(object.destroy).toHaveBeenCalledWith({});
+    expect(EventuallyQueue.remove).toHaveBeenCalledWith('queue1');
+  });
+
+  it('should not remove if queue destroy callback network fails', async () => {
+    const object = new ParseObject('TestObject');
+    jest.spyOn(object, 'destroy').mockImplementationOnce(() => {
+      throw new ParseError(
+        ParseError.CONNECTION_FAILED,
+        'XMLHttpRequest failed: "Unable to connect to the Parse API"'
+      );
+    });
+    jest.spyOn(EventuallyQueue, 'remove').mockImplementationOnce(() => {});
+    const queueObject = {
+      action: 'destroy',
+      queueId: 'queue1',
+      serverOptions: {},
+    };
+    await EventuallyQueue.sendQueueCallback(object, queueObject);
+    expect(object.destroy).toHaveBeenCalledTimes(1);
+    expect(object.destroy).toHaveBeenCalledWith({});
+    expect(EventuallyQueue.remove).toHaveBeenCalledTimes(0);
   });
 
   it('can handle send queue save callback with no object', async () => {
@@ -193,7 +256,7 @@ describe('EventuallyQueue', () => {
     const object = null;
 
     const queueObject = { queueId: 'queue0' };
-    await EventuallyQueue.sendQueueCallback(object, queueObject, 'token');
+    await EventuallyQueue.sendQueueCallback(object, queueObject);
     expect(EventuallyQueue.remove).toHaveBeenCalledTimes(1);
     expect(EventuallyQueue.remove).toHaveBeenCalledWith('queue0');
   });
@@ -208,12 +271,55 @@ describe('EventuallyQueue', () => {
       action: 'save',
       queueId: 'queue2',
       object: { foo: 'bar' },
+      serverOptions: { sessionToken: 'token' },
     };
-    await EventuallyQueue.sendQueueCallback(object, queueObject, 'token');
+    await EventuallyQueue.sendQueueCallback(object, queueObject);
     expect(object.save).toHaveBeenCalledTimes(1);
     expect(EventuallyQueue.remove).toHaveBeenCalledTimes(1);
     expect(object.save).toHaveBeenCalledWith({ foo: 'bar' }, { sessionToken: 'token' });
     expect(EventuallyQueue.remove).toHaveBeenCalledWith('queue2');
+  });
+
+  it('can handle send queue save callback', async () => {
+    const object = new ParseObject('TestObject');
+    jest.spyOn(object, 'save').mockImplementationOnce(() => {
+      return Promise.reject('Unable to save.');
+    });
+    jest.spyOn(EventuallyQueue, 'remove').mockImplementationOnce(() => {});
+    await EventuallyQueue.save(object);
+
+    const queueObject = {
+      action: 'save',
+      queueId: 'queue2',
+      object: { foo: 'bar' },
+      serverOptions: { sessionToken: 'token' },
+    };
+    await EventuallyQueue.sendQueueCallback(object, queueObject);
+    expect(object.save).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.remove).toHaveBeenCalledTimes(1);
+    expect(object.save).toHaveBeenCalledWith({ foo: 'bar' }, { sessionToken: 'token' });
+    expect(EventuallyQueue.remove).toHaveBeenCalledWith('queue2');
+  });
+
+  it('should not remove if queue save callback network fails', async () => {
+    const object = new ParseObject('TestObject');
+    jest.spyOn(object, 'save').mockImplementationOnce(() => {
+      throw new ParseError(
+        ParseError.CONNECTION_FAILED,
+        'XMLHttpRequest failed: "Unable to connect to the Parse API"'
+      );
+    });
+    jest.spyOn(EventuallyQueue, 'remove').mockImplementationOnce(() => {});
+    const queueObject = {
+      action: 'save',
+      queueId: 'queue2',
+      object: { foo: 'bar' },
+      serverOptions: {},
+    };
+    await EventuallyQueue.sendQueueCallback(object, queueObject);
+    expect(object.save).toHaveBeenCalledTimes(1);
+    expect(object.save).toHaveBeenCalledWith({ foo: 'bar' }, {});
+    expect(EventuallyQueue.remove).toHaveBeenCalledTimes(0);
   });
 
   it('can handle send queue save callback if queue is old', async () => {
@@ -231,16 +337,15 @@ describe('EventuallyQueue', () => {
       queueId: 'queue3',
       object: { createdAt: new Date() },
     };
-    await EventuallyQueue.sendQueueCallback(object, queueObject, 'token');
+    await EventuallyQueue.sendQueueCallback(object, queueObject);
     expect(EventuallyQueue.remove).toHaveBeenCalledTimes(1);
     expect(EventuallyQueue.remove).toHaveBeenCalledWith('queue3');
   });
 
   it('can process new object', async () => {
     jest.spyOn(EventuallyQueue, 'sendQueueCallback').mockImplementationOnce(() => {});
-    await EventuallyQueue.reprocess.create(MockObject, {}, 'createToken');
+    await EventuallyQueue.reprocess.create(MockObject, {});
     expect(EventuallyQueue.sendQueueCallback).toHaveBeenCalledTimes(1);
-    expect(EventuallyQueue.sendQueueCallback.mock.calls[0][2]).toBe('createToken');
   });
 
   it('can process object by id', async () => {
@@ -248,11 +353,12 @@ describe('EventuallyQueue', () => {
     const object = new ParseObject('TestObject');
     const queueObject = {
       id: 'object1',
+      serverOptions: { sessionToken: 'idToken' },
     };
     mockQueryFind.mockImplementationOnce(() => Promise.resolve([object]));
-    await EventuallyQueue.reprocess.byId(MockObject, queueObject, 'idToken');
+    await EventuallyQueue.reprocess.byId(MockObject, queueObject);
     expect(EventuallyQueue.sendQueueCallback).toHaveBeenCalledTimes(1);
-    expect(EventuallyQueue.sendQueueCallback).toHaveBeenCalledWith(object, queueObject, 'idToken');
+    expect(EventuallyQueue.sendQueueCallback).toHaveBeenCalledWith(object, queueObject);
     expect(mockQueryFind).toHaveBeenCalledTimes(1);
     expect(mockQueryFind).toHaveBeenCalledWith({ sessionToken: 'idToken' });
   });
@@ -262,15 +368,12 @@ describe('EventuallyQueue', () => {
     const object = new ParseObject('TestObject');
     const queueObject = {
       hash: 'secret',
+      serverOptions: { sessionToken: 'hashToken' },
     };
     mockQueryFind.mockImplementationOnce(() => Promise.resolve([object]));
-    await EventuallyQueue.reprocess.byHash(MockObject, queueObject, 'hashToken');
+    await EventuallyQueue.reprocess.byHash(MockObject, queueObject);
     expect(EventuallyQueue.sendQueueCallback).toHaveBeenCalledTimes(1);
-    expect(EventuallyQueue.sendQueueCallback).toHaveBeenCalledWith(
-      object,
-      queueObject,
-      'hashToken'
-    );
+    expect(EventuallyQueue.sendQueueCallback).toHaveBeenCalledWith(object, queueObject);
     expect(mockQueryFind).toHaveBeenCalledTimes(1);
     expect(mockQueryFind).toHaveBeenCalledWith({ sessionToken: 'hashToken' });
   });
@@ -279,10 +382,10 @@ describe('EventuallyQueue', () => {
     jest.spyOn(EventuallyQueue.reprocess, 'create').mockImplementationOnce(() => {});
     const queueObject = {
       hash: 'secret',
+      serverOptions: { sessionToken: 'hashToken' },
     };
     mockQueryFind.mockImplementationOnce(() => Promise.resolve([]));
-    await EventuallyQueue.reprocess.byHash(MockObject, queueObject, 'hashToken');
-    expect(EventuallyQueue.reprocess.create.mock.calls[0][2]).toBe('hashToken');
+    await EventuallyQueue.reprocess.byHash(MockObject, queueObject);
     expect(mockQueryFind).toHaveBeenCalledTimes(1);
     expect(mockQueryFind).toHaveBeenCalledWith({ sessionToken: 'hashToken' });
   });
@@ -295,18 +398,17 @@ describe('EventuallyQueue', () => {
 
   it('can poll server', async () => {
     jest.spyOn(EventuallyQueue, 'sendQueue').mockImplementationOnce(() => {});
-    RESTController._setXHR(mockXHR([{ status: 200, response: { status: 'ok' } }]));
-    EventuallyQueue.poll('pollToken');
+    RESTController._setXHR(mockXHR([{ status: 107, response: { error: 'ok' } }]));
+    EventuallyQueue.poll();
     expect(EventuallyQueue.polling).toBeDefined();
     jest.runOnlyPendingTimers();
     await flushPromises();
 
     expect(EventuallyQueue.polling).toBeUndefined();
     expect(EventuallyQueue.sendQueue).toHaveBeenCalledTimes(1);
-    expect(EventuallyQueue.sendQueue).toHaveBeenCalledWith('pollToken');
   });
 
-  it('can poll server with connection error', async () => {
+  it('can continue polling with connection error', async () => {
     const retry = CoreManager.get('REQUEST_ATTEMPT_LIMIT');
     CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1);
     RESTController._setXHR(

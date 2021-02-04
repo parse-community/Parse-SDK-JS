@@ -11,6 +11,7 @@ import decode from './decode';
 import encode from './encode';
 import CoreManager from './CoreManager';
 import CryptoController from './CryptoController';
+import EventuallyQueue from './EventuallyQueue';
 import InstallationController from './InstallationController';
 import * as ParseOp from './ParseOp';
 import RESTController from './RESTController';
@@ -46,6 +47,7 @@ const Parse = {
       /* eslint-enable no-console */
     }
     Parse._initialize(applicationId, javaScriptKey);
+    EventuallyQueue.poll();
   },
 
   _initialize(applicationId: string, javaScriptKey: string, masterKey: string) {
@@ -197,7 +199,7 @@ Parse.CLP = require('./ParseCLP').default;
 Parse.CoreManager = require('./CoreManager');
 Parse.Config = require('./ParseConfig').default;
 Parse.Error = require('./ParseError').default;
-Parse.EventuallyQueue = require('./EventuallyQueue');
+Parse.EventuallyQueue = EventuallyQueue;
 Parse.FacebookUtils = require('./FacebookUtils').default;
 Parse.File = require('./ParseFile').default;
 Parse.GeoPoint = require('./ParseGeoPoint').default;

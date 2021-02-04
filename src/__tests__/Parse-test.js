@@ -14,8 +14,10 @@ jest.dontMock('../encode');
 jest.dontMock('../Parse');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('crypto-js/aes');
+jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
 const CoreManager = require('../CoreManager');
+const EventuallyQueue = require('../EventuallyQueue');
 const Parse = require('../Parse');
 
 describe('Parse module', () => {
@@ -34,6 +36,12 @@ describe('Parse module', () => {
     expect(typeof Parse.Cloud.useMasterKey).toBe('function');
     Parse.Cloud.useMasterKey();
     expect(CoreManager.get('USE_MASTER_KEY')).toBe(true);
+  });
+
+  it('should not start eventually queue poll in node build', () => {
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    Parse.initialize('A', 'B');
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(0);
   });
 
   it('exposes certain keys as properties', () => {
