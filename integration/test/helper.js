@@ -115,20 +115,18 @@ global.TestPoint = Parse.Object.extend('TestPoint');
 global.TestObject = Parse.Object.extend('TestObject');
 global.reconfigureServer = reconfigureServer;
 
-beforeAll(async done => {
+beforeAll(async () => {
   await reconfigureServer();
   Parse.initialize('integration');
   Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
   Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
-  done();
 });
 
-afterEach(async done => {
+afterEach(async () => {
   await Parse.User.logOut();
   Parse.Storage._clear();
   await TestUtils.destroyAllDataPermanently(true);
   destroyAliveConnections();
   // Connection close events are not immediate on node 10+... wait a bit
   await sleep(0);
-  done();
 });
