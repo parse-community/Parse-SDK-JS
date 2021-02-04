@@ -45,14 +45,11 @@ global.FB = {
 };
 
 describe('Parse User', () => {
-  beforeAll(() => {
+  beforeEach(done => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
     Parse.Object.registerSubclass('_User', Parse.User);
-  });
-
-  beforeEach(done => {
     let promise = Promise.resolve();
     try {
       promise = Parse.User.logOut();

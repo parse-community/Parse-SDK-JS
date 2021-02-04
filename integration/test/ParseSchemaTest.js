@@ -27,14 +27,11 @@ const defaultCLPS = {
 const TestObject = Parse.Object.extend('TestObject');
 
 describe('Schema', () => {
-  beforeAll(() => {
+  beforeEach(done => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
     Parse.Storage._clear();
-  });
-
-  beforeEach(done => {
     clear().then(done);
   });
 

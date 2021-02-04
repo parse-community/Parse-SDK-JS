@@ -8,13 +8,10 @@ const southwestOfSF = new Parse.GeoPoint(37.708813, -122.526398);
 const northeastOfSF = new Parse.GeoPoint(37.822802, -122.373962);
 
 describe('Geo Box', () => {
-  beforeAll(() => {
+  beforeEach(done => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
-  });
-
-  beforeEach(done => {
     clear().then(done).catch(done);
   });
 

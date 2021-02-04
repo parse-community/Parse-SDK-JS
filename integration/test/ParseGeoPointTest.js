@@ -9,7 +9,7 @@ const TestPoint = Parse.Object.extend('TestPoint');
 const Container = Parse.Object.extend('Container');
 
 describe('Geo Point', () => {
-  beforeAll(done => {
+  beforeEach(done => {
     Parse.initialize('integration');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1);

@@ -2,6 +2,7 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
 
 const ParseServer = require('parse-server').default;
 const CustomAuth = require('./CustomAuth');
+const sleep = require('./sleep');
 const { TestUtils } = require('parse-server');
 
 const port = 1337;
@@ -38,26 +39,45 @@ const defaultConfiguration = {
     paths: ['functions/CloudFunctionIdempotency', 'jobs/CloudJob1', 'classes/IdempotentTest'],
     ttl: 120,
   },
+  fileUpload: {
+    enableForPublic: true,
+    enableForAnonymousUser: true,
+    enableForAuthenticatedUser: true,
+  },
 };
 
 const openConnections = {};
+const destroyAliveConnections = function () {
+  for (const socketId in openConnections) {
+    try {
+      openConnections[socketId].destroy();
+      delete openConnections[socketId];
+    } catch (e) {
+      /* */
+    }
+  }
+};
+let parseServer;
 let server;
 
 const reconfigureServer = changedConfiguration => {
   return new Promise((resolve, reject) => {
     if (server) {
-      return server.close(() => {
-        server = undefined;
-        reconfigureServer(changedConfiguration).then(resolve, reject);
+      return parseServer.handleShutdown().then(() => {
+        server.close(() => {
+          parseServer = undefined;
+          server = undefined;
+          reconfigureServer(changedConfiguration).then(resolve, reject);
+        });
       });
     }
     try {
-      let parseServer = undefined;
-      const newConfiguration = Object.assign({}, defaultConfiguration, changedConfiguration, {
+      const newConfiguration = Object.assign({}, defaultConfiguration, changedConfiguration || {}, {
         serverStartComplete: error => {
           if (error) {
             reject(error);
           } else {
+            Parse.CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1);
             resolve(parseServer);
           }
         },
@@ -66,9 +86,6 @@ const reconfigureServer = changedConfiguration => {
       });
       parseServer = ParseServer.start(newConfiguration);
       const app = parseServer.expressApp;
-      app.use(mountPath, err => {
-        console.error(err);
-      });
       app.get('/clear/:fast', (req, res) => {
         const { fast } = req.params;
         TestUtils.destroyAllDataPermanently(fast).then(() => {
@@ -96,6 +113,14 @@ global.TestPoint = Parse.Object.extend('TestPoint');
 global.TestObject = Parse.Object.extend('TestObject');
 global.reconfigureServer = reconfigureServer;
 
-beforeAll(done => {
-  reconfigureServer().then(done).catch(done.fail);
+beforeAll(async done => {
+  await reconfigureServer();
+  done();
+});
+
+afterEach(async done => {
+  destroyAliveConnections();
+  // Connection close events are not immediate on node 10+... wait a bit
+  await sleep(0);
+  done();
 });

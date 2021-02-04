@@ -61,7 +61,7 @@ describe('Parse.ACL', () => {
     assert.equal(object.getACL().getPublicReadAccess(), false);
     assert.equal(object.getACL().getPublicWriteAccess(), false);
 
-    await await Parse.User.logOut();
+    await Parse.User.logOut();
     try {
       const query = new Parse.Query(TestObject);
       await query.get(object.id);
@@ -214,7 +214,7 @@ describe('Parse.ACL', () => {
     object.getACL().setPublicReadAccess(true);
     await object.save();
 
-    Parse.User.logOut();
+    await Parse.User.logOut();
     const o = await new Parse.Query(TestObject).get(object.id);
     assert(o);
   });
@@ -232,7 +232,7 @@ describe('Parse.ACL', () => {
     object.getACL().setPublicReadAccess(true);
     await object.save();
 
-    Parse.User.logOut();
+    await Parse.User.logOut();
     const o = await new Parse.Query('AlsoUniqueObject').find();
 
     assert(o.length > 0);
@@ -273,7 +273,7 @@ describe('Parse.ACL', () => {
     object.getACL().setPublicReadAccess(true);
     await object.save();
 
-    Parse.User.logOut();
+    await Parse.User.logOut();
     try {
       await object.destroy();
     } catch (e) {

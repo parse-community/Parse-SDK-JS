@@ -6,7 +6,7 @@ const Parse = require('../../node');
 const sleep = require('./sleep');
 
 describe('Parse Cloud', () => {
-  beforeAll(done => {
+  beforeEach(done => {
     Parse.initialize('integration', null, 'notsosecret');
     Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
     Parse.Storage._clear();
