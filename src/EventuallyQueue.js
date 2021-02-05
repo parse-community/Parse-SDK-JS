@@ -9,24 +9,94 @@ import ParseObject from './ParseObject';
 import ParseQuery from './ParseQuery';
 import Storage from './Storage';
 
+import type { SaveOptions } from './ParseObject';
+import type { RequestOptions } from './RESTController';
+
+type QueueObject = {
+  queueId: string,
+  action: string,
+  object: ParseObject,
+  serverOptions: SaveOptions | RequestOptions,
+  id: string,
+  className: string,
+  hash: string,
+  createdAt: Date,
+};
+
+type Queue = Array<QueueObject>;
+
+/**
+ * Provides utility functions to queue objects that will be
+ * saved to the server at a later date.
+ *
+ * @class Parse.EventuallyQueue
+ * @static
+ */
 const EventuallyQueue = {
-  localStorageKey: 'Parse.Eventually.Queue',
+  localStorageKey: 'Parse/Eventually/Queue',
   polling: undefined,
 
-  save(object, serverOptions = {}) {
+  /**
+   * Add object to queue with save operation.
+   *
+   * @function save
+   * @name Parse.EventuallyQueue.save
+   * @param {ParseObject} object Parse.Object to be saved eventually
+   * @param {object} [serverOptions] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Object.html#save Parse.Object.save} options.
+   * @returns {Promise} A promise that is fulfilled if object is added to queue.
+   * @static
+   * @see Parse.Object#saveEventually
+   */
+  save(object: ParseObject, serverOptions: SaveOptions = {}): Promise {
     return this.enqueue('save', object, serverOptions);
   },
 
-  destroy(object, serverOptions = {}) {
+  /**
+   * Add object to queue with save operation.
+   *
+   * @function destroy
+   * @name Parse.EventuallyQueue.destroy
+   * @param {ParseObject} object Parse.Object to be destroyed eventually
+   * @param {object} [serverOptions] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Object.html#destroy Parse.Object.destroy} options
+   * @returns {Promise} A promise that is fulfilled if object is added to queue.
+   * @static
+   * @see Parse.Object#destroyEventually
+   */
+  destroy(object: ParseObject, serverOptions: RequestOptions = {}): Promise {
     return this.enqueue('destroy', object, serverOptions);
   },
-  generateQueueId(action, object) {
+
+  /**
+   * Generate unique identifier to avoid duplicates and maintain previous state.
+   *
+   * @param {string} action save / destroy
+   * @param {object} object Parse.Object to be queued
+   * @returns {string}
+   * @static
+   * @ignore
+   */
+  generateQueueId(action: string, object: ParseObject): string {
     object._getId();
     const { className, id, _localId } = object;
     const uniqueId = object.get('hash') || _localId;
     return [action, className, id, uniqueId].join('_');
   },
-  async enqueue(action, object, serverOptions) {
+
+  /**
+   * Build queue object and add to queue.
+   *
+   * @param {string} action save / destroy
+   * @param {object} object Parse.Object to be queued
+   * @param {object} [serverOptions]
+   * @returns {Promise} A promise that is fulfilled if object is added to queue.
+   * @static
+   * @ignore
+   */
+  async enqueue(
+    action: string,
+    object: ParseObject,
+    serverOptions: SaveOptions | RequestOptions
+  ): Promise {
     const queueData = await this.getQueue();
     const queueId = this.generateQueueId(action, object);
 
@@ -54,7 +124,15 @@ const EventuallyQueue = {
     return this.setQueue(queueData);
   },
 
-  async getQueue() {
+  /**
+   * Returns the queue from local storage
+   *
+   * @function getQueue
+   * @name Parse.EventuallyQueue.getQueue
+   * @returns {Promise<Array>}
+   * @static
+   */
+  async getQueue(): Promise<Array> {
     const q = await Storage.getItemAsync(this.localStorageKey);
     if (!q) {
       return [];
@@ -62,11 +140,27 @@ const EventuallyQueue = {
     return JSON.parse(q);
   },
 
-  setQueue(queueData) {
-    return Storage.setItemAsync(this.localStorageKey, JSON.stringify(queueData));
+  /**
+   * Saves the queue to local storage
+   *
+   * @param {Queue} queue Queue containing Parse.Object data.
+   * @returns {Promise} A promise that is fulfilled when queue is stored.
+   * @static
+   * @ignore
+   */
+  setQueue(queue: Queue): Promise<void> {
+    return Storage.setItemAsync(this.localStorageKey, JSON.stringify(queue));
   },
 
-  async remove(queueId) {
+  /**
+   * Removes Parse.Object data from queue.
+   *
+   * @param {string} queueId Unique identifier for Parse.Object data.
+   * @returns {Promise} A promise that is fulfilled when queue is stored.
+   * @static
+   * @ignore
+   */
+  async remove(queueId: string): Promise<void> {
     const queueData = await this.getQueue();
     const index = this.queueItemExists(queueData, queueId);
     if (index > -1) {
@@ -75,20 +169,53 @@ const EventuallyQueue = {
     }
   },
 
-  clear() {
+  /**
+   * Removes all objects from queue.
+   *
+   * @function clear
+   * @name Parse.EventuallyQueue.clear
+   * @returns {Promise} A promise that is fulfilled when queue is cleared.
+   * @static
+   */
+  clear(): Promise {
     return Storage.setItemAsync(this.localStorageKey, JSON.stringify([]));
   },
 
-  queueItemExists(queueData, queueId) {
-    return queueData.findIndex(data => data.queueId === queueId);
+  /**
+   * Return the index of a queueId in the queue. Returns -1 if not found.
+   *
+   * @param {Queue} queue Queue containing Parse.Object data.
+   * @param {string} queueId Unique identifier for Parse.Object data.
+   * @returns {number}
+   * @static
+   * @ignore
+   */
+  queueItemExists(queue: Queue, queueId: string): number {
+    return queue.findIndex(data => data.queueId === queueId);
   },
 
-  async length() {
+  /**
+   * Return the number of objects in the queue.
+   *
+   * @function length
+   * @name Parse.EventuallyQueue.length
+   * @returns {number}
+   * @static
+   */
+  async length(): number {
     const queueData = await this.getQueue();
     return queueData.length;
   },
 
-  async sendQueue() {
+  /**
+   * Sends the queue to the server.
+   *
+   * @function sendQueue
+   * @name Parse.EventuallyQueue.sendQueue
+   * @returns {Promise<boolean>} Returns true if queue was sent successfully.
+   * @static
+   */
+  async sendQueue(): Promise<boolean> {
     const queueData = await this.getQueue();
     if (queueData.length === 0) {
       return false;
@@ -106,7 +233,16 @@ const EventuallyQueue = {
     return true;
   },
 
-  async sendQueueCallback(object, queueObject) {
+  /**
+   * Build queue object and add to queue.
+   *
+   * @param {ParseObject} object Parse.Object to be processed
+   * @param {QueueObject} queueObject Parse.Object data from the queue
+   * @returns {Promise} A promise that is fulfilled when operation is performed.
+   * @static
+   * @ignore
+   */
+  async sendQueueCallback(object: ParseObject, queueObject: QueueObject): Promise<void> {
     if (!object) {
       return this.remove(queueObject.queueId);
     }
@@ -141,6 +277,14 @@ const EventuallyQueue = {
     }
   },
 
+  /**
+   * Start polling server for network connection.
+   * Will send queue if connection is established.
+   *
+   * @function poll
+   * @name Parse.EventuallyQueue.poll
+   * @static
+   */
   poll() {
     if (this.polling) {
       return;
@@ -149,17 +293,25 @@ const EventuallyQueue = {
       const RESTController = CoreManager.getRESTController();
       RESTController.ajax('GET', CoreManager.get('SERVER_URL')).catch(error => {
         if (error !== 'Unable to connect to the Parse API') {
-          clearInterval(this.polling);
-          this.polling = undefined;
+          this.stopPoll();
           return this.sendQueue();
         }
       });
     }, 2000);
   },
+
+  /**
+   * Turns off polling.
+   *
+   * @function stopPoll
+   * @name Parse.EventuallyQueue.stopPoll
+   * @static
+   */
   stopPoll() {
     clearInterval(this.polling);
     this.polling = undefined;
   },
+
   reprocess: {
     create(ObjectType, queueObject) {
       const newObject = new ObjectType();

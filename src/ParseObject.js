@@ -57,7 +57,7 @@ type SaveParams = {
   body: AttributeMap,
 };
 
-type SaveOptions = FullOptions & {
+export type SaveOptions = FullOptions & {
   cascadeSave?: boolean,
   context?: AttributeMap,
 };
