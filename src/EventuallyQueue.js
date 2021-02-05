@@ -25,6 +25,11 @@ type QueueObject = {
 
 type Queue = Array<QueueObject>;
 
+const QUEUE_KEY = 'Parse/Eventually/Queue';
+let queueCache = [];
+let dirtyCache = true;
+let polling = undefined;
+
 /**
  * Provides utility functions to queue objects that will be
  * saved to the server at a later date.
@@ -33,9 +38,6 @@ type Queue = Array<QueueObject>;
  * @static
  */
 const EventuallyQueue = {
-  localStorageKey: 'Parse/Eventually/Queue',
-  polling: undefined,
-
   /**
    * Add object to queue with save operation.
    *
@@ -103,9 +105,9 @@ const EventuallyQueue = {
     let index = this.queueItemExists(queueData, queueId);
     if (index > -1) {
       // Add cached values to new object if they don't exist
-      for (const prop in queueData[index].object.attributes) {
+      for (const prop in queueData[index].object) {
         if (typeof object.get(prop) === 'undefined') {
-          object.set(prop, queueData[index].object.attributes[prop]);
+          object.set(prop, queueData[index].object[prop]);
         }
       }
     } else {
@@ -114,7 +116,7 @@ const EventuallyQueue = {
     queueData[index] = {
       queueId,
       action,
-      object,
+      object: object.toJSON(),
       serverOptions,
       id: object.id,
       className: object.className,
@@ -124,8 +126,16 @@ const EventuallyQueue = {
     return this.setQueue(queueData);
   },
 
+  store(data) {
+    return Storage.setItemAsync(QUEUE_KEY, JSON.stringify(data));
+  },
+
+  load() {
+    return Storage.getItemAsync(QUEUE_KEY);
+  },
+
   /**
-   * Returns the queue from local storage
+   * Sets the in-memory queue from local storage and returns.
    *
    * @function getQueue
    * @name Parse.EventuallyQueue.getQueue
@@ -133,11 +143,11 @@ const EventuallyQueue = {
    * @static
    */
   async getQueue(): Promise<Array> {
-    const q = await Storage.getItemAsync(this.localStorageKey);
-    if (!q) {
-      return [];
+    if (dirtyCache) {
+      queueCache = JSON.parse((await this.load()) || '[]');
+      dirtyCache = false;
     }
-    return JSON.parse(q);
+    return queueCache;
   },
 
   /**
@@ -149,7 +159,8 @@ const EventuallyQueue = {
    * @ignore
    */
   setQueue(queue: Queue): Promise<void> {
-    return Storage.setItemAsync(this.localStorageKey, JSON.stringify(queue));
+    queueCache = queue;
+    return this.store(queueCache);
   },
 
   /**
@@ -165,7 +176,6 @@ const EventuallyQueue = {
     const index = this.queueItemExists(queueData, queueId);
     if (index > -1) {
       queueData.splice(index, 1);
-      await this.setQueue(queueData);
     }
   },
 
@@ -178,7 +188,8 @@ const EventuallyQueue = {
    * @static
    */
   clear(): Promise {
-    return Storage.setItemAsync(this.localStorageKey, JSON.stringify([]));
+    queueCache = [];
+    return this.store([]);
   },
 
   /**
@@ -216,18 +227,22 @@ const EventuallyQueue = {
    * @static
    */
   async sendQueue(): Promise<boolean> {
-    const queueData = await this.getQueue();
+    const queue = await this.getQueue();
+    const queueData = [...queue];
+
     if (queueData.length === 0) {
       return false;
     }
     for (let i = 0; i < queueData.length; i += 1) {
-      const ObjectType = ParseObject.extend(queueData[i].className);
-      if (queueData[i].id) {
-        await this.reprocess.byId(ObjectType, queueData[i]);
-      } else if (queueData[i].hash) {
-        await this.reprocess.byHash(ObjectType, queueData[i]);
+      const queueObject = queueData[i];
+      const { id, hash, className } = queueObject;
+      const ObjectType = ParseObject.extend(className);
+      if (id) {
+        await this.process.byId(ObjectType, queueObject);
+      } else if (hash) {
+        await this.process.byHash(ObjectType, queueObject);
       } else {
-        await this.reprocess.create(ObjectType, queueData[i]);
+        await this.process.create(ObjectType, queueObject);
       }
     }
     return true;
@@ -283,13 +298,14 @@ const EventuallyQueue = {
    *
    * @function poll
    * @name Parse.EventuallyQueue.poll
+   * @param [ms] Milliseconds to ping the server. Default 2000ms
    * @static
    */
-  poll() {
-    if (this.polling) {
+  poll(ms: number = 2000) {
+    if (polling) {
       return;
     }
-    this.polling = setInterval(() => {
+    polling = setInterval(() => {
       const RESTController = CoreManager.getRESTController();
       RESTController.ajax('GET', CoreManager.get('SERVER_URL')).catch(error => {
         if (error !== 'Unable to connect to the Parse API') {
@@ -297,7 +313,7 @@ const EventuallyQueue = {
           return this.sendQueue();
         }
       });
-    }, 2000);
+    }, ms);
   },
 
   /**
@@ -308,14 +324,30 @@ const EventuallyQueue = {
    * @static
    */
   stopPoll() {
-    clearInterval(this.polling);
-    this.polling = undefined;
+    clearInterval(polling);
+    polling = undefined;
   },
 
-  reprocess: {
+  /**
+   * Return true if pinging the server.
+   *
+   * @function isPolling
+   * @name Parse.EventuallyQueue.isPolling
+   * @returns {boolean}
+   * @static
+   */
+  isPolling(): boolean {
+    return !!polling;
+  },
+
+  _setPolling(flag: boolean) {
+    polling = flag;
+  },
+
+  process: {
     create(ObjectType, queueObject) {
-      const newObject = new ObjectType();
-      return EventuallyQueue.sendQueueCallback(newObject, queueObject);
+      const object = new ObjectType();
+      return EventuallyQueue.sendQueueCallback(object, queueObject);
     },
     async byId(ObjectType, queueObject) {
       const { sessionToken } = queueObject.serverOptions;
@@ -332,7 +364,7 @@ const EventuallyQueue = {
       if (results.length > 0) {
         return EventuallyQueue.sendQueueCallback(results[0], queueObject);
       }
-      return EventuallyQueue.reprocess.create(ObjectType, queueObject);
+      return EventuallyQueue.process.create(ObjectType, queueObject);
     },
   },
 };

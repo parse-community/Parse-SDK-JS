@@ -22,6 +22,9 @@ class MockObject {
   get(key) {
     return this.attributes[key];
   }
+  toJSON() {
+    return this.attributes;
+  }
   static extend(className) {
     class MockSubclass {
       constructor() {
@@ -91,7 +94,7 @@ describe('EventuallyQueue', () => {
     const [savedObject, deleteObject] = await EventuallyQueue.getQueue();
     expect(savedObject.id).toEqual(object.id);
     expect(savedObject.action).toEqual('save');
-    expect(savedObject.object).toEqual(object);
+    expect(savedObject.object).toEqual(object.toJSON());
     expect(savedObject.className).toEqual(object.className);
     expect(savedObject.serverOptions).toEqual({ sessionToken: 'token' });
     expect(savedObject.createdAt).toBeDefined();
@@ -99,7 +102,7 @@ describe('EventuallyQueue', () => {
 
     expect(deleteObject.id).toEqual(object.id);
     expect(deleteObject.action).toEqual('destroy');
-    expect(deleteObject.object).toEqual(object);
+    expect(deleteObject.object).toEqual(object.toJSON());
     expect(deleteObject.className).toEqual(object.className);
     expect(deleteObject.serverOptions).toEqual({ sessionToken: 'secret' });
     expect(deleteObject.createdAt).toBeDefined();
@@ -135,8 +138,7 @@ describe('EventuallyQueue', () => {
     expect(length).toBe(1);
 
     const queue = await EventuallyQueue.getQueue();
-    expect(queue[0].object.attributes.foo).toBe('bar');
-    expect(queue[0].object.attributes.test).toBe('1234');
+    expect(queue[0].object.test).toBe('1234');
   });
 
   it('can remove object from queue', async () => {
@@ -165,17 +167,17 @@ describe('EventuallyQueue', () => {
   });
 
   it('can send queue by object id', async () => {
-    jest.spyOn(EventuallyQueue.reprocess, 'byId').mockImplementationOnce(() => {});
+    jest.spyOn(EventuallyQueue.process, 'byId').mockImplementationOnce(() => {});
     const object = new ParseObject('TestObject');
     await EventuallyQueue.save(object);
 
     const didSend = await EventuallyQueue.sendQueue();
     expect(didSend).toBe(true);
-    expect(EventuallyQueue.reprocess.byId).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.process.byId).toHaveBeenCalledTimes(1);
   });
 
   it('can send queue by object hash', async () => {
-    jest.spyOn(EventuallyQueue.reprocess, 'byHash').mockImplementationOnce(() => {});
+    jest.spyOn(EventuallyQueue.process, 'byHash').mockImplementationOnce(() => {});
     const object = new ParseObject('TestObject');
     delete object.id;
     object.set('hash', 'secret');
@@ -183,18 +185,18 @@ describe('EventuallyQueue', () => {
 
     const didSend = await EventuallyQueue.sendQueue();
     expect(didSend).toBe(true);
-    expect(EventuallyQueue.reprocess.byHash).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.process.byHash).toHaveBeenCalledTimes(1);
   });
 
   it('can send queue by object create', async () => {
-    jest.spyOn(EventuallyQueue.reprocess, 'create').mockImplementationOnce(() => {});
+    jest.spyOn(EventuallyQueue.process, 'create').mockImplementationOnce(() => {});
     const object = new ParseObject('TestObject');
     delete object.id;
     await EventuallyQueue.save(object);
 
     const didSend = await EventuallyQueue.sendQueue();
     expect(didSend).toBe(true);
-    expect(EventuallyQueue.reprocess.create).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.process.create).toHaveBeenCalledTimes(1);
   });
 
   it('can handle send queue destroy callback', async () => {
@@ -344,7 +346,7 @@ describe('EventuallyQueue', () => {
 
   it('can process new object', async () => {
     jest.spyOn(EventuallyQueue, 'sendQueueCallback').mockImplementationOnce(() => {});
-    await EventuallyQueue.reprocess.create(MockObject, {});
+    await EventuallyQueue.process.create(MockObject, {});
     expect(EventuallyQueue.sendQueueCallback).toHaveBeenCalledTimes(1);
   });
 
@@ -356,7 +358,7 @@ describe('EventuallyQueue', () => {
       serverOptions: { sessionToken: 'idToken' },
     };
     mockQueryFind.mockImplementationOnce(() => Promise.resolve([object]));
-    await EventuallyQueue.reprocess.byId(MockObject, queueObject);
+    await EventuallyQueue.process.byId(MockObject, queueObject);
     expect(EventuallyQueue.sendQueueCallback).toHaveBeenCalledTimes(1);
     expect(EventuallyQueue.sendQueueCallback).toHaveBeenCalledWith(object, queueObject);
     expect(mockQueryFind).toHaveBeenCalledTimes(1);
@@ -371,7 +373,7 @@ describe('EventuallyQueue', () => {
       serverOptions: { sessionToken: 'hashToken' },
     };
     mockQueryFind.mockImplementationOnce(() => Promise.resolve([object]));
-    await EventuallyQueue.reprocess.byHash(MockObject, queueObject);
+    await EventuallyQueue.process.byHash(MockObject, queueObject);
     expect(EventuallyQueue.sendQueueCallback).toHaveBeenCalledTimes(1);
     expect(EventuallyQueue.sendQueueCallback).toHaveBeenCalledWith(object, queueObject);
     expect(mockQueryFind).toHaveBeenCalledTimes(1);
@@ -379,32 +381,32 @@ describe('EventuallyQueue', () => {
   });
 
   it('can process new object if hash not exists', async () => {
-    jest.spyOn(EventuallyQueue.reprocess, 'create').mockImplementationOnce(() => {});
+    jest.spyOn(EventuallyQueue.process, 'create').mockImplementationOnce(() => {});
     const queueObject = {
       hash: 'secret',
       serverOptions: { sessionToken: 'hashToken' },
     };
     mockQueryFind.mockImplementationOnce(() => Promise.resolve([]));
-    await EventuallyQueue.reprocess.byHash(MockObject, queueObject);
+    await EventuallyQueue.process.byHash(MockObject, queueObject);
     expect(mockQueryFind).toHaveBeenCalledTimes(1);
     expect(mockQueryFind).toHaveBeenCalledWith({ sessionToken: 'hashToken' });
   });
 
   it('cannot poll if already polling', () => {
-    EventuallyQueue.polling = true;
+    EventuallyQueue._setPolling(true);
     EventuallyQueue.poll();
-    expect(EventuallyQueue.polling).toBe(true);
+    expect(EventuallyQueue.isPolling()).toBe(true);
   });
 
   it('can poll server', async () => {
     jest.spyOn(EventuallyQueue, 'sendQueue').mockImplementationOnce(() => {});
     RESTController._setXHR(mockXHR([{ status: 107, response: { error: 'ok' } }]));
     EventuallyQueue.poll();
-    expect(EventuallyQueue.polling).toBeDefined();
+    expect(EventuallyQueue.isPolling()).toBe(true);
     jest.runOnlyPendingTimers();
     await flushPromises();
 
-    expect(EventuallyQueue.polling).toBeUndefined();
+    expect(EventuallyQueue.isPolling()).toBe(false);
     expect(EventuallyQueue.sendQueue).toHaveBeenCalledTimes(1);
   });
 
@@ -415,11 +417,11 @@ describe('EventuallyQueue', () => {
       mockXHR([{ status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }])
     );
     EventuallyQueue.poll();
-    expect(EventuallyQueue.polling).toBeDefined();
+    expect(EventuallyQueue.isPolling()).toBe(true);
     jest.runOnlyPendingTimers();
     await flushPromises();
 
-    expect(EventuallyQueue.polling).toBeDefined();
+    expect(EventuallyQueue.isPolling()).toBe(true);
     CoreManager.set('REQUEST_ATTEMPT_LIMIT', retry);
   });
 });

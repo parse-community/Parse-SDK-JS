@@ -5,6 +5,10 @@ const Parse = require('../../node');
 const sleep = require('./sleep');
 
 describe('Parse EventuallyQueue', () => {
+  beforeEach(async () => {
+    await Parse.EventuallyQueue.clear();
+  });
+
   it('can queue save object', async () => {
     const object = new TestObject({ test: 'test' });
     await object.save();
@@ -59,7 +63,7 @@ describe('Parse EventuallyQueue', () => {
     length = await Parse.EventuallyQueue.length();
     assert.strictEqual(length, 0);
 
-    // TODO: can't use obj1, etc because they don't have an id
+    // TODO: Properly handle SingleInstance
     await Parse.EventuallyQueue.destroy(results[0]);
     await Parse.EventuallyQueue.destroy(results[1]);
     await Parse.EventuallyQueue.destroy(results[2]);
@@ -134,13 +138,30 @@ describe('Parse EventuallyQueue', () => {
     assert.strictEqual(hashes[0].get('foo'), 'bar');
   });
 
+  it('can queue same object but override undefined fields', async () => {
+    const object = new Parse.Object('TestObject');
+    object.set('foo', 'bar');
+    object.set('test', '1234');
+    await Parse.EventuallyQueue.save(object);
+
+    object.set('foo', undefined);
+    await Parse.EventuallyQueue.save(object);
+
+    const length = await Parse.EventuallyQueue.length();
+    assert.strictEqual(length, 1);
+
+    const queue = await Parse.EventuallyQueue.getQueue();
+    assert.strictEqual(queue[0].object.foo, 'bar');
+    assert.strictEqual(queue[0].object.test, '1234');
+  });
+
   it('can poll server', async () => {
     const object = new TestObject({ test: 'test' });
     await object.save();
     object.set('foo', 'bar');
     await Parse.EventuallyQueue.save(object);
     Parse.EventuallyQueue.poll();
-    assert.ok(Parse.EventuallyQueue.polling);
+    assert.ok(Parse.EventuallyQueue.isPolling());
 
     await sleep(4000);
     const query = new Parse.Query(TestObject);
@@ -149,7 +170,7 @@ describe('Parse EventuallyQueue', () => {
 
     const length = await Parse.EventuallyQueue.length();
     assert.strictEqual(length, 0);
-    assert.strictEqual(Parse.EventuallyQueue.polling, undefined);
+    assert.strictEqual(Parse.EventuallyQueue.isPolling(), false);
   });
 
   it('can clear queue', async () => {
@@ -171,13 +192,13 @@ describe('Parse EventuallyQueue', () => {
     parseServer.server.close(async () => {
       await object.saveEventually();
       let length = await Parse.EventuallyQueue.length();
-      assert(Parse.EventuallyQueue.polling);
+      assert(Parse.EventuallyQueue.isPolling());
       assert.strictEqual(length, 1);
 
       await reconfigureServer({});
       await sleep(3000); // Wait for polling
 
-      assert.strictEqual(Parse.EventuallyQueue.polling, undefined);
+      assert.strictEqual(Parse.EventuallyQueue.isPolling(), false);
       length = await Parse.EventuallyQueue.length();
       assert.strictEqual(length, 0);
 
@@ -197,13 +218,13 @@ describe('Parse EventuallyQueue', () => {
     parseServer.server.close(async () => {
       await object.destroyEventually();
       let length = await Parse.EventuallyQueue.length();
-      assert(Parse.EventuallyQueue.polling);
+      assert(Parse.EventuallyQueue.isPolling());
       assert.strictEqual(length, 1);
 
       await reconfigureServer({});
       await sleep(3000); // Wait for polling
 
-      assert.strictEqual(Parse.EventuallyQueue.polling, undefined);
+      assert.strictEqual(Parse.EventuallyQueue.isPolling(), false);
       length = await Parse.EventuallyQueue.length();
       assert.strictEqual(length, 0);
 
