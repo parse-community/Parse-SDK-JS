@@ -176,6 +176,7 @@ const EventuallyQueue = {
     const index = this.queueItemExists(queueData, queueId);
     if (index > -1) {
       queueData.splice(index, 1);
+      await this.setQueue(queueData);
     }
   },
 
