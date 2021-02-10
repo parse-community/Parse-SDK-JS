@@ -255,11 +255,13 @@ describe('ParseObject', () => {
   });
 
   it('can be inflated from server JSON', () => {
+    const date = new Date();
     const json = {
       className: 'Item',
       createdAt: '2013-12-14T04:51:19Z',
       objectId: 'I1',
       size: 'medium',
+      date: date
     };
     const o = ParseObject.fromJSON(json);
     expect(o.className).toBe('Item');
@@ -268,8 +270,10 @@ describe('ParseObject', () => {
       size: 'medium',
       createdAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
       updatedAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
+      date
     });
     expect(o.dirty()).toBe(false);
+    expect(o.get('date')).toBeInstanceOf(Date);
   });
 
   it('can override old data when inflating from the server', () => {
@@ -1239,6 +1243,7 @@ describe('ParseObject', () => {
     expect(o.op('count')).toBe(undefined);
   });
 
+  
   it('can revert a specific field in unsaved ops', () => {
     const o = ParseObject.fromJSON({
       className: 'Item',
