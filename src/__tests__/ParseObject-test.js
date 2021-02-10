@@ -1243,7 +1243,6 @@ describe('ParseObject', () => {
     expect(o.op('count')).toBe(undefined);
   });
 
-
   it('can revert a specific field in unsaved ops', () => {
     const o = ParseObject.fromJSON({
       className: 'Item',
