@@ -140,6 +140,7 @@ const mockLocalDatastore = {
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
 const CoreManager = require('../CoreManager');
+const EventuallyQueue = require('../EventuallyQueue');
 const ParseACL = require('../ParseACL').default;
 const ParseError = require('../ParseError').default;
 const ParseFile = require('../ParseFile').default;
@@ -1533,6 +1534,53 @@ describe('ParseObject', () => {
     });
   });
 
+  it('can save the object eventually', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            objectId: 'PFEventually',
+          },
+        },
+      ])
+    );
+    const p = new ParseObject('Person');
+    p.set('age', 38);
+    const obj = await p.saveEventually();
+    expect(obj).toBe(p);
+    expect(obj.get('age')).toBe(38);
+    expect(obj.op('age')).toBe(undefined);
+    expect(obj.dirty()).toBe(false);
+  });
+
+  it('can save the object eventually on network failure', async () => {
+    const p = new ParseObject('Person');
+    jest.spyOn(EventuallyQueue, 'save').mockImplementationOnce(() => Promise.resolve());
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(p, 'save').mockImplementationOnce(() => {
+      throw new ParseError(
+        ParseError.CONNECTION_FAILED,
+        'XMLHttpRequest failed: "Unable to connect to the Parse API"'
+      );
+    });
+    await p.saveEventually();
+    expect(EventuallyQueue.save).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not save the object eventually on error', async () => {
+    const p = new ParseObject('Person');
+    jest.spyOn(EventuallyQueue, 'save').mockImplementationOnce(() => Promise.resolve());
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(p, 'save').mockImplementationOnce(() => {
+      throw new ParseError(ParseError.OTHER_CAUSE, 'Tried to save a batch with a cycle.');
+    });
+    await p.saveEventually();
+    expect(EventuallyQueue.save).toHaveBeenCalledTimes(0);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(0);
+  });
+
   it('can save the object with key / value', done => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([
@@ -2842,6 +2890,33 @@ describe('ObjectController', () => {
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
     await result;
+  });
+
+  it('can destroy the object eventually on network failure', async () => {
+    const p = new ParseObject('Person');
+    jest.spyOn(EventuallyQueue, 'destroy').mockImplementationOnce(() => Promise.resolve());
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(p, 'destroy').mockImplementationOnce(() => {
+      throw new ParseError(
+        ParseError.CONNECTION_FAILED,
+        'XMLHttpRequest failed: "Unable to connect to the Parse API"'
+      );
+    });
+    await p.destroyEventually();
+    expect(EventuallyQueue.destroy).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not destroy object eventually on error', async () => {
+    const p = new ParseObject('Person');
+    jest.spyOn(EventuallyQueue, 'destroy').mockImplementationOnce(() => Promise.resolve());
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(p, 'destroy').mockImplementationOnce(() => {
+      throw new ParseError(ParseError.OTHER_CAUSE, 'Unable to delete.');
+    });
+    await p.destroyEventually();
+    expect(EventuallyQueue.destroy).toHaveBeenCalledTimes(0);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(0);
   });
 
   it('can save an object', async () => {
