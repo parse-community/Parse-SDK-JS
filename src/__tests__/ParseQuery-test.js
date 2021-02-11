@@ -3253,7 +3253,7 @@ describe('ParseQuery LocalDatastore', () => {
 
     const obj4 = {
       className: 'Item',
-      objectId: 'objectId3',
+      objectId: 'objectId4',
       password: 123,
       number: 4,
       createdAt: new Date('2018-08-12T00:00:00.000Z'),
