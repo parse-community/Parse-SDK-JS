@@ -2012,6 +2012,7 @@ describe('Parse Object', () => {
     const fetched = await query.get(user.id);
     assert.equal(fetched.isDataAvailable(), true);
   });
+
   it('from json save data', async () => {
     const json = {
       className: 'TestObject',
