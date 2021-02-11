@@ -1752,10 +1752,11 @@ class ParseObject {
    * @param {object} json The JSON map of the Object's data
    * @param {boolean} override In single instance mode, all old server data
    *   is overwritten if this is set to true
+   * @param {boolean} dirty Whether the Parse.Object should set JSON keys to dirty
    * @static
    * @returns {Parse.Object} A Parse.Object reference
    */
-  static fromJSON(json: any, override?: boolean) {
+  static fromJSON(json: any, override?: boolean, dirty?: boolean) {
     if (!json.className) {
       throw new Error('Cannot create an object without a className');
     }
@@ -1765,6 +1766,8 @@ class ParseObject {
     for (const attr in json) {
       if (attr !== 'className' && attr !== '__type') {
         otherAttributes[attr] = json[attr];
+          o.set(attr, json[attr])
+        }
       }
     }
     if (override) {
