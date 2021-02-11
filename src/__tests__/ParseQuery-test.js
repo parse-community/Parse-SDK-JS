@@ -3260,7 +3260,12 @@ describe('ParseQuery LocalDatastore', () => {
       updatedAt: new Date('2018-08-12T00:00:00.000Z'),
     };
 
-    mockLocalDatastore._serializeObjectsFromPinName.mockImplementation(() => [obj1, obj3, obj2, obj4]);
+    mockLocalDatastore._serializeObjectsFromPinName.mockImplementation(() => [
+      obj1,
+      obj3,
+      obj2,
+      obj4,
+    ]);
 
     mockLocalDatastore.checkIfEnabled.mockImplementation(() => true);
 

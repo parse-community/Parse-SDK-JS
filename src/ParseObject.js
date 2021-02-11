@@ -1838,7 +1838,7 @@ class ParseObject {
       if (attr !== 'className' && attr !== '__type') {
         otherAttributes[attr] = json[attr];
         if (dirty) {
-          o.set(attr, json[attr])
+          o.set(attr, json[attr]);
         }
       }
     }

@@ -2012,4 +2012,32 @@ describe('Parse Object', () => {
     const fetched = await query.get(user.id);
     assert.equal(fetched.isDataAvailable(), true);
   });
+  it('from json save data', async () => {
+    const json = {
+      className: 'TestObject',
+      date: new Date(),
+      array: [],
+      object: {},
+      string: '',
+    };
+    const obj = Parse.Object.fromJSON(json, false, true);
+    expect(obj.get('date')).toBeDefined();
+    expect(obj.get('date')).toBeInstanceOf(Date);
+    expect(obj.get('array')).toBeDefined();
+    expect(obj.get('array')).toBeInstanceOf(Array);
+    expect(obj.get('object')).toBeDefined();
+    expect(obj.get('object')).toBeInstanceOf(Object);
+    expect(obj.get('string')).toBeDefined();
+    expect(obj.get('string')).toBeInstanceOf(String);
+    await obj.save();
+    await obj.fetch();
+    expect(obj.get('date')).toBeDefined();
+    expect(obj.get('date')).toBeInstanceOf(Date);
+    expect(obj.get('array')).toBeDefined();
+    expect(obj.get('array')).toBeInstanceOf(Array);
+    expect(obj.get('object')).toBeDefined();
+    expect(obj.get('object')).toBeInstanceOf(Object);
+    expect(obj.get('string')).toBeDefined();
+    expect(obj.get('string')).toBeInstanceOf(String);
+  });
 });
