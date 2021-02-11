@@ -3251,7 +3251,16 @@ describe('ParseQuery LocalDatastore', () => {
       updatedAt: new Date('2018-08-12T00:00:00.000Z'),
     };
 
-    mockLocalDatastore._serializeObjectsFromPinName.mockImplementation(() => [obj1, obj3, obj2]);
+    const obj4 = {
+      className: 'Item',
+      objectId: 'objectId3',
+      password: 123,
+      number: 4,
+      createdAt: new Date('2018-08-12T00:00:00.000Z'),
+      updatedAt: new Date('2018-08-12T00:00:00.000Z'),
+    };
+
+    mockLocalDatastore._serializeObjectsFromPinName.mockImplementation(() => [obj1, obj3, obj2, obj4]);
 
     mockLocalDatastore.checkIfEnabled.mockImplementation(() => true);
 
@@ -3262,22 +3271,16 @@ describe('ParseQuery LocalDatastore', () => {
     expect(results[0].get('number')).toEqual(2);
     expect(results[1].get('number')).toEqual(3);
     expect(results[2].get('number')).toEqual(4);
+    expect(results[3].get('number')).toEqual(4);
 
     q = new ParseQuery('Item');
     q.descending('number');
     q.fromLocalDatastore();
     results = await q.find();
     expect(results[0].get('number')).toEqual(4);
-    expect(results[1].get('number')).toEqual(3);
-    expect(results[2].get('number')).toEqual(2);
-
-    q = new ParseQuery('Item');
-    q.descending('number');
-    q.fromLocalDatastore();
-    results = await q.find();
-    expect(results[0].get('number')).toEqual(4);
-    expect(results[1].get('number')).toEqual(3);
-    expect(results[2].get('number')).toEqual(2);
+    expect(results[1].get('number')).toEqual(4);
+    expect(results[2].get('number')).toEqual(3);
+    expect(results[3].get('number')).toEqual(2);
 
     q = new ParseQuery('Item');
     q.ascending('_created_at');
