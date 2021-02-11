@@ -92,6 +92,18 @@ describe('ParseSchema', () => {
     done();
   });
 
+  it('can create schema pointer and relation with addFields', () => {
+    const schema = new ParseSchema('SchemaTest');
+    schema
+      .addField('newPointer', 'Pointer', { targetClass: '_User' })
+      .addField('newRelation', 'Relation', { targetClass: '_User' });
+
+    expect(schema._fields.newPointer.type).toEqual('Pointer');
+    expect(schema._fields.newRelation.type).toEqual('Relation');
+    expect(schema._fields.newPointer.targetClass).toEqual('_User');
+    expect(schema._fields.newRelation.targetClass).toEqual('_User');
+  });
+
   it('can create schema fields required and default values', () => {
     const object = new ParseObject('TestObject', '1234');
     const schema = new ParseSchema('SchemaTest');
