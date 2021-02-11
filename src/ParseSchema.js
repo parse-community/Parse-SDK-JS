@@ -214,6 +214,7 @@ class ParseSchema {
    * Valid options are:<ul>
    *   <li>required: If field is not set, save operation fails (Requires Parse Server 3.7.0+)
    *   <li>defaultValue: If field is not set, a default value is selected (Requires Parse Server 3.7.0+)
+   *   <li>targetClass: Required if type is Pointer or Parse.Relation
    * </ul>
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
@@ -225,6 +226,12 @@ class ParseSchema {
     }
     if (FIELD_TYPES.indexOf(type) === -1) {
       throw new Error(`${type} is not a valid type.`);
+    }
+    if (type === 'Pointer') {
+      return this.addPointer(name, options.targetClass, options);
+    }
+    if (type === 'Relation') {
+      return this.addRelation(name, options.targetClass, options);
     }
     const fieldOptions = { type };
 
