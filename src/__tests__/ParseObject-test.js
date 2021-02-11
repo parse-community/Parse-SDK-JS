@@ -262,7 +262,7 @@ describe('ParseObject', () => {
       createdAt: '2013-12-14T04:51:19Z',
       objectId: 'I1',
       size: 'medium',
-      date: date
+      date: date,
     };
     const o = ParseObject.fromJSON(json);
     expect(o.className).toBe('Item');
@@ -271,10 +271,32 @@ describe('ParseObject', () => {
       size: 'medium',
       createdAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
       updatedAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
-      date
+      date,
     });
     expect(o.dirty()).toBe(false);
     expect(o.get('date')).toBeInstanceOf(Date);
+  });
+
+  it('can be dirty with fromJSON', () => {
+    const date = new Date();
+    const json = {
+      className: 'Item',
+      createdAt: '2013-12-14T04:51:19Z',
+      objectId: 'I1',
+      size: 'medium',
+      date: date,
+    };
+    const o = ParseObject.fromJSON(json, false, true);
+    expect(o.className).toBe('Item');
+    expect(o.id).toBe('I1');
+    expect(o.attributes).toEqual({
+      size: 'medium',
+      createdAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
+      updatedAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
+      date,
+    });
+    expect(o.dirty()).toBe(true);
+    expect(o.dirtyKeys()).toEqual(['size', 'date']);
   });
 
   it('can override old data when inflating from the server', () => {
