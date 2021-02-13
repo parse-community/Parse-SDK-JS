@@ -5,6 +5,7 @@ const CustomAuth = require('./CustomAuth');
 const sleep = require('./sleep');
 const { TestUtils } = require('parse-server');
 const Parse = require('../../node');
+const setGlobalVars = require('indexeddbshim');
 
 const port = 1337;
 const mountPath = '/parse';
@@ -114,6 +115,8 @@ global.Container = Parse.Object.extend('Container');
 global.TestPoint = Parse.Object.extend('TestPoint');
 global.TestObject = Parse.Object.extend('TestObject');
 global.reconfigureServer = reconfigureServer;
+global.window = global; // Used for indexedDB shim
+setGlobalVars();
 
 beforeAll(async () => {
   await reconfigureServer();

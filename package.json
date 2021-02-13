@@ -67,6 +67,7 @@
     "gulp-uglify": "3.0.2",
     "gulp-watch": "5.0.1",
     "husky": "4.3.5",
+    "indexeddbshim": "7.0.0",
     "jasmine": "3.5.0",
     "jasmine-reporters": "2.3.2",
     "jest": "24.9.0",
