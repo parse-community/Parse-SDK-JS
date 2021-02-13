@@ -309,6 +309,16 @@ class ParseUser extends ParseObject {
   }
 
   /**
+   * Returns true if <code>current</code> would return this user.
+   *
+   * @returns {Promise<boolean>} true if user is cached on disk
+   */
+  async isCurrentAsync(): Promise<boolean> {
+    const current = await ParseUser.currentAsync();
+    return !!current && current.id === this.id;
+  }
+
+  /**
    * Returns get("username").
    *
    * @returns {string}
@@ -458,13 +468,13 @@ class ParseUser extends ParseObject {
    * @param {...any} args
    * @returns {Promise}
    */
-  save(...args: Array<any>): Promise<ParseUser> {
-    return super.save.apply(this, args).then(() => {
-      if (this.isCurrent()) {
-        return CoreManager.getUserController().updateUserOnDisk(this);
-      }
-      return this;
-    });
+  async save(...args: Array<any>): Promise<ParseUser> {
+    await super.save.apply(this, args);
+    const current = await this.isCurrentAsync();
+    if (current) {
+      return CoreManager.getUserController().updateUserOnDisk(this);
+    }
+    return this;
   }
 
   /**

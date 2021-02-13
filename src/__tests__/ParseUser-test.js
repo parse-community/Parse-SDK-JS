@@ -1280,6 +1280,54 @@ describe('ParseUser', () => {
     });
   });
 
+  it('can linkWith async', async () => {
+    const currentStorage = CoreManager.getStorageController();
+    CoreManager.setStorageController(mockAsyncStorage);
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve(
+          {
+            objectId: 'uid5Async',
+            sessionToken: 'r:123abc',
+            authData: {
+              test: {
+                id: 'id',
+                access_token: 'access_token',
+              },
+            },
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+    const provider = {
+      authenticate(options) {
+        if (options.success) {
+          options.success(this, {
+            id: 'id',
+            access_token: 'access_token',
+          });
+        }
+      },
+      restoreAuthentication() {},
+      getAuthType() {
+        return 'test';
+      },
+      deauthenticate() {},
+    };
+
+    const user = new ParseUser();
+    await user.linkWith(provider, null, { useMasterKey: true });
+
+    expect(user.get('authData')).toEqual({
+      test: { id: 'id', access_token: 'access_token' },
+    });
+    CoreManager.setStorageController(currentStorage);
+  });
+
   it('handle linkWith authentication failure', async () => {
     const provider = {
       authenticate(options) {
