@@ -601,6 +601,7 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
+   *   <li>json: Return raw json without converting to Parse.Object
    * </ul>
    *
    * @returns {Promise} A promise that is resolved with the result when
@@ -618,6 +619,9 @@ class ParseQuery {
     }
     if (options && options.hasOwnProperty('context') && typeof options.context === 'object') {
       firstOptions.context = options.context;
+    }
+    if (options && options.hasOwnProperty('json')) {
+      firstOptions.json = options.json;
     }
 
     return this.first(firstOptions).then(response => {
@@ -640,6 +644,7 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
+   *   <li>json: Return raw json without converting to Parse.Object
    * </ul>
    *
    * @returns {Promise} A promise that is resolved with the results when
@@ -686,8 +691,11 @@ class ParseQuery {
         if (select) {
           handleSelectResult(data, select);
         }
-
-        return ParseObject.fromJSON(data, !select);
+        if (options.json) {
+          return data;
+        } else {
+          return ParseObject.fromJSON(data, !select);
+        }
       });
 
       const count = response.count;
@@ -849,6 +857,7 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
+   *   <li>json: Return raw json without converting to Parse.Object
    * </ul>
    *
    * @returns {Promise} A promise that is resolved with the object when
@@ -900,8 +909,11 @@ class ParseQuery {
       if (select) {
         handleSelectResult(objects[0], select);
       }
-
-      return ParseObject.fromJSON(objects[0], !select);
+      if (options.json) {
+        return objects[0];
+      } else {
+        return ParseObject.fromJSON(objects[0], !select);
+      }
     });
   }
 

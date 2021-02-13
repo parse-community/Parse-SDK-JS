@@ -1341,6 +1341,43 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can return raw json from query', async () => {
+    CoreManager.setQueryController({
+      aggregate() {},
+      find() {
+        return Promise.resolve({
+          results: [
+            {
+              objectId: 'I1',
+              size: 'small',
+              name: 'Product 3',
+            },
+          ],
+        });
+      },
+    });
+
+    const q = new ParseQuery('Item');
+    q.equalTo('size', 'small');
+    const results = await q.find({ json: true });
+    expect(results[0].objectId).toBe('I1');
+    expect(results[0].size).toBe('small');
+    expect(results[0].name).toEqual('Product 3');
+    expect(results[0].className).toEqual('Item');
+
+    let result = await q.first({ json: true });
+    expect(result.objectId).toBe('I1');
+    expect(result.size).toBe('small');
+    expect(result.name).toEqual('Product 3');
+    expect(result.className).toEqual('Item');
+
+    result = await q.get(result.objectId, { json: true });
+    expect(result.objectId).toBe('I1');
+    expect(result.size).toBe('small');
+    expect(result.name).toEqual('Product 3');
+    expect(result.className).toEqual('Item');
+  });
+
   it('will error when getting a nonexistent object', done => {
     CoreManager.setQueryController({
       aggregate() {},

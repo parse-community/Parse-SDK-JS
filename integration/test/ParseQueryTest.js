@@ -48,6 +48,30 @@ describe('Parse Query', () => {
       .catch(done.fail);
   });
 
+  it('can return raw json from queries', async () => {
+    const object = new TestObject({ foo: 'bar' });
+    await object.save();
+
+    const query = new Parse.Query(TestObject);
+    const results = await query.find({ json: true });
+    assert.strictEqual(results[0] instanceof Parse.Object, false);
+    assert.strictEqual(results[0].foo, 'bar');
+    assert.strictEqual(results[0].className, 'TestObject');
+    assert.strictEqual(results[0].objectId, object.id);
+
+    let result = await query.first({ json: true });
+    assert.strictEqual(result instanceof Parse.Object, false);
+    assert.strictEqual(result.foo, 'bar');
+    assert.strictEqual(result.className, 'TestObject');
+    assert.strictEqual(result.objectId, object.id);
+
+    result = await query.get(object.id, { json: true });
+    assert.strictEqual(result instanceof Parse.Object, false);
+    assert.strictEqual(result.foo, 'bar');
+    assert.strictEqual(result.className, 'TestObject');
+    assert.strictEqual(result.objectId, object.id);
+  });
+
   it('can do query with count', async () => {
     const items = [];
     for (let i = 0; i < 4; i++) {
