@@ -10,43 +10,16 @@
 jest.autoMockOff();
 
 const mockRNStorageInterface = require('./test_helpers/mockRNStorage');
+const mockStorageInterface = require('./test_helpers/mockStorageInteface');
+const mockIndexedDB = require('./test_helpers/mockIndexedDB');
 const mockWeChat = require('./test_helpers/mockWeChat');
 const CoreManager = require('../CoreManager');
 
 global.wx = mockWeChat;
-
-let mockStorage = {};
-const mockStorageInterface = {
-  getItem(path) {
-    return mockStorage[path] || null;
-  },
-
-  getItemAsync(path) {
-    return Promise.resolve(mockStorageInterface.getItem(path));
-  },
-
-  setItem(path, value) {
-    mockStorage[path] = value;
-  },
-
-  setItemAsync(path, value) {
-    return Promise.resolve(mockStorageInterface.setItem(path, value));
-  },
-
-  removeItem(path) {
-    delete mockStorage[path];
-  },
-
-  removeItemAsync(path) {
-    return Promise.resolve(mockStorageInterface.removeItem(path));
-  },
-
-  clear() {
-    mockStorage = {};
-  },
-};
-
 global.localStorage = mockStorageInterface;
+jest.mock('idb-keyval', () => {
+  return mockIndexedDB;
+});
 
 const BrowserStorageController = require('../StorageController.browser');
 
@@ -189,6 +162,46 @@ describe('React Native StorageController', () => {
       expect(error).toBe('Error Thrown');
       done();
     });
+  });
+});
+
+const IndexedDBStorageController = require('../IndexedDBStorageController');
+
+describe('React Native StorageController', () => {
+  beforeEach(() => {
+    IndexedDBStorageController.clear();
+  });
+
+  it('is asynchronous', () => {
+    expect(IndexedDBStorageController.async).toBe(1);
+    expect(typeof IndexedDBStorageController.getItemAsync).toBe('function');
+    expect(typeof IndexedDBStorageController.setItemAsync).toBe('function');
+    expect(typeof IndexedDBStorageController.removeItemAsync).toBe('function');
+  });
+
+  it('can store and retrieve values', async () => {
+    let result = await IndexedDBStorageController.getItemAsync('myKey');
+    expect(result).toBe(null);
+    await IndexedDBStorageController.setItemAsync('myKey', 'myValue');
+    result = await IndexedDBStorageController.getItemAsync('myKey');
+    expect(result).toBe('myValue');
+  });
+
+  it('can remove values', async () => {
+    await IndexedDBStorageController.setItemAsync('myKey', 'myValue');
+    let result = await IndexedDBStorageController.getItemAsync('myKey');
+    expect(result).toBe('myValue');
+    await IndexedDBStorageController.removeItemAsync('myKey');
+    result = await IndexedDBStorageController.getItemAsync('myKey');
+    expect(result).toBe(null);
+  });
+
+  it('can getAllKeys', async () => {
+    await IndexedDBStorageController.setItemAsync('myKey', 'myValue');
+    const result = await IndexedDBStorageController.getItemAsync('myKey');
+    expect(result).toBe('myValue');
+    const keys = await IndexedDBStorageController.getAllKeysAsync();
+    expect(keys[0]).toBe('myKey');
   });
 });
 
