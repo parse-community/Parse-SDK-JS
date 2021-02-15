@@ -309,6 +309,16 @@ class ParseUser extends ParseObject {
   }
 
   /**
+   * Returns true if <code>current</code> would return this user.
+   *
+   * @returns {Promise<boolean>} true if user is cached on disk
+   */
+  async isCurrentAsync(): Promise<boolean> {
+    const current = await ParseUser.currentAsync();
+    return !!current && current.id === this.id;
+  }
+
+  /**
    * Returns get("username").
    *
    * @returns {string}
@@ -458,13 +468,13 @@ class ParseUser extends ParseObject {
    * @param {...any} args
    * @returns {Promise}
    */
-  save(...args: Array<any>): Promise<ParseUser> {
-    return super.save.apply(this, args).then(() => {
-      if (this.isCurrent()) {
-        return CoreManager.getUserController().updateUserOnDisk(this);
-      }
-      return this;
-    });
+  async save(...args: Array<any>): Promise<ParseUser> {
+    await super.save.apply(this, args);
+    const current = await this.isCurrentAsync();
+    if (current) {
+      return CoreManager.getUserController().updateUserOnDisk(this);
+    }
+    return this;
   }
 
   /**
@@ -474,13 +484,13 @@ class ParseUser extends ParseObject {
    * @param {...any} args
    * @returns {Parse.User}
    */
-  destroy(...args: Array<any>): Promise<ParseUser> {
-    return super.destroy.apply(this, args).then(() => {
-      if (this.isCurrent()) {
-        return CoreManager.getUserController().removeUserFromDisk();
-      }
-      return this;
-    });
+  async destroy(...args: Array<any>): Promise<ParseUser> {
+    await super.destroy.apply(this, args);
+    const current = await this.isCurrentAsync();
+    if (current) {
+      return CoreManager.getUserController().removeUserFromDisk();
+    }
+    return this;
   }
 
   /**
@@ -490,13 +500,13 @@ class ParseUser extends ParseObject {
    * @param {...any} args
    * @returns {Parse.User}
    */
-  fetch(...args: Array<any>): Promise<ParseUser> {
-    return super.fetch.apply(this, args).then(() => {
-      if (this.isCurrent()) {
-        return CoreManager.getUserController().updateUserOnDisk(this);
-      }
-      return this;
-    });
+  async fetch(...args: Array<any>): Promise<ParseUser> {
+    await super.fetch.apply(this, args);
+    const current = await this.isCurrentAsync();
+    if (current) {
+      return CoreManager.getUserController().updateUserOnDisk(this);
+    }
+    return this;
   }
 
   /**
@@ -506,13 +516,13 @@ class ParseUser extends ParseObject {
    * @param {...any} args
    * @returns {Parse.User}
    */
-  fetchWithInclude(...args: Array<any>): Promise<ParseUser> {
-    return super.fetchWithInclude.apply(this, args).then(() => {
-      if (this.isCurrent()) {
-        return CoreManager.getUserController().updateUserOnDisk(this);
-      }
-      return this;
-    });
+  async fetchWithInclude(...args: Array<any>): Promise<ParseUser> {
+    await super.fetchWithInclude.apply(this, args);
+    const current = await this.isCurrentAsync();
+    if (current) {
+      return CoreManager.getUserController().updateUserOnDisk(this);
+    }
+    return this;
   }
 
   /**
@@ -1161,7 +1171,7 @@ const DefaultController = {
     return RESTController.request('POST', 'requestPasswordReset', { email: email }, options);
   },
 
-  upgradeToRevocableSession(user: ParseUser, options: RequestOptions) {
+  async upgradeToRevocableSession(user: ParseUser, options: RequestOptions) {
     const token = user.getSessionToken();
     if (!token) {
       return Promise.reject(
@@ -1172,15 +1182,15 @@ const DefaultController = {
     options.sessionToken = token;
 
     const RESTController = CoreManager.getRESTController();
-    return RESTController.request('POST', 'upgradeToRevocableSession', {}, options).then(result => {
-      const session = new ParseSession();
-      session._finishFetch(result);
-      user._finishFetch({ sessionToken: session.getSessionToken() });
-      if (user.isCurrent()) {
-        return DefaultController.setCurrentUser(user);
-      }
-      return Promise.resolve(user);
-    });
+    const result = await RESTController.request('POST', 'upgradeToRevocableSession', {}, options);
+    const session = new ParseSession();
+    session._finishFetch(result);
+    user._finishFetch({ sessionToken: session.getSessionToken() });
+    const current = await user.isCurrentAsync();
+    if (current) {
+      return DefaultController.setCurrentUser(user);
+    }
+    return Promise.resolve(user);
   },
 
   linkWith(user: ParseUser, authData: AuthData, options: FullOptions) {
