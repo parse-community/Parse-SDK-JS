@@ -1,7 +1,34 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.19.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.0.0...master)
+
+## 3.0.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.19.0...3.0.0)
+
+**Breaking Changes**
+For security purposes, logIn will default to `POST` instead of `GET` method. ([#1284](https://github.com/parse-community/Parse-SDK-JS/pull/1284))
+
+If you need to use `GET` set the `usePost` option to false.
+
+`Parse.User.logIn('username', 'password', { usePost: false })`
+
+**Features**
+- Add EventuallyQueue API, object.saveEventually, object.destroyEventually ([#1291](https://github.com/parse-community/Parse-SDK-JS/pull/1291))
+- Add Parse.CLP Object to control ClassLevelPermissions ([#1145](https://github.com/parse-community/Parse-SDK-JS/pull/1145))
+- Add option `{ json: true }` on queries ([#1294](https://github.com/parse-community/Parse-SDK-JS/pull/1294))
+- Add IndexedDB Storage Controller ([#1297](https://github.com/parse-community/Parse-SDK-JS/pull/1297))
+- Parse.User.isCurrentAsync() for async storage ([#1298](https://github.com/parse-community/Parse-SDK-JS/pull/1298))
+
+**Improvements**
+- Add useMasterKey option to Parse.File.destroy() ([#1285](https://github.com/parse-community/Parse-SDK-JS/pull/1285))
+- User management on React-Native ([#1298](https://github.com/parse-community/Parse-SDK-JS/pull/1298))
+
+**Fixes**
+- Allow connect to LiveQuery with null fields ([#1282](https://github.com/parse-community/Parse-SDK-JS/pull/1282))
+- fromJSON: Return date if value is type `Date` ([#1293](https://github.com/parse-community/Parse-SDK-JS/pull/1293))
+- fromJSON: Allow keys to dirty, allows save fromJSON ([#1295](https://github.com/parse-community/Parse-SDK-JS/pull/1295))
+- Parse.Schema.addField accepts Pointer and Relation types ([#1281](https://github.com/parse-community/Parse-SDK-JS/pull/1281))
 
 ## 2.19.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/2.18.0...2.19.0)
