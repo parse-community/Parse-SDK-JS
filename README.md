@@ -44,6 +44,12 @@ const Parse = require('parse');
 import Parse from 'parse/dist/parse.min.js';
 ```
 
+For web worker or browser applications, indexedDB storage is available:
+
+```js
+Parse.CoreManager.setStorageController(Parse.IndexedDB);
+```
+
 For server-side applications or Node.js command line tools, include `'parse/node'`:
 
 ```js

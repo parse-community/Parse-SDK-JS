@@ -200,4 +200,12 @@ describe('Parse module', () => {
   it('_encode', () => {
     expect(Parse._encode(12)).toBe(12);
   });
+
+  it('can get IndexedDB storage', () => {
+    console.log(Parse.IndexedDB);
+    expect(Parse.IndexedDB).toBeDefined();
+    CoreManager.setStorageController(Parse.IndexedDB);
+    const currentStorage = CoreManager.getStorageController();
+    expect(currentStorage).toEqual(Parse.IndexedDB);
+  });
 });
