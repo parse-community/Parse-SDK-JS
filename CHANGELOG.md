@@ -8,7 +8,9 @@
 
 **Breaking Changes**
 For security purposes, logIn will default to `POST` instead of `GET` method. ([#1284](https://github.com/parse-community/Parse-SDK-JS/pull/1284))
+
 If you need to use `GET` set the `usePost` option to false.
+
 `Parse.User.logIn('username', 'password', { usePost: false })`
 
 **Features**
