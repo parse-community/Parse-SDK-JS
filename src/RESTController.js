@@ -122,6 +122,9 @@ const RESTController = {
               if ((xhr.getAllResponseHeaders() || '').includes('x-parse-job-status-id: ')) {
                 response = xhr.getResponseHeader('x-parse-job-status-id');
               }
+              if ((xhr.getAllResponseHeaders() || '').includes('x-parse-push-status-id: ')) {
+                response = xhr.getResponseHeader('x-parse-push-status-id');
+              }
             }
           } catch (e) {
             promise.reject(e.toString());

@@ -36,6 +36,12 @@ const defaultConfiguration = {
   },
   verbose: false,
   silent: true,
+  push: {
+    android: {
+      senderId: 'yolo',
+      apiKey: 'yolo',
+    },
+  },
   idempotencyOptions: {
     paths: ['functions/CloudFunctionIdempotency', 'jobs/CloudJob1', 'classes/IdempotentTest'],
     ttl: 120,
