@@ -81,6 +81,16 @@ const Parse = {
   },
 
   /**
+   * Returns information regarding the current server's health
+   *
+   * @returns {Promise}
+   * @static
+   */
+  getServerHealth() {
+    return CoreManager.getRESTController().request('GET', 'health');
+  },
+
+  /**
    * @member {string} Parse.applicationId
    * @static
    */
@@ -228,9 +238,6 @@ Parse.LiveQuery = require('./ParseLiveQuery').default;
 Parse.LiveQueryClient = require('./LiveQueryClient').default;
 Parse.IndexedDB = require('./IndexedDBStorageController');
 
-Parse.getServerHealth = function () {
-  return CoreManager.getRESTController().request('GET', 'health');
-};
 Parse._request = function (...args) {
   return CoreManager.getRESTController().request.apply(null, args);
 };
