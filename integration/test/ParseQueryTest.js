@@ -1158,7 +1158,7 @@ describe('Parse Query', () => {
       });
   });
 
-  it('can test case insensitive regex', done => {
+  it('can test case insensitive matches', done => {
     const obj = new TestObject();
     obj.set('myString', 'hockey');
     obj
@@ -1173,6 +1173,32 @@ describe('Parse Query', () => {
         assert.equal(results[0].get('myString'), 'hockey');
         done();
       });
+  });
+
+  it('can test case insensitive startsWith', async () => {
+    const obj = new TestObject();
+    obj.set('myString', 'basketball');
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    query.startsWith('myString', 'baSKet', 'i');
+    const results = await query.find();
+
+    assert.strictEqual(results.length, 1);
+    assert.strictEqual(results[0].get('myString'), 'basketball');
+  });
+
+  it('can test case insensitive endsWith', async () => {
+    const obj = new TestObject();
+    obj.set('myString', 'basketball');
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    query.endsWith('myString', 'tBAll', 'i');
+    const results = await query.find();
+
+    assert.strictEqual(results.length, 1);
+    assert.strictEqual(results[0].get('myString'), 'basketball');
   });
 
   it('fails for invalid regex options', done => {
