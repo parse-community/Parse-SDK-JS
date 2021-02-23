@@ -81,6 +81,16 @@ const Parse = {
   },
 
   /**
+   * Returns information regarding the current server's health
+   *
+   * @returns {Promise}
+   * @static
+   */
+  getServerHealth() {
+    return CoreManager.getRESTController().request('GET', 'health');
+  },
+
+  /**
    * @member {string} Parse.applicationId
    * @static
    */

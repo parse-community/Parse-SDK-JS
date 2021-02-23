@@ -308,12 +308,14 @@ const EventuallyQueue = {
     }
     polling = setInterval(() => {
       const RESTController = CoreManager.getRESTController();
-      RESTController.ajax('GET', CoreManager.get('SERVER_URL')).catch(error => {
-        if (error !== 'Unable to connect to the Parse API') {
-          this.stopPoll();
-          return this.sendQueue();
-        }
-      });
+      RESTController.request('GET', 'health')
+        .then(({ status }) => {
+          if (status === 'ok') {
+            this.stopPoll();
+            return this.sendQueue();
+          }
+        })
+        .catch(e => e);
     }, ms);
   },
 

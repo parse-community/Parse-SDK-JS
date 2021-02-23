@@ -699,16 +699,6 @@ describe('ParseObject', () => {
     expect(o.get('objectField').letter).toEqual('a');
   });
 
-  it('ignore set nested field on new object', () => {
-    const o = new ParseObject('Person');
-    o.set('objectField.number', 20);
-
-    expect(o.attributes).toEqual({});
-    expect(o.op('objectField.number') instanceof SetOp).toBe(false);
-    expect(o.dirtyKeys()).toEqual([]);
-    expect(o._getSaveJSON()).toEqual({});
-  });
-
   it('can add elements to an array field', () => {
     const o = new ParseObject('Schedule');
     o.add('available', 'Monday');

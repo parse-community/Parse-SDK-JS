@@ -168,6 +168,18 @@ describe('Parse module', () => {
     Parse.allowCustomObjectId = false;
   });
 
+  it('getServerHealth', () => {
+    const controller = {
+      request: jest.fn(),
+      ajax: jest.fn(),
+    };
+    CoreManager.setRESTController(controller);
+    Parse.getServerHealth();
+    const [method, path] = controller.request.mock.calls[0];
+    expect(method).toBe('GET');
+    expect(path).toBe('health');
+  });
+
   it('_request', () => {
     const controller = {
       request: jest.fn(),

@@ -750,15 +750,6 @@ class ParseObject {
 
     const currentAttributes = this.attributes;
 
-    // Only set nested fields if exists
-    const serverData = this._getServerData();
-    if (typeof key === 'string' && key.includes('.')) {
-      const field = key.split('.')[0];
-      if (!serverData[field]) {
-        return this;
-      }
-    }
-
     // Calculate new values
     const newValues = {};
     for (const attr in newOps) {

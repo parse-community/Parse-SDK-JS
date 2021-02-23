@@ -414,16 +414,6 @@ describe('Parse Object', () => {
     assert.equal(result.get('objectField').unknown, 20);
   });
 
-  it('ignore set nested fields on new object', async () => {
-    const obj = new TestObject();
-    obj.set('objectField.number', 5);
-    assert.deepEqual(obj._getPendingOps()[0], {});
-    assert.equal(obj.get('objectField'), undefined);
-
-    await obj.save();
-    assert.equal(obj.get('objectField'), undefined);
-  });
-
   it('can set nested fields two levels', async () => {
     const obj = new TestObject({ objectField: { foo: { bar: 5 } } });
     assert.equal(obj.get('objectField').foo.bar, 5);
