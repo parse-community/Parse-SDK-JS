@@ -324,10 +324,19 @@ class ParseObject {
   }
 
   _getSaveParams(): SaveParams {
-    const method = this.id ? 'PUT' : 'POST';
+    let method = this.id ? 'PUT' : 'POST';
     const body = this._getSaveJSON();
     let path = 'classes/' + this.className;
-    if (this.id) {
+    if (CoreManager.get('ALLOW_CUSTOM_OBJECT_ID')) {
+      if (!this.createdAt) {
+        method = 'POST';
+        path += '';
+        body.objectId = this.id;
+      } else {
+        method = 'PUT';
+        path += '/' + this.id;
+      }
+    } else if (this.id) {
       path += '/' + this.id;
     } else if (this.className === '_User') {
       path = 'users';
@@ -2362,6 +2371,7 @@ const DefaultController = {
 
     const RESTController = CoreManager.getRESTController();
     const stateController = CoreManager.getObjectStateController();
+    const allowCustomObjectId = CoreManager.get('ALLOW_CUSTOM_OBJECT_ID');
 
     options = options || {};
     options.returnStatus = options.returnStatus || true;
@@ -2384,6 +2394,12 @@ const DefaultController = {
         if (el instanceof ParseFile) {
           filesSaved.push(el.save(options));
         } else if (el instanceof ParseObject) {
+          if (allowCustomObjectId && !el.id) {
+            throw new ParseError(
+              ParseError.MISSING_OBJECT_ID,
+              'objectId must not be empty, null or undefined'
+            );
+          }
           pending.push(el);
         }
       });
@@ -2477,6 +2493,12 @@ const DefaultController = {
         });
       });
     } else if (target instanceof ParseObject) {
+      if (allowCustomObjectId && !target.id) {
+        throw new ParseError(
+          ParseError.MISSING_OBJECT_ID,
+          'objectId must not be empty, null or undefined'
+        );
+      }
       // generate _localId in case if cascadeSave=false
       target._getId();
       const localId = target._localId;
