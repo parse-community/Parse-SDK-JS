@@ -52,6 +52,12 @@ const RESTController = require('../RESTController');
 const Storage = require('../Storage');
 const mockXHR = require('./test_helpers/mockXHR');
 
+CoreManager.setInstallationController({
+  currentInstallationId() {
+    return Promise.resolve('iid');
+  },
+});
+
 function flushPromises() {
   return new Promise(resolve => setImmediate(resolve));
 }
@@ -400,7 +406,7 @@ describe('EventuallyQueue', () => {
 
   it('can poll server', async () => {
     jest.spyOn(EventuallyQueue, 'sendQueue').mockImplementationOnce(() => {});
-    RESTController._setXHR(mockXHR([{ status: 107, response: { error: 'ok' } }]));
+    RESTController._setXHR(mockXHR([{ status: 200, response: { status: 'ok' } }]));
     EventuallyQueue.poll();
     expect(EventuallyQueue.isPolling()).toBe(true);
     jest.runOnlyPendingTimers();
