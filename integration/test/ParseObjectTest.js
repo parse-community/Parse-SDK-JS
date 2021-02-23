@@ -278,6 +278,20 @@ describe('Parse Object', () => {
     assert.equal(result.get('objectField').number, 20);
   });
 
+  it('can increment nested four levels', async () => {
+    const obj = new TestObject({ a: { b: { c: { d: 1 } } } });
+    await obj.save();
+    obj.increment('a.b.c.d');
+    assert.strictEqual(obj.get('a').b.c.d, 2);
+
+    await obj.save();
+    assert.strictEqual(obj.get('a').b.c.d, 2);
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.strictEqual(result.get('a').b.c.d, 2);
+  });
+
   it('can increment nested field and retain full object', async () => {
     const obj = new Parse.Object('TestIncrementObject');
     obj.set('objectField', { number: 5, letter: 'a' });
