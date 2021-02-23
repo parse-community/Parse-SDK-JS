@@ -406,7 +406,7 @@ describe('EventuallyQueue', () => {
 
   it('can poll server', async () => {
     jest.spyOn(EventuallyQueue, 'sendQueue').mockImplementationOnce(() => {});
-    RESTController._setXHR(mockXHR([{ status: 200, response: {} }]));
+    RESTController._setXHR(mockXHR([{ status: 200, response: { status: 'ok' } }]));
     EventuallyQueue.poll();
     expect(EventuallyQueue.isPolling()).toBe(true);
     jest.runOnlyPendingTimers();
