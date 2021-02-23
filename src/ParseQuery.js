@@ -1573,13 +1573,14 @@ class ParseQuery {
    *
    * @param {string} key The key that the string to match is stored in.
    * @param {string} prefix The substring that the value must start with.
+   * @param {string} modifiers The regular expression mode.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  startsWith(key: string, prefix: string): ParseQuery {
+  startsWith(key: string, prefix: string, modifiers: string): ParseQuery {
     if (typeof prefix !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this._addCondition(key, '$regex', this._regexStartWith(prefix));
+    return this.matches(key, this._regexStartWith(prefix), modifiers);
   }
 
   /**
@@ -1588,13 +1589,14 @@ class ParseQuery {
    *
    * @param {string} key The key that the string to match is stored in.
    * @param {string} suffix The substring that the value must end with.
+   * @param {string} modifiers The regular expression mode.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  endsWith(key: string, suffix: string): ParseQuery {
+  endsWith(key: string, suffix: string, modifiers: string): ParseQuery {
     if (typeof suffix !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this._addCondition(key, '$regex', quote(suffix) + '$');
+    return this.matches(key, quote(suffix) + '$', modifiers);
   }
 
   /**
