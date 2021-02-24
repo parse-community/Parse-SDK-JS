@@ -199,6 +199,17 @@ const Parse = {
   get idempotency() {
     return CoreManager.get('IDEMPOTENCY');
   },
+
+  /**
+   * @member {boolean} Parse.allowCustomObjectId
+   * @static
+   */
+  set allowCustomObjectId(value) {
+    CoreManager.set('ALLOW_CUSTOM_OBJECT_ID', value);
+  },
+  get allowCustomObjectId() {
+    return CoreManager.get('ALLOW_CUSTOM_OBJECT_ID');
+  },
 };
 
 Parse.ACL = require('./ParseACL').default;

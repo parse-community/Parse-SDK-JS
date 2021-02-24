@@ -3770,4 +3770,40 @@ describe('ParseObject pin', () => {
       done();
     });
   });
+
+  it('can allowCustomObjectId', async done => {
+    CoreManager.set('ALLOW_CUSTOM_OBJECT_ID', true);
+    const o = new ParseObject('Person');
+    let params = o._getSaveParams();
+    expect(params).toEqual({
+      method: 'POST',
+      body: { objectId: undefined },
+      path: 'classes/Person',
+    });
+    try {
+      await o.save();
+      done.fail();
+    } catch (error) {
+      expect(error.message).toBe('objectId must not be empty, null or undefined');
+    }
+    try {
+      await ParseObject.saveAll([o]);
+      done.fail();
+    } catch (error) {
+      expect(error.message).toBe('objectId must not be empty, null or undefined');
+    }
+    o._finishFetch({
+      objectId: 'CUSTOM_ID',
+      createdAt: { __type: 'Date', iso: new Date().toISOString() },
+      updatedAt: { __type: 'Date', iso: new Date().toISOString() },
+    });
+    params = o._getSaveParams();
+    expect(params).toEqual({
+      method: 'PUT',
+      body: {},
+      path: 'classes/Person/CUSTOM_ID',
+    });
+    CoreManager.set('ALLOW_CUSTOM_OBJECT_ID', false);
+    done();
+  });
 });
