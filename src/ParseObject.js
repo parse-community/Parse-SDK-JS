@@ -931,9 +931,6 @@ class ParseObject {
    */
   clone(): any {
     const clone = new this.constructor(this.className);
-    if (!clone.className) {
-      clone.className = this.className;
-    }
     let attributes = this.attributes;
     if (typeof this.constructor.readOnlyAttributes === 'function') {
       const readonly = this.constructor.readOnlyAttributes() || [];
@@ -960,9 +957,6 @@ class ParseObject {
    */
   newInstance(): any {
     const clone = new this.constructor(this.className);
-    if (!clone.className) {
-      clone.className = this.className;
-    }
     clone.id = this.id;
     if (singleInstance) {
       // Just return an object with the right id

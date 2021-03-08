@@ -3425,18 +3425,21 @@ describe('ParseObject Subclasses', () => {
       'You must register the subclass constructor. Did you attempt to register an instance of the subclass?'
     );
   });
-  it('registerSubclass with unknown className', () => {
-    let outerClassName = '';
-    class TestObject extends ParseObject {
+  it('can use on ParseObject subclass for multiple Parse.Object class names', () => {
+    class MyParseObjects extends ParseObject {
       constructor(className) {
         super(className);
-        outerClassName = className;
       }
     }
-    ParseObject.registerSubclass('TestObject', TestObject);
-    const o = new TestObject('TestObject');
-    expect(o.className).toBe('TestObject');
-    expect(outerClassName).toBe('TestObject');
+    ParseObject.registerSubclass('TestObject', MyParseObjects);
+    ParseObject.registerSubclass('TestObject1', MyParseObjects);
+    ParseObject.registerSubclass('TestObject2', MyParseObjects);
+    const obj = new MyParseObjects('TestObject');
+    expect(obj.className).toBe('TestObject');
+    const obj1 = new MyParseObjects('TestObject1');
+    expect(obj1.className).toBe('TestObject1');
+    const obj2 = new MyParseObjects('TestObject2');
+    expect(obj2.className).toBe('TestObject2');
   });
 
   it('can inflate subclasses from server JSON', () => {
