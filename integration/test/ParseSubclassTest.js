@@ -193,4 +193,21 @@ describe('Parse Object Subclasses', () => {
     const wartortle = new Wartortle();
     assert(wartortle.water);
   });
+  it('registerSubclass with unknown className', async () => {
+    let outerClassName = '';
+    class TestObject extends Parse.Object {
+      constructor(className) {
+        super(className);
+        outerClassName = className;
+      }
+    }
+    Parse.Object.registerSubclass('TestObject', TestObject);
+    const o = new Parse.Object('TestObject');
+    await o.save();
+    const query = new Parse.Query('TestObject');
+    const first = await query.first();
+    expect(first instanceof TestObject).toBe(true);
+    expect(first.className).toBe('TestObject');
+    expect(outerClassName).toBe('TestObject');
+  });
 });

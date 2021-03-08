@@ -930,7 +930,7 @@ class ParseObject {
    * @returns {Parse.Object}
    */
   clone(): any {
-    const clone = new this.constructor();
+    const clone = new this.constructor(this.className);
     if (!clone.className) {
       clone.className = this.className;
     }
@@ -959,7 +959,7 @@ class ParseObject {
    * @returns {Parse.Object}
    */
   newInstance(): any {
-    const clone = new this.constructor();
+    const clone = new this.constructor(this.className);
     if (!clone.className) {
       clone.className = this.className;
     }
@@ -1831,7 +1831,7 @@ class ParseObject {
       throw new Error('Cannot create an object without a className');
     }
     const constructor = classMap[json.className];
-    const o = constructor ? new constructor() : new ParseObject(json.className);
+    const o = constructor ? new constructor(json.className) : new ParseObject(json.className);
     const otherAttributes = {};
     for (const attr in json) {
       if (attr !== 'className' && attr !== '__type') {
