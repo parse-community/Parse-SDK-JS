@@ -193,6 +193,7 @@ describe('Parse Object Subclasses', () => {
     const wartortle = new Wartortle();
     assert(wartortle.water);
   });
+
   it('registerSubclass with unknown className', async () => {
     let outerClassName = '';
     class TestObject extends Parse.Object {

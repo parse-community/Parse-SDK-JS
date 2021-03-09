@@ -3425,6 +3425,7 @@ describe('ParseObject Subclasses', () => {
       'You must register the subclass constructor. Did you attempt to register an instance of the subclass?'
     );
   });
+
   it('can use on ParseObject subclass for multiple Parse.Object class names', () => {
     class MyParseObjects extends ParseObject {
       constructor(className) {
