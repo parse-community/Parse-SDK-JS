@@ -2,6 +2,7 @@
 
 ### master
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.1.0...master)
+- Add className argument to Parse Object subclass constructor ([#1315](https://github.com/parse-community/Parse-SDK-JS/pull/1315))
 
 ## 3.1.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.0.0...3.1.0)

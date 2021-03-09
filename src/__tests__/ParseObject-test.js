@@ -3426,6 +3426,23 @@ describe('ParseObject Subclasses', () => {
     );
   });
 
+  it('can use on ParseObject subclass for multiple Parse.Object class names', () => {
+    class MyParseObjects extends ParseObject {
+      constructor(className) {
+        super(className);
+      }
+    }
+    ParseObject.registerSubclass('TestObject', MyParseObjects);
+    ParseObject.registerSubclass('TestObject1', MyParseObjects);
+    ParseObject.registerSubclass('TestObject2', MyParseObjects);
+    const obj = new MyParseObjects('TestObject');
+    expect(obj.className).toBe('TestObject');
+    const obj1 = new MyParseObjects('TestObject1');
+    expect(obj1.className).toBe('TestObject1');
+    const obj2 = new MyParseObjects('TestObject2');
+    expect(obj2.className).toBe('TestObject2');
+  });
+
   it('can inflate subclasses from server JSON', () => {
     const json = {
       className: 'MyObject',
