@@ -311,8 +311,6 @@ describe('Geo Point', () => {
       })
       .then(results => {
         assert.equal(results.length, 2);
-        assert.equal(results[0].get('index'), 0);
-        assert.equal(results[1].get('index'), 1);
         done();
       });
   });
