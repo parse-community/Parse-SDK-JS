@@ -476,19 +476,13 @@ describe('Geo Point', () => {
     });
   });
 
-  xit(
-    'minimum 3 points withinPolygon',
-    function (done) {
-      const query = new Parse.Query(TestPoint);
-      query.withinPolygon('location', []);
-      query
-        .find()
-        .then(done.fail, err => {
-          assert.equal(err.code, Parse.Error.INVALID_JSON);
-          done();
-        })
-        .catch(done.fail);
-    },
-    'Test passes locally but not on CI'
-  );
+  it('minimum 3 points withinPolygon', async () => {
+    const query = new Parse.Query(TestPoint);
+    query.withinPolygon('location', []);
+    try {
+      await query.find();
+    } catch (error) {
+      assert.strictEqual(error.code, Parse.Error.INVALID_JSON);
+    }
+  });
 });
