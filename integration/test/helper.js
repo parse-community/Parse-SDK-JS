@@ -1,4 +1,4 @@
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 
 const ParseServer = require('parse-server').default;
 const CustomAuth = require('./CustomAuth');

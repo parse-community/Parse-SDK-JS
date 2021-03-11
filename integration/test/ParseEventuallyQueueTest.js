@@ -163,7 +163,9 @@ describe('Parse EventuallyQueue', () => {
     Parse.EventuallyQueue.poll();
     assert.ok(Parse.EventuallyQueue.isPolling());
 
-    await sleep(4000);
+    while (Parse.EventuallyQueue.isPolling()) {
+      await sleep(100);
+    }
     const query = new Parse.Query(TestObject);
     const result = await query.get(object.id);
     assert.strictEqual(result.get('foo'), 'bar');
@@ -199,12 +201,19 @@ describe('Parse EventuallyQueue', () => {
         await sleep(100);
       }
       assert.strictEqual(Parse.EventuallyQueue.isPolling(), false);
+
+      while (await Parse.EventuallyQueue.length()) {
+        await sleep(100);
+      }
       length = await Parse.EventuallyQueue.length();
       assert.strictEqual(length, 0);
 
       const query = new Parse.Query(TestObject);
       query.equalTo('hash', 'saveSecret');
-      const results = await query.find();
+      let results = await query.find();
+      while (results.length === 0) {
+        results = await query.find();
+      }
       assert.strictEqual(results.length, 1);
       done();
     });
@@ -225,12 +234,18 @@ describe('Parse EventuallyQueue', () => {
         await sleep(100);
       }
       assert.strictEqual(Parse.EventuallyQueue.isPolling(), false);
+      while (await Parse.EventuallyQueue.length()) {
+        await sleep(100);
+      }
       length = await Parse.EventuallyQueue.length();
       assert.strictEqual(length, 0);
 
       const query = new Parse.Query(TestObject);
       query.equalTo('hash', 'deleteSecret');
-      const results = await query.find();
+      let results = await query.find();
+      while (results.length) {
+        results = await query.find();
+      }
       assert.strictEqual(results.length, 0);
       done();
     });
