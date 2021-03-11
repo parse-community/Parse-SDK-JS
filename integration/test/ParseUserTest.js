@@ -2,6 +2,7 @@
 
 const assert = require('assert');
 const Parse = require('../../node');
+const uuidv4 = require('uuid/v4');
 
 class CustomUser extends Parse.User {
   constructor(attributes) {
@@ -42,8 +43,8 @@ global.FB = {
 };
 
 describe('Parse User', () => {
-  beforeEach(() => {
-    Parse.Object.registerSubclass('_User', Parse.User);
+  afterAll(() => {
+    Parse.Object.unregisterSubclass('CustomUser');
   });
 
   it('can sign up users via static method', done => {
@@ -491,6 +492,7 @@ describe('Parse User', () => {
   });
 
   it('can update users', done => {
+    Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
     user
       .signUp({
@@ -804,8 +806,8 @@ describe('Parse User', () => {
     Parse.User.enableUnsafeCurrentUser();
 
     let user = new CustomUser();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
     user = await CustomUser.logInWith(provider.getAuthType(), provider.getAuthData());
     expect(user._isLinked(provider)).toBe(true);
@@ -817,8 +819,8 @@ describe('Parse User', () => {
     Parse.User.enableUnsafeCurrentUser();
 
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
     await user.linkWith(provider.getAuthType(), provider.getAuthData());
     expect(user._isLinked(provider)).toBe(true);
@@ -830,8 +832,8 @@ describe('Parse User', () => {
     Parse.User.disableUnsafeCurrentUser();
 
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.save(null, { useMasterKey: true });
     await user.linkWith(provider.getAuthType(), provider.getAuthData(), {
       useMasterKey: true,
@@ -845,8 +847,8 @@ describe('Parse User', () => {
     Parse.User.disableUnsafeCurrentUser();
 
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
     expect(user.isCurrent()).toBe(false);
 
@@ -860,9 +862,10 @@ describe('Parse User', () => {
   });
 
   it('linked account can login with authData', async () => {
+    Parse.User.disableUnsafeCurrentUser();
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.save(null, { useMasterKey: true });
     await user.linkWith(provider.getAuthType(), provider.getAuthData(), {
       useMasterKey: true,
@@ -876,8 +879,8 @@ describe('Parse User', () => {
 
   it('can linking un-authenticated user without master key', async () => {
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.save(null, { useMasterKey: true });
     await user.linkWith(provider.getAuthType(), provider.getAuthData());
     expect(user.getSessionToken()).toBeDefined();
@@ -905,8 +908,8 @@ describe('Parse User', () => {
     };
     Parse.User._registerAuthenticationProvider(provider);
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
     await user.linkWith(provider.getAuthType(), provider.getAuthData());
     expect(user._isLinked(provider)).toBe(true);
@@ -925,8 +928,8 @@ describe('Parse User', () => {
     Parse.User.enableUnsafeCurrentUser();
     Parse.FacebookUtils.init();
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
     await Parse.FacebookUtils.link(user);
     expect(Parse.FacebookUtils.isLinked(user)).toBe(true);
@@ -958,8 +961,8 @@ describe('Parse User', () => {
       auth_token_secret: 'G1tl1R0gaYKTyxw0uYJDKRoVhM16ifyLeMwIaKlFtPkQr',
     };
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
 
     await user.linkWith('twitter', { authData });
@@ -982,8 +985,8 @@ describe('Parse User', () => {
       auth_token_secret: 'G1tl1R0gaYKTyxw0uYJDKRoVhM16ifyLeMwIaKlFtPkQr',
     };
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
 
     await user.linkWith('twitter', { authData });

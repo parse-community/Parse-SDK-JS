@@ -195,6 +195,7 @@ describe('Parse Object Subclasses', () => {
   });
 
   it('registerSubclass with unknown className', async () => {
+    Parse.Object.unregisterSubclass('TestObject');
     let outerClassName = '';
     class TestObject extends Parse.Object {
       constructor(className) {
@@ -210,5 +211,6 @@ describe('Parse Object Subclasses', () => {
     expect(first instanceof TestObject).toBe(true);
     expect(first.className).toBe('TestObject');
     expect(outerClassName).toBe('TestObject');
+    Parse.Object.unregisterSubclass('TestObject');
   });
 });

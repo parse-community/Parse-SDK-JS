@@ -2856,6 +2856,8 @@ function runTest(controller) {
 
       localDatastore = await Parse.LocalDatastore._getAllContents();
       expect(localDatastore[LDS_KEY(testClassB)][0].classA.objectId).toEqual(testClassA.id);
+      Parse.Object.unregisterSubclass('ClassA');
+      Parse.Object.unregisterSubclass('ClassB');
     });
   });
 }

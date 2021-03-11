@@ -3424,6 +3424,10 @@ describe('ParseObject Subclasses', () => {
     }).toThrow(
       'You must register the subclass constructor. Did you attempt to register an instance of the subclass?'
     );
+
+    expect(() => {
+      ParseObject.unregisterSubclass(1234);
+    }).toThrow('The first argument must be a valid class name.');
   });
 
   it('can use on ParseObject subclass for multiple Parse.Object class names', () => {
@@ -3435,12 +3439,27 @@ describe('ParseObject Subclasses', () => {
     ParseObject.registerSubclass('TestObject', MyParseObjects);
     ParseObject.registerSubclass('TestObject1', MyParseObjects);
     ParseObject.registerSubclass('TestObject2', MyParseObjects);
+
     const obj = new MyParseObjects('TestObject');
     expect(obj.className).toBe('TestObject');
     const obj1 = new MyParseObjects('TestObject1');
     expect(obj1.className).toBe('TestObject1');
     const obj2 = new MyParseObjects('TestObject2');
     expect(obj2.className).toBe('TestObject2');
+
+    let classMap = ParseObject._getClassMap();
+    expect(classMap.TestObject).toEqual(MyParseObjects);
+    expect(classMap.TestObject1).toEqual(MyParseObjects);
+    expect(classMap.TestObject2).toEqual(MyParseObjects);
+
+    ParseObject.unregisterSubclass('TestObject');
+    ParseObject.unregisterSubclass('TestObject1');
+    ParseObject.unregisterSubclass('TestObject2');
+
+    classMap = ParseObject._getClassMap();
+    expect(classMap.TestObject).toBeUndefined();
+    expect(classMap.TestObject1).toBeUndefined();
+    expect(classMap.TestObject2).toBeUndefined();
   });
 
   it('can inflate subclasses from server JSON', () => {
