@@ -3424,6 +3424,10 @@ describe('ParseObject Subclasses', () => {
     }).toThrow(
       'You must register the subclass constructor. Did you attempt to register an instance of the subclass?'
     );
+
+    expect(() => {
+      ParseObject.unregisterSubclass(1234);
+    }).toThrow('The first argument must be a valid class name.');
   });
 
   it('can use on ParseObject subclass for multiple Parse.Object class names', () => {
