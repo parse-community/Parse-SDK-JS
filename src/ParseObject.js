@@ -449,6 +449,10 @@ class ParseObject {
     stateController.mergeFirstPendingState(this._getStateIdentifier());
   }
 
+  static _getClassMap() {
+    return classMap;
+  }
+
   /** Public methods **/
 
   initialize() {
@@ -1882,6 +1886,18 @@ class ParseObject {
     if (!constructor.className) {
       constructor.className = className;
     }
+  }
+
+  /**
+   * Unegisters a subclass of Parse.Object with a specific class name.
+   *
+   * @param {string} className The class name of the subclass
+   */
+  static unregisterSubclass(className: string) {
+    if (typeof className !== 'string') {
+      throw new TypeError('The first argument must be a valid class name.');
+    }
+    delete classMap[className];
   }
 
   /**

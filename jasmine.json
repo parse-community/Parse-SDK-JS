@@ -6,6 +6,6 @@
   "spec_files": [
     "*Test.js"
   ],
-  "random": false,
+  "random": true,
   "timeout": 10000
 }
