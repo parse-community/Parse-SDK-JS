@@ -167,7 +167,10 @@ describe('Parse EventuallyQueue', () => {
       await sleep(100);
     }
     const query = new Parse.Query(TestObject);
-    const result = await query.get(object.id);
+    let result = await query.get(object.id);
+    while (result.get('foo') !== 'bar') {
+      result = await query.get(object.id);
+    }
     assert.strictEqual(result.get('foo'), 'bar');
 
     const length = await Parse.EventuallyQueue.length();
