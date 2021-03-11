@@ -356,8 +356,9 @@ describe('Geo Point', () => {
     query.withinKilometers('location', sfo, 3700.0, false);
     query.find().then(results => {
       assert.equal(results.length, 2);
-      assert.equal(results[0].get('name'), 'San Francisco');
-      assert.equal(results[1].get('name'), 'Sacramento');
+      results.forEach(result => {
+        assert.strictEqual(['San Francisco', 'Sacramento'].includes(result.get('name')), true);
+      });
       done();
     });
   });
@@ -399,8 +400,9 @@ describe('Geo Point', () => {
     query.withinMiles('location', sfo, 2200.0, false);
     query.find().then(results => {
       assert.equal(results.length, 2);
-      assert.equal(results[0].get('name'), 'San Francisco');
-      assert.equal(results[1].get('name'), 'Sacramento');
+      results.forEach(result => {
+        assert.strictEqual(['San Francisco', 'Sacramento'].includes(result.get('name')), true);
+      });
       done();
     });
   });
