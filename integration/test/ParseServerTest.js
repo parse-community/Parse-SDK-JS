@@ -4,9 +4,12 @@ const assert = require('assert');
 
 describe('ParseServer', () => {
   it('can reconfigure server', async done => {
-    const server = await reconfigureServer({ serverURL: 'www.google.com' });
-    assert.strictEqual(server.config.serverURL, 'www.google.com');
-    done();
+    const parseServer = await reconfigureServer({ serverURL: 'www.google.com' });
+    assert.strictEqual(parseServer.config.serverURL, 'www.google.com');
+    parseServer.server.close(async () => {
+      await reconfigureServer();
+      done();
+    });
   });
 
   it('can shutdown', async done => {

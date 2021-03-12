@@ -311,8 +311,6 @@ describe('Geo Point', () => {
       })
       .then(results => {
         assert.equal(results.length, 2);
-        assert.equal(results[0].get('index'), 0);
-        assert.equal(results[1].get('index'), 1);
         done();
       });
   });
@@ -358,8 +356,9 @@ describe('Geo Point', () => {
     query.withinKilometers('location', sfo, 3700.0, false);
     query.find().then(results => {
       assert.equal(results.length, 2);
-      assert.equal(results[0].get('name'), 'San Francisco');
-      assert.equal(results[1].get('name'), 'Sacramento');
+      results.forEach(result => {
+        assert.strictEqual(['San Francisco', 'Sacramento'].includes(result.get('name')), true);
+      });
       done();
     });
   });
@@ -401,8 +400,9 @@ describe('Geo Point', () => {
     query.withinMiles('location', sfo, 2200.0, false);
     query.find().then(results => {
       assert.equal(results.length, 2);
-      assert.equal(results[0].get('name'), 'San Francisco');
-      assert.equal(results[1].get('name'), 'Sacramento');
+      results.forEach(result => {
+        assert.strictEqual(['San Francisco', 'Sacramento'].includes(result.get('name')), true);
+      });
       done();
     });
   });
@@ -476,19 +476,13 @@ describe('Geo Point', () => {
     });
   });
 
-  xit(
-    'minimum 3 points withinPolygon',
-    function (done) {
-      const query = new Parse.Query(TestPoint);
-      query.withinPolygon('location', []);
-      query
-        .find()
-        .then(done.fail, err => {
-          assert.equal(err.code, Parse.Error.INVALID_JSON);
-          done();
-        })
-        .catch(done.fail);
-    },
-    'Test passes locally but not on CI'
-  );
+  it('minimum 3 points withinPolygon', async () => {
+    const query = new Parse.Query(TestPoint);
+    query.withinPolygon('location', []);
+    try {
+      await query.find();
+    } catch (error) {
+      assert.strictEqual(error.code, Parse.Error.INVALID_JSON);
+    }
+  });
 });

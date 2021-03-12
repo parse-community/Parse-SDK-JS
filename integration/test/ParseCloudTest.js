@@ -102,8 +102,13 @@ describe('Parse Cloud', () => {
     let jobStatus = await Parse.Cloud.getJobStatus(jobStatusId);
     assert.equal(jobStatus.get('status'), 'running');
 
-    await sleep(2000);
-
+    const checkJobStatus = async () => {
+      const result = await Parse.Cloud.getJobStatus(jobStatusId);
+      return result && result.get('status') === 'succeeded';
+    };
+    while (!(await checkJobStatus())) {
+      await sleep(100);
+    }
     jobStatus = await Parse.Cloud.getJobStatus(jobStatusId);
     assert.equal(jobStatus.get('status'), 'succeeded');
   });
