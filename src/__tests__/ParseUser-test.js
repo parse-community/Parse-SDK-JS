@@ -1066,6 +1066,8 @@ describe('ParseUser', () => {
 
   it('can sync anonymous user with current user', async () => {
     const provider = AnonymousUtils._getAuthProvider();
+    expect(AnonymousUtils.isRegistered()).toBe(true);
+
     jest.spyOn(provider, 'restoreAuthentication');
 
     const object = new ParseUser();
@@ -1086,7 +1088,7 @@ describe('ParseUser', () => {
     spy.mockRestore();
   });
 
-  it('can destroy anonymous user on logout', async () => {
+  it('can logout anonymous user', async () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
@@ -1111,7 +1113,7 @@ describe('ParseUser', () => {
     ParseUser._setCurrentUserCache(user);
 
     await ParseUser.logOut();
-    expect(user.destroy).toHaveBeenCalledTimes(1);
+    expect(ParseUser.current()).toBe(null);
   });
 
   it('can unlink', async () => {
@@ -1138,7 +1140,7 @@ describe('ParseUser', () => {
     expect(user.linkWith).toHaveBeenCalledTimes(1);
   });
 
-  it('can destroy anonymous user when login new user', async () => {
+  it('can logout anonymous user when login new user', async () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
@@ -1176,7 +1178,7 @@ describe('ParseUser', () => {
       ajax() {},
     });
     await ParseUser.logIn('username', 'password');
-    expect(user.destroy).toHaveBeenCalledTimes(1);
+    expect(ParseUser.current().id).not.toBe(user.id);
   });
 
   it('strip anonymity when we set username', () => {

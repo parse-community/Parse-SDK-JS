@@ -9,7 +9,6 @@
  * @flow
  */
 
-import AnonymousUtils from './AnonymousUtils';
 import CoreManager from './CoreManager';
 import isRevocableSession from './isRevocableSession';
 import ParseError from './ParseError';
@@ -337,8 +336,7 @@ class ParseUser extends ParseObject {
    * @param {string} username
    */
   setUsername(username: string) {
-    // Strip anonymity, even we do not support anonymous user in js SDK, we may
-    // encounter anonymous user created by android/iOS in cloud code.
+    // Strip anonymity
     const authData = this.get('authData');
     if (authData && typeof authData === 'object' && authData.hasOwnProperty('anonymous')) {
       // We need to set anonymous to null instead of deleting it in order to remove it from Parse.
@@ -960,13 +958,7 @@ const DefaultController = {
     return Storage.removeItemAsync(path);
   },
 
-  async setCurrentUser(user) {
-    const currentUser = await this.currentUserAsync();
-    if (currentUser && !user.equals(currentUser) && AnonymousUtils.isLinked(currentUser)) {
-      await currentUser.destroy({
-        sessionToken: currentUser.getSessionToken(),
-      });
-    }
+  setCurrentUser(user) {
     currentUserCache = user;
     user._cleanupAuthData();
     user._synchronizeAllAuthData();
@@ -1143,18 +1135,11 @@ const DefaultController = {
       const path = Storage.generatePath(CURRENT_USER_KEY);
       let promise = Storage.removeItemAsync(path);
       if (currentUser !== null) {
-        const isAnonymous = AnonymousUtils.isLinked(currentUser);
         const currentSession = currentUser.getSessionToken();
         if (currentSession && isRevocableSession(currentSession)) {
-          promise = promise
-            .then(() => {
-              if (isAnonymous) {
-                return currentUser.destroy({ sessionToken: currentSession });
-              }
-            })
-            .then(() => {
-              return RESTController.request('POST', 'logout', {}, { sessionToken: currentSession });
-            });
+          promise = promise.then(() => {
+            return RESTController.request('POST', 'logout', {}, { sessionToken: currentSession });
+          });
         }
         currentUser._logOutWithAll();
         currentUser._finishFetch({ sessionToken: undefined });
