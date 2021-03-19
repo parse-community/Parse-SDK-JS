@@ -1126,7 +1126,7 @@ const DefaultController = {
     });
   },
 
-  async logOut(options: RequestOptions): Promise<ParseUser> {
+  logOut(options: RequestOptions): Promise<ParseUser> {
     const RESTController = CoreManager.getRESTController();
     if (options.sessionToken) {
       return RESTController.request('POST', 'logout', {}, options);
