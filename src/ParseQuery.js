@@ -1880,7 +1880,7 @@ class ParseQuery {
   }
 
   /**
-   * Includes all nested Parse.Objects.
+   * Includes all nested Parse.Objects one level deep.
    *
    * Requires Parse Server 3.0.0+
    *
