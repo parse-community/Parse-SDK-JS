@@ -1,5 +1,8 @@
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 
+const { SpecReporter } = require('jasmine-spec-reporter');
+jasmine.getEnv().addReporter(new SpecReporter());
+
 const ParseServer = require('parse-server').default;
 const CustomAuth = require('./CustomAuth');
 const sleep = require('./sleep');
@@ -9,6 +12,7 @@ const Parse = require('../../node');
 const port = 1337;
 const mountPath = '/parse';
 const serverURL = 'http://localhost:1337/parse';
+let didChangeConfiguration = false;
 
 const defaultConfiguration = {
   databaseURI: 'mongodb://localhost:27017/integration',
@@ -68,7 +72,7 @@ const destroyAliveConnections = function () {
 let parseServer;
 let server;
 
-const reconfigureServer = changedConfiguration => {
+const reconfigureServer = (changedConfiguration = {}) => {
   return new Promise((resolve, reject) => {
     if (server) {
       return parseServer.handleShutdown().then(() => {
@@ -80,6 +84,7 @@ const reconfigureServer = changedConfiguration => {
       });
     }
     try {
+      didChangeConfiguration = Object.keys(changedConfiguration).length !== 0;
       const newConfiguration = Object.assign({}, defaultConfiguration, changedConfiguration || {}, {
         serverStartComplete: error => {
           if (error) {
@@ -124,7 +129,7 @@ global.reconfigureServer = reconfigureServer;
 beforeAll(async () => {
   await reconfigureServer();
   Parse.initialize('integration');
-  Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
+  Parse.CoreManager.set('SERVER_URL', serverURL);
   Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
 });
 
@@ -135,4 +140,7 @@ afterEach(async () => {
   destroyAliveConnections();
   // Connection close events are not immediate on node 10+... wait a bit
   await sleep(0);
+  if (didChangeConfiguration) {
+    await reconfigureServer();
+  }
 });
