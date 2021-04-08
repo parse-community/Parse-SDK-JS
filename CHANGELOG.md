@@ -1,8 +1,26 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.1.0...master)
-- Add className argument to Parse Object subclass constructor ([#1315](https://github.com/parse-community/Parse-SDK-JS/pull/1315))
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.2.0...master)
+
+## 3.2.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.1.0...3.2.0)
+
+**Breaking Changes**
+- Remove deletion of Anonymous User on logout ([#1324](https://github.com/parse-community/Parse-SDK-JS/pull/1324))
+See https://community.parseplatform.org/t/anonymous-user-destroyed-on-logout/1425
+
+**Improvements**
+- Allow multiple classNames for `Parse.Object.registerSubclass` ([#1315](https://github.com/parse-community/Parse-SDK-JS/pull/1315))
+```
+const classNames = ['ClassOne', 'ClassTwo', 'ClassThree'];
+for (const className of classNames) {
+  Parse.Object.registerSubclass(className, CustomClass);
+}
+```
+
+**Fixes**
+- Fixes build for WeChat WeApp, To reduce package size, see [issue/#1331](https://github.com/parse-community/Parse-SDK-JS/issues/1331)
 
 ## 3.1.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.0.0...3.1.0)
