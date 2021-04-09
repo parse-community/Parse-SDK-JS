@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://parseplatform.org/",
   "keywords": [
@@ -69,6 +69,7 @@
     "husky": "4.3.5",
     "jasmine": "3.5.0",
     "jasmine-reporters": "2.3.2",
+    "jasmine-spec-reporter": "6.0.0",
     "jest": "24.9.0",
     "jsdoc": "3.6.3",
     "jsdoc-babel": "0.5.0",
