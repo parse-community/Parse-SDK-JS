@@ -20,7 +20,7 @@ for (const className of classNames) {
 ```
 
 **Fixes**
-- Fixes build for WeChat WeApp, To reduce package size, see [issue/#1331](https://github.com/parse-community/Parse-SDK-JS/issues/1331)
+- Fixes build for WeChat WeApp, to reduce package size, see [issue/#1331](https://github.com/parse-community/Parse-SDK-JS/issues/1331)
 
 ## 3.1.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.0.0...3.1.0)
