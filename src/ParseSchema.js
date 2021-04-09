@@ -11,6 +11,9 @@
 
 import CoreManager from './CoreManager';
 import ParseObject from './ParseObject';
+import ParseCLP from './ParseCLP';
+
+import type { PermissionsMap } from './ParseCLP';
 
 const FIELD_TYPES = [
   'String',
@@ -190,11 +193,15 @@ class ParseSchema {
    * Sets Class Level Permissions when creating / updating a Schema.
    * EXERCISE CAUTION, running this may override CLP for this schema and cannot be reversed
    *
-   * @param {object} clp Class Level Permissions
+   * @param {object | Parse.CLP} clp Class Level Permissions
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  setCLP(clp: { [key: string]: mixed }) {
-    this._clp = clp;
+  setCLP(clp: PermissionsMap | ParseCLP) {
+    if (clp instanceof ParseCLP) {
+      this._clp = clp.toJSON();
+    } else {
+      this._clp = clp;
+    }
     return this;
   }
 
@@ -207,6 +214,7 @@ class ParseSchema {
    * Valid options are:<ul>
    *   <li>required: If field is not set, save operation fails (Requires Parse Server 3.7.0+)
    *   <li>defaultValue: If field is not set, a default value is selected (Requires Parse Server 3.7.0+)
+   *   <li>targetClass: Required if type is Pointer or Parse.Relation
    * </ul>
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
@@ -218,6 +226,12 @@ class ParseSchema {
     }
     if (FIELD_TYPES.indexOf(type) === -1) {
       throw new Error(`${type} is not a valid type.`);
+    }
+    if (type === 'Pointer') {
+      return this.addPointer(name, options.targetClass, options);
+    }
+    if (type === 'Relation') {
+      return this.addRelation(name, options.targetClass, options);
     }
     const fieldOptions = { type };
 

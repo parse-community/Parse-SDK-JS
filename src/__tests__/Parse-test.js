@@ -14,8 +14,10 @@ jest.dontMock('../encode');
 jest.dontMock('../Parse');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('crypto-js/aes');
+jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
 const CoreManager = require('../CoreManager');
+const EventuallyQueue = require('../EventuallyQueue');
 const Parse = require('../Parse');
 
 describe('Parse module', () => {
@@ -34,6 +36,12 @@ describe('Parse module', () => {
     expect(typeof Parse.Cloud.useMasterKey).toBe('function');
     Parse.Cloud.useMasterKey();
     expect(CoreManager.get('USE_MASTER_KEY')).toBe(true);
+  });
+
+  it('should not start eventually queue poll in node build', () => {
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    Parse.initialize('A', 'B');
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(0);
   });
 
   it('exposes certain keys as properties', () => {
@@ -153,6 +161,25 @@ describe('Parse module', () => {
     CoreManager.set('REQUEST_BATCH_SIZE', 20);
   });
 
+  it('can set allowCustomObjectId', () => {
+    expect(Parse.allowCustomObjectId).toBe(false);
+    Parse.allowCustomObjectId = true;
+    expect(CoreManager.get('ALLOW_CUSTOM_OBJECT_ID')).toBe(true);
+    Parse.allowCustomObjectId = false;
+  });
+
+  it('getServerHealth', () => {
+    const controller = {
+      request: jest.fn(),
+      ajax: jest.fn(),
+    };
+    CoreManager.setRESTController(controller);
+    Parse.getServerHealth();
+    const [method, path] = controller.request.mock.calls[0];
+    expect(method).toBe('GET');
+    expect(path).toBe('health');
+  });
+
   it('_request', () => {
     const controller = {
       request: jest.fn(),
@@ -191,5 +218,13 @@ describe('Parse module', () => {
 
   it('_encode', () => {
     expect(Parse._encode(12)).toBe(12);
+  });
+
+  it('can get IndexedDB storage', () => {
+    console.log(Parse.IndexedDB);
+    expect(Parse.IndexedDB).toBeDefined();
+    CoreManager.setStorageController(Parse.IndexedDB);
+    const currentStorage = CoreManager.getStorageController();
+    expect(currentStorage).toEqual(Parse.IndexedDB);
   });
 });

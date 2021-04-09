@@ -22,7 +22,16 @@ const mockObject = function (className, id) {
 };
 jest.setMock('../ParseObject', mockObject);
 
+const mockCLP = function (clp) {
+  this.permissionsMap = clp;
+  this.toJSON = function () {
+    return { ...this.permissionsMap };
+  };
+};
+jest.setMock('../ParseCLP', mockCLP);
+
 const ParseObject = require('../ParseObject');
+const ParseCLP = require('../ParseCLP');
 const ParseSchema = require('../ParseSchema').default;
 const CoreManager = require('../CoreManager');
 
@@ -81,6 +90,18 @@ describe('ParseSchema', () => {
     expect(schema._fields.pointerField.targetClass).toEqual('_User');
     expect(schema._fields.relationField.targetClass).toEqual('_User');
     done();
+  });
+
+  it('can create schema pointer and relation with addFields', () => {
+    const schema = new ParseSchema('SchemaTest');
+    schema
+      .addField('newPointer', 'Pointer', { targetClass: '_User' })
+      .addField('newRelation', 'Relation', { targetClass: '_User' });
+
+    expect(schema._fields.newPointer.type).toEqual('Pointer');
+    expect(schema._fields.newRelation.type).toEqual('Relation');
+    expect(schema._fields.newPointer.targetClass).toEqual('_User');
+    expect(schema._fields.newRelation.targetClass).toEqual('_User');
   });
 
   it('can create schema fields required and default values', () => {
@@ -148,6 +169,10 @@ describe('ParseSchema', () => {
     };
     schema.setCLP(clp);
     expect(schema._clp).toEqual(clp);
+
+    const clpObj = new ParseCLP(clp);
+    schema.setCLP(clpObj);
+    expect(schema._clp).toEqual(clpObj.toJSON());
     done();
   });
 

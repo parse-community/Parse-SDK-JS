@@ -323,14 +323,23 @@ class ParseFile {
    * Deletes the file from the Parse cloud.
    * In Cloud Code and Node only with Master Key.
    *
+   * @param {object} options
+   *  * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   * <pre>
    * @returns {Promise} Promise that is resolved when the delete finishes.
    */
-  destroy() {
+  destroy(options?: FullOptions = {}) {
     if (!this._name) {
       throw new ParseError(ParseError.FILE_DELETE_UNNAMED_ERROR, 'Cannot delete an unnamed file.');
     }
+    const destroyOptions = { useMasterKey: true };
+    if (options.hasOwnProperty('useMasterKey')) {
+      destroyOptions.useMasterKey = options.useMasterKey;
+    }
     const controller = CoreManager.getFileController();
-    return controller.deleteFile(this._name).then(() => {
+    return controller.deleteFile(this._name, destroyOptions).then(() => {
       this._data = null;
       this._requestTask = null;
       return this;
@@ -540,11 +549,13 @@ const DefaultController = {
     });
   },
 
-  deleteFile: function (name) {
+  deleteFile: function (name: string, options?: FullOptions) {
     const headers = {
       'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
-      'X-Parse-Master-Key': CoreManager.get('MASTER_KEY'),
     };
+    if (options.useMasterKey) {
+      headers['X-Parse-Master-Key'] = CoreManager.get('MASTER_KEY');
+    }
     let url = CoreManager.get('SERVER_URL');
     if (url[url.length - 1] !== '/') {
       url += '/';

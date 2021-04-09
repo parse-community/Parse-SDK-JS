@@ -1,23 +1,9 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
-const TestObject = Parse.Object.extend('TestObject');
-const Item = Parse.Object.extend('Item');
-const Container = Parse.Object.extend('Container');
-
 describe('Parse Object', () => {
-  beforeEach(done => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear().then(() => {
-      done();
-    });
-  });
-
   it('can create objects', done => {
     const object = new TestObject({ test: 'test' });
     object.save().then(o => {
@@ -292,6 +278,20 @@ describe('Parse Object', () => {
     assert.equal(result.get('objectField').number, 20);
   });
 
+  it('can increment nested four levels', async () => {
+    const obj = new TestObject({ a: { b: { c: { d: 1 } } } });
+    await obj.save();
+    obj.increment('a.b.c.d');
+    assert.strictEqual(obj.get('a').b.c.d, 2);
+
+    await obj.save();
+    assert.strictEqual(obj.get('a').b.c.d, 2);
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.strictEqual(result.get('a').b.c.d, 2);
+  });
+
   it('can increment nested field and retain full object', async () => {
     const obj = new Parse.Object('TestIncrementObject');
     obj.set('objectField', { number: 5, letter: 'a' });
@@ -412,16 +412,6 @@ describe('Parse Object', () => {
     const result = await query.get(obj.id);
     assert.equal(result.get('objectField').number, 5);
     assert.equal(result.get('objectField').unknown, 20);
-  });
-
-  it('ignore set nested fields on new object', async () => {
-    const obj = new TestObject();
-    obj.set('objectField.number', 5);
-    assert.deepEqual(obj._getPendingOps()[0], {});
-    assert.equal(obj.get('objectField'), undefined);
-
-    await obj.save();
-    assert.equal(obj.get('objectField'), undefined);
   });
 
   it('can set nested fields two levels', async () => {
@@ -2025,5 +2015,90 @@ describe('Parse Object', () => {
     const query = new Parse.Query(Parse.User);
     const fetched = await query.get(user.id);
     assert.equal(fetched.isDataAvailable(), true);
+  });
+
+  it('from json save data', async () => {
+    const json = {
+      className: 'TestObject',
+      date: new Date(),
+      array: [],
+      object: {},
+      string: '',
+    };
+    const obj = Parse.Object.fromJSON(json, false, true);
+    expect(obj.get('date')).toBeDefined();
+    expect(obj.get('date')).toBeInstanceOf(Date);
+    expect(obj.get('array')).toBeDefined();
+    expect(obj.get('array')).toBeInstanceOf(Array);
+    expect(obj.get('object')).toBeDefined();
+    expect(obj.get('object')).toBeInstanceOf(Object);
+    expect(obj.get('string')).toBeDefined();
+    expect(obj.get('string')).toBeInstanceOf(String);
+    await obj.save();
+    await obj.fetch();
+    expect(obj.get('date')).toBeDefined();
+    expect(obj.get('date')).toBeInstanceOf(Date);
+    expect(obj.get('array')).toBeDefined();
+    expect(obj.get('array')).toBeInstanceOf(Array);
+    expect(obj.get('object')).toBeDefined();
+    expect(obj.get('object')).toBeInstanceOf(Object);
+    expect(obj.get('string')).toBeDefined();
+    expect(obj.get('string')).toBeInstanceOf(String);
+  });
+
+  it('allowCustomObjectId', async () => {
+    await reconfigureServer({ allowCustomObjectId: true });
+    Parse.allowCustomObjectId = true;
+    const customId = `${Date.now()}`;
+    const object = new Parse.Object('TestObject');
+    try {
+      await object.save();
+      fail();
+    } catch (error) {
+      expect(error.message).toBe('objectId must not be empty, null or undefined');
+    }
+    object.id = customId;
+    object.set('foo', 'bar');
+    await object.save();
+    expect(object.id).toBe(customId);
+
+    const query = new Parse.Query('TestObject');
+    const result = await query.get(customId);
+    expect(result.get('foo')).toBe('bar');
+    expect(result.id).toBe(customId);
+
+    result.set('foo', 'baz');
+    await result.save();
+
+    const afterSave = await query.get(customId);
+    expect(afterSave.get('foo')).toBe('baz');
+    Parse.allowCustomObjectId = false;
+  });
+
+  it('allowCustomObjectId saveAll', async () => {
+    await reconfigureServer({ allowCustomObjectId: true });
+    Parse.allowCustomObjectId = true;
+    const customId1 = `${Date.now()}`;
+    const customId2 = `${Date.now()}`;
+    const obj1 = new TestObject({ foo: 'bar' });
+    const obj2 = new TestObject({ foo: 'baz' });
+    try {
+      await Parse.Object.saveAll([obj1, obj2]);
+      fail();
+    } catch (error) {
+      expect(error.message).toBe('objectId must not be empty, null or undefined');
+    }
+    obj1.id = customId1;
+    obj2.id = customId2;
+    await Parse.Object.saveAll([obj1, obj2]);
+    expect(obj1.id).toBe(customId1);
+    expect(obj2.id).toBe(customId2);
+
+    const query = new Parse.Query(TestObject);
+    const results = await query.find();
+    results.forEach(result => {
+      expect([customId1, customId2].includes(result.id));
+    });
+    Parse.allowCustomObjectId = false;
   });
 });

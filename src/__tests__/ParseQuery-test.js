@@ -1341,6 +1341,43 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can return raw json from query', async () => {
+    CoreManager.setQueryController({
+      aggregate() {},
+      find() {
+        return Promise.resolve({
+          results: [
+            {
+              objectId: 'I1',
+              size: 'small',
+              name: 'Product 3',
+            },
+          ],
+        });
+      },
+    });
+
+    const q = new ParseQuery('Item');
+    q.equalTo('size', 'small');
+    const results = await q.find({ json: true });
+    expect(results[0].objectId).toBe('I1');
+    expect(results[0].size).toBe('small');
+    expect(results[0].name).toEqual('Product 3');
+    expect(results[0].className).toEqual('Item');
+
+    let result = await q.first({ json: true });
+    expect(result.objectId).toBe('I1');
+    expect(result.size).toBe('small');
+    expect(result.name).toEqual('Product 3');
+    expect(result.className).toEqual('Item');
+
+    result = await q.get(result.objectId, { json: true });
+    expect(result.objectId).toBe('I1');
+    expect(result.size).toBe('small');
+    expect(result.name).toEqual('Product 3');
+    expect(result.className).toEqual('Item');
+  });
+
   it('will error when getting a nonexistent object', done => {
     CoreManager.setQueryController({
       aggregate() {},
@@ -3251,7 +3288,21 @@ describe('ParseQuery LocalDatastore', () => {
       updatedAt: new Date('2018-08-12T00:00:00.000Z'),
     };
 
-    mockLocalDatastore._serializeObjectsFromPinName.mockImplementation(() => [obj1, obj2, obj3]);
+    const obj4 = {
+      className: 'Item',
+      objectId: 'objectId4',
+      password: 123,
+      number: 4,
+      createdAt: new Date('2018-08-12T00:00:00.000Z'),
+      updatedAt: new Date('2018-08-12T00:00:00.000Z'),
+    };
+
+    mockLocalDatastore._serializeObjectsFromPinName.mockImplementation(() => [
+      obj1,
+      obj3,
+      obj2,
+      obj4,
+    ]);
 
     mockLocalDatastore.checkIfEnabled.mockImplementation(() => true);
 
@@ -3262,25 +3313,19 @@ describe('ParseQuery LocalDatastore', () => {
     expect(results[0].get('number')).toEqual(2);
     expect(results[1].get('number')).toEqual(3);
     expect(results[2].get('number')).toEqual(4);
+    expect(results[3].get('number')).toEqual(4);
 
     q = new ParseQuery('Item');
     q.descending('number');
     q.fromLocalDatastore();
     results = await q.find();
     expect(results[0].get('number')).toEqual(4);
-    expect(results[1].get('number')).toEqual(3);
-    expect(results[2].get('number')).toEqual(2);
+    expect(results[1].get('number')).toEqual(4);
+    expect(results[2].get('number')).toEqual(3);
+    expect(results[3].get('number')).toEqual(2);
 
     q = new ParseQuery('Item');
-    q.descending('number');
-    q.fromLocalDatastore();
-    results = await q.find();
-    expect(results[0].get('number')).toEqual(4);
-    expect(results[1].get('number')).toEqual(3);
-    expect(results[2].get('number')).toEqual(2);
-
-    q = new ParseQuery('Item');
-    q.descending('_created_at');
+    q.ascending('_created_at');
     q.fromLocalDatastore();
     results = await q.find();
     expect(results[0].get('number')).toEqual(2);
@@ -3288,7 +3333,7 @@ describe('ParseQuery LocalDatastore', () => {
     expect(results[2].get('number')).toEqual(4);
 
     q = new ParseQuery('Item');
-    q.descending('_updated_at');
+    q.ascending('_updated_at');
     q.fromLocalDatastore();
     results = await q.find();
     expect(results[0].get('number')).toEqual(2);

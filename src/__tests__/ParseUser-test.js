@@ -223,7 +223,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     CoreManager.setRESTController({
       request(method, path, body) {
-        expect(method).toBe('GET');
+        expect(method).toBe('POST');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
@@ -259,7 +259,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     CoreManager.setRESTController({
       request(method, path, body, options) {
-        expect(method).toBe('GET');
+        expect(method).toBe('POST');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
@@ -288,7 +288,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     CoreManager.setRESTController({
       request(method, path, body) {
-        expect(method).toBe('POST');
+        expect(method).toBe('GET');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
@@ -304,7 +304,7 @@ describe('ParseUser', () => {
       },
       ajax() {},
     });
-    ParseUser.logIn('username', 'password', { usePost: true }).then(u => {
+    ParseUser.logIn('username', 'password', { usePost: false }).then(u => {
       expect(u.id).toBe('uid2');
       expect(u.getSessionToken()).toBe('123abc');
       expect(u.isCurrent()).toBe(true);
@@ -430,7 +430,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     CoreManager.setRESTController({
       request(method, path, body) {
-        expect(method).toBe('GET');
+        expect(method).toBe('POST');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
@@ -1154,6 +1154,8 @@ describe('ParseUser', () => {
 
   it('can sync anonymous user with current user', async () => {
     const provider = AnonymousUtils._getAuthProvider();
+    expect(AnonymousUtils.isRegistered()).toBe(true);
+
     jest.spyOn(provider, 'restoreAuthentication');
 
     const object = new ParseUser();
@@ -1174,7 +1176,7 @@ describe('ParseUser', () => {
     spy.mockRestore();
   });
 
-  it('can destroy anonymous user on logout', async () => {
+  it('can logout anonymous user', async () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
@@ -1199,7 +1201,7 @@ describe('ParseUser', () => {
     ParseUser._setCurrentUserCache(user);
 
     await ParseUser.logOut();
-    expect(user.destroy).toHaveBeenCalledTimes(1);
+    expect(ParseUser.current()).toBe(null);
   });
 
   it('can unlink', async () => {
@@ -1226,7 +1228,7 @@ describe('ParseUser', () => {
     expect(user.linkWith).toHaveBeenCalledTimes(1);
   });
 
-  it('can destroy anonymous user when login new user', async () => {
+  it('can logout anonymous user when login new user', async () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
@@ -1264,7 +1266,7 @@ describe('ParseUser', () => {
       ajax() {},
     });
     await ParseUser.logIn('username', 'password');
-    expect(user.destroy).toHaveBeenCalledTimes(1);
+    expect(ParseUser.current().id).not.toBe(user.id);
   });
 
   it('strip anonymity when we set username', () => {
@@ -1366,6 +1368,54 @@ describe('ParseUser', () => {
     expect(user.get('authData')).toEqual({
       test: { id: 'id', access_token: 'access_token' },
     });
+  });
+
+  it('can linkWith async', async () => {
+    const currentStorage = CoreManager.getStorageController();
+    CoreManager.setStorageController(mockAsyncStorage);
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve(
+          {
+            objectId: 'uid5Async',
+            sessionToken: 'r:123abc',
+            authData: {
+              test: {
+                id: 'id',
+                access_token: 'access_token',
+              },
+            },
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+    const provider = {
+      authenticate(options) {
+        if (options.success) {
+          options.success(this, {
+            id: 'id',
+            access_token: 'access_token',
+          });
+        }
+      },
+      restoreAuthentication() {},
+      getAuthType() {
+        return 'test';
+      },
+      deauthenticate() {},
+    };
+
+    const user = new ParseUser();
+    await user.linkWith(provider, null, { useMasterKey: true });
+
+    expect(user.get('authData')).toEqual({
+      test: { id: 'id', access_token: 'access_token' },
+    });
+    CoreManager.setStorageController(currentStorage);
   });
 
   it('handle linkWith authentication failure', async () => {
@@ -1557,7 +1607,7 @@ describe('ParseUser', () => {
     let u = null;
     CoreManager.setRESTController({
       request(method, path, body) {
-        expect(method).toBe('GET');
+        expect(method).toBe('POST');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');
@@ -1612,7 +1662,7 @@ describe('ParseUser', () => {
     let u = null;
     CoreManager.setRESTController({
       request(method, path, body) {
-        expect(method).toBe('GET');
+        expect(method).toBe('POST');
         expect(path).toBe('login');
         expect(body.username).toBe('username');
         expect(body.password).toBe('password');

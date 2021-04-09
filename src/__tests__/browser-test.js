@@ -8,8 +8,10 @@ jest.dontMock('../Parse');
 jest.dontMock('../RESTController');
 jest.dontMock('../Storage');
 jest.dontMock('crypto-js/aes');
+jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
 const ParseError = require('../ParseError').default;
+const EventuallyQueue = require('../EventuallyQueue');
 
 class XMLHttpRequest {}
 class XDomainRequest {
@@ -48,6 +50,14 @@ describe('Browser', () => {
     Parse.initialize('A', 'B');
     expect(console.log).toHaveBeenCalledTimes(0);
     expect(Parse._initialize).toHaveBeenCalledTimes(1);
+  });
+
+  it('should start eventually queue poll on initialize', () => {
+    const Parse = require('../Parse');
+    jest.spyOn(console, 'log').mockImplementationOnce(() => {});
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    Parse.initialize('A', 'B');
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(1);
   });
 
   it('load StorageController', () => {

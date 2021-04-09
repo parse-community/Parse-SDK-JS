@@ -1,23 +1,12 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
 const southwestOfSF = new Parse.GeoPoint(37.708813, -122.526398);
 const northeastOfSF = new Parse.GeoPoint(37.822802, -122.373962);
 
 describe('Geo Box', () => {
-  beforeAll(() => {
-    Parse.initialize('integration');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-  });
-
-  beforeEach(done => {
-    clear().then(done).catch(done);
-  });
-
   it('can query geo boxes', done => {
     const caltrainStationLocation = new Parse.GeoPoint(37.776346, -122.394218);
     const caltrainStation = new Parse.Object('Location');

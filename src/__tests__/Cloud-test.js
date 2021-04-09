@@ -14,9 +14,11 @@ jest.dontMock('../encode');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseQuery');
+jest.dontMock('../Push');
 
 const Cloud = require('../Cloud');
 const CoreManager = require('../CoreManager');
+const Push = require('../Push');
 
 const defaultController = CoreManager.getCloudController();
 
@@ -303,5 +305,49 @@ describe('CloudController', () => {
       },
     });
     expect(options.useMasterKey).toBe(true);
+  });
+
+  it('can get push status', async () => {
+    const request = jest.fn();
+    request.mockReturnValue(
+      Promise.resolve({
+        results: [{ className: '_PushStatus', objectId: 'pushId1234' }],
+      })
+    );
+    CoreManager.setRESTController({ request: request, ajax: jest.fn() });
+
+    await Push.getPushStatus('pushId1234');
+    const [method, path, data, options] = request.mock.calls[0];
+    expect(method).toBe('GET');
+    expect(path).toBe('classes/_PushStatus');
+    expect(data).toEqual({
+      limit: 1,
+      where: {
+        objectId: 'pushId1234',
+      },
+    });
+    expect(options.useMasterKey).toBe(true);
+  });
+
+  it('can get push status with masterKey', async () => {
+    const request = jest.fn();
+    request.mockReturnValue(
+      Promise.resolve({
+        results: [{ className: '_PushStatus', objectId: 'pushId1234' }],
+      })
+    );
+    CoreManager.setRESTController({ request: request, ajax: jest.fn() });
+
+    await Push.getPushStatus('pushId1234', { useMasterKey: false });
+    const [method, path, data, options] = request.mock.calls[0];
+    expect(method).toBe('GET');
+    expect(path).toBe('classes/_PushStatus');
+    expect(data).toEqual({
+      limit: 1,
+      where: {
+        objectId: 'pushId1234',
+      },
+    });
+    expect(options.useMasterKey).toBe(false);
   });
 });

@@ -138,7 +138,11 @@ export function estimateAttributes(
           data[first] = { ...serverData[first] };
           let object = { ...data };
           for (let i = 0; i < fields.length - 1; i++) {
-            object = object[fields[i]];
+            const key = fields[i];
+            if (!(key in object)) {
+              object[key] = {};
+            }
+            object = object[key];
           }
           object[last] = pendingOps[i][attr].applyTo(object[last]);
         } else {

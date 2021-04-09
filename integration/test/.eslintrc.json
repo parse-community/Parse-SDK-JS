@@ -2,7 +2,17 @@
   "env": {
       "jasmine": true
   },
-  "globals": {},
+  "globals": {
+    "Child": true,
+    "Container": true,
+    "DiffObject": true,
+    "Item": true,
+    "Parse": true,
+    "Parent": true,
+    "reconfigureServer": true,
+    "TestObject": true,
+    "TestPoint": true
+  },
   "rules": {
     "no-console": [0],
     "no-var": "error"

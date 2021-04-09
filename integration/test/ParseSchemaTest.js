@@ -1,5 +1,6 @@
+'use strict';
+
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
 const emptyCLPS = {
@@ -24,20 +25,7 @@ const defaultCLPS = {
   protectedFields: { '*': [] },
 };
 
-const TestObject = Parse.Object.extend('TestObject');
-
 describe('Schema', () => {
-  beforeAll(() => {
-    Parse.initialize('integration');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
-    Parse.Storage._clear();
-  });
-
-  beforeEach(done => {
-    clear().then(done);
-  });
-
   it('invalid get all no schema', done => {
     Parse.Schema.all()
       .then(() => {})
@@ -264,7 +252,7 @@ describe('Schema', () => {
     assert.deepEqual(json, expected);
   });
 
-  it('save class level permissions', async () => {
+  it('save class level permissions json', async () => {
     const clp = {
       get: { requiresAuthentication: true },
       find: {},
@@ -279,6 +267,25 @@ describe('Schema', () => {
     testSchema.setCLP(clp);
     const schema = await testSchema.save();
     assert.deepEqual(schema.classLevelPermissions, clp);
+  });
+
+  it('save class level permissions object', async () => {
+    const permissionsMap = {
+      get: { '*': true },
+      find: {},
+      count: {},
+      create: { '*': true },
+      update: { '*': true },
+      delete: {},
+      addField: {},
+      protectedFields: {},
+    };
+    const clp = new Parse.CLP(permissionsMap);
+    const testSchema = new Parse.Schema('SchemaTest');
+    testSchema.setCLP(clp);
+    const schema = await testSchema.save();
+    assert.deepEqual(schema.classLevelPermissions, permissionsMap);
+    assert.deepEqual(schema.classLevelPermissions, clp.toJSON());
   });
 
   it('update class level permissions', async () => {

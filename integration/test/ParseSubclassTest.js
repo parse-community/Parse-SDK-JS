@@ -1,17 +1,9 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
 describe('Parse Object Subclasses', () => {
-  beforeEach(done => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear().then(done);
-  });
-
   it('uses subclasses when doing query find', done => {
     const Subclass = Parse.Object.extend('Subclass', {
       initialize(attributes, options, number) {
@@ -200,5 +192,25 @@ describe('Parse Object Subclasses', () => {
     const Wartortle = Squirtle.extend('Wartortle');
     const wartortle = new Wartortle();
     assert(wartortle.water);
+  });
+
+  it('registerSubclass with unknown className', async () => {
+    Parse.Object.unregisterSubclass('TestObject');
+    let outerClassName = '';
+    class TestObject extends Parse.Object {
+      constructor(className) {
+        super(className);
+        outerClassName = className;
+      }
+    }
+    Parse.Object.registerSubclass('TestObject', TestObject);
+    const o = new Parse.Object('TestObject');
+    await o.save();
+    const query = new Parse.Query('TestObject');
+    const first = await query.first();
+    expect(first instanceof TestObject).toBe(true);
+    expect(first.className).toBe('TestObject');
+    expect(outerClassName).toBe('TestObject');
+    Parse.Object.unregisterSubclass('TestObject');
   });
 });

@@ -14,6 +14,7 @@ import canBeSerialized from './canBeSerialized';
 import decode from './decode';
 import encode from './encode';
 import escape from './escape';
+import EventuallyQueue from './EventuallyQueue';
 import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
@@ -56,7 +57,7 @@ type SaveParams = {
   body: AttributeMap,
 };
 
-type SaveOptions = FullOptions & {
+export type SaveOptions = FullOptions & {
   cascadeSave?: boolean,
   context?: AttributeMap,
 };
@@ -323,10 +324,18 @@ class ParseObject {
   }
 
   _getSaveParams(): SaveParams {
-    const method = this.id ? 'PUT' : 'POST';
+    let method = this.id ? 'PUT' : 'POST';
     const body = this._getSaveJSON();
     let path = 'classes/' + this.className;
-    if (this.id) {
+    if (CoreManager.get('ALLOW_CUSTOM_OBJECT_ID')) {
+      if (!this.createdAt) {
+        method = 'POST';
+        body.objectId = this.id;
+      } else {
+        method = 'PUT';
+        path += '/' + this.id;
+      }
+    } else if (this.id) {
       path += '/' + this.id;
     } else if (this.className === '_User') {
       path = 'users';
@@ -438,6 +447,10 @@ class ParseObject {
   _handleSaveError() {
     const stateController = CoreManager.getObjectStateController();
     stateController.mergeFirstPendingState(this._getStateIdentifier());
+  }
+
+  static _getClassMap() {
+    return classMap;
   }
 
   /** Public methods **/
@@ -740,15 +753,6 @@ class ParseObject {
 
     const currentAttributes = this.attributes;
 
-    // Only set nested fields if exists
-    const serverData = this._getServerData();
-    if (typeof key === 'string' && key.includes('.')) {
-      const field = key.split('.')[0];
-      if (!serverData[field]) {
-        return this;
-      }
-    }
-
     // Calculate new values
     const newValues = {};
     for (const attr in newOps) {
@@ -930,10 +934,7 @@ class ParseObject {
    * @returns {Parse.Object}
    */
   clone(): any {
-    const clone = new this.constructor();
-    if (!clone.className) {
-      clone.className = this.className;
-    }
+    const clone = new this.constructor(this.className);
     let attributes = this.attributes;
     if (typeof this.constructor.readOnlyAttributes === 'function') {
       const readonly = this.constructor.readOnlyAttributes() || [];
@@ -959,10 +960,7 @@ class ParseObject {
    * @returns {Parse.Object}
    */
   newInstance(): any {
-    const clone = new this.constructor();
-    if (!clone.className) {
-      clone.className = this.className;
-    }
+    const clone = new this.constructor(this.className);
     clone.id = this.id;
     if (singleInstance) {
       // Just return an object with the right id
@@ -1201,6 +1199,42 @@ class ParseObject {
   }
 
   /**
+   * Saves this object to the server at some unspecified time in the future,
+   * even if Parse is currently inaccessible.
+   *
+   * Use this when you may not have a solid network connection, and don't need to know when the save completes.
+   * If there is some problem with the object such that it can't be saved, it will be silently discarded.
+   *
+   * Objects saved with this method will be stored locally in an on-disk cache until they can be delivered to Parse.
+   * They will be sent immediately if possible. Otherwise, they will be sent the next time a network connection is
+   * available. Objects saved this way will persist even after the app is closed, in which case they will be sent the
+   * next time the app is opened.
+   *
+   * @param {object} [options]
+   * Used to pass option parameters to method if arg1 and arg2 were both passed as strings.
+   * Valid options are:
+   * <ul>
+   * <li>sessionToken: A valid session token, used for making a request on
+   * behalf of a specific user.
+   * <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
+   * <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
+   * </ul>
+   * @returns {Promise} A promise that is fulfilled when the save
+   * completes.
+   */
+  async saveEventually(options: SaveOptions): Promise {
+    try {
+      await this.save(null, options);
+    } catch (e) {
+      if (e.message === 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+        await EventuallyQueue.save(this, options);
+        EventuallyQueue.poll();
+      }
+    }
+    return this;
+  }
+
+  /**
    * Set a hash of model attributes, and save the model to the server.
    * updatedAt will be updated when the request returns.
    * You can either call it as:<pre>
@@ -1303,6 +1337,40 @@ class ParseObject {
     return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
     });
+  }
+
+  /**
+   * Deletes this object from the server at some unspecified time in the future,
+   * even if Parse is currently inaccessible.
+   *
+   * Use this when you may not have a solid network connection,
+   * and don't need to know when the delete completes. If there is some problem with the object
+   * such that it can't be deleted, the request will be silently discarded.
+   *
+   * Delete instructions made with this method will be stored locally in an on-disk cache until they can be transmitted
+   * to Parse. They will be sent immediately if possible. Otherwise, they will be sent the next time a network connection
+   * is available. Delete requests will persist even after the app is closed, in which case they will be sent the
+   * next time the app is opened.
+   *
+   * @param {object} [options]
+   * Valid options are:<ul>
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
+   * </ul>
+   * @returns {Promise} A promise that is fulfilled when the destroy
+   *     completes.
+   */
+  async destroyEventually(options: RequestOptions): Promise {
+    try {
+      await this.destroy(options);
+    } catch (e) {
+      if (e.message === 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+        await EventuallyQueue.destroy(this, options);
+        EventuallyQueue.poll();
+      }
+    }
+    return this;
   }
 
   /**
@@ -1752,19 +1820,23 @@ class ParseObject {
    * @param {object} json The JSON map of the Object's data
    * @param {boolean} override In single instance mode, all old server data
    *   is overwritten if this is set to true
+   * @param {boolean} dirty Whether the Parse.Object should set JSON keys to dirty
    * @static
    * @returns {Parse.Object} A Parse.Object reference
    */
-  static fromJSON(json: any, override?: boolean) {
+  static fromJSON(json: any, override?: boolean, dirty?: boolean) {
     if (!json.className) {
       throw new Error('Cannot create an object without a className');
     }
     const constructor = classMap[json.className];
-    const o = constructor ? new constructor() : new ParseObject(json.className);
+    const o = constructor ? new constructor(json.className) : new ParseObject(json.className);
     const otherAttributes = {};
     for (const attr in json) {
       if (attr !== 'className' && attr !== '__type') {
         otherAttributes[attr] = json[attr];
+        if (dirty) {
+          o.set(attr, json[attr]);
+        }
       }
     }
     if (override) {
@@ -1814,6 +1886,18 @@ class ParseObject {
     if (!constructor.className) {
       constructor.className = className;
     }
+  }
+
+  /**
+   * Unegisters a subclass of Parse.Object with a specific class name.
+   *
+   * @param {string} className The class name of the subclass
+   */
+  static unregisterSubclass(className: string) {
+    if (typeof className !== 'string') {
+      throw new TypeError('The first argument must be a valid class name.');
+    }
+    delete classMap[className];
   }
 
   /**
@@ -2287,6 +2371,7 @@ const DefaultController = {
 
     const RESTController = CoreManager.getRESTController();
     const stateController = CoreManager.getObjectStateController();
+    const allowCustomObjectId = CoreManager.get('ALLOW_CUSTOM_OBJECT_ID');
 
     options = options || {};
     options.returnStatus = options.returnStatus || true;
@@ -2309,6 +2394,12 @@ const DefaultController = {
         if (el instanceof ParseFile) {
           filesSaved.push(el.save(options));
         } else if (el instanceof ParseObject) {
+          if (allowCustomObjectId && !el.id) {
+            throw new ParseError(
+              ParseError.MISSING_OBJECT_ID,
+              'objectId must not be empty, null or undefined'
+            );
+          }
           pending.push(el);
         }
       });
@@ -2402,6 +2493,12 @@ const DefaultController = {
         });
       });
     } else if (target instanceof ParseObject) {
+      if (allowCustomObjectId && !target.id) {
+        throw new ParseError(
+          ParseError.MISSING_OBJECT_ID,
+          'objectId must not be empty, null or undefined'
+        );
+      }
       // generate _localId in case if cascadeSave=false
       target._getId();
       const localId = target._localId;

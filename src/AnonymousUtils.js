@@ -89,6 +89,18 @@ const AnonymousUtils = {
     return user.linkWith(provider.getAuthType(), provider.getAuthData(), options);
   },
 
+  /**
+   * Returns true if Authentication Provider has been registered for use.
+   *
+   * @function isRegistered
+   * @name Parse.AnonymousUtils.isRegistered
+   * @returns {boolean}
+   * @static
+   */
+  isRegistered(): boolean {
+    return registered;
+  },
+
   _getAuthProvider() {
     const provider = {
       restoreAuthentication() {

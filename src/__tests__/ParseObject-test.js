@@ -140,6 +140,7 @@ const mockLocalDatastore = {
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
 const CoreManager = require('../CoreManager');
+const EventuallyQueue = require('../EventuallyQueue');
 const ParseACL = require('../ParseACL').default;
 const ParseError = require('../ParseError').default;
 const ParseFile = require('../ParseFile').default;
@@ -255,11 +256,13 @@ describe('ParseObject', () => {
   });
 
   it('can be inflated from server JSON', () => {
+    const date = new Date();
     const json = {
       className: 'Item',
       createdAt: '2013-12-14T04:51:19Z',
       objectId: 'I1',
       size: 'medium',
+      date: date,
     };
     const o = ParseObject.fromJSON(json);
     expect(o.className).toBe('Item');
@@ -268,8 +271,32 @@ describe('ParseObject', () => {
       size: 'medium',
       createdAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
       updatedAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
+      date,
     });
     expect(o.dirty()).toBe(false);
+    expect(o.get('date')).toBeInstanceOf(Date);
+  });
+
+  it('can be dirty with fromJSON', () => {
+    const date = new Date();
+    const json = {
+      className: 'Item',
+      createdAt: '2013-12-14T04:51:19Z',
+      objectId: 'I1',
+      size: 'medium',
+      date: date,
+    };
+    const o = ParseObject.fromJSON(json, false, true);
+    expect(o.className).toBe('Item');
+    expect(o.id).toBe('I1');
+    expect(o.attributes).toEqual({
+      size: 'medium',
+      createdAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
+      updatedAt: new Date(Date.UTC(2013, 11, 14, 4, 51, 19)),
+      date,
+    });
+    expect(o.dirty()).toBe(true);
+    expect(o.dirtyKeys()).toEqual(['size', 'date']);
   });
 
   it('can override old data when inflating from the server', () => {
@@ -670,16 +697,6 @@ describe('ParseObject', () => {
     });
     expect(o.get('objectField').number).toEqual(6);
     expect(o.get('objectField').letter).toEqual('a');
-  });
-
-  it('ignore set nested field on new object', () => {
-    const o = new ParseObject('Person');
-    o.set('objectField.number', 20);
-
-    expect(o.attributes).toEqual({});
-    expect(o.op('objectField.number') instanceof SetOp).toBe(false);
-    expect(o.dirtyKeys()).toEqual([]);
-    expect(o._getSaveJSON()).toEqual({});
   });
 
   it('can add elements to an array field', () => {
@@ -1531,6 +1548,53 @@ describe('ParseObject', () => {
       expect(obj.dirty()).toBe(false);
       done();
     });
+  });
+
+  it('can save the object eventually', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            objectId: 'PFEventually',
+          },
+        },
+      ])
+    );
+    const p = new ParseObject('Person');
+    p.set('age', 38);
+    const obj = await p.saveEventually();
+    expect(obj).toBe(p);
+    expect(obj.get('age')).toBe(38);
+    expect(obj.op('age')).toBe(undefined);
+    expect(obj.dirty()).toBe(false);
+  });
+
+  it('can save the object eventually on network failure', async () => {
+    const p = new ParseObject('Person');
+    jest.spyOn(EventuallyQueue, 'save').mockImplementationOnce(() => Promise.resolve());
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(p, 'save').mockImplementationOnce(() => {
+      throw new ParseError(
+        ParseError.CONNECTION_FAILED,
+        'XMLHttpRequest failed: "Unable to connect to the Parse API"'
+      );
+    });
+    await p.saveEventually();
+    expect(EventuallyQueue.save).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not save the object eventually on error', async () => {
+    const p = new ParseObject('Person');
+    jest.spyOn(EventuallyQueue, 'save').mockImplementationOnce(() => Promise.resolve());
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(p, 'save').mockImplementationOnce(() => {
+      throw new ParseError(ParseError.OTHER_CAUSE, 'Tried to save a batch with a cycle.');
+    });
+    await p.saveEventually();
+    expect(EventuallyQueue.save).toHaveBeenCalledTimes(0);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(0);
   });
 
   it('can save the object with key / value', done => {
@@ -2844,6 +2908,33 @@ describe('ObjectController', () => {
     await result;
   });
 
+  it('can destroy the object eventually on network failure', async () => {
+    const p = new ParseObject('Person');
+    jest.spyOn(EventuallyQueue, 'destroy').mockImplementationOnce(() => Promise.resolve());
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(p, 'destroy').mockImplementationOnce(() => {
+      throw new ParseError(
+        ParseError.CONNECTION_FAILED,
+        'XMLHttpRequest failed: "Unable to connect to the Parse API"'
+      );
+    });
+    await p.destroyEventually();
+    expect(EventuallyQueue.destroy).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not destroy object eventually on error', async () => {
+    const p = new ParseObject('Person');
+    jest.spyOn(EventuallyQueue, 'destroy').mockImplementationOnce(() => Promise.resolve());
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(p, 'destroy').mockImplementationOnce(() => {
+      throw new ParseError(ParseError.OTHER_CAUSE, 'Unable to delete.');
+    });
+    await p.destroyEventually();
+    expect(EventuallyQueue.destroy).toHaveBeenCalledTimes(0);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(0);
+  });
+
   it('can save an object', async () => {
     const objectController = CoreManager.getObjectController();
     const xhr = {
@@ -3333,6 +3424,42 @@ describe('ParseObject Subclasses', () => {
     }).toThrow(
       'You must register the subclass constructor. Did you attempt to register an instance of the subclass?'
     );
+
+    expect(() => {
+      ParseObject.unregisterSubclass(1234);
+    }).toThrow('The first argument must be a valid class name.');
+  });
+
+  it('can use on ParseObject subclass for multiple Parse.Object class names', () => {
+    class MyParseObjects extends ParseObject {
+      constructor(className) {
+        super(className);
+      }
+    }
+    ParseObject.registerSubclass('TestObject', MyParseObjects);
+    ParseObject.registerSubclass('TestObject1', MyParseObjects);
+    ParseObject.registerSubclass('TestObject2', MyParseObjects);
+
+    const obj = new MyParseObjects('TestObject');
+    expect(obj.className).toBe('TestObject');
+    const obj1 = new MyParseObjects('TestObject1');
+    expect(obj1.className).toBe('TestObject1');
+    const obj2 = new MyParseObjects('TestObject2');
+    expect(obj2.className).toBe('TestObject2');
+
+    let classMap = ParseObject._getClassMap();
+    expect(classMap.TestObject).toEqual(MyParseObjects);
+    expect(classMap.TestObject1).toEqual(MyParseObjects);
+    expect(classMap.TestObject2).toEqual(MyParseObjects);
+
+    ParseObject.unregisterSubclass('TestObject');
+    ParseObject.unregisterSubclass('TestObject1');
+    ParseObject.unregisterSubclass('TestObject2');
+
+    classMap = ParseObject._getClassMap();
+    expect(classMap.TestObject).toBeUndefined();
+    expect(classMap.TestObject1).toBeUndefined();
+    expect(classMap.TestObject2).toBeUndefined();
   });
 
   it('can inflate subclasses from server JSON', () => {
@@ -3678,5 +3805,41 @@ describe('ParseObject pin', () => {
       expect(obj.id).toBe('P5');
       done();
     });
+  });
+
+  it('can allowCustomObjectId', async done => {
+    CoreManager.set('ALLOW_CUSTOM_OBJECT_ID', true);
+    const o = new ParseObject('Person');
+    let params = o._getSaveParams();
+    expect(params).toEqual({
+      method: 'POST',
+      body: { objectId: undefined },
+      path: 'classes/Person',
+    });
+    try {
+      await o.save();
+      done.fail();
+    } catch (error) {
+      expect(error.message).toBe('objectId must not be empty, null or undefined');
+    }
+    try {
+      await ParseObject.saveAll([o]);
+      done.fail();
+    } catch (error) {
+      expect(error.message).toBe('objectId must not be empty, null or undefined');
+    }
+    o._finishFetch({
+      objectId: 'CUSTOM_ID',
+      createdAt: { __type: 'Date', iso: new Date().toISOString() },
+      updatedAt: { __type: 'Date', iso: new Date().toISOString() },
+    });
+    params = o._getSaveParams();
+    expect(params).toEqual({
+      method: 'PUT',
+      body: {},
+      path: 'classes/Person/CUSTOM_ID',
+    });
+    CoreManager.set('ALLOW_CUSTOM_OBJECT_ID', false);
+    done();
   });
 });

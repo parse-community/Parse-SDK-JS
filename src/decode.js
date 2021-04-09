@@ -17,7 +17,7 @@ import { opFromJSON } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
 export default function decode(value: any): any {
-  if (value === null || typeof value !== 'object') {
+  if (value === null || typeof value !== 'object' || value instanceof Date) {
     return value;
   }
   if (Array.isArray(value)) {

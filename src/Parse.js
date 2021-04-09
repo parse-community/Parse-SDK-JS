@@ -11,6 +11,7 @@ import decode from './decode';
 import encode from './encode';
 import CoreManager from './CoreManager';
 import CryptoController from './CryptoController';
+import EventuallyQueue from './EventuallyQueue';
 import InstallationController from './InstallationController';
 import * as ParseOp from './ParseOp';
 import RESTController from './RESTController';
@@ -46,6 +47,7 @@ const Parse = {
       /* eslint-enable no-console */
     }
     Parse._initialize(applicationId, javaScriptKey);
+    EventuallyQueue.poll();
   },
 
   _initialize(applicationId: string, javaScriptKey: string, masterKey: string) {
@@ -76,6 +78,16 @@ const Parse = {
    */
   setLocalDatastoreController(controller: any) {
     CoreManager.setLocalDatastoreController(controller);
+  },
+
+  /**
+   * Returns information regarding the current server's health
+   *
+   * @returns {Promise}
+   * @static
+   */
+  getServerHealth() {
+    return CoreManager.getRESTController().request('GET', 'health');
   },
 
   /**
@@ -187,15 +199,28 @@ const Parse = {
   get idempotency() {
     return CoreManager.get('IDEMPOTENCY');
   },
+
+  /**
+   * @member {boolean} Parse.allowCustomObjectId
+   * @static
+   */
+  set allowCustomObjectId(value) {
+    CoreManager.set('ALLOW_CUSTOM_OBJECT_ID', value);
+  },
+  get allowCustomObjectId() {
+    return CoreManager.get('ALLOW_CUSTOM_OBJECT_ID');
+  },
 };
 
 Parse.ACL = require('./ParseACL').default;
 Parse.Analytics = require('./Analytics');
 Parse.AnonymousUtils = require('./AnonymousUtils').default;
 Parse.Cloud = require('./Cloud');
+Parse.CLP = require('./ParseCLP').default;
 Parse.CoreManager = require('./CoreManager');
 Parse.Config = require('./ParseConfig').default;
 Parse.Error = require('./ParseError').default;
+Parse.EventuallyQueue = EventuallyQueue;
 Parse.FacebookUtils = require('./FacebookUtils').default;
 Parse.File = require('./ParseFile').default;
 Parse.GeoPoint = require('./ParseGeoPoint').default;
@@ -222,6 +247,7 @@ Parse.Storage = require('./Storage');
 Parse.User = require('./ParseUser').default;
 Parse.LiveQuery = require('./ParseLiveQuery').default;
 Parse.LiveQueryClient = require('./LiveQueryClient').default;
+Parse.IndexedDB = require('./IndexedDBStorageController');
 
 Parse._request = function (...args) {
   return CoreManager.getRESTController().request.apply(null, args);

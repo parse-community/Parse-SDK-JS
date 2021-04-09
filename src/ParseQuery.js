@@ -601,6 +601,7 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
+   *   <li>json: Return raw json without converting to Parse.Object
    * </ul>
    *
    * @returns {Promise} A promise that is resolved with the result when
@@ -618,6 +619,9 @@ class ParseQuery {
     }
     if (options && options.hasOwnProperty('context') && typeof options.context === 'object') {
       firstOptions.context = options.context;
+    }
+    if (options && options.hasOwnProperty('json')) {
+      firstOptions.json = options.json;
     }
 
     return this.first(firstOptions).then(response => {
@@ -640,6 +644,7 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
+   *   <li>json: Return raw json without converting to Parse.Object
    * </ul>
    *
    * @returns {Promise} A promise that is resolved with the results when
@@ -686,8 +691,11 @@ class ParseQuery {
         if (select) {
           handleSelectResult(data, select);
         }
-
-        return ParseObject.fromJSON(data, !select);
+        if (options.json) {
+          return data;
+        } else {
+          return ParseObject.fromJSON(data, !select);
+        }
       });
 
       const count = response.count;
@@ -849,6 +857,7 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
+   *   <li>json: Return raw json without converting to Parse.Object
    * </ul>
    *
    * @returns {Promise} A promise that is resolved with the object when
@@ -900,8 +909,11 @@ class ParseQuery {
       if (select) {
         handleSelectResult(objects[0], select);
       }
-
-      return ParseObject.fromJSON(objects[0], !select);
+      if (options.json) {
+        return objects[0];
+      } else {
+        return ParseObject.fromJSON(objects[0], !select);
+      }
     });
   }
 
@@ -1561,13 +1573,14 @@ class ParseQuery {
    *
    * @param {string} key The key that the string to match is stored in.
    * @param {string} prefix The substring that the value must start with.
+   * @param {string} modifiers The regular expression mode.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  startsWith(key: string, prefix: string): ParseQuery {
+  startsWith(key: string, prefix: string, modifiers: string): ParseQuery {
     if (typeof prefix !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this._addCondition(key, '$regex', this._regexStartWith(prefix));
+    return this.matches(key, this._regexStartWith(prefix), modifiers);
   }
 
   /**
@@ -1576,13 +1589,14 @@ class ParseQuery {
    *
    * @param {string} key The key that the string to match is stored in.
    * @param {string} suffix The substring that the value must end with.
+   * @param {string} modifiers The regular expression mode.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  endsWith(key: string, suffix: string): ParseQuery {
+  endsWith(key: string, suffix: string, modifiers: string): ParseQuery {
     if (typeof suffix !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this._addCondition(key, '$regex', quote(suffix) + '$');
+    return this.matches(key, quote(suffix) + '$', modifiers);
   }
 
   /**
@@ -1866,7 +1880,7 @@ class ParseQuery {
   }
 
   /**
-   * Includes all nested Parse.Objects.
+   * Includes all nested Parse.Objects one level deep.
    *
    * Requires Parse Server 3.0.0+
    *

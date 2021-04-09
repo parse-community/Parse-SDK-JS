@@ -1,38 +1,18 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
-const TestObject = Parse.Object.extend('TestObject');
-
 describe('Parse Query', () => {
-  beforeEach(done => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear()
-      .then(() => {
-        const numbers = [];
-        for (let i = 0; i < 10; i++) {
-          numbers[i] = new Parse.Object({
-            className: 'BoxedNumber',
-            number: i,
-          });
-        }
-        return Parse.Object.saveAll(numbers);
-      })
-      .then(() => {
-        return Parse.User.logOut();
-      })
-      .then(
-        () => {
-          done();
-        },
-        () => {
-          done();
-        }
-      );
+  beforeEach(async () => {
+    const numbers = [];
+    for (let i = 0; i < 10; i++) {
+      numbers[i] = new Parse.Object({
+        className: 'BoxedNumber',
+        number: i,
+      });
+    }
+    await Parse.Object.saveAll(numbers);
   });
 
   it('can do basic queries', done => {
@@ -66,6 +46,30 @@ describe('Parse Query', () => {
         done();
       })
       .catch(done.fail);
+  });
+
+  it('can return raw json from queries', async () => {
+    const object = new TestObject({ foo: 'bar' });
+    await object.save();
+
+    const query = new Parse.Query(TestObject);
+    const results = await query.find({ json: true });
+    assert.strictEqual(results[0] instanceof Parse.Object, false);
+    assert.strictEqual(results[0].foo, 'bar');
+    assert.strictEqual(results[0].className, 'TestObject');
+    assert.strictEqual(results[0].objectId, object.id);
+
+    let result = await query.first({ json: true });
+    assert.strictEqual(result instanceof Parse.Object, false);
+    assert.strictEqual(result.foo, 'bar');
+    assert.strictEqual(result.className, 'TestObject');
+    assert.strictEqual(result.objectId, object.id);
+
+    result = await query.get(object.id, { json: true });
+    assert.strictEqual(result instanceof Parse.Object, false);
+    assert.strictEqual(result.foo, 'bar');
+    assert.strictEqual(result.className, 'TestObject');
+    assert.strictEqual(result.objectId, object.id);
   });
 
   it('can do query with count', async () => {
@@ -1154,7 +1158,7 @@ describe('Parse Query', () => {
       });
   });
 
-  it('can test case insensitive regex', done => {
+  it('can test case insensitive matches', done => {
     const obj = new TestObject();
     obj.set('myString', 'hockey');
     obj
@@ -1169,6 +1173,32 @@ describe('Parse Query', () => {
         assert.equal(results[0].get('myString'), 'hockey');
         done();
       });
+  });
+
+  it('can test case insensitive startsWith', async () => {
+    const obj = new TestObject();
+    obj.set('myString', 'basketball');
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    query.startsWith('myString', 'baSKet', 'i');
+    const results = await query.find();
+
+    assert.strictEqual(results.length, 1);
+    assert.strictEqual(results[0].get('myString'), 'basketball');
+  });
+
+  it('can test case insensitive endsWith', async () => {
+    const obj = new TestObject();
+    obj.set('myString', 'basketball');
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    query.endsWith('myString', 'tBAll', 'i');
+    const results = await query.find();
+
+    assert.strictEqual(results.length, 1);
+    assert.strictEqual(results[0].get('myString'), 'basketball');
   });
 
   it('fails for invalid regex options', done => {
