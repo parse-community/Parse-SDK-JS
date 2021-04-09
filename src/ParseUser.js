@@ -636,21 +636,74 @@ class ParseUser extends ParseObject {
    * saves the session to disk, so you can retrieve the currently logged in
    * user using <code>current</code>.
    *
-   * @param {string} username The username (or email) to log in with.
-   * @param {string} password The password to log in with.
+   * @param {string | object} usernameOrObject The username (or email) to log in with or an object with auth fields.
+   * @param {string | object} passwordOrOptions The password to log in with or options if usernameOrObject is an object.
    * @param {object} options
    * @static
    * @returns {Promise} A promise that is fulfilled with the user when
    *     the login completes.
    */
-  static logIn(username: string, password: string, options?: FullOptions) {
-    if (typeof username !== 'string') {
-      return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Username must be a string.'));
-    } else if (typeof password !== 'string') {
+  static logIn(
+    usernameOrObject: string | Object,
+    passwordOrOptions: string | FullOptions,
+    options?: FullOptions
+  ) {
+    const usernameIsObject = typeof usernameOrObject === 'object';
+    if (typeof usernameOrObject !== 'string') {
+      if (!usernameIsObject) {
+        return Promise.reject(
+          new ParseError(
+            ParseError.OTHER_CAUSE,
+            'Username must be a string or an object with username and password keys.'
+          )
+        );
+      }
+      if (typeof usernameOrObject.username !== 'string') {
+        return Promise.reject(
+          new ParseError(
+            ParseError.OTHER_CAUSE,
+            'Auth payload should contain username key with string value'
+          )
+        );
+      }
+      if (typeof usernameOrObject.password !== 'string') {
+        return Promise.reject(
+          new ParseError(
+            ParseError.OTHER_CAUSE,
+            'Auth payload should contain password key with string value'
+          )
+        );
+      }
+      if (usernameOrObject.authData && typeof usernameOrObject.authData !== 'object') {
+        return Promise.reject(
+          new ParseError(ParseError.OTHER_CAUSE, 'authData should be an object')
+        );
+      }
+      if (
+        Object.keys(usernameOrObject).some(
+          key => !['authData', 'username', 'password'].includes(key)
+        )
+      ) {
+        return Promise.reject(
+          new ParseError(
+            ParseError.OTHER_CAUSE,
+            'This operation only support authData, username and password keys'
+          )
+        );
+      }
+    }
+    if (typeof passwordOrOptions !== 'string' && !usernameIsObject) {
       return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Password must be a string.'));
     }
     const user = new this();
-    user._finishFetch({ username: username, password: password });
+    user._finishFetch(
+      usernameIsObject
+        ? usernameOrObject
+        : {
+          username: usernameOrObject,
+          password: passwordOrOptions,
+        }
+    );
     return user.logIn(options);
   }
 
@@ -735,6 +788,32 @@ class ParseUser extends ParseObject {
   ): Promise<ParseUser> {
     const user = new this();
     return user.linkWith(provider, options, saveOpts);
+  }
+
+  /**
+   * Ask Parse server for an auth challenge (ex: WebAuthn login/signup)
+   *
+   * @param data
+   * @static
+   * @returns {Promise}
+   */
+  static challenge(data: {
+    authData?: AuthData,
+    username?: string,
+    password?: string,
+    challengeData: any,
+  }): Promise<{ challengeData: any }> {
+    if (!data.challengeData) {
+      return Promise.reject(
+        new ParseError(ParseError.OTHER_CAUSE, 'challengeData is required for the challenge.')
+      );
+    }
+    if (data.username && !data.password) {
+      return Promise.reject(
+        new ParseError(ParseError.OTHER_CAUSE, 'Running challenge via username require password.')
+      );
+    }
+    return CoreManager.getUserController().challenge(data);
   }
 
   /**
@@ -1080,22 +1159,30 @@ const DefaultController = {
     const auth = {
       username: user.get('username'),
       password: user.get('password'),
+      authData: user.get('authData'),
     };
-    return RESTController.request(options.usePost ? 'POST' : 'GET', 'login', auth, options).then(
-      response => {
-        user._migrateId(response.objectId);
-        user._setExisted(true);
-        stateController.setPendingOp(user._getStateIdentifier(), 'username', undefined);
-        stateController.setPendingOp(user._getStateIdentifier(), 'password', undefined);
-        response.password = undefined;
-        user._finishFetch(response);
-        if (!canUseCurrentUser) {
-          // We can't set the current user, so just return the one we logged in
-          return Promise.resolve(user);
-        }
-        return DefaultController.setCurrentUser(user);
+    return RESTController.request(
+      options.usePost || auth.authData ? 'POST' : 'GET',
+      'login',
+      auth,
+      options
+    ).then(response => {
+      user._migrateId(response.objectId);
+      user._setExisted(true);
+      stateController.setPendingOp(user._getStateIdentifier(), 'username', undefined);
+      stateController.setPendingOp(user._getStateIdentifier(), 'password', undefined);
+      response.password = undefined;
+      user._finishFetch(response);
+      if (!canUseCurrentUser) {
+        // We can't set the current user, so just return the one we logged in
+        return Promise.resolve(user);
       }
-    );
+      return DefaultController.setCurrentUser(user);
+    });
+  },
+
+  challenge(data: any): Promise<{ challengeData: any }> {
+    return CoreManager.getRESTController().request('POST', 'challenge', data);
   },
 
   become(user: ParseUser, options: RequestOptions): Promise<ParseUser> {

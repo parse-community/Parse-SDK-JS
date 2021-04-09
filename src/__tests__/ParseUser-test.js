@@ -322,12 +322,14 @@ describe('ParseUser', () => {
   it('fail login when invalid username or password is used', done => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
-    ParseUser.logIn({}, 'password')
+    ParseUser.logIn(undefined, 'password')
       .then(null, err => {
         expect(err.code).toBe(ParseError.OTHER_CAUSE);
-        expect(err.message).toBe('Username must be a string.');
+        expect(err.message).toBe(
+          'Username must be a string or an object with username and password keys.'
+        );
 
-        return ParseUser.logIn('username', {});
+        return ParseUser.logIn('username', undefined);
       })
       .then(null, err => {
         expect(err.code).toBe(ParseError.OTHER_CAUSE);
@@ -335,6 +337,92 @@ describe('ParseUser', () => {
 
         done();
       });
+  });
+
+  it('fail login when invalid object passed via username', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    try {
+      await ParseUser.logIn({}, 'password');
+      expect(false).toBeTrue();
+    } catch (err) {
+      expect(err.code).toBe(ParseError.OTHER_CAUSE);
+      expect(err.message).toBe('Auth payload should contain username key with string value');
+    }
+    try {
+      await ParseUser.logIn({ username: 'test' }, {});
+      expect(false).toBeTrue();
+    } catch (err) {
+      expect(err.code).toBe(ParseError.OTHER_CAUSE);
+      expect(err.message).toBe('Auth payload should contain password key with string value');
+    }
+    try {
+      await ParseUser.logIn({ username: 'test', password: 'test', authData: 'test' }, {});
+      expect(false).toBeTrue();
+    } catch (err) {
+      expect(err.code).toBe(ParseError.OTHER_CAUSE);
+      expect(err.message).toBe('authData should be an object');
+    }
+    try {
+      await ParseUser.logIn(
+        {
+          username: 'test',
+          password: 'test',
+          authData: { test: true },
+          aField: true,
+        },
+        {}
+      );
+      expect(false).toBeTrue();
+    } catch (err) {
+      expect(err.code).toBe(ParseError.OTHER_CAUSE);
+      expect(err.message).toBe('This operation only support authData, username and password keys');
+    }
+  });
+
+  it('should login with username as object', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body) {
+        expect(method).toBe('POST');
+        expect(path).toBe('login');
+        expect(body.username).toBe('username');
+        expect(body.password).toBe('password');
+        expect(body.authData).toEqual({ test: { data: true } });
+
+        return Promise.resolve(
+          {
+            objectId: 'uid2',
+            username: 'username',
+            sessionToken: '123abc',
+            authDataResponse: {
+              test: { challenge: 'test' },
+            },
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+    const u = await ParseUser.logIn({
+      username: 'username',
+      password: 'password',
+      authData: { test: { data: true } },
+    });
+    expect(u.id).toBe('uid2');
+    expect(u.getSessionToken()).toBe('123abc');
+    expect(u.isCurrent()).toBe(true);
+    expect(u.authenticated()).toBe(true);
+    expect(ParseUser.current()).toBe(u);
+    ParseUser._clearCache();
+    const current = ParseUser.current();
+    expect(current instanceof ParseUser).toBe(true);
+    expect(current.id).toBe('uid2');
+    expect(current.authenticated()).toBe(true);
+    expect(current.get('authDataResponse')).toEqual({
+      test: { challenge: 'test' },
+    });
   });
 
   it('preserves changes when logging in', done => {
@@ -1842,5 +1930,50 @@ describe('ParseUser', () => {
 
     const user = new CustomUser();
     expect(user.test).toBe(true);
+  });
+
+  it('should return challenge', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body) {
+        expect(method).toBe('POST');
+        expect(path).toBe('challenge');
+        expect(body.username).toBe('username');
+        expect(body.password).toBe('password');
+        expect(body.challengeData).toEqual({ test: { data: true } });
+
+        return Promise.resolve(
+          {
+            challengeData: { test: { token: true } },
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+
+    try {
+      await ParseUser.challenge({
+        username: 'username',
+        challengeData: { test: { data: true } },
+      });
+    } catch (e) {
+      expect(e.message).toContain('Running challenge via username require password.');
+    }
+
+    try {
+      await ParseUser.challenge({});
+    } catch (e) {
+      expect(e.message).toContain('challengeData is required for the challenge.');
+    }
+
+    const res = await ParseUser.challenge({
+      username: 'username',
+      password: 'password',
+      challengeData: { test: { data: true } },
+    });
+
+    expect(res.challengeData).toEqual({ test: { token: true } });
   });
 });

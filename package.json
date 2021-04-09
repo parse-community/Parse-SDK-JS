@@ -75,9 +75,11 @@
     "jsdoc-babel": "0.5.0",
     "lint-staged": "10.5.3",
     "metro-react-native-babel-preset": "0.59.0",
+    "mongodb-runner": "mongodb-js/runner",
     "parse-server": "github:parse-community/parse-server#master",
     "prettier": "2.2.1",
     "regenerator-runtime": "0.13.5",
+    "start-server-and-test": "^1.11.6",
     "vinyl-source-stream": "2.0.0"
   },
   "optionalDependencies": {
@@ -93,7 +95,9 @@
     "watch:browser": "cross-env PARSE_BUILD=browser npm run watch",
     "watch:node": "cross-env PARSE_BUILD=node npm run watch",
     "watch:react-native": "cross-env PARSE_BUILD=react-native npm run watch",
-    "integration": "cross-env TESTING=1 jasmine --config=jasmine.json",
+    "integration": " cross-env TESTING=1 jasmine --config=jasmine.json",
+    "preintegration": "mongodb-runner start",
+    "postintegration": "mongodb-runner stop",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
     "prepare": "npm run build",
     "release_docs": "./release_docs.sh",
