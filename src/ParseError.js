@@ -378,6 +378,14 @@ ParseError.DUPLICATE_REQUEST = 159;
 ParseError.INVALID_EVENT_NAME = 160;
 
 /**
+ * Error code indicating that a field had an invalid value.
+ *
+ * @property {number} INVALID_VALUE
+ * @static
+ */
+ParseError.INVALID_VALUE = 162;
+
+/**
  * Error code indicating that the username is missing or empty.
  *
  * @property {number} USERNAME_MISSING
