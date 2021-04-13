@@ -2727,6 +2727,12 @@ function runTest(controller) {
       q.fromLocalDatastore();
       objects = await q.find();
       assert.equal(objects.length, 1);
+
+      q = new Parse.Query(TestObject);
+      q.lessThanOrEqualTo('dateField', { $relativeTime: 'in 0 day' });
+      q.fromLocalDatastore();
+      objects = await q.find();
+      assert.equal(objects.length, 1);
     });
 
     it(`${controller.name} supports withinPolygon`, async () => {

@@ -61,6 +61,24 @@ describe('OfflineQuery', () => {
     expect(matchesQuery(q.className, obj, [], q)).toBe(true);
   });
 
+  it('matches queries relativeTime date field', () => {
+    const date = new Date('1995-12-17T03:24:00');
+    const obj = new ParseObject('Item');
+    obj.set('field', date);
+    const q = new ParseQuery('Item');
+    q.lessThanOrEqualTo('field', { $relativeTime: 'in 0 day' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+  });
+
+  it('matches invalid queries relativeTime date field', () => {
+    const date = new Date('1995-12-17T03:24:00');
+    const obj = new ParseObject('Item');
+    obj.set('field', date);
+    const q = new ParseQuery('Item');
+    q.equalTo('field', { $relativeTime: 'in 0 day' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(false);
+  });
+
   it('matches queries relation', () => {
     const obj = new ParseObject('Item');
     const relation = obj.relation('author');
