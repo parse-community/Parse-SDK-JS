@@ -304,10 +304,7 @@ describe('Parse Object', () => {
     });
 
     obj.increment('objectField.number', 15);
-    assert.deepStrictEqual(obj.attributes.objectField, {
-      number: 20,
-      letter: 'a',
-    });
+    await obj.save();
     assert.deepStrictEqual(obj.attributes.objectField, {
       number: 20,
       letter: 'a',
@@ -381,7 +378,7 @@ describe('Parse Object', () => {
     } catch (error) {
       assert.equal(
         error.message,
-        'schema mismatch for TestObject.hello; expected String but got Object'
+        `Cannot create property 'dot' on string 'world'`
       );
     }
   });
