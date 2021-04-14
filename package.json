@@ -100,7 +100,8 @@
     "release_docs": "./release_docs.sh",
     "gulp": "gulp",
     "prettier": "prettier --write '{src,integration}/{**/*,*}.js' && npm run lint:fix",
-    "cross-env": "cross-env"
+    "cross-env": "cross-env",
+    "madge:circular": "node_modules/.bin/madge ./src --circular"
   },
   "husky": {
     "hooks": {
