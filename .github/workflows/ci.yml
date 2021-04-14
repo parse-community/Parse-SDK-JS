@@ -7,6 +7,16 @@ on:
     branches:
       - '**'
 jobs:
+  check-lock-file-version:
+    name: NPM Lock File Version
+    timeout-minutes: 5
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check NPM lock file version
+        uses: mansona/npm-lockfile-version@v1
+        with:
+          version: 1
   build:
     runs-on: ubuntu-18.04
     timeout-minutes: 30
