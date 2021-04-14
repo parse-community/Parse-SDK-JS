@@ -590,6 +590,16 @@ describe('ParseObject', () => {
     expect(o2.attributes).toEqual({ age: 40 });
     o2.increment('age');
     expect(o2.attributes).toEqual({ age: 41 });
+
+    const obj = ParseObject.fromJSON({
+      _id: 'someId',
+      items: [ { value: 'a', count: 5 }, { value: 'b', count: 1 } ],
+      className: 'bug'
+    })
+    obj.increment('items.0.count')
+    expect(obj.get('items')).toEqual([
+      { value: 'a', count: 6 }, { value: 'b', count: 1 }
+    ])
   });
 
   it('can decrement a field', () => {
