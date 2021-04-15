@@ -1259,7 +1259,7 @@ class ParseObject {
    * }, function(error) {
    * // The save failed.  Error is an instance of Parse.Error.
    * });</pre>
-   * 
+   *
    * Example 2: <pre>
    * gameTurn.save("player", "Jake Cutter");</pre>
    *
