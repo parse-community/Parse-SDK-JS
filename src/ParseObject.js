@@ -1261,7 +1261,7 @@ class ParseObject {
    * });</pre>
    * 
    * Example 2: <pre>
-   * player.save("name", "Jake Cutter");</pre>
+   * gameTurn.save("player", "Jake Cutter");</pre>
    *
    * @param {string | object | null} [arg1]
    * Valid options are:<ul>
