@@ -1246,9 +1246,11 @@ class ParseObject {
    * or<pre>
    * object.save(attrs, options);</pre>
    * or<pre>
+   * object.save(key, value);</pre>
+   * or<pre>
    * object.save(key, value, options);</pre>
    *
-   * For example, <pre>
+   * Example 1: <pre>
    * gameTurn.save({
    * player: "Jake Cutter",
    * diceRoll: 2
@@ -1257,6 +1259,9 @@ class ParseObject {
    * }, function(error) {
    * // The save failed.  Error is an instance of Parse.Error.
    * });</pre>
+   *
+   * Example 2: <pre>
+   * gameTurn.save("player", "Jake Cutter");</pre>
    *
    * @param {string | object | null} [arg1]
    * Valid options are:<ul>
