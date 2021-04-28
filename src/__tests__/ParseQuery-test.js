@@ -2503,6 +2503,14 @@ describe('ParseQuery', () => {
       );
   });
 
+  it('create query instance from className', () => {
+    const q = ParseQuery.from('Item');
+    expect(q.className).toBe('Item');
+    expect(q.toJSON()).toEqual({
+      where: {},
+    });
+  });
+
   it('restores queries from json representation', () => {
     const q = new ParseQuery('Item');
 

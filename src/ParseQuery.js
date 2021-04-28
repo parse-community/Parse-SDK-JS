@@ -577,6 +577,16 @@ class ParseQuery {
   }
 
   /**
+   * Static method to create Parse.Query instance
+   *
+   * @param {string} className
+   * @returns {Parse.Query} new created query
+   */
+  static from(className: string): ParseQuery {
+    return new ParseQuery(className);
+  }
+
+  /**
    * Static method to restore Parse.Query by json representation
    * Internally calling Parse.Query.withJSON
    *
