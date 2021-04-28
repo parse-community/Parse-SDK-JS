@@ -2504,10 +2504,18 @@ describe('ParseQuery', () => {
   });
 
   it('create query instance from className', () => {
-    const q = ParseQuery.from('Item');
+    let q = ParseQuery.from('Item');
     expect(q.className).toBe('Item');
     expect(q.toJSON()).toEqual({
       where: {},
+    });
+
+    q = ParseQuery.from('Item', { hello: 'world' });
+    expect(q.className).toBe('Item');
+    expect(q.toJSON()).toEqual({
+      where: {
+        hello: 'world',
+      },
     });
   });
 
