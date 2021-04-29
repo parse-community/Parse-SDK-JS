@@ -580,15 +580,10 @@ class ParseQuery {
    * Static method to create Parse.Query instance
    *
    * @param {string} className
-   * @param {object} eq key / value object for query.equalTo()
    * @returns {Parse.Query} new created query
    */
-  static from(className: string, eq: { [key: string]: any }): ParseQuery {
-    const query = new ParseQuery(className);
-    if (eq) {
-      query.equalTo(eq);
-    }
-    return query;
+  static from(className: string): ParseQuery {
+    return new ParseQuery(className);
   }
 
   /**
