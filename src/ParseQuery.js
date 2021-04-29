@@ -579,11 +579,11 @@ class ParseQuery {
   /**
    * Static method to create Parse.Query instance
    *
-   * @param {string} className
-   * @returns {Parse.Query} new created query
+   * @param {(string | Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
+   * @returns {Parse.Query} Newly created query
    */
-  static from(className: string): ParseQuery {
-    return new ParseQuery(className);
+  static from(objectClass: string | ParseObject): ParseQuery {
+    return new ParseQuery(objectClass);
   }
 
   /**
