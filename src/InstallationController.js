@@ -10,7 +10,12 @@
  */
 
 import Storage from './Storage';
-const uuidv4 = require('uuid/v4');
+let uuidv4 = null;
+if (process.env.PARSE_BUILD === 'weapp') {
+  uuidv4 = require('./uuid.weapp');
+} else {
+  uuidv4 = require('uuid/v4');
+}
 
 let iidCache = null;
 
