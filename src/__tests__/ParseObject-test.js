@@ -33,7 +33,7 @@ jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 jest.dontMock('../LocalDatastore');
 
-jest.mock('uuid/v4', () => {
+jest.mock('../uuid', () => {
   let value = 0;
   return () => value++;
 });
