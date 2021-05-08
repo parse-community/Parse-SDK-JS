@@ -10,7 +10,7 @@
  */
 
 import Storage from './Storage';
-const uuidv4 = require('uuid/v4');
+const uuidv4 = require('./uuid');
 
 let iidCache = null;
 

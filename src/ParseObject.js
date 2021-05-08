@@ -43,7 +43,7 @@ import unsavedChildren from './unsavedChildren';
 import type { AttributeMap, OpsMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
 
-const uuidv4 = require('uuid/v4');
+const uuidv4 = require('./uuid');
 
 export type Pointer = {
   __type: string,

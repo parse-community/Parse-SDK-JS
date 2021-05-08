@@ -9,7 +9,7 @@
  * @flow
  */
 /* global XMLHttpRequest, XDomainRequest */
-const uuidv4 = require('uuid/v4');
+const uuidv4 = require('./uuid');
 
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
