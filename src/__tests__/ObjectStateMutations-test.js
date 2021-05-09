@@ -195,6 +195,77 @@ describe('ObjectStateMutations', () => {
         },
       },
     });
+    serverData = {
+      _id: 'someId',
+      items: [
+        {
+          value: 'a',
+          count: 5
+        },
+        {
+          value: 'b',
+          count: 1
+        }
+      ],
+      className: 'bug',
+      number: 2
+    }
+    pendingOps = [{ 'items.0.count': new ParseOps.IncrementOp(1) }];
+    expect(
+      ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId')
+    ).toEqual({
+      _id: 'someId',
+      items: [
+        {
+          value: 'a',
+          count: 6
+        },
+        {
+          value: 'b',
+          count: 1
+        }
+      ],
+      className: 'bug',
+      number: 2
+    });
+
+    serverData = {
+      _id: 'someId',
+      items: [
+        {
+          value: {
+            count: 54
+          },
+          count: 5
+        },
+        {
+          value: 'b',
+          count: 1
+        }
+      ],
+      className: 'bug',
+      number: 2
+    }
+    pendingOps = [{ 'items.0.value.count': new ParseOps.IncrementOp(6) }];
+    expect(
+      ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId')
+    ).toEqual({
+      _id: 'someId',
+      items: [
+        {
+          value: {
+            count: 60
+          },
+          count: 5
+        },
+        {
+          value: 'b',
+          count: 1
+        }
+      ],
+      className: 'bug',
+      number: 2
+    })
   });
 
   it('can commit changes from the server', () => {
