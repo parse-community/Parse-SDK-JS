@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@babel/runtime": "7.13.16",
-    "@babel/runtime-corejs3": "7.13.10",
+    "@babel/runtime-corejs3": "7.13.16",
     "idb-keyval": "5.0.5",
     "react-native-crypto-js": "1.0.0",
     "uuid": "3.4.0",
