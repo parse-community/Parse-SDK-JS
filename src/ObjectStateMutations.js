@@ -180,7 +180,7 @@ export function commitServerChanges(
       !(val instanceof ParseRelation)
     ) {
       const json = encode(val, false, true);
-      nestedSet(objectCache, attr, JSON.stringify(json));
+      objectCache[attr] = JSON.stringify(json);
     }
   }
 }
