@@ -505,7 +505,7 @@ describe('Parse User', () => {
         return user.save();
       })
       .then(() => {
-        assert.equal(Object.keys(user.attributes).length, 6);
+        assert.equal(Object.keys(user.attributes).length, 5);
         assert(user.attributes.hasOwnProperty('username'));
         assert(user.attributes.hasOwnProperty('email'));
         return user.destroy();
