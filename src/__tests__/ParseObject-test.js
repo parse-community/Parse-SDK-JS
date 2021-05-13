@@ -465,45 +465,6 @@ describe('ParseObject', () => {
     expect(o.attributes).toEqual({ name: 'William', behavior: 'formal' });
   });
 
-  it('can set nested fields', async () => {
-    // Mock XHR
-    CoreManager.getRESTController()._setXHR(
-      mockXHR([
-        {
-          status: 200,
-          response: { objectId: 'yolo' },
-        },
-      ])
-    );
-    const o = new ParseObject('Person');
-    expect(o.attributes).toEqual({});
-    o.set('data', {});
-    await o.save();
-    expect(o.get('data')).toEqual({});
-    o.set('data.a', {});
-    CoreManager.getRESTController()._setXHR(
-      mockXHR([
-        {
-          status: 200,
-          response: {},
-        },
-      ])
-    );
-    await o.save();
-    expect(o.get('data')).toEqual({ a: {} });
-    o.set('data.a.b', {});
-    CoreManager.getRESTController()._setXHR(
-      mockXHR([
-        {
-          status: 200,
-          response: {},
-        },
-      ])
-    );
-    await o.save();
-    expect(o.get('data')).toEqual({ a: { b: {} } });
-  });
-
   it('can set id with the objectId attribute', () => {
     const o = new ParseObject('Person');
     expect(o.attributes).toEqual({});
