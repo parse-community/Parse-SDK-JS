@@ -409,7 +409,7 @@ class ParseObject {
     for (attr in pending) {
       if (pending[attr] instanceof RelationOp) {
         changes[attr] = pending[attr].applyTo(undefined, this, attr);
-      } else if (!(attr in response) && !attr.includes('.')) {
+      } else if (!(attr in response)) {
         // Only SetOps and UnsetOps should not come back with results
         changes[attr] = pending[attr].applyTo(undefined);
       }

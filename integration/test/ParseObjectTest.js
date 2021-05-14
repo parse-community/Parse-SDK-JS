@@ -401,6 +401,20 @@ describe('Parse Object', () => {
     assert.equal(result.get('objectField').number, 20);
   });
 
+  it('can set non existing nested fields to objects', async () => {
+    const o = new Parse.Object('Person');
+    expect(o.attributes).toEqual({});
+    o.set('data', {});
+    await o.save();
+    expect(o.get('data')).toEqual({});
+    o.set('data.a', {});
+    await o.save();
+    expect(o.get('data')).toEqual({ a: {} });
+    o.set('data.a.b', {});
+    await o.save();
+    expect(o.get('data')).toEqual({ a: { b: {} } });
+  });
+
   it('can set non existing fields', async () => {
     const obj = new TestObject();
     obj.set('objectField', { number: 5 });

@@ -154,6 +154,19 @@ export function estimateAttributes(
   return data;
 }
 
+function nestedSet(obj, key, value) {
+  const path = key.split('.');
+  for (let i = 0; i < path.length - 1; i++) {
+    if (!(path[i] in obj)) obj[path[i]] = {};
+    obj = obj[path[i]];
+  }
+  if (typeof value === 'undefined') {
+    delete obj[path[path.length - 1]];
+  } else {
+    obj[path[path.length - 1]] = value;
+  }
+}
+
 export function commitServerChanges(
   serverData: AttributeMap,
   objectCache: ObjectCache,
@@ -161,7 +174,7 @@ export function commitServerChanges(
 ) {
   for (const attr in changes) {
     const val = changes[attr];
-    serverData[attr] = val;
+    nestedSet(serverData, attr, val);
     if (
       val &&
       typeof val === 'object' &&
