@@ -160,8 +160,11 @@ function nestedSet(obj, key, value) {
     if (!(path[i] in obj)) obj[path[i]] = {};
     obj = obj[path[i]];
   }
-  if (typeof value === 'undefined') delete obj[path[path.length - 1]];
-  else obj[path[path.length - 1]] = value;
+  if (typeof value === 'undefined') {
+    delete obj[path[path.length - 1]];
+  } else {
+    obj[path[path.length - 1]] = value;
+  }
 }
 
 export function commitServerChanges(
