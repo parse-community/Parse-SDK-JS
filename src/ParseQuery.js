@@ -346,7 +346,9 @@ class ParseQuery {
     if (!this._where[key] || typeof this._where[key] === 'string') {
       const prev = this._where[key];
       this._where[key] = {};
-      this._where[key]['$eq'] = prev;
+      if (typeof this._where[key] === 'string') {
+        this._where[key]['$eq'] = prev;
+      }
     }
     this._where[key][condition] = encode(value, false, true);
     return this;
