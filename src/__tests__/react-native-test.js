@@ -10,18 +10,21 @@ jest.dontMock('../ParseObject');
 jest.dontMock('../Storage');
 
 jest.mock(
-  '../../../../react-native/Libraries/vendor/emitter/_EventEmitter',
+  '../../../../react-native/Libraries/vendor/emitter/EventEmitter',
   () => {
     return {
-      prototype: {
-        addListener: new (require('events').EventEmitter)(),
+      default: {
+        prototype: {
+          addListener: new (require('events').EventEmitter)(),
+        },
       },
     };
   },
   { virtual: true }
 );
 
-const mockEmitter = require('../../../../react-native/Libraries/vendor/emitter/_EventEmitter');
+const mockEmitter = require('../../../../react-native/Libraries/vendor/emitter/EventEmitter')
+  .default;
 const CoreManager = require('../CoreManager');
 
 describe('React Native', () => {
