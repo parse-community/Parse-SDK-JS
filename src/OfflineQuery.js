@@ -87,7 +87,7 @@ function equalObjectsGeneric(obj, compareTo, eqlFn) {
  *
  * @param {*} text
  * @param {*} now
- * @returns {{status:string,info:string,result:Date} }
+ * @returns {{status:string,info:string,result:Date}}
  */
 function relativeTimeToDate(text, now = new Date()) {
   text = text.toLowerCase();
