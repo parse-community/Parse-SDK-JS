@@ -1,7 +1,22 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.2.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.3.0...master)
+
+## 3.3.0
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.2.0...3.3.0)
+
+**Improvements**
+- Improve support for nested keys ([#1364](https://github.com/parse-community/Parse-SDK-JS/pull/1364))
+- Doc improvement ([#1349](https://github.com/parse-community/Parse-SDK-JS/pull/1349))
+- Add npm version ci check ([#1345](https://github.com/parse-community/Parse-SDK-JS/pull/1345))
+- Added an error code for geospatial index failures ([#1342](https://github.com/parse-community/Parse-SDK-JS/pull/1342))
+- Added date support to OfflineQuery class ([#1344](https://github.com/parse-community/Parse-SDK-JS/pull/1344))
+
+**Fixes**
+- Fix react native build ([#1381](https://github.com/parse-community/Parse-SDK-JS/pull/1381))
+- Fix weapp uuid error ([#1356](https://github.com/parse-community/Parse-SDK-JS/pull/1356))
+- Fix EventEmitter undefined on React Native 0.64 ([#1351](https://github.com/parse-community/Parse-SDK-JS/pull/1351))
 
 ## 3.2.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.1.0...3.2.0)
