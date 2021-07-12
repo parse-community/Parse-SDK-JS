@@ -83,11 +83,11 @@ function equalObjectsGeneric(obj, compareTo, eqlFn) {
 /**
  * Converts human readable relative date string
  * ie: 'in 10 days' to a date relative to now
+ * copied from parse-server/src/Adapters/Storage/Mongo/MongoTransform.js
  *
  * @param {*} text
  * @param {*} now
- * @returns {status,info,result}
- * copied from parse-server/src/Adapters/Storage/Mongo/MongoTransform.js
+ * @returns {{status:string,info:string,result:Date} }
  */
 function relativeTimeToDate(text, now = new Date()) {
   text = text.toLowerCase();
