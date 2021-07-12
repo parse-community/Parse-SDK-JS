@@ -2355,7 +2355,9 @@ describe('Parse Query', () => {
     query.hint('_id_');
     query.explain();
     const explain = await query.find();
-    assert.equal(explain.queryPlanner.winningPlan.inputStage.inputStage.indexName, '_id_');
+    assert.equal(explain[0].queryPlanner.winningPlan.inputStage.inputStage.indexName, '_id_');
+    const explainFirst = await query.first();
+    assert.equal(explainFirst.queryPlanner.winningPlan.inputStage.inputStage.indexName, '_id_');
   });
 
   it('can query with select on null field', async () => {
