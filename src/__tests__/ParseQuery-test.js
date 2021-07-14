@@ -807,6 +807,36 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can combine other clauses with equalTo', () => {
+    const q = new ParseQuery('Item');
+    q.exists('inStock');
+    q.equalTo('inStock', null);
+
+    expect(q.toJSON()).toEqual({
+      where: {
+        inStock: {
+          $eq: null,
+          $exists: true,
+        },
+      },
+    });
+  });
+
+  it('can combine equalTo clause with any other clause', () => {
+    const q = new ParseQuery('Item');
+    q.equalTo('inStock', null);
+    q.exists('inStock');
+
+    expect(q.toJSON()).toEqual({
+      where: {
+        inStock: {
+          $eq: null,
+          $exists: true,
+        },
+      },
+    });
+  });
+
   it('can specify ordering', () => {
     const q = new ParseQuery('Item');
     q.greaterThan('inStock', 0).ascending('createdAt');
