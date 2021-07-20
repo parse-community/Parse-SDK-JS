@@ -34,7 +34,7 @@
     "idb-keyval": "5.0.6",
     "react-native-crypto-js": "1.0.0",
     "uuid": "3.4.0",
-    "ws": "7.5.0",
+    "ws": "7.5.1",
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
