@@ -67,7 +67,6 @@ function b64Digit(number: number): string {
  * A Parse.File is a local representation of a file that is saved to the Parse
  * cloud.
  *
- * @alias Parse.File
  */
 class ParseFile {
   _name: string;
@@ -108,6 +107,7 @@ class ParseFile {
    *     extension.
    * @param metadata {Object} Optional key value pairs to be stored with file object
    * @param tags {Object} Optional key value pairs to be stored with file object
+   * @alias Parse.File
    */
   constructor(name: string, data?: FileData, type?: string, metadata?: Object, tags?: Object) {
     const specifiedType = type || '';

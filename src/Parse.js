@@ -228,6 +228,18 @@ Parse.Polygon = require('./ParsePolygon').default;
 Parse.Installation = require('./ParseInstallation').default;
 Parse.LocalDatastore = require('./LocalDatastore');
 Parse.Object = require('./ParseObject').default;
+/**
+ * @static
+ * @name Parse.Op
+ * @property {any} Set
+ * @property {any} Unset
+ * @property {any} Increment
+ * @property {any} Add
+ * @property {any} Remove
+ * @property {any} AddUnique
+ * @property {any} Relation
+ *
+ */
 Parse.Op = {
   Set: ParseOp.SetOp,
   Unset: ParseOp.UnsetOp,

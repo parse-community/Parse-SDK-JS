@@ -30,7 +30,7 @@
  *   object.set("location", point);
  *   object.save();</pre></p>
  *
- * @alias Parse.GeoPoint
+
  */
 /* global navigator */
 class ParseGeoPoint {
@@ -40,6 +40,7 @@ class ParseGeoPoint {
   /**
    * @param {(number[] | object | number)} arg1 Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point.
    * @param {number} arg2 The longitude of the GeoPoint
+   * @alias Parse.GeoPoint
    */
   constructor(
     arg1: Array<number> | { latitude: number, longitude: number } | number,

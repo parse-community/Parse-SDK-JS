@@ -29,12 +29,12 @@ const PUBLIC_KEY = '*';
  * <code>Parse.Object</code> to restrict access to only a subset of users
  * of your application.</p>
  *
- * @alias Parse.ACL
  */
 class ParseACL {
   permissionsById: ByIdMap;
 
   /**
+   * @alias Parse.ACL
    * @param {(Parse.User | object)} arg1 The user to initialize the ACL for
    */
   constructor(arg1: ParseUser | ByIdMap) {

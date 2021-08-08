@@ -23,8 +23,10 @@
     "lib/",
     "LICENSE",
     "PATENTS",
-    "README.md"
+    "README.md",
+    "types/index.d.ts"
   ],
+  "types": "types/index.d.ts",
   "browser": {
     "react-native": false
   },
@@ -78,6 +80,7 @@
     "parse-server": "github:parse-community/parse-server#master",
     "prettier": "2.2.1",
     "regenerator-runtime": "0.13.5",
+    "tsd-jsdoc": "2.5.0",
     "vinyl-source-stream": "2.0.0"
   },
   "optionalDependencies": {
@@ -95,6 +98,7 @@
     "watch:react-native": "cross-env PARSE_BUILD=react-native npm run watch",
     "integration": "cross-env TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
+    "types": "jsdoc -c ./jsdoc-ts-conf.json ./src && node -e \"require('fs').rename('types/types.d.ts','types/index.d.ts', () => null)\"",
     "prepare": "npm run build",
     "release_docs": "./release_docs.sh",
     "gulp": "gulp",

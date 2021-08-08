@@ -24,7 +24,6 @@ import ParseQuery from './ParseQuery';
  * particular parent object and key.
  * </p>
  *
- * @alias Parse.Relation
  */
 class ParseRelation {
   parent: ?ParseObject;
@@ -32,6 +31,7 @@ class ParseRelation {
   targetClassName: ?string;
 
   /**
+   * @alias Parse.Relation
    * @param {Parse.Object} parent The parent of this relation.
    * @param {string} key The key for this relation on the parent.
    */

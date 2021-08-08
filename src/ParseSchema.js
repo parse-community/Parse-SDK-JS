@@ -49,7 +49,6 @@ type FieldOptions = {
  * </pre>
  * </p>
  *
- * @alias Parse.Schema
  */
 class ParseSchema {
   className: string;
@@ -58,6 +57,7 @@ class ParseSchema {
   _clp: { [key: string]: mixed };
 
   /**
+   * @alias Parse.Schema
    * @param {string} className Parse Class string.
    */
   constructor(className: string) {

@@ -22,13 +22,14 @@ import type { RequestOptions } from './RESTController';
  * Parse.Config is a local representation of configuration data that
  * can be set from the Parse dashboard.
  *
- * @alias Parse.Config
  */
 
 class ParseConfig {
   attributes: { [key: string]: any };
   _escapedAttributes: { [key: string]: any };
-
+  /**
+   * @alias Parse.Config
+   */
   constructor() {
     this.attributes = {};
     this._escapedAttributes = {};

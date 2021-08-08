@@ -10,10 +10,10 @@
 /**
  * Constructs a new Parse.Error object with the given code and message.
  *
- * @alias Parse.Error
  */
 class ParseError extends Error {
   /**
+   * @alias Parse.Error
    * @param {number} code An error code constant from <code>Parse.Error</code>.
    * @param {string} message A detailed description of the error.
    */

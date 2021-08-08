@@ -35,11 +35,11 @@ const authProviders = {};
  * user specific methods, like authentication, signing up, and validation of
  * uniqueness.</p>
  *
- * @alias Parse.User
  * @augments Parse.Object
  */
 class ParseUser extends ParseObject {
   /**
+   * @alias Parse.User
    * @param {object} attributes The initial set of data to store in the user.
    */
   constructor(attributes: ?AttributeMap) {

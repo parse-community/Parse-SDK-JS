@@ -120,12 +120,12 @@ VALID_PERMISSIONS_EXTENDED.set('protectedFields', {});
  * setRoleAddFieldAccess(role: Role, allowed: boolean)
  * </p>
  *
- * @alias Parse.CLP
  */
 class ParseCLP {
   permissionsMap: PermissionsMap;
 
   /**
+   * @alias Parse.CLP
    * @param {(Parse.User | Parse.Role | object)} userId The user to initialize the CLP for
    */
   constructor(userId: ParseUser | ParseRole | PermissionsMap) {

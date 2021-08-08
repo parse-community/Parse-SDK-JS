@@ -45,6 +45,13 @@ import type { RequestOptions, FullOptions } from './RESTController';
 
 const uuidv4 = require('./uuid');
 
+/**
+ * @typedef Pointer
+ * @property {string} __type
+ * @property {string} className
+ * @property {string} objectId
+ */
+
 export type Pointer = {
   __type: string,
   className: string,
@@ -107,6 +114,7 @@ function getServerUrlPath() {
  */
 class ParseObject {
   /**
+   * @alias Parse.Object
    * @param {string} className The class name for the object
    * @param {object} attributes The initial set of data to store in the object.
    * @param {object} options The options for this object instance.
@@ -694,7 +702,7 @@ class ParseObject {
    * @param {(string|object)} value The value to give it.
    * @param {object} options A set of options for the set.
    *     The only supported option is <code>error</code>.
-   * @returns {(ParseObject|boolean)} true if the set succeeded.
+   * @returns {(Parse.Object|boolean)} true if the set succeeded.
    */
   set(key: mixed, value: mixed, options?: mixed): ParseObject | boolean {
     let changes = {};
@@ -792,7 +800,7 @@ class ParseObject {
    *
    * @param {string} attr The string name of an attribute.
    * @param options
-   * @returns {(ParseObject | boolean)}
+   * @returns {(Parse.Object | boolean)}
    */
   unset(attr: string, options?: { [opt: string]: mixed }): ParseObject | boolean {
     options = options || {};
@@ -806,7 +814,7 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param amount {Number} The amount to increment by (optional).
-   * @returns {(ParseObject|boolean)}
+   * @returns {(Parse.Object|boolean)}
    */
   increment(attr: string, amount?: number): ParseObject | boolean {
     if (typeof amount === 'undefined') {
@@ -824,7 +832,7 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param amount {Number} The amount to decrement by (optional).
-   * @returns {(ParseObject | boolean)}
+   * @returns {(Parse.Object | boolean)}
    */
   decrement(attr: string, amount?: number): ParseObject | boolean {
     if (typeof amount === 'undefined') {
@@ -842,7 +850,7 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param item {} The item to add.
-   * @returns {(ParseObject | boolean)}
+   * @returns {(Parse.Object | boolean)}
    */
   add(attr: string, item: mixed): ParseObject | boolean {
     return this.set(attr, new AddOp([item]));
@@ -854,7 +862,7 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param items {Object[]} The items to add.
-   * @returns {(ParseObject | boolean)}
+   * @returns {(Parse.Object | boolean)}
    */
   addAll(attr: string, items: Array<mixed>): ParseObject | boolean {
     return this.set(attr, new AddOp(items));
@@ -867,7 +875,7 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param item {} The object to add.
-   * @returns {(ParseObject | boolean)}
+   * @returns {(Parse.Object | boolean)}
    */
   addUnique(attr: string, item: mixed): ParseObject | boolean {
     return this.set(attr, new AddUniqueOp([item]));
@@ -880,7 +888,7 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param items {Object[]} The objects to add.
-   * @returns {(ParseObject | boolean)}
+   * @returns {(Parse.Object | boolean)}
    */
   addAllUnique(attr: string, items: Array<mixed>): ParseObject | boolean {
     return this.set(attr, new AddUniqueOp(items));
@@ -892,7 +900,7 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param item {} The object to remove.
-   * @returns {(ParseObject | boolean)}
+   * @returns {(Parse.Object | boolean)}
    */
   remove(attr: string, item: mixed): ParseObject | boolean {
     return this.set(attr, new RemoveOp([item]));
@@ -904,7 +912,7 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param items {Object[]} The object to remove.
-   * @returns {(ParseObject | boolean)}
+   * @returns {(Parse.Object | boolean)}
    */
   removeAll(attr: string, items: Array<mixed>): ParseObject | boolean {
     return this.set(attr, new RemoveOp(items));
@@ -1080,7 +1088,7 @@ class ParseObject {
    *
    * @param {Parse.ACL} acl An instance of Parse.ACL.
    * @param {object} options
-   * @returns {(ParseObject | boolean)} Whether the set passed validation.
+   * @returns {(Parse.Object | boolean)} Whether the set passed validation.
    * @see Parse.Object#set
    */
   setACL(acl: ParseACL, options?: mixed): ParseObject | boolean {
@@ -1110,7 +1118,7 @@ class ParseObject {
   /**
    * Clears all attributes on a model
    *
-   * @returns {(ParseObject | boolean)}
+   * @returns {(Parse.Object | boolean)}
    */
   clear(): ParseObject | boolean {
     const attributes = this.attributes;

@@ -28,13 +28,13 @@ import ParseGeoPoint from './ParseGeoPoint';
  *   object.set("area", polygon);
  *   object.save();</pre></p>
  *
- * @alias Parse.Polygon
  */
 class ParsePolygon {
   _coordinates: Array<Array<number>>;
 
   /**
    * @param {(number[][] | Parse.GeoPoint[])} coordinates An Array of coordinate pairs
+   * @alias Parse.Polygon
    */
   constructor(coordinates: Array<Array<number>> | Array<ParseGeoPoint>) {
     this._coordinates = ParsePolygon._validate(coordinates);

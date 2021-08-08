@@ -43,7 +43,7 @@ const EventuallyQueue = {
    *
    * @function save
    * @name Parse.EventuallyQueue.save
-   * @param {ParseObject} object Parse.Object to be saved eventually
+   * @param {Parse.Object} object Parse.Object to be saved eventually
    * @param {object} [serverOptions] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Object.html#save Parse.Object.save} options.
    * @returns {Promise} A promise that is fulfilled if object is added to queue.
    * @static
@@ -58,7 +58,7 @@ const EventuallyQueue = {
    *
    * @function destroy
    * @name Parse.EventuallyQueue.destroy
-   * @param {ParseObject} object Parse.Object to be destroyed eventually
+   * @param {Parse.Object} object Parse.Object to be destroyed eventually
    * @param {object} [serverOptions] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Object.html#destroy Parse.Object.destroy} options
    * @returns {Promise} A promise that is fulfilled if object is added to queue.
    * @static
@@ -252,7 +252,7 @@ const EventuallyQueue = {
   /**
    * Build queue object and add to queue.
    *
-   * @param {ParseObject} object Parse.Object to be processed
+   * @param {Parse.Object} object Parse.Object to be processed
    * @param {QueueObject} queueObject Parse.Object data from the queue
    * @returns {Promise} A promise that is fulfilled when operation is performed.
    * @static

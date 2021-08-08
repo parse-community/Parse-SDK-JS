@@ -22,11 +22,11 @@ import type { RequestOptions, FullOptions } from './RESTController';
  * This class is a subclass of a Parse.Object, and retains the same
  * functionality of a Parse.Object.</p>
  *
- * @alias Parse.Session
  * @augments Parse.Object
  */
 class ParseSession extends ParseObject {
   /**
+   * @alias Parse.Session
    * @param {object} attributes The initial set of data to store in the user.
    */
   constructor(attributes: ?AttributeMap) {

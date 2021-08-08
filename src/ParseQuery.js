@@ -223,7 +223,6 @@ function handleOfflineSort(a, b, sorts) {
  *     // error is an instance of Parse.Error.
  * });</pre></p>
  *
- * @alias Parse.Query
  */
 class ParseQuery {
   /**
@@ -249,6 +248,7 @@ class ParseQuery {
   _xhrRequest: any;
 
   /**
+   * @alias Parse.Query
    * @param {(string | Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
    */
   constructor(objectClass: string | ParseObject) {
@@ -1845,7 +1845,7 @@ class ParseQuery {
    * Sets the flag to include with response the total number of objects satisfying this query,
    * despite limits/skip. Might be useful for pagination.
    * Note that result of this query will be wrapped as an object with
-   * `results`: holding {ParseObject} array and `count`: integer holding total number
+   * `results`: holding {Parse.Object} array and `count`: integer holding total number
    *
    * @param {boolean} includeCount false - disable, true - enable.
    * @returns {Parse.Query} Returns the query, so you can chain this call.

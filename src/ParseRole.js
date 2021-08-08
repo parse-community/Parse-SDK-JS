@@ -26,11 +26,11 @@ import type ParseRelation from './ParseRelation';
  * <p>Roles must have a name (which cannot be changed after creation of the
  * role), and must specify an ACL.</p>
  *
- * @alias Parse.Role
  * @augments Parse.Object
  */
 class ParseRole extends ParseObject {
   /**
+   * @alias Parse.Role
    * @param {string} name The name of the Role to create.
    * @param {Parse.ACL} acl The ACL for this role. Roles must have an ACL.
    * A Parse.Role is a local representation of a role persisted to the Parse
@@ -72,7 +72,7 @@ class ParseRole extends ParseObject {
    * @param {string} name The name of the role.
    * @param {object} options Standard options object with success and error
    *     callbacks.
-   * @returns {(ParseObject|boolean)} true if the set succeeded.
+   * @returns {(Parse.Object|boolean)} true if the set succeeded.
    */
   setName(name: string, options?: mixed): ParseObject | boolean {
     return this.set('name', name, options);
