@@ -94,17 +94,17 @@ declare namespace Parse {
         /**
          * <p>Makes a call to a cloud function.</p>
          * @param name - <p>The function name.</p>
-         * @param data - <p>The parameters to send to the cloud function.</p>
+         * @param [data] - <p>The parameters to send to the cloud function.</p>
          * @returns <p>A promise that will be resolved with the result
          * of the function.</p>
          */
-        static run(name: string, data: any, options: any): Promise;
+        static run(name: string, data?: any, options?: any): Promise<any>;
         /**
          * <p>Gets data for the current set of cloud jobs.</p>
          * @returns <p>A promise that will be resolved with the result
          * of the function.</p>
          */
-        static getJobsData(): Promise;
+        static getJobsData(): Promise<object>;
         /**
          * <p>Starts a given cloud job, which will process asynchronously.</p>
          * @param name - <p>The function name.</p>
@@ -112,13 +112,13 @@ declare namespace Parse {
          * @returns <p>A promise that will be resolved with the jobStatusId
          * of the job.</p>
          */
-        static startJob(name: string, data: any): Promise;
+        static startJob(name: string, data: any): Promise<string>;
         /**
          * <p>Gets job status by Id</p>
          * @param jobStatusId - <p>The Id of Job Status.</p>
          * @returns <p>Status of Job.</p>
          */
-        static getJobStatus(jobStatusId: string): Parse.Object;
+        static getJobStatus(jobStatusId: string): Promise<Parse.Object>;
         /**
          * <p>Defines a Cloud Function.</p>
          * <p><strong>Available in Cloud Code only.</strong></p>
@@ -126,7 +126,7 @@ declare namespace Parse {
          * @param func - <p>The Cloud Function to register</p>
          * @param [validator] - <p>An optional function to help validating cloud code.</p>
          */
-        static define<T extends ((param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] })  => any & (() => any))>(name: string, func: Parse.Cloud.FunctionRequestFunc<T>, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.FunctionRequestFunc<T>): void;
+        static define(name: string, func: Parse.Cloud.FunctionRequestFunc, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.FunctionRequestFunc): this;
         /**
          * <p>Registers an after delete function.</p>
          * <p><strong>Available in Cloud Code only.</strong></p>
@@ -563,8 +563,8 @@ declare namespace Parse {
             event: string;
             object: Parse.Object;
             original: Parse.Object;
-            clients: Integer;
-            subscriptions: Integer;
+            clients: number;
+            subscriptions: number;
             sendEvent: boolean;
         };
         /**
@@ -626,7 +626,7 @@ declare namespace Parse {
         /**
          * @param request - <p>The request object</p>
          */
-        type FunctionRequestFunc<T> = (request: Parse.Cloud.FunctionRequest) => ReturnType<T>;
+        type FunctionRequestFunc = (request: Parse.Cloud.FunctionRequest) => any;
         /**
          * @property installationId - <p>If set, the installationId triggering the request.</p>
          * @property master - <p>If true, means the master key was used.</p>
@@ -642,20 +642,20 @@ declare namespace Parse {
         /**
          * @param request - <p>The request object</p>
          */
-        type JobRequestFunc = (request: Parse.Cloud.JobRequest) => any;
+        type JobRequestFunc = (request: Parse.Cloud.JobRequest) => void;
         /**
          * @property params - <p>The params passed to the background job.</p>
-         * @property [error] - <p>If error is called, will end the job unsuccessfully with an optional completion message to be stored in the job status.</p>
-         * @property [message] - <p>If message is called with a string argument, will update the current message to be stored in the job status.</p>
-         * @property [success] - <p>If success is called, will end the job successfullly with the optional completion message to be stored in the job status.</p>
+         * @property error - <p>If error is called, will end the job unsuccessfully with an optional completion message to be stored in the job status.</p>
+         * @property message - <p>If message is called with a string argument, will update the current message to be stored in the job status.</p>
+         * @property success - <p>If success is called, will end the job successfullly with the optional completion message to be stored in the job status.</p>
          */
         type JobRequest = {
             params: {
                 [key: string]: object;
             };
-            error?: (...params: any[]) => any;
-            message?: (...params: any[]) => any;
-            success?: (...params: any[]) => any;
+            error: (...params: any[]) => any;
+            message: (...params: any[]) => any;
+            success: (...params: any[]) => any;
         };
         /**
          * @param message - <p>The request object</p>
@@ -700,23 +700,21 @@ declare namespace Parse {
             error: string;
         };
         /**
-         * @property body - <p>The body of the request. If it is a JSON object, then the Content-Type set in the headers must be application/x-www-form-urlencoded or application/json. You can also set this to a {@link Buffer} object to send raw bytes. If you use a Buffer, you should also set the Content-Type header explicitly to describe what these bytes represent.</p>
-         * @property error - <p>The function that is called when the request fails. It will be passed a Parse.Cloud.HTTPResponse object.</p>
-         * @property followRedirects - <p>Whether to follow redirects caused by HTTP 3xx responses. Defaults to false.</p>
-         * @property headers - <p>The headers for the request.</p>
-         * @property method - <p>The method of the request. GET, POST, PUT, DELETE, HEAD, and OPTIONS are supported. Will default to GET if not specified.</p>
-         * @property params - <p>The query portion of the url. You can pass a JSON object of key value pairs like params: {q : 'Sean Plott'} or a raw string like params:q=Sean Plott.</p>
-         * @property success - <p>The function that is called when the request successfully completes. It will be passed a Parse.Cloud.HTTPResponse object.</p>
+         * @property [body] - <p>The body of the request. If it is a JSON object, then the Content-Type set in the headers must be application/x-www-form-urlencoded or application/json. You can also set this to a {@link Buffer} object to send raw bytes. If you use a Buffer, you should also set the Content-Type header explicitly to describe what these bytes represent.</p>
+         * @property [error] - <p>The function that is called when the request fails. It will be passed a Parse.Cloud.HTTPResponse object.</p>
+         * @property [followRedirects] - <p>Whether to follow redirects caused by HTTP 3xx responses. Defaults to false.</p>
+         * @property [headers] - <p>The headers for the request.</p>
+         * @property [method] - <p>The method of the request. GET, POST, PUT, DELETE, HEAD, and OPTIONS are supported. Will default to GET if not specified.</p>
+         * @property [params] - <p>The query portion of the url. You can pass a JSON object of key value pairs like params: {q : 'Sean Plott'} or a raw string like params:q=Sean Plott.</p>
          * @property url - <p>The url to send the request to.</p>
          */
         type HTTPOptions = {
-            body: string | any;
-            error: (...params: any[]) => any;
-            followRedirects: boolean;
-            headers: any;
-            method: string;
-            params: string | any;
-            success: (...params: any[]) => any;
+            body?: string | any;
+            error?: (...params: any[]) => any;
+            followRedirects?: boolean;
+            headers?: any;
+            method?: string;
+            params?: string | any;
             url: string;
         };
         /**
@@ -940,11 +938,79 @@ declare namespace Parse {
          */
         close(): void;
     }
-    class Subscription {
+    /**
+     * <p>Creates a new LiveQuery Subscription.
+     * Extends events.EventEmitter
+     * <a href="https://nodejs.org/api/events.html#events_class_eventemitter">cloud functions</a>.</p>
+     * <p>Response Object - Contains data from the client that made the request
+     * <ul>
+     * <li>clientId</li>
+     * <li>installationId - requires Parse Server 4.0.0+</li>
+     * </ul>
+     * </p>
+     * <p>Open Event - When you call query.subscribe(), we send a subscribe request to
+     * the LiveQuery server, when we get the confirmation from the LiveQuery server,
+     * this event will be emitted. When the client loses WebSocket connection to the
+     * LiveQuery server, we will try to auto reconnect the LiveQuery server. If we
+     * reconnect the LiveQuery server and successfully resubscribe the ParseQuery,
+     * you'll also get this event.
+     * <pre>
+     * subscription.on('open', (response) => {
+     *
+     * });</pre></p>
+     * <p>Create Event - When a new ParseObject is created and it fulfills the ParseQuery you subscribe,
+     * you'll get this event. The object is the ParseObject which is created.
+     * <pre>
+     * subscription.on('create', (object, response) => {
+     *
+     * });</pre></p>
+     * <p>Update Event - When an existing ParseObject (original) which fulfills the ParseQuery you subscribe
+     * is updated (The ParseObject fulfills the ParseQuery before and after changes),
+     * you'll get this event. The object is the ParseObject which is updated.
+     * Its content is the latest value of the ParseObject.
+     * <p>Parse-Server 3.1.3+ Required for original object parameter</p>
+     * <pre>
+     * subscription.on('update', (object, original, response) => {
+     *
+     * });</pre></p>
+     * <p>Enter Event - When an existing ParseObject's (original) old value doesn't fulfill the ParseQuery
+     * but its new value fulfills the ParseQuery, you'll get this event. The object is the
+     * ParseObject which enters the ParseQuery. Its content is the latest value of the ParseObject.
+     * <p>Parse-Server 3.1.3+ Required for original object parameter</p>
+     * <pre>
+     * subscription.on('enter', (object, original, response) => {
+     *
+     * });</pre></p>
+     * <p>Update Event - When an existing ParseObject's old value fulfills the ParseQuery but its new value
+     * doesn't fulfill the ParseQuery, you'll get this event. The object is the ParseObject
+     * which leaves the ParseQuery. Its content is the latest value of the ParseObject.
+     * <pre>
+     * subscription.on('leave', (object, response) => {
+     *
+     * });</pre></p>
+     * <p>Delete Event - When an existing ParseObject which fulfills the ParseQuery is deleted, you'll
+     * get this event. The object is the ParseObject which is deleted.
+     * <pre>
+     * subscription.on('delete', (object, response) => {
+     *
+     * });</pre></p>
+     * <p>Close Event - When the client loses the WebSocket connection to the LiveQuery
+     * server and we stop receiving events, you'll get this event.
+     * <pre>
+     * subscription.on('close', () => {
+     *
+     * });</pre></p>
+     * @param id - <p>subscription id</p>
+     * @param query - <p>query to subscribe to</p>
+     * @param sessionToken - <p>optional session token</p>
+     */
+    class LiveQuerySubscription {
+        constructor(id: string, query: string, sessionToken: string);
         /**
          * <p>Close the subscription</p>
          */
         unsubscribe(): Promise;
+        on(event: string, callback: LiveQueryEventCallback): void;
     }
     /**
      * <p>Provides a local datastore which can be used to store and retrieve <code>Parse.Object</code>. <br />
@@ -967,6 +1033,8 @@ declare namespace Parse {
          */
         static updateFromServer(): void;
     }
+    type AuthData = any;
+    type AuthProvider = any;
     /**
      * <p>Creates a new ACL.
      * If no argument is given, the ACL has no permissions for anyone.
@@ -977,10 +1045,10 @@ declare namespace Parse {
      * <p>An ACL, or Access Control List can be added to any
      * <code>Parse.Object</code> to restrict access to only a subset of users
      * of your application.</p>
-     * @param arg1 - <p>The user to initialize the ACL for</p>
+     * @param [arg1] - <p>The user to initialize the ACL for</p>
      */
     class ACL {
-        constructor(arg1: Parse.User | any);
+        constructor(arg1?: Parse.User | any);
         /**
          * <p>Returns a JSON-encoded version of the ACL.</p>
          */
@@ -1344,397 +1412,275 @@ declare namespace Parse {
         /**
          * <p>Error code indicating some error other than those enumerated here.</p>
          */
-        static OTHER_CAUSE: {
-            OTHER_CAUSE: number;
-        };
+        static OTHER_CAUSE: number;
         /**
          * <p>Error code indicating that something has gone wrong with the server.</p>
          */
-        static INTERNAL_SERVER_ERROR: {
-            INTERNAL_SERVER_ERROR: number;
-        };
+        static INTERNAL_SERVER_ERROR: number;
         /**
          * <p>Error code indicating the connection to the Parse servers failed.</p>
          */
-        static CONNECTION_FAILED: {
-            CONNECTION_FAILED: number;
-        };
+        static CONNECTION_FAILED: number;
         /**
          * <p>Error code indicating the specified object doesn't exist.</p>
          */
-        static OBJECT_NOT_FOUND: {
-            OBJECT_NOT_FOUND: number;
-        };
+        static OBJECT_NOT_FOUND: number;
         /**
          * <p>Error code indicating you tried to query with a datatype that doesn't
          * support it, like exact matching an array or object.</p>
          */
-        static INVALID_QUERY: {
-            INVALID_QUERY: number;
-        };
+        static INVALID_QUERY: number;
         /**
          * <p>Error code indicating a missing or invalid classname. Classnames are
          * case-sensitive. They must start with a letter, and a-zA-Z0-9_ are the
          * only valid characters.</p>
          */
-        static INVALID_CLASS_NAME: {
-            INVALID_CLASS_NAME: number;
-        };
+        static INVALID_CLASS_NAME: number;
         /**
          * <p>Error code indicating an unspecified object id.</p>
          */
-        static MISSING_OBJECT_ID: {
-            MISSING_OBJECT_ID: number;
-        };
+        static MISSING_OBJECT_ID: number;
         /**
          * <p>Error code indicating an invalid key name. Keys are case-sensitive. They
          * must start with a letter, and a-zA-Z0-9_ are the only valid characters.</p>
          */
-        static INVALID_KEY_NAME: {
-            INVALID_KEY_NAME: number;
-        };
+        static INVALID_KEY_NAME: number;
         /**
          * <p>Error code indicating a malformed pointer. You should not see this unless
          * you have been mucking about changing internal Parse code.</p>
          */
-        static INVALID_POINTER: {
-            INVALID_POINTER: number;
-        };
+        static INVALID_POINTER: number;
         /**
          * <p>Error code indicating that badly formed JSON was received upstream. This
          * either indicates you have done something unusual with modifying how
          * things encode to JSON, or the network is failing badly.</p>
          */
-        static INVALID_JSON: {
-            INVALID_JSON: number;
-        };
+        static INVALID_JSON: number;
         /**
          * <p>Error code indicating that the feature you tried to access is only
          * available internally for testing purposes.</p>
          */
-        static COMMAND_UNAVAILABLE: {
-            COMMAND_UNAVAILABLE: number;
-        };
+        static COMMAND_UNAVAILABLE: number;
         /**
          * <p>You must call Parse.initialize before using the Parse library.</p>
          */
-        static NOT_INITIALIZED: {
-            NOT_INITIALIZED: number;
-        };
+        static NOT_INITIALIZED: number;
         /**
          * <p>Error code indicating that a field was set to an inconsistent type.</p>
          */
-        static INCORRECT_TYPE: {
-            INCORRECT_TYPE: number;
-        };
+        static INCORRECT_TYPE: number;
         /**
          * <p>Error code indicating an invalid channel name. A channel name is either
          * an empty string (the broadcast channel) or contains only a-zA-Z0-9_
          * characters and starts with a letter.</p>
          */
-        static INVALID_CHANNEL_NAME: {
-            INVALID_CHANNEL_NAME: number;
-        };
+        static INVALID_CHANNEL_NAME: number;
         /**
          * <p>Error code indicating that push is misconfigured.</p>
          */
-        static PUSH_MISCONFIGURED: {
-            PUSH_MISCONFIGURED: number;
-        };
+        static PUSH_MISCONFIGURED: number;
         /**
          * <p>Error code indicating that the object is too large.</p>
          */
-        static OBJECT_TOO_LARGE: {
-            OBJECT_TOO_LARGE: number;
-        };
+        static OBJECT_TOO_LARGE: number;
         /**
          * <p>Error code indicating that the operation isn't allowed for clients.</p>
          */
-        static OPERATION_FORBIDDEN: {
-            OPERATION_FORBIDDEN: number;
-        };
+        static OPERATION_FORBIDDEN: number;
         /**
          * <p>Error code indicating the result was not found in the cache.</p>
          */
-        static CACHE_MISS: {
-            CACHE_MISS: number;
-        };
+        static CACHE_MISS: number;
         /**
          * <p>Error code indicating that an invalid key was used in a nested
          * JSONObject.</p>
          */
-        static INVALID_NESTED_KEY: {
-            INVALID_NESTED_KEY: number;
-        };
+        static INVALID_NESTED_KEY: number;
         /**
          * <p>Error code indicating that an invalid filename was used for ParseFile.
          * A valid file name contains only a-zA-Z0-9_. characters and is between 1
          * and 128 characters.</p>
          */
-        static INVALID_FILE_NAME: {
-            INVALID_FILE_NAME: number;
-        };
+        static INVALID_FILE_NAME: number;
         /**
          * <p>Error code indicating an invalid ACL was provided.</p>
          */
-        static INVALID_ACL: {
-            INVALID_ACL: number;
-        };
+        static INVALID_ACL: number;
         /**
          * <p>Error code indicating that the request timed out on the server. Typically
          * this indicates that the request is too expensive to run.</p>
          */
-        static TIMEOUT: {
-            TIMEOUT: number;
-        };
+        static TIMEOUT: number;
         /**
          * <p>Error code indicating that the email address was invalid.</p>
          */
-        static INVALID_EMAIL_ADDRESS: {
-            INVALID_EMAIL_ADDRESS: number;
-        };
+        static INVALID_EMAIL_ADDRESS: number;
         /**
          * <p>Error code indicating a missing content type.</p>
          */
-        static MISSING_CONTENT_TYPE: {
-            MISSING_CONTENT_TYPE: number;
-        };
+        static MISSING_CONTENT_TYPE: number;
         /**
          * <p>Error code indicating a missing content length.</p>
          */
-        static MISSING_CONTENT_LENGTH: {
-            MISSING_CONTENT_LENGTH: number;
-        };
+        static MISSING_CONTENT_LENGTH: number;
         /**
          * <p>Error code indicating an invalid content length.</p>
          */
-        static INVALID_CONTENT_LENGTH: {
-            INVALID_CONTENT_LENGTH: number;
-        };
+        static INVALID_CONTENT_LENGTH: number;
         /**
          * <p>Error code indicating a file that was too large.</p>
          */
-        static FILE_TOO_LARGE: {
-            FILE_TOO_LARGE: number;
-        };
+        static FILE_TOO_LARGE: number;
         /**
          * <p>Error code indicating an error saving a file.</p>
          */
-        static FILE_SAVE_ERROR: {
-            FILE_SAVE_ERROR: number;
-        };
+        static FILE_SAVE_ERROR: number;
         /**
          * <p>Error code indicating that a unique field was given a value that is
          * already taken.</p>
          */
-        static DUPLICATE_VALUE: {
-            DUPLICATE_VALUE: number;
-        };
+        static DUPLICATE_VALUE: number;
         /**
          * <p>Error code indicating that a role's name is invalid.</p>
          */
-        static INVALID_ROLE_NAME: {
-            INVALID_ROLE_NAME: number;
-        };
+        static INVALID_ROLE_NAME: number;
         /**
          * <p>Error code indicating that an application quota was exceeded.  Upgrade to
          * resolve.</p>
          */
-        static EXCEEDED_QUOTA: {
-            EXCEEDED_QUOTA: number;
-        };
+        static EXCEEDED_QUOTA: number;
         /**
          * <p>Error code indicating that a Cloud Code script failed.</p>
          */
-        static SCRIPT_FAILED: {
-            SCRIPT_FAILED: number;
-        };
+        static SCRIPT_FAILED: number;
         /**
          * <p>Error code indicating that a Cloud Code validation failed.</p>
          */
-        static VALIDATION_ERROR: {
-            VALIDATION_ERROR: number;
-        };
+        static VALIDATION_ERROR: number;
         /**
          * <p>Error code indicating that invalid image data was provided.</p>
          */
-        static INVALID_IMAGE_DATA: {
-            INVALID_IMAGE_DATA: number;
-        };
+        static INVALID_IMAGE_DATA: number;
         /**
          * <p>Error code indicating an unsaved file.</p>
          */
-        static UNSAVED_FILE_ERROR: {
-            UNSAVED_FILE_ERROR: number;
-        };
+        static UNSAVED_FILE_ERROR: number;
         /**
          * <p>Error code indicating an invalid push time.</p>
          */
-        static INVALID_PUSH_TIME_ERROR: {
-            INVALID_PUSH_TIME_ERROR: number;
-        };
+        static INVALID_PUSH_TIME_ERROR: number;
         /**
          * <p>Error code indicating an error deleting a file.</p>
          */
-        static FILE_DELETE_ERROR: {
-            FILE_DELETE_ERROR: number;
-        };
+        static FILE_DELETE_ERROR: number;
         /**
          * <p>Error code indicating an error deleting an unnamed file.</p>
          */
-        static FILE_DELETE_UNNAMED_ERROR: {
-            FILE_DELETE_UNNAMED_ERROR: number;
-        };
+        static FILE_DELETE_UNNAMED_ERROR: number;
         /**
          * <p>Error code indicating that the application has exceeded its request
          * limit.</p>
          */
-        static REQUEST_LIMIT_EXCEEDED: {
-            REQUEST_LIMIT_EXCEEDED: number;
-        };
+        static REQUEST_LIMIT_EXCEEDED: number;
         /**
          * <p>Error code indicating that the request was a duplicate and has been discarded due to
          * idempotency rules.</p>
          */
-        static DUPLICATE_REQUEST: {
-            DUPLICATE_REQUEST: number;
-        };
+        static DUPLICATE_REQUEST: number;
         /**
          * <p>Error code indicating an invalid event name.</p>
          */
-        static INVALID_EVENT_NAME: {
-            INVALID_EVENT_NAME: number;
-        };
+        static INVALID_EVENT_NAME: number;
         /**
          * <p>Error code indicating that a field had an invalid value.</p>
          */
-        static INVALID_VALUE: {
-            INVALID_VALUE: number;
-        };
+        static INVALID_VALUE: number;
         /**
          * <p>Error code indicating that the username is missing or empty.</p>
          */
-        static USERNAME_MISSING: {
-            USERNAME_MISSING: number;
-        };
+        static USERNAME_MISSING: number;
         /**
          * <p>Error code indicating that the password is missing or empty.</p>
          */
-        static PASSWORD_MISSING: {
-            PASSWORD_MISSING: number;
-        };
+        static PASSWORD_MISSING: number;
         /**
          * <p>Error code indicating that the username has already been taken.</p>
          */
-        static USERNAME_TAKEN: {
-            USERNAME_TAKEN: number;
-        };
+        static USERNAME_TAKEN: number;
         /**
          * <p>Error code indicating that the email has already been taken.</p>
          */
-        static EMAIL_TAKEN: {
-            EMAIL_TAKEN: number;
-        };
+        static EMAIL_TAKEN: number;
         /**
          * <p>Error code indicating that the email is missing, but must be specified.</p>
          */
-        static EMAIL_MISSING: {
-            EMAIL_MISSING: number;
-        };
+        static EMAIL_MISSING: number;
         /**
          * <p>Error code indicating that a user with the specified email was not found.</p>
          */
-        static EMAIL_NOT_FOUND: {
-            EMAIL_NOT_FOUND: number;
-        };
+        static EMAIL_NOT_FOUND: number;
         /**
          * <p>Error code indicating that a user object without a valid session could
          * not be altered.</p>
          */
-        static SESSION_MISSING: {
-            SESSION_MISSING: number;
-        };
+        static SESSION_MISSING: number;
         /**
          * <p>Error code indicating that a user can only be created through signup.</p>
          */
-        static MUST_CREATE_USER_THROUGH_SIGNUP: {
-            MUST_CREATE_USER_THROUGH_SIGNUP: number;
-        };
+        static MUST_CREATE_USER_THROUGH_SIGNUP: number;
         /**
          * <p>Error code indicating that an an account being linked is already linked
          * to another user.</p>
          */
-        static ACCOUNT_ALREADY_LINKED: {
-            ACCOUNT_ALREADY_LINKED: number;
-        };
+        static ACCOUNT_ALREADY_LINKED: number;
         /**
          * <p>Error code indicating that the current session token is invalid.</p>
          */
-        static INVALID_SESSION_TOKEN: {
-            INVALID_SESSION_TOKEN: number;
-        };
+        static INVALID_SESSION_TOKEN: number;
         /**
          * <p>Error code indicating an error enabling or verifying MFA</p>
          */
-        static MFA_ERROR: {
-            MFA_ERROR: number;
-        };
+        static MFA_ERROR: number;
         /**
          * <p>Error code indicating that a valid MFA token must be provided</p>
          */
-        static MFA_TOKEN_REQUIRED: {
-            MFA_TOKEN_REQUIRED: number;
-        };
+        static MFA_TOKEN_REQUIRED: number;
         /**
          * <p>Error code indicating that a user cannot be linked to an account because
          * that account's id could not be found.</p>
          */
-        static LINKED_ID_MISSING: {
-            LINKED_ID_MISSING: number;
-        };
+        static LINKED_ID_MISSING: number;
         /**
          * <p>Error code indicating that a user with a linked (e.g. Facebook) account
          * has an invalid session.</p>
          */
-        static INVALID_LINKED_SESSION: {
-            INVALID_LINKED_SESSION: number;
-        };
+        static INVALID_LINKED_SESSION: number;
         /**
          * <p>Error code indicating that a service being linked (e.g. Facebook or
          * Twitter) is unsupported.</p>
          */
-        static UNSUPPORTED_SERVICE: {
-            UNSUPPORTED_SERVICE: number;
-        };
+        static UNSUPPORTED_SERVICE: number;
         /**
          * <p>Error code indicating an invalid operation occured on schema</p>
          */
-        static INVALID_SCHEMA_OPERATION: {
-            INVALID_SCHEMA_OPERATION: number;
-        };
+        static INVALID_SCHEMA_OPERATION: number;
         /**
          * <p>Error code indicating that there were multiple errors. Aggregate errors
          * have an &quot;errors&quot; property, which is an array of error objects with more
          * detail about each error that occurred.</p>
          */
-        static AGGREGATE_ERROR: {
-            AGGREGATE_ERROR: number;
-        };
+        static AGGREGATE_ERROR: number;
         /**
          * <p>Error code indicating the client was unable to read an input file.</p>
          */
-        static FILE_READ_ERROR: {
-            FILE_READ_ERROR: number;
-        };
+        static FILE_READ_ERROR: number;
         /**
          * <p>Error code indicating a real error code is unavailable because
          * we had to use an XDomainRequest object to allow CORS requests in
          * Internet Explorer, which strips the body from HTTP responses that have
          * a non-2XX status code.</p>
          */
-        static X_DOMAIN_REQUEST: {
-            X_DOMAIN_REQUEST: number;
-        };
+        static X_DOMAIN_REQUEST: number;
     }
     /**
      * <p>A Parse.File is a local representation of a file that is saved to the Parse
@@ -1762,14 +1708,14 @@ declare namespace Parse {
      *     // The file either could not be read, or could not be saved to Parse.
      *   });
      * }</pre>
-     * @param type - <p>Optional Content-Type header to use for the file. If
+     * @param [type] - <p>Optional Content-Type header to use for the file. If
      * this is omitted, the content type will be inferred from the name's
      * extension.</p>
-     * @param metadata - <p>Optional key value pairs to be stored with file object</p>
-     * @param tags - <p>Optional key value pairs to be stored with file object</p>
+     * @param [metadata] - <p>Optional key value pairs to be stored with file object</p>
+     * @param [tags] - <p>Optional key value pairs to be stored with file object</p>
      */
     class File {
-        constructor(name: string, data: any[], type: string, metadata: any, tags: any);
+        constructor(name: string, data: any[] | Blob | any, type?: string, metadata?: any, tags?: any);
         /**
          * <p>Return the data for the file, downloading it if not already present.
          * Data is present if initialized with Byte Array, Base64 or Saved with Uri.
@@ -1786,9 +1732,9 @@ declare namespace Parse {
         /**
          * <p>Gets the url of the file. It is only available after you save the file or
          * after you get the file from a Parse.Object.</p>
-         * @param options - <p>An object to specify url options</p>
+         * @param [options] - <p>An object to specify url options</p>
          */
-        url(options: any): string;
+        url(options?: any): string;
         /**
          * <p>Gets the metadata of the file.</p>
          */
@@ -1799,7 +1745,7 @@ declare namespace Parse {
         tags(): any;
         /**
          * <p>Saves the file to the Parse cloud.</p>
-         * @param options - <ul>
+         * @param [options] - <ul>
          * <li>Valid options are:<ul><li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *   be used for this request.
          * <li>sessionToken: A valid session token, used for making a request on
@@ -1820,7 +1766,7 @@ declare namespace Parse {
          * </ul>
          * @returns <p>Promise that is resolved when the save finishes.</p>
          */
-        save(options: any): Promise;
+        save(options?: any): Promise;
         /**
          * <p>Aborts the request if it has already been sent.</p>
          */
@@ -1828,7 +1774,7 @@ declare namespace Parse {
         /**
          * <p>Deletes the file from the Parse cloud.
          * In Cloud Code and Node only with Master Key.</p>
-         * @param options - <ul>
+         * @param [options] - <ul>
          * <li>Valid options are:<ul><li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *   be used for this request.
          * </li>
@@ -1836,7 +1782,7 @@ declare namespace Parse {
          * <pre>
          * @returns <p>Promise that is resolved when the delete finishes.</p>
          */
-        destroy(options: any): Promise;
+        destroy(options?: any): Promise;
         /**
          * <p>Sets metadata to be saved with file object. Overwrites existing metadata</p>
          * @param metadata - <p>Key value pairs to be stored with file object</p>
@@ -1868,6 +1814,12 @@ declare namespace Parse {
         constructor(arg1: number[] | any | number, arg2: number);
     }
     /**
+     * @param [attributes] - <p>The initial set of data to store in the installation.</p>
+     */
+    class Installation {
+        constructor(attributes?: any);
+    }
+    /**
      * <p>We expose three events to help you monitor the status of the WebSocket connection:</p>
      * <p>Open - When we establish the WebSocket connection to the LiveQuery server, you'll get this event.
      * <pre>
@@ -1886,7 +1838,27 @@ declare namespace Parse {
      * });</pre></p>
      */
     class LiveQuery {
+        /**
+         * <p>After open is called, the LiveQuery will try to send a connect request
+         * to the LiveQuery server.</p>
+         * @param func - <p>function to run on open</p>
+         */
+        static open(func: (...params: any[]) => any): void;
+        /**
+         * <p>When you're done using LiveQuery, you can call Parse.LiveQuery.close().
+         * This function will close the WebSocket connection to the LiveQuery server,
+         * cancel the auto reconnect, and unsubscribe all subscriptions based on it.
+         * If you call query.subscribe() after this, we'll create a new WebSocket
+         * connection to the LiveQuery server.</p>
+         * @param func - <p>function to run on close</p>
+         */
+        static close(func: (...params: any[]) => any): void;
     }
+    type Pointer = {
+        __type: string;
+        className: string;
+        objectId: string;
+    };
     /**
      * <p>Creates a new model with defined attributes.</p>
      * <p>You won't normally call this method directly.  It is recommended that
@@ -1900,12 +1872,12 @@ declare namespace Parse {
      *     var MyClass = Parse.Object.extend("ClassName");
      *     var object = new MyClass();
      * </pre></p>
-     * @param className - <p>The class name for the object</p>
-     * @param attributes - <p>The initial set of data to store in the object.</p>
-     * @param options - <p>The options for this object instance.</p>
+     * @param [className] - <p>The class name for the object</p>
+     * @param [attributes] - <p>The initial set of data to store in the object.</p>
+     * @param [options] - <p>The options for this object instance.</p>
      */
     class Object {
-        constructor(className: string, attributes: any, options: any);
+        constructor(className?: string, attributes?: any, options?: any);
         /**
          * <p>Prototype getters / setters</p>
          */
@@ -1913,15 +1885,11 @@ declare namespace Parse {
         /**
          * <p>The first time this object was saved on the server.</p>
          */
-        createdAt: {
-            createdAt: Date;
-        };
+        createdAt: Date;
         /**
          * <p>The last time this object was updated on the server.</p>
          */
-        updatedAt: {
-            updatedAt: Date;
-        };
+        updatedAt: Date;
         /**
          * <p>Returns a local or server Id used uniquely identify this object</p>
          */
@@ -1952,9 +1920,9 @@ declare namespace Parse {
          * <p>Returns true if this object has been modified since its last
          * save/refresh.  If an attribute is specified, it returns true only if that
          * particular attribute has been modified since the last save/refresh.</p>
-         * @param attr - <p>An attribute name (optional).</p>
+         * @param [attr] - <p>An attribute name (optional).</p>
          */
-        dirty(attr: string): boolean;
+        dirty(attr?: string): boolean;
         /**
          * <p>Returns an array of keys that have been modified since last save/refresh</p>
          */
@@ -2012,32 +1980,32 @@ declare namespace Parse {
          * <p>game.set(&quot;finished&quot;, true);</pre></p></p>
          * <p>game.set(&quot;player.score&quot;, 10);</pre></p></p>
          * @param key - <p>The key to set.</p>
-         * @param value - <p>The value to give it.</p>
-         * @param options - <p>A set of options for the set.
+         * @param [value] - <p>The value to give it. Optional if <code>key</code> is an object.</p>
+         * @param [options] - <p>A set of options for the set.
          * The only supported option is <code>error</code>.</p>
          * @returns <p>true if the set succeeded.</p>
          */
-        set(key: string | any, value: string | any, options: any): Parse.Object | boolean;
+        set(key: string | any, value?: string | any, options?: any): Parse.Object | boolean;
         /**
          * <p>Remove an attribute from the model. This is a noop if the attribute doesn't
          * exist.</p>
          * @param attr - <p>The string name of an attribute.</p>
          */
-        unset(attr: string, options: any): Parse.Object | boolean;
+        unset(attr: string, options?: any): Parse.Object | boolean;
         /**
          * <p>Atomically increments the value of the given attribute the next time the
          * object is saved. If no amount is specified, 1 is used by default.</p>
          * @param attr - <p>The key.</p>
-         * @param amount - <p>The amount to increment by (optional).</p>
+         * @param [amount] - <p>The amount to increment by (optional).</p>
          */
-        increment(attr: string, amount: number): Parse.Object | boolean;
+        increment(attr: string, amount?: number): Parse.Object | boolean;
         /**
          * <p>Atomically decrements the value of the given attribute the next time the
          * object is saved. If no amount is specified, 1 is used by default.</p>
          * @param attr - <p>The key.</p>
-         * @param amount - <p>The amount to decrement by (optional).</p>
+         * @param [amount] - <p>The amount to decrement by (optional).</p>
          */
-        decrement(attr: string, amount: number): Parse.Object | boolean;
+        decrement(attr: string, amount?: number): Parse.Object | boolean;
         /**
          * <p>Atomically add an object to the end of the array associated with a given
          * key.</p>
@@ -2051,7 +2019,7 @@ declare namespace Parse {
          * @param attr - <p>The key.</p>
          * @param items - <p>The items to add.</p>
          */
-        addAll(attr: string, items: object[]): Parse.Object | boolean;
+        addAll(attr: string, items: any[]): Parse.Object | boolean;
         /**
          * <p>Atomically add an object to the array associated with a given key, only
          * if it is not already present in the array. The position of the insert is
@@ -2067,7 +2035,7 @@ declare namespace Parse {
          * @param attr - <p>The key.</p>
          * @param items - <p>The objects to add.</p>
          */
-        addAllUnique(attr: string, items: object[]): Parse.Object | boolean;
+        addAllUnique(attr: string, items: any[]): Parse.Object | boolean;
         /**
          * <p>Atomically remove all instances of an object from the array associated
          * with a given key.</p>
@@ -2081,7 +2049,7 @@ declare namespace Parse {
          * @param attr - <p>The key.</p>
          * @param items - <p>The object to remove.</p>
          */
-        removeAll(attr: string, items: object[]): Parse.Object | boolean;
+        removeAll(attr: string, items: any[]): Parse.Object | boolean;
         /**
          * <p>Returns an instance of a subclass of Parse.Op describing what kind of
          * modification has been performed on this field since the last time it was
@@ -2090,7 +2058,7 @@ declare namespace Parse {
          * @param attr - <p>The key.</p>
          * @returns <p>The operation, or undefined if none.</p>
          */
-        op(attr: string): Parse.O;
+        op(attr: string): Parse.Op;
         /**
          * <p>Creates a new model with identical attributes to this one.</p>
          */
@@ -2143,7 +2111,7 @@ declare namespace Parse {
          * @param acl - <p>An instance of Parse.ACL.</p>
          * @returns <p>Whether the set passed validation.</p>
          */
-        setACL(acl: Parse.ACL, options: any): Parse.Object | boolean;
+        setACL(acl: Parse.ACL, options?: any): Parse.Object | boolean;
         /**
          * <p>Clears any (or specific) changes to this object made since the last call to save()</p>
          * @param [keys] - <p>specify which fields to revert</p>
@@ -2175,7 +2143,7 @@ declare namespace Parse {
          * <p>Includes nested Parse.Objects for the provided key. You can use dot
          * notation to specify which fields in the included object are also fetched.</p>
          * @param keys - <p>The name(s) of the key(s) to include.</p>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *     be used for this request.
          *   <li>sessionToken: A valid session token, used for making a request on
@@ -2184,7 +2152,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the fetch
          * completes.</p>
          */
-        fetchWithInclude(keys: string | (string | string[])[], options: any): Promise;
+        fetchWithInclude(keys: string | (string | string[])[], options?: any): Promise;
         /**
          * <p>Saves this object to the server at some unspecified time in the future,
          * even if Parse is currently inaccessible.</p>
@@ -2263,7 +2231,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the save
          * completes.</p>
          */
-        save(arg1?: string | any | null, arg2?: string | any, arg3?: any): Promise;
+        save(arg1?: string | any | null, arg2?: string | any, arg3?: any): Promise<Parse.Object>;
         /**
          * <p>Deletes this object from the server at some unspecified time in the future,
          * even if Parse is currently inaccessible.</p>
@@ -2498,7 +2466,7 @@ declare namespace Parse {
          * </pre>
          * @param list - <p>A list of <code>Parse.Object</code>.</p>
          */
-        static saveAll(list: any[], options: any): Parse.Object[];
+        static saveAll(list: any[], options?: any): Parse.Object[];
         /**
          * <p>Creates a reference to a subclass of Parse.Object with the given id. This
          * does not exist on Parse.Object, only on subclasses.</p>
@@ -2514,12 +2482,12 @@ declare namespace Parse {
         /**
          * <p>Creates a new instance of a Parse Object from a JSON representation.</p>
          * @param json - <p>The JSON map of the Object's data</p>
-         * @param override - <p>In single instance mode, all old server data
+         * @param [override] - <p>In single instance mode, all old server data
          * is overwritten if this is set to true</p>
-         * @param dirty - <p>Whether the Parse.Object should set JSON keys to dirty</p>
+         * @param [dirty] - <p>Whether the Parse.Object should set JSON keys to dirty</p>
          * @returns <p>A Parse.Object reference</p>
          */
-        static fromJSON(json: any, override: boolean, dirty: boolean): Parse.Object;
+        static fromJSON(json: any, override?: boolean, dirty?: boolean): Parse.Object;
         /**
          * <p>Registers a subclass of Parse.Object with a specific class name.
          * When objects of that class are retrieved from a query, they will be
@@ -2733,7 +2701,7 @@ declare namespace Parse {
      * @param objectClass - <p>An instance of a subclass of Parse.Object, or a Parse className string.</p>
      */
     class Query {
-        constructor(objectClass: string | Parse.Object);
+        constructor(objectClass: string | Parse.Object | any);
         /**
          * <p>Adds constraint that at least one of the passed in queries matches.</p>
          * @returns <p>Returns the query, so you can chain this call.</p>
@@ -2792,7 +2760,7 @@ declare namespace Parse {
          * <p>Constructs a Parse.Object whose id is already known by fetching data from
          * the server. Unlike the <code>first</code> method, it never returns undefined.</p>
          * @param objectId - <p>The id of the object to be fetched.</p>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *     be used for this request.
          *   <li>sessionToken: A valid session token, used for making a request on
@@ -2803,10 +2771,10 @@ declare namespace Parse {
          * @returns <p>A promise that is resolved with the result when
          * the query completes.</p>
          */
-        get(objectId: string, options: any): Promise;
+        get(objectId: string, options?: any): Promise;
         /**
          * <p>Retrieves a list of ParseObjects that satisfy this query.</p>
-         * @param options - <p>Valid options
+         * @param [options] - <p>Valid options
          * are:<ul></p>
          *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *     be used for this request.
@@ -2818,7 +2786,7 @@ declare namespace Parse {
          * @returns <p>A promise that is resolved with the results when
          * the query completes.</p>
          */
-        find(options: any): Promise;
+        find(options?: any): Promise<Parse.Object[]>;
         /**
          * <p>Retrieves a complete list of ParseObjects that satisfy this query.
          * Using <code>eachBatch</code> under the hood to fetch all the valid objects.</p>
@@ -2848,27 +2816,27 @@ declare namespace Parse {
         /**
          * <p>Executes a distinct query and returns unique values</p>
          * @param key - <p>A field to find distinct values</p>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>sessionToken: A valid session token, used for making a request on
          *       behalf of a specific user.
          * </ul>
          * @returns <p>A promise that is resolved with the query completes.</p>
          */
-        distinct(key: string, options: any): Promise;
+        distinct(key: string, options?: any): Promise;
         /**
          * <p>Executes an aggregate query and returns aggregate results</p>
          * @param pipeline - <p>Array or Object of stages to process query</p>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>sessionToken: A valid session token, used for making a request on
          *       behalf of a specific user.
          * </ul>
          * @returns <p>A promise that is resolved with the query completes.</p>
          */
-        aggregate(pipeline: any[] | any, options: any): Promise;
+        aggregate(pipeline: any[] | any, options?: any): Promise;
         /**
          * <p>Retrieves at most one Parse.Object that satisfies this query.</p>
          * <p>Returns the object if there is one, otherwise undefined.</p>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *     be used for this request.
          *   <li>sessionToken: A valid session token, used for making a request on
@@ -2879,7 +2847,7 @@ declare namespace Parse {
          * @returns <p>A promise that is resolved with the object when
          * the query completes.</p>
          */
-        first(options: any): Promise;
+        first(options?: any): Promise<Parse.Object>;
         /**
          * <p>Iterates over objects matching a query, calling a callback for each batch.
          * If the callback returns a promise, the iteration will not continue until
@@ -2910,7 +2878,7 @@ declare namespace Parse {
          * and may not use limit or skip.</p>
          * @param callback - <p>Callback that will be called with each result
          * of the query.</p>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *     be used for this request.
          *   <li>sessionToken: A valid session token, used for making a request on
@@ -2919,7 +2887,7 @@ declare namespace Parse {
          * @returns <p>A promise that will be fulfilled once the
          * iteration has completed.</p>
          */
-        each(callback: (...params: any[]) => any, options: any): Promise;
+        each(callback: (...params: any[]) => any, options?: any): Promise;
         /**
          * <p>Adds a hint to force index selection. (https://docs.mongodb.com/manual/reference/operator/meta/hint/)</p>
          * @param value - <p>String or Object of index that should be used when executing query</p>
@@ -2944,7 +2912,7 @@ declare namespace Parse {
          *   <li>index: The index of the current Parse.Object being processed in the array.</li>
          *   <li>query: The query map was called upon.</li>
          * </ul>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *     be used for this request.
          *   <li>sessionToken: A valid session token, used for making a request on
@@ -2953,7 +2921,7 @@ declare namespace Parse {
          * @returns <p>A promise that will be fulfilled once the
          * iteration has completed.</p>
          */
-        map(callback: (...params: any[]) => any, options: any): Promise;
+        map(callback: (...params: any[]) => any, options?: any): Promise;
         /**
          * <p>Iterates over each result of a query, calling a callback for each one. If
          * the callback returns a promise, the iteration will not continue until
@@ -2967,7 +2935,7 @@ declare namespace Parse {
          *   <li>index: The index of the current Parse.Object being processed in the array.</li>
          * </ul>
          * @param initialValue - <p>A value to use as the first argument to the first call of the callback. If no initialValue is supplied, the first object in the query will be used and skipped.</p>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *     be used for this request.
          *   <li>sessionToken: A valid session token, used for making a request on
@@ -2976,7 +2944,7 @@ declare namespace Parse {
          * @returns <p>A promise that will be fulfilled once the
          * iteration has completed.</p>
          */
-        reduce(callback: (...params: any[]) => any, initialValue: any, options: any): Promise;
+        reduce(callback: (...params: any[]) => any, initialValue: any, options?: any): Promise;
         /**
          * <p>Iterates over each result of a query, calling a callback for each one. If
          * the callback returns a promise, the iteration will not continue until
@@ -2989,7 +2957,7 @@ declare namespace Parse {
          *   <li>index: The index of the current Parse.Object being processed in the array.</li>
          *   <li>query: The query filter was called upon.</li>
          * </ul>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *     be used for this request.
          *   <li>sessionToken: A valid session token, used for making a request on
@@ -2998,7 +2966,7 @@ declare namespace Parse {
          * @returns <p>A promise that will be fulfilled once the
          * iteration has completed.</p>
          */
-        filter(callback: (...params: any[]) => any, options: any): Promise;
+        filter(callback: (...params: any[]) => any, options?: any): Promise;
         /**
          * <p>Adds a constraint to the query that requires a particular key's value to
          * be equal to the provided value.</p>
@@ -3105,10 +3073,10 @@ declare namespace Parse {
          * This may be slow for large datasets.</p>
          * @param key - <p>The key that the string to match is stored in.</p>
          * @param regex - <p>The regular expression pattern to match.</p>
-         * @param modifiers - <p>The regular expression mode.</p>
+         * @param [modifiers] - <p>The regular expression mode.</p>
          * @returns <p>Returns the query, so you can chain this call.</p>
          */
-        matches(key: string, regex: RegExp, modifiers: string): Parse.Query;
+        matches(key: string, regex: RegExp, modifiers?: string): Parse.Query;
         /**
          * <p>Adds a constraint that requires that a key's value matches a Parse.Query
          * constraint.</p>
@@ -3198,10 +3166,10 @@ declare namespace Parse {
          * for large datasets.</p>
          * @param key - <p>The key that the string to match is stored in.</p>
          * @param prefix - <p>The substring that the value must start with.</p>
-         * @param modifiers - <p>The regular expression mode.</p>
+         * @param [modifiers] - <p>The regular expression mode.</p>
          * @returns <p>Returns the query, so you can chain this call.</p>
          */
-        startsWith(key: string, prefix: string, modifiers: string): Parse.Query;
+        startsWith(key: string, prefix: string, modifiers?: string): Parse.Query;
         /**
          * <p>Adds a constraint for finding string values that end with a provided
          * string.  This will be slow for large datasets.</p>
@@ -3225,12 +3193,12 @@ declare namespace Parse {
          * @param key - <p>The key that the Parse.GeoPoint is stored in.</p>
          * @param point - <p>The reference Parse.GeoPoint that is used.</p>
          * @param maxDistance - <p>Maximum distance (in radians) of results to return.</p>
-         * @param sorted - <p>A Bool value that is true if results should be
+         * @param [sorted] - <p>A Bool value that is true if results should be
          * sorted by distance ascending, false is no sorting is required,
          * defaults to true.</p>
          * @returns <p>Returns the query, so you can chain this call.</p>
          */
-        withinRadians(key: string, point: Parse.GeoPoint, maxDistance: number, sorted: boolean): Parse.Query;
+        withinRadians(key: string, point: Parse.GeoPoint, maxDistance: number, sorted?: boolean): Parse.Query;
         /**
          * <p>Adds a proximity based constraint for finding objects with key point
          * values near the point given and within the maximum distance given.
@@ -3238,12 +3206,12 @@ declare namespace Parse {
          * @param key - <p>The key that the Parse.GeoPoint is stored in.</p>
          * @param point - <p>The reference Parse.GeoPoint that is used.</p>
          * @param maxDistance - <p>Maximum distance (in miles) of results to return.</p>
-         * @param sorted - <p>A Bool value that is true if results should be
+         * @param [sorted] - <p>A Bool value that is true if results should be
          * sorted by distance ascending, false is no sorting is required,
          * defaults to true.</p>
          * @returns <p>Returns the query, so you can chain this call.</p>
          */
-        withinMiles(key: string, point: Parse.GeoPoint, maxDistance: number, sorted: boolean): Parse.Query;
+        withinMiles(key: string, point: Parse.GeoPoint, maxDistance: number, sorted?: boolean): Parse.Query;
         /**
          * <p>Adds a proximity based constraint for finding objects with key point
          * values near the point given and within the maximum distance given.
@@ -3251,12 +3219,12 @@ declare namespace Parse {
          * @param key - <p>The key that the Parse.GeoPoint is stored in.</p>
          * @param point - <p>The reference Parse.GeoPoint that is used.</p>
          * @param maxDistance - <p>Maximum distance (in kilometers) of results to return.</p>
-         * @param sorted - <p>A Bool value that is true if results should be
+         * @param [sorted] - <p>A Bool value that is true if results should be
          * sorted by distance ascending, false is no sorting is required,
          * defaults to true.</p>
          * @returns <p>Returns the query, so you can chain this call.</p>
          */
-        withinKilometers(key: string, point: Parse.GeoPoint, maxDistance: number, sorted: boolean): Parse.Query;
+        withinKilometers(key: string, point: Parse.GeoPoint, maxDistance: number, sorted?: boolean): Parse.Query;
         /**
          * <p>Adds a constraint to the query that requires a particular key's
          * coordinates be contained within a given rectangular geographic bounding
@@ -3379,11 +3347,11 @@ declare namespace Parse {
         readPreference(readPreference: string, includeReadPreference: string, subqueryReadPreference: string): Parse.Query;
         /**
          * <p>Subscribe this query to get liveQuery updates</p>
-         * @param sessionToken - <p>(optional) Defaults to the currentUser</p>
+         * @param [sessionToken] - <p>(optional) Defaults to the currentUser</p>
          * @returns <p>Returns the liveQuerySubscription, it's an event emitter
          * which can be used to get liveQuery updates.</p>
          */
-        subscribe(sessionToken: string): Promise<LiveQuerySubscription>;
+        subscribe(sessionToken?: string): Promise<LiveQuerySubscription>;
         /**
          * <p>Constructs a Parse.Query that is the OR of the passed in queries.  For
          * example:</p>
@@ -3540,15 +3508,11 @@ declare namespace Parse {
         /**
          * <p>The first time this object was saved on the server.</p>
          */
-        createdAt: {
-            createdAt: Date;
-        };
+        createdAt: Date;
         /**
          * <p>The last time this object was updated on the server.</p>
          */
-        updatedAt: {
-            updatedAt: Date;
-        };
+        updatedAt: Date;
         /**
          * <p>Returns a local or server Id used uniquely identify this object</p>
          */
@@ -3579,9 +3543,9 @@ declare namespace Parse {
          * <p>Returns true if this object has been modified since its last
          * save/refresh.  If an attribute is specified, it returns true only if that
          * particular attribute has been modified since the last save/refresh.</p>
-         * @param attr - <p>An attribute name (optional).</p>
+         * @param [attr] - <p>An attribute name (optional).</p>
          */
-        dirty(attr: string): boolean;
+        dirty(attr?: string): boolean;
         /**
          * <p>Returns an array of keys that have been modified since last save/refresh</p>
          */
@@ -3639,32 +3603,32 @@ declare namespace Parse {
          * <p>game.set(&quot;finished&quot;, true);</pre></p></p>
          * <p>game.set(&quot;player.score&quot;, 10);</pre></p></p>
          * @param key - <p>The key to set.</p>
-         * @param value - <p>The value to give it.</p>
-         * @param options - <p>A set of options for the set.
+         * @param [value] - <p>The value to give it. Optional if <code>key</code> is an object.</p>
+         * @param [options] - <p>A set of options for the set.
          * The only supported option is <code>error</code>.</p>
          * @returns <p>true if the set succeeded.</p>
          */
-        set(key: string | any, value: string | any, options: any): Parse.Object | boolean;
+        set(key: string | any, value?: string | any, options?: any): Parse.Object | boolean;
         /**
          * <p>Remove an attribute from the model. This is a noop if the attribute doesn't
          * exist.</p>
          * @param attr - <p>The string name of an attribute.</p>
          */
-        unset(attr: string, options: any): Parse.Object | boolean;
+        unset(attr: string, options?: any): Parse.Object | boolean;
         /**
          * <p>Atomically increments the value of the given attribute the next time the
          * object is saved. If no amount is specified, 1 is used by default.</p>
          * @param attr - <p>The key.</p>
-         * @param amount - <p>The amount to increment by (optional).</p>
+         * @param [amount] - <p>The amount to increment by (optional).</p>
          */
-        increment(attr: string, amount: number): Parse.Object | boolean;
+        increment(attr: string, amount?: number): Parse.Object | boolean;
         /**
          * <p>Atomically decrements the value of the given attribute the next time the
          * object is saved. If no amount is specified, 1 is used by default.</p>
          * @param attr - <p>The key.</p>
-         * @param amount - <p>The amount to decrement by (optional).</p>
+         * @param [amount] - <p>The amount to decrement by (optional).</p>
          */
-        decrement(attr: string, amount: number): Parse.Object | boolean;
+        decrement(attr: string, amount?: number): Parse.Object | boolean;
         /**
          * <p>Atomically add an object to the end of the array associated with a given
          * key.</p>
@@ -3678,7 +3642,7 @@ declare namespace Parse {
          * @param attr - <p>The key.</p>
          * @param items - <p>The items to add.</p>
          */
-        addAll(attr: string, items: object[]): Parse.Object | boolean;
+        addAll(attr: string, items: any[]): Parse.Object | boolean;
         /**
          * <p>Atomically add an object to the array associated with a given key, only
          * if it is not already present in the array. The position of the insert is
@@ -3694,7 +3658,7 @@ declare namespace Parse {
          * @param attr - <p>The key.</p>
          * @param items - <p>The objects to add.</p>
          */
-        addAllUnique(attr: string, items: object[]): Parse.Object | boolean;
+        addAllUnique(attr: string, items: any[]): Parse.Object | boolean;
         /**
          * <p>Atomically remove all instances of an object from the array associated
          * with a given key.</p>
@@ -3708,7 +3672,7 @@ declare namespace Parse {
          * @param attr - <p>The key.</p>
          * @param items - <p>The object to remove.</p>
          */
-        removeAll(attr: string, items: object[]): Parse.Object | boolean;
+        removeAll(attr: string, items: any[]): Parse.Object | boolean;
         /**
          * <p>Returns an instance of a subclass of Parse.Op describing what kind of
          * modification has been performed on this field since the last time it was
@@ -3770,7 +3734,7 @@ declare namespace Parse {
          * @param acl - <p>An instance of Parse.ACL.</p>
          * @returns <p>Whether the set passed validation.</p>
          */
-        setACL(acl: Parse.ACL, options: any): Parse.Object | boolean;
+        setACL(acl: Parse.ACL, options?: any): Parse.Object | boolean;
         /**
          * <p>Clears any (or specific) changes to this object made since the last call to save()</p>
          * @param [keys] - <p>specify which fields to revert</p>
@@ -3802,7 +3766,7 @@ declare namespace Parse {
          * <p>Includes nested Parse.Objects for the provided key. You can use dot
          * notation to specify which fields in the included object are also fetched.</p>
          * @param keys - <p>The name(s) of the key(s) to include.</p>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *     be used for this request.
          *   <li>sessionToken: A valid session token, used for making a request on
@@ -3811,7 +3775,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the fetch
          * completes.</p>
          */
-        fetchWithInclude(keys: string | (string | string[])[], options: any): Promise;
+        fetchWithInclude(keys: string | (string | string[])[], options?: any): Promise;
         /**
          * <p>Saves this object to the server at some unspecified time in the future,
          * even if Parse is currently inaccessible.</p>
@@ -3890,7 +3854,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the save
          * completes.</p>
          */
-        save(arg1?: string | any | null, arg2?: string | any, arg3?: any): Promise;
+        save(arg1?: string | any | null, arg2?: string | any, arg3?: any): Promise<Parse.Object>;
         /**
          * <p>Deletes this object from the server at some unspecified time in the future,
          * even if Parse is currently inaccessible.</p>
@@ -4007,39 +3971,39 @@ declare namespace Parse {
          * @returns <p>A promise that is resolved with the result when
          * the query completes.</p>
          */
-        static all(): Promise;
+        static all(): Promise<any>;
         /**
          * <p>Get the Schema from Parse</p>
          * @returns <p>A promise that is resolved with the result when
          * the query completes.</p>
          */
-        get(): Promise;
+        get(): Promise<any>;
         /**
          * <p>Create a new Schema on Parse</p>
          * @returns <p>A promise that is resolved with the result when
          * the query completes.</p>
          */
-        save(): Promise;
+        save(): Promise<any>;
         /**
          * <p>Update a Schema on Parse</p>
          * @returns <p>A promise that is resolved with the result when
          * the query completes.</p>
          */
-        update(): Promise;
+        update(): Promise<any>;
         /**
          * <p>Removing a Schema from Parse
          * Can only be used on Schema without objects</p>
          * @returns <p>A promise that is resolved with the result when
          * the query completes.</p>
          */
-        delete(): Promise;
+        delete(): Promise<any>;
         /**
          * <p>Removes all objects from a Schema (class) in Parse.
          * EXERCISE CAUTION, running this will delete all objects for this schema and cannot be reversed</p>
          * @returns <p>A promise that is resolved with the result when
          * the query completes.</p>
          */
-        purge(): Promise;
+        purge(): Promise<any>;
         /**
          * <p>Sets Class Level Permissions when creating / updating a Schema.
          * EXERCISE CAUTION, running this may override CLP for this schema and cannot be reversed</p>
@@ -4050,15 +4014,15 @@ declare namespace Parse {
         /**
          * <p>Adding a Field to Create / Update a Schema</p>
          * @param name - <p>Name of the field that will be created on Parse</p>
-         * @param type - <p>Can be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)</p>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [type] - <p>Can be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)</p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>required: If field is not set, save operation fails (Requires Parse Server 3.7.0+)
          *   <li>defaultValue: If field is not set, a default value is selected (Requires Parse Server 3.7.0+)
          *   <li>targetClass: Required if type is Pointer or Parse.Relation
          * </ul>
          * @returns <p>Returns the schema, so you can chain this call.</p>
          */
-        addField(name: string, type: string, options: any): Parse.Schema;
+        addField(name: string, type?: string, options?: any): Parse.Schema;
         /**
          * <p>Adding an Index to Create / Update a Schema</p>
          * @param name - <p>Name of the index</p>
@@ -4072,74 +4036,74 @@ declare namespace Parse {
         /**
          * <p>Adding String Field</p>
          * @param name - <p>Name of the field that will be created on Parse</p>
-         * @param options - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
+         * @param [options] - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
          * @returns <p>Returns the schema, so you can chain this call.</p>
          */
-        addString(name: string, options: any): Parse.Schema;
+        addString(name: string, options?: any): Parse.Schema;
         /**
          * <p>Adding Number Field</p>
          * @param name - <p>Name of the field that will be created on Parse</p>
-         * @param options - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
+         * @param [options] - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
          * @returns <p>Returns the schema, so you can chain this call.</p>
          */
-        addNumber(name: string, options: any): Parse.Schema;
+        addNumber(name: string, options?: any): Parse.Schema;
         /**
          * <p>Adding Boolean Field</p>
          * @param name - <p>Name of the field that will be created on Parse</p>
-         * @param options - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
+         * @param [options] - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
          * @returns <p>Returns the schema, so you can chain this call.</p>
          */
-        addBoolean(name: string, options: any): Parse.Schema;
+        addBoolean(name: string, options?: any): Parse.Schema;
         /**
          * <p>Adding Date Field</p>
          * @param name - <p>Name of the field that will be created on Parse</p>
-         * @param options - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
+         * @param [options] - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
          * @returns <p>Returns the schema, so you can chain this call.</p>
          */
-        addDate(name: string, options: any): Parse.Schema;
+        addDate(name: string, options?: any): Parse.Schema;
         /**
          * <p>Adding File Field</p>
          * @param name - <p>Name of the field that will be created on Parse</p>
-         * @param options - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
+         * @param [options] - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
          * @returns <p>Returns the schema, so you can chain this call.</p>
          */
-        addFile(name: string, options: any): Parse.Schema;
+        addFile(name: string, options?: any): Parse.Schema;
         /**
          * <p>Adding GeoPoint Field</p>
          * @param name - <p>Name of the field that will be created on Parse</p>
-         * @param options - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
+         * @param [options] - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
          * @returns <p>Returns the schema, so you can chain this call.</p>
          */
-        addGeoPoint(name: string, options: any): Parse.Schema;
+        addGeoPoint(name: string, options?: any): Parse.Schema;
         /**
          * <p>Adding Polygon Field</p>
          * @param name - <p>Name of the field that will be created on Parse</p>
-         * @param options - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
+         * @param [options] - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
          * @returns <p>Returns the schema, so you can chain this call.</p>
          */
-        addPolygon(name: string, options: any): Parse.Schema;
+        addPolygon(name: string, options?: any): Parse.Schema;
         /**
          * <p>Adding Array Field</p>
          * @param name - <p>Name of the field that will be created on Parse</p>
-         * @param options - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
+         * @param [options] - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
          * @returns <p>Returns the schema, so you can chain this call.</p>
          */
-        addArray(name: string, options: any): Parse.Schema;
+        addArray(name: string, options?: any): Parse.Schema;
         /**
          * <p>Adding Object Field</p>
          * @param name - <p>Name of the field that will be created on Parse</p>
-         * @param options - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
+         * @param [options] - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
          * @returns <p>Returns the schema, so you can chain this call.</p>
          */
-        addObject(name: string, options: any): Parse.Schema;
+        addObject(name: string, options?: any): Parse.Schema;
         /**
          * <p>Adding Pointer Field</p>
          * @param name - <p>Name of the field that will be created on Parse</p>
          * @param targetClass - <p>Name of the target Pointer Class</p>
-         * @param options - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
+         * @param [options] - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}</p>
          * @returns <p>Returns the schema, so you can chain this call.</p>
          */
-        addPointer(name: string, targetClass: string, options: any): Parse.Schema;
+        addPointer(name: string, targetClass: string, options?: any): Parse.Schema;
         /**
          * <p>Adding Relation Field</p>
          * @param name - <p>Name of the field that will be created on Parse</p>
@@ -4164,10 +4128,10 @@ declare namespace Parse {
      * <p>A Parse.Session object is a local representation of a revocable session.
      * This class is a subclass of a Parse.Object, and retains the same
      * functionality of a Parse.Object.</p>
-     * @param attributes - <p>The initial set of data to store in the user.</p>
+     * @param [attributes] - <p>The initial set of data to store in the user.</p>
      */
     class Session extends Parse.Object {
-        constructor(attributes: any);
+        constructor(attributes?: any);
         /**
          * <p>Returns the session token string.</p>
          */
@@ -4195,15 +4159,11 @@ declare namespace Parse {
         /**
          * <p>The first time this object was saved on the server.</p>
          */
-        createdAt: {
-            createdAt: Date;
-        };
+        createdAt: Date;
         /**
          * <p>The last time this object was updated on the server.</p>
          */
-        updatedAt: {
-            updatedAt: Date;
-        };
+        updatedAt: Date;
         /**
          * <p>Returns a local or server Id used uniquely identify this object</p>
          */
@@ -4234,9 +4194,9 @@ declare namespace Parse {
          * <p>Returns true if this object has been modified since its last
          * save/refresh.  If an attribute is specified, it returns true only if that
          * particular attribute has been modified since the last save/refresh.</p>
-         * @param attr - <p>An attribute name (optional).</p>
+         * @param [attr] - <p>An attribute name (optional).</p>
          */
-        dirty(attr: string): boolean;
+        dirty(attr?: string): boolean;
         /**
          * <p>Returns an array of keys that have been modified since last save/refresh</p>
          */
@@ -4294,32 +4254,32 @@ declare namespace Parse {
          * <p>game.set(&quot;finished&quot;, true);</pre></p></p>
          * <p>game.set(&quot;player.score&quot;, 10);</pre></p></p>
          * @param key - <p>The key to set.</p>
-         * @param value - <p>The value to give it.</p>
-         * @param options - <p>A set of options for the set.
+         * @param [value] - <p>The value to give it. Optional if <code>key</code> is an object.</p>
+         * @param [options] - <p>A set of options for the set.
          * The only supported option is <code>error</code>.</p>
          * @returns <p>true if the set succeeded.</p>
          */
-        set(key: string | any, value: string | any, options: any): Parse.Object | boolean;
+        set(key: string | any, value?: string | any, options?: any): Parse.Object | boolean;
         /**
          * <p>Remove an attribute from the model. This is a noop if the attribute doesn't
          * exist.</p>
          * @param attr - <p>The string name of an attribute.</p>
          */
-        unset(attr: string, options: any): Parse.Object | boolean;
+        unset(attr: string, options?: any): Parse.Object | boolean;
         /**
          * <p>Atomically increments the value of the given attribute the next time the
          * object is saved. If no amount is specified, 1 is used by default.</p>
          * @param attr - <p>The key.</p>
-         * @param amount - <p>The amount to increment by (optional).</p>
+         * @param [amount] - <p>The amount to increment by (optional).</p>
          */
-        increment(attr: string, amount: number): Parse.Object | boolean;
+        increment(attr: string, amount?: number): Parse.Object | boolean;
         /**
          * <p>Atomically decrements the value of the given attribute the next time the
          * object is saved. If no amount is specified, 1 is used by default.</p>
          * @param attr - <p>The key.</p>
-         * @param amount - <p>The amount to decrement by (optional).</p>
+         * @param [amount] - <p>The amount to decrement by (optional).</p>
          */
-        decrement(attr: string, amount: number): Parse.Object | boolean;
+        decrement(attr: string, amount?: number): Parse.Object | boolean;
         /**
          * <p>Atomically add an object to the end of the array associated with a given
          * key.</p>
@@ -4333,7 +4293,7 @@ declare namespace Parse {
          * @param attr - <p>The key.</p>
          * @param items - <p>The items to add.</p>
          */
-        addAll(attr: string, items: object[]): Parse.Object | boolean;
+        addAll(attr: string, items: any[]): Parse.Object | boolean;
         /**
          * <p>Atomically add an object to the array associated with a given key, only
          * if it is not already present in the array. The position of the insert is
@@ -4349,7 +4309,7 @@ declare namespace Parse {
          * @param attr - <p>The key.</p>
          * @param items - <p>The objects to add.</p>
          */
-        addAllUnique(attr: string, items: object[]): Parse.Object | boolean;
+        addAllUnique(attr: string, items: any[]): Parse.Object | boolean;
         /**
          * <p>Atomically remove all instances of an object from the array associated
          * with a given key.</p>
@@ -4363,7 +4323,7 @@ declare namespace Parse {
          * @param attr - <p>The key.</p>
          * @param items - <p>The object to remove.</p>
          */
-        removeAll(attr: string, items: object[]): Parse.Object | boolean;
+        removeAll(attr: string, items: any[]): Parse.Object | boolean;
         /**
          * <p>Returns an instance of a subclass of Parse.Op describing what kind of
          * modification has been performed on this field since the last time it was
@@ -4425,7 +4385,7 @@ declare namespace Parse {
          * @param acl - <p>An instance of Parse.ACL.</p>
          * @returns <p>Whether the set passed validation.</p>
          */
-        setACL(acl: Parse.ACL, options: any): Parse.Object | boolean;
+        setACL(acl: Parse.ACL, options?: any): Parse.Object | boolean;
         /**
          * <p>Clears any (or specific) changes to this object made since the last call to save()</p>
          * @param [keys] - <p>specify which fields to revert</p>
@@ -4457,7 +4417,7 @@ declare namespace Parse {
          * <p>Includes nested Parse.Objects for the provided key. You can use dot
          * notation to specify which fields in the included object are also fetched.</p>
          * @param keys - <p>The name(s) of the key(s) to include.</p>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *     be used for this request.
          *   <li>sessionToken: A valid session token, used for making a request on
@@ -4466,7 +4426,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the fetch
          * completes.</p>
          */
-        fetchWithInclude(keys: string | (string | string[])[], options: any): Promise;
+        fetchWithInclude(keys: string | (string | string[])[], options?: any): Promise;
         /**
          * <p>Saves this object to the server at some unspecified time in the future,
          * even if Parse is currently inaccessible.</p>
@@ -4545,7 +4505,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the save
          * completes.</p>
          */
-        save(arg1?: string | any | null, arg2?: string | any, arg3?: any): Promise;
+        save(arg1?: string | any | null, arg2?: string | any, arg3?: any): Promise<Parse.Object>;
         /**
          * <p>Deletes this object from the server at some unspecified time in the future,
          * even if Parse is currently inaccessible.</p>
@@ -4647,10 +4607,10 @@ declare namespace Parse {
      * same functionality of a Parse.Object, but also extends it with various
      * user specific methods, like authentication, signing up, and validation of
      * uniqueness.</p>
-     * @param attributes - <p>The initial set of data to store in the user.</p>
+     * @param [attributes] - <p>The initial set of data to store in the user.</p>
      */
     class User extends Parse.Object {
-        constructor(attributes: any);
+        constructor(attributes?: any);
         /**
          * <p>Request a revocable session token to replace the older style of token.</p>
          * @returns <p>A promise that is resolved when the replacement
@@ -4777,7 +4737,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled with the user when
          * the login is complete.</p>
          */
-        logIn(options: any): Promise;
+        logIn(options?: any): Promise<Parse.User>;
         /**
          * <p>Wrap the default save behavior with functionality to save to local
          * storage if this is current user.</p>
@@ -4817,7 +4777,7 @@ declare namespace Parse {
          * either from memory or localStorage, if necessary.</p>
          * @returns <p>The currently logged in Parse.User.</p>
          */
-        static current(): Parse.Object;
+        static current(): Parse.User;
         /**
          * <p>Retrieves the currently logged in ParseUser from asynchronous Storage.</p>
          * @returns <p>A Promise that is resolved with the currently
@@ -4845,7 +4805,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled with the user when
          * the login completes.</p>
          */
-        static logIn(username: string, password: string, options: any): Promise;
+        static logIn(username: string, password: string, options?: any): Promise<Parse.User>;
         /**
          * <p>Logs in a user with a session token. On success, this saves the session
          * to disk, so you can retrieve the currently logged in user using
@@ -4854,7 +4814,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled with the user when
          * the login completes.</p>
          */
-        static become(sessionToken: string, options: any): Promise;
+        static become(sessionToken: string, options?: any): Promise<Parse.User>;
         /**
          * <p>Retrieves a user with a session token.</p>
          * @param sessionToken - <p>The sessionToken to get user with.</p>
@@ -4869,7 +4829,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled with the user when
          * the login completes.</p>
          */
-        static hydrate(userJSON: any): Promise;
+        static hydrate(userJSON: any): Promise<Parse.User>;
         /**
          * <p>Static version of {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#linkWith linkWith}</p>
          */
@@ -4881,7 +4841,7 @@ declare namespace Parse {
          * @returns <p>A promise that is resolved when the session is
          * destroyed on the server.</p>
          */
-        static logOut(options: any): Promise;
+        static logOut(options?: any): Promise<any>;
         /**
          * <p>Requests a password reset email to be sent to the specified email address
          * associated with the user account. This email allows the user to securely
@@ -4889,13 +4849,13 @@ declare namespace Parse {
          * @param email - <p>The email address associated with the user that
          * forgot their password.</p>
          */
-        static requestPasswordReset(email: string, options: any): Promise;
+        static requestPasswordReset(email: string, options?: any): Promise<any>;
         /**
          * <p>Request an email verification.</p>
          * @param email - <p>The email address associated with the user that
          * forgot their password.</p>
          */
-        static requestEmailVerification(email: string, options: any): Promise;
+        static requestEmailVerification(email: string, options?: any): Promise<any>;
         /**
          * <p>Verify whether a given password is the password of the current user.</p>
          * @param username - <p>A username to be used for identificaiton</p>
@@ -4951,15 +4911,11 @@ declare namespace Parse {
         /**
          * <p>The first time this object was saved on the server.</p>
          */
-        createdAt: {
-            createdAt: Date;
-        };
+        createdAt: Date;
         /**
          * <p>The last time this object was updated on the server.</p>
          */
-        updatedAt: {
-            updatedAt: Date;
-        };
+        updatedAt: Date;
         /**
          * <p>Returns a local or server Id used uniquely identify this object</p>
          */
@@ -4990,9 +4946,9 @@ declare namespace Parse {
          * <p>Returns true if this object has been modified since its last
          * save/refresh.  If an attribute is specified, it returns true only if that
          * particular attribute has been modified since the last save/refresh.</p>
-         * @param attr - <p>An attribute name (optional).</p>
+         * @param [attr] - <p>An attribute name (optional).</p>
          */
-        dirty(attr: string): boolean;
+        dirty(attr?: string): boolean;
         /**
          * <p>Returns an array of keys that have been modified since last save/refresh</p>
          */
@@ -5050,32 +5006,32 @@ declare namespace Parse {
          * <p>game.set(&quot;finished&quot;, true);</pre></p></p>
          * <p>game.set(&quot;player.score&quot;, 10);</pre></p></p>
          * @param key - <p>The key to set.</p>
-         * @param value - <p>The value to give it.</p>
-         * @param options - <p>A set of options for the set.
+         * @param [value] - <p>The value to give it. Optional if <code>key</code> is an object.</p>
+         * @param [options] - <p>A set of options for the set.
          * The only supported option is <code>error</code>.</p>
          * @returns <p>true if the set succeeded.</p>
          */
-        set(key: string | any, value: string | any, options: any): Parse.Object | boolean;
+        set(key: string | any, value?: string | any, options?: any): Parse.Object | boolean;
         /**
          * <p>Remove an attribute from the model. This is a noop if the attribute doesn't
          * exist.</p>
          * @param attr - <p>The string name of an attribute.</p>
          */
-        unset(attr: string, options: any): Parse.Object | boolean;
+        unset(attr: string, options?: any): Parse.Object | boolean;
         /**
          * <p>Atomically increments the value of the given attribute the next time the
          * object is saved. If no amount is specified, 1 is used by default.</p>
          * @param attr - <p>The key.</p>
-         * @param amount - <p>The amount to increment by (optional).</p>
+         * @param [amount] - <p>The amount to increment by (optional).</p>
          */
-        increment(attr: string, amount: number): Parse.Object | boolean;
+        increment(attr: string, amount?: number): Parse.Object | boolean;
         /**
          * <p>Atomically decrements the value of the given attribute the next time the
          * object is saved. If no amount is specified, 1 is used by default.</p>
          * @param attr - <p>The key.</p>
-         * @param amount - <p>The amount to decrement by (optional).</p>
+         * @param [amount] - <p>The amount to decrement by (optional).</p>
          */
-        decrement(attr: string, amount: number): Parse.Object | boolean;
+        decrement(attr: string, amount?: number): Parse.Object | boolean;
         /**
          * <p>Atomically add an object to the end of the array associated with a given
          * key.</p>
@@ -5089,7 +5045,7 @@ declare namespace Parse {
          * @param attr - <p>The key.</p>
          * @param items - <p>The items to add.</p>
          */
-        addAll(attr: string, items: object[]): Parse.Object | boolean;
+        addAll(attr: string, items: any[]): Parse.Object | boolean;
         /**
          * <p>Atomically add an object to the array associated with a given key, only
          * if it is not already present in the array. The position of the insert is
@@ -5105,7 +5061,7 @@ declare namespace Parse {
          * @param attr - <p>The key.</p>
          * @param items - <p>The objects to add.</p>
          */
-        addAllUnique(attr: string, items: object[]): Parse.Object | boolean;
+        addAllUnique(attr: string, items: any[]): Parse.Object | boolean;
         /**
          * <p>Atomically remove all instances of an object from the array associated
          * with a given key.</p>
@@ -5119,7 +5075,7 @@ declare namespace Parse {
          * @param attr - <p>The key.</p>
          * @param items - <p>The object to remove.</p>
          */
-        removeAll(attr: string, items: object[]): Parse.Object | boolean;
+        removeAll(attr: string, items: any[]): Parse.Object | boolean;
         /**
          * <p>Returns an instance of a subclass of Parse.Op describing what kind of
          * modification has been performed on this field since the last time it was
@@ -5181,7 +5137,7 @@ declare namespace Parse {
          * @param acl - <p>An instance of Parse.ACL.</p>
          * @returns <p>Whether the set passed validation.</p>
          */
-        setACL(acl: Parse.ACL, options: any): Parse.Object | boolean;
+        setACL(acl: Parse.ACL, options?: any): Parse.Object | boolean;
         /**
          * <p>Clears any (or specific) changes to this object made since the last call to save()</p>
          * @param [keys] - <p>specify which fields to revert</p>
@@ -5338,6 +5294,13 @@ declare namespace Parse {
 }
 
 /**
+ * <p>LiveQuery event Callback</p>
+ * @param object - <p>LiveQuery event object</p>
+ * @param [original] - <p>LiveQuery event original object</p>
+ */
+declare type LiveQueryEventCallback = (object: Parse.Object, original?: Parse.Object) => void;
+
+/**
  * @property status - <p>The conversion status, <code>error</code> if conversion failed or
  * <code>success</code> if conversion succeeded.</p>
  * @property info - <p>The error message if conversion failed, or the relative
@@ -5395,7 +5358,7 @@ declare class Parse {
     static serverAuthToken: string;
     static serverAuthType: string;
     static liveQueryServerURL: string;
-    static encryptedUser: string;
+    static encryptedUser: boolean;
     static secret: string;
     static idempotency: boolean;
     static allowCustomObjectId: boolean;
@@ -5434,12 +5397,6 @@ declare class Parse {
      */
     static isEncryptedUserEnabled(): boolean;
 }
-
-declare type Pointer = {
-    __type: string;
-    className: string;
-    objectId: string;
-};
 
 /**
  * <p>Interface declaration for Authentication Providers</p>

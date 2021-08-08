@@ -40,7 +40,7 @@ const authProviders = {};
 class ParseUser extends ParseObject {
   /**
    * @alias Parse.User
-   * @param {object} attributes The initial set of data to store in the user.
+   * @param {object} [attributes] The initial set of data to store in the user.
    */
   constructor(attributes: ?AttributeMap) {
     super('_User');
@@ -437,8 +437,8 @@ class ParseUser extends ParseObject {
    *
    * <p>A username and password must be set before calling logIn.</p>
    *
-   * @param {object} options
-   * @returns {Promise} A promise that is fulfilled with the user when
+   * @param {object} [options]
+   * @returns {Promise<Parse.User>} A promise that is fulfilled with the user when
    *     the login is complete.
    */
   logIn(options?: FullOptions): Promise<ParseUser> {
@@ -584,7 +584,7 @@ class ParseUser extends ParseObject {
    * either from memory or localStorage, if necessary.
    *
    * @static
-   * @returns {Parse.Object} The currently logged in Parse.User.
+   * @returns {Parse.User} The currently logged in Parse.User.
    */
   static current(): ?ParseUser {
     if (!canUseCurrentUser) {
@@ -638,9 +638,9 @@ class ParseUser extends ParseObject {
    *
    * @param {string} username The username (or email) to log in with.
    * @param {string} password The password to log in with.
-   * @param {object} options
+   * @param {object} [options]
    * @static
-   * @returns {Promise} A promise that is fulfilled with the user when
+   * @returns {Promise<Parse.User>} A promise that is fulfilled with the user when
    *     the login completes.
    */
   static logIn(username: string, password: string, options?: FullOptions) {
@@ -660,9 +660,9 @@ class ParseUser extends ParseObject {
    * <code>current</code>.
    *
    * @param {string} sessionToken The sessionToken to log in with.
-   * @param {object} options
+   * @param {object} [options]
    * @static
-   * @returns {Promise} A promise that is fulfilled with the user when
+   * @returns {Promise<Parse.User>} A promise that is fulfilled with the user when
    *     the login completes.
    */
   static become(sessionToken: string, options?: RequestOptions) {
@@ -710,7 +710,7 @@ class ParseUser extends ParseObject {
    *
    * @param {object} userJSON The JSON map of the User's data
    * @static
-   * @returns {Promise} A promise that is fulfilled with the user when
+   * @returns {Promise<Parse.User>} A promise that is fulfilled with the user when
    *     the login completes.
    */
   static hydrate(userJSON: AttributeMap) {
@@ -742,9 +742,9 @@ class ParseUser extends ParseObject {
    * session from disk, log out of linked services, and future calls to
    * <code>current</code> will return <code>null</code>.
    *
-   * @param {object} options
+   * @param {object} [options]
    * @static
-   * @returns {Promise} A promise that is resolved when the session is
+   * @returns {Promise<any>} A promise that is resolved when the session is
    *   destroyed on the server.
    */
   static logOut(options: RequestOptions = {}) {
@@ -759,9 +759,9 @@ class ParseUser extends ParseObject {
    *
    * @param {string} email The email address associated with the user that
    *     forgot their password.
-   * @param {object} options
+   * @param {object} [options]
    * @static
-   * @returns {Promise}
+   * @returns {Promise<any>}
    */
   static requestPasswordReset(email: string, options?: RequestOptions) {
     options = options || {};
@@ -780,9 +780,9 @@ class ParseUser extends ParseObject {
    *
    * @param {string} email The email address associated with the user that
    *     forgot their password.
-   * @param {object} options
+   * @param {object} [options]
    * @static
-   * @returns {Promise}
+   * @returns {Promise<any>}
    */
   static requestEmailVerification(email: string, options?: RequestOptions) {
     options = options || {};

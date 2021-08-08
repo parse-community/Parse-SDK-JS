@@ -168,7 +168,7 @@ const Parse = {
   },
 
   /**
-   * @member {string} Parse.encryptedUser
+   * @member {boolean} Parse.encryptedUser
    * @static
    */
   set encryptedUser(value) {
@@ -199,6 +199,16 @@ const Parse = {
   get idempotency() {
     return CoreManager.get('IDEMPOTENCY');
   },
+
+  /**
+   * @typedef Parse.AuthData
+   * @type {any}
+   */
+
+  /**
+   * @typedef Parse.AuthProvider
+   * @type {any}
+   */
 
   /**
    * @member {boolean} Parse.allowCustomObjectId
@@ -240,6 +250,7 @@ Parse.Object = require('./ParseObject').default;
  * @property {any} Relation
  *
  */
+
 Parse.Op = {
   Set: ParseOp.SetOp,
   Unset: ParseOp.UnsetOp,

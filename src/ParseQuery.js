@@ -249,7 +249,7 @@ class ParseQuery {
 
   /**
    * @alias Parse.Query
-   * @param {(string | Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
+   * @param {(string | Parse.Object | any)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
    */
   constructor(objectClass: string | ParseObject) {
     if (typeof objectClass === 'string') {
@@ -594,7 +594,7 @@ class ParseQuery {
    * the server. Unlike the <code>first</code> method, it never returns undefined.
    *
    * @param {string} objectId The id of the object to be fetched.
-   * @param {object} options
+   * @param {object} [options]
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -637,7 +637,7 @@ class ParseQuery {
   /**
    * Retrieves a list of ParseObjects that satisfy this query.
    *
-   * @param {object} options Valid options
+   * @param {object} [options] Valid options
    * are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -647,7 +647,7 @@ class ParseQuery {
    *   <li>json: Return raw json without converting to Parse.Object
    * </ul>
    *
-   * @returns {Promise} A promise that is resolved with the results when
+   * @returns {Promise<Array<Parse.Object>>} A promise that is resolved with the results when
    * the query completes.
    */
   find(options?: FullOptions): Promise<Array<ParseObject>> {
@@ -771,7 +771,7 @@ class ParseQuery {
    * Executes a distinct query and returns unique values
    *
    * @param {string} key A field to find distinct values
-   * @param {object} options
+   * @param {object} [options]
    * Valid options are:<ul>
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
@@ -805,7 +805,7 @@ class ParseQuery {
    * Executes an aggregate query and returns aggregate results
    *
    * @param {(Array|object)} pipeline Array or Object of stages to process query
-   * @param {object} options Valid options are:<ul>
+   * @param {object} [options] Valid options are:<ul>
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
@@ -851,7 +851,7 @@ class ParseQuery {
    *
    * Returns the object if there is one, otherwise undefined.
    *
-   * @param {object} options Valid options are:<ul>
+   * @param {object} [options] Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -860,7 +860,7 @@ class ParseQuery {
    *   <li>json: Return raw json without converting to Parse.Object
    * </ul>
    *
-   * @returns {Promise} A promise that is resolved with the object when
+   * @returns {Promise<Parse.Object>} A promise that is resolved with the object when
    * the query completes.
    */
   first(options?: FullOptions): Promise<ParseObject | void> {
@@ -1025,7 +1025,7 @@ class ParseQuery {
    *
    * @param {Function} callback Callback that will be called with each result
    *     of the query.
-   * @param {object} options Valid options are:<ul>
+   * @param {object} [options] Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -1088,7 +1088,7 @@ class ParseQuery {
    *   <li>query: The query map was called upon.</li>
    * </ul>
    *
-   * @param {object} options Valid options are:<ul>
+   * @param {object} [options] Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -1126,7 +1126,7 @@ class ParseQuery {
    *   <li>index: The index of the current Parse.Object being processed in the array.</li>
    * </ul>
    * @param {*} initialValue A value to use as the first argument to the first call of the callback. If no initialValue is supplied, the first object in the query will be used and skipped.
-   * @param {object} options Valid options are:<ul>
+   * @param {object} [options] Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -1177,7 +1177,7 @@ class ParseQuery {
    *   <li>query: The query filter was called upon.</li>
    * </ul>
    *
-   * @param {object} options Valid options are:<ul>
+   * @param {object} [options] Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -1386,7 +1386,7 @@ class ParseQuery {
    *
    * @param {string} key The key that the string to match is stored in.
    * @param {RegExp} regex The regular expression pattern to match.
-   * @param {string} modifiers The regular expression mode.
+   * @param {string} [modifiers] The regular expression mode.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   matches(key: string, regex: RegExp, modifiers: string): ParseQuery {
@@ -1573,7 +1573,7 @@ class ParseQuery {
    *
    * @param {string} key The key that the string to match is stored in.
    * @param {string} prefix The substring that the value must start with.
-   * @param {string} modifiers The regular expression mode.
+   * @param {string} [modifiers] The regular expression mode.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   startsWith(key: string, prefix: string, modifiers: string): ParseQuery {
@@ -1622,7 +1622,7 @@ class ParseQuery {
    * @param {string} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
    * @param {number} maxDistance Maximum distance (in radians) of results to return.
-   * @param {boolean} sorted A Bool value that is true if results should be
+   * @param {boolean} [sorted] A Bool value that is true if results should be
    * sorted by distance ascending, false is no sorting is required,
    * defaults to true.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
@@ -1651,7 +1651,7 @@ class ParseQuery {
    * @param {string} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
    * @param {number} maxDistance Maximum distance (in miles) of results to return.
-   * @param {boolean} sorted A Bool value that is true if results should be
+   * @param {boolean} [sorted] A Bool value that is true if results should be
    * sorted by distance ascending, false is no sorting is required,
    * defaults to true.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
@@ -1668,7 +1668,7 @@ class ParseQuery {
    * @param {string} key The key that the Parse.GeoPoint is stored in.
    * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
    * @param {number} maxDistance Maximum distance (in kilometers) of results to return.
-   * @param {boolean} sorted A Bool value that is true if results should be
+   * @param {boolean} [sorted] A Bool value that is true if results should be
    * sorted by distance ascending, false is no sorting is required,
    * defaults to true.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
@@ -1954,7 +1954,7 @@ class ParseQuery {
   /**
    * Subscribe this query to get liveQuery updates
    *
-   * @param {string} sessionToken (optional) Defaults to the currentUser
+   * @param {string} [sessionToken] (optional) Defaults to the currentUser
    * @returns {Promise<LiveQuerySubscription>} Returns the liveQuerySubscription, it's an event emitter
    * which can be used to get liveQuery updates.
    */

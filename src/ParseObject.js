@@ -46,7 +46,7 @@ import type { RequestOptions, FullOptions } from './RESTController';
 const uuidv4 = require('./uuid');
 
 /**
- * @typedef Pointer
+ * @typedef Parse.Pointer
  * @property {string} __type
  * @property {string} className
  * @property {string} objectId
@@ -112,12 +112,13 @@ function getServerUrlPath() {
  *
  * @alias Parse.Object
  */
+
 class ParseObject {
   /**
    * @alias Parse.Object
-   * @param {string} className The class name for the object
-   * @param {object} attributes The initial set of data to store in the object.
-   * @param {object} options The options for this object instance.
+   * @param {string} [className] The class name for the object
+   * @param {object} [attributes]  The initial set of data to store in the object.
+   * @param {object} [options] The options for this object instance.
    */
   constructor(
     className: ?string | { className: string, [attr: string]: mixed },
@@ -173,9 +174,9 @@ class ParseObject {
   /**
    * The first time this object was saved on the server.
    *
-   * @property {Date} createdAt
-   * @returns {Date}
+   * @type {Date}
    */
+
   get createdAt(): ?Date {
     return this._getServerData().createdAt;
   }
@@ -183,8 +184,7 @@ class ParseObject {
   /**
    * The last time this object was updated on the server.
    *
-   * @property {Date} updatedAt
-   * @returns {Date}
+   * @type {Date}
    */
   get updatedAt(): ?Date {
     return this._getServerData().updatedAt;
@@ -520,7 +520,7 @@ class ParseObject {
    * save/refresh.  If an attribute is specified, it returns true only if that
    * particular attribute has been modified since the last save/refresh.
    *
-   * @param {string} attr An attribute name (optional).
+   * @param {string} [attr] An attribute name (optional).
    * @returns {boolean}
    */
   dirty(attr?: string): boolean {
@@ -699,8 +699,8 @@ class ParseObject {
    *   game.set("player.score", 10);</pre></p>
    *
    * @param {(string|object)} key The key to set.
-   * @param {(string|object)} value The value to give it.
-   * @param {object} options A set of options for the set.
+   * @param {(string|object)} [value] The value to give it. Optional if `key` is an object.
+   * @param {object} [options] A set of options for the set.
    *     The only supported option is <code>error</code>.
    * @returns {(Parse.Object|boolean)} true if the set succeeded.
    */
@@ -799,7 +799,7 @@ class ParseObject {
    * exist.
    *
    * @param {string} attr The string name of an attribute.
-   * @param options
+   * @param [options]
    * @returns {(Parse.Object | boolean)}
    */
   unset(attr: string, options?: { [opt: string]: mixed }): ParseObject | boolean {
@@ -812,8 +812,8 @@ class ParseObject {
    * Atomically increments the value of the given attribute the next time the
    * object is saved. If no amount is specified, 1 is used by default.
    *
-   * @param attr {String} The key.
-   * @param amount {Number} The amount to increment by (optional).
+   * @param {string} attr The key.
+   * @param {number} [amount] The amount to increment by (optional).
    * @returns {(Parse.Object|boolean)}
    */
   increment(attr: string, amount?: number): ParseObject | boolean {
@@ -831,7 +831,7 @@ class ParseObject {
    * object is saved. If no amount is specified, 1 is used by default.
    *
    * @param attr {String} The key.
-   * @param amount {Number} The amount to decrement by (optional).
+   * @param [amount] {Number} The amount to decrement by (optional).
    * @returns {(Parse.Object | boolean)}
    */
   decrement(attr: string, amount?: number): ParseObject | boolean {
@@ -861,7 +861,7 @@ class ParseObject {
    * key.
    *
    * @param attr {String} The key.
-   * @param items {Object[]} The items to add.
+   * @param items {Array<any>} The items to add.
    * @returns {(Parse.Object | boolean)}
    */
   addAll(attr: string, items: Array<mixed>): ParseObject | boolean {
@@ -887,7 +887,7 @@ class ParseObject {
    * not guaranteed.
    *
    * @param attr {String} The key.
-   * @param items {Object[]} The objects to add.
+   * @param items {Array<any>} The objects to add.
    * @returns {(Parse.Object | boolean)}
    */
   addAllUnique(attr: string, items: Array<mixed>): ParseObject | boolean {
@@ -911,7 +911,7 @@ class ParseObject {
    * with a given key.
    *
    * @param attr {String} The key.
-   * @param items {Object[]} The object to remove.
+   * @param items {Array<any>} The object to remove.
    * @returns {(Parse.Object | boolean)}
    */
   removeAll(attr: string, items: Array<mixed>): ParseObject | boolean {
@@ -1087,7 +1087,7 @@ class ParseObject {
    * Sets the ACL to be used for this object.
    *
    * @param {Parse.ACL} acl An instance of Parse.ACL.
-   * @param {object} options
+   * @param {object} [options]
    * @returns {(Parse.Object | boolean)} Whether the set passed validation.
    * @see Parse.Object#set
    */
@@ -1190,7 +1190,7 @@ class ParseObject {
    * notation to specify which fields in the included object are also fetched.
    *
    * @param {string | Array<string | Array<string>>} keys The name(s) of the key(s) to include.
-   * @param {object} options
+   * @param {object} [options]
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -1302,7 +1302,7 @@ class ParseObject {
    * <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
    * <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
    * </ul>
-   * @returns {Promise} A promise that is fulfilled when the save
+   * @returns {Promise<Parse.Object>} A promise that is fulfilled when the save
    * completes.
    */
   save(
@@ -1786,7 +1786,7 @@ class ParseObject {
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {object} options
+   * @param {object} [options]
    * @static
    * @returns {Parse.Object[]}
    */
@@ -1831,9 +1831,9 @@ class ParseObject {
    * Creates a new instance of a Parse Object from a JSON representation.
    *
    * @param {object} json The JSON map of the Object's data
-   * @param {boolean} override In single instance mode, all old server data
+   * @param {boolean} [override] In single instance mode, all old server data
    *   is overwritten if this is set to true
-   * @param {boolean} dirty Whether the Parse.Object should set JSON keys to dirty
+   * @param {boolean} [dirty] Whether the Parse.Object should set JSON keys to dirty
    * @static
    * @returns {Parse.Object} A Parse.Object reference
    */

@@ -35,9 +35,9 @@ import type { RequestOptions } from './RESTController';
  * @function run
  * @name Parse.Cloud.run
  * @param {string} name The function name.
- * @param {object} data The parameters to send to the cloud function.
- * @param {object} options
- * @returns {Promise} A promise that will be resolved with the result
+ * @param {object} [data] The parameters to send to the cloud function.
+ * @param {object} [options]
+ * @returns {Promise<any>} A promise that will be resolved with the result
  * of the function.
  */
 export function run(name: string, data: mixed, options: RequestOptions): Promise<mixed> {
@@ -66,7 +66,7 @@ export function run(name: string, data: mixed, options: RequestOptions): Promise
  *
  * @function getJobsData
  * @name Parse.Cloud.getJobsData
- * @returns {Promise} A promise that will be resolved with the result
+ * @returns {Promise<object>} A promise that will be resolved with the result
  * of the function.
  */
 export function getJobsData(): Promise<Object> {
@@ -83,7 +83,7 @@ export function getJobsData(): Promise<Object> {
  * @name Parse.Cloud.startJob
  * @param {string} name The function name.
  * @param {object} data The parameters to send to the cloud function.
- * @returns {Promise} A promise that will be resolved with the jobStatusId
+ * @returns {Promise<string>} A promise that will be resolved with the jobStatusId
  * of the job.
  */
 export function startJob(name: string, data: mixed): Promise<string> {
@@ -102,7 +102,7 @@ export function startJob(name: string, data: mixed): Promise<string> {
  * @function getJobStatus
  * @name Parse.Cloud.getJobStatus
  * @param {string} jobStatusId The Id of Job Status.
- * @returns {Parse.Object} Status of Job.
+ * @returns {Promise<Parse.Object>} Status of Job.
  */
 export function getJobStatus(jobStatusId: string): Promise<ParseObject> {
   const query = new ParseQuery('_JobStatus');

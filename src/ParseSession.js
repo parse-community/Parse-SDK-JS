@@ -27,7 +27,7 @@ import type { RequestOptions, FullOptions } from './RESTController';
 class ParseSession extends ParseObject {
   /**
    * @alias Parse.Session
-   * @param {object} attributes The initial set of data to store in the user.
+   * @param {object} [attributes] The initial set of data to store in the user.
    */
   constructor(attributes: ?AttributeMap) {
     super('_Session');

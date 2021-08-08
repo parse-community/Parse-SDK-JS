@@ -14,6 +14,10 @@ import ParseObject from './ParseObject';
 import type { AttributeMap } from './ObjectStateMutations';
 
 export default class Installation extends ParseObject {
+  /**
+   * @alias Parse.Installation
+   * @param {object} [attributes] The initial set of data to store in the installation.
+   */
   constructor(attributes: ?AttributeMap) {
     super('_Installation');
     if (attributes && typeof attributes === 'object') {

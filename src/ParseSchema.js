@@ -76,7 +76,7 @@ class ParseSchema {
   /**
    * Static method to get all schemas
    *
-   * @returns {Promise} A promise that is resolved with the result when
+   * @returns {Promise<any>} A promise that is resolved with the result when
    * the query completes.
    */
   static all() {
@@ -92,7 +92,7 @@ class ParseSchema {
   /**
    * Get the Schema from Parse
    *
-   * @returns {Promise} A promise that is resolved with the result when
+   * @returns {Promise<any>} A promise that is resolved with the result when
    * the query completes.
    */
   get() {
@@ -110,7 +110,7 @@ class ParseSchema {
   /**
    * Create a new Schema on Parse
    *
-   * @returns {Promise} A promise that is resolved with the result when
+   * @returns {Promise<any>} A promise that is resolved with the result when
    * the query completes.
    */
   save() {
@@ -130,7 +130,7 @@ class ParseSchema {
   /**
    * Update a Schema on Parse
    *
-   * @returns {Promise} A promise that is resolved with the result when
+   * @returns {Promise<any>} A promise that is resolved with the result when
    * the query completes.
    */
   update() {
@@ -154,7 +154,7 @@ class ParseSchema {
    * Removing a Schema from Parse
    * Can only be used on Schema without objects
    *
-   * @returns {Promise} A promise that is resolved with the result when
+   * @returns {Promise<any>} A promise that is resolved with the result when
    * the query completes.
    */
   delete() {
@@ -168,7 +168,7 @@ class ParseSchema {
    * Removes all objects from a Schema (class) in Parse.
    * EXERCISE CAUTION, running this will delete all objects for this schema and cannot be reversed
    *
-   * @returns {Promise} A promise that is resolved with the result when
+   * @returns {Promise<any>} A promise that is resolved with the result when
    * the query completes.
    */
   purge() {
@@ -209,8 +209,8 @@ class ParseSchema {
    * Adding a Field to Create / Update a Schema
    *
    * @param {string} name Name of the field that will be created on Parse
-   * @param {string} type Can be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)
-   * @param {object} options
+   * @param {string} [type] Can be a (String|Number|Boolean|Date|Parse.File|Parse.GeoPoint|Array|Object|Pointer|Parse.Relation)
+   * @param {object} [options]
    * Valid options are:<ul>
    *   <li>required: If field is not set, save operation fails (Requires Parse Server 3.7.0+)
    *   <li>defaultValue: If field is not set, a default value is selected (Requires Parse Server 3.7.0+)
@@ -273,7 +273,7 @@ class ParseSchema {
    * Adding String Field
    *
    * @param {string} name Name of the field that will be created on Parse
-   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @param {object} [options] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addString(name: string, options: FieldOptions) {
@@ -284,7 +284,7 @@ class ParseSchema {
    * Adding Number Field
    *
    * @param {string} name Name of the field that will be created on Parse
-   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @param {object} [options] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addNumber(name: string, options: FieldOptions) {
@@ -295,7 +295,7 @@ class ParseSchema {
    * Adding Boolean Field
    *
    * @param {string} name Name of the field that will be created on Parse
-   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @param {object} [options] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addBoolean(name: string, options: FieldOptions) {
@@ -306,7 +306,7 @@ class ParseSchema {
    * Adding Date Field
    *
    * @param {string} name Name of the field that will be created on Parse
-   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @param {object} [options] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addDate(name: string, options: FieldOptions) {
@@ -323,7 +323,7 @@ class ParseSchema {
    * Adding File Field
    *
    * @param {string} name Name of the field that will be created on Parse
-   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @param {object} [options] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addFile(name: string, options: FieldOptions) {
@@ -334,7 +334,7 @@ class ParseSchema {
    * Adding GeoPoint Field
    *
    * @param {string} name Name of the field that will be created on Parse
-   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @param {object} [options] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addGeoPoint(name: string, options: FieldOptions) {
@@ -345,7 +345,7 @@ class ParseSchema {
    * Adding Polygon Field
    *
    * @param {string} name Name of the field that will be created on Parse
-   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @param {object} [options] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addPolygon(name: string, options: FieldOptions) {
@@ -356,7 +356,7 @@ class ParseSchema {
    * Adding Array Field
    *
    * @param {string} name Name of the field that will be created on Parse
-   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @param {object} [options] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addArray(name: string, options: FieldOptions) {
@@ -367,7 +367,7 @@ class ParseSchema {
    * Adding Object Field
    *
    * @param {string} name Name of the field that will be created on Parse
-   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @param {object} [options] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addObject(name: string, options: FieldOptions) {
@@ -379,7 +379,7 @@ class ParseSchema {
    *
    * @param {string} name Name of the field that will be created on Parse
    * @param {string} targetClass Name of the target Pointer Class
-   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @param {object} [options] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addPointer(name: string, targetClass: string, options: FieldOptions = {}) {

@@ -5,10 +5,9 @@
  *
  * @function define
  * @name Parse.Cloud.define
- * @template T extends ((param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] })  => any & (() => any))
- * @param {String} name The name of the Cloud Function
- * @param {Parse.Cloud.FunctionRequestFunc<T>} func The Cloud Function to register
- * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.FunctionRequestFunc<T>} [validator] An optional function to help validating cloud code.
+ * @param {string} name The name of the Cloud Function
+ * @param {Parse.Cloud.FunctionRequestFunc} func The Cloud Function to register
+ * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.FunctionRequestFunc} [validator] An optional function to help validating cloud code.
  */
 
 /**
@@ -29,7 +28,7 @@
  *
  * @function afterDelete
  * @name Parse.Cloud.afterDelete
- * @param {(String|Parse.Object)} ParseClass The Parse.Object subclass to register the after delete function for. This can instead be a String that is the className of the subclass.
+ * @param {(string | Parse.Object)} ParseClass The Parse.Object subclass to register the after delete function for. This can instead be a String that is the className of the subclass.
  * @param {Parse.Cloud.TriggerRequestFunc} func The function to run after a delete.
  * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.TriggerRequestFunc} [validator] An optional function to help validating cloud code.
  */
@@ -54,7 +53,7 @@
  *
  * @function afterSave
  * @name Parse.Cloud.afterSave
- * @param {(String|Parse.Object)} ParseClass The Parse.Object subclass to register the after save function for. This can instead be a String that is the className of the subclass.
+ * @param {(string | Parse.Object)} ParseClass The Parse.Object subclass to register the after save function for. This can instead be a String that is the className of the subclass.
  * @param {Parse.Cloud.TriggerRequestFunc} func The function to run after a save.
  * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.TriggerRequestFunc} [validator] An optional function to help validating cloud code.
  */
@@ -79,12 +78,12 @@
  *
  * @function beforeFind
  * @name Parse.Cloud.beforeFind
- * @param {(String|Parse.Object)} ParseClass The Parse.Object subclass to register the before find function for. This can instead be a String that is the className of the subclass.
+ * @param {(string | Parse.Object)} ParseClass The Parse.Object subclass to register the before find function for. This can instead be a String that is the className of the subclass.
  * @param {Parse.Cloud.BeforeFindRequestFunc} func The function to run before a find.
  * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.BeforeFindRequestFunc} [validator] An optional function to help validating cloud code.
  */
 
- /**
+/**
  * Registers an after find function.
  *
  * **Available in Cloud Code only.**
@@ -104,7 +103,7 @@
  *
  * @function afterFind
  * @name Parse.Cloud.afterFind
- * @param {(String|Parse.Object)} ParseClass The Parse.Object subclass to register the after find function for. This can instead be a String that is the className of the subclass.
+ * @param {(string | Parse.Object)} ParseClass The Parse.Object subclass to register the after find function for. This can instead be a String that is the className of the subclass.
  * @param {Parse.Cloud.AfterFindRequestFunc} func The function to run before a find.
  * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.AfterFindRequestFunc} [validator] An optional function to help validating cloud code.
  */
@@ -127,7 +126,7 @@
  *
  * @function beforeDelete
  * @name Parse.Cloud.beforeDelete
- * @param {(String|Parse.Object)} ParseClass The Parse.Object subclass to register the before delete function for. This can instead be a String that is the className of the subclass.
+ * @param {(string | Parse.Object)} ParseClass The Parse.Object subclass to register the before delete function for. This can instead be a String that is the className of the subclass.
  * @param {Parse.Cloud.TriggerRequestFunc} func The function to run before a delete.
  * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.TriggerRequestFunc} [validator] An optional function to help validating cloud code.
  */
@@ -190,7 +189,7 @@
  * });
  * ```
  *
- * @method afterLogout
+ * @function afterLogout
  * @name Parse.Cloud.afterLogout
  * @param {Parse.Cloud.TriggerRequestFunc} func The function to run after a logout.
  */
@@ -215,7 +214,7 @@
  *
  * @function beforeSave
  * @name Parse.Cloud.beforeSave
- * @param {(String|Parse.Object)} ParseClass The Parse.Object subclass to register the after save function for. This can instead be a String that is the className of the subclass.
+ * @param {(string | Parse.Object)} ParseClass The Parse.Object subclass to register the after save function for. This can instead be a String that is the className of the subclass.
  * @param {Parse.Cloud.TriggerRequestFunc} func The function to run before a save.
  * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.TriggerRequestFunc} [validator] An optional function to help validating cloud code.
  */
@@ -304,7 +303,7 @@
  * }, { ...validationObject });
  *```
  *
- * @method beforeDeleteFile
+ * @function beforeDeleteFile
  * @name Parse.Cloud.beforeDeleteFile
  * @param {Parse.Cloud.FileTriggerRequestFunc} func The function to run before deleting a file.
  * @param {(Parse.Cloud.ValidatorObject|Parse.Cloud.FileTriggerRequestFunc)} [validator] An optional function to help validating cloud code.
@@ -327,7 +326,7 @@
  * }, { ...validationObject });
  *```
  *
- * @method afterDeleteFile
+ * @function afterDeleteFile
  * @name Parse.Cloud.afterDeleteFile
  * @param {Parse.Cloud.FileTriggerRequestFunc} func The function to after before deleting a file.
  * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.FileTriggerRequestFunc} [validator] An optional function to help validating cloud code.
@@ -370,9 +369,9 @@
  * });
  *```
  *
- * @method sendEmail
+ * @function sendEmail
  * @name Parse.Cloud.sendEmail
- * @param {Object} data The object of the mail data to send.
+ * @param {object} data The object of the mail data to send.
  */
 
 /**
@@ -393,7 +392,7 @@
  *
  * @function beforeSubscribe
  * @name Parse.Cloud.beforeSubscribe
- * @param {(String|Parse.Object)} ParseClass The Parse.Object subclass to register the before subscription function for. This can instead be a String that is the className of the subclass.
+ * @param {(string | Parse.Object)} ParseClass The Parse.Object subclass to register the before subscription function for. This can instead be a String that is the className of the subclass.
  * @param {Parse.Cloud.TriggerRequest} func The function to run before a subscription.
  * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.TriggerRequest} [validator] An optional function to help validating cloud code.
  *
@@ -416,9 +415,9 @@
  * }, { ...validationObject });
  *```
  *
- * @method afterLiveQueryEvent
+ * @function afterLiveQueryEvent
  * @name Parse.Cloud.afterLiveQueryEvent
- * @param {(String|Parse.Object)} ParseClass The Parse.Object subclass to register the after live query event function for. This can instead be a String that is the className of the subclass.
+ * @param {(string | Parse.Object)} ParseClass The Parse.Object subclass to register the after live query event function for. This can instead be a String that is the className of the subclass.
  * @param {Parse.Cloud.LiveQueryEventTrigger} func The function to run after a live query event.
  * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.LiveQueryEventTrigger} [validator] An optional function to help validating cloud code.
  */
@@ -464,57 +463,57 @@
 /**
  * @callback Parse.Cloud.TriggerRequestFunc
  * @param {Parse.Cloud.TriggerRequest} request The request object
- * @return {Any}
+ * @returns {any}
  */
 
 /**
  * @typedef Parse.Cloud.TriggerRequest
- * @property {String} installationId If set, the installationId triggering the request.
- * @property {Boolean} master If true, means the master key was used.
+ * @property {string} installationId If set, the installationId triggering the request.
+ * @property {boolean} master If true, means the master key was used.
  * @property {Parse.User} user If set, the user that made the request.
  * @property {Parse.Object} object The object triggering the hook.
- * @property {String} ip The IP address of the client making the request.
- * @property {Object} headers The original HTTP headers for the request.
- * @property {String} triggerName The name of the trigger (`beforeSave`, `afterSave`, ...)
- * @property {Object} log The current logger inside Parse Server.
+ * @property {string} ip The IP address of the client making the request.
+ * @property {object} headers The original HTTP headers for the request.
+ * @property {string} triggerName The name of the trigger (`beforeSave`, `afterSave`, ...)
+ * @property {object} log The current logger inside Parse Server.
  * @property {Parse.Object} original If set, the object, as currently stored.
- * @property {Object.<string,Object>} context If set, the context of the request
+ * @property {object.<string, object>} context If set, the context of the request
  */
 
 /**
  * @callback Parse.Cloud.FileTriggerRequestFunc
  * @param {Parse.Cloud.FileTriggerRequest} request The request object
- * @return {Any}
+ * @returns {any}
  */
 
 /**
  * @typedef Parse.Cloud.FileTriggerRequest
- * @property {String} installationId If set, the installationId triggering the request.
- * @property {Boolean} master If true, means the master key was used.
+ * @property {string} installationId If set, the installationId triggering the request.
+ * @property {boolean} master If true, means the master key was used.
  * @property {Parse.User} user If set, the user that made the request.
  * @property {Parse.File} file The file that triggered the hook.
  * @property {number} fileSize The size of the file in bytes.
  * @property {number} contentLength The value from Content-Length header
- * @property {String} ip The IP address of the client making the request.
- * @property {Object} headers The original HTTP headers for the request.
- * @property {String} triggerName The name of the trigger (`beforeSaveFile`, `afterSaveFile`)
- * @property {Object} log The current logger inside Parse Server.
+ * @property {string} ip The IP address of the client making the request.
+ * @property {object} headers The original HTTP headers for the request.
+ * @property {string} triggerName The name of the trigger (`beforeSaveFile`, `afterSaveFile`)
+ * @property {object} log The current logger inside Parse Server.
  */
 
 /**
  * @callback Parse.Cloud.ConnectTriggerRequestFunc
  * @param {Parse.Cloud.ConnectTriggerRequest} request The request object
- * @return {Any}
+ * @returns {any}
  */
 
 /**
  * @typedef Parse.Cloud.ConnectTriggerRequest
- * @property {String} installationId If set, the installationId triggering the request.
- * @property {Boolean} useMasterKey If true, means the master key was used.
+ * @property {string} installationId If set, the installationId triggering the request.
+ * @property {boolean} useMasterKey If true, means the master key was used.
  * @property {Parse.User} user If set, the user that made the request.
  * @property {number} clients The number of clients connected.
  * @property {number} subscriptions The number of subscriptions connected.
- * @property {String} sessionToken If set, the session of the user that made the request.
+ * @property {string} sessionToken If set, the session of the user that made the request.
  */
 
 /**
@@ -528,100 +527,99 @@
 /**
  * @callback Parse.Cloud.LiveQueryEventTriggerFunc
  * @param {Parse.Cloud.LiveQueryEventTrigger} request The request object
- * @return {Any}
+ * @returns {any}
  */
 
 /**
  * @typedef Parse.Cloud.LiveQueryEventTrigger
- * @property {String} installationId If set, the installationId triggering the request.
- * @property {Boolean} useMasterKey If true, means the master key was used.
+ * @property {string} installationId If set, the installationId triggering the request.
+ * @property {boolean} useMasterKey If true, means the master key was used.
  * @property {Parse.User} user If set, the user that made the request.
- * @property {String} sessionToken If set, the session of the user that made the request.
- * @property {String} event The live query event that triggered the request.
+ * @property {string} sessionToken If set, the session of the user that made the request.
+ * @property {string} event The live query event that triggered the request.
  * @property {Parse.Object} object The object triggering the hook.
  * @property {Parse.Object} original If set, the object, as currently stored.
- * @property {Integer} clients The number of clients connected.
- * @property {Integer} subscriptions The number of subscriptions connected.
- * @property {Boolean} sendEvent If the LiveQuery event should be sent to the client. Set to false to prevent LiveQuery from pushing to the client.
+ * @property {number} clients The number of clients connected.
+ * @property {number} subscriptions The number of subscriptions connected.
+ * @property {boolean} sendEvent If the LiveQuery event should be sent to the client. Set to false to prevent LiveQuery from pushing to the client.
  */
 
 /**
  * @callback Parse.Cloud.BeforeFindRequestFunc
  * @param {Parse.Cloud.BeforeFindRequest} request The request object
- * @return {Any}
+ * @returns {any}
  */
 
 /**
  * @typedef Parse.Cloud.BeforeFindRequest
- * @property {String} installationId If set, the installationId triggering the request.
- * @property {Boolean} master If true, means the master key was used.
+ * @property {string} installationId If set, the installationId triggering the request.
+ * @property {boolean} master If true, means the master key was used.
  * @property {Parse.User} user If set, the user that made the request.
  * @property {Parse.Query} query The query triggering the hook.
- * @property {String} ip The IP address of the client making the request.
- * @property {Object} headers The original HTTP headers for the request.
- * @property {String} triggerName The name of the trigger (`beforeSave`, `afterSave`, ...)
- * @property {Object} log The current logger inside Parse Server.
- * @property {Boolean} isGet whether the query a `get` or a `find`
- * @property {Boolean} count whether the query a `get` or a `find`
+ * @property {string} ip The IP address of the client making the request.
+ * @property {object} headers The original HTTP headers for the request.
+ * @property {string} triggerName The name of the trigger (`beforeSave`, `afterSave`, ...)
+ * @property {object} log The current logger inside Parse Server.
+ * @property {boolean} isGet whether the query a `get` or a `find`
+ * @property {boolean} count whether the query a `get` or a `find`
  * @property {Parse.Cloud.ReadPreferenceOption} readPreference read preferences of the query
  */
 
 /**
  * @static
  * @name Parse.Cloud.ReadPreferenceOption
- * @property {String} Primary Primary read preference option
- * @property {String} PrimaryPreferred Prefer primary
- * @property {String} Secondary Secondary read preference option
- * @property {String} SecondaryPreferred Prefer secondary
- * @property {String} Nearest Nearest read preference option
+ * @property {string} Primary Primary read preference option
+ * @property {string} PrimaryPreferred Prefer primary
+ * @property {string} Secondary Secondary read preference option
+ * @property {string} SecondaryPreferred Prefer secondary
+ * @property {string} Nearest Nearest read preference option
  */
 
 /**
  * @callback Parse.Cloud.AfterFindRequestFunc
  * @param {Parse.Cloud.AfterFindRequest} request The request object
- * @return {Any}
+ * @returns {any}
  */
 
 /**
  * @typedef Parse.Cloud.AfterFindRequest
- * @property {String} installationId If set, the installationId triggering the request.
- * @property {Boolean} master If true, means the master key was used.
+ * @property {string} installationId If set, the installationId triggering the request.
+ * @property {boolean} master If true, means the master key was used.
  * @property {Parse.User} user If set, the user that made the request.
  * @property {Parse.Query} query The query triggering the hook.
  * @property {Array<Parse.Object>} results The results the query yielded.
- * @property {String} ip The IP address of the client making the request.
- * @property {Object} headers The original HTTP headers for the request.
- * @property {String} triggerName The name of the trigger (`beforeSave`, `afterSave`, ...)
- * @property {Object} log The current logger inside Parse Server.
+ * @property {string} ip The IP address of the client making the request.
+ * @property {object} headers The original HTTP headers for the request.
+ * @property {string} triggerName The name of the trigger (`beforeSave`, `afterSave`, ...)
+ * @property {object} log The current logger inside Parse Server.
  */
 
 /**
- * @callback Parse.Cloud.FunctionRequestFunc<T>
+ * @callback Parse.Cloud.FunctionRequestFunc
  * @param {Parse.Cloud.FunctionRequest} request The request object
- * @return {ReturnType<T>}
+ * @returns {any}
  */
 
 /**
  * @typedef Parse.Cloud.FunctionRequest
- * @property {String} installationId If set, the installationId triggering the request.
- * @property {Boolean} master If true, means the master key was used.
+ * @property {string} installationId If set, the installationId triggering the request.
+ * @property {boolean} master If true, means the master key was used.
  * @property {Parse.User} user If set, the user that made the request.
- * @property {Object.<string,Object>} params The params passed to the cloud function.
- * @property {Object} log The current logger inside Parse Server.
+ * @property {object.<string, object>} params The params passed to the cloud function.
+ * @property {object} log The current logger inside Parse Server.
  */
 
 /**
  * @callback Parse.Cloud.JobRequestFunc
  * @param {Parse.Cloud.JobRequest} request The request object
- * @return {Any}
  */
 
 /**
  * @typedef Parse.Cloud.JobRequest
- * @property {Object.<string,Object>} params The params passed to the background job.
- * @property {Function} [error] If error is called, will end the job unsuccessfully with an optional completion message to be stored in the job status.
- * @property {Function} [message] If message is called with a string argument, will update the current message to be stored in the job status.
- * @property {Function} [success] If success is called, will end the job successfullly with the optional completion message to be stored in the job status.
+ * @property {object.<string, object>} params The params passed to the background job.
+ * @property {Function} error If error is called, will end the job unsuccessfully with an optional completion message to be stored in the job status.
+ * @property {Function} message If message is called with a string argument, will update the current message to be stored in the job status.
+ * @property {Function} success If success is called, will end the job successfullly with the optional completion message to be stored in the job status.
  */
 
 /**
@@ -631,34 +629,33 @@
 
 /**
  * @typedef Parse.Cloud.ValidatorObject
- * @property {Boolean} requireUser whether the cloud trigger requires a user.
- * @property {Boolean} requireMaster whether the cloud trigger requires a master key.
- * @property {Boolean} validateMasterKey whether the validator should run if masterKey is provided. Defaults to false.
- * @property {Boolean} skipWithMasterKey whether the cloud code function should be ignored using a masterKey.
- * @property {Array<String>|function}requireAnyUserRoles If set, request.user has to be part of at least one roles name to make the request. If set to a function, function must return role names.
- * @property {Array<String>|function}requireAllUserRoles If set, request.user has to be part all roles name to make the request. If set to a function, function must return role names.
- * @property {Object.<string, Parse.Cloud.ValidatorObjectFieldOptions>|Array<String>} requireUserKeys If set, keys required on request.user to make the request.
- * @property {Object.<string, Parse.Cloud.ValidatorObjectFieldOptions>|Array<String>} fields if an array of strings, validator will look for keys in request.params, and throw if not provided. If Object, fields to validate. If the trigger is a cloud function, `request.params` will be validated, otherwise `request.object`.
+ * @property {boolean} requireUser whether the cloud trigger requires a user.
+ * @property {boolean} requireMaster whether the cloud trigger requires a master key.
+ * @property {boolean} validateMasterKey whether the validator should run if masterKey is provided. Defaults to false.
+ * @property {boolean} skipWithMasterKey whether the cloud code function should be ignored using a masterKey.
+ * @property {Array<string> | Function}requireAnyUserRoles If set, request.user has to be part of at least one roles name to make the request. If set to a function, function must return role names.
+ * @property {Array<string> | Function}requireAllUserRoles If set, request.user has to be part all roles name to make the request. If set to a function, function must return role names.
+ * @property {object.<string, Parse.Cloud.ValidatorObjectFieldOptions> | Array<string>} requireUserKeys If set, keys required on request.user to make the request.
+ * @property {object.<string, Parse.Cloud.ValidatorObjectFieldOptions> | Array<string>} fields if an array of strings, validator will look for keys in request.params, and throw if not provided. If Object, fields to validate. If the trigger is a cloud function, `request.params` will be validated, otherwise `request.object`.
  */
 
 /**
  * @typedef Parse.Cloud.ValidatorObjectFieldOptions
- * @property {Any} type expected type of data for field.
- * @property {Boolean} constant whether the field can be modified on the object.
- * @property {Any} default default value if field is `null`, or initial value `constant` is `true`.
- * @property {Array|function|Any} options array of options that the field can be, function to validate field, or single value. Throw an error if value is invalid.
- * @property {String} error custom error message if field is invalid.
+ * @property {any} type expected type of data for field.
+ * @property {boolean} constant whether the field can be modified on the object.
+ * @property {any} default default value if field is `null`, or initial value `constant` is `true`.
+ * @property {Array | Function | any} options array of options that the field can be, function to validate field, or single value. Throw an error if value is invalid.
+ * @property {string} error custom error message if field is invalid.
  */
 
 /**
  * @typedef Parse.Cloud.HTTPOptions
- * @property {string | object} body The body of the request. If it is a JSON object, then the Content-Type set in the headers must be application/x-www-form-urlencoded or application/json. You can also set this to a {@link Buffer} object to send raw bytes. If you use a Buffer, you should also set the Content-Type header explicitly to describe what these bytes represent.
- * @property {Function} error The function that is called when the request fails. It will be passed a Parse.Cloud.HTTPResponse object.
- * @property {boolean} followRedirects Whether to follow redirects caused by HTTP 3xx responses. Defaults to false.
- * @property {object} headers The headers for the request.
- * @property {string} method The method of the request. GET, POST, PUT, DELETE, HEAD, and OPTIONS are supported. Will default to GET if not specified.
- * @property {string | object} params The query portion of the url. You can pass a JSON object of key value pairs like params: {q : 'Sean Plott'} or a raw string like params:q=Sean Plott.
- * @property {Function} success The function that is called when the request successfully completes. It will be passed a Parse.Cloud.HTTPResponse object.
+ * @property {string | object} [body] The body of the request. If it is a JSON object, then the Content-Type set in the headers must be application/x-www-form-urlencoded or application/json. You can also set this to a {@link Buffer} object to send raw bytes. If you use a Buffer, you should also set the Content-Type header explicitly to describe what these bytes represent.
+ * @property {Function} [error] The function that is called when the request fails. It will be passed a Parse.Cloud.HTTPResponse object.
+ * @property {boolean} [followRedirects] Whether to follow redirects caused by HTTP 3xx responses. Defaults to false.
+ * @property {object} [headers] The headers for the request.
+ * @property {string} [method] The method of the request. GET, POST, PUT, DELETE, HEAD, and OPTIONS are supported. Will default to GET if not specified.
+ * @property {string | object} [params] The query portion of the url. You can pass a JSON object of key value pairs like params: {q : 'Sean Plott'} or a raw string like params:q=Sean Plott.
  * @property {string} url The url to send the request to.
  */
 

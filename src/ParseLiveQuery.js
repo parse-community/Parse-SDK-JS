@@ -49,6 +49,11 @@ const LiveQuery = new EventEmitter();
 /**
  * After open is called, the LiveQuery will try to send a connect request
  * to the LiveQuery server.
+ *
+ * @function open
+ * @name Parse.LiveQuery.open
+ * @param {Function} func function to run on open
+ * @static
  */
 LiveQuery.open = async () => {
   const liveQueryClient = await getLiveQueryClient();
@@ -61,6 +66,11 @@ LiveQuery.open = async () => {
  * cancel the auto reconnect, and unsubscribe all subscriptions based on it.
  * If you call query.subscribe() after this, we'll create a new WebSocket
  * connection to the LiveQuery server.
+ *
+ * @function close
+ * @name Parse.LiveQuery.close
+ * @param {Function} func function to run on close
+ * @static
  */
 LiveQuery.close = async () => {
   const liveQueryClient = await getLiveQueryClient();

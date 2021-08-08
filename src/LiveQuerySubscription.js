@@ -95,10 +95,10 @@ import { resolvingPromise } from './promiseUtils';
  *
  * });</pre></p>
  *
- * @alias Parse.LiveQuerySubscription
  */
 class Subscription extends EventEmitter {
-  /*
+  /**
+   * @alias Parse.LiveQuerySubscription
    * @param {string} id - subscription id
    * @param {string} query - query to subscribe to
    * @param {string} sessionToken - optional session token
@@ -128,6 +128,22 @@ class Subscription extends EventEmitter {
         liveQueryClient.unsubscribe(this);
         this.emit('close');
       });
+  }
+  /**
+   * LiveQuery event Callback
+   *
+   * @callback LiveQueryEventCallback
+   * @param {Parse.Object} object LiveQuery event object
+   * @param {Parse.Object} [original] LiveQuery event original object
+   */
+
+  /**
+   * @param {string} event
+   * @param {LiveQueryEventCallback} callback
+   */
+
+  on(event, callback) {
+    super.on(event, callback);
   }
 }
 

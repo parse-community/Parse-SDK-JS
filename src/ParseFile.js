@@ -79,11 +79,11 @@ class ParseFile {
   _tags: ?Object;
 
   /**
-   * @param name {String} The file's name. This will be prefixed by a unique
+   * @param name {string} The file's name. This will be prefixed by a unique
    *     value once the file has finished saving. The file name must begin with
    *     an alphanumeric character, and consist of alphanumeric characters,
    *     periods, spaces, underscores, or dashes.
-   * @param data {Array} The data for the file, as either:
+   * @param {Array | Blob | object} data The data for the file, as either:
    *     1. an Array of byte value Numbers, or
    *     2. an Object like { base64: "..." } with a base64-encoded String.
    *     3. an Object like { uri: "..." } with a uri String.
@@ -102,11 +102,11 @@ class ParseFile {
    *     // The file either could not be read, or could not be saved to Parse.
    *   });
    * }</pre>
-   * @param type {String} Optional Content-Type header to use for the file. If
+   * @param {string} [type] Optional Content-Type header to use for the file. If
    *     this is omitted, the content type will be inferred from the name's
    *     extension.
-   * @param metadata {Object} Optional key value pairs to be stored with file object
-   * @param tags {Object} Optional key value pairs to be stored with file object
+   * @param {object} [metadata] Optional key value pairs to be stored with file object
+   * @param {object} [tags] Optional key value pairs to be stored with file object
    * @alias Parse.File
    */
   constructor(name: string, data?: FileData, type?: string, metadata?: Object, tags?: Object) {
@@ -201,7 +201,7 @@ class ParseFile {
    * Gets the url of the file. It is only available after you save the file or
    * after you get the file from a Parse.Object.
    *
-   * @param {object} options An object to specify url options
+   * @param {object} [options] An object to specify url options
    * @returns {string}
    */
   url(options?: { forceSecure?: boolean }): ?string {
@@ -237,7 +237,7 @@ class ParseFile {
   /**
    * Saves the file to the Parse cloud.
    *
-   * @param {object} options
+   * @param {object} [options]
    *  * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -323,7 +323,7 @@ class ParseFile {
    * Deletes the file from the Parse cloud.
    * In Cloud Code and Node only with Master Key.
    *
-   * @param {object} options
+   * @param {object} [options]
    *  * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
