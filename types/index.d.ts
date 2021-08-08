@@ -1807,11 +1807,66 @@ declare namespace Parse {
         addTag(key: string, value: any): void;
     }
     /**
+     * <p>Creates a new GeoPoint with any of the following forms:<br></p>
+     *   <pre>
+     *   new GeoPoint(otherGeoPoint)
+     *   new GeoPoint(30, 30)
+     *   new GeoPoint([30, 30])
+     *   new GeoPoint({latitude: 30, longitude: 30})
+     *   new GeoPoint()  // defaults to (0, 0)
+     *   </pre>
+     * <p>Represents a latitude / longitude point that may be associated
+     * with a key in a ParseObject or used as a reference point for geo queries.
+     * This allows proximity-based queries on the key.</p>
+     * <p>Only one key in a class may contain a GeoPoint.</p>
+     * <p>Example:<pre>
+     *   var point = new Parse.GeoPoint(30.0, -20.0);
+     *   var object = new Parse.Object("PlaceObject");
+     *   object.set("location", point);
+     *   object.save();</pre></p>
      * @param arg1 - <p>Either a list of coordinate pairs, an object with <code>latitude</code>, <code>longitude</code>, or the latitude or the point.</p>
      * @param arg2 - <p>The longitude of the GeoPoint</p>
      */
     class GeoPoint {
         constructor(arg1: number[] | any | number, arg2: number);
+        /**
+         * <p>North-south portion of the coordinate, in range [-90, 90].
+         * Throws an exception if set out of range in a modern browser.</p>
+         */
+        latitude: {
+            latitude: number;
+        };
+        /**
+         * <p>East-west portion of the coordinate, in range [-180, 180].
+         * Throws if set out of range in a modern browser.</p>
+         */
+        longitude: {
+            longitude: number;
+        };
+        /**
+         * <p>Returns a JSON representation of the GeoPoint, suitable for Parse.</p>
+         */
+        toJSON(): any;
+        /**
+         * <p>Returns the distance from this GeoPoint to another in radians.</p>
+         * @param point - <p>the other Parse.GeoPoint.</p>
+         */
+        radiansTo(point: Parse.GeoPoint): number;
+        /**
+         * <p>Returns the distance from this GeoPoint to another in kilometers.</p>
+         * @param point - <p>the other Parse.GeoPoint.</p>
+         */
+        kilometersTo(point: Parse.GeoPoint): number;
+        /**
+         * <p>Returns the distance from this GeoPoint to another in miles.</p>
+         * @param point - <p>the other Parse.GeoPoint.</p>
+         */
+        milesTo(point: Parse.GeoPoint): number;
+        /**
+         * <p>Creates a GeoPoint with the user's current location, if available.</p>
+         * @returns <p>User's current location</p>
+         */
+        static current(): Parse.GeoPoint;
     }
     /**
      * @param [attributes] - <p>The initial set of data to store in the installation.</p>
