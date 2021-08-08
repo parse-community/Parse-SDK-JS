@@ -126,7 +126,7 @@ declare namespace Parse {
          * @param func - <p>The Cloud Function to register</p>
          * @param [validator] - <p>An optional function to help validating cloud code.</p>
          */
-        static define(name: string, func: Parse.Cloud.FunctionRequestFunc, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.FunctionRequestFunc): this;
+        static define(name: string, func: Parse.Cloud.FunctionRequestFunc, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.FunctionRequestFunc): void;
         /**
          * <p>Registers an after delete function.</p>
          * <p><strong>Available in Cloud Code only.</strong></p>
@@ -676,14 +676,14 @@ declare namespace Parse {
             requireMaster: boolean;
             validateMasterKey: boolean;
             skipWithMasterKey: boolean;
-            requireAnyUserRoles: String[] | ((...params: any[]) => any);
-            requireAllUserRoles: String[] | ((...params: any[]) => any);
+            requireAnyUserRoles: string[] | ((...params: any[]) => any);
+            requireAllUserRoles: string[] | ((...params: any[]) => any);
             requireUserKeys: {
                 [key: string]: Parse.Cloud.ValidatorObjectFieldOptions;
-            } | String[];
+            } | string[];
             fields: {
                 [key: string]: Parse.Cloud.ValidatorObjectFieldOptions;
-            } | String[];
+            } | string[];
         };
         /**
          * @property type - <p>expected type of data for field.</p>
