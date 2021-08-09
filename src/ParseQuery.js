@@ -252,6 +252,7 @@ class ParseQuery {
    * @template ParseObject extends Parse.Object = Parse.Object
    * @param {(string | Parse.Object | ParseObject | any)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
    */
+
   constructor(objectClass: string | ParseObject) {
     if (typeof objectClass === 'string') {
       if (objectClass === 'User' && CoreManager.get('PERFORM_USER_REWRITE')) {
@@ -360,6 +361,25 @@ class ParseQuery {
   _regexStartWith(string: string): string {
     return '^' + quote(string);
   }
+/**
+ * @typedef QueryJSON
+ * @property {Attributes} where
+ * @property {string} [include]
+ * @property {string} [excludeKeys]
+ * @property {string} [keys]
+ * @property {number} [limit]
+ * @property {number} [skip]
+ * @property {string} [order]
+ * @property {string} [className]
+ * @property {number} [count]
+ * @property {any} [hint]
+ * @property {Boolean} [explain]
+ * @property {string} [readPreference]
+ * @property {string} [includeReadPreference]
+ *
+ *  @property {string} [subqueryReadPreference]
+ *
+ */
 
   async _handleOfflineQuery(params: any) {
     OfflineQuery.validateQuery(this);
@@ -605,7 +625,7 @@ class ParseQuery {
    *   <li>json: Return raw json without converting to Parse.Object
    * </ul>
    *
-   * @returns {Promise} A promise that is resolved with the result when
+   * @returns {Promise<Parse.Object>} A promise that is resolved with the result when
    * the query completes.
    */
   get(objectId: string, options?: FullOptions): Promise<ParseObject> {
@@ -720,7 +740,7 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @returns {Promise} A promise that is resolved with the results when
+   * @returns {Promise<Array<Parse.Object>>} A promise that is resolved with the results when
    * the query completes.
    */
   async findAll(options?: BatchOptions): Promise<Array<ParseObject>> {
@@ -742,7 +762,7 @@ class ParseQuery {
    *       behalf of a specific user.
    * </ul>
    *
-   * @returns {Promise} A promise that is resolved with the count when
+   * @returns {Promise<number>} A promise that is resolved with the count when
    * the query completes.
    */
   count(options?: FullOptions): Promise<number> {
@@ -778,7 +798,7 @@ class ParseQuery {
    *       behalf of a specific user.
    * </ul>
    *
-   * @returns {Promise} A promise that is resolved with the query completes.
+   * @returns {Promise<Array<any>>} A promise that is resolved with the query completes.
    */
   distinct(key: string, options?: FullOptions): Promise<Array<mixed>> {
     options = options || {};
@@ -811,7 +831,7 @@ class ParseQuery {
    *       behalf of a specific user.
    * </ul>
    *
-   * @returns {Promise} A promise that is resolved with the query completes.
+   * @returns {Promise<Array<any>>} A promise that is resolved with the query completes.
    */
   aggregate(pipeline: mixed, options?: FullOptions): Promise<Array<mixed>> {
     options = options || {};
@@ -936,7 +956,7 @@ class ParseQuery {
    *       behalf of a specific user.
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    * </ul>
-   * @returns {Promise} A promise that will be fulfilled once the
+   * @returns {Promise<void>} A promise that will be fulfilled once the
    *     iteration has completed.
    */
   eachBatch(
@@ -1032,7 +1052,7 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @returns {Promise} A promise that will be fulfilled once the
+   * @returns {Promise<void>} A promise that will be fulfilled once the
    *     iteration has completed.
    */
   each(callback: (obj: ParseObject) => any, options?: BatchOptions): Promise<void> {
@@ -1095,7 +1115,7 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @returns {Promise} A promise that will be fulfilled once the
+   * @returns {Promise<Array<any>>} A promise that will be fulfilled once the
    *     iteration has completed.
    */
   async map(
@@ -1133,7 +1153,7 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @returns {Promise} A promise that will be fulfilled once the
+   * @returns {Promise<Array<any>>} A promise that will be fulfilled once the
    *     iteration has completed.
    */
   async reduce(
@@ -1184,7 +1204,7 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @returns {Promise} A promise that will be fulfilled once the
+   * @returns {Promise<Array<Parse.Object>>} A promise that will be fulfilled once the
    *     iteration has completed.
    */
   async filter(

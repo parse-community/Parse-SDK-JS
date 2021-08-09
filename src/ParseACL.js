@@ -80,7 +80,7 @@ class ParseACL {
   /**
    * Returns whether this ACL is equal to another object
    *
-   * @param {ParseACL} other The other object's ACL to compare to
+   * @param {Parse.ACL} other The other object's ACL to compare to
    * @returns {boolean}
    */
   equals(other: ParseACL): boolean {

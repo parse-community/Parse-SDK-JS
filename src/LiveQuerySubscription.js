@@ -119,7 +119,7 @@ class Subscription extends EventEmitter {
   /**
    * Close the subscription
    *
-   * @returns {Promise}
+   * @returns {Promise<any>}
    */
   unsubscribe(): Promise {
     return CoreManager.getLiveQueryController()

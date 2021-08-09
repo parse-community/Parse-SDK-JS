@@ -83,7 +83,7 @@ const Parse = {
   /**
    * Returns information regarding the current server's health
    *
-   * @returns {Promise}
+   * @returns {Promise<any>}
    * @static
    */
   getServerHealth() {
@@ -240,7 +240,7 @@ Parse.LocalDatastore = require('./LocalDatastore');
 Parse.Object = require('./ParseObject').default;
 /**
  * @static
- * @name Parse.Op
+ * @typedef Parse.Op
  * @property {any} Set
  * @property {any} Unset
  * @property {any} Increment

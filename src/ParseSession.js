@@ -60,7 +60,7 @@ class ParseSession extends ParseObject {
    *
    * @param {object} options useMasterKey
    * @static
-   * @returns {Promise} A promise that is resolved with the Parse.Session
+   * @returns {Promise<Parse.Session>} A promise that is resolved with the Parse.Session
    * object after it has been fetched. If there is no current user, the
    * promise will be rejected.
    */

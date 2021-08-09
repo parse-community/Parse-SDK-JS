@@ -45,7 +45,7 @@ const EventuallyQueue = {
    * @name Parse.EventuallyQueue.save
    * @param {Parse.Object} object Parse.Object to be saved eventually
    * @param {object} [serverOptions] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Object.html#save Parse.Object.save} options.
-   * @returns {Promise} A promise that is fulfilled if object is added to queue.
+   * @returns {Promise<any>} A promise that is fulfilled if object is added to queue.
    * @static
    * @see Parse.Object#saveEventually
    */
@@ -60,7 +60,7 @@ const EventuallyQueue = {
    * @name Parse.EventuallyQueue.destroy
    * @param {Parse.Object} object Parse.Object to be destroyed eventually
    * @param {object} [serverOptions] See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Object.html#destroy Parse.Object.destroy} options
-   * @returns {Promise} A promise that is fulfilled if object is added to queue.
+   * @returns {Promise<any>} A promise that is fulfilled if object is added to queue.
    * @static
    * @see Parse.Object#destroyEventually
    */
@@ -90,7 +90,7 @@ const EventuallyQueue = {
    * @param {string} action save / destroy
    * @param {object} object Parse.Object to be queued
    * @param {object} [serverOptions]
-   * @returns {Promise} A promise that is fulfilled if object is added to queue.
+   * @returns {Promise<any>} A promise that is fulfilled if object is added to queue.
    * @static
    * @ignore
    */
@@ -154,7 +154,7 @@ const EventuallyQueue = {
    * Saves the queue to local storage
    *
    * @param {Queue} queue Queue containing Parse.Object data.
-   * @returns {Promise} A promise that is fulfilled when queue is stored.
+   * @returns {Promise<void>} A promise that is fulfilled when queue is stored.
    * @static
    * @ignore
    */
@@ -167,7 +167,7 @@ const EventuallyQueue = {
    * Removes Parse.Object data from queue.
    *
    * @param {string} queueId Unique identifier for Parse.Object data.
-   * @returns {Promise} A promise that is fulfilled when queue is stored.
+   * @returns {Promise<void>} A promise that is fulfilled when queue is stored.
    * @static
    * @ignore
    */
@@ -185,7 +185,7 @@ const EventuallyQueue = {
    *
    * @function clear
    * @name Parse.EventuallyQueue.clear
-   * @returns {Promise} A promise that is fulfilled when queue is cleared.
+   * @returns {Promise<any>} A promise that is fulfilled when queue is cleared.
    * @static
    */
   clear(): Promise {
@@ -254,7 +254,7 @@ const EventuallyQueue = {
    *
    * @param {Parse.Object} object Parse.Object to be processed
    * @param {QueueObject} queueObject Parse.Object data from the queue
-   * @returns {Promise} A promise that is fulfilled when operation is performed.
+   * @returns {Promise<void>} A promise that is fulfilled when operation is performed.
    * @static
    * @ignore
    */

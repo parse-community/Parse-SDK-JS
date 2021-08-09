@@ -168,7 +168,7 @@ class ParseFile {
    * Data is present if initialized with Byte Array, Base64 or Saved with Uri.
    * Data is cleared if saved with File object selected with a file upload control
    *
-   * @returns {Promise} Promise that is resolve with base64 data
+   * @returns {Promise<String>} Promise that is resolve with base64 data
    */
   async getData(): Promise<String> {
     if (this._data) {
@@ -255,7 +255,7 @@ class ParseFile {
    * });
    * </pre>
    * </ul>
-   * @returns {Promise} Promise that is resolved when the save finishes.
+   * @returns {Promise<Parse.File>} Promise that is resolved when the save finishes.
    */
   save(options?: FullOptions) {
     options = options || {};
@@ -328,7 +328,7 @@ class ParseFile {
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    * <pre>
-   * @returns {Promise} Promise that is resolved when the delete finishes.
+   * @returns {Promise<Parse.File>} Promise that is resolved when the delete finishes.
    */
   destroy(options?: FullOptions = {}) {
     if (!this._name) {

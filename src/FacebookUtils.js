@@ -165,7 +165,7 @@ const FacebookUtils = {
    *    REST API docs if you want to handle getting facebook auth tokens
    *    yourself.
    * @param {object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
-   * @returns {Promise}
+   * @returns {Promise<Parse.User>}
    */
   logIn(permissions, options) {
     if (!permissions || typeof permissions === 'string') {
@@ -203,7 +203,7 @@ const FacebookUtils = {
    *    REST API docs if you want to handle getting facebook auth tokens
    *    yourself.
    * @param {object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
-   * @returns {Promise}
+   * @returns {Promise<Parse.User>}
    */
   link(user, permissions, options) {
     if (!permissions || typeof permissions === 'string') {
@@ -226,7 +226,7 @@ const FacebookUtils = {
    *     current user.
    * @param {object} options Standard options object with success and error
    *    callbacks.
-   * @returns {Promise}
+   * @returns {Promise<any>}
    */
   unlink: function (user, options) {
     if (!initialized) {

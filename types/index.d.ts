@@ -29,7 +29,7 @@ declare namespace Parse {
          * @returns <p>A promise that is resolved when the round-trip
          * to the server completes.</p>
          */
-        static track(name: string, dimensions: any): Promise;
+        static track(name: string, dimensions: any): Promise<any>;
     }
     /**
      * <p>Provides utility functions for working with Anonymously logged-in users. <br />
@@ -444,20 +444,6 @@ declare namespace Parse {
          * @param func - <p>The Background Job to register.</p>
          */
         static job(name: string, func: Parse.Cloud.JobRequestFunc): void;
-        /**
-         * @property Primary - <p>Primary read preference option</p>
-         * @property PrimaryPreferred - <p>Prefer primary</p>
-         * @property Secondary - <p>Secondary read preference option</p>
-         * @property SecondaryPreferred - <p>Prefer secondary</p>
-         * @property Nearest - <p>Nearest read preference option</p>
-         */
-        static ReadPreferenceOption: {
-            Primary: string;
-            PrimaryPreferred: string;
-            Secondary: string;
-            SecondaryPreferred: string;
-            Nearest: string;
-        };
     }
     namespace Cloud {
         /**
@@ -539,18 +525,6 @@ declare namespace Parse {
             sessionToken: string;
         };
         /**
-         * @property installationId - <p>If set, the installationId triggering the request.</p>
-         * @property master - <p>If true, means the master key was used.</p>
-         * @property user - <p>If set, the user that made the request.</p>
-         * @property params - <p>The params passed to the cloud function.</p>
-         */
-        type FunctionRequest = {
-            installationId: string;
-            master: boolean;
-            user: Parse.User;
-            params: any;
-        };
-        /**
          * @param request - <p>The request object</p>
          */
         type LiveQueryEventTriggerFunc = (request: Parse.Cloud.LiveQueryEventTrigger) => any;
@@ -609,6 +583,20 @@ declare namespace Parse {
             readPreference: Parse.Cloud.ReadPreferenceOption;
         };
         /**
+         * @property Primary - <p>Primary read preference option</p>
+         * @property PrimaryPreferred - <p>Prefer primary</p>
+         * @property Secondary - <p>Secondary read preference option</p>
+         * @property SecondaryPreferred - <p>Prefer secondary</p>
+         * @property Nearest - <p>Nearest read preference option</p>
+         */
+        type ReadPreferenceOption = {
+            Primary: string;
+            PrimaryPreferred: string;
+            Secondary: string;
+            SecondaryPreferred: string;
+            Nearest: string;
+        };
+        /**
          * @param request - <p>The request object</p>
          */
         type AfterFindRequestFunc = (request: Parse.Cloud.AfterFindRequest) => any;
@@ -643,12 +631,16 @@ declare namespace Parse {
          * @property master - <p>If true, means the master key was used.</p>
          * @property user - <p>If set, the user that made the request.</p>
          * @property params - <p>The params passed to the cloud function.</p>
+         * @property log - <p>The current logger inside Parse Server.</p>
          */
         type FunctionRequest = {
             installationId: string;
             master: boolean;
             user: Parse.User;
-            params: any;
+            params: {
+                [key: string]: object;
+            };
+            log: any;
         };
         /**
          * @param request - <p>The request object</p>
@@ -756,14 +748,14 @@ declare namespace Parse {
          * @param [serverOptions] - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Object.html#save Parse.Object.save} options.</p>
          * @returns <p>A promise that is fulfilled if object is added to queue.</p>
          */
-        static save(object: Parse.Object, serverOptions?: any): Promise;
+        static save(object: Parse.Object, serverOptions?: any): Promise<any>;
         /**
          * <p>Add object to queue with save operation.</p>
          * @param object - <p>Parse.Object to be destroyed eventually</p>
          * @param [serverOptions] - <p>See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Object.html#destroy Parse.Object.destroy} options</p>
          * @returns <p>A promise that is fulfilled if object is added to queue.</p>
          */
-        static destroy(object: Parse.Object, serverOptions?: any): Promise;
+        static destroy(object: Parse.Object, serverOptions?: any): Promise<any>;
         /**
          * <p>Sets the in-memory queue from local storage and returns.</p>
          */
@@ -772,7 +764,7 @@ declare namespace Parse {
          * <p>Removes all objects from queue.</p>
          * @returns <p>A promise that is fulfilled when queue is cleared.</p>
          */
-        static clear(): Promise;
+        static clear(): Promise<any>;
         /**
          * <p>Return the number of objects in the queue.</p>
          */
@@ -841,7 +833,7 @@ declare namespace Parse {
          * yourself.</p>
          * @param options - <p>MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string</p>
          */
-        static logIn(permissions: string | any, options: any): Promise;
+        static logIn(permissions: string | any, options: any): Promise<Parse.User>;
         /**
          * <p>Links Facebook to an existing PFUser. This method delegates to the
          * Facebook SDK to authenticate the user, and then automatically links
@@ -860,7 +852,7 @@ declare namespace Parse {
          * yourself.</p>
          * @param options - <p>MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string</p>
          */
-        static link(user: Parse.User, permissions: string | any, options: any): Promise;
+        static link(user: Parse.User, permissions: string | any, options: any): Promise<Parse.User>;
         /**
          * <p>Unlinks the Parse.User from a Facebook account.</p>
          * @param user - <p>User to unlink from Facebook. This must be the
@@ -868,7 +860,7 @@ declare namespace Parse {
          * @param options - <p>Standard options object with success and error
          * callbacks.</p>
          */
-        static unlink(user: Parse.User, options: any): Promise;
+        static unlink(user: Parse.User, options: any): Promise<any>;
     }
     /**
      * <p>Creates a new LiveQueryClient.
@@ -1020,7 +1012,7 @@ declare namespace Parse {
         /**
          * <p>Close the subscription</p>
          */
-        unsubscribe(): Promise;
+        unsubscribe(): Promise<any>;
         on(event: string, callback: LiveQueryEventCallback): void;
     }
     /**
@@ -1046,6 +1038,15 @@ declare namespace Parse {
     }
     type AuthData = any;
     type AuthProvider = any;
+    type Op = {
+        Set: any;
+        Unset: any;
+        Increment: any;
+        Add: any;
+        Remove: any;
+        AddUnique: any;
+        Relation: any;
+    };
     /**
      * <p>Creates a new ACL.
      * If no argument is given, the ACL has no permissions for anyone.
@@ -1068,7 +1069,7 @@ declare namespace Parse {
          * <p>Returns whether this ACL is equal to another object</p>
          * @param other - <p>The other object's ACL to compare to</p>
          */
-        equals(other: ParseACL): boolean;
+        equals(other: Parse.ACL): boolean;
         /**
          * <p>Sets whether the given user is allowed to read this object.</p>
          * @param userId - <p>An instance of Parse.User or its objectId.</p>
@@ -1399,7 +1400,7 @@ declare namespace Parse {
          * @returns <p>A promise that is resolved with a newly-created
          * configuration object when the get completes.</p>
          */
-        static get(options: any): Promise;
+        static get(options: any): Promise<Parse.Config>;
         /**
          * <p>Save value keys to the server.</p>
          * @param attrs - <p>The config parameters and values.</p>
@@ -1411,7 +1412,7 @@ declare namespace Parse {
          * @returns <p>A promise that is resolved with a newly-created
          * configuration object or with the current with the update.</p>
          */
-        static save(attrs: any, masterKeyOnlyFlags: any): Promise;
+        static save(attrs: any, masterKeyOnlyFlags: any): Promise<Parse.Object>;
     }
     /**
      * <p>Constructs a new Parse.Error object with the given code and message.</p>
@@ -1733,7 +1734,7 @@ declare namespace Parse {
          * Data is cleared if saved with File object selected with a file upload control</p>
          * @returns <p>Promise that is resolve with base64 data</p>
          */
-        getData(): Promise;
+        getData(): Promise<String>;
         /**
          * <p>Gets the name of the file. Before save is called, this is the filename
          * given by the user. After save is called, that name gets prefixed with a
@@ -1777,7 +1778,7 @@ declare namespace Parse {
          * </ul>
          * @returns <p>Promise that is resolved when the save finishes.</p>
          */
-        save(options?: any): Promise;
+        save(options?: any): Promise<Parse.File>;
         /**
          * <p>Aborts the request if it has already been sent.</p>
          */
@@ -1793,7 +1794,7 @@ declare namespace Parse {
          * <pre>
          * @returns <p>Promise that is resolved when the delete finishes.</p>
          */
-        destroy(options?: any): Promise;
+        destroy(options?: any): Promise<Parse.File>;
         /**
          * <p>Sets metadata to be saved with file object. Overwrites existing metadata</p>
          * @param metadata - <p>Key value pairs to be stored with file object</p>
@@ -1942,7 +1943,7 @@ declare namespace Parse {
      * @param [attributes] - <p>The initial set of data to store in the object.</p>
      * @param [options] - <p>The options for this object instance.</p>
      */
-    class Object<[T]> {
+    class Object<T extends Attributes = Attributes> {
         constructor(className?: string, attributes?: T, options?: any);
         /**
          * <p>Object attributes</p>
@@ -2202,7 +2203,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the fetch
          * completes.</p>
          */
-        fetch(options: any): Promise;
+        fetch(options: any): Promise<this>;
         /**
          * <p>Fetch the model from the server. If the server's representation of the
          * model differs from its current attributes, they will be overriden.</p>
@@ -2218,7 +2219,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the fetch
          * completes.</p>
          */
-        fetchWithInclude(keys: string | (string | string[])[], options?: any): Promise;
+        fetchWithInclude(keys: string | (string | string[])[], options?: any): Promise<this>;
         /**
          * <p>Saves this object to the server at some unspecified time in the future,
          * even if Parse is currently inaccessible.</p>
@@ -2239,7 +2240,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the save
          * completes.</p>
          */
-        saveEventually(options?: any): Promise;
+        saveEventually(options?: any): Promise<this>;
         /**
          * <p>Set a hash of model attributes, and save the model to the server.
          * updatedAt will be updated when the request returns.
@@ -2297,7 +2298,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the save
          * completes.</p>
          */
-        save(arg1?: string | any | null, arg2?: string | any, arg3?: any): Promise<Parse.Object>;
+        save(arg1?: string | any | null, arg2?: string | any, arg3?: any): Promise<this>;
         /**
          * <p>Deletes this object from the server at some unspecified time in the future,
          * even if Parse is currently inaccessible.</p>
@@ -2316,7 +2317,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the destroy
          * completes.</p>
          */
-        destroyEventually(options?: any): Promise;
+        destroyEventually(options?: any): Promise<this>;
         /**
          * <p>Destroy this model on the server if it was already persisted.</p>
          * @param options - <p>Valid options are:<ul></p>
@@ -2329,7 +2330,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the destroy
          * completes.</p>
          */
-        destroy(options: any): Promise;
+        destroy(options: any): Promise<this>;
         /**
          * <p>Asynchronously stores the object and every object it points to in the local datastore,
          * recursively, using a default pin name: _default.</p>
@@ -2342,7 +2343,7 @@ declare namespace Parse {
          * <code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code></p>
          * @returns <p>A promise that is fulfilled when the pin completes.</p>
          */
-        pin(): Promise;
+        pin(): Promise<any>;
         /**
          * <p>Asynchronously removes the object and every object it points to in the local datastore,
          * recursively, using a default pin name: _default.</p>
@@ -2351,7 +2352,7 @@ declare namespace Parse {
          * </pre>
          * @returns <p>A promise that is fulfilled when the unPin completes.</p>
          */
-        unPin(): Promise;
+        unPin(): Promise<any>;
         /**
          * <p>Asynchronously returns if the object is pinned</p>
          * <pre>
@@ -2372,7 +2373,7 @@ declare namespace Parse {
          * @param name - <p>Name of Pin.</p>
          * @returns <p>A promise that is fulfilled when the pin completes.</p>
          */
-        pinWithName(name: string): Promise;
+        pinWithName(name: string): Promise<void>;
         /**
          * <p>Asynchronously removes the object and every object it points to in the local datastore, recursively.</p>
          * <pre>
@@ -2381,7 +2382,7 @@ declare namespace Parse {
          * @param name - <p>Name of Pin.</p>
          * @returns <p>A promise that is fulfilled when the unPin completes.</p>
          */
-        unPinWithName(name: string): Promise;
+        unPinWithName(name: string): Promise<void>;
         /**
          * <p>Asynchronously loads data from the local datastore into this object.</p>
          * <pre>
@@ -2391,7 +2392,7 @@ declare namespace Parse {
          * and then call <code>fetchFromLocalDatastore()</code> on it.</p>
          * @returns <p>A promise that is fulfilled when the fetch completes.</p>
          */
-        fetchFromLocalDatastore(): Promise;
+        fetchFromLocalDatastore(): Promise<this>;
         /**
          * <p>Static methods</p>
          */
@@ -2518,7 +2519,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the destroyAll
          * completes.</p>
          */
-        static destroyAll(list: any[], options: any): Promise;
+        static destroyAll(list: any[], options: any): Promise<any>;
         /**
          * <p>Saves the given list of Parse.Object.
          * If any error is encountered, stops and calls the error handler.</p>
@@ -2630,7 +2631,7 @@ declare namespace Parse {
          * @param objects - <p>A list of <code>Parse.Object</code>.</p>
          * @returns <p>A promise that is fulfilled when the pin completes.</p>
          */
-        static pinAll(objects: any[]): Promise;
+        static pinAll(objects: any[]): Promise<void>;
         /**
          * <p>Asynchronously stores the objects and every object they point to in the local datastore, recursively.</p>
          * <p>If those other objects have not been fetched from Parse, they will not be stored.
@@ -2644,7 +2645,7 @@ declare namespace Parse {
          * @param objects - <p>A list of <code>Parse.Object</code>.</p>
          * @returns <p>A promise that is fulfilled when the pin completes.</p>
          */
-        static pinAllWithName(name: string, objects: any[]): Promise;
+        static pinAllWithName(name: string, objects: any[]): Promise<void>;
         /**
          * <p>Asynchronously removes the objects and every object they point to in the local datastore,
          * recursively, using a default pin name: _default.</p>
@@ -2654,7 +2655,7 @@ declare namespace Parse {
          * @param objects - <p>A list of <code>Parse.Object</code>.</p>
          * @returns <p>A promise that is fulfilled when the unPin completes.</p>
          */
-        static unPinAll(objects: any[]): Promise;
+        static unPinAll(objects: any[]): Promise<void>;
         /**
          * <p>Asynchronously removes the objects and every object they point to in the local datastore, recursively.</p>
          * <pre>
@@ -2664,7 +2665,7 @@ declare namespace Parse {
          * @param objects - <p>A list of <code>Parse.Object</code>.</p>
          * @returns <p>A promise that is fulfilled when the unPin completes.</p>
          */
-        static unPinAllWithName(name: string, objects: any[]): Promise;
+        static unPinAllWithName(name: string, objects: any[]): Promise<void>;
         /**
          * <p>Asynchronously removes all objects in the local datastore using a default pin name: _default.</p>
          * <pre>
@@ -2672,7 +2673,7 @@ declare namespace Parse {
          * </pre>
          * @returns <p>A promise that is fulfilled when the unPin completes.</p>
          */
-        static unPinAllObjects(): Promise;
+        static unPinAllObjects(): Promise<void>;
         /**
          * <p>Asynchronously removes all objects with the specified pin name.
          * Deletes the pin name also.</p>
@@ -2682,7 +2683,7 @@ declare namespace Parse {
          * @param name - <p>Name of Pin.</p>
          * @returns <p>A promise that is fulfilled when the unPin completes.</p>
          */
-        static unPinAllObjectsWithName(name: string): Promise;
+        static unPinAllObjectsWithName(name: string): Promise<void>;
     }
     /**
      * <p>Creates a new Polygon with any of the following forms:<br></p>
@@ -2837,7 +2838,7 @@ declare namespace Parse {
          * @returns <p>A promise that is resolved with the result when
          * the query completes.</p>
          */
-        get(objectId: string, options?: any): Promise;
+        get(objectId: string, options?: any): Promise<Parse.Object>;
         /**
          * <p>Retrieves a list of ParseObjects that satisfy this query.</p>
          * @param [options] - <p>Valid options
@@ -2866,7 +2867,7 @@ declare namespace Parse {
          * @returns <p>A promise that is resolved with the results when
          * the query completes.</p>
          */
-        findAll(options: any): Promise;
+        findAll(options: any): Promise<Parse.Object[]>;
         /**
          * <p>Counts the number of objects that match this query.</p>
          * @param options - <p>Valid options are:<ul></p>
@@ -2878,7 +2879,7 @@ declare namespace Parse {
          * @returns <p>A promise that is resolved with the count when
          * the query completes.</p>
          */
-        count(options: any): Promise;
+        count(options: any): Promise<number>;
         /**
          * <p>Executes a distinct query and returns unique values</p>
          * @param key - <p>A field to find distinct values</p>
@@ -2888,7 +2889,7 @@ declare namespace Parse {
          * </ul>
          * @returns <p>A promise that is resolved with the query completes.</p>
          */
-        distinct(key: string, options?: any): Promise;
+        distinct(key: string, options?: any): Promise<any[]>;
         /**
          * <p>Executes an aggregate query and returns aggregate results</p>
          * @param pipeline - <p>Array or Object of stages to process query</p>
@@ -2898,7 +2899,7 @@ declare namespace Parse {
          * </ul>
          * @returns <p>A promise that is resolved with the query completes.</p>
          */
-        aggregate(pipeline: any[] | any, options?: any): Promise;
+        aggregate(pipeline: any[] | any, options?: any): Promise<any[]>;
         /**
          * <p>Retrieves at most one Parse.Object that satisfies this query.</p>
          * <p>Returns the object if there is one, otherwise undefined.</p>
@@ -2934,7 +2935,7 @@ declare namespace Parse {
          * @returns <p>A promise that will be fulfilled once the
          * iteration has completed.</p>
          */
-        eachBatch(callback: (...params: any[]) => any, options: any): Promise;
+        eachBatch(callback: (...params: any[]) => any, options: any): Promise<void>;
         /**
          * <p>Iterates over each result of a query, calling a callback for each one. If
          * the callback returns a promise, the iteration will not continue until
@@ -2953,7 +2954,7 @@ declare namespace Parse {
          * @returns <p>A promise that will be fulfilled once the
          * iteration has completed.</p>
          */
-        each(callback: (...params: any[]) => any, options?: any): Promise;
+        each(callback: (...params: any[]) => any, options?: any): Promise<void>;
         /**
          * <p>Adds a hint to force index selection. (https://docs.mongodb.com/manual/reference/operator/meta/hint/)</p>
          * @param value - <p>String or Object of index that should be used when executing query</p>
@@ -2987,7 +2988,7 @@ declare namespace Parse {
          * @returns <p>A promise that will be fulfilled once the
          * iteration has completed.</p>
          */
-        map(callback: (...params: any[]) => any, options?: any): Promise;
+        map(callback: (...params: any[]) => any, options?: any): Promise<any[]>;
         /**
          * <p>Iterates over each result of a query, calling a callback for each one. If
          * the callback returns a promise, the iteration will not continue until
@@ -3010,7 +3011,7 @@ declare namespace Parse {
          * @returns <p>A promise that will be fulfilled once the
          * iteration has completed.</p>
          */
-        reduce(callback: (...params: any[]) => any, initialValue: any, options?: any): Promise;
+        reduce(callback: (...params: any[]) => any, initialValue: any, options?: any): Promise<any[]>;
         /**
          * <p>Iterates over each result of a query, calling a callback for each one. If
          * the callback returns a promise, the iteration will not continue until
@@ -3032,7 +3033,7 @@ declare namespace Parse {
          * @returns <p>A promise that will be fulfilled once the
          * iteration has completed.</p>
          */
-        filter(callback: (...params: any[]) => any, options?: any): Promise;
+        filter(callback: (...params: any[]) => any, options?: any): Promise<Parse.Object[]>;
         /**
          * <p>Adds a constraint to the query that requires a particular key's value to
          * be equal to the provided value.</p>
@@ -3770,7 +3771,7 @@ declare namespace Parse {
          * object after it has been fetched. If there is no current user, the
          * promise will be rejected.</p>
          */
-        static current(options: any): Promise;
+        static current(options: any): Promise<Parse.Session>;
         /**
          * <p>Determines whether the current session token is revocable.
          * This method is useful for migrating Express.js or Node.js web apps to
@@ -4037,7 +4038,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the fetch
          * completes.</p>
          */
-        fetch(options: any): Promise;
+        fetch(options: any): Promise<this>;
         /**
          * <p>Fetch the model from the server. If the server's representation of the
          * model differs from its current attributes, they will be overriden.</p>
@@ -4053,7 +4054,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the fetch
          * completes.</p>
          */
-        fetchWithInclude(keys: string | (string | string[])[], options?: any): Promise;
+        fetchWithInclude(keys: string | (string | string[])[], options?: any): Promise<this>;
         /**
          * <p>Saves this object to the server at some unspecified time in the future,
          * even if Parse is currently inaccessible.</p>
@@ -4074,7 +4075,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the save
          * completes.</p>
          */
-        saveEventually(options?: any): Promise;
+        saveEventually(options?: any): Promise<this>;
         /**
          * <p>Set a hash of model attributes, and save the model to the server.
          * updatedAt will be updated when the request returns.
@@ -4132,7 +4133,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the save
          * completes.</p>
          */
-        save(arg1?: string | any | null, arg2?: string | any, arg3?: any): Promise<Parse.Object>;
+        save(arg1?: string | any | null, arg2?: string | any, arg3?: any): Promise<this>;
         /**
          * <p>Deletes this object from the server at some unspecified time in the future,
          * even if Parse is currently inaccessible.</p>
@@ -4151,7 +4152,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the destroy
          * completes.</p>
          */
-        destroyEventually(options?: any): Promise;
+        destroyEventually(options?: any): Promise<this>;
         /**
          * <p>Destroy this model on the server if it was already persisted.</p>
          * @param options - <p>Valid options are:<ul></p>
@@ -4164,7 +4165,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the destroy
          * completes.</p>
          */
-        destroy(options: any): Promise;
+        destroy(options: any): Promise<this>;
         /**
          * <p>Asynchronously stores the object and every object it points to in the local datastore,
          * recursively, using a default pin name: _default.</p>
@@ -4177,7 +4178,7 @@ declare namespace Parse {
          * <code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code></p>
          * @returns <p>A promise that is fulfilled when the pin completes.</p>
          */
-        pin(): Promise;
+        pin(): Promise<any>;
         /**
          * <p>Asynchronously removes the object and every object it points to in the local datastore,
          * recursively, using a default pin name: _default.</p>
@@ -4186,7 +4187,7 @@ declare namespace Parse {
          * </pre>
          * @returns <p>A promise that is fulfilled when the unPin completes.</p>
          */
-        unPin(): Promise;
+        unPin(): Promise<any>;
         /**
          * <p>Asynchronously returns if the object is pinned</p>
          * <pre>
@@ -4207,7 +4208,7 @@ declare namespace Parse {
          * @param name - <p>Name of Pin.</p>
          * @returns <p>A promise that is fulfilled when the pin completes.</p>
          */
-        pinWithName(name: string): Promise;
+        pinWithName(name: string): Promise<void>;
         /**
          * <p>Asynchronously removes the object and every object it points to in the local datastore, recursively.</p>
          * <pre>
@@ -4216,7 +4217,7 @@ declare namespace Parse {
          * @param name - <p>Name of Pin.</p>
          * @returns <p>A promise that is fulfilled when the unPin completes.</p>
          */
-        unPinWithName(name: string): Promise;
+        unPinWithName(name: string): Promise<void>;
         /**
          * <p>Asynchronously loads data from the local datastore into this object.</p>
          * <pre>
@@ -4226,7 +4227,7 @@ declare namespace Parse {
          * and then call <code>fetchFromLocalDatastore()</code> on it.</p>
          * @returns <p>A promise that is fulfilled when the fetch completes.</p>
          */
-        fetchFromLocalDatastore(): Promise;
+        fetchFromLocalDatastore(): Promise<this>;
     }
     /**
      * <p>A Parse.User object is a local representation of a user persisted to the
@@ -4236,14 +4237,14 @@ declare namespace Parse {
      * uniqueness.</p>
      * @param [attributes] - <p>The initial set of data to store in the user.</p>
      */
-    class User<[T] extends Attributes> extends Parse.Object<T> {
+    class User<T extends Attributes = Attributes> extends Object<T> {
         constructor(attributes?: any);
         /**
          * <p>Request a revocable session token to replace the older style of token.</p>
          * @returns <p>A promise that is resolved when the replacement
          * token has been fetched.</p>
          */
-        _upgradeToRevocableSession(options: any): Promise;
+        _upgradeToRevocableSession(options: any): Promise<void>;
         /**
          * <p>Parse allows you to link your users with {@link https://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication 3rd party authentication}, enabling
          * your users to sign up or log into your application using their existing identities.
@@ -4256,8 +4257,8 @@ declare namespace Parse {
          * @param saveOpts - <p>useMasterKey / sessionToken</p>
          * @returns <p>A promise that is fulfilled with the user is linked</p>
          */
-        linkWith(provider: string | AuthProvider, options: any, saveOpts: any): Promise;
-        _linkWith(provider: any, options: any, saveOpts: any): Promise;
+        linkWith(provider: string | AuthProvider, options: any, saveOpts: any): Promise<this>;
+        _linkWith(provider: any, options: any, saveOpts: any): Promise<this>;
         /**
          * <p>Synchronizes auth data for a provider (e.g. puts the access token in the
          * right place to be used by the Facebook SDK).</p>
@@ -4278,7 +4279,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the unlinking
          * finishes.</p>
          */
-        _unlinkFrom(provider: string | AuthProvider, options: any): Promise;
+        _unlinkFrom(provider: string | AuthProvider, options: any): Promise<this>;
         /**
          * <p>Checks whether a user is linked to a service.</p>
          * @param provider - <p>service to link to</p>
@@ -4355,7 +4356,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the signup
          * finishes.</p>
          */
-        signUp(attrs: any, options: any): Promise;
+        signUp(attrs: any, options: any): Promise<this>;
         /**
          * <p>Logs in a Parse.User. On success, this saves the session to disk,
          * so you can retrieve the currently logged in user using
@@ -4364,34 +4365,34 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled with the user when
          * the login is complete.</p>
          */
-        logIn(options?: any): Promise<Parse.User>;
+        logIn(options?: any): Promise<this>;
         /**
          * <p>Wrap the default save behavior with functionality to save to local
          * storage if this is current user.</p>
          */
-        save(...args: any[]): Promise;
+        save(...args: any[]): Promise<this>;
         /**
          * <p>Wrap the default destroy behavior with functionality that logs out
          * the current user when it is destroyed</p>
          */
-        destroy(...args: any[]): Parse.User;
+        destroy(...args: any[]): Promise<this>;
         /**
          * <p>Wrap the default fetch behavior with functionality to save to local
          * storage if this is current user.</p>
          */
-        fetch(...args: any[]): Parse.User;
+        fetch(...args: any[]): Promise<this>;
         /**
          * <p>Wrap the default fetchWithInclude behavior with functionality to save to local
          * storage if this is current user.</p>
          */
-        fetchWithInclude(...args: any[]): Parse.User;
+        fetchWithInclude(...args: any[]): Promise<this>;
         /**
          * <p>Verify whether a given password is the password of the current user.</p>
          * @param password - <p>A password to be verified</p>
          * @returns <p>A promise that is fulfilled with a user
          * when the password is correct.</p>
          */
-        verifyPassword(password: string, options: any): Promise;
+        verifyPassword(password: string, options: any): Promise<this>;
         /**
          * <p>Adds functionality to the existing Parse.User class.</p>
          * @param protoProps - <p>A set of properties to add to the prototype</p>
@@ -4410,7 +4411,7 @@ declare namespace Parse {
          * @returns <p>A Promise that is resolved with the currently
          * logged in Parse User</p>
          */
-        static currentAsync(): Promise;
+        static currentAsync(): Promise<Parse.User | null>;
         /**
          * <p>Signs up a new user with a username (or email) and password.
          * This will create a new Parse.User on the server, and also persist the
@@ -4422,7 +4423,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled with the user when
          * the signup completes.</p>
          */
-        static signUp(username: string, password: string, attrs: any, options: any): Promise;
+        static signUp(username: string, password: string, attrs: any, options: any): Promise<Parse.User>;
         /**
          * <p>Logs in a user with a username (or email) and password. On success, this
          * saves the session to disk, so you can retrieve the currently logged in
@@ -4447,7 +4448,7 @@ declare namespace Parse {
          * @param sessionToken - <p>The sessionToken to get user with.</p>
          * @returns <p>A promise that is fulfilled with the user is fetched.</p>
          */
-        static me(sessionToken: string, options: any): Promise;
+        static me(sessionToken: string, options: any): Promise<Parse.USer>;
         /**
          * <p>Logs in a user with a session token. On success, this saves the session
          * to disk, so you can retrieve the currently logged in user using
@@ -4456,11 +4457,11 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled with the user when
          * the login completes.</p>
          */
-        static hydrate(userJSON: any): Promise<Parse.User>;
+        static hydrate(userJSON: any): Promise<this>;
         /**
          * <p>Static version of {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#linkWith linkWith}</p>
          */
-        static logInWith(provider: any, options: any, saveOpts: any): Promise;
+        static logInWith(provider: any, options: any, saveOpts: any): Promise<this>;
         /**
          * <p>Logs out the currently logged in user session. This will remove the
          * session from disk, log out of linked services, and future calls to
@@ -4490,7 +4491,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled with a user
          * when the password is correct.</p>
          */
-        static verifyPassword(username: string, password: string, options: any): Promise;
+        static verifyPassword(username: string, password: string, options: any): Promise<void>;
         /**
          * <p>Allow someone to define a custom User class without className
          * being rewritten to _User. The default behavior is to rewrite
@@ -4510,7 +4511,7 @@ declare namespace Parse {
          * completed. If a replacement session token is requested, the promise
          * will be resolved after a new token has been fetched.</p>
          */
-        static enableRevocableSession(options: any): Promise;
+        static enableRevocableSession(options: any): Promise<void>;
         /**
          * <p>Enables the use of become or the current user in a server
          * environment. These features are disabled by default, since they depend on
@@ -4530,7 +4531,7 @@ declare namespace Parse {
          * implement custom authentication, deauthentication.</p>
          */
         static _registerAuthenticationProvider(provider: any): void;
-        static _logInWith(provider: any, options: any, saveOpts: any): Promise;
+        static _logInWith(provider: any, options: any, saveOpts: any): Promise<this>;
     }
     /**
      * <p>Contains functions to deal with Push in Parse.</p>
@@ -4560,7 +4561,7 @@ declare namespace Parse {
          * @returns <p>A promise that is fulfilled when the push request
          * completes.</p>
          */
-        static send(data: any, options: any): Promise;
+        static send(data: any, options: any): Promise<void>;
         /**
          * <p>Gets push status by Id</p>
          * @param pushStatusId - <p>The Id of Push Status.</p>
@@ -4632,7 +4633,7 @@ declare class Parse {
     /**
      * <p>Returns information regarding the current server's health</p>
      */
-    static getServerHealth(): Promise;
+    static getServerHealth(): Promise<any>;
     static applicationId: string;
     static javaScriptKey: string;
     static masterKey: string;
@@ -4644,15 +4645,6 @@ declare class Parse {
     static secret: string;
     static idempotency: boolean;
     static allowCustomObjectId: boolean;
-    static Op: {
-        Set: any;
-        Unset: any;
-        Increment: any;
-        Add: any;
-        Remove: any;
-        AddUnique: any;
-        Relation: any;
-    };
     /**
      * <p>Enable pinning in your application.
      * This must be called before your application can use pinning.</p>
@@ -4682,6 +4674,23 @@ declare class Parse {
 
 declare type Attributes = {
     [key: string]: any;
+};
+
+declare type QueryJSON = {
+    where: Attributes;
+    include?: string;
+    excludeKeys?: string;
+    keys?: string;
+    limit?: number;
+    skip?: number;
+    order?: string;
+    className?: string;
+    count?: number;
+    hint?: any;
+    explain?: boolean;
+    readPreference?: string;
+    includeReadPreference?: string;
+    subqueryReadPreference?: string;
 };
 
 /**

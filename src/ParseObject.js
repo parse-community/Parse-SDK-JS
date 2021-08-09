@@ -121,7 +121,7 @@ function getServerUrlPath() {
 class ParseObject {
   /**
    * @alias Parse.Object
-   * @template [T]
+   * @template T extends Attributes = Attributes
    * @param {string} [className] The class name for the object
    * @param {T} [attributes]  The initial set of data to store in the object.
    * @param {object} [options] The options for this object instance.
@@ -1161,7 +1161,7 @@ class ParseObject {
    *       or an array of array of strings.
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    * </ul>
-   * @returns {Promise} A promise that is fulfilled when the fetch
+   * @returns {Promise<this>} A promise that is fulfilled when the fetch
    *     completes.
    */
   fetch(options: RequestOptions): Promise {
@@ -1209,7 +1209,7 @@ class ParseObject {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   * @returns {Promise} A promise that is fulfilled when the fetch
+   * @returns {Promise<this>} A promise that is fulfilled when the fetch
    *     completes.
    */
   fetchWithInclude(keys: String | Array<string | Array<string>>, options: RequestOptions): Promise {
@@ -1239,7 +1239,7 @@ class ParseObject {
    * <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
    * <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
    * </ul>
-   * @returns {Promise} A promise that is fulfilled when the save
+   * @returns {Promise<this>} A promise that is fulfilled when the save
    * completes.
    */
   async saveEventually(options: SaveOptions): Promise {
@@ -1314,7 +1314,7 @@ class ParseObject {
    * <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
    * <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
    * </ul>
-   * @returns {Promise<Parse.Object>} A promise that is fulfilled when the save
+   * @returns {Promise<this>} A promise that is fulfilled when the save
    * completes.
    */
   save(
@@ -1383,7 +1383,7 @@ class ParseObject {
    *       behalf of a specific user.
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
    * </ul>
-   * @returns {Promise} A promise that is fulfilled when the destroy
+   * @returns {Promise<this>} A promise that is fulfilled when the destroy
    *     completes.
    */
   async destroyEventually(options: RequestOptions): Promise {
@@ -1409,7 +1409,7 @@ class ParseObject {
    *       behalf of a specific user.
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
    * </ul>
-   * @returns {Promise} A promise that is fulfilled when the destroy
+   * @returns {Promise<this>} A promise that is fulfilled when the destroy
    *     completes.
    */
   destroy(options: RequestOptions): Promise {
@@ -1444,7 +1444,7 @@ class ParseObject {
    * To retrieve object:
    * <code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code>
    *
-   * @returns {Promise} A promise that is fulfilled when the pin completes.
+   * @returns {Promise<any>} A promise that is fulfilled when the pin completes.
    */
   pin(): Promise<void> {
     return ParseObject.pinAllWithName(DEFAULT_PIN, [this]);
@@ -1458,7 +1458,7 @@ class ParseObject {
    * await object.unPin();
    * </pre>
    *
-   * @returns {Promise} A promise that is fulfilled when the unPin completes.
+   * @returns {Promise<any>} A promise that is fulfilled when the unPin completes.
    */
   unPin(): Promise<void> {
     return ParseObject.unPinAllWithName(DEFAULT_PIN, [this]);
@@ -1497,7 +1497,7 @@ class ParseObject {
    * <code>query.fromLocalDatastore()</code> or <code>query.fromPinWithName(name)</code>
    *
    * @param {string} name Name of Pin.
-   * @returns {Promise} A promise that is fulfilled when the pin completes.
+   * @returns {Promise<void>} A promise that is fulfilled when the pin completes.
    */
   pinWithName(name: string): Promise<void> {
     return ParseObject.pinAllWithName(name, [this]);
@@ -1511,7 +1511,7 @@ class ParseObject {
    * </pre>
    *
    * @param {string} name Name of Pin.
-   * @returns {Promise} A promise that is fulfilled when the unPin completes.
+   * @returns {Promise<void>} A promise that is fulfilled when the unPin completes.
    */
   unPinWithName(name: string): Promise<void> {
     return ParseObject.unPinAllWithName(name, [this]);
@@ -1527,7 +1527,7 @@ class ParseObject {
    * You can create an unfetched pointer with <code>Parse.Object.createWithoutData()</code>
    * and then call <code>fetchFromLocalDatastore()</code> on it.
    *
-   * @returns {Promise} A promise that is fulfilled when the fetch completes.
+   * @returns {Promise<this>} A promise that is fulfilled when the fetch completes.
    */
   async fetchFromLocalDatastore(): Promise<ParseObject> {
     const localDatastore = CoreManager.getLocalDatastore();
@@ -1764,7 +1764,7 @@ class ParseObject {
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {object} options
    * @static
-   * @returns {Promise} A promise that is fulfilled when the destroyAll
+   * @returns {Promise<any>} A promise that is fulfilled when the destroyAll
    * completes.
    */
   static destroyAll(list: Array<ParseObject>, options = {}) {
@@ -2087,7 +2087,7 @@ class ParseObject {
    * <code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code>
    *
    * @param {Array} objects A list of <code>Parse.Object</code>.
-   * @returns {Promise} A promise that is fulfilled when the pin completes.
+   * @returns {Promise<void>} A promise that is fulfilled when the pin completes.
    * @static
    */
   static pinAll(objects: Array<ParseObject>): Promise<void> {
@@ -2113,7 +2113,7 @@ class ParseObject {
    *
    * @param {string} name Name of Pin.
    * @param {Array} objects A list of <code>Parse.Object</code>.
-   * @returns {Promise} A promise that is fulfilled when the pin completes.
+   * @returns {Promise<void>} A promise that is fulfilled when the pin completes.
    * @static
    */
   static pinAllWithName(name: string, objects: Array<ParseObject>): Promise<void> {
@@ -2133,7 +2133,7 @@ class ParseObject {
    * </pre>
    *
    * @param {Array} objects A list of <code>Parse.Object</code>.
-   * @returns {Promise} A promise that is fulfilled when the unPin completes.
+   * @returns {Promise<void>} A promise that is fulfilled when the unPin completes.
    * @static
    */
   static unPinAll(objects: Array<ParseObject>): Promise<void> {
@@ -2153,7 +2153,7 @@ class ParseObject {
    *
    * @param {string} name Name of Pin.
    * @param {Array} objects A list of <code>Parse.Object</code>.
-   * @returns {Promise} A promise that is fulfilled when the unPin completes.
+   * @returns {Promise<void>} A promise that is fulfilled when the unPin completes.
    * @static
    */
   static unPinAllWithName(name: string, objects: Array<ParseObject>): Promise<void> {
@@ -2171,7 +2171,7 @@ class ParseObject {
    * await Parse.Object.unPinAllObjects();
    * </pre>
    *
-   * @returns {Promise} A promise that is fulfilled when the unPin completes.
+   * @returns {Promise<void>} A promise that is fulfilled when the unPin completes.
    * @static
    */
   static unPinAllObjects(): Promise<void> {
@@ -2191,7 +2191,7 @@ class ParseObject {
    * </pre>
    *
    * @param {string} name Name of Pin.
-   * @returns {Promise} A promise that is fulfilled when the unPin completes.
+   * @returns {Promise<void>} A promise that is fulfilled when the unPin completes.
    * @static
    */
   static unPinAllObjectsWithName(name: string): Promise<void> {

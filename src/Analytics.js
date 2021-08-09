@@ -48,7 +48,7 @@ import CoreManager from './CoreManager';
  * having happened.
  * @param {object} dimensions The dictionary of information by which to
  * segment this event.
- * @returns {Promise} A promise that is resolved when the round-trip
+ * @returns {Promise<any>} A promise that is resolved when the round-trip
  * to the server completes.
  */
 export function track(name: string, dimensions: { [key: string]: string }): Promise {

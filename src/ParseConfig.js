@@ -87,7 +87,7 @@ class ParseConfig {
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    * </ul>
-   * @returns {Promise} A promise that is resolved with a newly-created
+   * @returns {Promise<Parse.Config>} A promise that is resolved with a newly-created
    *     configuration object when the get completes.
    */
   static get(options: RequestOptions = {}) {
@@ -105,7 +105,7 @@ class ParseConfig {
    * For example: `param1: true` makes `param1` only retrievable by using the master key.
    * If a parameter is not provided or set to `false`, it can be retrieved without
    * using the master key.
-   * @returns {Promise} A promise that is resolved with a newly-created
+   * @returns {Promise<Parse.Object>} A promise that is resolved with a newly-created
    *     configuration object or with the current with the update.
    */
   static save(attrs: { [key: string]: any }, masterKeyOnlyFlags: { [key: string]: any }) {

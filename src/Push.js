@@ -55,7 +55,7 @@ export type PushData = {
  *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
  *     be used for this request.
  * </ul>
- * @returns {Promise} A promise that is fulfilled when the push request
+ * @returns {Promise<void>} A promise that is fulfilled when the push request
  *     completes.
  */
 export function send(data: PushData, options?: FullOptions = {}): Promise {
