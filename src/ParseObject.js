@@ -95,6 +95,11 @@ function getServerUrlPath() {
 }
 
 /**
+ * @typedef Attributes
+ * @type {object.<string, any>}
+ */
+
+/**
  * Creates a new model with defined attributes.
  *
  * <p>You won't normally call this method directly.  It is recommended that
@@ -116,8 +121,9 @@ function getServerUrlPath() {
 class ParseObject {
   /**
    * @alias Parse.Object
+   * @template [T]
    * @param {string} [className] The class name for the object
-   * @param {object} [attributes]  The initial set of data to store in the object.
+   * @param {T} [attributes]  The initial set of data to store in the object.
    * @param {object} [options] The options for this object instance.
    */
   constructor(
@@ -165,6 +171,12 @@ class ParseObject {
   className: string;
 
   /** Prototype getters / setters **/
+
+/**
+   * Object attributes
+   *
+   * @type {T}
+   */
 
   get attributes(): AttributeMap {
     const stateController = CoreManager.getObjectStateController();
@@ -470,8 +482,8 @@ class ParseObject {
   /**
    * Returns a JSON version of the object suitable for saving to Parse.
    *
-   * @param seen
-   * @param offline
+   * @param [seen]
+   * @param [offline]
    * @returns {object}
    */
   toJSON(seen: Array<any> | void, offline?: boolean): AttributeMap {

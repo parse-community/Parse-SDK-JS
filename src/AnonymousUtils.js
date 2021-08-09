@@ -66,7 +66,7 @@ const AnonymousUtils = {
    * @function logIn
    * @name Parse.AnonymousUtils.logIn
    * @param {object} options MasterKey / SessionToken.
-   * @returns {Promise} Logged in user
+   * @returns {Promise<Parse.User>} Logged in user
    * @static
    */
   logIn(options?: RequestOptions): Promise<ParseUser> {
@@ -81,7 +81,7 @@ const AnonymousUtils = {
    * @name Parse.AnonymousUtils.link
    * @param {Parse.User} user User to link. This must be the current user.
    * @param {object} options MasterKey / SessionToken.
-   * @returns {Promise} Linked with User
+   * @returns {Promise<Parse.User>} Linked with User
    * @static
    */
   link(user: ParseUser, options?: RequestOptions): Promise<ParseUser> {

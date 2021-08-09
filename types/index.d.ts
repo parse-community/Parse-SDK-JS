@@ -70,14 +70,14 @@ declare namespace Parse {
          * @param options - <p>MasterKey / SessionToken.</p>
          * @returns <p>Logged in user</p>
          */
-        static logIn(options: any): Promise;
+        static logIn(options: any): Promise<Parse.User>;
         /**
          * <p>Links Anonymous User to an existing PFUser.</p>
          * @param user - <p>User to link. This must be the current user.</p>
          * @param options - <p>MasterKey / SessionToken.</p>
          * @returns <p>Linked with User</p>
          */
-        static link(user: Parse.User, options: any): Promise;
+        static link(user: Parse.User, options: any): Promise<Parse.User>;
         /**
          * <p>Returns true if Authentication Provider has been registered for use.</p>
          */
@@ -98,7 +98,7 @@ declare namespace Parse {
          * @returns <p>A promise that will be resolved with the result
          * of the function.</p>
          */
-        static run(name: string, data?: any, options?: any): Promise<any>;
+        static run<T extends ((param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any)>(name: string, data?: any | Parameters<T>, options?: any): Promise<ReturnType<T>>;
         /**
          * <p>Gets data for the current set of cloud jobs.</p>
          * @returns <p>A promise that will be resolved with the result
@@ -126,7 +126,7 @@ declare namespace Parse {
          * @param func - <p>The Cloud Function to register</p>
          * @param [validator] - <p>An optional function to help validating cloud code.</p>
          */
-        static define(name: string, func: Parse.Cloud.FunctionRequestFunc, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.FunctionRequestFunc): void;
+        static define<T extends (param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any>(name: string, func: Parse.Cloud.FunctionRequestFunc<Parameters<T>>, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.FunctionRequestFunc<Parameters<T>>): void;
         /**
          * <p>Registers an after delete function.</p>
          * <p><strong>Available in Cloud Code only.</strong></p>
@@ -388,7 +388,7 @@ declare namespace Parse {
          * @param func - <p>The function to run before a subscription.</p>
          * @param [validator] - <p>An optional function to help validating cloud code.</p>
          */
-        static beforeSubscribe(ParseClass: string | Parse.Object, func: Parse.Cloud.TriggerRequest, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.TriggerRequest): void;
+        static beforeSubscribe(ParseClass: string | Parse.Object, func: Parse.Cloud.TriggerRequestFunc, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.TriggerRequestFunc): void;
         /**
          * <p>Registers an after live query server event function.</p>
          * <p><strong>Available in Cloud Code only.</strong></p>
@@ -406,7 +406,18 @@ declare namespace Parse {
          * @param func - <p>The function to run after a live query event.</p>
          * @param [validator] - <p>An optional function to help validating cloud code.</p>
          */
-        static afterLiveQueryEvent(ParseClass: string | Parse.Object, func: Parse.Cloud.LiveQueryEventTrigger, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.LiveQueryEventTrigger): void;
+        static afterLiveQueryEvent(ParseClass: string | Parse.Object, func: Parse.Cloud.LiveQueryEventTriggerFunc, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.LiveQueryEventTriggerFunc): void;
+        /**
+         * <p>Registers an on live query server event function.</p>
+         * <p><strong>Available in Cloud Code only.</strong></p>
+         * <pre class="prettyprint source"><code>Parse.Cloud.onLiveQueryEvent((event) => {
+         *   // code here
+         * });
+         *
+         * </code></pre>
+         * @param func - <p>The function to run on a live query event.</p>
+         */
+        static onLiveQueryEvent(func: Parse.Cloud.LiveQueryEventTriggerFunc): void;
         /**
          * <p>Makes an HTTP Request.</p>
          * <p><strong>Available in Cloud Code only.</strong></p>
@@ -626,7 +637,7 @@ declare namespace Parse {
         /**
          * @param request - <p>The request object</p>
          */
-        type FunctionRequestFunc = (request: Parse.Cloud.FunctionRequest) => any;
+        type FunctionRequestFunc<T> = (request: Parse.Cloud.FunctionRequest) => Promise<ReturnType<T>> | ReturnType<T> | any;
         /**
          * @property installationId - <p>If set, the installationId triggering the request.</p>
          * @property master - <p>If true, means the master key was used.</p>
@@ -1824,11 +1835,11 @@ declare namespace Parse {
      *   var object = new Parse.Object("PlaceObject");
      *   object.set("location", point);
      *   object.save();</pre></p>
-     * @param arg1 - <p>Either a list of coordinate pairs, an object with <code>latitude</code>, <code>longitude</code>, or the latitude or the point.</p>
-     * @param arg2 - <p>The longitude of the GeoPoint</p>
+     * @param [arg1] - <p>Either a list of coordinate pairs, an object with <code>latitude</code>, <code>longitude</code>, or the latitude or the point.</p>
+     * @param [arg2] - <p>The longitude of the GeoPoint</p>
      */
     class GeoPoint {
-        constructor(arg1: number[] | any | number, arg2: number);
+        constructor(arg1?: number[] | any | number, arg2?: number);
         /**
          * <p>North-south portion of the coordinate, in range [-90, 90].
          * Throws an exception if set out of range in a modern browser.</p>
@@ -1931,12 +1942,12 @@ declare namespace Parse {
      * @param [attributes] - <p>The initial set of data to store in the object.</p>
      * @param [options] - <p>The options for this object instance.</p>
      */
-    class Object {
-        constructor(className?: string, attributes?: any, options?: any);
+    class Object<[T]> {
+        constructor(className?: string, attributes?: T, options?: any);
         /**
-         * <p>Prototype getters / setters</p>
+         * <p>Object attributes</p>
          */
-        attributes: any;
+        attributes: T;
         /**
          * <p>The first time this object was saved on the server.</p>
          */
@@ -1965,7 +1976,7 @@ declare namespace Parse {
         /**
          * <p>Returns a JSON version of the object suitable for saving to Parse.</p>
          */
-        toJSON(seen: any, offline: any): any;
+        toJSON(seen?: any, offline?: any): any;
         /**
          * <p>Determines whether this ParseObject is equal to another ParseObject</p>
          * @param other - <p>An other object ot compare</p>
@@ -2755,8 +2766,8 @@ declare namespace Parse {
      * });</pre></p>
      * @param objectClass - <p>An instance of a subclass of Parse.Object, or a Parse className string.</p>
      */
-    class Query {
-        constructor(objectClass: string | Parse.Object | any);
+    class Query<ParseObject extends Parse.Object = Parse.Object> {
+        constructor(objectClass: string | Parse.Object | ParseObject | any);
         /**
          * <p>Adds constraint that at least one of the passed in queries matches.</p>
          * @returns <p>Returns the query, so you can chain this call.</p>
@@ -3514,7 +3525,7 @@ declare namespace Parse {
      * A Parse.Role is a local representation of a role persisted to the Parse
      * cloud.</p>
      */
-    class Role extends Parse.Object {
+    class Role<attributes extends Attributes = Attributes> extends Parse.Object<attributes> {
         constructor(name: string, acl: Parse.ACL);
         /**
          * <p>Gets the name of the role.  You can alternatively call role.get(&quot;name&quot;)</p>
@@ -3557,220 +3568,6 @@ declare namespace Parse {
          */
         getRoles(): Parse.Relation;
         /**
-         * <p>Prototype getters / setters</p>
-         */
-        attributes: any;
-        /**
-         * <p>The first time this object was saved on the server.</p>
-         */
-        createdAt: Date;
-        /**
-         * <p>The last time this object was updated on the server.</p>
-         */
-        updatedAt: Date;
-        /**
-         * <p>Returns a local or server Id used uniquely identify this object</p>
-         */
-        _getId(): string;
-        /**
-         * <p>Returns a unique identifier used to pull data from the State Controller.</p>
-         */
-        _getStateIdentifier(): Parse.Object | any;
-        /**
-         * @param [keysToClear] - <p>if specified, only ops matching
-         * these fields will be cleared</p>
-         */
-        _clearPendingOps(keysToClear?: string[]): void;
-        /**
-         * <p>Public methods</p>
-         */
-        initialize(): void;
-        /**
-         * <p>Returns a JSON version of the object suitable for saving to Parse.</p>
-         */
-        toJSON(seen: any, offline: any): any;
-        /**
-         * <p>Determines whether this ParseObject is equal to another ParseObject</p>
-         * @param other - <p>An other object ot compare</p>
-         */
-        equals(other: any): boolean;
-        /**
-         * <p>Returns true if this object has been modified since its last
-         * save/refresh.  If an attribute is specified, it returns true only if that
-         * particular attribute has been modified since the last save/refresh.</p>
-         * @param [attr] - <p>An attribute name (optional).</p>
-         */
-        dirty(attr?: string): boolean;
-        /**
-         * <p>Returns an array of keys that have been modified since last save/refresh</p>
-         */
-        dirtyKeys(): string[];
-        /**
-         * <p>Returns true if the object has been fetched.</p>
-         */
-        isDataAvailable(): boolean;
-        /**
-         * <p>Gets a Pointer referencing this Object.</p>
-         */
-        toPointer(): Pointer;
-        /**
-         * <p>Gets a Pointer referencing this Object.</p>
-         */
-        toOfflinePointer(): Pointer;
-        /**
-         * <p>Gets the value of an attribute.</p>
-         * @param attr - <p>The string name of an attribute.</p>
-         */
-        get(attr: string): any;
-        /**
-         * <p>Gets a relation on the given class for the attribute.</p>
-         * @param attr - <p>The attribute to get the relation for.</p>
-         */
-        relation(attr: string): Parse.Relation;
-        /**
-         * <p>Gets the HTML-escaped value of an attribute.</p>
-         * @param attr - <p>The string name of an attribute.</p>
-         */
-        escape(attr: string): string;
-        /**
-         * <p>Returns <code>true</code> if the attribute contains a value that is not
-         * null or undefined.</p>
-         * @param attr - <p>The string name of the attribute.</p>
-         */
-        has(attr: string): boolean;
-        /**
-         * <p>Sets a hash of model attributes on the object.</p>
-         * <p>You can call it with an object containing keys and values, with one
-         * key and value, or dot notation.  For example:<pre>
-         *   gameTurn.set({
-         *     player: player1,
-         *     diceRoll: 2
-         *   }, {
-         *     error: function(gameTurnAgain, error) {
-         *       // The set failed validation.
-         *     }
-         *   });
-         * <p>game.set(&quot;currentPlayer&quot;, player2, {
-         * error: function(gameTurnAgain, error) {
-         * // The set failed validation.
-         * }
-         * });</p>
-         * <p>game.set(&quot;finished&quot;, true);</pre></p></p>
-         * <p>game.set(&quot;player.score&quot;, 10);</pre></p></p>
-         * @param key - <p>The key to set.</p>
-         * @param [value] - <p>The value to give it. Optional if <code>key</code> is an object.</p>
-         * @param [options] - <p>A set of options for the set.
-         * The only supported option is <code>error</code>.</p>
-         * @returns <p>true if the set succeeded.</p>
-         */
-        set(key: string | any, value?: string | any, options?: any): Parse.Object | boolean;
-        /**
-         * <p>Remove an attribute from the model. This is a noop if the attribute doesn't
-         * exist.</p>
-         * @param attr - <p>The string name of an attribute.</p>
-         */
-        unset(attr: string, options?: any): Parse.Object | boolean;
-        /**
-         * <p>Atomically increments the value of the given attribute the next time the
-         * object is saved. If no amount is specified, 1 is used by default.</p>
-         * @param attr - <p>The key.</p>
-         * @param [amount] - <p>The amount to increment by (optional).</p>
-         */
-        increment(attr: string, amount?: number): Parse.Object | boolean;
-        /**
-         * <p>Atomically decrements the value of the given attribute the next time the
-         * object is saved. If no amount is specified, 1 is used by default.</p>
-         * @param attr - <p>The key.</p>
-         * @param [amount] - <p>The amount to decrement by (optional).</p>
-         */
-        decrement(attr: string, amount?: number): Parse.Object | boolean;
-        /**
-         * <p>Atomically add an object to the end of the array associated with a given
-         * key.</p>
-         * @param attr - <p>The key.</p>
-         * @param item - <p>The item to add.</p>
-         */
-        add(attr: string, item: any): Parse.Object | boolean;
-        /**
-         * <p>Atomically add the objects to the end of the array associated with a given
-         * key.</p>
-         * @param attr - <p>The key.</p>
-         * @param items - <p>The items to add.</p>
-         */
-        addAll(attr: string, items: any[]): Parse.Object | boolean;
-        /**
-         * <p>Atomically add an object to the array associated with a given key, only
-         * if it is not already present in the array. The position of the insert is
-         * not guaranteed.</p>
-         * @param attr - <p>The key.</p>
-         * @param item - <p>The object to add.</p>
-         */
-        addUnique(attr: string, item: any): Parse.Object | boolean;
-        /**
-         * <p>Atomically add the objects to the array associated with a given key, only
-         * if it is not already present in the array. The position of the insert is
-         * not guaranteed.</p>
-         * @param attr - <p>The key.</p>
-         * @param items - <p>The objects to add.</p>
-         */
-        addAllUnique(attr: string, items: any[]): Parse.Object | boolean;
-        /**
-         * <p>Atomically remove all instances of an object from the array associated
-         * with a given key.</p>
-         * @param attr - <p>The key.</p>
-         * @param item - <p>The object to remove.</p>
-         */
-        remove(attr: string, item: any): Parse.Object | boolean;
-        /**
-         * <p>Atomically remove all instances of the objects from the array associated
-         * with a given key.</p>
-         * @param attr - <p>The key.</p>
-         * @param items - <p>The object to remove.</p>
-         */
-        removeAll(attr: string, items: any[]): Parse.Object | boolean;
-        /**
-         * <p>Returns an instance of a subclass of Parse.Op describing what kind of
-         * modification has been performed on this field since the last time it was
-         * saved. For example, after calling object.increment(&quot;x&quot;), calling
-         * object.op(&quot;x&quot;) would return an instance of Parse.Op.Increment.</p>
-         * @param attr - <p>The key.</p>
-         * @returns <p>The operation, or undefined if none.</p>
-         */
-        op(attr: string): Parse.Op;
-        /**
-         * <p>Creates a new model with identical attributes to this one.</p>
-         */
-        clone(): Parse.Object;
-        /**
-         * <p>Creates a new instance of this object. Not to be confused with clone()</p>
-         */
-        newInstance(): Parse.Object;
-        /**
-         * <p>Returns true if this object has never been saved to Parse.</p>
-         */
-        isNew(): boolean;
-        /**
-         * <p>Returns true if this object was created by the Parse server when the
-         * object might have already been there (e.g. in the case of a Facebook
-         * login)</p>
-         */
-        existed(): boolean;
-        /**
-         * <p>Returns true if this object exists on the Server</p>
-         * @param options - <p>Valid options are:<ul></p>
-         *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-         *     be used for this request.
-         *   <li>sessionToken: A valid session token, used for making a request on
-         *       behalf of a specific user.
-         * </ul>
-         * @returns <p>A boolean promise that is fulfilled if object exists.</p>
-         */
-        exists(options: any): Promise<boolean>;
-        /**
-         * <p>Checks if the model is currently in a valid state.</p>
-         */
-        isValid(): boolean;
-        /**
          * <p>You should not call this function directly unless you subclass
          * <code>Parse.Object</code>, in which case you can override this method
          * to provide additional validation on <code>set</code> and
@@ -3779,231 +3576,6 @@ declare namespace Parse {
          * @returns <p>False if the data is valid.  An error object otherwise.</p>
          */
         validate(attrs: any): Parse.Error | boolean;
-        /**
-         * <p>Returns the ACL for this object.</p>
-         * @returns <p>An instance of Parse.ACL.</p>
-         */
-        getACL(): Parse.ACL;
-        /**
-         * <p>Sets the ACL to be used for this object.</p>
-         * @param acl - <p>An instance of Parse.ACL.</p>
-         * @returns <p>Whether the set passed validation.</p>
-         */
-        setACL(acl: Parse.ACL, options?: any): Parse.Object | boolean;
-        /**
-         * <p>Clears any (or specific) changes to this object made since the last call to save()</p>
-         * @param [keys] - <p>specify which fields to revert</p>
-         */
-        revert(...keys?: string[]): void;
-        /**
-         * <p>Clears all attributes on a model</p>
-         */
-        clear(): Parse.Object | boolean;
-        /**
-         * <p>Fetch the model from the server. If the server's representation of the
-         * model differs from its current attributes, they will be overriden.</p>
-         * @param options - <p>Valid options are:<ul></p>
-         *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-         *     be used for this request.
-         *   <li>sessionToken: A valid session token, used for making a request on
-         *       behalf of a specific user.
-         *   <li>include: The name(s) of the key(s) to include. Can be a string, an array of strings,
-         *       or an array of array of strings.
-         *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
-         * </ul>
-         * @returns <p>A promise that is fulfilled when the fetch
-         * completes.</p>
-         */
-        fetch(options: any): Promise;
-        /**
-         * <p>Fetch the model from the server. If the server's representation of the
-         * model differs from its current attributes, they will be overriden.</p>
-         * <p>Includes nested Parse.Objects for the provided key. You can use dot
-         * notation to specify which fields in the included object are also fetched.</p>
-         * @param keys - <p>The name(s) of the key(s) to include.</p>
-         * @param [options] - <p>Valid options are:<ul></p>
-         *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-         *     be used for this request.
-         *   <li>sessionToken: A valid session token, used for making a request on
-         *       behalf of a specific user.
-         * </ul>
-         * @returns <p>A promise that is fulfilled when the fetch
-         * completes.</p>
-         */
-        fetchWithInclude(keys: string | (string | string[])[], options?: any): Promise;
-        /**
-         * <p>Saves this object to the server at some unspecified time in the future,
-         * even if Parse is currently inaccessible.</p>
-         * <p>Use this when you may not have a solid network connection, and don't need to know when the save completes.
-         * If there is some problem with the object such that it can't be saved, it will be silently discarded.</p>
-         * <p>Objects saved with this method will be stored locally in an on-disk cache until they can be delivered to Parse.
-         * They will be sent immediately if possible. Otherwise, they will be sent the next time a network connection is
-         * available. Objects saved this way will persist even after the app is closed, in which case they will be sent the
-         * next time the app is opened.</p>
-         * @param [options] - <p>Used to pass option parameters to method if arg1 and arg2 were both passed as strings.
-         * Valid options are:</p>
-         * <ul>
-         * <li>sessionToken: A valid session token, used for making a request on
-         * behalf of a specific user.
-         * <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
-         * <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
-         * </ul>
-         * @returns <p>A promise that is fulfilled when the save
-         * completes.</p>
-         */
-        saveEventually(options?: any): Promise;
-        /**
-         * <p>Set a hash of model attributes, and save the model to the server.
-         * updatedAt will be updated when the request returns.
-         * You can either call it as:<pre>
-         * object.save();</pre>
-         * or<pre>
-         * object.save(attrs);</pre>
-         * or<pre>
-         * object.save(null, options);</pre>
-         * or<pre>
-         * object.save(attrs, options);</pre>
-         * or<pre>
-         * object.save(key, value);</pre>
-         * or<pre>
-         * object.save(key, value, options);</pre></p>
-         * <p>Example 1: <pre>
-         * gameTurn.save({
-         * player: &quot;Jake Cutter&quot;,
-         * diceRoll: 2
-         * }).then(function(gameTurnAgain) {
-         * // The save was successful.
-         * }, function(error) {
-         * // The save failed.  Error is an instance of Parse.Error.
-         * });</pre></p>
-         * <p>Example 2: <pre>
-         * gameTurn.save(&quot;player&quot;, &quot;Jake Cutter&quot;);</pre></p>
-         * @param [arg1] - <p>Valid options are:<ul></p>
-         * <li>`Object` - Key/value pairs to update on the object.</li>
-         * <li>`String` Key - Key of attribute to update (requires arg2 to also be string)</li>
-         * <li>`null` - Passing null for arg1 allows you to save the object with options passed in arg2.</li>
-         * </ul>
-         * @param [arg2] - <ul>
-         * <li>`String` Value - If arg1 was passed as a key, arg2 is the value that should be set on that key.</li>
-         * <li>`Object` Options - Valid options are:
-         * <ul>
-         * <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-         * be used for this request.
-         * <li>sessionToken: A valid session token, used for making a request on
-         * behalf of a specific user.
-         * <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
-         * <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
-         * </ul>
-         * </li>
-         * </ul>
-         * @param [arg3] - <p>Used to pass option parameters to method if arg1 and arg2 were both passed as strings.
-         * Valid options are:</p>
-         * <ul>
-         * <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-         * be used for this request.
-         * <li>sessionToken: A valid session token, used for making a request on
-         * behalf of a specific user.
-         * <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
-         * <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
-         * </ul>
-         * @returns <p>A promise that is fulfilled when the save
-         * completes.</p>
-         */
-        save(arg1?: string | any | null, arg2?: string | any, arg3?: any): Promise<Parse.Object>;
-        /**
-         * <p>Deletes this object from the server at some unspecified time in the future,
-         * even if Parse is currently inaccessible.</p>
-         * <p>Use this when you may not have a solid network connection,
-         * and don't need to know when the delete completes. If there is some problem with the object
-         * such that it can't be deleted, the request will be silently discarded.</p>
-         * <p>Delete instructions made with this method will be stored locally in an on-disk cache until they can be transmitted
-         * to Parse. They will be sent immediately if possible. Otherwise, they will be sent the next time a network connection
-         * is available. Delete requests will persist even after the app is closed, in which case they will be sent the
-         * next time the app is opened.</p>
-         * @param [options] - <p>Valid options are:<ul></p>
-         *   <li>sessionToken: A valid session token, used for making a request on
-         *       behalf of a specific user.
-         *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
-         * </ul>
-         * @returns <p>A promise that is fulfilled when the destroy
-         * completes.</p>
-         */
-        destroyEventually(options?: any): Promise;
-        /**
-         * <p>Destroy this model on the server if it was already persisted.</p>
-         * @param options - <p>Valid options are:<ul></p>
-         *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-         *     be used for this request.
-         *   <li>sessionToken: A valid session token, used for making a request on
-         *       behalf of a specific user.
-         *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
-         * </ul>
-         * @returns <p>A promise that is fulfilled when the destroy
-         * completes.</p>
-         */
-        destroy(options: any): Promise;
-        /**
-         * <p>Asynchronously stores the object and every object it points to in the local datastore,
-         * recursively, using a default pin name: _default.</p>
-         * <p>If those other objects have not been fetched from Parse, they will not be stored.
-         * However, if they have changed data, all the changes will be retained.</p>
-         * <pre>
-         * await object.pin();
-         * </pre>
-         * <p>To retrieve object:
-         * <code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code></p>
-         * @returns <p>A promise that is fulfilled when the pin completes.</p>
-         */
-        pin(): Promise;
-        /**
-         * <p>Asynchronously removes the object and every object it points to in the local datastore,
-         * recursively, using a default pin name: _default.</p>
-         * <pre>
-         * await object.unPin();
-         * </pre>
-         * @returns <p>A promise that is fulfilled when the unPin completes.</p>
-         */
-        unPin(): Promise;
-        /**
-         * <p>Asynchronously returns if the object is pinned</p>
-         * <pre>
-         * const isPinned = await object.isPinned();
-         * </pre>
-         * @returns <p>A boolean promise that is fulfilled if object is pinned.</p>
-         */
-        isPinned(): Promise<boolean>;
-        /**
-         * <p>Asynchronously stores the objects and every object they point to in the local datastore, recursively.</p>
-         * <p>If those other objects have not been fetched from Parse, they will not be stored.
-         * However, if they have changed data, all the changes will be retained.</p>
-         * <pre>
-         * await object.pinWithName(name);
-         * </pre>
-         * <p>To retrieve object:
-         * <code>query.fromLocalDatastore()</code> or <code>query.fromPinWithName(name)</code></p>
-         * @param name - <p>Name of Pin.</p>
-         * @returns <p>A promise that is fulfilled when the pin completes.</p>
-         */
-        pinWithName(name: string): Promise;
-        /**
-         * <p>Asynchronously removes the object and every object it points to in the local datastore, recursively.</p>
-         * <pre>
-         * await object.unPinWithName(name);
-         * </pre>
-         * @param name - <p>Name of Pin.</p>
-         * @returns <p>A promise that is fulfilled when the unPin completes.</p>
-         */
-        unPinWithName(name: string): Promise;
-        /**
-         * <p>Asynchronously loads data from the local datastore into this object.</p>
-         * <pre>
-         * await object.fetchFromLocalDatastore();
-         * </pre>
-         * <p>You can create an unfetched pointer with <code>Parse.Object.createWithoutData()</code>
-         * and then call <code>fetchFromLocalDatastore()</code> on it.</p>
-         * @returns <p>A promise that is fulfilled when the fetch completes.</p>
-         */
-        fetchFromLocalDatastore(): Promise;
     }
     /**
      * <p>A Parse.Schema object is for handling schema data from Parse.</p>
@@ -4208,9 +3780,9 @@ declare namespace Parse {
          */
         static isCurrentSessionRevocable(): boolean;
         /**
-         * <p>Prototype getters / setters</p>
+         * <p>Object attributes</p>
          */
-        attributes: any;
+        attributes: T;
         /**
          * <p>The first time this object was saved on the server.</p>
          */
@@ -4239,7 +3811,7 @@ declare namespace Parse {
         /**
          * <p>Returns a JSON version of the object suitable for saving to Parse.</p>
          */
-        toJSON(seen: any, offline: any): any;
+        toJSON(seen?: any, offline?: any): any;
         /**
          * <p>Determines whether this ParseObject is equal to another ParseObject</p>
          * @param other - <p>An other object ot compare</p>
@@ -4664,7 +4236,7 @@ declare namespace Parse {
      * uniqueness.</p>
      * @param [attributes] - <p>The initial set of data to store in the user.</p>
      */
-    class User extends Parse.Object {
+    class User<[T] extends Attributes> extends Parse.Object<T> {
         constructor(attributes?: any);
         /**
          * <p>Request a revocable session token to replace the older style of token.</p>
@@ -4959,351 +4531,6 @@ declare namespace Parse {
          */
         static _registerAuthenticationProvider(provider: any): void;
         static _logInWith(provider: any, options: any, saveOpts: any): Promise;
-        /**
-         * <p>Prototype getters / setters</p>
-         */
-        attributes: any;
-        /**
-         * <p>The first time this object was saved on the server.</p>
-         */
-        createdAt: Date;
-        /**
-         * <p>The last time this object was updated on the server.</p>
-         */
-        updatedAt: Date;
-        /**
-         * <p>Returns a local or server Id used uniquely identify this object</p>
-         */
-        _getId(): string;
-        /**
-         * <p>Returns a unique identifier used to pull data from the State Controller.</p>
-         */
-        _getStateIdentifier(): Parse.Object | any;
-        /**
-         * @param [keysToClear] - <p>if specified, only ops matching
-         * these fields will be cleared</p>
-         */
-        _clearPendingOps(keysToClear?: string[]): void;
-        /**
-         * <p>Public methods</p>
-         */
-        initialize(): void;
-        /**
-         * <p>Returns a JSON version of the object suitable for saving to Parse.</p>
-         */
-        toJSON(seen: any, offline: any): any;
-        /**
-         * <p>Determines whether this ParseObject is equal to another ParseObject</p>
-         * @param other - <p>An other object ot compare</p>
-         */
-        equals(other: any): boolean;
-        /**
-         * <p>Returns true if this object has been modified since its last
-         * save/refresh.  If an attribute is specified, it returns true only if that
-         * particular attribute has been modified since the last save/refresh.</p>
-         * @param [attr] - <p>An attribute name (optional).</p>
-         */
-        dirty(attr?: string): boolean;
-        /**
-         * <p>Returns an array of keys that have been modified since last save/refresh</p>
-         */
-        dirtyKeys(): string[];
-        /**
-         * <p>Returns true if the object has been fetched.</p>
-         */
-        isDataAvailable(): boolean;
-        /**
-         * <p>Gets a Pointer referencing this Object.</p>
-         */
-        toPointer(): Pointer;
-        /**
-         * <p>Gets a Pointer referencing this Object.</p>
-         */
-        toOfflinePointer(): Pointer;
-        /**
-         * <p>Gets the value of an attribute.</p>
-         * @param attr - <p>The string name of an attribute.</p>
-         */
-        get(attr: string): any;
-        /**
-         * <p>Gets a relation on the given class for the attribute.</p>
-         * @param attr - <p>The attribute to get the relation for.</p>
-         */
-        relation(attr: string): Parse.Relation;
-        /**
-         * <p>Gets the HTML-escaped value of an attribute.</p>
-         * @param attr - <p>The string name of an attribute.</p>
-         */
-        escape(attr: string): string;
-        /**
-         * <p>Returns <code>true</code> if the attribute contains a value that is not
-         * null or undefined.</p>
-         * @param attr - <p>The string name of the attribute.</p>
-         */
-        has(attr: string): boolean;
-        /**
-         * <p>Sets a hash of model attributes on the object.</p>
-         * <p>You can call it with an object containing keys and values, with one
-         * key and value, or dot notation.  For example:<pre>
-         *   gameTurn.set({
-         *     player: player1,
-         *     diceRoll: 2
-         *   }, {
-         *     error: function(gameTurnAgain, error) {
-         *       // The set failed validation.
-         *     }
-         *   });
-         * <p>game.set(&quot;currentPlayer&quot;, player2, {
-         * error: function(gameTurnAgain, error) {
-         * // The set failed validation.
-         * }
-         * });</p>
-         * <p>game.set(&quot;finished&quot;, true);</pre></p></p>
-         * <p>game.set(&quot;player.score&quot;, 10);</pre></p></p>
-         * @param key - <p>The key to set.</p>
-         * @param [value] - <p>The value to give it. Optional if <code>key</code> is an object.</p>
-         * @param [options] - <p>A set of options for the set.
-         * The only supported option is <code>error</code>.</p>
-         * @returns <p>true if the set succeeded.</p>
-         */
-        set(key: string | any, value?: string | any, options?: any): Parse.Object | boolean;
-        /**
-         * <p>Remove an attribute from the model. This is a noop if the attribute doesn't
-         * exist.</p>
-         * @param attr - <p>The string name of an attribute.</p>
-         */
-        unset(attr: string, options?: any): Parse.Object | boolean;
-        /**
-         * <p>Atomically increments the value of the given attribute the next time the
-         * object is saved. If no amount is specified, 1 is used by default.</p>
-         * @param attr - <p>The key.</p>
-         * @param [amount] - <p>The amount to increment by (optional).</p>
-         */
-        increment(attr: string, amount?: number): Parse.Object | boolean;
-        /**
-         * <p>Atomically decrements the value of the given attribute the next time the
-         * object is saved. If no amount is specified, 1 is used by default.</p>
-         * @param attr - <p>The key.</p>
-         * @param [amount] - <p>The amount to decrement by (optional).</p>
-         */
-        decrement(attr: string, amount?: number): Parse.Object | boolean;
-        /**
-         * <p>Atomically add an object to the end of the array associated with a given
-         * key.</p>
-         * @param attr - <p>The key.</p>
-         * @param item - <p>The item to add.</p>
-         */
-        add(attr: string, item: any): Parse.Object | boolean;
-        /**
-         * <p>Atomically add the objects to the end of the array associated with a given
-         * key.</p>
-         * @param attr - <p>The key.</p>
-         * @param items - <p>The items to add.</p>
-         */
-        addAll(attr: string, items: any[]): Parse.Object | boolean;
-        /**
-         * <p>Atomically add an object to the array associated with a given key, only
-         * if it is not already present in the array. The position of the insert is
-         * not guaranteed.</p>
-         * @param attr - <p>The key.</p>
-         * @param item - <p>The object to add.</p>
-         */
-        addUnique(attr: string, item: any): Parse.Object | boolean;
-        /**
-         * <p>Atomically add the objects to the array associated with a given key, only
-         * if it is not already present in the array. The position of the insert is
-         * not guaranteed.</p>
-         * @param attr - <p>The key.</p>
-         * @param items - <p>The objects to add.</p>
-         */
-        addAllUnique(attr: string, items: any[]): Parse.Object | boolean;
-        /**
-         * <p>Atomically remove all instances of an object from the array associated
-         * with a given key.</p>
-         * @param attr - <p>The key.</p>
-         * @param item - <p>The object to remove.</p>
-         */
-        remove(attr: string, item: any): Parse.Object | boolean;
-        /**
-         * <p>Atomically remove all instances of the objects from the array associated
-         * with a given key.</p>
-         * @param attr - <p>The key.</p>
-         * @param items - <p>The object to remove.</p>
-         */
-        removeAll(attr: string, items: any[]): Parse.Object | boolean;
-        /**
-         * <p>Returns an instance of a subclass of Parse.Op describing what kind of
-         * modification has been performed on this field since the last time it was
-         * saved. For example, after calling object.increment(&quot;x&quot;), calling
-         * object.op(&quot;x&quot;) would return an instance of Parse.Op.Increment.</p>
-         * @param attr - <p>The key.</p>
-         * @returns <p>The operation, or undefined if none.</p>
-         */
-        op(attr: string): Parse.Op;
-        /**
-         * <p>Creates a new model with identical attributes to this one.</p>
-         */
-        clone(): Parse.Object;
-        /**
-         * <p>Creates a new instance of this object. Not to be confused with clone()</p>
-         */
-        newInstance(): Parse.Object;
-        /**
-         * <p>Returns true if this object has never been saved to Parse.</p>
-         */
-        isNew(): boolean;
-        /**
-         * <p>Returns true if this object was created by the Parse server when the
-         * object might have already been there (e.g. in the case of a Facebook
-         * login)</p>
-         */
-        existed(): boolean;
-        /**
-         * <p>Returns true if this object exists on the Server</p>
-         * @param options - <p>Valid options are:<ul></p>
-         *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-         *     be used for this request.
-         *   <li>sessionToken: A valid session token, used for making a request on
-         *       behalf of a specific user.
-         * </ul>
-         * @returns <p>A boolean promise that is fulfilled if object exists.</p>
-         */
-        exists(options: any): Promise<boolean>;
-        /**
-         * <p>Checks if the model is currently in a valid state.</p>
-         */
-        isValid(): boolean;
-        /**
-         * <p>You should not call this function directly unless you subclass
-         * <code>Parse.Object</code>, in which case you can override this method
-         * to provide additional validation on <code>set</code> and
-         * <code>save</code>.  Your implementation should return</p>
-         * @param attrs - <p>The current data to validate.</p>
-         * @returns <p>False if the data is valid.  An error object otherwise.</p>
-         */
-        validate(attrs: any): Parse.Error | boolean;
-        /**
-         * <p>Returns the ACL for this object.</p>
-         * @returns <p>An instance of Parse.ACL.</p>
-         */
-        getACL(): Parse.ACL;
-        /**
-         * <p>Sets the ACL to be used for this object.</p>
-         * @param acl - <p>An instance of Parse.ACL.</p>
-         * @returns <p>Whether the set passed validation.</p>
-         */
-        setACL(acl: Parse.ACL, options?: any): Parse.Object | boolean;
-        /**
-         * <p>Clears any (or specific) changes to this object made since the last call to save()</p>
-         * @param [keys] - <p>specify which fields to revert</p>
-         */
-        revert(...keys?: string[]): void;
-        /**
-         * <p>Clears all attributes on a model</p>
-         */
-        clear(): Parse.Object | boolean;
-        /**
-         * <p>Saves this object to the server at some unspecified time in the future,
-         * even if Parse is currently inaccessible.</p>
-         * <p>Use this when you may not have a solid network connection, and don't need to know when the save completes.
-         * If there is some problem with the object such that it can't be saved, it will be silently discarded.</p>
-         * <p>Objects saved with this method will be stored locally in an on-disk cache until they can be delivered to Parse.
-         * They will be sent immediately if possible. Otherwise, they will be sent the next time a network connection is
-         * available. Objects saved this way will persist even after the app is closed, in which case they will be sent the
-         * next time the app is opened.</p>
-         * @param [options] - <p>Used to pass option parameters to method if arg1 and arg2 were both passed as strings.
-         * Valid options are:</p>
-         * <ul>
-         * <li>sessionToken: A valid session token, used for making a request on
-         * behalf of a specific user.
-         * <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
-         * <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
-         * </ul>
-         * @returns <p>A promise that is fulfilled when the save
-         * completes.</p>
-         */
-        saveEventually(options?: any): Promise;
-        /**
-         * <p>Deletes this object from the server at some unspecified time in the future,
-         * even if Parse is currently inaccessible.</p>
-         * <p>Use this when you may not have a solid network connection,
-         * and don't need to know when the delete completes. If there is some problem with the object
-         * such that it can't be deleted, the request will be silently discarded.</p>
-         * <p>Delete instructions made with this method will be stored locally in an on-disk cache until they can be transmitted
-         * to Parse. They will be sent immediately if possible. Otherwise, they will be sent the next time a network connection
-         * is available. Delete requests will persist even after the app is closed, in which case they will be sent the
-         * next time the app is opened.</p>
-         * @param [options] - <p>Valid options are:<ul></p>
-         *   <li>sessionToken: A valid session token, used for making a request on
-         *       behalf of a specific user.
-         *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
-         * </ul>
-         * @returns <p>A promise that is fulfilled when the destroy
-         * completes.</p>
-         */
-        destroyEventually(options?: any): Promise;
-        /**
-         * <p>Asynchronously stores the object and every object it points to in the local datastore,
-         * recursively, using a default pin name: _default.</p>
-         * <p>If those other objects have not been fetched from Parse, they will not be stored.
-         * However, if they have changed data, all the changes will be retained.</p>
-         * <pre>
-         * await object.pin();
-         * </pre>
-         * <p>To retrieve object:
-         * <code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code></p>
-         * @returns <p>A promise that is fulfilled when the pin completes.</p>
-         */
-        pin(): Promise;
-        /**
-         * <p>Asynchronously removes the object and every object it points to in the local datastore,
-         * recursively, using a default pin name: _default.</p>
-         * <pre>
-         * await object.unPin();
-         * </pre>
-         * @returns <p>A promise that is fulfilled when the unPin completes.</p>
-         */
-        unPin(): Promise;
-        /**
-         * <p>Asynchronously returns if the object is pinned</p>
-         * <pre>
-         * const isPinned = await object.isPinned();
-         * </pre>
-         * @returns <p>A boolean promise that is fulfilled if object is pinned.</p>
-         */
-        isPinned(): Promise<boolean>;
-        /**
-         * <p>Asynchronously stores the objects and every object they point to in the local datastore, recursively.</p>
-         * <p>If those other objects have not been fetched from Parse, they will not be stored.
-         * However, if they have changed data, all the changes will be retained.</p>
-         * <pre>
-         * await object.pinWithName(name);
-         * </pre>
-         * <p>To retrieve object:
-         * <code>query.fromLocalDatastore()</code> or <code>query.fromPinWithName(name)</code></p>
-         * @param name - <p>Name of Pin.</p>
-         * @returns <p>A promise that is fulfilled when the pin completes.</p>
-         */
-        pinWithName(name: string): Promise;
-        /**
-         * <p>Asynchronously removes the object and every object it points to in the local datastore, recursively.</p>
-         * <pre>
-         * await object.unPinWithName(name);
-         * </pre>
-         * @param name - <p>Name of Pin.</p>
-         * @returns <p>A promise that is fulfilled when the unPin completes.</p>
-         */
-        unPinWithName(name: string): Promise;
-        /**
-         * <p>Asynchronously loads data from the local datastore into this object.</p>
-         * <pre>
-         * await object.fetchFromLocalDatastore();
-         * </pre>
-         * <p>You can create an unfetched pointer with <code>Parse.Object.createWithoutData()</code>
-         * and then call <code>fetchFromLocalDatastore()</code> on it.</p>
-         * @returns <p>A promise that is fulfilled when the fetch completes.</p>
-         */
-        fetchFromLocalDatastore(): Promise;
     }
     /**
      * <p>Contains functions to deal with Push in Parse.</p>
@@ -5452,6 +4679,10 @@ declare class Parse {
      */
     static isEncryptedUserEnabled(): boolean;
 }
+
+declare type Attributes = {
+    [key: string]: any;
+};
 
 /**
  * <p>Interface declaration for Authentication Providers</p>

@@ -6,6 +6,12 @@ class GameScore extends Parse.Object {
     }
 }
 
+class Game extends Parse.Object<{ gameScore: GameScore; score: string }> {
+    constructor(options?: any) {
+        super("Game", options);
+    }
+}
+
 function test_config() {
     Parse.Config.save({ foo: "bar" }, { foo: true });
     Parse.Config.get({ useMasterKey: true });
@@ -217,14 +223,14 @@ async function test_live_query() {
         object;
     });
     subscription.on("update", (object, original) => {
-        // $ExpectType Object<Attributes>
+        // $ExpectType Object<Attributes> | undefined
         original;
     });
 }
 
-// function return_a_generic_query(): Parse.Query<Game> {
-//     return new Parse.Query(Game);
-// }
+function return_a_generic_query(): Parse.Query<Game> {
+    return new Parse.Query(GameScore);
+}
 
 function test_anonymous_utils() {
     // $ExpectType boolean
@@ -502,28 +508,28 @@ async function test_cloud_functions() {
     await Parse.Cloud.run("SomeFunction", null, { useMasterKey: true });
 
     // ExpectType boolean
-    // await Parse.Cloud.run<() => boolean>("SomeFunction");
+    await Parse.Cloud.run<() => boolean>("SomeFunction");
 
     // $ExpectType boolean
-    // await Parse.Cloud.run<() => boolean>("SomeFunction", null);
+    await Parse.Cloud.run<() => boolean>("SomeFunction", null);
 
     // $ExpectType boolean
-    // await Parse.Cloud.run<() => boolean>("SomeFunction", null, { useMasterKey: true });
+    await Parse.Cloud.run<() => boolean>("SomeFunction", null, { useMasterKey: true });
 
     // $ExpectType number
-    // await Parse.Cloud.run<(params: { paramA: string }) => number>("SomeFunction", { paramA: "hello" });
+    await Parse.Cloud.run<(params: { paramA: string }) => number>("SomeFunction", { paramA: "hello" });
 
     // $ExpectError
-    // await Parse.Cloud.run<(params: { paramA: string }) => number>("SomeFunction");
+    await Parse.Cloud.run<(params: { paramA: string }) => number>("SomeFunction");
 
     // $ExpectError
-    // await Parse.Cloud.run<(params: { paramA: string }) => number>("SomeFunction", { paramZ: "hello" });
+    await Parse.Cloud.run<(params: { paramA: string }) => number>("SomeFunction", { paramZ: "hello" });
 
     // $ExpectError
-    // await Parse.Cloud.run<(params: { paramA: string }) => number>("SomeFunction", null, { useMasterKey: true });
+    await Parse.Cloud.run<(params: { paramA: string }) => number>("SomeFunction", null, { useMasterKey: true });
 
     // $ExpectError
-    // await Parse.Cloud.run<(params: string) => any>("SomeFunction", "hello");
+    await Parse.Cloud.run<(params: string) => any>("SomeFunction", "hello");
 
     Parse.Cloud.afterDelete("MyCustomClass", (request: Parse.Cloud.TriggerRequest) => {
         // result
@@ -1732,9 +1738,7 @@ function testQuery() {
         query.doesNotMatchQuery("nonexistentProp", new Parse.Query("Example"));
 
         // $ExpectType Query<MySubClass>
-        query.endsWith("attribute1", "asuffixstring");
-        // $ExpectError
-        query.endsWith("nonexistentProp", "asuffixstring");
+        query.endsWith("attribute1", "asuffixstring", "regex");
 
         // $ExpectType Query<MySubClass>
         query.equalTo("attribute2", 0);

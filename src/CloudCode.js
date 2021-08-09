@@ -1,3 +1,4 @@
+
 /**
  * Defines a Cloud Function.
  *
@@ -5,10 +6,14 @@
  *
  * @function define
  * @name Parse.Cloud.define
+ * @template T extends (param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any
  * @param {string} name The name of the Cloud Function
- * @param {Parse.Cloud.FunctionRequestFunc} func The Cloud Function to register
- * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.FunctionRequestFunc} [validator] An optional function to help validating cloud code.
+ * @param {Parse.Cloud.FunctionRequestFunc<Parameters<T>>} func The Cloud Function to register
+ * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.FunctionRequestFunc<Parameters<T>>} [validator] An optional function to help validating cloud code.
+ * @returns {void}
  */
+
+
 
 /**
  * Registers an after delete function.
@@ -393,8 +398,8 @@
  * @function beforeSubscribe
  * @name Parse.Cloud.beforeSubscribe
  * @param {(string | Parse.Object)} ParseClass The Parse.Object subclass to register the before subscription function for. This can instead be a String that is the className of the subclass.
- * @param {Parse.Cloud.TriggerRequest} func The function to run before a subscription.
- * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.TriggerRequest} [validator] An optional function to help validating cloud code.
+ * @param {Parse.Cloud.TriggerRequestFunc} func The function to run before a subscription.
+ * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.TriggerRequestFunc} [validator] An optional function to help validating cloud code.
  *
  */
 
@@ -418,8 +423,25 @@
  * @function afterLiveQueryEvent
  * @name Parse.Cloud.afterLiveQueryEvent
  * @param {(string | Parse.Object)} ParseClass The Parse.Object subclass to register the after live query event function for. This can instead be a String that is the className of the subclass.
- * @param {Parse.Cloud.LiveQueryEventTrigger} func The function to run after a live query event.
- * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.LiveQueryEventTrigger} [validator] An optional function to help validating cloud code.
+ * @param {Parse.Cloud.LiveQueryEventTriggerFunc} func The function to run after a live query event.
+ * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.LiveQueryEventTriggerFunc} [validator] An optional function to help validating cloud code.
+ */
+
+ /**
+ * Registers an on live query server event function.
+ *
+ * **Available in Cloud Code only.**
+ *
+ * ```
+ * Parse.Cloud.onLiveQueryEvent((event) => {
+ *   // code here
+ * });
+ *
+ *```
+ *
+ * @function onLiveQueryEvent
+ * @name Parse.Cloud.onLiveQueryEvent
+ * @param {Parse.Cloud.LiveQueryEventTriggerFunc} func The function to run on a live query event.
  */
 
 /**
@@ -597,7 +619,8 @@
 /**
  * @callback Parse.Cloud.FunctionRequestFunc
  * @param {Parse.Cloud.FunctionRequest} request The request object
- * @returns {any}
+ * @template T
+ * @returns {Promise<ReturnType<T>> | ReturnType<T> | any}
  */
 
 /**

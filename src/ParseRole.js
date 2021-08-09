@@ -31,6 +31,8 @@ import type ParseRelation from './ParseRelation';
 class ParseRole extends ParseObject {
   /**
    * @alias Parse.Role
+   * @template attributes extends Attributes = Attributes
+   * @extends Parse.Object<attributes>
    * @param {string} name The name of the Role to create.
    * @param {Parse.ACL} acl The ACL for this role. Roles must have an ACL.
    * A Parse.Role is a local representation of a role persisted to the Parse

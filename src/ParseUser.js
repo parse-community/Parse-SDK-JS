@@ -41,6 +41,8 @@ class ParseUser extends ParseObject {
   /**
    * @alias Parse.User
    * @param {object} [attributes] The initial set of data to store in the user.
+   * @template [T] extends Attributes
+   * @extends {Parse.Object<T>}
    */
   constructor(attributes: ?AttributeMap) {
     super('_User');

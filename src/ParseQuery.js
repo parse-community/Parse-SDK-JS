@@ -249,7 +249,8 @@ class ParseQuery {
 
   /**
    * @alias Parse.Query
-   * @param {(string | Parse.Object | any)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
+   * @template ParseObject extends Parse.Object = Parse.Object
+   * @param {(string | Parse.Object | ParseObject | any)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
    */
   constructor(objectClass: string | ParseObject) {
     if (typeof objectClass === 'string') {
