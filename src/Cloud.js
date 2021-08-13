@@ -34,13 +34,13 @@ import type { RequestOptions } from './RESTController';
  *
  * @function run
  * @name Parse.Cloud.run
- * @template T extends ((param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any)
  * @param {string} name The function name.
- * @param {object | Parameters<T>} [data] The parameters to send to the cloud function.
+ * @param {object} [data] The parameters to send to the cloud function.
  * @param {object} [options]
- * @returns {Promise<ReturnType<T>>} A promise that will be resolved with the result
+ * @returns {Promise<any>} A promise that will be resolved with the result
  * of the function.
  */
+
 export function run(name: string, data: mixed, options: RequestOptions): Promise<mixed> {
   options = options || {};
   if (typeof name !== 'string' || name.length === 0) {

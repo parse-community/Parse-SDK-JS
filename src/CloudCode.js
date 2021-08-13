@@ -6,14 +6,11 @@
  *
  * @function define
  * @name Parse.Cloud.define
- * @template T extends (param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any
  * @param {string} name The name of the Cloud Function
- * @param {Parse.Cloud.FunctionRequestFunc<Parameters<T>>} func The Cloud Function to register
- * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.FunctionRequestFunc<Parameters<T>>} [validator] An optional function to help validating cloud code.
+ * @param {Parse.Cloud.FunctionRequestFunc} func The Cloud Function to register
+ * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.FunctionRequestFunc} [validator] An optional function to help validating cloud code.
  * @returns {void}
  */
-
-
 
 /**
  * Registers an after delete function.
@@ -611,8 +608,7 @@
 /**
  * @callback Parse.Cloud.FunctionRequestFunc
  * @param {Parse.Cloud.FunctionRequest} request The request object
- * @template T
- * @returns {Promise<ReturnType<T>> | ReturnType<T> | any}
+ * @returns {Promise<any>}
  */
 
 /**

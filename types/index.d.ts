@@ -98,7 +98,7 @@ declare namespace Parse {
          * @returns <p>A promise that will be resolved with the result
          * of the function.</p>
          */
-        static run<T extends ((param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any)>(name: string, data?: any | Parameters<T>, options?: any): Promise<ReturnType<T>>;
+        static run(name: string, data?: any, options?: any): Promise<any>;
         /**
          * <p>Gets data for the current set of cloud jobs.</p>
          * @returns <p>A promise that will be resolved with the result
@@ -126,7 +126,7 @@ declare namespace Parse {
          * @param func - <p>The Cloud Function to register</p>
          * @param [validator] - <p>An optional function to help validating cloud code.</p>
          */
-        static define<T extends (param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any>(name: string, func: Parse.Cloud.FunctionRequestFunc<Parameters<T>>, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.FunctionRequestFunc<Parameters<T>>): void;
+        static define(name: string, func: Parse.Cloud.FunctionRequestFunc, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.FunctionRequestFunc): void;
         /**
          * <p>Registers an after delete function.</p>
          * <p><strong>Available in Cloud Code only.</strong></p>
@@ -444,6 +444,36 @@ declare namespace Parse {
          * @param func - <p>The Background Job to register.</p>
          */
         static job(name: string, func: Parse.Cloud.JobRequestFunc): void;
+        /**
+         * <p>Typescript Generic variation of Parse.Cloud.run</p>
+         * @param name - <p>The function name.</p>
+         * @param [data] - <p>The parameters to send to the cloud function.</p>
+         * @returns <p>A promise that will be resolved with the result
+         * of the function.</p>
+         */
+        static run<T extends () => any>(name: string, data?: any, options?: any): Promise<ReturnType<T>>;
+        /**
+         * <p>Typescript Generic variation of Parse.Cloud.run</p>
+         * @param name - <p>The function name.</p>
+         * @param [data] - <p>The parameters to send to the cloud function.</p>
+         * @returns <p>A promise that will be resolved with the result
+         * of the function.</p>
+         */
+        static run<T extends (param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any>(name: string, data?: Parameters<T>[0], options?: any): Promise<ReturnType<T>>;
+        /**
+         * <p>Typescript Generic variation of defining a Cloud Function</p>
+         * @param name - <p>The name of the Cloud Function</p>
+         * @param func - <p>The Cloud Function to register</p>
+         * @param [validator] - <p>An optional function to help validating cloud code.</p>
+         */
+        static define<T extends () => any>(name: string, func: Parse.Cloud.FunctionRequestFuncGeneric1<T>, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.FunctionRequestFunc): void;
+        /**
+         * <p>Typescript Generic variation of defining a Cloud Function</p>
+         * @param name - <p>The name of the Cloud Function</p>
+         * @param func - <p>The Cloud Function to register</p>
+         * @param [validator] - <p>An optional function to help validating cloud code.</p>
+         */
+        static define<T extends (param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any>(name: string, func: Parse.Cloud.FunctionRequestFuncGeneric2<T>, validator?: Parse.Cloud.ValidatorObject | Parse.Cloud.FunctionRequestFunc): void;
     }
     namespace Cloud {
         /**
@@ -625,7 +655,7 @@ declare namespace Parse {
         /**
          * @param request - <p>The request object</p>
          */
-        type FunctionRequestFunc<T> = (request: Parse.Cloud.FunctionRequest) => Promise<ReturnType<T>> | ReturnType<T> | any;
+        type FunctionRequestFunc = (request: Parse.Cloud.FunctionRequest) => Promise<any>;
         /**
          * @property installationId - <p>If set, the installationId triggering the request.</p>
          * @property master - <p>If true, means the master key was used.</p>
@@ -735,6 +765,28 @@ declare namespace Parse {
             headers: any;
             status: number;
             text: string;
+        };
+        /**
+         * @param request - <p>The request object</p>
+         */
+        type FunctionRequestFuncGeneric1<T extends (...args: any) => any> = (request: Parse.Cloud.FunctionRequest) => Promise<ReturnType<T>> | ReturnType<T>;
+        /**
+         * @param request - <p>The request object</p>
+         */
+        type FunctionRequestFuncGeneric2<T extends (...args: any) => any> = (request: Parse.Cloud.FunctionRequestGeneric<Parameters<T>[0]>) => Promise<ReturnType<T>> | ReturnType<T>;
+        /**
+         * @property installationId - <p>If set, the installationId triggering the request.</p>
+         * @property master - <p>If true, means the master key was used.</p>
+         * @property user - <p>If set, the user that made the request.</p>
+         * @property params - <p>The params passed to the cloud function.</p>
+         * @property log - <p>The current logger inside Parse Server.</p>
+         */
+        type FunctionRequestGeneric<T> = {
+            installationId: string;
+            master: boolean;
+            user: Parse.User;
+            params: T;
+            log: any;
         };
     }
     /**
@@ -1413,6 +1465,10 @@ declare namespace Parse {
          * configuration object or with the current with the update.</p>
          */
         static save(attrs: any, masterKeyOnlyFlags: any): Promise<Parse.Object>;
+        /**
+         * <p>Used for testing</p>
+         */
+        static _clearCache(): void;
     }
     /**
      * <p>Constructs a new Parse.Error object with the given code and message.</p>
@@ -1940,11 +1996,11 @@ declare namespace Parse {
      *     var object = new MyClass();
      * </pre></p>
      * @param [className] - <p>The class name for the object</p>
-     * @param [attributes] - <p>The initial set of data to store in the object.</p>
+     * @param [TATattributes] - <p>The initial set of data to store in the object.</p>
      * @param [options] - <p>The options for this object instance.</p>
      */
     class Object<T extends Attributes = Attributes> {
-        constructor(className?: string, attributes?: T, options?: any);
+        constructor(className?: string, TATattributes?: T, options?: any);
         /**
          * <p>Object attributes</p>
          */
@@ -3633,6 +3689,10 @@ declare namespace Parse {
          */
         purge(): Promise<any>;
         /**
+         * <p>Assert if ClassName has been filled</p>
+         */
+        assertClassName(): void;
+        /**
          * <p>Sets Class Level Permissions when creating / updating a Schema.
          * EXERCISE CAUTION, running this may override CLP for this schema and cannot be reversed</p>
          * @param clp - <p>Class Level Permissions</p>
@@ -4584,6 +4644,28 @@ declare namespace Parse {
 declare type LiveQueryEventCallback = (object: Parse.Object, original?: Parse.Object) => void;
 
 /**
+ * <p>Copyright (c) 2015-present, Parse, LLC.
+ * All rights reserved.</p>
+ * <p>This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.</p>
+ */
+declare const DEFAULT_PIN = "_default";
+
+/**
+ * <p>contains -- Determines if an object is contained in a list with special handling for Parse pointers.</p>
+ */
+declare function contains(haystack: any, needle: any): boolean;
+
+/**
+ * <p>matchesQuery -- Determines if an object would be returned by a Parse Query
+ * It's a lightweight, where-clause only implementation of a full query engine.
+ * Since we find queries that match objects, rather than objects that match
+ * queries, we can avoid building a full-blown query tool.</p>
+ */
+declare function matchesQuery(className: any, object: any, objects: any, query: any): boolean;
+
+/**
  * @property status - <p>The conversion status, <code>error</code> if conversion failed or
  * <code>success</code> if conversion succeeded.</p>
  * @property info - <p>The error message if conversion failed, or the relative
@@ -4604,6 +4686,11 @@ declare type RelativeTimeToDateResult = {
  * @param [now = new Date()] - <p>The date from which add or subtract. Default is now.</p>
  */
 declare function relativeTimeToDate(text: string, now?: Date): RelativeTimeToDateResult;
+
+/**
+ * <p>Determines whether an object matches a single key's constraints</p>
+ */
+declare function matchesKeyConstraints(className: any, object: any, objects: any, key: any, constraints: any): boolean;
 
 /**
  * <p>Contains all Parse API classes and functions.</p>
@@ -4676,6 +4763,19 @@ declare type Attributes = {
     [key: string]: any;
 };
 
+/**
+ * <p>Converts a string into a regex that matches it.
+ * Surrounding with \Q .. \E does this, we just need to escape any \E's in
+ * the text separately.</p>
+ */
+declare function quote(s: any): string;
+
+/**
+ * <p>Extracts the class name from queries. If not all queries have the same
+ * class name an error will be thrown.</p>
+ */
+declare function _getClassNameFromQueries(queries: any): string;
+
 declare type QueryJSON = {
     where: Attributes;
     include?: string;
@@ -4692,6 +4792,15 @@ declare type QueryJSON = {
     includeReadPreference?: string;
     subqueryReadPreference?: string;
 };
+
+/**
+ * <p>Copyright (c) 2015-present, Parse, LLC.
+ * All rights reserved.</p>
+ * <p>This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.</p>
+ */
+declare const StorageController: any;
 
 /**
  * <p>Interface declaration for Authentication Providers</p>

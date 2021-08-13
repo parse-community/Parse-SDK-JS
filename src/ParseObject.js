@@ -121,11 +121,21 @@ function getServerUrlPath() {
 class ParseObject {
   /**
    * @alias Parse.Object
-   * @template T extends Attributes = Attributes
    * @param {string} [className] The class name for the object
-   * @param {T} [attributes]  The initial set of data to store in the object.
+   * @param {object} [attributes]  The initial set of data to store in the object.
    * @param {object} [options] The options for this object instance.
    */
+
+  /**
+  * @generic
+  * @variation 2
+  * @alias Parse.Object
+  * @template T extends Attributes = Attributes
+  * @param {string} [className] The class name for the object
+  * @param {T} [TATattributes]  The initial set of data to store in the object.
+  * @param {object} [options] The options for this object instance.
+  */
+
   constructor(
     className: ?string | { className: string, [attr: string]: mixed },
     attributes?: { [attr: string]: mixed },
