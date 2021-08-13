@@ -31,13 +31,16 @@ import type ParseRelation from './ParseRelation';
 class ParseRole extends ParseObject {
   /**
    * @alias Parse.Role
-   * @template attributes extends Attributes = Attributes
-   * @extends Parse.Object<attributes>
+   * <types>
+   * @template T extends Attributes = Attributes
+   * @extends Parse.Object<T>
+   * </types>
    * @param {string} name The name of the Role to create.
    * @param {Parse.ACL} acl The ACL for this role. Roles must have an ACL.
    * A Parse.Role is a local representation of a role persisted to the Parse
    * cloud.
    */
+
   constructor(name: string, acl: ParseACL) {
     super('_Role');
     if (typeof name === 'string' && acl instanceof ParseACL) {

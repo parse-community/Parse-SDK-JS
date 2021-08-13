@@ -445,6 +445,20 @@ declare namespace Parse {
          */
         static job(name: string, func: Parse.Cloud.JobRequestFunc): void;
         /**
+         * @property Primary - <p>Primary read preference option</p>
+         * @property PrimaryPreferred - <p>Prefer primary</p>
+         * @property Secondary - <p>Secondary read preference option</p>
+         * @property SecondaryPreferred - <p>Prefer secondary</p>
+         * @property Nearest - <p>Nearest read preference option</p>
+         */
+        static ReadPreferenceOption: {
+            Primary: string;
+            PrimaryPreferred: string;
+            Secondary: string;
+            SecondaryPreferred: string;
+            Nearest: string;
+        };
+        /**
          * <p>Typescript Generic variation of Parse.Cloud.run</p>
          * @param name - <p>The function name.</p>
          * @param [data] - <p>The parameters to send to the cloud function.</p>
@@ -459,7 +473,7 @@ declare namespace Parse {
          * @returns <p>A promise that will be resolved with the result
          * of the function.</p>
          */
-        static run<T extends (param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any>(name: string, data?: Parameters<T>[0], options?: any): Promise<ReturnType<T>>;
+        static run<T extends (param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any, Params = Parameters<T>[0]>(name: string, data?: Params, options?: any): Promise<ReturnType<T>>;
         /**
          * <p>Typescript Generic variation of defining a Cloud Function</p>
          * @param name - <p>The name of the Cloud Function</p>
@@ -613,20 +627,6 @@ declare namespace Parse {
             readPreference: Parse.Cloud.ReadPreferenceOption;
         };
         /**
-         * @property Primary - <p>Primary read preference option</p>
-         * @property PrimaryPreferred - <p>Prefer primary</p>
-         * @property Secondary - <p>Secondary read preference option</p>
-         * @property SecondaryPreferred - <p>Prefer secondary</p>
-         * @property Nearest - <p>Nearest read preference option</p>
-         */
-        type ReadPreferenceOption = {
-            Primary: string;
-            PrimaryPreferred: string;
-            Secondary: string;
-            SecondaryPreferred: string;
-            Nearest: string;
-        };
-        /**
          * @param request - <p>The request object</p>
          */
         type AfterFindRequestFunc = (request: Parse.Cloud.AfterFindRequest) => any;
@@ -773,7 +773,7 @@ declare namespace Parse {
         /**
          * @param request - <p>The request object</p>
          */
-        type FunctionRequestFuncGeneric2<T extends (...args: any) => any> = (request: Parse.Cloud.FunctionRequestGeneric<Parameters<T>[0]>) => Promise<ReturnType<T>> | ReturnType<T>;
+        type FunctionRequestFuncGeneric2<T extends (...args: any) => any, Params = Parameters<T>[0]> = (request: Parse.Cloud.FunctionRequestGeneric<Params>) => Promise<ReturnType<T>> | ReturnType<T>;
         /**
          * @property installationId - <p>If set, the installationId triggering the request.</p>
          * @property master - <p>If true, means the master key was used.</p>
@@ -1468,7 +1468,7 @@ declare namespace Parse {
         /**
          * <p>Used for testing</p>
          */
-        static _clearCache(): void;
+        private static _clearCache(): void;
     }
     /**
      * <p>Constructs a new Parse.Error object with the given code and message.</p>
@@ -1996,11 +1996,11 @@ declare namespace Parse {
      *     var object = new MyClass();
      * </pre></p>
      * @param [className] - <p>The class name for the object</p>
-     * @param [TATattributes] - <p>The initial set of data to store in the object.</p>
+     * @param [tatattributes] - <p>The initial set of data to store in the object.</p>
      * @param [options] - <p>The options for this object instance.</p>
      */
     class Object<T extends Attributes = Attributes> {
-        constructor(className?: string, TATattributes?: T, options?: any);
+        constructor(className?: string, tatattributes?: T, options?: any);
         /**
          * <p>Object attributes</p>
          */
@@ -2490,14 +2490,14 @@ declare namespace Parse {
          * </pre>
          * @param list - <p>A list of <code>Parse.Object</code>.</p>
          * @param keys - <p>The name(s) of the key(s) to include.</p>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *     be used for this request.
          *   <li>sessionToken: A valid session token, used for making a request on
          *       behalf of a specific user.
          * </ul>
          */
-        static fetchAllWithInclude(list: any[], keys: string | (string | string[])[], options: any): Parse.Object[];
+        static fetchAllWithInclude(list: any[], keys: string | (string | string[])[], options?: any): Parse.Object[];
         /**
          * <p>Fetches the given list of Parse.Object if needed.
          * If any error is encountered, stops and calls the error handler.</p>
@@ -2514,14 +2514,14 @@ declare namespace Parse {
          * </pre>
          * @param list - <p>A list of <code>Parse.Object</code>.</p>
          * @param keys - <p>The name(s) of the key(s) to include.</p>
-         * @param options - <p>Valid options are:<ul></p>
+         * @param [options] - <p>Valid options are:<ul></p>
          *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
          *     be used for this request.
          *   <li>sessionToken: A valid session token, used for making a request on
          *       behalf of a specific user.
          * </ul>
          */
-        static fetchAllIfNeededWithInclude(list: any[], keys: string | (string | string[])[], options: any): Parse.Object[];
+        static fetchAllIfNeededWithInclude(list: any[], keys: string | (string | string[])[], options?: any): Parse.Object[];
         /**
          * <p>Fetches the given list of Parse.Object if needed.
          * If any error is encountered, stops and calls the error handler.</p>
@@ -2589,7 +2589,7 @@ declare namespace Parse {
          * </pre>
          * @param list - <p>A list of <code>Parse.Object</code>.</p>
          */
-        static saveAll(list: any[], options?: any): Parse.Object[];
+        static saveAll<T extends readonly Object[]>(list: T, options?: any): Parse.Object[];
         /**
          * <p>Creates a reference to a subclass of Parse.Object with the given id. This
          * does not exist on Parse.Object, only on subclasses.</p>
@@ -2823,8 +2823,8 @@ declare namespace Parse {
      * });</pre></p>
      * @param objectClass - <p>An instance of a subclass of Parse.Object, or a Parse className string.</p>
      */
-    class Query<ParseObject extends Parse.Object = Parse.Object> {
-        constructor(objectClass: string | Parse.Object | ParseObject | any);
+    class Query<T extends Object = Object, R=(new (...args: any[]) => T | Parse.Object)> {
+        constructor(objectClass: string | R);
         /**
          * <p>Adds constraint that at least one of the passed in queries matches.</p>
          * @returns <p>Returns the query, so you can chain this call.</p>
@@ -3267,13 +3267,13 @@ declare namespace Parse {
          *  </pre>
          * @param key - <p>The key that the string to match is stored in.</p>
          * @param value - <p>The string to search</p>
-         * @param options - <p>(Optional)</p>
+         * @param [options] - <p>(Optional)</p>
          * @param options.language - <p>The language that determines the list of stop words for the search and the rules for the stemmer and tokenizer.</p>
          * @param options.caseSensitive - <p>A boolean flag to enable or disable case sensitive search.</p>
          * @param options.diacriticSensitive - <p>A boolean flag to enable or disable diacritic sensitive search.</p>
          * @returns <p>Returns the query, so you can chain this call.</p>
          */
-        fullText(key: string, value: string, options: {
+        fullText(key: string, value: string, options?: {
             language: string;
             caseSensitive: boolean;
             diacriticSensitive: boolean;
@@ -3437,7 +3437,7 @@ declare namespace Parse {
          * @param keys - <p>The name(s) of the key(s) to include.</p>
          * @returns <p>Returns the query, so you can chain this call.</p>
          */
-        include(...keys: (string | string[])[]): Parse.Query;
+        include<K extends keyof T["attributes"] | keyof Attributes>(...keys: (K | string[])[]): this;
         /**
          * <p>Includes all nested Parse.Objects one level deep.</p>
          * <p>Requires Parse Server 3.0.0+</p>
@@ -3582,7 +3582,7 @@ declare namespace Parse {
      * A Parse.Role is a local representation of a role persisted to the Parse
      * cloud.</p>
      */
-    class Role<attributes extends Attributes = Attributes> extends Parse.Object<attributes> {
+    class Role<T extends Attributes = Attributes> extends Parse.Object<T> {
         constructor(name: string, acl: Parse.ACL);
         /**
          * <p>Gets the name of the role.  You can alternatively call role.get(&quot;name&quot;)</p>
@@ -3691,7 +3691,7 @@ declare namespace Parse {
         /**
          * <p>Assert if ClassName has been filled</p>
          */
-        assertClassName(): void;
+        private assertClassName(): void;
         /**
          * <p>Sets Class Level Permissions when creating / updating a Schema.
          * EXERCISE CAUTION, running this may override CLP for this schema and cannot be reversed</p>
@@ -4297,8 +4297,8 @@ declare namespace Parse {
      * uniqueness.</p>
      * @param [attributes] - <p>The initial set of data to store in the user.</p>
      */
-    class User<T extends Attributes = Attributes> extends Object<T> {
-        constructor(attributes?: any);
+    class User<T extends Attributes = Attributes> extends Parse.Object<T> {
+        constructor(attributes?: T);
         /**
          * <p>Request a revocable session token to replace the older style of token.</p>
          * @returns <p>A promise that is resolved when the replacement

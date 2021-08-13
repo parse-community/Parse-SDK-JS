@@ -1,7 +1,7 @@
+/* <types> */
 /**
  * Typescript Generic variation of Parse.Cloud.run
  *
- * @generic
  * @function run
  * @variation 2
  * @name Parse.Cloud.run
@@ -17,13 +17,12 @@
 /**
  * Typescript Generic variation of Parse.Cloud.run
  *
- * @generic
  * @function run
  * @variation 3
  * @name Parse.Cloud.run
- * @template T extends (param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any
+ * @template T extends (param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any, Params = Parameters<T>[0]
  * @param {string} name The function name.
- * @param {Parameters<T<0>>} [data] The parameters to send to the cloud function.
+ * @param {Params} [data] The parameters to send to the cloud function.
  * @param {object} [options]
  * @returns {Promise<ReturnType<T>>} A promise that will be resolved with the result
  * of the function.
@@ -33,7 +32,6 @@
 /**
  * Typescript Generic variation of defining a Cloud Function
  *
- * @generic
  * @function define
  * @name Parse.Cloud.define
  * @variation 2
@@ -48,7 +46,6 @@
 /**
  * Typescript Generic variation of defining a Cloud Function
  *
- * @generic
  * @function define
  * @name Parse.Cloud.define
  * @variation 3
@@ -61,7 +58,6 @@
 
 
 /**
- * @generic
  * @callback Parse.Cloud.FunctionRequestFuncGeneric1
  * @param {Parse.Cloud.FunctionRequest} request The request object
  * @template T extends (...args: any) => any
@@ -69,15 +65,13 @@
  */
 
 /**
- * @generic
  * @callback Parse.Cloud.FunctionRequestFuncGeneric2
- * @param {Parse.Cloud.FunctionRequestGeneric<Parameters<T<0>>>} request The request object
- * @template T extends (...args: any) => any
+ * @param {Parse.Cloud.FunctionRequestGeneric<Params>} request The request object
+ * @template T extends (...args: any) => any, Params = Parameters<T>[0]
  * @returns {Promise<ReturnType<T>> | ReturnType<T>}
  */
 
 /**
- * @generic
  * @typedef Parse.Cloud.FunctionRequestGeneric
  * @template T
  * @property {string} installationId If set, the installationId triggering the request.
@@ -86,3 +80,4 @@
  * @property {T} params The params passed to the cloud function.
  * @property {object} log The current logger inside Parse Server.
  */
+/* </types> */

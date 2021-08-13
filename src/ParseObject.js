@@ -122,19 +122,15 @@ class ParseObject {
   /**
    * @alias Parse.Object
    * @param {string} [className] The class name for the object
+   * <docs>
    * @param {object} [attributes]  The initial set of data to store in the object.
+   * </docs>
+   * <types>
+   * @template T extends Attributes = Attributes
+   * @param {T} [tatattributes]  The initial set of data to store in the object.
+   * </types>
    * @param {object} [options] The options for this object instance.
    */
-
-  /**
-  * @generic
-  * @variation 2
-  * @alias Parse.Object
-  * @template T extends Attributes = Attributes
-  * @param {string} [className] The class name for the object
-  * @param {T} [TATattributes]  The initial set of data to store in the object.
-  * @param {object} [options] The options for this object instance.
-  */
 
   constructor(
     className: ?string | { className: string, [attr: string]: mixed },
@@ -182,10 +178,15 @@ class ParseObject {
 
   /** Prototype getters / setters **/
 
-/**
+  /**
    * Object attributes
    *
+   * <docs>
+   * @type {object}
+   * </docs>
+   * <types>
    * @type {T}
+   * </types>
    */
 
   get attributes(): AttributeMap {
@@ -1621,7 +1622,7 @@ class ParseObject {
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {string | Array<string | Array<string>>} keys The name(s) of the key(s) to include.
-   * @param {object} options
+   * @param {object} [options]
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -1661,7 +1662,7 @@ class ParseObject {
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {string | Array<string | Array<string>>} keys The name(s) of the key(s) to include.
-   * @param {object} options
+   * @param {object} [options]
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -1807,11 +1808,18 @@ class ParseObject {
    * });
    * </pre>
    *
+   * <docs>
    * @param {Array} list A list of <code>Parse.Object</code>.
+   * </docs>
+   * <types>
+   * @template T extends readonly Object[]
+   * @param {T} list A list of <code>Parse.Object</code>.
+   * </types>
    * @param {object} [options]
    * @static
    * @returns {Parse.Object[]}
    */
+
   static saveAll(list: Array<ParseObject>, options: RequestOptions = {}) {
     const saveOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {

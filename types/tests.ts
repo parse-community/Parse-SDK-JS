@@ -693,10 +693,10 @@ async function test_cloud_functions() {
     });
 
     // $ExpectError
-    // Parse.Cloud.define("AFunc");
+    Parse.Cloud.define("AFunc");
 
     // $ExpectError
-    // Parse.Cloud.define<(params: string) => number>("AFunc", () => 123);
+    Parse.Cloud.define<(params: string) => number>("AFunc", () => 123);
 
     Parse.Cloud.job("AJob", (request: Parse.Cloud.JobRequest) => {
         request.message("Message to associate with this job run");
@@ -723,15 +723,15 @@ function test_geo_points() {
     point = new Parse.GeoPoint(40.0, -30.0);
     point = new Parse.GeoPoint({ latitude: 40.0, longitude: -30.0 });
 
-    // const userObject = Parse.User.current<Parse.User<{ location: Parse.GeoPoint }>>()!;
+    const userObject = Parse.User.current<Parse.User<{ location: Parse.GeoPoint }>>()!;
 
-    // // User's location
-    // const userGeoPoint = userObject.get("location");
+    // User's location
+    const userGeoPoint = userObject.get("location");
 
     // Create a query for places
     const query = new Parse.Query(Parse.User);
     // Interested in locations near user.
-    // query.near("location", userGeoPoint);
+    query.near("location", userGeoPoint);
     // Limit what could be a lot of points.
     query.limit(10);
 
@@ -1056,349 +1056,349 @@ async function test_schema(
 }
 
 function testObject() {
-    // function testConstructor() {
-    //     // $ExpectType Object<Attributes>
-    //     new Parse.Object();
+    function testConstructor() {
+        // $ExpectType Object<Attributes>
+        new Parse.Object();
 
-    //     // $ExpectType Object<Attributes>
-    //     new Parse.Object("TestObject");
+        // $ExpectType Object<Attributes>
+        new Parse.Object("TestObject");
 
-    //     // $ExpectType Object<{ example: number; }>
-    //     new Parse.Object("TestObject", { example: 100 });
+        // $ExpectType Object<{ example: number; }>
+        new Parse.Object("TestObject", { example: 100 });
 
-    //     // $ExpectType Object<{ example: boolean; }>
-    //     new Parse.Object<{ example: boolean }>("TestObject", { example: true });
+        // $ExpectType Object<{ example: boolean; }>
+        new Parse.Object<{ example: boolean }>("TestObject", { example: true });
 
-    //     // $ExpectType Object<{ example: string; }>
-    //     new Parse.Object("TestObject", { example: "hello" }, { ignoreValidation: true });
+        // $ExpectType Object<{ example: string; }>
+        new Parse.Object("TestObject", { example: "hello" }, { ignoreValidation: true });
 
-    //     // $ExpectError
-    //     new Parse.Object<{ example: string }>("TestObject");
+        // $ExpectError
+        new Parse.Object<{ example: string }>("TestObject");
 
-    //     // $ExpectError
-    //     new Parse.Object<{ example: boolean }>("TestObject", { example: "hello" });
-    // }
+        // $ExpectError
+        new Parse.Object<{ example: boolean }>("TestObject", { example: "hello" });
+    }
 
-    // function testStaticMethods() {
-    //     async function testSaveAll(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: string }>) {
-    //         // $ExpectType Object<Attributes>[]
-    //         await Parse.Object.saveAll([objUntyped]);
+    function testStaticMethods() {
+        async function testSaveAll(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: string }>) {
+            // $ExpectType Object<Attributes>[]
+            await Parse.Object.saveAll([objUntyped]);
 
-    //         // $ExpectType Object<{ example: string; }>[]
-    //         await Parse.Object.saveAll([objTyped]);
+            // $ExpectType Object<{ example: string; }>[]
+            await Parse.Object.saveAll([objTyped]);
 
-    //         // $ExpectType [Object<Attributes>, Object<{ example: string; }>]
-    //         await Parse.Object.saveAll<[typeof objUntyped, typeof objTyped]>([objUntyped, objTyped]);
+            // $ExpectType [Object<Attributes>, Object<{ example: string; }>]
+            await Parse.Object.saveAll<[typeof objUntyped, typeof objTyped]>([objUntyped, objTyped]);
 
-    //         // $ExpectError
-    //         await Parse.Object.saveAll([123]);
-    //     }
-    // }
+            // $ExpectError
+            await Parse.Object.saveAll([123]);
+        }
+    }
 
-    // function testAttributes(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: string }>) {
-    //     // $ExpectType any
-    //     objUntyped.attributes.whatever;
+    function testAttributes(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: string }>) {
+        // $ExpectType any
+        objUntyped.attributes.whatever;
 
-    //     // $ExpectType string
-    //     objTyped.attributes.example;
+        // $ExpectType string
+        objTyped.attributes.example;
 
-    //     // $ExpectError
-    //     objTyped.attributes.other;
-    // }
+        // $ExpectError
+        objTyped.attributes.other;
+    }
 
-    // function testAdd(objUntyped: Parse.Object, objTyped: Parse.Object<{ stringList: string[]; thing: boolean }>) {
-    //     // $ExpectType false | Object<Attributes>
-    //     objUntyped.add("whatever", "hello");
+    function testAdd(objUntyped: Parse.Object, objTyped: Parse.Object<{ stringList: string[]; thing: boolean }>) {
+        // $ExpectType false | Object<Attributes>
+        objUntyped.add("whatever", "hello");
 
-    //     // $ExpectType false | Object<{ stringList: string[]; thing: boolean; }>
-    //     objTyped.add("stringList", "hello");
+        // $ExpectType false | Object<{ stringList: string[]; thing: boolean; }>
+        objTyped.add("stringList", "hello");
 
-    //     // $ExpectError
-    //     objTyped.add("stringList", 100);
+        // $ExpectError
+        objTyped.add("stringList", 100);
 
-    //     // $ExpectError
-    //     objTyped.add("thing", true);
+        // $ExpectError
+        objTyped.add("thing", true);
 
-    //     // $ExpectError
-    //     objTyped.add("whatever", "hello");
-    // }
+        // $ExpectError
+        objTyped.add("whatever", "hello");
+    }
 
-    // function testAddAll(objUntyped: Parse.Object, objTyped: Parse.Object<{ stringList: string[]; thing: boolean }>) {
-    //     // $ExpectType false | Object<Attributes>
-    //     objUntyped.addAll("whatever", ["hello", 100]);
+    function testAddAll(objUntyped: Parse.Object, objTyped: Parse.Object<{ stringList: string[]; thing: boolean }>) {
+        // $ExpectType false | Object<Attributes>
+        objUntyped.addAll("whatever", ["hello", 100]);
 
-    //     // $ExpectType false | Object<{ stringList: string[]; thing: boolean; }>
-    //     objTyped.addAll("stringList", ["hello"]);
+        // $ExpectType false | Object<{ stringList: string[]; thing: boolean; }>
+        objTyped.addAll("stringList", ["hello"]);
 
-    //     // $ExpectError
-    //     objTyped.addAll("stringList", [100]);
+        // $ExpectError
+        objTyped.addAll("stringList", [100]);
 
-    //     // $ExpectError
-    //     objTyped.addAll("thing", [true]);
+        // $ExpectError
+        objTyped.addAll("thing", [true]);
 
-    //     // $ExpectError
-    //     objTyped.addAll("whatever", ["hello"]);
-    // }
+        // $ExpectError
+        objTyped.addAll("whatever", ["hello"]);
+    }
 
-    // function testAddAllUnique(
-    //     objUntyped: Parse.Object,
-    //     objTyped: Parse.Object<{ stringList: string[]; thing: boolean }>,
-    // ) {
-    //     // $ExpectType false | Object<Attributes>
-    //     objUntyped.addAllUnique("whatever", ["hello", 100]);
+    function testAddAllUnique(
+        objUntyped: Parse.Object,
+        objTyped: Parse.Object<{ stringList: string[]; thing: boolean }>,
+    ) {
+        // $ExpectType false | Object<Attributes>
+        objUntyped.addAllUnique("whatever", ["hello", 100]);
 
-    //     // $ExpectType false | Object<{ stringList: string[]; thing: boolean; }>
-    //     objTyped.addAllUnique("stringList", ["hello"]);
+        // $ExpectType false | Object<{ stringList: string[]; thing: boolean; }>
+        objTyped.addAllUnique("stringList", ["hello"]);
 
-    //     // $ExpectError
-    //     objTyped.addAllUnique("stringList", [100]);
+        // $ExpectError
+        objTyped.addAllUnique("stringList", [100]);
 
-    //     // $ExpectError
-    //     objTyped.addAllUnique("thing", [true]);
+        // $ExpectError
+        objTyped.addAllUnique("thing", [true]);
 
-    //     // $ExpectError
-    //     objTyped.addAllUnique("whatever", ["hello"]);
-    // }
+        // $ExpectError
+        objTyped.addAllUnique("whatever", ["hello"]);
+    }
 
-    // function testAddUnique(objUntyped: Parse.Object, objTyped: Parse.Object<{ stringList: string[]; thing: boolean }>) {
-    //     // $ExpectType false | Object<Attributes>
-    //     objUntyped.addUnique("whatever", "hello");
+    function testAddUnique(objUntyped: Parse.Object, objTyped: Parse.Object<{ stringList: string[]; thing: boolean }>) {
+        // $ExpectType false | Object<Attributes>
+        objUntyped.addUnique("whatever", "hello");
 
-    //     // $ExpectType false | Object<{ stringList: string[]; thing: boolean; }>
-    //     objTyped.addUnique("stringList", "hello");
+        // $ExpectType false | Object<{ stringList: string[]; thing: boolean; }>
+        objTyped.addUnique("stringList", "hello");
 
-    //     // $ExpectError
-    //     objTyped.addUnique("stringList", 100);
+        // $ExpectError
+        objTyped.addUnique("stringList", 100);
 
-    //     // $ExpectError
-    //     objTyped.addUnique("thing", true);
+        // $ExpectError
+        objTyped.addUnique("thing", true);
 
-    //     // $ExpectError
-    //     objTyped.addUnique("whatever", "hello");
-    // }
+        // $ExpectError
+        objTyped.addUnique("whatever", "hello");
+    }
 
-    // function testDirty(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: string }>) {
-    //     // $ExpectType boolean
-    //     objUntyped.dirty();
+    function testDirty(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: string }>) {
+        // $ExpectType boolean
+        objUntyped.dirty();
 
-    //     // $ExpectType boolean
-    //     objUntyped.dirty("whatever");
+        // $ExpectType boolean
+        objUntyped.dirty("whatever");
 
-    //     // $ExpectType boolean
-    //     objTyped.dirty();
+        // $ExpectType boolean
+        objTyped.dirty();
 
-    //     // $ExpectType boolean
-    //     objTyped.dirty("example");
+        // $ExpectType boolean
+        objTyped.dirty("example");
 
-    //     // $ExpectError
-    //     objTyped.dirty("other");
-    // }
+        // $ExpectError
+        objTyped.dirty("other");
+    }
 
-    // function testEquals(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: string }>) {
-    //     // $ExpectType boolean
-    //     objUntyped.equals(objTyped);
+    function testEquals(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: string }>) {
+        // $ExpectType boolean
+        objUntyped.equals(objTyped);
 
-    //     // $ExpectType boolean
-    //     objTyped.equals(objUntyped);
+        // $ExpectType boolean
+        objTyped.equals(objUntyped);
 
-    //     // $ExpectError
-    //     objUntyped.equals("blah");
-    // }
+        // $ExpectError
+        objUntyped.equals("blah");
+    }
 
-    // function testEscape(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: string }>) {
-    //     // $ExpectType string
-    //     objUntyped.escape("whatever");
+    function testEscape(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: string }>) {
+        // $ExpectType string
+        objUntyped.escape("whatever");
 
-    //     // $ExpectType string
-    //     objTyped.escape("example");
+        // $ExpectType string
+        objTyped.escape("example");
 
-    //     // $ExpectError
-    //     objTyped.escape("other");
-    // }
+        // $ExpectError
+        objTyped.escape("other");
+    }
 
-    // function testFetchWithInclude(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: string }>) {
-    //     // $ExpectType Promise<Object<Attributes>>
-    //     objUntyped.fetchWithInclude("whatever");
+    function testFetchWithInclude(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: string }>) {
+        // $ExpectType Promise<Object<Attributes>>
+        objUntyped.fetchWithInclude("whatever");
 
-    //     // $ExpectType Promise<Object<Attributes>>
-    //     objUntyped.fetchWithInclude(["whatever"]);
+        // $ExpectType Promise<Object<Attributes>>
+        objUntyped.fetchWithInclude(["whatever"]);
 
-    //     // $ExpectType Promise<Object<Attributes>>
-    //     objUntyped.fetchWithInclude([["whatever"]]);
+        // $ExpectType Promise<Object<Attributes>>
+        objUntyped.fetchWithInclude([["whatever"]]);
 
-    //     // $ExpectError
-    //     objUntyped.fetchWithInclude([[["whatever"]]]);
+        // $ExpectError
+        objUntyped.fetchWithInclude([[["whatever"]]]);
 
-    //     // $ExpectType Promise<Object<{ example: string; }>>
-    //     objTyped.fetchWithInclude("example");
+        // $ExpectType Promise<Object<{ example: string; }>>
+        objTyped.fetchWithInclude("example");
 
-    //     // $ExpectType Promise<Object<{ example: string; }>>
-    //     objTyped.fetchWithInclude(["example"]);
+        // $ExpectType Promise<Object<{ example: string; }>>
+        objTyped.fetchWithInclude(["example"]);
 
-    //     // $ExpectType Promise<Object<{ example: string; }>>
-    //     objTyped.fetchWithInclude([["example"]]);
+        // $ExpectType Promise<Object<{ example: string; }>>
+        objTyped.fetchWithInclude([["example"]]);
 
-    //     // $ExpectError
-    //     objTyped.fetchWithInclude([[["example"]]]);
+        // $ExpectError
+        objTyped.fetchWithInclude([[["example"]]]);
 
-    //     // $ExpectType Promise<Object<{ example: string; }>[]>
-    //     Parse.Object.fetchAllIfNeededWithInclude([objTyped], "example");
+        // $ExpectType Promise<Object<{ example: string; }>[]>
+        Parse.Object.fetchAllIfNeededWithInclude([objTyped], "example");
 
-    //     // $ExpectError
-    //     Parse.Object.fetchAllIfNeededWithInclude([objTyped], "notAnAttribute");
+        // $ExpectError
+        Parse.Object.fetchAllIfNeededWithInclude([objTyped], "notAnAttribute");
 
-    //     // $ExpectType Promise<Object<{ example: string; }>[]>
-    //     Parse.Object.fetchAllWithInclude([objTyped], "example");
+        // $ExpectType Promise<Object<{ example: string; }>[]>
+        Parse.Object.fetchAllWithInclude([objTyped], "example");
 
-    //     // $ExpectError
-    //     Parse.Object.fetchAllWithInclude([objTyped], "notAnAttribute");
-    // }
+        // $ExpectError
+        Parse.Object.fetchAllWithInclude([objTyped], "notAnAttribute");
+    }
 
-    // function testGet(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number }>) {
-    //     // $ExpectType any
-    //     objUntyped.get("whatever");
+    function testGet(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number }>) {
+        // $ExpectType any
+        objUntyped.get("whatever");
 
-    //     // $ExpectType number
-    //     objTyped.get("example");
+        // $ExpectType number
+        objTyped.get("example");
 
-    //     // $ExpectError
-    //     objTyped.get("other");
-    // }
+        // $ExpectError
+        objTyped.get("other");
+    }
 
-    // function testHas(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number }>) {
-    //     // $ExpectType boolean
-    //     objUntyped.has("whatever");
+    function testHas(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number }>) {
+        // $ExpectType boolean
+        objUntyped.has("whatever");
 
-    //     // $ExpectType boolean
-    //     objTyped.has("example");
+        // $ExpectType boolean
+        objTyped.has("example");
 
-    //     // $ExpectError
-    //     objTyped.has("other");
-    // }
+        // $ExpectError
+        objTyped.has("other");
+    }
 
-    // function testIncrement(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number }>) {
-    //     // $ExpectType false | Object<Attributes>
-    //     objUntyped.increment("whatever");
+    function testIncrement(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number }>) {
+        // $ExpectType false | Object<Attributes>
+        objUntyped.increment("whatever");
 
-    //     // $ExpectType false | Object<Attributes>
-    //     objUntyped.increment("whatever", 10);
+        // $ExpectType false | Object<Attributes>
+        objUntyped.increment("whatever", 10);
 
-    //     // $ExpectType false | Object<{ example: number; }>
-    //     objTyped.increment("example");
+        // $ExpectType false | Object<{ example: number; }>
+        objTyped.increment("example");
 
-    //     // $ExpectType false | Object<{ example: number; }>
-    //     objTyped.increment("example", 20);
+        // $ExpectType false | Object<{ example: number; }>
+        objTyped.increment("example", 20);
 
-    //     // $ExpectError
-    //     objTyped.increment("example", true);
+        // $ExpectError
+        objTyped.increment("example", true);
 
-    //     // $ExpectError
-    //     objTyped.increment("other");
-    // }
+        // $ExpectError
+        objTyped.increment("other");
+    }
 
-    // function testDecrement(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number }>) {
-    //     // $ExpectType false | Object<Attributes>
-    //     objUntyped.decrement("whatever");
+    function testDecrement(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number }>) {
+        // $ExpectType false | Object<Attributes>
+        objUntyped.decrement("whatever");
 
-    //     // $ExpectType false | Object<Attributes>
-    //     objUntyped.decrement("whatever", 10);
+        // $ExpectType false | Object<Attributes>
+        objUntyped.decrement("whatever", 10);
 
-    //     // $ExpectType false | Object<{ example: number; }>
-    //     objTyped.decrement("example");
+        // $ExpectType false | Object<{ example: number; }>
+        objTyped.decrement("example");
 
-    //     // $ExpectType false | Object<{ example: number; }>
-    //     objTyped.decrement("example", 20);
+        // $ExpectType false | Object<{ example: number; }>
+        objTyped.decrement("example", 20);
 
-    //     // $ExpectError
-    //     objTyped.decrement("example", true);
+        // $ExpectError
+        objTyped.decrement("example", true);
 
-    //     // $ExpectError
-    //     objTyped.decrement("other");
-    // }
+        // $ExpectError
+        objTyped.decrement("other");
+    }
 
-    // function testNewInstance(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number }>) {
-    //     // $ExpectType Object<Attributes>
-    //     objUntyped.newInstance();
+    function testNewInstance(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number }>) {
+        // $ExpectType Object<Attributes>
+        objUntyped.newInstance();
 
-    //     // $ExpectType Object<{ example: number; }>
-    //     objTyped.newInstance();
-    // }
+        // $ExpectType Object<{ example: number; }>
+        objTyped.newInstance();
+    }
 
-    // function testOp(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number }>) {
-    //     // $ExpectType any
-    //     objUntyped.op("whatever");
+    function testOp(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number }>) {
+        // $ExpectType any
+        objUntyped.op("whatever");
 
-    //     // $ExpectType any
-    //     objTyped.op("example");
+        // $ExpectType any
+        objTyped.op("example");
 
-    //     // $ExpectError
-    //     objTyped.op("other");
-    // }
+        // $ExpectError
+        objTyped.op("other");
+    }
 
-    // function testRelation(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number; rel: Parse.Relation }>) {
-    //     // $ExpectType Relation<Object<Attributes>, Object<Attributes>>
-    //     objUntyped.relation("whatever");
+    function testRelation(objUntyped: Parse.Object, objTyped: Parse.Object<{ example: number; rel: Parse.Relation }>) {
+        // $ExpectType Relation<Object<Attributes>, Object<Attributes>>
+        objUntyped.relation("whatever");
 
-    //     // $ExpectType Relation<Object<{ example: number; rel: Relation<Object<Attributes>, Object<Attributes>>; }>, Object<Attributes>>
-    //     objTyped.relation("rel");
+        // $ExpectType Relation<Object<{ example: number; rel: Relation<Object<Attributes>, Object<Attributes>>; }>, Object<Attributes>>
+        objTyped.relation("rel");
 
-    //     // $ExpectError
-    //     objTyped.relation("example");
+        // $ExpectError
+        objTyped.relation("example");
 
-    //     // $ExpectError
-    //     objTyped.relation("other");
-    // }
+        // $ExpectError
+        objTyped.relation("other");
+    }
 
-    // function testRemove(objUntyped: Parse.Object, objTyped: Parse.Object<{ stringList: string[]; thing: boolean }>) {
-    //     // $ExpectType false | Object<Attributes>
-    //     objUntyped.remove("whatever", "hello");
+    function testRemove(objUntyped: Parse.Object, objTyped: Parse.Object<{ stringList: string[]; thing: boolean }>) {
+        // $ExpectType false | Object<Attributes>
+        objUntyped.remove("whatever", "hello");
 
-    //     // $ExpectType false | Object<{ stringList: string[]; thing: boolean; }>
-    //     objTyped.remove("stringList", "hello");
+        // $ExpectType false | Object<{ stringList: string[]; thing: boolean; }>
+        objTyped.remove("stringList", "hello");
 
-    //     // $ExpectError
-    //     objTyped.remove("stringList", 100);
+        // $ExpectError
+        objTyped.remove("stringList", 100);
 
-    //     // $ExpectError
-    //     objTyped.remove("thing", true);
+        // $ExpectError
+        objTyped.remove("thing", true);
 
-    //     // $ExpectError
-    //     objTyped.remove("whatever", "hello");
-    // }
+        // $ExpectError
+        objTyped.remove("whatever", "hello");
+    }
 
-    // function testRemoveAll(objUntyped: Parse.Object, objTyped: Parse.Object<{ stringList: string[]; thing: boolean }>) {
-    //     // $ExpectType false | Object<Attributes>
-    //     objUntyped.removeAll("whatever", ["hello", 100]);
+    function testRemoveAll(objUntyped: Parse.Object, objTyped: Parse.Object<{ stringList: string[]; thing: boolean }>) {
+        // $ExpectType false | Object<Attributes>
+        objUntyped.removeAll("whatever", ["hello", 100]);
 
-    //     // $ExpectType false | Object<{ stringList: string[]; thing: boolean; }>
-    //     objTyped.removeAll("stringList", ["hello"]);
+        // $ExpectType false | Object<{ stringList: string[]; thing: boolean; }>
+        objTyped.removeAll("stringList", ["hello"]);
 
-    //     // $ExpectError
-    //     objTyped.removeAll("stringList", [100]);
+        // $ExpectError
+        objTyped.removeAll("stringList", [100]);
 
-    //     // $ExpectError
-    //     objTyped.removeAll("thing", [true]);
+        // $ExpectError
+        objTyped.removeAll("thing", [true]);
 
-    //     // $ExpectError
-    //     objTyped.removeAll("whatever", ["hello"]);
-    // }
+        // $ExpectError
+        objTyped.removeAll("whatever", ["hello"]);
+    }
 
-    // function testRevert(objUntyped: Parse.Object, objTyped: Parse.Object<{ thingOne: number; thingTwo: boolean }>) {
-    //     // $ExpectType void
-    //     objUntyped.revert();
+    function testRevert(objUntyped: Parse.Object, objTyped: Parse.Object<{ thingOne: number; thingTwo: boolean }>) {
+        // $ExpectType void
+        objUntyped.revert();
 
-    //     // $ExpectType void
-    //     objUntyped.revert("whatever", "more whatever");
+        // $ExpectType void
+        objUntyped.revert("whatever", "more whatever");
 
-    //     // $ExpectType void
-    //     objTyped.revert();
+        // $ExpectType void
+        objTyped.revert();
 
-    //     // $ExpectType void
-    //     objTyped.revert("thingOne", "thingTwo");
+        // $ExpectType void
+        objTyped.revert("thingOne", "thingTwo");
 
-    //     // $ExpectError
-    //     objTyped.revert("other");
-    // }
+        // $ExpectError
+        objTyped.revert("other");
+    }
     interface ObjectAttributes {
         example: boolean;
         someString: string;

@@ -40,9 +40,14 @@ const authProviders = {};
 class ParseUser extends ParseObject {
   /**
    * @alias Parse.User
+   * <docs>
    * @param {object} [attributes] The initial set of data to store in the user.
+   * </docs>
+   * <types>
    * @template T extends Attributes = Attributes
-   * @extends Object<T>
+   * @param {T} [attributes] The initial set of data to store in the user.
+   * @extends Parse.Object<T>
+   * </types>
    */
   constructor(attributes: ?AttributeMap) {
     super('_User');

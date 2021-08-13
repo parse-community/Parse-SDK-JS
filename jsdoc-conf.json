@@ -1,5 +1,5 @@
 {
-  "plugins": ["node_modules/jsdoc-babel", "plugins/markdown"],
+  "plugins": ["node_modules/jsdoc-babel", "plugins/markdown", "./types/plugin.js"],
   "babel": {
       "plugins": ["@babel/plugin-transform-flow-comments"]
   },

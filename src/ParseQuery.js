@@ -249,8 +249,13 @@ class ParseQuery {
 
   /**
    * @alias Parse.Query
-   * @template ParseObject extends Parse.Object = Parse.Object
-   * @param {(string | Parse.Object | ParseObject | any)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
+   * <docs>
+   * @param {(string | Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
+   * </docs>
+   * <types>
+   * @template T extends Object = Object, R=(new (...args: any[]) => T | Parse.Object)
+   * @param {string | R } objectClass An instance of a subclass of Parse.Object, or a Parse className string.
+   * </types>
    */
 
   constructor(objectClass: string | ParseObject) {
@@ -1535,7 +1540,7 @@ class ParseQuery {
    *
    * @param {string} key The key that the string to match is stored in.
    * @param {string} value The string to search
-   * @param {object} options (Optional)
+   * @param {object} [options] (Optional)
    * @param {string} options.language The language that determines the list of stop words for the search and the rules for the stemmer and tokenizer.
    * @param {boolean} options.caseSensitive A boolean flag to enable or disable case sensitive search.
    * @param {boolean} options.diacriticSensitive A boolean flag to enable or disable diacritic sensitive search.
@@ -1886,9 +1891,17 @@ class ParseQuery {
    * Requires Parse Server 3.0.0+
    * <pre>query.include('*');</pre>
    *
+   * <docs>
    * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
-   * @returns {Parse.Query} Returns the query, so you can chain this call.
+   * </docs>
+   * <types>
+   * @template K extends keyof T["attributes"] | keyof Attributes
+   * @param {K | Array<string>} keys The name(s) of the key(s) to include.
+   * </types>
+   * @returns {this} Returns the query, so you can chain this call.
+   *
    */
+
   include(...keys: Array<string | Array<string>>): ParseQuery {
     keys.forEach(key => {
       if (Array.isArray(key)) {
