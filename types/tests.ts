@@ -1971,7 +1971,11 @@ function testUser() {
         new Parse.User({ example: 100 });
 
         // $ExpectError
+        // TODO -> Cannot work out how to fix
         new Parse.User<{ example: number }>();
+
+        // $ExpectError
+        new Parse.User<{ example: number }>({ });
 
         // $ExpectError
         new Parse.User<{ example: number }>({ example: "hello" });

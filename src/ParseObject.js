@@ -127,7 +127,7 @@ class ParseObject {
    * </docs>
    * <types>
    * @template T extends Attributes = Attributes
-   * @param {T} [tatattributes]  The initial set of data to store in the object.
+   * @param {T} [attributes]  The initial set of data to store in the object.
    * </types>
    * @param {object} [options] The options for this object instance.
    */
@@ -1120,8 +1120,7 @@ class ParseObject {
 
   /**
    * Clears any (or specific) changes to this object made since the last call to save()
-   *
-   * @param {string} [keys] - specify which fields to revert
+   * @param {string} keys - specify which fields to revert
    */
   revert(...keys: Array<string>): void {
     let keysToRevert;

@@ -44,9 +44,9 @@ class ParseUser extends ParseObject {
    * @param {object} [attributes] The initial set of data to store in the user.
    * </docs>
    * <types>
+   * @extends Parse.Object<T>
    * @template T extends Attributes = Attributes
    * @param {T} [attributes] The initial set of data to store in the user.
-   * @extends Parse.Object<T>
    * </types>
    */
   constructor(attributes: ?AttributeMap) {
@@ -90,7 +90,7 @@ class ParseUser extends ParseObject {
    *   <li>If provider is AuthProvider, options is saveOpts
    * </ul>
    * @param {object} saveOpts useMasterKey / sessionToken
-   * @returns {Promise<this>} A promise that is fulfilled with the user is linked
+   * @returns {Promise<Parse.User>} A promise that is fulfilled with the user is linked
    */
   linkWith(
     provider: any,
@@ -155,7 +155,7 @@ class ParseUser extends ParseObject {
    * @param options
    * @param saveOpts
    * @deprecated since 2.9.0 see {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#linkWith linkWith}
-   * @returns {Promise<this>}
+   * @returns {Promise<Parse.User>}
    */
   _linkWith(
     provider: any,
@@ -230,7 +230,7 @@ class ParseUser extends ParseObject {
    *
    * @param {string | AuthProvider} provider Name of auth provider or {@link https://parseplatform.org/Parse-SDK-JS/api/master/AuthProvider.html AuthProvider}
    * @param {object} options MasterKey / SessionToken
-   * @returns {Promise<this>} A promise that is fulfilled when the unlinking
+   * @returns {Promise<Parse.User>} A promise that is fulfilled when the unlinking
    *     finishes.
    */
   _unlinkFrom(provider: any, options?: FullOptions): Promise<ParseUser> {
@@ -419,7 +419,7 @@ class ParseUser extends ParseObject {
    *
    * @param {object} attrs Extra fields to set on the new user, or null.
    * @param {object} options
-   * @returns {Promise<this>} A promise that is fulfilled when the signup
+   * @returns {Promise<Parse.User>} A promise that is fulfilled when the signup
    *     finishes.
    */
   signUp(attrs: AttributeMap, options?: FullOptions): Promise<ParseUser> {
@@ -445,7 +445,7 @@ class ParseUser extends ParseObject {
    * <p>A username and password must be set before calling logIn.</p>
    *
    * @param {object} [options]
-   * @returns {Promise<this>} A promise that is fulfilled with the user when
+   * @returns {Promise<Parse.User>} A promise that is fulfilled with the user when
    *     the login is complete.
    */
   logIn(options?: FullOptions): Promise<ParseUser> {
@@ -535,7 +535,7 @@ class ParseUser extends ParseObject {
    *
    * @param {string} password A password to be verified
    * @param {object} options
-   * @returns {Promise<this>} A promise that is fulfilled with a user
+   * @returns {Promise<Parse.User>} A promise that is fulfilled with a user
    *  when the password is correct.
    */
   verifyPassword(password: string, options?: RequestOptions): Promise<ParseUser> {
@@ -696,7 +696,7 @@ class ParseUser extends ParseObject {
    * @param {string} sessionToken The sessionToken to get user with.
    * @param {object} options
    * @static
-   * @returns {Promise<Parse.USer>} A promise that is fulfilled with the user is fetched.
+   * @returns {Promise<Parse.User>} A promise that is fulfilled with the user is fetched.
    */
   static me(sessionToken: string, options?: RequestOptions = {}) {
     const controller = CoreManager.getUserController();
@@ -717,7 +717,7 @@ class ParseUser extends ParseObject {
    *
    * @param {object} userJSON The JSON map of the User's data
    * @static
-   * @returns {Promise<this>} A promise that is fulfilled with the user when
+   * @returns {Promise<Parse.User>} A promise that is fulfilled with the user when
    *     the login completes.
    */
   static hydrate(userJSON: AttributeMap) {
@@ -733,7 +733,7 @@ class ParseUser extends ParseObject {
    * @param options
    * @param saveOpts
    * @static
-   * @returns {Promise<this>}
+   * @returns {Promise<Parse.User>}
    */
   static logInWith(
     provider: any,
@@ -922,7 +922,7 @@ class ParseUser extends ParseObject {
    * @param saveOpts
    * @deprecated since 2.9.0 see {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#logInWith logInWith}
    * @static
-   * @returns {Promise<this>}
+   * @returns {Promise<Parse.User>}
    */
   static _logInWith(provider: any, options: { authData?: AuthData }, saveOpts?: FullOptions) {
     const user = new this();
