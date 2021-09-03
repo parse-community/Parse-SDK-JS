@@ -366,25 +366,25 @@ class ParseQuery {
   _regexStartWith(string: string): string {
     return '^' + quote(string);
   }
-/**
- * @typedef QueryJSON
- * @property {Attributes} where
- * @property {string} [include]
- * @property {string} [excludeKeys]
- * @property {string} [keys]
- * @property {number} [limit]
- * @property {number} [skip]
- * @property {string} [order]
- * @property {string} [className]
- * @property {number} [count]
- * @property {any} [hint]
- * @property {Boolean} [explain]
- * @property {string} [readPreference]
- * @property {string} [includeReadPreference]
- *
- *  @property {string} [subqueryReadPreference]
- *
- */
+  /**
+   * @typedef QueryJSON
+   * @property {Attributes} where
+   * @property {string} [include]
+   * @property {string} [excludeKeys]
+   * @property {string} [keys]
+   * @property {number} [limit]
+   * @property {number} [skip]
+   * @property {string} [order]
+   * @property {string} [className]
+   * @property {number} [count]
+   * @property {any} [hint]
+   * @property {boolean} [explain]
+   * @property {string} [readPreference]
+   * @property {string} [includeReadPreference]
+   *
+   *  @property {string} [subqueryReadPreference]
+   *
+   */
 
   async _handleOfflineQuery(params: any) {
     OfflineQuery.validateQuery(this);
@@ -1892,6 +1892,7 @@ class ParseQuery {
    * <pre>query.include('*');</pre>
    *
    * <docs>
+   *
    * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
    * </docs>
    * <types>

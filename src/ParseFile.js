@@ -168,7 +168,7 @@ class ParseFile {
    * Data is present if initialized with Byte Array, Base64 or Saved with Uri.
    * Data is cleared if saved with File object selected with a file upload control
    *
-   * @returns {Promise<String>} Promise that is resolve with base64 data
+   * @returns {Promise<string>} Promise that is resolve with base64 data
    */
   async getData(): Promise<String> {
     if (this._data) {

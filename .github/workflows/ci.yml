@@ -20,7 +20,7 @@ jobs:
   build:
     runs-on: ubuntu-18.04
     timeout-minutes: 30
-    env:      
+    env:
       MONGODB_VERSION: 3.6.9
     steps:
     - uses: actions/checkout@v2
@@ -39,6 +39,8 @@ jobs:
     - run: npm install -g mongodb-runner
     - run: mongodb-runner start
     - run: npm run lint
+    - run: npm run types
+    - run: npm run test:types
     - run: npm test -- --maxWorkers=4
     - run: npm run integration
       env:

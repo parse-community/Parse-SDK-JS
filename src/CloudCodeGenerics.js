@@ -13,7 +13,6 @@
  * of the function.
  */
 
-
 /**
  * Typescript Generic variation of Parse.Cloud.run
  *
@@ -28,7 +27,6 @@
  * of the function.
  */
 
-
 /**
  * Typescript Generic variation of defining a Cloud Function
  *
@@ -42,7 +40,6 @@
  * @returns {void}
  */
 
-
 /**
  * Typescript Generic variation of defining a Cloud Function
  *
@@ -55,7 +52,6 @@
  * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.FunctionRequestFunc} [validator] An optional function to help validating cloud code.
  * @returns {void}
  */
-
 
 /**
  * @callback Parse.Cloud.FunctionRequestFuncGeneric1

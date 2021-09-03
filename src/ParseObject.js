@@ -182,6 +182,7 @@ class ParseObject {
    * Object attributes
    *
    * <docs>
+   *
    * @type {object}
    * </docs>
    * <types>
@@ -1120,6 +1121,7 @@ class ParseObject {
 
   /**
    * Clears any (or specific) changes to this object made since the last call to save()
+   *
    * @param {string} keys - specify which fields to revert
    */
   revert(...keys: Array<string>): void {
@@ -1808,6 +1810,7 @@ class ParseObject {
    * </pre>
    *
    * <docs>
+   *
    * @param {Array} list A list of <code>Parse.Object</code>.
    * </docs>
    * <types>

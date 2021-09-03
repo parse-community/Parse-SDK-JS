@@ -33,7 +33,7 @@ class ParseRole extends ParseObject {
    * @alias Parse.Role
    * <types>
    * @template T extends Attributes = Attributes
-   * @extends Parse.Object<T>
+   * @augments Parse.Object<T>
    * </types>
    * @param {string} name The name of the Role to create.
    * @param {Parse.ACL} acl The ACL for this role. Roles must have an ACL.

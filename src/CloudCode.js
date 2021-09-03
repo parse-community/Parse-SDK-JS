@@ -1,4 +1,3 @@
-
 /**
  * Defines a Cloud Function.
  *
@@ -424,7 +423,7 @@
  * @param {Parse.Cloud.ValidatorObject|Parse.Cloud.LiveQueryEventTriggerFunc} [validator] An optional function to help validating cloud code.
  */
 
- /**
+/**
  * Registers an on live query server event function.
  *
  * **Available in Cloud Code only.**

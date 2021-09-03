@@ -9,8 +9,8 @@
     "es6": true
   },
   "parser": "babel-eslint",
-  "globals": { 
-    "wx": true 
+  "globals": {
+    "wx": true
   },
   "plugins": [
     "flowtype",
@@ -50,7 +50,8 @@
       {
         "definedTags": [
           "flow",
-          "flow-weak"
+          "flow-weak",
+          "template"
         ]
       }
     ],
@@ -61,7 +62,14 @@
           "AuthProvider",
           "AsyncStorage",
           "LocalDatastoreController",
-          "Parse"
+          "Parse",
+          "ReturnType",
+          "Params",
+          "this",
+          "Attributes",
+          "R",
+          "T",
+          "K"
         ]
       }
     ]

@@ -38,17 +38,19 @@ const authProviders = {};
  * @augments Parse.Object
  */
 class ParseUser extends ParseObject {
+  /* eslint-disable valid-jsdoc */
   /**
    * @alias Parse.User
    * <docs>
    * @param {object} [attributes] The initial set of data to store in the user.
    * </docs>
    * <types>
-   * @extends Parse.Object<T>
+   * @augments Parse.Object<T>
    * @template T extends Attributes = Attributes
    * @param {T} [attributes] The initial set of data to store in the user.
    * </types>
    */
+  /* eslint-enable valid-jsdoc */
   constructor(attributes: ?AttributeMap) {
     super('_User');
     if (attributes && typeof attributes === 'object') {

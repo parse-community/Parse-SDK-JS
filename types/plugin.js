@@ -13,9 +13,9 @@ exports.handlers = {
       }
     }
     e.source = string.join('')
-      .replaceAll('<types>', '')
-      .replaceAll('</types>', '')
-      .replaceAll('<docs>', '')
-      .replaceAll('</docs>', '')
+      .split('<types>').join('')
+      .split('</types>').join('')
+      .split('<docs>').join('')
+      .split('</docs>').join('')
   }
 }

@@ -29,7 +29,7 @@ class ParseSession extends ParseObject {
    * @alias Parse.Session
    * <types>
    * @template T extends Attributes = Attributes
-   * @extends Parse.Object<T>
+   * @augments Parse.Object<T>
    * </types>
    * @param {object} [attributes] The initial set of data to store in the user.
    */
