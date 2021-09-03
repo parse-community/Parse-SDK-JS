@@ -36,6 +36,7 @@ const authProviders = {};
  * uniqueness.</p>
  *
  * @augments Parse.Object
+ * @alias Parse.User
  */
 class ParseUser extends ParseObject {
   /* eslint-disable valid-jsdoc */

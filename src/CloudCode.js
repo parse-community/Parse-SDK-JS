@@ -576,8 +576,7 @@
  */
 
 /**
- * @type {object}
- * @name Parse.Cloud.ReadPreferenceOption
+ * @typedef Parse.Cloud.ReadPreferenceOption
  * @property {string} Primary Primary read preference option
  * @property {string} PrimaryPreferred Prefer primary
  * @property {string} Secondary Secondary read preference option

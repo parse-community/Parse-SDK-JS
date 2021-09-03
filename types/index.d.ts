@@ -445,20 +445,6 @@ declare namespace Parse {
          */
         static job(name: string, func: Parse.Cloud.JobRequestFunc): void;
         /**
-         * @property Primary - <p>Primary read preference option</p>
-         * @property PrimaryPreferred - <p>Prefer primary</p>
-         * @property Secondary - <p>Secondary read preference option</p>
-         * @property SecondaryPreferred - <p>Prefer secondary</p>
-         * @property Nearest - <p>Nearest read preference option</p>
-         */
-        static ReadPreferenceOption: {
-            Primary: string;
-            PrimaryPreferred: string;
-            Secondary: string;
-            SecondaryPreferred: string;
-            Nearest: string;
-        };
-        /**
          * <p>Typescript Generic variation of Parse.Cloud.run</p>
          * @param name - <p>The function name.</p>
          * @param [data] - <p>The parameters to send to the cloud function.</p>
@@ -625,6 +611,20 @@ declare namespace Parse {
             isGet: boolean;
             count: boolean;
             readPreference: Parse.Cloud.ReadPreferenceOption;
+        };
+        /**
+         * @property Primary - <p>Primary read preference option</p>
+         * @property PrimaryPreferred - <p>Prefer primary</p>
+         * @property Secondary - <p>Secondary read preference option</p>
+         * @property SecondaryPreferred - <p>Prefer secondary</p>
+         * @property Nearest - <p>Nearest read preference option</p>
+         */
+        type ReadPreferenceOption = {
+            Primary: string;
+            PrimaryPreferred: string;
+            Secondary: string;
+            SecondaryPreferred: string;
+            Nearest: string;
         };
         /**
          * @param request - <p>The request object</p>
@@ -3842,6 +3842,310 @@ declare namespace Parse {
         static isCurrentSessionRevocable(): boolean;
     }
     /**
+     * <p>A Parse.User object is a local representation of a user persisted to the
+     * Parse cloud. This class is a subclass of a Parse.Object, and retains the
+     * same functionality of a Parse.Object, but also extends it with various
+     * user specific methods, like authentication, signing up, and validation of
+     * uniqueness.</p>
+     * @param [attributes] - <p>The initial set of data to store in the user.</p>
+     */
+    class User<T extends Attributes = Attributes> extends Parse.Object<T> {
+        constructor(attributes?: T);
+        /**
+         * <p>Request a revocable session token to replace the older style of token.</p>
+         * @returns <p>A promise that is resolved when the replacement
+         * token has been fetched.</p>
+         */
+        _upgradeToRevocableSession(options: any): Promise<void>;
+        /**
+         * <p>Parse allows you to link your users with {@link https://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication 3rd party authentication}, enabling
+         * your users to sign up or log into your application using their existing identities.
+         * Since 2.9.0</p>
+         * @param provider - <p>Name of auth provider or {@link https://parseplatform.org/Parse-SDK-JS/api/master/AuthProvider.html AuthProvider}</p>
+         * @param options - <ul>
+         *   <li>If provider is string, options is {@link http:\\/\\/docs.parseplatform.org/parse-server/guide/#supported-3rd-party-authentications authData}
+         *   <li>If provider is AuthProvider, options is saveOpts
+         * </ul>
+         * @param saveOpts - <p>useMasterKey / sessionToken</p>
+         * @returns <p>A promise that is fulfilled with the user is linked</p>
+         */
+        linkWith(provider: string | AuthProvider, options: any, saveOpts: any): Promise<Parse.User>;
+        _linkWith(provider: any, options: any, saveOpts: any): Promise<Parse.User>;
+        /**
+         * <p>Synchronizes auth data for a provider (e.g. puts the access token in the
+         * right place to be used by the Facebook SDK).</p>
+         */
+        _synchronizeAuthData(provider: any): void;
+        /**
+         * <p>Synchronizes authData for all providers.</p>
+         */
+        _synchronizeAllAuthData(): void;
+        /**
+         * <p>Removes null values from authData (which exist temporarily for unlinking)</p>
+         */
+        _cleanupAuthData(): void;
+        /**
+         * <p>Unlinks a user from a service.</p>
+         * @param provider - <p>Name of auth provider or {@link https://parseplatform.org/Parse-SDK-JS/api/master/AuthProvider.html AuthProvider}</p>
+         * @param options - <p>MasterKey / SessionToken</p>
+         * @returns <p>A promise that is fulfilled when the unlinking
+         * finishes.</p>
+         */
+        _unlinkFrom(provider: string | AuthProvider, options: any): Promise<Parse.User>;
+        /**
+         * <p>Checks whether a user is linked to a service.</p>
+         * @param provider - <p>service to link to</p>
+         * @returns <p>true if link was successful</p>
+         */
+        _isLinked(provider: any): boolean;
+        /**
+         * <p>Deauthenticates all providers.</p>
+         */
+        _logOutWithAll(): void;
+        /**
+         * <p>Deauthenticates a single provider (e.g. removing access tokens from the
+         * Facebook SDK).</p>
+         * @param provider - <p>service to logout of</p>
+         */
+        _logOutWith(provider: any): void;
+        /**
+         * <p>Class instance method used to maintain specific keys when a fetch occurs.
+         * Used to ensure that the session token is not lost.</p>
+         * @returns <p>sessionToken</p>
+         */
+        _preserveFieldsOnFetch(): any;
+        /**
+         * <p>Returns true if <code>current</code> would return this user.</p>
+         * @returns <p>true if user is cached on disk</p>
+         */
+        isCurrent(): boolean;
+        /**
+         * <p>Returns true if <code>current</code> would return this user.</p>
+         * @returns <p>true if user is cached on disk</p>
+         */
+        isCurrentAsync(): Promise<boolean>;
+        /**
+         * <p>Returns get(&quot;username&quot;).</p>
+         */
+        getUsername(): string;
+        /**
+         * <p>Calls set(&quot;username&quot;, username, options) and returns the result.</p>
+         */
+        setUsername(username: string): void;
+        /**
+         * <p>Calls set(&quot;password&quot;, password, options) and returns the result.</p>
+         * @param password - <p>User's Password</p>
+         */
+        setPassword(password: string): void;
+        /**
+         * <p>Returns get(&quot;email&quot;).</p>
+         * @returns <p>User's Email</p>
+         */
+        getEmail(): string;
+        /**
+         * <p>Calls set(&quot;email&quot;, email) and returns the result.</p>
+         */
+        setEmail(email: string): boolean;
+        /**
+         * <p>Returns the session token for this user, if the user has been logged in,
+         * or if it is the result of a query with the master key. Otherwise, returns
+         * undefined.</p>
+         * @returns <p>the session token, or undefined</p>
+         */
+        getSessionToken(): string;
+        /**
+         * <p>Checks whether this user is the current user and has been authenticated.</p>
+         * @returns <p>whether this user is the current user and is logged in.</p>
+         */
+        authenticated(): boolean;
+        /**
+         * <p>Signs up a new user. You should call this instead of save for
+         * new Parse.Users. This will create a new Parse.User on the server, and
+         * also persist the session on disk so that you can access the user using
+         * <code>current</code>.</p>
+         * <p>A username and password must be set before calling signUp.</p>
+         * @param attrs - <p>Extra fields to set on the new user, or null.</p>
+         * @returns <p>A promise that is fulfilled when the signup
+         * finishes.</p>
+         */
+        signUp(attrs: any, options: any): Promise<Parse.User>;
+        /**
+         * <p>Logs in a Parse.User. On success, this saves the session to disk,
+         * so you can retrieve the currently logged in user using
+         * <code>current</code>.</p>
+         * <p>A username and password must be set before calling logIn.</p>
+         * @returns <p>A promise that is fulfilled with the user when
+         * the login is complete.</p>
+         */
+        logIn(options?: any): Promise<Parse.User>;
+        /**
+         * <p>Wrap the default save behavior with functionality to save to local
+         * storage if this is current user.</p>
+         */
+        save(...args: any[]): Promise<this>;
+        /**
+         * <p>Wrap the default destroy behavior with functionality that logs out
+         * the current user when it is destroyed</p>
+         */
+        destroy(...args: any[]): Promise<this>;
+        /**
+         * <p>Wrap the default fetch behavior with functionality to save to local
+         * storage if this is current user.</p>
+         */
+        fetch(...args: any[]): Promise<this>;
+        /**
+         * <p>Wrap the default fetchWithInclude behavior with functionality to save to local
+         * storage if this is current user.</p>
+         */
+        fetchWithInclude(...args: any[]): Promise<this>;
+        /**
+         * <p>Verify whether a given password is the password of the current user.</p>
+         * @param password - <p>A password to be verified</p>
+         * @returns <p>A promise that is fulfilled with a user
+         * when the password is correct.</p>
+         */
+        verifyPassword(password: string, options: any): Promise<Parse.User>;
+        /**
+         * <p>Adds functionality to the existing Parse.User class.</p>
+         * @param protoProps - <p>A set of properties to add to the prototype</p>
+         * @param classProps - <p>A set of static properties to add to the class</p>
+         * @returns <p>The newly extended Parse.User class</p>
+         */
+        static extend(protoProps: any, classProps: any): Parse.User;
+        /**
+         * <p>Retrieves the currently logged in ParseUser with a valid session,
+         * either from memory or localStorage, if necessary.</p>
+         * @returns <p>The currently logged in Parse.User.</p>
+         */
+        static current(): Parse.User;
+        /**
+         * <p>Retrieves the currently logged in ParseUser from asynchronous Storage.</p>
+         * @returns <p>A Promise that is resolved with the currently
+         * logged in Parse User</p>
+         */
+        static currentAsync(): Promise<Parse.User | null>;
+        /**
+         * <p>Signs up a new user with a username (or email) and password.
+         * This will create a new Parse.User on the server, and also persist the
+         * session in localStorage so that you can access the user using
+         * {@link #current}.</p>
+         * @param username - <p>The username (or email) to sign up with.</p>
+         * @param password - <p>The password to sign up with.</p>
+         * @param attrs - <p>Extra fields to set on the new user.</p>
+         * @returns <p>A promise that is fulfilled with the user when
+         * the signup completes.</p>
+         */
+        static signUp(username: string, password: string, attrs: any, options: any): Promise<Parse.User>;
+        /**
+         * <p>Logs in a user with a username (or email) and password. On success, this
+         * saves the session to disk, so you can retrieve the currently logged in
+         * user using <code>current</code>.</p>
+         * @param username - <p>The username (or email) to log in with.</p>
+         * @param password - <p>The password to log in with.</p>
+         * @returns <p>A promise that is fulfilled with the user when
+         * the login completes.</p>
+         */
+        static logIn(username: string, password: string, options?: any): Promise<Parse.User>;
+        /**
+         * <p>Logs in a user with a session token. On success, this saves the session
+         * to disk, so you can retrieve the currently logged in user using
+         * <code>current</code>.</p>
+         * @param sessionToken - <p>The sessionToken to log in with.</p>
+         * @returns <p>A promise that is fulfilled with the user when
+         * the login completes.</p>
+         */
+        static become(sessionToken: string, options?: any): Promise<Parse.User>;
+        /**
+         * <p>Retrieves a user with a session token.</p>
+         * @param sessionToken - <p>The sessionToken to get user with.</p>
+         * @returns <p>A promise that is fulfilled with the user is fetched.</p>
+         */
+        static me(sessionToken: string, options: any): Promise<Parse.User>;
+        /**
+         * <p>Logs in a user with a session token. On success, this saves the session
+         * to disk, so you can retrieve the currently logged in user using
+         * <code>current</code>. If there is no session token the user will not logged in.</p>
+         * @param userJSON - <p>The JSON map of the User's data</p>
+         * @returns <p>A promise that is fulfilled with the user when
+         * the login completes.</p>
+         */
+        static hydrate(userJSON: any): Promise<Parse.User>;
+        /**
+         * <p>Static version of {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#linkWith linkWith}</p>
+         */
+        static logInWith(provider: any, options: any, saveOpts: any): Promise<Parse.User>;
+        /**
+         * <p>Logs out the currently logged in user session. This will remove the
+         * session from disk, log out of linked services, and future calls to
+         * <code>current</code> will return <code>null</code>.</p>
+         * @returns <p>A promise that is resolved when the session is
+         * destroyed on the server.</p>
+         */
+        static logOut(options?: any): Promise<any>;
+        /**
+         * <p>Requests a password reset email to be sent to the specified email address
+         * associated with the user account. This email allows the user to securely
+         * reset their password on the Parse site.</p>
+         * @param email - <p>The email address associated with the user that
+         * forgot their password.</p>
+         */
+        static requestPasswordReset(email: string, options?: any): Promise<any>;
+        /**
+         * <p>Request an email verification.</p>
+         * @param email - <p>The email address associated with the user that
+         * forgot their password.</p>
+         */
+        static requestEmailVerification(email: string, options?: any): Promise<any>;
+        /**
+         * <p>Verify whether a given password is the password of the current user.</p>
+         * @param username - <p>A username to be used for identificaiton</p>
+         * @param password - <p>A password to be verified</p>
+         * @returns <p>A promise that is fulfilled with a user
+         * when the password is correct.</p>
+         */
+        static verifyPassword(username: string, password: string, options: any): Promise<void>;
+        /**
+         * <p>Allow someone to define a custom User class without className
+         * being rewritten to _User. The default behavior is to rewrite
+         * User to _User for legacy reasons. This allows developers to
+         * override that behavior.</p>
+         * @param isAllowed - <p>Whether or not to allow custom User class</p>
+         */
+        static allowCustomUserClass(isAllowed: boolean): void;
+        /**
+         * <p>Allows a legacy application to start using revocable sessions. If the
+         * current session token is not revocable, a request will be made for a new,
+         * revocable session.
+         * It is not necessary to call this method from cloud code unless you are
+         * handling user signup or login from the server side. In a cloud code call,
+         * this function will not attempt to upgrade the current token.</p>
+         * @returns <p>A promise that is resolved when the process has
+         * completed. If a replacement session token is requested, the promise
+         * will be resolved after a new token has been fetched.</p>
+         */
+        static enableRevocableSession(options: any): Promise<void>;
+        /**
+         * <p>Enables the use of become or the current user in a server
+         * environment. These features are disabled by default, since they depend on
+         * global objects that are not memory-safe for most servers.</p>
+         */
+        static enableUnsafeCurrentUser(): void;
+        /**
+         * <p>Disables the use of become or the current user in any environment.
+         * These features are disabled on servers by default, since they depend on
+         * global objects that are not memory-safe for most servers.</p>
+         */
+        static disableUnsafeCurrentUser(): void;
+        /**
+         * <p>When registering users with {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#linkWith linkWith} a basic auth provider
+         * is automatically created for you.</p>
+         * <p>For advanced authentication, you can register an Auth provider to
+         * implement custom authentication, deauthentication.</p>
+         */
+        static _registerAuthenticationProvider(provider: any): void;
+        static _logInWith(provider: any, options: any, saveOpts: any): Promise<Parse.User>;
+    }
+    /**
      * <p>Contains functions to deal with Push in Parse.</p>
      */
     class Push {
@@ -4040,647 +4344,6 @@ declare type QueryJSON = {
     includeReadPreference?: string;
     subqueryReadPreference?: string;
 };
-
-declare class ParseUser extends Parse.Object {
-    /**
-     * <p>Request a revocable session token to replace the older style of token.</p>
-     * @returns <p>A promise that is resolved when the replacement
-     * token has been fetched.</p>
-     */
-    _upgradeToRevocableSession(options: any): Promise<void>;
-    /**
-     * <p>Parse allows you to link your users with {@link https://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication 3rd party authentication}, enabling
-     * your users to sign up or log into your application using their existing identities.
-     * Since 2.9.0</p>
-     * @param provider - <p>Name of auth provider or {@link https://parseplatform.org/Parse-SDK-JS/api/master/AuthProvider.html AuthProvider}</p>
-     * @param options - <ul>
-     *   <li>If provider is string, options is {@link http:\\/\\/docs.parseplatform.org/parse-server/guide/#supported-3rd-party-authentications authData}
-     *   <li>If provider is AuthProvider, options is saveOpts
-     * </ul>
-     * @param saveOpts - <p>useMasterKey / sessionToken</p>
-     * @returns <p>A promise that is fulfilled with the user is linked</p>
-     */
-    linkWith(provider: string | AuthProvider, options: any, saveOpts: any): Promise<Parse.User>;
-    _linkWith(provider: any, options: any, saveOpts: any): Promise<Parse.User>;
-    /**
-     * <p>Synchronizes auth data for a provider (e.g. puts the access token in the
-     * right place to be used by the Facebook SDK).</p>
-     */
-    _synchronizeAuthData(provider: any): void;
-    /**
-     * <p>Synchronizes authData for all providers.</p>
-     */
-    _synchronizeAllAuthData(): void;
-    /**
-     * <p>Removes null values from authData (which exist temporarily for unlinking)</p>
-     */
-    _cleanupAuthData(): void;
-    /**
-     * <p>Unlinks a user from a service.</p>
-     * @param provider - <p>Name of auth provider or {@link https://parseplatform.org/Parse-SDK-JS/api/master/AuthProvider.html AuthProvider}</p>
-     * @param options - <p>MasterKey / SessionToken</p>
-     * @returns <p>A promise that is fulfilled when the unlinking
-     * finishes.</p>
-     */
-    _unlinkFrom(provider: string | AuthProvider, options: any): Promise<Parse.User>;
-    /**
-     * <p>Checks whether a user is linked to a service.</p>
-     * @param provider - <p>service to link to</p>
-     * @returns <p>true if link was successful</p>
-     */
-    _isLinked(provider: any): boolean;
-    /**
-     * <p>Deauthenticates all providers.</p>
-     */
-    _logOutWithAll(): void;
-    /**
-     * <p>Deauthenticates a single provider (e.g. removing access tokens from the
-     * Facebook SDK).</p>
-     * @param provider - <p>service to logout of</p>
-     */
-    _logOutWith(provider: any): void;
-    /**
-     * <p>Class instance method used to maintain specific keys when a fetch occurs.
-     * Used to ensure that the session token is not lost.</p>
-     * @returns <p>sessionToken</p>
-     */
-    _preserveFieldsOnFetch(): any;
-    /**
-     * <p>Returns true if <code>current</code> would return this user.</p>
-     * @returns <p>true if user is cached on disk</p>
-     */
-    isCurrent(): boolean;
-    /**
-     * <p>Returns true if <code>current</code> would return this user.</p>
-     * @returns <p>true if user is cached on disk</p>
-     */
-    isCurrentAsync(): Promise<boolean>;
-    /**
-     * <p>Returns get(&quot;username&quot;).</p>
-     */
-    getUsername(): string;
-    /**
-     * <p>Calls set(&quot;username&quot;, username, options) and returns the result.</p>
-     */
-    setUsername(username: string): void;
-    /**
-     * <p>Calls set(&quot;password&quot;, password, options) and returns the result.</p>
-     * @param password - <p>User's Password</p>
-     */
-    setPassword(password: string): void;
-    /**
-     * <p>Returns get(&quot;email&quot;).</p>
-     * @returns <p>User's Email</p>
-     */
-    getEmail(): string;
-    /**
-     * <p>Calls set(&quot;email&quot;, email) and returns the result.</p>
-     */
-    setEmail(email: string): boolean;
-    /**
-     * <p>Returns the session token for this user, if the user has been logged in,
-     * or if it is the result of a query with the master key. Otherwise, returns
-     * undefined.</p>
-     * @returns <p>the session token, or undefined</p>
-     */
-    getSessionToken(): string;
-    /**
-     * <p>Checks whether this user is the current user and has been authenticated.</p>
-     * @returns <p>whether this user is the current user and is logged in.</p>
-     */
-    authenticated(): boolean;
-    /**
-     * <p>Signs up a new user. You should call this instead of save for
-     * new Parse.Users. This will create a new Parse.User on the server, and
-     * also persist the session on disk so that you can access the user using
-     * <code>current</code>.</p>
-     * <p>A username and password must be set before calling signUp.</p>
-     * @param attrs - <p>Extra fields to set on the new user, or null.</p>
-     * @returns <p>A promise that is fulfilled when the signup
-     * finishes.</p>
-     */
-    signUp(attrs: any, options: any): Promise<Parse.User>;
-    /**
-     * <p>Logs in a Parse.User. On success, this saves the session to disk,
-     * so you can retrieve the currently logged in user using
-     * <code>current</code>.</p>
-     * <p>A username and password must be set before calling logIn.</p>
-     * @returns <p>A promise that is fulfilled with the user when
-     * the login is complete.</p>
-     */
-    logIn(options?: any): Promise<Parse.User>;
-    /**
-     * <p>Wrap the default save behavior with functionality to save to local
-     * storage if this is current user.</p>
-     */
-    save(...args: any[]): Promise<this>;
-    /**
-     * <p>Wrap the default destroy behavior with functionality that logs out
-     * the current user when it is destroyed</p>
-     */
-    destroy(...args: any[]): Promise<this>;
-    /**
-     * <p>Wrap the default fetch behavior with functionality to save to local
-     * storage if this is current user.</p>
-     */
-    fetch(...args: any[]): Promise<this>;
-    /**
-     * <p>Wrap the default fetchWithInclude behavior with functionality to save to local
-     * storage if this is current user.</p>
-     */
-    fetchWithInclude(...args: any[]): Promise<this>;
-    /**
-     * <p>Verify whether a given password is the password of the current user.</p>
-     * @param password - <p>A password to be verified</p>
-     * @returns <p>A promise that is fulfilled with a user
-     * when the password is correct.</p>
-     */
-    verifyPassword(password: string, options: any): Promise<Parse.User>;
-    /**
-     * <p>Adds functionality to the existing Parse.User class.</p>
-     * @param protoProps - <p>A set of properties to add to the prototype</p>
-     * @param classProps - <p>A set of static properties to add to the class</p>
-     * @returns <p>The newly extended Parse.User class</p>
-     */
-    static extend(protoProps: any, classProps: any): Parse.User;
-    /**
-     * <p>Retrieves the currently logged in ParseUser with a valid session,
-     * either from memory or localStorage, if necessary.</p>
-     * @returns <p>The currently logged in Parse.User.</p>
-     */
-    static current(): Parse.User;
-    /**
-     * <p>Retrieves the currently logged in ParseUser from asynchronous Storage.</p>
-     * @returns <p>A Promise that is resolved with the currently
-     * logged in Parse User</p>
-     */
-    static currentAsync(): Promise<Parse.User | null>;
-    /**
-     * <p>Signs up a new user with a username (or email) and password.
-     * This will create a new Parse.User on the server, and also persist the
-     * session in localStorage so that you can access the user using
-     * {@link #current}.</p>
-     * @param username - <p>The username (or email) to sign up with.</p>
-     * @param password - <p>The password to sign up with.</p>
-     * @param attrs - <p>Extra fields to set on the new user.</p>
-     * @returns <p>A promise that is fulfilled with the user when
-     * the signup completes.</p>
-     */
-    static signUp(username: string, password: string, attrs: any, options: any): Promise<Parse.User>;
-    /**
-     * <p>Logs in a user with a username (or email) and password. On success, this
-     * saves the session to disk, so you can retrieve the currently logged in
-     * user using <code>current</code>.</p>
-     * @param username - <p>The username (or email) to log in with.</p>
-     * @param password - <p>The password to log in with.</p>
-     * @returns <p>A promise that is fulfilled with the user when
-     * the login completes.</p>
-     */
-    static logIn(username: string, password: string, options?: any): Promise<Parse.User>;
-    /**
-     * <p>Logs in a user with a session token. On success, this saves the session
-     * to disk, so you can retrieve the currently logged in user using
-     * <code>current</code>.</p>
-     * @param sessionToken - <p>The sessionToken to log in with.</p>
-     * @returns <p>A promise that is fulfilled with the user when
-     * the login completes.</p>
-     */
-    static become(sessionToken: string, options?: any): Promise<Parse.User>;
-    /**
-     * <p>Retrieves a user with a session token.</p>
-     * @param sessionToken - <p>The sessionToken to get user with.</p>
-     * @returns <p>A promise that is fulfilled with the user is fetched.</p>
-     */
-    static me(sessionToken: string, options: any): Promise<Parse.User>;
-    /**
-     * <p>Logs in a user with a session token. On success, this saves the session
-     * to disk, so you can retrieve the currently logged in user using
-     * <code>current</code>. If there is no session token the user will not logged in.</p>
-     * @param userJSON - <p>The JSON map of the User's data</p>
-     * @returns <p>A promise that is fulfilled with the user when
-     * the login completes.</p>
-     */
-    static hydrate(userJSON: any): Promise<Parse.User>;
-    /**
-     * <p>Static version of {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#linkWith linkWith}</p>
-     */
-    static logInWith(provider: any, options: any, saveOpts: any): Promise<Parse.User>;
-    /**
-     * <p>Logs out the currently logged in user session. This will remove the
-     * session from disk, log out of linked services, and future calls to
-     * <code>current</code> will return <code>null</code>.</p>
-     * @returns <p>A promise that is resolved when the session is
-     * destroyed on the server.</p>
-     */
-    static logOut(options?: any): Promise<any>;
-    /**
-     * <p>Requests a password reset email to be sent to the specified email address
-     * associated with the user account. This email allows the user to securely
-     * reset their password on the Parse site.</p>
-     * @param email - <p>The email address associated with the user that
-     * forgot their password.</p>
-     */
-    static requestPasswordReset(email: string, options?: any): Promise<any>;
-    /**
-     * <p>Request an email verification.</p>
-     * @param email - <p>The email address associated with the user that
-     * forgot their password.</p>
-     */
-    static requestEmailVerification(email: string, options?: any): Promise<any>;
-    /**
-     * <p>Verify whether a given password is the password of the current user.</p>
-     * @param username - <p>A username to be used for identificaiton</p>
-     * @param password - <p>A password to be verified</p>
-     * @returns <p>A promise that is fulfilled with a user
-     * when the password is correct.</p>
-     */
-    static verifyPassword(username: string, password: string, options: any): Promise<void>;
-    /**
-     * <p>Allow someone to define a custom User class without className
-     * being rewritten to _User. The default behavior is to rewrite
-     * User to _User for legacy reasons. This allows developers to
-     * override that behavior.</p>
-     * @param isAllowed - <p>Whether or not to allow custom User class</p>
-     */
-    static allowCustomUserClass(isAllowed: boolean): void;
-    /**
-     * <p>Allows a legacy application to start using revocable sessions. If the
-     * current session token is not revocable, a request will be made for a new,
-     * revocable session.
-     * It is not necessary to call this method from cloud code unless you are
-     * handling user signup or login from the server side. In a cloud code call,
-     * this function will not attempt to upgrade the current token.</p>
-     * @returns <p>A promise that is resolved when the process has
-     * completed. If a replacement session token is requested, the promise
-     * will be resolved after a new token has been fetched.</p>
-     */
-    static enableRevocableSession(options: any): Promise<void>;
-    /**
-     * <p>Enables the use of become or the current user in a server
-     * environment. These features are disabled by default, since they depend on
-     * global objects that are not memory-safe for most servers.</p>
-     */
-    static enableUnsafeCurrentUser(): void;
-    /**
-     * <p>Disables the use of become or the current user in any environment.
-     * These features are disabled on servers by default, since they depend on
-     * global objects that are not memory-safe for most servers.</p>
-     */
-    static disableUnsafeCurrentUser(): void;
-    /**
-     * <p>When registering users with {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#linkWith linkWith} a basic auth provider
-     * is automatically created for you.</p>
-     * <p>For advanced authentication, you can register an Auth provider to
-     * implement custom authentication, deauthentication.</p>
-     */
-    static _registerAuthenticationProvider(provider: any): void;
-    static _logInWith(provider: any, options: any, saveOpts: any): Promise<Parse.User>;
-    /**
-     * <p>Object attributes</p>
-     */
-    attributes: T;
-    /**
-     * <p>The first time this object was saved on the server.</p>
-     */
-    createdAt: Date;
-    /**
-     * <p>The last time this object was updated on the server.</p>
-     */
-    updatedAt: Date;
-    /**
-     * <p>Returns a local or server Id used uniquely identify this object</p>
-     */
-    _getId(): string;
-    /**
-     * <p>Returns a unique identifier used to pull data from the State Controller.</p>
-     */
-    _getStateIdentifier(): Parse.Object | any;
-    /**
-     * @param [keysToClear] - <p>if specified, only ops matching
-     * these fields will be cleared</p>
-     */
-    _clearPendingOps(keysToClear?: string[]): void;
-    /**
-     * <p>Public methods</p>
-     */
-    initialize(): void;
-    /**
-     * <p>Returns a JSON version of the object suitable for saving to Parse.</p>
-     */
-    toJSON(seen?: any, offline?: any): any;
-    /**
-     * <p>Determines whether this ParseObject is equal to another ParseObject</p>
-     * @param other - <p>An other object ot compare</p>
-     */
-    equals(other: any): boolean;
-    /**
-     * <p>Returns true if this object has been modified since its last
-     * save/refresh.  If an attribute is specified, it returns true only if that
-     * particular attribute has been modified since the last save/refresh.</p>
-     * @param [attr] - <p>An attribute name (optional).</p>
-     */
-    dirty(attr?: string): boolean;
-    /**
-     * <p>Returns an array of keys that have been modified since last save/refresh</p>
-     */
-    dirtyKeys(): string[];
-    /**
-     * <p>Returns true if the object has been fetched.</p>
-     */
-    isDataAvailable(): boolean;
-    /**
-     * <p>Gets a Pointer referencing this Object.</p>
-     */
-    toPointer(): Pointer;
-    /**
-     * <p>Gets a Pointer referencing this Object.</p>
-     */
-    toOfflinePointer(): Pointer;
-    /**
-     * <p>Gets the value of an attribute.</p>
-     * @param attr - <p>The string name of an attribute.</p>
-     */
-    get(attr: string): any;
-    /**
-     * <p>Gets a relation on the given class for the attribute.</p>
-     * @param attr - <p>The attribute to get the relation for.</p>
-     */
-    relation(attr: string): Parse.Relation;
-    /**
-     * <p>Gets the HTML-escaped value of an attribute.</p>
-     * @param attr - <p>The string name of an attribute.</p>
-     */
-    escape(attr: string): string;
-    /**
-     * <p>Returns <code>true</code> if the attribute contains a value that is not
-     * null or undefined.</p>
-     * @param attr - <p>The string name of the attribute.</p>
-     */
-    has(attr: string): boolean;
-    /**
-     * <p>Sets a hash of model attributes on the object.</p>
-     * <p>You can call it with an object containing keys and values, with one
-     * key and value, or dot notation.  For example:<pre>
-     *   gameTurn.set({
-     *     player: player1,
-     *     diceRoll: 2
-     *   }, {
-     *     error: function(gameTurnAgain, error) {
-     *       // The set failed validation.
-     *     }
-     *   });
-     * <p>game.set(&quot;currentPlayer&quot;, player2, {
-     * error: function(gameTurnAgain, error) {
-     * // The set failed validation.
-     * }
-     * });</p>
-     * <p>game.set(&quot;finished&quot;, true);</pre></p></p>
-     * <p>game.set(&quot;player.score&quot;, 10);</pre></p></p>
-     * @param key - <p>The key to set.</p>
-     * @param [value] - <p>The value to give it. Optional if <code>key</code> is an object.</p>
-     * @param [options] - <p>A set of options for the set.
-     * The only supported option is <code>error</code>.</p>
-     * @returns <p>true if the set succeeded.</p>
-     */
-    set(key: string | any, value?: string | any, options?: any): Parse.Object | boolean;
-    /**
-     * <p>Remove an attribute from the model. This is a noop if the attribute doesn't
-     * exist.</p>
-     * @param attr - <p>The string name of an attribute.</p>
-     */
-    unset(attr: string, options?: any): Parse.Object | boolean;
-    /**
-     * <p>Atomically increments the value of the given attribute the next time the
-     * object is saved. If no amount is specified, 1 is used by default.</p>
-     * @param attr - <p>The key.</p>
-     * @param [amount] - <p>The amount to increment by (optional).</p>
-     */
-    increment(attr: string, amount?: number): Parse.Object | boolean;
-    /**
-     * <p>Atomically decrements the value of the given attribute the next time the
-     * object is saved. If no amount is specified, 1 is used by default.</p>
-     * @param attr - <p>The key.</p>
-     * @param [amount] - <p>The amount to decrement by (optional).</p>
-     */
-    decrement(attr: string, amount?: number): Parse.Object | boolean;
-    /**
-     * <p>Atomically add an object to the end of the array associated with a given
-     * key.</p>
-     * @param attr - <p>The key.</p>
-     * @param item - <p>The item to add.</p>
-     */
-    add(attr: string, item: any): Parse.Object | boolean;
-    /**
-     * <p>Atomically add the objects to the end of the array associated with a given
-     * key.</p>
-     * @param attr - <p>The key.</p>
-     * @param items - <p>The items to add.</p>
-     */
-    addAll(attr: string, items: any[]): Parse.Object | boolean;
-    /**
-     * <p>Atomically add an object to the array associated with a given key, only
-     * if it is not already present in the array. The position of the insert is
-     * not guaranteed.</p>
-     * @param attr - <p>The key.</p>
-     * @param item - <p>The object to add.</p>
-     */
-    addUnique(attr: string, item: any): Parse.Object | boolean;
-    /**
-     * <p>Atomically add the objects to the array associated with a given key, only
-     * if it is not already present in the array. The position of the insert is
-     * not guaranteed.</p>
-     * @param attr - <p>The key.</p>
-     * @param items - <p>The objects to add.</p>
-     */
-    addAllUnique(attr: string, items: any[]): Parse.Object | boolean;
-    /**
-     * <p>Atomically remove all instances of an object from the array associated
-     * with a given key.</p>
-     * @param attr - <p>The key.</p>
-     * @param item - <p>The object to remove.</p>
-     */
-    remove(attr: string, item: any): Parse.Object | boolean;
-    /**
-     * <p>Atomically remove all instances of the objects from the array associated
-     * with a given key.</p>
-     * @param attr - <p>The key.</p>
-     * @param items - <p>The object to remove.</p>
-     */
-    removeAll(attr: string, items: any[]): Parse.Object | boolean;
-    /**
-     * <p>Returns an instance of a subclass of Parse.Op describing what kind of
-     * modification has been performed on this field since the last time it was
-     * saved. For example, after calling object.increment(&quot;x&quot;), calling
-     * object.op(&quot;x&quot;) would return an instance of Parse.Op.Increment.</p>
-     * @param attr - <p>The key.</p>
-     * @returns <p>The operation, or undefined if none.</p>
-     */
-    op(attr: string): Parse.Op;
-    /**
-     * <p>Creates a new model with identical attributes to this one.</p>
-     */
-    clone(): Parse.Object;
-    /**
-     * <p>Creates a new instance of this object. Not to be confused with clone()</p>
-     */
-    newInstance(): Parse.Object;
-    /**
-     * <p>Returns true if this object has never been saved to Parse.</p>
-     */
-    isNew(): boolean;
-    /**
-     * <p>Returns true if this object was created by the Parse server when the
-     * object might have already been there (e.g. in the case of a Facebook
-     * login)</p>
-     */
-    existed(): boolean;
-    /**
-     * <p>Returns true if this object exists on the Server</p>
-     * @param options - <p>Valid options are:<ul></p>
-     *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-     *     be used for this request.
-     *   <li>sessionToken: A valid session token, used for making a request on
-     *       behalf of a specific user.
-     * </ul>
-     * @returns <p>A boolean promise that is fulfilled if object exists.</p>
-     */
-    exists(options: any): Promise<boolean>;
-    /**
-     * <p>Checks if the model is currently in a valid state.</p>
-     */
-    isValid(): boolean;
-    /**
-     * <p>You should not call this function directly unless you subclass
-     * <code>Parse.Object</code>, in which case you can override this method
-     * to provide additional validation on <code>set</code> and
-     * <code>save</code>.  Your implementation should return</p>
-     * @param attrs - <p>The current data to validate.</p>
-     * @returns <p>False if the data is valid.  An error object otherwise.</p>
-     */
-    validate(attrs: any): Parse.Error | boolean;
-    /**
-     * <p>Returns the ACL for this object.</p>
-     * @returns <p>An instance of Parse.ACL.</p>
-     */
-    getACL(): Parse.ACL;
-    /**
-     * <p>Sets the ACL to be used for this object.</p>
-     * @param acl - <p>An instance of Parse.ACL.</p>
-     * @returns <p>Whether the set passed validation.</p>
-     */
-    setACL(acl: Parse.ACL, options?: any): Parse.Object | boolean;
-    /**
-     * <p>Clears any (or specific) changes to this object made since the last call to save()</p>
-     * @param keys - <p>specify which fields to revert</p>
-     */
-    revert(...keys: string[]): void;
-    /**
-     * <p>Clears all attributes on a model</p>
-     */
-    clear(): Parse.Object | boolean;
-    /**
-     * <p>Saves this object to the server at some unspecified time in the future,
-     * even if Parse is currently inaccessible.</p>
-     * <p>Use this when you may not have a solid network connection, and don't need to know when the save completes.
-     * If there is some problem with the object such that it can't be saved, it will be silently discarded.</p>
-     * <p>Objects saved with this method will be stored locally in an on-disk cache until they can be delivered to Parse.
-     * They will be sent immediately if possible. Otherwise, they will be sent the next time a network connection is
-     * available. Objects saved this way will persist even after the app is closed, in which case they will be sent the
-     * next time the app is opened.</p>
-     * @param [options] - <p>Used to pass option parameters to method if arg1 and arg2 were both passed as strings.
-     * Valid options are:</p>
-     * <ul>
-     * <li>sessionToken: A valid session token, used for making a request on
-     * behalf of a specific user.
-     * <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
-     * <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
-     * </ul>
-     * @returns <p>A promise that is fulfilled when the save
-     * completes.</p>
-     */
-    saveEventually(options?: any): Promise<this>;
-    /**
-     * <p>Deletes this object from the server at some unspecified time in the future,
-     * even if Parse is currently inaccessible.</p>
-     * <p>Use this when you may not have a solid network connection,
-     * and don't need to know when the delete completes. If there is some problem with the object
-     * such that it can't be deleted, the request will be silently discarded.</p>
-     * <p>Delete instructions made with this method will be stored locally in an on-disk cache until they can be transmitted
-     * to Parse. They will be sent immediately if possible. Otherwise, they will be sent the next time a network connection
-     * is available. Delete requests will persist even after the app is closed, in which case they will be sent the
-     * next time the app is opened.</p>
-     * @param [options] - <p>Valid options are:<ul></p>
-     *   <li>sessionToken: A valid session token, used for making a request on
-     *       behalf of a specific user.
-     *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
-     * </ul>
-     * @returns <p>A promise that is fulfilled when the destroy
-     * completes.</p>
-     */
-    destroyEventually(options?: any): Promise<this>;
-    /**
-     * <p>Asynchronously stores the object and every object it points to in the local datastore,
-     * recursively, using a default pin name: _default.</p>
-     * <p>If those other objects have not been fetched from Parse, they will not be stored.
-     * However, if they have changed data, all the changes will be retained.</p>
-     * <pre>
-     * await object.pin();
-     * </pre>
-     * <p>To retrieve object:
-     * <code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code></p>
-     * @returns <p>A promise that is fulfilled when the pin completes.</p>
-     */
-    pin(): Promise<any>;
-    /**
-     * <p>Asynchronously removes the object and every object it points to in the local datastore,
-     * recursively, using a default pin name: _default.</p>
-     * <pre>
-     * await object.unPin();
-     * </pre>
-     * @returns <p>A promise that is fulfilled when the unPin completes.</p>
-     */
-    unPin(): Promise<any>;
-    /**
-     * <p>Asynchronously returns if the object is pinned</p>
-     * <pre>
-     * const isPinned = await object.isPinned();
-     * </pre>
-     * @returns <p>A boolean promise that is fulfilled if object is pinned.</p>
-     */
-    isPinned(): Promise<boolean>;
-    /**
-     * <p>Asynchronously stores the objects and every object they point to in the local datastore, recursively.</p>
-     * <p>If those other objects have not been fetched from Parse, they will not be stored.
-     * However, if they have changed data, all the changes will be retained.</p>
-     * <pre>
-     * await object.pinWithName(name);
-     * </pre>
-     * <p>To retrieve object:
-     * <code>query.fromLocalDatastore()</code> or <code>query.fromPinWithName(name)</code></p>
-     * @param name - <p>Name of Pin.</p>
-     * @returns <p>A promise that is fulfilled when the pin completes.</p>
-     */
-    pinWithName(name: string): Promise<void>;
-    /**
-     * <p>Asynchronously removes the object and every object it points to in the local datastore, recursively.</p>
-     * <pre>
-     * await object.unPinWithName(name);
-     * </pre>
-     * @param name - <p>Name of Pin.</p>
-     * @returns <p>A promise that is fulfilled when the unPin completes.</p>
-     */
-    unPinWithName(name: string): Promise<void>;
-    /**
-     * <p>Asynchronously loads data from the local datastore into this object.</p>
-     * <pre>
-     * await object.fetchFromLocalDatastore();
-     * </pre>
-     * <p>You can create an unfetched pointer with <code>Parse.Object.createWithoutData()</code>
-     * and then call <code>fetchFromLocalDatastore()</code> on it.</p>
-     * @returns <p>A promise that is fulfilled when the fetch completes.</p>
-     */
-    fetchFromLocalDatastore(): Promise<this>;
-}
 
 /**
  * <p>Copyright (c) 2015-present, Parse, LLC.
