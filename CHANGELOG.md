@@ -3,9 +3,6 @@
 ### master
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.3.0...master)
 
-**Improvements**
-- Add Parse Issue Bot (Manuel Trezza) [#1400](https://github.com/parse-community/Parse-SDK-JS/pull/1400)
-
 ## 3.3.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.2.0...3.3.0)
 
