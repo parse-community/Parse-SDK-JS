@@ -81,6 +81,10 @@ describe('OfflineQuery', () => {
     expect(matchesQuery(q.className, obj, [], q)).toBe(false);
 
     q = new ParseQuery('Item');
+    q.lessThan('ttl', { $relativeTime: '0 yr 0 wk 5 d 0 hr 0 min 0 sec ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(false);
+
+    q = new ParseQuery('Item');
     q.greaterThan('ttl', { $relativeTime: 'now' });
     expect(matchesQuery(q.className, obj, [], q)).toBe(true);
 
@@ -90,7 +94,19 @@ describe('OfflineQuery', () => {
     expect(matchesQuery(q.className, obj, [], q)).toBe(true);
 
     q = new ParseQuery('Item');
-    q.greaterThan('ttl', { $relativeTime: '1 year 3 weeks 1 hour 3 minutes 2 seconds ago' });
+    q.greaterThan('ttl', { $relativeTime: '1 years 3 weeks 1 hours 3 minutes 2 seconds ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: '2 year 2 week 1 hour 4 day 3 minute 2 second ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: '2 yrs 2 wks 1 hrs 3 mins 2 secs ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: '0 yr 0 wk 0 d 24 hr 3 min 2 sec ago' });
     expect(matchesQuery(q.className, obj, [], q)).toBe(true);
   });
 
