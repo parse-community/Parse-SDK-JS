@@ -824,13 +824,13 @@ describe('ParseQuery', () => {
 
   it('can combine equalTo clause with any other clause', () => {
     const q = new ParseQuery('Item');
-    q.equalTo('inStock', null);
-    q.exists('inStock');
+    q.equalTo('arrayField', ['a', 'b']);
+    q.exists('arrayField');
 
     expect(q.toJSON()).toEqual({
       where: {
-        inStock: {
-          $eq: null,
+        arrayField: {
+          $eq: ['a', 'b'],
           $exists: true,
         },
       },
