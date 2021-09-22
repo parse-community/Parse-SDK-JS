@@ -325,6 +325,11 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
     }
 
     switch (condition) {
+    case '$eq':
+      if (object[key] !== compareTo) {
+        return false;
+      }
+      break;
     case '$lt':
       if (object[key] >= compareTo) {
         return false;
