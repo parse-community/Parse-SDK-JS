@@ -119,7 +119,9 @@ describe('ParseQuery', () => {
     q.equalTo('size', 'medium');
     expect(q.toJSON()).toEqual({
       where: {
-        size: 'medium',
+        size: {
+          $eq: 'medium',
+        },
       },
     });
 
@@ -127,7 +129,9 @@ describe('ParseQuery', () => {
     q.equalTo('size', 'small');
     expect(q.toJSON()).toEqual({
       where: {
-        size: 'small',
+        size: {
+          $eq: 'small',
+        },
       },
     });
 
@@ -136,6 +140,7 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         size: {
+          $eq: 'small',
           $exists: false,
         },
       },
@@ -146,8 +151,13 @@ describe('ParseQuery', () => {
     q.equalTo({ size, stock });
     expect(q.toJSON()).toEqual({
       where: {
-        size: 'medium',
-        stock: true,
+        size: {
+          $eq: 'medium',
+          $exists: false,
+        },
+        stock: {
+          $eq: true,
+        },
       },
     });
   });
@@ -463,7 +473,9 @@ describe('ParseQuery', () => {
           $inQuery: {
             className: 'Item',
             where: {
-              inStock: 0,
+              inStock: {
+                $eq: 0,
+              },
             },
           },
         },
@@ -483,7 +495,9 @@ describe('ParseQuery', () => {
           $notInQuery: {
             className: 'Item',
             where: {
-              inStock: 0,
+              inStock: {
+                $eq: 0,
+              },
             },
           },
         },
@@ -505,7 +519,9 @@ describe('ParseQuery', () => {
             query: {
               className: 'Item',
               where: {
-                inStock: 0,
+                inStock: {
+                  $eq: 0,
+                },
               },
             },
           },
@@ -528,7 +544,9 @@ describe('ParseQuery', () => {
             query: {
               className: 'Item',
               where: {
-                inStock: 0,
+                inStock: {
+                  $eq: 0,
+                },
               },
             },
           },
@@ -980,7 +998,9 @@ describe('ParseQuery', () => {
     q.equalTo('name', 'Product 5');
     expect(q.toJSON()).toEqual({
       where: {
-        name: 'Product 5',
+        name: {
+          $eq: 'Product 5',
+        },
       },
       skip: 4,
     });
@@ -1176,7 +1196,7 @@ describe('ParseQuery', () => {
     let mediumOrLarge = ParseQuery.or(q, q2);
     expect(mediumOrLarge.toJSON()).toEqual({
       where: {
-        $or: [{ size: 'medium' }, { size: 'large' }],
+        $or: [{ size: { $eq: 'medium' } }, { size: { $eq: 'large' } }],
       },
     });
 
@@ -1185,7 +1205,7 @@ describe('ParseQuery', () => {
     mediumOrLarge = ParseQuery.or(q, q2);
     expect(mediumOrLarge.toJSON()).toEqual({
       where: {
-        $or: [{ size: 'medium' }, { size: 'large' }],
+        $or: [{ size: { $eq: 'medium' } }, { size: { $eq: 'large' } }],
       },
     });
   });
@@ -1202,7 +1222,7 @@ describe('ParseQuery', () => {
     let mediumOrLarge = ParseQuery.and(q, q2);
     expect(mediumOrLarge.toJSON()).toEqual({
       where: {
-        $and: [{ size: 'medium' }, { size: 'large' }],
+        $and: [{ size: { $eq: 'medium' } }, { size: { $eq: 'large' } }],
       },
     });
 
@@ -1211,7 +1231,7 @@ describe('ParseQuery', () => {
     mediumOrLarge = ParseQuery.and(q, q2);
     expect(mediumOrLarge.toJSON()).toEqual({
       where: {
-        $and: [{ size: 'medium' }, { size: 'large' }],
+        $and: [{ size: { $eq: 'medium' } }, { size: { $eq: 'large' } }],
       },
     });
   });
@@ -1228,7 +1248,7 @@ describe('ParseQuery', () => {
     let mediumOrLarge = ParseQuery.nor(q, q2);
     expect(mediumOrLarge.toJSON()).toEqual({
       where: {
-        $nor: [{ size: 'medium' }, { size: 'large' }],
+        $nor: [{ size: { $eq: 'medium' } }, { size: { $eq: 'large' } }],
       },
     });
 
@@ -1237,7 +1257,7 @@ describe('ParseQuery', () => {
     mediumOrLarge = ParseQuery.nor(q, q2);
     expect(mediumOrLarge.toJSON()).toEqual({
       where: {
-        $nor: [{ size: 'medium' }, { size: 'large' }],
+        $nor: [{ size: { $eq: 'medium' } }, { size: { $eq: 'large' } }],
       },
     });
   });
@@ -1250,7 +1270,9 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           limit: 1,
           where: {
-            size: 'small',
+            size: {
+              $eq: 'small',
+            },
           },
         });
         expect(options.requestTask).toBeDefined();
@@ -1283,7 +1305,9 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           limit: 1,
           where: {
-            size: 'small',
+            size: {
+              $eq: 'small',
+            },
           },
         });
         expect(options.useMasterKey).toEqual(true);
@@ -1314,7 +1338,9 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           explain: true,
           where: {
-            size: 'small',
+            size: {
+              $eq: 'small',
+            },
           },
         });
         expect(options.requestTask).toBeDefined();
@@ -1348,7 +1374,9 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           limit: 1,
           where: {
-            objectId: 'I27',
+            objectId: {
+              $eq: 'I27',
+            },
           },
         });
         expect(options.requestTask).toBeDefined();
@@ -1416,7 +1444,9 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           limit: 1,
           where: {
-            objectId: 'I28',
+            objectId: {
+              $eq: 'I28',
+            },
           },
         });
         expect(options.requestTask).toBeDefined();
@@ -1450,7 +1480,9 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           limit: 1,
           where: {
-            objectId: 'I27',
+            objectId: {
+              $eq: 'I27',
+            },
           },
         });
         expect(options.useMasterKey).toEqual(true);
@@ -1481,7 +1513,9 @@ describe('ParseQuery', () => {
           limit: 0,
           count: 1,
           where: {
-            size: 'small',
+            size: {
+              $eq: 'small',
+            },
           },
         });
         expect(options.requestTask).toBeDefined();
@@ -1510,7 +1544,9 @@ describe('ParseQuery', () => {
           limit: 0,
           count: 1,
           where: {
-            size: 'small',
+            size: {
+              $eq: 'small',
+            },
           },
         });
         expect(options.useMasterKey).toEqual(true);
@@ -1703,7 +1739,9 @@ describe('ParseQuery', () => {
         include: '*',
         hint: '_id_',
         where: {
-          arrayField: ['a', 'b'],
+          arrayField: {
+            $eq: ['a', 'b'],
+          },
           size: {
             $in: ['small', 'medium'],
           },
@@ -1713,12 +1751,14 @@ describe('ParseQuery', () => {
               query: {
                 className: 'Review',
                 where: {
-                  stars: 5,
+                  stars: { $eq: 5 },
                 },
               },
             },
           },
-          valid: true,
+          valid: {
+            $eq: true,
+          },
         },
       });
       expect(options.requestTask).toBeDefined();
@@ -1839,12 +1879,16 @@ describe('ParseQuery', () => {
               query: {
                 className: 'Review',
                 where: {
-                  stars: 5,
+                  stars: {
+                    $eq: 5,
+                  },
                 },
               },
             },
           },
-          valid: true,
+          valid: {
+            $eq: true,
+          },
         },
       });
       expect(options.requestTask).toBeDefined();
@@ -1909,12 +1953,16 @@ describe('ParseQuery', () => {
                 query: {
                   className: 'Review',
                   where: {
-                    stars: 5,
+                    stars: {
+                      $eq: 5,
+                    },
                   },
                 },
               },
             },
-            valid: true,
+            valid: {
+              $eq: true,
+            },
           },
         });
         expect(options.requestTask).toBeDefined();
@@ -1958,7 +2006,9 @@ describe('ParseQuery', () => {
             size: {
               $in: ['small', 'medium'],
             },
-            valid: true,
+            valid: {
+              $eq: true,
+            },
           },
         });
         expect(options.useMasterKey).toEqual(true);
@@ -2009,7 +2059,9 @@ describe('ParseQuery', () => {
             size: {
               $in: ['small', 'medium'],
             },
-            valid: true,
+            valid: {
+              $eq: true,
+            },
           },
           hint: '_id_',
         });
@@ -2558,7 +2610,9 @@ describe('ParseQuery', () => {
       order: 'a,b,c',
       skip: 4,
       where: {
-        size: 'medium',
+        size: {
+          $eq: 'medium',
+        },
       },
     });
   });
@@ -2571,7 +2625,9 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           distinct: 'size',
           where: {
-            size: 'small',
+            size: {
+              $eq: 'small',
+            },
           },
         });
         expect(options.useMasterKey).toEqual(true);
@@ -2599,7 +2655,9 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           distinct: 'size',
           where: {
-            size: 'small',
+            size: {
+              $eq: 'small',
+            },
           },
         });
         expect(options.useMasterKey).toEqual(true);
@@ -2630,7 +2688,9 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           distinct: 'size',
           where: {
-            size: 'small',
+            size: {
+              $eq: 'small',
+            },
           },
           hint: '_id_',
         });
