@@ -319,17 +319,47 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
       toString.call(compareTo) === '[object Date]' ||
       (typeof compareTo === 'string' &&
         new Date(compareTo) !== 'Invalid Date' &&
-        !isNaN(new Date(compareTo)))
+        !isNaN(new Date(compareTo)) &&
+        new Date(compareTo).toISOString() === compareTo)
     ) {
       object[key] = new Date(object[key].iso ? object[key].iso : object[key]);
     }
 
     switch (condition) {
-    case '$eq':
-      if (object[key] !== compareTo) {
-        return false;
+    case '$eq': {
+      if (typeof compareTo !== 'object') {
+        // Equality (or Array contains) cases
+        if (Array.isArray(object[key])) {
+          if (object[key].indexOf(constraints[condition]) === -1) {
+            return false;
+          }
+          break;
+        }
+        if (object[key] !== compareTo) {
+          return false;
+        }
+        break;
+      } else {
+        if (compareTo && constraints[condition].__type === 'Pointer') {
+          if (
+            !equalObjectsGeneric(object[key], constraints[condition], function (obj, ptr) {
+              return (
+                typeof obj !== 'undefined' &&
+                  ptr.className === obj.className &&
+                  ptr.objectId === obj.objectId
+              );
+            })
+          ) {
+            return false;
+          }
+          break;
+        }
+        if (!equalObjects(decode(object[key]), compareTo)) {
+          return false;
+        }
       }
       break;
+    }
     case '$lt':
       if (object[key] >= compareTo) {
         return false;
