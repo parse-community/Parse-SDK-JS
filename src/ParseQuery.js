@@ -344,11 +344,7 @@ class ParseQuery {
    */
   _addCondition(key: string, condition: string, value: mixed): ParseQuery {
     if (!this._where[key] || typeof this._where[key] === 'string') {
-      const prev = this._where[key];
       this._where[key] = {};
-      if (typeof this._where[key] === 'string') {
-        this._where[key]['$eq'] = prev;
-      }
     }
     this._where[key][condition] = encode(value, false, true);
     return this;
@@ -1226,11 +1222,8 @@ class ParseQuery {
       return this.doesNotExist(key);
     }
 
-    if (typeof this._where[key] === 'undefined') {
-      this._where[key] = encode(value, false, true);
-    } else {
-      this._addCondition(key, '$eq', value);
-    }
+    // this._where[key] = encode(value, false, true);
+    this._addCondition(key, '$eq', value);
     return this;
   }
 
