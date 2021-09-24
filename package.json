@@ -81,7 +81,7 @@
     "vinyl-source-stream": "2.0.0"
   },
   "optionalDependencies": {
-    "crypto-js": "4.0.0"
+    "crypto-js": "4.1.1"
   },
   "scripts": {
     "build": "node build_releases.js",
