@@ -1,7 +1,13 @@
 # Parse-SDK-JS
 
 ### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.3.0...master)
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.3.1...master)
+
+## 3.3.1
+[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.3.0...3.3.1)
+
+**Fixes**
+- Upgraded crypto-js dependency for compatibility with webpack in Parse Dashboard
 
 ## 3.3.0
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.2.0...3.3.0)
