@@ -109,6 +109,7 @@ const RESTController = {
       const xhr = new XHR();
       xhr.onreadystatechange = function () {
         if (xhr.readyState !== 4 || handled || xhr._aborted) {
+          promise.reject(xhr);
           return;
         }
         handled = true;

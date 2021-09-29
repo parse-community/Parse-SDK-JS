@@ -67,6 +67,15 @@ describe('RESTController', () => {
     });
   });
 
+  it('reject response if server is unavailable', done => {
+    RESTController._setXHR(mockXHR([{ status: 0 }], { readyState: 1 }));
+    RESTController.ajax('POST', 'users', {}).then(null, err => {
+      expect(err.readyState).toBe(1);
+      done();
+    });
+    jest.runAllTimers();
+  });
+
   it('retries on 5XX errors', done => {
     RESTController._setXHR(
       mockXHR([{ status: 500 }, { status: 500 }, { status: 200, response: { success: true } }])
@@ -462,7 +471,6 @@ describe('RESTController', () => {
     });
     RESTController.request('GET', 'classes/MyObject', {}, {});
     await flushPromises();
-    xhr.onreadystatechange();
     expect(JSON.parse(xhr.send.mock.calls[0][0])).toEqual({
       _method: 'GET',
       _ApplicationId: 'A',

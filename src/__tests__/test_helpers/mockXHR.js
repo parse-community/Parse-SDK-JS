@@ -32,7 +32,7 @@ function mockXHR(results, options = {}) {
     send: function () {
       this.status = results[attempts].status;
       this.responseText = JSON.stringify(results[attempts].response || {});
-      this.readyState = 4;
+      this.readyState = options.readyState || 4;
       attempts++;
       this.onreadystatechange();
       this.onprogress(options.progress);
