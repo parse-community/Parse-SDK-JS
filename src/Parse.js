@@ -47,7 +47,6 @@ const Parse = {
       /* eslint-enable no-console */
     }
     Parse._initialize(applicationId, javaScriptKey);
-    EventuallyQueue.poll();
   },
 
   _initialize(applicationId: string, javaScriptKey: string, masterKey: string) {
@@ -267,12 +266,19 @@ Parse._getInstallationId = function () {
 };
 /**
  * Enable pinning in your application.
- * This must be called before your application can use pinning.
+ * This must be called before initialize in your application.
  *
  * @static
  */
 Parse.enableLocalDatastore = function () {
-  Parse.LocalDatastore.isEnabled = true;
+  if (!Parse.applicationId) {
+    console.log("'enableLocalDataStore' must be called before 'initialize'");
+    return;
+  }
+  if (!Parse.LocalDatastore.isEnabled) {
+    Parse.LocalDatastore.isEnabled = true;
+    EventuallyQueue.poll();
+  }
 };
 /**
  * Flag that indicates whether Local Datastore is enabled.
