@@ -129,6 +129,12 @@ describe('Parse module', () => {
     expect(Parse.LocalDatastore.isEnabled).toBe(true);
     expect(Parse.isLocalDatastoreEnabled()).toBe(true);
     expect(EventuallyQueue.poll).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.poll).toHaveBeenCalledWith(2000);
+
+    EventuallyQueue.poll.mockClear();
+    const polling = false;
+    Parse.enableLocalDatastore(polling);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(0);
   });
 
   it('can dump LocalDatastore', async () => {
