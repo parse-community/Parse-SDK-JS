@@ -266,7 +266,7 @@ Parse._getInstallationId = function () {
 };
 /**
  * Enable pinning in your application.
- * This must be called before initialize in your application.
+ * This must be called after `Parse.initialize` in your application.
  *
  * @param [polling] Allow pinging the server /health endpoint. Default true
  * @param [ms] Milliseconds to ping the server. Default 2000ms
@@ -274,7 +274,7 @@ Parse._getInstallationId = function () {
  */
 Parse.enableLocalDatastore = function (polling = true, ms: number = 2000) {
   if (!Parse.applicationId) {
-    console.log("'enableLocalDataStore' must be called before 'initialize'");
+    console.log("'enableLocalDataStore' must be called after 'initialize'");
     return;
   }
   if (!Parse.LocalDatastore.isEnabled) {
