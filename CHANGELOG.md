@@ -1,7 +1,8 @@
 # Parse-SDK-JS
 
-### master
-[Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.3.1...master)
+## [Unreleased (master branch)](https://github.com/parse-community/Parse-SDK-JS/compare/3.3.1...master)
+
+- fix: Move EventuallyQueue polling to enableLocalDatastore ([#1419](https://github.com/parse-community/Parse-SDK-JS/pull/1419))
 
 ## 3.3.1
 [Full Changelog](https://github.com/parse-community/Parse-SDK-JS/compare/3.3.0...3.3.1)
