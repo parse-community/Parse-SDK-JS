@@ -7,8 +7,8 @@
 [![Coverage](http://codecov.io/github/parse-community/Parse-SDK-JS/coverage.svg?branch=master)](http://codecov.io/github/parse-community/Parse-SDK-JS?branch=master)
 
 [![npm latest version](https://img.shields.io/npm/v/parse/latest.svg)](https://www.npmjs.com/package/parse)
+[![npm alpha version](https://img.shields.io/npm/v/parse/alpha.svg)](https://www.npmjs.com/package/parse)
 <!-- [![npm beta version](https://img.shields.io/npm/v/parse/beta.svg)](https://www.npmjs.com/package/parse) -->
-<!-- [![npm alpha version](https://img.shields.io/npm/v/parse/alpha.svg)](https://www.npmjs.com/package/parse) -->
 
 [![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)][open-collective-link]
 [![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)][open-collective-link]
