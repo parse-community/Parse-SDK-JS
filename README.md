@@ -2,9 +2,13 @@
 
 ---
 
-[![Build Status CI](https://github.com/parse-community/Parse-SDK-JS/workflows/ci/badge.svg?branch=master)](https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Amaster)
+[![Build Status CI alpha](https://github.com/parse-community/Parse-SDK-JS/workflows/ci/badge.svg?branch=alpha)](https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Aalpha)
+[![Build Status CI release](https://github.com/parse-community/Parse-SDK-JS/workflows/ci/badge.svg?branch=release)](https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Arelease)
 [![Snyk Badge](https://snyk.io/test/github/parse-community/Parse-SDK-JS/badge.svg)](https://snyk.io/test/github/parse-community/Parse-SDK-JS)
-[![Coverage](http://codecov.io/github/parse-community/Parse-SDK-JS/coverage.svg?branch=master)](http://codecov.io/github/parse-community/Parse-SDK-JS?branch=master)
+[![Coverage](http://codecov.io/github/parse-community/Parse-SDK-JS/coverage.svg?branch=alpha)](http://codecov.io/github/parse-community/Parse-SDK-JS?branch=alpha)
+
+[![Node Version](https://img.shields.io/badge/nodejs-12,_14,_15-green.svg?logo=node.js&style=flat)](https://nodejs.org/)
+[![auto-release](https://img.shields.io/badge/%F0%9F%9A%80-auto--release-9e34eb.svg)](https://github.com/parse-community/parse-dashboard/releases)
 
 [![npm latest version](https://img.shields.io/npm/v/parse/latest.svg)](https://www.npmjs.com/package/parse)
 [![npm alpha version](https://img.shields.io/npm/v/parse/alpha.svg)](https://www.npmjs.com/package/parse)
