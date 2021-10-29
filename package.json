@@ -29,7 +29,7 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime": "7.14.8",
+    "@babel/runtime": "7.15.3",
     "@babel/runtime-corejs3": "7.14.6",
     "idb-keyval": "5.1.0",
     "react-native-crypto-js": "1.0.0",
