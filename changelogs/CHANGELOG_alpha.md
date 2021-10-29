@@ -1,3 +1,10 @@
+# [3.4.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/3.4.0-alpha.1...3.4.0-alpha.2) (2021-10-29)
+
+
+### Bug Fixes
+
+* upgrade @babel/runtime from 7.14.8 to 7.15.3 ([#1404](https://github.com/parse-community/Parse-SDK-JS/issues/1404)) ([8cb321c](https://github.com/parse-community/Parse-SDK-JS/commit/8cb321cbe81d51d4bbf94c2ac2638c14a0826bf4))
+
 # [3.4.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/3.3.2-alpha.1...3.4.0-alpha.1) (2021-10-27)
 
 
