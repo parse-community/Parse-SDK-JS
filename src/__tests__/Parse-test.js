@@ -114,15 +114,34 @@ describe('Parse module', () => {
 
   it('can enable LocalDatastore', () => {
     jest.spyOn(console, 'log').mockImplementationOnce(() => {});
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+
+    Parse.initialize(null, null);
+    Parse.enableLocalDatastore();
+    expect(console.log).toHaveBeenCalledWith(
+      "'enableLocalDataStore' must be called after 'initialize'"
+    );
+
+    Parse.initialize('A', 'B');
     Parse.LocalDatastore.isEnabled = false;
     Parse.enableLocalDatastore();
+
     expect(Parse.LocalDatastore.isEnabled).toBe(true);
     expect(Parse.isLocalDatastoreEnabled()).toBe(true);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.poll).toHaveBeenCalledWith(2000);
+
+    EventuallyQueue.poll.mockClear();
+    const polling = false;
+    Parse.enableLocalDatastore(polling);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(0);
   });
 
   it('can dump LocalDatastore', async () => {
+    jest.spyOn(console, 'log').mockImplementationOnce(() => {});
     Parse.LocalDatastore.isEnabled = false;
     let LDS = await Parse.dumpLocalDatastore();
+    expect(console.log).toHaveBeenCalledWith('Parse.enableLocalDatastore() must be called first');
     expect(LDS).toEqual({});
     Parse.LocalDatastore.isEnabled = true;
     const controller = {
