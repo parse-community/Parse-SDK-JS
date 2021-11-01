@@ -1,3 +1,15 @@
+# [3.4.0](https://github.com/parse-community/Parse-SDK-JS/compare/3.3.1...3.4.0) (2021-11-01)
+
+
+### Bug Fixes
+
+* update parse server dependency branch; recreate package lock ([#1424](https://github.com/parse-community/Parse-SDK-JS/issues/1424)) ([38455ef](https://github.com/parse-community/Parse-SDK-JS/commit/38455ef6770d108dbf2f34604dade6dc0d63a201))
+* upgrade @babel/runtime from 7.14.8 to 7.15.3 ([#1404](https://github.com/parse-community/Parse-SDK-JS/issues/1404)) ([8cb321c](https://github.com/parse-community/Parse-SDK-JS/commit/8cb321cbe81d51d4bbf94c2ac2638c14a0826bf4))
+
+### Features
+
+* add options to enable polling and set the polling interval; fixes excessive polling ([#1419](https://github.com/parse-community/Parse-SDK-JS/issues/1419)) ([0f804b8](https://github.com/parse-community/Parse-SDK-JS/commit/0f804b8760bba619080a79da5c6d3641f112b211))
+
 # [3.3.1](https://github.com/parse-community/Parse-SDK-JS/compare/3.3.0...3.3.1)
 
 ### Bug Fixes
