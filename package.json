@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "3.3.1",
+  "version": "3.4.0-alpha.2",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://parseplatform.org/",
   "keywords": [
@@ -29,12 +29,12 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime": "7.14.8",
-    "@babel/runtime-corejs3": "7.14.6",
+    "@babel/runtime-corejs3": "7.14.7",
+    "@babel/runtime": "7.15.4",
     "idb-keyval": "5.0.6",
     "react-native-crypto-js": "1.0.0",
     "uuid": "3.4.0",
-    "ws": "7.5.0",
+    "ws": "7.5.1",
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
@@ -46,6 +46,12 @@
     "@babel/preset-env": "7.10.2",
     "@babel/preset-react": "7.10.1",
     "@parse/minami": "1.0.0",
+    "@semantic-release/changelog": "5.0.1",
+    "@semantic-release/commit-analyzer": "8.0.1",
+    "@semantic-release/git": "9.0.0",
+    "@semantic-release/github": "7.2.3",
+    "@semantic-release/npm": "7.1.3",
+    "@semantic-release/release-notes-generator": "9.0.3",
     "babel-eslint": "10.1.0",
     "babel-jest": "24.9.0",
     "babel-plugin-inline-package-json": "2.0.0",
@@ -75,9 +81,10 @@
     "jsdoc-babel": "0.5.0",
     "lint-staged": "10.5.3",
     "metro-react-native-babel-preset": "0.59.0",
-    "parse-server": "github:parse-community/parse-server#master",
+    "parse-server": "github:parse-community/parse-server#alpha",
     "prettier": "2.2.1",
     "regenerator-runtime": "0.13.5",
+    "semantic-release": "17.4.6",
     "vinyl-source-stream": "2.0.0"
   },
   "optionalDependencies": {
