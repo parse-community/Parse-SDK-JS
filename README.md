@@ -98,14 +98,6 @@ We have curated a [migration guide][migration] that should help you migrate your
 
 Parse Server supports many [3rd Party Authenications][3rd-party-auth]. It is possible to [linkWith][link-with] any 3rd Party Authentication by creating a [custom authentication module][custom-auth-module].
 
-## Want to ride the bleeding edge?
-
-We recommend using the most recent tagged build published to npm for production. However, you can test not-yet-released versions of the Parse-SDK-JS by referencing specific branches in your `package.json`. For example, to use the alpha branch:
-
-```
-npm install parse-community/Parse-SDK-JS.git#alpha
-```
-
 ### Experimenting
 
 You can also use your own forks, and work in progress branches by specifying them:
