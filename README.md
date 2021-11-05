@@ -100,10 +100,10 @@ Parse Server supports many [3rd Party Authenications][3rd-party-auth]. It is pos
 
 ## Want to ride the bleeding edge?
 
-We recommend using the most recent tagged build published to npm for production. However, you can test not-yet-released versions of the Parse-SDK-JS by referencing specific branches in your `package.json`. For example, to use the master branch:
+We recommend using the most recent tagged build published to npm for production. However, you can test not-yet-released versions of the Parse-SDK-JS by referencing specific branches in your `package.json`. For example, to use the alpha branch:
 
 ```
-npm install parse-community/Parse-SDK-JS.git#master
+npm install parse-community/Parse-SDK-JS.git#alpha
 ```
 
 ### Experimenting
