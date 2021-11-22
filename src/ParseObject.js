@@ -1800,6 +1800,94 @@ class ParseObject {
   }
 
   /**
+   * Saves the given list of Parse.Object.
+   * Will keep trying to save all items lists, even if ecountering errors, up to options.retyMax (default 3).
+   *
+   * <pre>
+   * Parse.Object.saveAllSettled([object1, object2, ...], options)
+   * .then((list) => {
+   * // All the objects were saved.
+   * }, (error) => {
+   * // An error occurred while saving one of the objects.
+   * });
+   * </pre>
+   *
+   * @param {Array} list A list of <code>Parse.Object</code>.
+   * @param {object} options
+   * Used to pass option parameters to method (optional).
+   * Valid options are:
+   * <ul>
+   * <li>retryMax: Number of times to retry (defualt 3)
+   * <li>delay: milliseconds between save requests (default 100)
+   * </ul>
+   * @static
+   * @returns {Parse.Object[]}
+   */
+   static saveAllSettled(list: Array<ParseObject>, options: RequestOptions = {}) {
+    const saveOptions = {};
+    if (options.hasOwnProperty('retryMax')) {
+      saveOptions.retryMax = options.retryMax;
+    } else {
+      saveOptions.retryMax = 3;
+    }
+    if (options.hasOwnProperty('delay')) {
+      saveOptions.delay = options.delay;
+    } else {
+      saveOptions.delay = 100;
+    }
+    
+    list = list || [];
+    let statuses = list.map(function () {
+      return { status: 'init' };
+    });
+    let retryCount = 0;
+
+    return new Promise(function (resolve, reject) {
+      
+      function saveRun() {
+        //created a staggered sequence of save calls, delayed by <options.delay> ms
+        let delay = 0;
+        let staggered = list.map( (item, i) => {
+          return  new Promise(staggerResolve => {
+            if (item.dirty() && statuses[i].status !== 'fulfilled') {
+              delay += options.delay;
+              setTimeout(() => {
+                staggerResolve(item.save());
+              }, delay)              
+            } else {
+              staggerResolve(item);
+            }                        
+          })          
+        });
+
+        Promise.allSettled(staggered).then( (results) => {
+          statuses = results;
+          const successCount = results.reduce( (total, result) => {
+            return total + (result.status === 'fulfilled' ? 1 : 0);
+          }, 0);
+
+          if (successCount === list.length) {
+            //all saved ok
+            resolve(list);
+          } else if (retryCount < options.retryMax) {
+            //try again, with those that failed
+            retryCount++;
+            saveRun(retryCount);
+          } else {
+            //hit the limit - reject
+            reject({
+              message: 'Time Out. Saved ' + successCount + ' of ' + items.length + ' items.',
+              statuses: statuses
+            });
+          }
+        });
+      }
+      saveRun();
+    });
+  }
+
+
+  /**
    * Creates a reference to a subclass of Parse.Object with the given id. This
    * does not exist on Parse.Object, only on subclasses.
    *
