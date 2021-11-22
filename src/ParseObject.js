@@ -1801,7 +1801,8 @@ class ParseObject {
 
   /**
    * Saves the given list of Parse.Object.
-   * Will keep trying to save all items lists, even if encountering errors, up to options.retryMax (default 3).
+   * Will keep trying to save all items lists, even if encountering errors, 
+   * up to options.retryMax (default 3).
    *
    * <pre>
    * Parse.Object.saveAllSettled([object1, object2, ...], options)
@@ -1812,7 +1813,9 @@ class ParseObject {
    *  error will contain:
    * <ul>
    * <li>message: error message
-   * <li>statuses: list of statuses { status : fulfilled | rejected, reason : <error message, if rejected>, fulfilled : <value of saved object, if saved ok>} corresponding to list
+   * <li>statuses: list of statuses { status : fulfilled | rejected, 
+   *                                  reason : <error message, if rejected>, 
+   *                                  fulfilled : <value of saved object, if saved ok>} 
    * </ul>
    * });
    * </pre>
