@@ -1884,7 +1884,7 @@ class ParseObject {
           } else {
             //hit the limit - reject
             reject({
-              message: 'Time Out. Saved ' + successCount + ' of ' + items.length + ' items.',
+              message: 'Time Out. Saved ' + successCount + ' of ' + list.length + ' items.',
               statuses: statuses
             });
           }
