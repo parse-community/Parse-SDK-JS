@@ -1809,6 +1809,11 @@ class ParseObject {
    * // All the objects were saved.
    * }, (error) => {
    * // An error occurred while saving one of the objects.
+   *  error will contain:
+   * <ul>
+   * <li>message: error message
+   * <li>statuses: list of statuses { status : fulfilled | rejected, reason : <error message, if rejected>, fulfilled : <value of saved object, if saved ok>} corresponding to list
+   * </ul>
    * });
    * </pre>
    *
