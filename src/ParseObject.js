@@ -1801,7 +1801,7 @@ class ParseObject {
 
   /**
    * Saves the given list of Parse.Object.
-   * Will keep trying to save all items lists, even if ecountering errors, up to options.retyMax (default 3).
+   * Will keep trying to save all items lists, even if encountering errors, up to options.retryMax (default 3).
    *
    * <pre>
    * Parse.Object.saveAllSettled([object1, object2, ...], options)
