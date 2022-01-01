@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "3.4.0",
+  "version": "3.4.0-alpha.3",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://parseplatform.org/",
   "keywords": [
@@ -29,9 +29,9 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime-corejs3": "7.14.7",
     "@babel/runtime": "7.15.4",
-    "idb-keyval": "5.0.6",
+    "@babel/runtime-corejs3": "7.14.7",
+    "idb-keyval": "6.0.3",
     "react-native-crypto-js": "1.0.0",
     "uuid": "3.4.0",
     "ws": "7.5.1",
