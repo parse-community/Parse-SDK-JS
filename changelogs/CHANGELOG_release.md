@@ -1,3 +1,10 @@
+## [3.4.1](https://github.com/parse-community/Parse-SDK-JS/compare/3.4.0...3.4.1) (2022-01-01)
+
+
+### Bug Fixes
+
+* upgrade idb-keyval from 5.0.6 to 6.0.3 ([#1397](https://github.com/parse-community/Parse-SDK-JS/issues/1397)) ([922a6db](https://github.com/parse-community/Parse-SDK-JS/commit/922a6dbb8e8208d18d0759543962cbb4c1ae6d96))
+
 # [3.4.0](https://github.com/parse-community/Parse-SDK-JS/compare/3.3.1...3.4.0) (2021-11-01)
 
 
