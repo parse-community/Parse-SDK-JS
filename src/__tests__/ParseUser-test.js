@@ -940,6 +940,74 @@ describe('ParseUser', () => {
       });
   });
 
+  it('user who logs out, deletes attribute, then logs back in has correct attributes', done => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path) {
+        expect(path).toBe('login');
+
+        return Promise.resolve(
+          {
+            objectId: 'uid2',
+            username: 'username',
+            sessionToken: '123abc',
+            fieldToBeDeleted: 'This field is returned in the first login but not the second',
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+
+    ParseUser.logIn('username', 'password')
+      .then(u => {
+        expect(u.isCurrent()).toBe(true);
+        expect(u.id).toBe('uid2');
+        expect(u.get('username')).toBe('username');
+        expect(u.get('fieldToBeDeleted')).toBe(
+          'This field is returned in the first login but not the second'
+        );
+        CoreManager.setRESTController({
+          request() {
+            return Promise.resolve({}, 200);
+          },
+          ajax() {},
+        });
+        return ParseUser.logOut();
+      })
+      .then(() => {
+        expect(ParseUser.current()).toBe(null);
+      })
+      .then(() => {
+        CoreManager.setRESTController({
+          request(method, path) {
+            expect(path).toBe('login');
+
+            return Promise.resolve(
+              {
+                objectId: 'uid2',
+                username: 'username',
+                sessionToken: '123abc',
+                // We assume fieldToBeDeleted was deleted while user was logged out
+              },
+              200
+            );
+          },
+          ajax() {},
+        });
+        return ParseUser.logIn('username', 'password');
+      })
+      .then(u => {
+        expect(u.isCurrent()).toBe(true);
+        expect(u.id).toBe('uid2');
+        expect(u.get('username')).toBe('username');
+        expect(u.get('fieldToBeDeleted')).toBe(undefined); // Failing test
+
+        done();
+      });
+  });
+
   it('can retreive a user with sessionToken (me)', async () => {
     ParseUser.disableUnsafeCurrentUser();
     ParseUser._clearCache();
