@@ -940,72 +940,59 @@ describe('ParseUser', () => {
       });
   });
 
-  it('user who logs out, deletes attribute, then logs back in has correct attributes', done => {
+  it('user who logs out, deletes attribute, then logs back in has correct attributes', async () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path) {
+      async request(method, path) {
         expect(path).toBe('login');
-
-        return Promise.resolve(
-          {
-            objectId: 'uid2',
-            username: 'username',
-            sessionToken: '123abc',
-            fieldToBeDeleted: 'This field is returned in the first login but not the second',
-          },
-          200
-        );
+        return {
+          objectId: 'uid2',
+          username: 'username',
+          sessionToken: '123abc',
+          fieldToBeDeleted: 'This field is returned in the first login but not the second',
+        };
       },
       ajax() {},
     });
 
-    ParseUser.logIn('username', 'password')
-      .then(u => {
-        expect(u.isCurrent()).toBe(true);
-        expect(u.id).toBe('uid2');
-        expect(u.get('username')).toBe('username');
-        expect(u.get('fieldToBeDeleted')).toBe(
-          'This field is returned in the first login but not the second'
-        );
-        CoreManager.setRESTController({
-          request() {
-            return Promise.resolve({}, 200);
-          },
-          ajax() {},
-        });
-        return ParseUser.logOut();
-      })
-      .then(() => {
-        expect(ParseUser.current()).toBe(null);
-      })
-      .then(() => {
-        CoreManager.setRESTController({
-          request(method, path) {
-            expect(path).toBe('login');
+    const user1 = await ParseUser.logIn('username', 'password');
+    expect(user1.isCurrent()).toBe(true);
+    expect(user1.id).toBe('uid2');
+    expect(user1.get('username')).toBe('username');
+    expect(user1.get('fieldToBeDeleted')).toBe(
+      'This field is returned in the first login but not the second'
+    );
 
-            return Promise.resolve(
-              {
-                objectId: 'uid2',
-                username: 'username',
-                sessionToken: '123abc',
-                // We assume fieldToBeDeleted was deleted while user was logged out
-              },
-              200
-            );
-          },
-          ajax() {},
-        });
-        return ParseUser.logIn('username', 'password');
-      })
-      .then(u => {
-        expect(u.isCurrent()).toBe(true);
-        expect(u.id).toBe('uid2');
-        expect(u.get('username')).toBe('username');
-        expect(u.get('fieldToBeDeleted')).toBe(undefined); // Failing test
+    CoreManager.setRESTController({
+      async request() {
+        return {};
+      },
+      ajax() {},
+    });
 
-        done();
-      });
+    await ParseUser.logOut();
+    expect(ParseUser.current()).toBe(null);
+
+    CoreManager.setRESTController({
+      async request(method, path) {
+        expect(path).toBe('login');
+
+        return {
+          objectId: 'uid2',
+          username: 'username',
+          sessionToken: '123abc',
+          // We assume fieldToBeDeleted was deleted while user was logged out
+        };
+      },
+      ajax() {},
+    });
+
+    const user2 = await ParseUser.logIn('username', 'password');
+    expect(user2.isCurrent()).toBe(true);
+    expect(user2.id).toBe('uid2');
+    expect(user2.get('username')).toBe('username');
+    expect(user2.get('fieldToBeDeleted')).toBe(undefined); // Failing test
   });
 
   it('can retreive a user with sessionToken (me)', async () => {
