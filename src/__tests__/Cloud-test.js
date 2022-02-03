@@ -15,15 +15,22 @@ jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseQuery');
 jest.dontMock('../Push');
+jest.dontMock('../parseDate');
+jest.dontMock('../ObjectStateMutations');
+jest.dontMock('../SingleInstanceStateController');
+jest.dontMock('../UniqueInstanceStateController');
 
 const Cloud = require('../Cloud');
 const CoreManager = require('../CoreManager');
 const Push = require('../Push');
+const ParseObject = require('../ParseObject').default;
 
 const defaultController = CoreManager.getCloudController();
 
 describe('Cloud', () => {
   beforeEach(() => {
+    ParseObject.enableSingleInstance();
+
     const run = jest.fn();
     const getJobsData = jest.fn();
     const startJob = jest.fn();
@@ -214,6 +221,48 @@ describe('CloudController', () => {
     Cloud.run('myfunction').then(() => {
       done();
     });
+  });
+
+  it('run same function twice with different responses', async () => {
+    const request = jest.fn();
+    request.mockReturnValue(
+      Promise.resolve({
+        success: true,
+        result: {
+          objectId: 'abc123',
+          className: 'Item',
+          __type: 'Object',
+          createdAt: '2015-01-01T00:00:00.000Z',
+          updatedAt: '2015-01-01T00:00:00.000Z',
+          label: 'foobar',
+        },
+      })
+    );
+
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request: request, ajax: ajax });
+
+    const response1 = await Cloud.run('myfunction');
+    expect(response1.get('label')).toBe('foobar');
+
+    request.mockReturnValue(
+      Promise.resolve({
+        success: true,
+        result: {
+          objectId: 'abc123',
+          className: 'Item',
+          __type: 'Object',
+          createdAt: '2015-01-01T00:00:00.000Z',
+          updatedAt: '2015-01-01T00:00:00.000Z',
+          label2: 'control to confirm correct mock usage',
+          // Note that 'label' is not returned
+        },
+      })
+    );
+
+    const response2 = await Cloud.run('myfunction');
+    expect(response2.get('label2')).toBe('control to confirm correct mock usage');
+    expect(response2.get('label')).toBe(undefined); // Failing test PR #1442
   });
 
   it('startJob passes encoded requests', () => {

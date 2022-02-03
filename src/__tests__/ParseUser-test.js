@@ -992,7 +992,7 @@ describe('ParseUser', () => {
     expect(user2.isCurrent()).toBe(true);
     expect(user2.id).toBe('uid2');
     expect(user2.get('username')).toBe('username');
-    expect(user2.get('fieldToBeDeleted')).toBe(undefined); // Failing test
+    expect(user2.get('fieldToBeDeleted')).toBe(undefined); // Failing test PR #1442
   });
 
   it('can retreive a user with sessionToken (me)', async () => {
