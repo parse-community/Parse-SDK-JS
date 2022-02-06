@@ -434,6 +434,14 @@ ParseError.EMAIL_MISSING = 204;
 ParseError.EMAIL_NOT_FOUND = 205;
 
 /**
+ * Error code indicating that the email has already been verified and can not be verified again.
+ *
+ * @property {number} EMAIL_ALREADY_VERIFIED
+ * @static
+ */
+ ParseError.EMAIL_ALREADY_VERIFIED = 212;
+
+/**
  * Error code indicating that a user object without a valid session could
  * not be altered.
  *
