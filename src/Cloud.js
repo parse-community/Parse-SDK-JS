@@ -121,6 +121,7 @@ const DefaultController = {
       if (typeof res === 'object' && Object.keys(res).length > 0 && !res.hasOwnProperty('result')) {
         throw new ParseError(ParseError.INVALID_JSON, 'The server returned an invalid response.');
       }
+      ParseObject._clearAllState();
       const decoded = decode(res);
       if (decoded && decoded.hasOwnProperty('result')) {
         return Promise.resolve(decoded.result);
