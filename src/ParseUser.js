@@ -1088,8 +1088,7 @@ const DefaultController = {
         stateController.setPendingOp(user._getStateIdentifier(), 'username', undefined);
         stateController.setPendingOp(user._getStateIdentifier(), 'password', undefined);
         response.password = undefined;
-        user._clearServerData();
-        user._finishFetch(response);
+        user._finishFetch(response, true);
         if (!canUseCurrentUser) {
           // We can't set the current user, so just return the one we logged in
           return Promise.resolve(user);
