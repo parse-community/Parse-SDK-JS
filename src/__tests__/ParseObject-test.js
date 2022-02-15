@@ -661,6 +661,33 @@ describe('ParseObject', () => {
     });
   });
 
+  it('can set multiple nested fields (regression test for #1450)', () => {
+    const o = new ParseObject('Person');
+    o._finishFetch({
+      objectId: 'setNested2_1450',
+      objectField: {
+        number: 5,
+        letter: 'a',
+      },
+    });
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 5, letter: 'a' },
+    });
+    o.set('objectField.number', 20);
+    o.set('objectField.letter', 'b');
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 20, letter: 'b' },
+    });
+    expect(o.op('objectField.number') instanceof SetOp).toBe(true);
+    expect(o.dirtyKeys()).toEqual(['objectField.number', 'objectField.letter', 'objectField']);
+    expect(o._getSaveJSON()).toEqual({
+      'objectField.number': 20,
+      'objectField.letter': 'b',
+    });
+  });
+
   it('can increment a nested field', () => {
     const o = new ParseObject('Person');
     o._finishFetch({
