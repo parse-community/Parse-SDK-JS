@@ -659,6 +659,14 @@ describe('ParseObject', () => {
       'objectField.number': 20,
       otherField: { hello: 'world' },
     });
+    expect(o.toJSON()).toEqual({
+      objectField: {
+        number: 20,
+        letter: 'a',
+      },
+      otherField: { hello: 'world' },
+      objectId: 'setNested',
+    });
   });
 
   it('can increment a nested field', () => {
