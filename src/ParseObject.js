@@ -122,13 +122,7 @@ class ParseObject {
   /**
    * @alias Parse.Object
    * @param {string} [className] The class name for the object
-   * <docs>
    * @param {object} [attributes]  The initial set of data to store in the object.
-   * </docs>
-   * <types>
-   * @template T extends Attributes = Attributes
-   * @param {T} [attributes]  The initial set of data to store in the object.
-   * </types>
    * @param {object} [options] The options for this object instance.
    */
 
@@ -181,13 +175,7 @@ class ParseObject {
   /**
    * Object attributes
    *
-   * <docs>
-   *
    * @type {object}
-   * </docs>
-   * <types>
-   * @type {T}
-   * </types>
    */
 
   get attributes(): AttributeMap {
@@ -1809,14 +1797,7 @@ class ParseObject {
    * });
    * </pre>
    *
-   * <docs>
-   *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * </docs>
-   * <types>
-   * @template T extends readonly Object[]
-   * @param {T} list A list of <code>Parse.Object</code>.
-   * </types>
    * @param {object} [options]
    * @static
    * @returns {Parse.Object[]}

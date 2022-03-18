@@ -249,13 +249,7 @@ class ParseQuery {
 
   /**
    * @alias Parse.Query
-   * <docs>
    * @param {(string | Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
-   * </docs>
-   * <types>
-   * @template T extends Object = Object, R=(new (...args: any[]) => T | Parse.Object)
-   * @param {string | R } objectClass An instance of a subclass of Parse.Object, or a Parse className string.
-   * </types>
    */
 
   constructor(objectClass: string | ParseObject) {
@@ -1891,14 +1885,8 @@ class ParseQuery {
    * Requires Parse Server 3.0.0+
    * <pre>query.include('*');</pre>
    *
-   * <docs>
    *
    * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
-   * </docs>
-   * <types>
-   * @template K extends keyof T["attributes"] | keyof Attributes
-   * @param {K | Array<string>} keys The name(s) of the key(s) to include.
-   * </types>
    * @returns {this} Returns the query, so you can chain this call.
    *
    */
