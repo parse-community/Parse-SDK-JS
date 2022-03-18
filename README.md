@@ -1,31 +1,38 @@
-<p align="center">
-    <img alt="Parse Platform" src="https://github.com/parse-community/Parse-SDK-JS/raw/master/.github/parse-logo.png" width="200">
-</p>
+![parse-repository-header-sdk-js](https://user-images.githubusercontent.com/5673677/138293960-641c96bf-1293-4061-99a5-a4ed09868e1c.png)
 
-<h2 align="center">Parse SDK for JavaScript</h2>
+---
 
-<p align="center">
-    A library that gives you access to the powerful Parse Server backend from your JavaScript app.
-</p>
+[![Build Status CI alpha](https://github.com/parse-community/Parse-SDK-JS/workflows/ci/badge.svg?branch=alpha)](https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Aalpha)
+[![Build Status CI release](https://github.com/parse-community/Parse-SDK-JS/workflows/ci/badge.svg?branch=release)](https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Arelease)
+[![Snyk Badge](https://snyk.io/test/github/parse-community/Parse-SDK-JS/badge.svg)](https://snyk.io/test/github/parse-community/Parse-SDK-JS)
+[![Coverage](http://codecov.io/github/parse-community/Parse-SDK-JS/coverage.svg?branch=alpha)](http://codecov.io/github/parse-community/Parse-SDK-JS?branch=alpha)
 
-<p align="center">
-    <a href="https://twitter.com/intent/follow?screen_name=parseplatform"><img alt="Follow on Twitter" src="https://img.shields.io/twitter/follow/parseplatform?style=social&label=Follow"></a>
-    <a href="https://community.parseplatform.org/"><img alt="Join the conversation" src="https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg"></a>
-    <a href="https://github.com/parse-community/Parse-SDK-JS/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-BSD-lightgrey.svg"></a>
-    <a href="https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Amaster"><img alt="Build status" src="https://github.com/parse-community/Parse-SDK-JS/workflows/ci/badge.svg?branch=master"></a>
-    <a href="#backers"><img alt="Backers on Open Collective" src="https://opencollective.com/parse-server/backers/badge.svg" /></a>
-  <a href="#sponsors"><img alt="Sponsors on Open Collective" src="https://opencollective.com/parse-server/sponsors/badge.svg" /></a>
-</p>
+[![Node Version](https://img.shields.io/badge/nodejs-12,_14,_15-green.svg?logo=node.js&style=flat)](https://nodejs.org/)
+[![auto-release](https://img.shields.io/badge/%F0%9F%9A%80-auto--release-9e34eb.svg)](https://github.com/parse-community/parse-dashboard/releases)
 
-<p align="center">
-    <a href="http://codecov.io/github/parse-community/Parse-SDK-JS?branch=master"><img alt="Test coverage" src="http://codecov.io/github/parse-community/Parse-SDK-JS/coverage.svg?branch=master"></a>
-    <a href="https://npmjs.org/parse"><img alt="npm version" src="https://badge.fury.io/js/parse.svg"></a>
-    <a href="https://cdnjs.com/libraries/parse"><img alt="CDNJS version" src="https://img.shields.io/cdnjs/v/parse.svg"></a>
-    <a href="https://greenkeeper.io/"><img alt="Greenkeeper badge" src="https://badges.greenkeeper.io/parse-community/Parse-SDK-JS.svg"></a>
-</p>
-<br>
+[![npm latest version](https://img.shields.io/npm/v/parse/latest.svg)](https://www.npmjs.com/package/parse)
+[![npm alpha version](https://img.shields.io/npm/v/parse/alpha.svg)](https://www.npmjs.com/package/parse)
+<!-- [![npm beta version](https://img.shields.io/npm/v/parse/beta.svg)](https://www.npmjs.com/package/parse) -->
 
-For more information on Parse and its features, see [the website](https://parseplatform.org), [the JavaScript guide](https://docs.parseplatform.org/js/guide/), [the Cloud Code guide](https://docs.parseplatform.org/cloudcode/guide/) or [API Reference](https://parseplatform.org/Parse-SDK-JS/api/).
+[![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)][open-collective-link]
+[![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)][open-collective-link]
+[![License](https://img.shields.io/badge/license-BSD-lightgrey.svg)][license-link]
+[![Forum](https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg)](https://community.parseplatform.org/c/client-sdks/javascript-sdk)
+[![Twitter](https://img.shields.io/twitter/follow/ParsePlatform.svg?label=Follow&style=social)](https://twitter.com/intent/follow?screen_name=ParsePlatform)
+
+---
+
+A library that gives you access to the powerful Parse Server backend from your JavaScript app. For more information on Parse and its features, see [the website](https://parseplatform.org), [the JavaScript guide](https://docs.parseplatform.org/js/guide/), [the Cloud Code guide](https://docs.parseplatform.org/cloudcode/guide/) or [API Reference](https://parseplatform.org/Parse-SDK-JS/api/).
+
+---
+
+- [Getting Started](#getting-started)
+  - [Using Parse on Different Platforms](#using-parse-on-different-platforms)
+- [Upgrading to Parse SDK 2.0.0](#upgrading-to-parse-sdk-200)
+- [3rd Party Authentications](#3rd-party-authentications)
+- [Want to ride the bleeding edge?](#want-to-ride-the-bleeding-edge)
+  - [Experimenting](#experimenting)
+- [Contributing](#contributing)
 
 ## Getting Started
 
@@ -91,14 +98,6 @@ We have curated a [migration guide][migration] that should help you migrate your
 
 Parse Server supports many [3rd Party Authenications][3rd-party-auth]. It is possible to [linkWith][link-with] any 3rd Party Authentication by creating a [custom authentication module][custom-auth-module].
 
-## Want to ride the bleeding edge?
-
-We recommend using the most recent tagged build published to npm for production. However, you can test not-yet-released versions of the Parse-SDK-JS by referencing specific branches in your `package.json`. For example, to use the master branch:
-
-```
-npm install parse-community/Parse-SDK-JS.git#master
-```
-
 ### Experimenting
 
 You can also use your own forks, and work in progress branches by specifying them:
@@ -113,19 +112,6 @@ And don't forget, if you plan to deploy it remotely, you should run `npm install
 
 We really want Parse to be yours, to see it grow and thrive in the open source community. Please see the [Contributing to Parse Javascript SDK guide][contributing].
 
-## License
-
-```
-Copyright (c) 2015-present, Parse, LLC.
-All rights reserved.
-
-This source code is licensed under the BSD-style license found in the
-LICENSE file in the root directory of this source tree. An additional grant
-of patent rights can be found in the PATENTS file in the same directory.
-```
-
------
-As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code.
  
 [3rd-party-auth]: http://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication
 [contributing]: https://github.com/parse-community/Parse-SDK-JS/blob/master/CONTRIBUTING.md
@@ -134,3 +120,4 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
 [migration]: https://github.com/parse-community/Parse-SDK-JS/blob/master/2.0.0.md
 [open-collective-link]: https://opencollective.com/parse-server
 [types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse 
+[license-link]: LICENSE

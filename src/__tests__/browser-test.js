@@ -57,7 +57,7 @@ describe('Browser', () => {
     jest.spyOn(console, 'log').mockImplementationOnce(() => {});
     jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
     Parse.initialize('A', 'B');
-    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(0);
   });
 
   it('load StorageController', () => {
