@@ -21,16 +21,16 @@ jest.dontMock('../LocalDatastore');
 jest.dontMock('../OfflineQuery');
 jest.dontMock('../LiveQuerySubscription');
 
-jest.mock('uuid/v4', () => {
+jest.mock('../uuid', () => {
   let value = 0;
   return () => value++;
 });
-const mockObject = function(className) {
+const mockObject = function (className) {
   this.className = className;
   this.attributes = {};
 };
-mockObject.registerSubclass = function() {};
-mockObject.fromJSON = function(json) {
+mockObject.registerSubclass = function () {};
+mockObject.fromJSON = function (json) {
   const o = new mockObject(json.className);
   o.id = json.objectId;
   for (const attr in json) {
@@ -74,7 +74,7 @@ describe('ParseQuery', () => {
     const q = new ParseQuery('Item');
     expect(q.className).toBe('Item');
     expect(q.toJSON()).toEqual({
-      where: {}
+      where: {},
     });
   });
 
@@ -83,7 +83,7 @@ describe('ParseQuery', () => {
     const q2 = new ParseQuery(item);
     expect(q2.className).toBe('Item');
     expect(q2.toJSON()).toEqual({
-      where: {}
+      where: {},
     });
   });
 
@@ -94,7 +94,7 @@ describe('ParseQuery', () => {
     const q = new ParseQuery(ObjectFunction);
     expect(q.className).toBe('Item');
     expect(q.toJSON()).toEqual({
-      where: {}
+      where: {},
     });
   });
 
@@ -104,16 +104,14 @@ describe('ParseQuery', () => {
     const q = new ParseQuery(ObjectFunction);
     expect(q.className).toBe('Item');
     expect(q.toJSON()).toEqual({
-      where: {}
+      where: {},
     });
   });
 
   it('throws when created with invalid data', () => {
-    expect(function() {
+    expect(function () {
       new ParseQuery();
-    }).toThrow(
-      'A ParseQuery must be constructed with a ParseObject or class name.'
-    );
+    }).toThrow('A ParseQuery must be constructed with a ParseObject or class name.');
   });
 
   it('can generate equality queries', () => {
@@ -121,16 +119,16 @@ describe('ParseQuery', () => {
     q.equalTo('size', 'medium');
     expect(q.toJSON()).toEqual({
       where: {
-        size: 'medium'
-      }
+        size: 'medium',
+      },
     });
 
     // Overrides old constraint
     q.equalTo('size', 'small');
     expect(q.toJSON()).toEqual({
       where: {
-        size: 'small'
-      }
+        size: 'small',
+      },
     });
 
     // equalTo('key', undefined) resolves to 'does not exist'
@@ -138,9 +136,9 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         size: {
-          $exists: false
-        }
-      }
+          $exists: false,
+        },
+      },
     });
 
     const size = 'medium';
@@ -150,7 +148,7 @@ describe('ParseQuery', () => {
       where: {
         size: 'medium',
         stock: true,
-      }
+      },
     });
   });
 
@@ -160,18 +158,18 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         size: {
-          $ne: 'small'
-        }
-      }
+          $ne: 'small',
+        },
+      },
     });
 
     q.notEqualTo('size', 'medium');
     expect(q.toJSON()).toEqual({
       where: {
         size: {
-          $ne: 'medium'
-        }
-      }
+          $ne: 'medium',
+        },
+      },
     });
 
     const size = 'medium';
@@ -184,8 +182,8 @@ describe('ParseQuery', () => {
         },
         stock: {
           $ne: true,
-        }
-      }
+        },
+      },
     });
   });
 
@@ -195,18 +193,18 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $lt: 10
-        }
-      }
+          $lt: 10,
+        },
+      },
     });
 
     q.lessThan('inStock', 4);
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $lt: 4
-        }
-      }
+          $lt: 4,
+        },
+      },
     });
   });
 
@@ -216,18 +214,18 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $lte: 10
-        }
-      }
+          $lte: 10,
+        },
+      },
     });
 
     q.lessThanOrEqualTo('inStock', 4);
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $lte: 4
-        }
-      }
+          $lte: 4,
+        },
+      },
     });
   });
 
@@ -237,18 +235,18 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
-      }
+          $gt: 0,
+        },
+      },
     });
 
     q.greaterThan('inStock', 100);
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 100
-        }
-      }
+          $gt: 100,
+        },
+      },
     });
   });
 
@@ -258,18 +256,18 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gte: 0
-        }
-      }
+          $gte: 0,
+        },
+      },
     });
 
     q.greaterThanOrEqualTo('inStock', 100);
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gte: 100
-        }
-      }
+          $gte: 100,
+        },
+      },
     });
   });
 
@@ -279,18 +277,18 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         size: {
-          $in: ['small', 'medium']
-        }
-      }
+          $in: ['small', 'medium'],
+        },
+      },
     });
 
     q.containedIn('size', ['small', 'medium', 'large']);
     expect(q.toJSON()).toEqual({
       where: {
         size: {
-          $in: ['small', 'medium', 'large']
-        }
-      }
+          $in: ['small', 'medium', 'large'],
+        },
+      },
     });
   });
 
@@ -300,18 +298,18 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         size: {
-          $nin: ['small', 'medium']
-        }
-      }
+          $nin: ['small', 'medium'],
+        },
+      },
     });
 
     q.notContainedIn('size', ['small', 'large']);
     expect(q.toJSON()).toEqual({
       where: {
         size: {
-          $nin: ['small', 'large']
-        }
-      }
+          $nin: ['small', 'large'],
+        },
+      },
     });
   });
 
@@ -321,18 +319,18 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         tags: {
-          $all: ['hot', 'sold-out']
-        }
-      }
+          $all: ['hot', 'sold-out'],
+        },
+      },
     });
 
     q.containsAll('tags', ['sale', 'new']);
     expect(q.toJSON()).toEqual({
       where: {
         tags: {
-          $all: ['sale', 'new']
-        }
-      }
+          $all: ['sale', 'new'],
+        },
+      },
     });
   });
 
@@ -342,7 +340,7 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         tags: {
-          $containedBy: ['hot', 'sold-out']
+          $containedBy: ['hot', 'sold-out'],
         },
       },
     });
@@ -351,7 +349,7 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         tags: {
-          $containedBy: ['sale', 'new']
+          $containedBy: ['sale', 'new'],
         },
       },
     });
@@ -363,35 +361,27 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         tags: {
-          $all: [
-            {$regex: '^\\Qho\\E'},
-            {$regex: '^\\Qout\\E'}
-          ]
-        }
-      }
+          $all: [{ $regex: '^\\Qho\\E' }, { $regex: '^\\Qout\\E' }],
+        },
+      },
     });
 
     q.containsAllStartingWith('tags', ['sal', 'ne']);
     expect(q.toJSON()).toEqual({
       where: {
         tags: {
-          $all: [
-            {$regex: '^\\Qsal\\E'},
-            {$regex: '^\\Qne\\E'}
-          ]
-        }
-      }
+          $all: [{ $regex: '^\\Qsal\\E' }, { $regex: '^\\Qne\\E' }],
+        },
+      },
     });
 
     q.containsAllStartingWith('tags', 'noArray');
     expect(q.toJSON()).toEqual({
       where: {
         tags: {
-          $all: [
-            { $regex: '^\\QnoArray\\E' },
-          ]
-        }
-      }
+          $all: [{ $regex: '^\\QnoArray\\E' }],
+        },
+      },
     });
   });
 
@@ -401,9 +391,9 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         name: {
-          $exists: true
-        }
-      }
+          $exists: true,
+        },
+      },
     });
   });
 
@@ -413,9 +403,9 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         name: {
-          $exists: false
-        }
-      }
+          $exists: false,
+        },
+      },
     });
   });
 
@@ -425,9 +415,9 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         name: {
-          $regex: 'ing$'
-        }
-      }
+          $regex: 'ing$',
+        },
+      },
     });
 
     q.matches('name', /\bor\b/, 'i');
@@ -435,9 +425,9 @@ describe('ParseQuery', () => {
       where: {
         name: {
           $regex: '\\bor\\b',
-          $options: 'i'
-        }
-      }
+          $options: 'i',
+        },
+      },
     });
 
     q.matches('name', /\bor\b/i);
@@ -445,9 +435,9 @@ describe('ParseQuery', () => {
       where: {
         name: {
           $regex: '\\bor\\b',
-          $options: 'i'
-        }
-      }
+          $options: 'i',
+        },
+      },
     });
 
     q.matches('name', /\bor\b/im);
@@ -455,9 +445,9 @@ describe('ParseQuery', () => {
       where: {
         name: {
           $regex: '\\bor\\b',
-          $options: 'im'
-        }
-      }
+          $options: 'im',
+        },
+      },
     });
   });
 
@@ -473,15 +463,15 @@ describe('ParseQuery', () => {
           $inQuery: {
             className: 'Item',
             where: {
-              inStock: 0
-            }
-          }
-        }
-      }
+              inStock: 0,
+            },
+          },
+        },
+      },
     });
   });
 
-  it('can generate queries that don\'t match results from other queries', () => {
+  it("can generate queries that don't match results from other queries", () => {
     const q1 = new ParseQuery('Item');
     q1.equalTo('inStock', 0);
 
@@ -493,11 +483,11 @@ describe('ParseQuery', () => {
           $notInQuery: {
             className: 'Item',
             where: {
-              inStock: 0
-            }
-          }
-        }
-      }
+              inStock: 0,
+            },
+          },
+        },
+      },
     });
   });
 
@@ -515,16 +505,16 @@ describe('ParseQuery', () => {
             query: {
               className: 'Item',
               where: {
-                inStock: 0
-              }
-            }
-          }
-        }
-      }
+                inStock: 0,
+              },
+            },
+          },
+        },
+      },
     });
   });
 
-  it('can generate queries that don\'t match keys from other queries', () => {
+  it("can generate queries that don't match keys from other queries", () => {
     const q1 = new ParseQuery('Item');
     q1.equalTo('inStock', 0);
 
@@ -538,12 +528,12 @@ describe('ParseQuery', () => {
             query: {
               className: 'Item',
               where: {
-                inStock: 0
-              }
-            }
-          }
-        }
-      }
+                inStock: 0,
+              },
+            },
+          },
+        },
+      },
     });
   });
 
@@ -557,9 +547,9 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         name: {
-          $regex: '\\Q or \\E'
-        }
-      }
+          $regex: '\\Q or \\E',
+        },
+      },
     });
 
     // Test escaping in quote()
@@ -567,18 +557,18 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         name: {
-          $regex: '\\Qslash-E \\E\\\\E\\Q\\E'
-        }
-      }
+          $regex: '\\Qslash-E \\E\\\\E\\Q\\E',
+        },
+      },
     });
 
     q.contains('name', 'slash-Q \\Q');
     expect(q.toJSON()).toEqual({
       where: {
         name: {
-          $regex: '\\Qslash-Q \\Q\\E'
-        }
-      }
+          $regex: '\\Qslash-Q \\Q\\E',
+        },
+      },
     });
   });
 
@@ -592,18 +582,18 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         name: {
-          $regex: '^\\QAbc\\E'
-        }
-      }
+          $regex: '^\\QAbc\\E',
+        },
+      },
     });
 
     q.startsWith('name', 'Def');
     expect(q.toJSON()).toEqual({
       where: {
         name: {
-          $regex: '^\\QDef\\E'
-        }
-      }
+          $regex: '^\\QDef\\E',
+        },
+      },
     });
   });
 
@@ -617,18 +607,18 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         name: {
-          $regex: '\\QXYZ\\E$'
-        }
-      }
+          $regex: '\\QXYZ\\E$',
+        },
+      },
     });
 
     q.endsWith('name', 'xyz');
     expect(q.toJSON()).toEqual({
       where: {
         name: {
-          $regex: '\\Qxyz\\E$'
-        }
-      }
+          $regex: '\\Qxyz\\E$',
+        },
+      },
     });
   });
 
@@ -641,10 +631,10 @@ describe('ParseQuery', () => {
           $nearSphere: {
             __type: 'GeoPoint',
             latitude: 10,
-            longitude: 20
-          }
-        }
-      }
+            longitude: 20,
+          },
+        },
+      },
     });
 
     q.near('shippedTo', [30, 40]);
@@ -654,10 +644,10 @@ describe('ParseQuery', () => {
           $nearSphere: {
             __type: 'GeoPoint',
             latitude: 30,
-            longitude: 40
-          }
-        }
-      }
+            longitude: 40,
+          },
+        },
+      },
     });
 
     // GeoPoint's internal fallback
@@ -668,10 +658,10 @@ describe('ParseQuery', () => {
           $nearSphere: {
             __type: 'GeoPoint',
             latitude: 0,
-            longitude: 0
-          }
-        }
-      }
+            longitude: 0,
+          },
+        },
+      },
     });
   });
 
@@ -684,11 +674,11 @@ describe('ParseQuery', () => {
           $nearSphere: {
             __type: 'GeoPoint',
             latitude: 20,
-            longitude: 40
+            longitude: 40,
           },
-          $maxDistance: 2
-        }
-      }
+          $maxDistance: 2,
+        },
+      },
     });
 
     q.withinMiles('shippedTo', [20, 30], 3958.8, true);
@@ -698,11 +688,11 @@ describe('ParseQuery', () => {
           $nearSphere: {
             __type: 'GeoPoint',
             latitude: 20,
-            longitude: 30
+            longitude: 30,
           },
-          $maxDistance: 1
-        }
-      }
+          $maxDistance: 1,
+        },
+      },
     });
 
     q.withinKilometers('shippedTo', [30, 30], 6371.0, true);
@@ -712,11 +702,11 @@ describe('ParseQuery', () => {
           $nearSphere: {
             __type: 'GeoPoint',
             latitude: 30,
-            longitude: 30
+            longitude: 30,
           },
-          $maxDistance: 1
-        }
-      }
+          $maxDistance: 1,
+        },
+      },
     });
   });
 
@@ -729,11 +719,11 @@ describe('ParseQuery', () => {
           $geoWithin: {
             $centerSphere: [
               [40, 20], // This takes [lng, lat] vs. ParseGeoPoint [lat, lng].
-              2
-            ]
-          }
-        }
-      }
+              2,
+            ],
+          },
+        },
+      },
     });
 
     q.withinMiles('shippedTo', new ParseGeoPoint(20, 30), 3958.8, false);
@@ -743,11 +733,11 @@ describe('ParseQuery', () => {
           $geoWithin: {
             $centerSphere: [
               [30, 20], // This takes [lng, lat] vs. ParseGeoPoint [lat, lng].
-              1
-            ]
-          }
-        }
-      }
+              1,
+            ],
+          },
+        },
+      },
     });
 
     q.withinKilometers('shippedTo', new ParseGeoPoint(30, 30), 6371.0, false);
@@ -757,11 +747,11 @@ describe('ParseQuery', () => {
           $geoWithin: {
             $centerSphere: [
               [30, 30], // This takes [lng, lat] vs. ParseGeoPoint [lat, lng].
-              1
-            ]
-          }
-        }
-      }
+              1,
+            ],
+          },
+        },
+      },
     });
   });
 
@@ -772,18 +762,21 @@ describe('ParseQuery', () => {
       where: {
         shippedTo: {
           $within: {
-            $box: [{
-              __type: 'GeoPoint',
-              latitude: 20,
-              longitude: 20
-            }, {
-              __type: 'GeoPoint',
-              latitude: 10,
-              longitude: 30
-            }]
-          }
-        }
-      }
+            $box: [
+              {
+                __type: 'GeoPoint',
+                latitude: 20,
+                longitude: 20,
+              },
+              {
+                __type: 'GeoPoint',
+                latitude: 10,
+                longitude: 30,
+              },
+            ],
+          },
+        },
+      },
     });
   });
 
@@ -795,9 +788,9 @@ describe('ParseQuery', () => {
       where: {
         inStock: {
           $lt: 10,
-          $gt: 0
-        }
-      }
+          $gt: 0,
+        },
+      },
     });
 
     q.containedIn('size', ['small', 'medium']);
@@ -805,12 +798,12 @@ describe('ParseQuery', () => {
       where: {
         inStock: {
           $lt: 10,
-          $gt: 0
+          $gt: 0,
         },
         size: {
-          $in: ['small', 'medium']
-        }
-      }
+          $in: ['small', 'medium'],
+        },
+      },
     });
   });
 
@@ -820,10 +813,10 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      order: 'createdAt'
+      order: 'createdAt',
     });
 
     // overrides
@@ -831,31 +824,31 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      order: 'name'
+      order: 'name',
     });
 
     q.ascending('name');
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      order: 'name'
+      order: 'name',
     });
 
     // removes whitespace
-    q.ascending('  createdAt')
+    q.ascending('  createdAt');
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      order: 'createdAt'
+      order: 'createdAt',
     });
 
     // add additional ordering
@@ -863,70 +856,70 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      order: 'createdAt,name'
+      order: 'createdAt,name',
     });
 
     q.ascending(['a', 'b', 'c']);
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      order: 'a,b,c'
+      order: 'a,b,c',
     });
 
     q.ascending('name', 'createdAt');
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      order: 'name,createdAt'
+      order: 'name,createdAt',
     });
 
     q.descending('createdAt');
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      order: '-createdAt'
+      order: '-createdAt',
     });
 
     q.addAscending('name');
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      order: '-createdAt,name'
+      order: '-createdAt,name',
     });
 
     q.addDescending('a', 'b', 'c');
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      order: '-createdAt,name,-a,-b,-c'
+      order: '-createdAt,name,-a,-b,-c',
     });
 
     q.descending(['a', 'b']);
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      order: '-a,-b'
+      order: '-a,-b',
     });
 
     const q2 = new ParseQuery('Item');
@@ -946,58 +939,50 @@ describe('ParseQuery', () => {
 
   it('can establish skip counts', () => {
     const q = new ParseQuery('Item');
-    expect(q.skip.bind(q, 'string')).toThrow(
-      'You can only skip by a positive number'
-    );
-    expect(q.skip.bind(q, -5)).toThrow(
-      'You can only skip by a positive number'
-    );
+    expect(q.skip.bind(q, 'string')).toThrow('You can only skip by a positive number');
+    expect(q.skip.bind(q, -5)).toThrow('You can only skip by a positive number');
 
     q.skip(4);
     expect(q.toJSON()).toEqual({
       where: {},
-      skip: 4
+      skip: 4,
     });
     q.equalTo('name', 'Product 5');
     expect(q.toJSON()).toEqual({
       where: {
-        name: 'Product 5'
+        name: 'Product 5',
       },
-      skip: 4
+      skip: 4,
     });
   });
 
   it('can establish result limits', () => {
     const q = new ParseQuery('Item');
-    expect(q.limit.bind(q, 'string')).toThrow(
-      'You can only set the limit to a numeric value'
-    );
+    expect(q.limit.bind(q, 'string')).toThrow('You can only set the limit to a numeric value');
 
     q.limit(10);
     expect(q.toJSON()).toEqual({
       where: {},
-      limit: 10
+      limit: 10,
     });
     q.limit(-1);
     expect(q.toJSON()).toEqual({
-      where: {}
+      where: {},
     });
   });
 
   it('can set withCount flag in find query', () => {
     const q = new ParseQuery('Item');
-    expect(q.withCount.bind(q, 'string')).toThrow(
-      'You can only set withCount to a boolean value'
-    );
+    expect(q.withCount.bind(q, 'string')).toThrow('You can only set withCount to a boolean value');
 
     q.withCount(true);
     expect(q.toJSON()).toEqual({
       where: {},
-      count: 1
+      count: 1,
     });
     q.withCount(false);
     expect(q.toJSON()).toEqual({
-      where: {}
+      where: {},
     });
   });
 
@@ -1036,30 +1021,30 @@ describe('ParseQuery', () => {
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      include: 'manufacturer'
+      include: 'manufacturer',
     });
 
     q.include('previousModel', 'nextModel');
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      include: 'manufacturer,previousModel,nextModel'
+      include: 'manufacturer,previousModel,nextModel',
     });
 
-    q.include(['lastPurchaser', 'lastPurchase'])
+    q.include(['lastPurchaser', 'lastPurchase']);
     expect(q.toJSON()).toEqual({
       where: {
         inStock: {
-          $gt: 0
-        }
+          $gt: 0,
+        },
       },
-      include: 'manufacturer,previousModel,nextModel,lastPurchaser,lastPurchase'
+      include: 'manufacturer,previousModel,nextModel,lastPurchaser,lastPurchase',
     });
   });
 
@@ -1082,7 +1067,7 @@ describe('ParseQuery', () => {
     const json = q.toJSON();
     expect(json).toEqual({
       where: {},
-      excludeKeys: 'foo'
+      excludeKeys: 'foo',
     });
     const q2 = new ParseQuery('Item');
     q2.withJSON(json);
@@ -1095,7 +1080,7 @@ describe('ParseQuery', () => {
     const json = q.toJSON();
     expect(json).toEqual({
       where: {},
-      excludeKeys: 'foo,bar'
+      excludeKeys: 'foo,bar',
     });
     const q2 = new ParseQuery('Item');
     q2.withJSON(json);
@@ -1133,28 +1118,26 @@ describe('ParseQuery', () => {
     q.select('size');
     expect(q.toJSON()).toEqual({
       where: {},
-      keys: 'size'
+      keys: 'size',
     });
 
     q.select('inStock', 'lastPurchase');
     expect(q.toJSON()).toEqual({
       where: {},
-      keys: 'size,inStock,lastPurchase'
+      keys: 'size,inStock,lastPurchase',
     });
 
-    q.select(['weight', 'color'])
+    q.select(['weight', 'color']);
     expect(q.toJSON()).toEqual({
       where: {},
-      keys: 'size,inStock,lastPurchase,weight,color'
+      keys: 'size,inStock,lastPurchase,weight,color',
     });
   });
 
   it('can combine queries with an OR clause', () => {
     const q = new ParseQuery('Item');
     let q2 = new ParseQuery('Purchase');
-    expect(ParseQuery.or.bind(null, q, q2)).toThrow(
-      'All queries must be for the same class.'
-    );
+    expect(ParseQuery.or.bind(null, q, q2)).toThrow('All queries must be for the same class.');
 
     q2 = new ParseQuery('Item');
     q.equalTo('size', 'medium');
@@ -1163,11 +1146,8 @@ describe('ParseQuery', () => {
     let mediumOrLarge = ParseQuery.or(q, q2);
     expect(mediumOrLarge.toJSON()).toEqual({
       where: {
-        $or: [
-          { size: 'medium' },
-          { size: 'large' }
-        ]
-      }
+        $or: [{ size: 'medium' }, { size: 'large' }],
+      },
     });
 
     // It removes limits, skips, etc
@@ -1175,20 +1155,15 @@ describe('ParseQuery', () => {
     mediumOrLarge = ParseQuery.or(q, q2);
     expect(mediumOrLarge.toJSON()).toEqual({
       where: {
-        $or: [
-          { size: 'medium' },
-          { size: 'large' }
-        ]
-      }
+        $or: [{ size: 'medium' }, { size: 'large' }],
+      },
     });
   });
 
   it('can combine queries with an AND clause', () => {
     const q = new ParseQuery('Item');
     let q2 = new ParseQuery('Purchase');
-    expect(ParseQuery.and.bind(null, q, q2)).toThrow(
-      'All queries must be for the same class.'
-    );
+    expect(ParseQuery.and.bind(null, q, q2)).toThrow('All queries must be for the same class.');
 
     q2 = new ParseQuery('Item');
     q.equalTo('size', 'medium');
@@ -1197,11 +1172,8 @@ describe('ParseQuery', () => {
     let mediumOrLarge = ParseQuery.and(q, q2);
     expect(mediumOrLarge.toJSON()).toEqual({
       where: {
-        $and: [
-          { size: 'medium' },
-          { size: 'large' }
-        ]
-      }
+        $and: [{ size: 'medium' }, { size: 'large' }],
+      },
     });
 
     // It removes limits, skips, etc
@@ -1209,20 +1181,15 @@ describe('ParseQuery', () => {
     mediumOrLarge = ParseQuery.and(q, q2);
     expect(mediumOrLarge.toJSON()).toEqual({
       where: {
-        $and: [
-          { size: 'medium' },
-          { size: 'large' }
-        ]
-      }
+        $and: [{ size: 'medium' }, { size: 'large' }],
+      },
     });
   });
 
   it('can combine queries with a NOR clause', () => {
     const q = new ParseQuery('Item');
     let q2 = new ParseQuery('Purchase');
-    expect(ParseQuery.nor.bind(null, q, q2)).toThrow(
-      'All queries must be for the same class.',
-    );
+    expect(ParseQuery.nor.bind(null, q, q2)).toThrow('All queries must be for the same class.');
 
     q2 = new ParseQuery('Item');
     q.equalTo('size', 'medium');
@@ -1231,10 +1198,7 @@ describe('ParseQuery', () => {
     let mediumOrLarge = ParseQuery.nor(q, q2);
     expect(mediumOrLarge.toJSON()).toEqual({
       where: {
-        $nor: [
-          { size: 'medium' },
-          { size: 'large' },
-        ],
+        $nor: [{ size: 'medium' }, { size: 'large' }],
       },
     });
 
@@ -1243,15 +1207,12 @@ describe('ParseQuery', () => {
     mediumOrLarge = ParseQuery.nor(q, q2);
     expect(mediumOrLarge.toJSON()).toEqual({
       where: {
-        $nor: [
-          { size: 'medium' },
-          { size: 'large' },
-        ],
+        $nor: [{ size: 'medium' }, { size: 'large' }],
       },
     });
   });
 
-  it('can get the first object of a query', (done) => {
+  it('can get the first object of a query', done => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1259,32 +1220,32 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           limit: 1,
           where: {
-            size: 'small'
-          }
+            size: 'small',
+          },
         });
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
-          results: [
-            { objectId: 'I1', size: 'small', name: 'Product 3' }
-          ]
+          results: [{ objectId: 'I1', size: 'small', name: 'Product 3' }],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
-    q.equalTo('size', 'small').first().then((obj) => {
-      expect(obj instanceof ParseObject).toBe(true);
-      expect(obj.className).toBe('Item');
-      expect(obj.id).toBe('I1');
-      expect(obj.attributes).toEqual({
-        size: 'small',
-        name: 'Product 3'
+    q.equalTo('size', 'small')
+      .first()
+      .then(obj => {
+        expect(obj instanceof ParseObject).toBe(true);
+        expect(obj.className).toBe('Item');
+        expect(obj.id).toBe('I1');
+        expect(obj.attributes).toEqual({
+          size: 'small',
+          name: 'Product 3',
+        });
+        done();
       });
-      done();
-    });
   });
 
-  it('can pass options to a first() query', (done) => {
+  it('can pass options to a first() query', done => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1292,28 +1253,30 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           limit: 1,
           where: {
-            size: 'small'
-          }
+            size: 'small',
+          },
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
-          results: []
+          results: [],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
-    q.equalTo('size', 'small').first({
-      useMasterKey: true,
-      sessionToken: '1234'
-    }).then((obj) => {
-      expect(obj).toBe(undefined);
-      done();
-    });
+    q.equalTo('size', 'small')
+      .first({
+        useMasterKey: true,
+        sessionToken: '1234',
+      })
+      .then(obj => {
+        expect(obj).toBe(undefined);
+        done();
+      });
   });
 
-  it('can handle explain query', (done) => {
+  it('can handle explain query', done => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1321,31 +1284,33 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           explain: true,
           where: {
-            size: 'small'
-          }
+            size: 'small',
+          },
         });
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: {
             objectId: 'I1',
             size: 'small',
-            name: 'Product 3'
+            name: 'Product 3',
           },
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
     q.explain();
-    q.equalTo('size', 'small').find().then((result) => {
-      expect(result.objectId).toBe('I1');
-      expect(result.size).toBe('small');
-      expect(result.name).toEqual('Product 3');
-      done();
-    });
+    q.equalTo('size', 'small')
+      .find()
+      .then(result => {
+        expect(result.objectId).toBe('I1');
+        expect(result.size).toBe('small');
+        expect(result.name).toEqual('Product 3');
+        done();
+      });
   });
 
-  it('can get a single object by id', (done) => {
+  it('can get a single object by id', done => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1353,63 +1318,67 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           limit: 1,
           where: {
-            objectId: 'I27'
-          }
+            objectId: 'I27',
+          },
         });
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
-          results: [
-            { objectId: 'I27', size: 'large', name: 'Product 27' }
-          ]
+          results: [{ objectId: 'I27', size: 'large', name: 'Product 27' }],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
-    q.get('I27').then((obj) => {
+    q.get('I27').then(obj => {
       expect(obj instanceof ParseObject).toBe(true);
       expect(obj.className).toBe('Item');
       expect(obj.id).toBe('I27');
       expect(obj.attributes).toEqual({
         size: 'large',
-        name: 'Product 27'
+        name: 'Product 27',
       });
       done();
     });
   });
 
-  it('will error when getting a nonexistent object', (done) => {
+  it('can return raw json from query', async () => {
     CoreManager.setQueryController({
       aggregate() {},
-      find(className, params, options) {
-        expect(className).toBe('Item');
-        expect(params).toEqual({
-          limit: 1,
-          where: {
-            objectId: 'I28'
-          }
-        });
-        expect(options.requestTask).toBeDefined();
+      find() {
         return Promise.resolve({
-          results: []
+          results: [
+            {
+              objectId: 'I1',
+              size: 'small',
+              name: 'Product 3',
+            },
+          ],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
-    q.get('I28').then(() => {
-      // Should not be reached
-      expect(true).toBe(false);
-      done();
-    }, (err) => {
-      expect(err.code).toBe(ParseError.OBJECT_NOT_FOUND);
-      expect(err.message).toBe('Object not found.');
-      done();
-    });
+    q.equalTo('size', 'small');
+    const results = await q.find({ json: true });
+    expect(results[0].objectId).toBe('I1');
+    expect(results[0].size).toBe('small');
+    expect(results[0].name).toEqual('Product 3');
+    expect(results[0].className).toEqual('Item');
+
+    let result = await q.first({ json: true });
+    expect(result.objectId).toBe('I1');
+    expect(result.size).toBe('small');
+    expect(result.name).toEqual('Product 3');
+    expect(result.className).toEqual('Item');
+
+    result = await q.get(result.objectId, { json: true });
+    expect(result.objectId).toBe('I1');
+    expect(result.size).toBe('small');
+    expect(result.name).toEqual('Product 3');
+    expect(result.className).toEqual('Item');
   });
 
-  it('can pass options to a get() query', (done) => {
-    const context = {a: "a"};
+  it('will error when getting a nonexistent object', done => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1417,31 +1386,63 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           limit: 1,
           where: {
-            objectId: 'I27'
-          }
+            objectId: 'I28',
+          },
+        });
+        expect(options.requestTask).toBeDefined();
+        return Promise.resolve({
+          results: [],
+        });
+      },
+    });
+
+    const q = new ParseQuery('Item');
+    q.get('I28').then(
+      () => {
+        // Should not be reached
+        expect(true).toBe(false);
+        done();
+      },
+      err => {
+        expect(err.code).toBe(ParseError.OBJECT_NOT_FOUND);
+        expect(err.message).toBe('Object not found.');
+        done();
+      }
+    );
+  });
+
+  it('can pass options to a get() query', done => {
+    const context = { a: 'a' };
+    CoreManager.setQueryController({
+      aggregate() {},
+      find(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          limit: 1,
+          where: {
+            objectId: 'I27',
+          },
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         expect(options.context).toEqual(context);
         return Promise.resolve({
-          results: [
-            { objectId: 'I27', size: 'large', name: 'Product 27' }
-          ]
+          results: [{ objectId: 'I27', size: 'large', name: 'Product 27' }],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
     q.get('I27', {
       useMasterKey: true,
       sessionToken: '1234',
-      context: context
+      context: context,
     }).then(() => {
       done();
     });
   });
 
-  it('can issue a count query', (done) => {
+  it('can issue a count query', done => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1450,25 +1451,27 @@ describe('ParseQuery', () => {
           limit: 0,
           count: 1,
           where: {
-            size: 'small'
-          }
+            size: 'small',
+          },
         });
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
-          count: 145
+          count: 145,
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
-    q.equalTo('size', 'small').count().then((count) => {
-      expect(count).toBe(145);
-      done();
-    });
+    q.equalTo('size', 'small')
+      .count()
+      .then(count => {
+        expect(count).toBe(145);
+        done();
+      });
   });
 
-  it('can pass options to a count query', (done) => {
+  it('can pass options to a count query', done => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1477,30 +1480,31 @@ describe('ParseQuery', () => {
           limit: 0,
           count: 1,
           where: {
-            size: 'small'
-          }
+            size: 'small',
+          },
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [],
-          count: 145
+          count: 145,
         });
-      }
+      },
     });
-
 
     const q = new ParseQuery('Item');
-    q.equalTo('size', 'small').count({
-      useMasterKey: true,
-      sessionToken: '1234'
-    }).then((count) => {
-      expect(count).toBe(145);
-      done();
-    });
+    q.equalTo('size', 'small')
+      .count({
+        useMasterKey: true,
+        sessionToken: '1234',
+      })
+      .then(count => {
+        expect(count).toBe(145);
+        done();
+      });
   });
 
-  it('can issue a query to the controller', (done) => {
+  it('can issue a query to the controller', done => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1512,8 +1516,8 @@ describe('ParseQuery', () => {
           order: 'createdAt',
           where: {
             size: {
-              $in: ['small', 'medium']
-            }
+              $in: ['small', 'medium'],
+            },
           },
           readPreference: 'PRIMARY',
           includeReadPreference: 'SECONDARY',
@@ -1524,9 +1528,9 @@ describe('ParseQuery', () => {
           results: [
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
             { objectId: 'I89', size: 'small', name: 'Product 89' },
-          ]
+          ],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
@@ -1537,24 +1541,24 @@ describe('ParseQuery', () => {
       .select('size', 'name')
       .readPreference('PRIMARY', 'SECONDARY', 'SECONDARY_PREFERRED')
       .find()
-      .then((objs) => {
+      .then(objs => {
         expect(objs.length).toBe(2);
         expect(objs[0] instanceof ParseObject).toBe(true);
         expect(objs[0].attributes).toEqual({
           size: 'medium',
-          name: 'Product 55'
+          name: 'Product 55',
         });
         expect(objs[1] instanceof ParseObject).toBe(true);
         expect(objs[1].attributes).toEqual({
           size: 'small',
-          name: 'Product 89'
+          name: 'Product 89',
         });
         done();
       });
   });
 
-  it('can pass options to find()', (done) => {
-    const context = {a: "a"};
+  it('can pass options to find()', done => {
+    const context = { a: 'a' };
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1562,17 +1566,17 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           where: {
             size: {
-              $in: ['small', 'medium']
-            }
-          }
+              $in: ['small', 'medium'],
+            },
+          },
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         expect(options.context).toEqual(context);
         return Promise.resolve({
-          results: []
+          results: [],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
@@ -1580,41 +1584,42 @@ describe('ParseQuery', () => {
       .find({
         useMasterKey: true,
         sessionToken: '1234',
-        context: context
+        context: context,
       })
-      .then((objs) => {
+      .then(objs => {
         expect(objs).toEqual([]);
         done();
       });
   });
 
-  it('can receive both count and objects from find() using withCount flag', (done) => {
+  it('can receive both count and objects from find() using withCount flag', done => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
           where: {},
-          count: 1
+          count: 1,
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
-          results:[
+          results: [
             { objectId: '1', name: 'Product 55' },
-            { objectId: '2', name: 'Product 89' } ],
-          count: 2
+            { objectId: '2', name: 'Product 89' },
+          ],
+          count: 2,
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
     q.withCount(true)
       .find({
         useMasterKey: true,
-        sessionToken: '1234'
+        sessionToken: '1234',
       })
-      .then((obj) => {
+      .then(obj => {
         expect(obj.results).toBeDefined();
         expect(obj.results.length).toBe(2);
         expect(obj.count).toBeDefined();
@@ -1627,17 +1632,19 @@ describe('ParseQuery', () => {
     let findMock;
     beforeEach(() => {
       findMock = jest.fn();
-      findMock.mockReturnValueOnce(Promise.resolve({
-        results: [
-          { objectId: 'I55', size: 'medium', name: 'Product 55' },
-          { objectId: 'I89', size: 'small', name: 'Product 89' },
-        ]
-      }));
-      findMock.mockReturnValueOnce(Promise.resolve({
-        results: [
-          { objectId: 'I91', size: 'small', name: 'Product 91' },
-        ]
-      }));
+      findMock.mockReturnValueOnce(
+        Promise.resolve({
+          results: [
+            { objectId: 'I55', size: 'medium', name: 'Product 55' },
+            { objectId: 'I89', size: 'small', name: 'Product 89' },
+          ],
+        })
+      );
+      findMock.mockReturnValueOnce(
+        Promise.resolve({
+          results: [{ objectId: 'I91', size: 'small', name: 'Product 91' }],
+        })
+      );
       CoreManager.setQueryController({
         aggregate() {},
         find: findMock,
@@ -1647,11 +1654,7 @@ describe('ParseQuery', () => {
     it('passes query attributes through to the REST API', async () => {
       const q = new ParseQuery('Item');
       q.containedIn('size', ['small', 'medium']);
-      q.matchesKeyInQuery(
-        'name',
-        'productName',
-        new ParseQuery('Review').equalTo('stars', 5)
-      );
+      q.matchesKeyInQuery('name', 'productName', new ParseQuery('Review').equalTo('stars', 5));
       q.equalTo('valid', true);
       q.equalTo('arrayField', ['a', 'b']);
       q.select('size', 'name');
@@ -1662,7 +1665,7 @@ describe('ParseQuery', () => {
 
       expect(findMock).toHaveBeenCalledTimes(1);
       const [className, params, options] = findMock.mock.calls[0];
-      expect(className).toBe('Item')
+      expect(className).toBe('Item');
       expect(params).toEqual({
         limit: 100,
         order: 'objectId',
@@ -1672,7 +1675,7 @@ describe('ParseQuery', () => {
         where: {
           arrayField: ['a', 'b'],
           size: {
-            $in: ['small', 'medium']
+            $in: ['small', 'medium'],
           },
           name: {
             $select: {
@@ -1680,13 +1683,13 @@ describe('ParseQuery', () => {
               query: {
                 className: 'Review',
                 where: {
-                  stars: 5
-                }
-              }
-            }
+                  stars: 5,
+                },
+              },
+            },
           },
-          valid: true
-        }
+          valid: true,
+        },
       });
       expect(options.requestTask).toBeDefined();
     });
@@ -1721,7 +1724,7 @@ describe('ParseQuery', () => {
       const q = new ParseQuery('Item');
       await q.eachBatch(() => {}, { batchSize: 2 });
       expect(findMock).toHaveBeenCalledTimes(2);
-    })
+    });
 
     it('stops iteration when the callback returns a promise that rejects', async () => {
       let callCount = 0;
@@ -1737,8 +1740,8 @@ describe('ParseQuery', () => {
     it('handles a synchronous callback', async () => {
       const results = [];
       const q = new ParseQuery('Item');
-      await q.eachBatch((items) => {
-        items.map(item => results.push(item.attributes.size))
+      await q.eachBatch(items => {
+        items.map(item => results.push(item.attributes.size));
       });
       expect(results).toEqual(['medium', 'small']);
     });
@@ -1746,8 +1749,8 @@ describe('ParseQuery', () => {
     it('handles an asynchronous callback', async () => {
       const results = [];
       const q = new ParseQuery('Item');
-      await q.eachBatch((items) => {
-        items.map(item => results.push(item.attributes.size))
+      await q.eachBatch(items => {
+        items.map(item => results.push(item.attributes.size));
         return new Promise(resolve => setImmediate(resolve));
       });
       expect(results).toEqual(['medium', 'small']);
@@ -1758,17 +1761,19 @@ describe('ParseQuery', () => {
     let findMock;
     beforeEach(() => {
       findMock = jest.fn();
-      findMock.mockReturnValueOnce(Promise.resolve({
-        results: [
-          { objectId: 'I55', size: 'medium', name: 'Product 55' },
-          { objectId: 'I89', size: 'small', name: 'Product 89' },
-        ]
-      }));
-      findMock.mockReturnValueOnce(Promise.resolve({
-        results: [
-          { objectId: 'I91', size: 'small', name: 'Product 91' },
-        ]
-      }));
+      findMock.mockReturnValueOnce(
+        Promise.resolve({
+          results: [
+            { objectId: 'I55', size: 'medium', name: 'Product 55' },
+            { objectId: 'I89', size: 'small', name: 'Product 89' },
+          ],
+        })
+      );
+      findMock.mockReturnValueOnce(
+        Promise.resolve({
+          results: [{ objectId: 'I91', size: 'small', name: 'Product 91' }],
+        })
+      );
       CoreManager.setQueryController({
         aggregate() {},
         find: findMock,
@@ -1778,11 +1783,7 @@ describe('ParseQuery', () => {
     it('passes query attributes through to the REST API', async () => {
       const q = new ParseQuery('Item');
       q.containedIn('size', ['small', 'medium']);
-      q.matchesKeyInQuery(
-        'name',
-        'productName',
-        new ParseQuery('Review').equalTo('stars', 5)
-      );
+      q.matchesKeyInQuery('name', 'productName', new ParseQuery('Review').equalTo('stars', 5));
       q.equalTo('valid', true);
       q.select('size', 'name');
       q.includeAll();
@@ -1791,7 +1792,7 @@ describe('ParseQuery', () => {
       await q.findAll();
       expect(findMock).toHaveBeenCalledTimes(1);
       const [className, params, options] = findMock.mock.calls[0];
-      expect(className).toBe('Item')
+      expect(className).toBe('Item');
       expect(params).toEqual({
         limit: 100,
         order: 'objectId',
@@ -1800,7 +1801,7 @@ describe('ParseQuery', () => {
         hint: '_id_',
         where: {
           size: {
-            $in: ['small', 'medium']
+            $in: ['small', 'medium'],
           },
           name: {
             $select: {
@@ -1808,13 +1809,13 @@ describe('ParseQuery', () => {
               query: {
                 className: 'Review',
                 where: {
-                  stars: 5
-                }
-              }
-            }
+                  stars: 5,
+                },
+              },
+            },
           },
-          valid: true
-        }
+          valid: true,
+        },
       });
       expect(options.requestTask).toBeDefined();
     });
@@ -1849,7 +1850,7 @@ describe('ParseQuery', () => {
       const q = new ParseQuery('Item');
       await q.findAll({ batchSize: 2 });
       expect(findMock).toHaveBeenCalledTimes(2);
-    })
+    });
 
     it('Returns all objects', async () => {
       const q = new ParseQuery('Item');
@@ -1858,7 +1859,7 @@ describe('ParseQuery', () => {
     });
   });
 
-  it('can iterate over results with each()', (done) => {
+  it('can iterate over results with each()', done => {
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1870,7 +1871,7 @@ describe('ParseQuery', () => {
           include: '*',
           where: {
             size: {
-              $in: ['small', 'medium']
+              $in: ['small', 'medium'],
             },
             name: {
               $select: {
@@ -1878,13 +1879,13 @@ describe('ParseQuery', () => {
                 query: {
                   className: 'Review',
                   where: {
-                    stars: 5
-                  }
-                }
-              }
+                    stars: 5,
+                  },
+                },
+              },
             },
-            valid: true
-          }
+            valid: true,
+          },
         });
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
@@ -1892,18 +1893,14 @@ describe('ParseQuery', () => {
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
             { objectId: 'I89', size: 'small', name: 'Product 89' },
             { objectId: 'I91', size: 'small', name: 'Product 91' },
-          ]
+          ],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
     q.containedIn('size', ['small', 'medium']);
-    q.matchesKeyInQuery(
-      'name',
-      'productName',
-      new ParseQuery('Review').equalTo('stars', 5)
-    );
+    q.matchesKeyInQuery('name', 'productName', new ParseQuery('Review').equalTo('stars', 5));
     q.equalTo('valid', true);
     q.select('size', 'name');
     q.includeAll();
@@ -1917,8 +1914,8 @@ describe('ParseQuery', () => {
     });
   });
 
-  it('can pass options to each()', (done) => {
-    const context = {a: "a"};
+  it('can pass options to each()', done => {
+    const context = { a: 'a' };
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1929,10 +1926,10 @@ describe('ParseQuery', () => {
           keys: 'size,name',
           where: {
             size: {
-              $in: ['small', 'medium']
+              $in: ['small', 'medium'],
             },
-            valid: true
-          }
+            valid: true,
+          },
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
@@ -1942,9 +1939,9 @@ describe('ParseQuery', () => {
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
             { objectId: 'I89', size: 'small', name: 'Product 89' },
             { objectId: 'I91', size: 'small', name: 'Product 91' },
-          ]
+          ],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
@@ -1953,21 +1950,23 @@ describe('ParseQuery', () => {
     q.select('size', 'name');
     let calls = 0;
 
-    q.each(() => {
-      calls++;
-    }, {
-      useMasterKey: true,
-      sessionToken: '1234',
-      context: context
-    }).then(() => {
+    q.each(
+      () => {
+        calls++;
+      },
+      {
+        useMasterKey: true,
+        sessionToken: '1234',
+        context: context,
+      }
+    ).then(() => {
       expect(calls).toBe(3);
       done();
     });
   });
 
-
-  it('can pass options to each() with hint', (done) => {
-    const context = {a: "a"};
+  it('can pass options to each() with hint', done => {
+    const context = { a: 'a' };
     CoreManager.setQueryController({
       aggregate() {},
       find(className, params, options) {
@@ -1978,9 +1977,9 @@ describe('ParseQuery', () => {
           keys: 'size,name',
           where: {
             size: {
-              $in: ['small', 'medium']
+              $in: ['small', 'medium'],
             },
-            valid: true
+            valid: true,
           },
           hint: '_id_',
         });
@@ -1992,9 +1991,9 @@ describe('ParseQuery', () => {
             { objectId: 'I55', size: 'medium', name: 'Product 55' },
             { objectId: 'I89', size: 'small', name: 'Product 89' },
             { objectId: 'I91', size: 'small', name: 'Product 91' },
-          ]
+          ],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
@@ -2004,13 +2003,16 @@ describe('ParseQuery', () => {
     q.hint('_id_');
     let calls = 0;
 
-    q.each(() => {
-      calls++;
-    }, {
-      useMasterKey: true,
-      sessionToken: '1234',
-      context: context
-    }).then(() => {
+    q.each(
+      () => {
+        calls++;
+      },
+      {
+        useMasterKey: true,
+        sessionToken: '1234',
+        context: context,
+      }
+    ).then(() => {
       expect(calls).toBe(3);
       done();
     });
@@ -2046,21 +2048,21 @@ describe('ParseQuery', () => {
               { objectId: 'I55', size: 'medium', name: 'Product 55' },
               { objectId: 'I89', size: 'small', name: 'Product 89' },
               { objectId: 'I91', size: 'small', name: 'Product 91' },
-            ]
+            ],
           });
-        }
+        },
       });
     });
 
     it('can iterate with a synchronous callback', async () => {
-      const callback = (object) => object.attributes.size;
+      const callback = object => object.attributes.size;
       const q = new ParseQuery('Item');
       const results = await q.map(callback);
       expect(results).toEqual(['medium', 'small', 'small']);
     });
 
     it('can iterate with an asynchronous callback', async () => {
-      const callback = async (object) => object.attributes.size;
+      const callback = async object => object.attributes.size;
       const q = new ParseQuery('Item');
       const results = await q.map(callback);
       expect(results).toEqual(['medium', 'small', 'small']);
@@ -2068,10 +2070,12 @@ describe('ParseQuery', () => {
 
     it('stops iteration when a rejected promise is returned', async () => {
       let callCount = 0;
-      await new ParseQuery('Item').map(() => {
-        callCount++;
-        return Promise.reject(new Error('Callback rejecting'));
-      }).catch(() => {});
+      await new ParseQuery('Item')
+        .map(() => {
+          callCount++;
+          return Promise.reject(new Error('Callback rejecting'));
+        })
+        .catch(() => {});
       expect(callCount).toEqual(1);
     });
   });
@@ -2086,9 +2090,9 @@ describe('ParseQuery', () => {
               { objectId: 'I55', number: 1 },
               { objectId: 'I89', number: 2 },
               { objectId: 'I91', number: 3 },
-            ]
+            ],
           });
-        }
+        },
       });
     });
 
@@ -2110,8 +2114,8 @@ describe('ParseQuery', () => {
       let callCount = 0;
       const callback = () => {
         callCount += 1;
-        return Promise.reject(new Error("Callback rejecting"));
-      }
+        return Promise.reject(new Error('Callback rejecting'));
+      };
       const q = new ParseQuery('Item');
       await q.reduce(callback, 0).catch(() => {});
       expect(callCount).toBe(1);
@@ -2123,7 +2127,7 @@ describe('ParseQuery', () => {
         callCount += 1;
         accumulator.attributes.number += object.attributes.number;
         return accumulator;
-      }
+      };
       const q = new ParseQuery('Item');
       const result = await q.reduce(callback);
       expect(result.id).toBe('I55');
@@ -2134,14 +2138,16 @@ describe('ParseQuery', () => {
     it('rejects with a TypeError when there are no results and no initial value was provided', async () => {
       CoreManager.setQueryController({
         aggregate() {},
-        find() { return Promise.resolve({ results: [] }) },
+        find() {
+          return Promise.resolve({ results: [] });
+        },
       });
 
       const q = new ParseQuery('Item');
       const callback = (accumulator, object) => {
         accumulator.attributes.number += object.attributes.number;
         return accumulator;
-      }
+      };
       return expect(q.reduce(callback)).rejects.toThrow(TypeError);
     });
   });
@@ -2156,21 +2162,21 @@ describe('ParseQuery', () => {
               { objectId: 'I55', size: 'medium', name: 'Product 55' },
               { objectId: 'I89', size: 'small', name: 'Product 89' },
               { objectId: 'I91', size: 'small', name: 'Product 91' },
-            ]
+            ],
           });
-        }
+        },
       });
     });
 
     it('can iterate results with a synchronous callback', async () => {
-      const callback = (object) => object.attributes.size === 'small';
+      const callback = object => object.attributes.size === 'small';
       const q = new ParseQuery('Item');
       const results = await q.filter(callback);
       expect(results.length).toBe(2);
     });
 
     it('can iterate results with an async callback', async () => {
-      const callback = async (object) => object.attributes.size === 'small';
+      const callback = async object => object.attributes.size === 'small';
       const q = new ParseQuery('Item');
       const results = await q.filter(callback);
       expect(results.length).toBe(2);
@@ -2188,17 +2194,20 @@ describe('ParseQuery', () => {
     });
   });
 
-  it('returns an error when iterating over an invalid query', (done) => {
+  it('returns an error when iterating over an invalid query', done => {
     const q = new ParseQuery('Item');
     q.limit(10);
-    q.each(() => {}).then(() => {
-      // this should not be reached
-      expect(true).toBe(false);
-      done();
-    }, (err) => {
-      expect(err).toBe('Cannot iterate on a query with sort, skip, or limit.');
-      done();
-    });
+    q.each(() => {}).then(
+      () => {
+        // this should not be reached
+        expect(true).toBe(false);
+        done();
+      },
+      err => {
+        expect(err).toBe('Cannot iterate on a query with sort, skip, or limit.');
+        done();
+      }
+    );
   });
 
   it('rewrites User queries when the rewrite is enabled', () => {
@@ -2210,48 +2219,43 @@ describe('ParseQuery', () => {
     expect(q.className).toBe('User');
   });
 
-  it('does not override the className if it comes from the server', (done) => {
+  it('does not override the className if it comes from the server', done => {
     CoreManager.setQueryController({
       aggregate() {},
       find() {
         return Promise.resolve({
-          results: [
-            { className: 'Product', objectId: 'P40', name: 'Product 40' },
-          ]
+          results: [{ className: 'Product', objectId: 'P40', name: 'Product 40' }],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
-    q.find().then((results) => {
+    q.find().then(results => {
       expect(results[0].className).toBe('Product');
       done();
     });
   });
 
-  it('can override the className with a name from the server', (done) => {
+  it('can override the className with a name from the server', done => {
     CoreManager.setQueryController({
       aggregate() {},
       find() {
         return Promise.resolve({
-          results: [
-            { objectId: 'P41', name: 'Product 41' },
-          ],
-          className: 'Product'
+          results: [{ objectId: 'P41', name: 'Product 41' }],
+          className: 'Product',
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
-    q.find().then((results) => {
+    q.find().then(results => {
       expect(results[0].className).toBe('Product');
       done();
     });
   });
 
-
-  it('overrides cached object with query results', (done) => {
-    jest.dontMock("../ParseObject");
+  it('overrides cached object with query results', done => {
+    jest.dontMock('../ParseObject');
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
     CoreManager = require('../CoreManager');
@@ -2263,42 +2267,45 @@ describe('ParseQuery', () => {
       objectId: 'T01',
       name: 'Name',
       other: 'other',
-      className:"Thing",
-      createdAt: '2017-01-10T10:00:00Z'
+      className: 'Thing',
+      createdAt: '2017-01-10T10:00:00Z',
     };
 
     CoreManager.setQueryController({
       aggregate() {},
       find() {
         return Promise.resolve({
-          results: [objectToReturn]
+          results: [objectToReturn],
         });
-      }
+      },
     });
 
-    const q = new ParseQuery("Thing");
+    const q = new ParseQuery('Thing');
     let testObject;
-    q.find().then((results) => {
-      testObject = results[0];
+    q.find()
+      .then(results => {
+        testObject = results[0];
 
-      expect(testObject.get("name")).toBe("Name");
-      expect(testObject.get("other")).toBe("other");
+        expect(testObject.get('name')).toBe('Name');
+        expect(testObject.get('other')).toBe('other');
 
-      objectToReturn = { objectId: 'T01', name: 'Name2'};
-      const q2 = new ParseQuery("Thing");
-      return q2.find();
-    }).then((results) => {
-      expect(results[0].get("name")).toBe("Name2");
-      expect(results[0].has("other")).toBe(false);
-    }).then(() => {
-      expect(testObject.get("name")).toBe("Name2");
-      expect(testObject.has("other")).toBe(false);
-      done();
-    });
+        objectToReturn = { objectId: 'T01', name: 'Name2' };
+        const q2 = new ParseQuery('Thing');
+        return q2.find();
+      })
+      .then(results => {
+        expect(results[0].get('name')).toBe('Name2');
+        expect(results[0].has('other')).toBe(false);
+      })
+      .then(() => {
+        expect(testObject.get('name')).toBe('Name2');
+        expect(testObject.has('other')).toBe(false);
+        done();
+      });
   });
 
-  it('does not override unselected fields with select query results', (done) => {
-    jest.dontMock("../ParseObject");
+  it('does not override unselected fields with select query results', done => {
+    jest.dontMock('../ParseObject');
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
     CoreManager = require('../CoreManager');
@@ -2311,59 +2318,70 @@ describe('ParseQuery', () => {
       name: 'Name',
       other: 'other',
       tbd: 'exists',
-      className:"Thing",
+      className: 'Thing',
       createdAt: '2017-01-10T10:00:00Z',
-      subObject: {key1:"value", key2:"value2", key3:"thisWillGoAway"}
+      subObject: { key1: 'value', key2: 'value2', key3: 'thisWillGoAway' },
     };
 
     CoreManager.setQueryController({
       aggregate() {},
       find() {
         return Promise.resolve({
-          results: [objectToReturn]
+          results: [objectToReturn],
         });
-      }
+      },
     });
 
-    const q = new ParseQuery("Thing");
+    const q = new ParseQuery('Thing');
     let testObject;
-    return q.find().then((results) => {
-      testObject = results[0];
+    return q
+      .find()
+      .then(results => {
+        testObject = results[0];
 
-      expect(testObject.get("name")).toBe("Name");
-      expect(testObject.get("other")).toBe("other");
-      expect(testObject.has("tbd")).toBe(true);
-      expect(testObject.get("subObject").key1).toBe("value");
-      expect(testObject.get("subObject").key2).toBe("value2");
-      expect(testObject.get("subObject").key3).toBe("thisWillGoAway");
+        expect(testObject.get('name')).toBe('Name');
+        expect(testObject.get('other')).toBe('other');
+        expect(testObject.has('tbd')).toBe(true);
+        expect(testObject.get('subObject').key1).toBe('value');
+        expect(testObject.get('subObject').key2).toBe('value2');
+        expect(testObject.get('subObject').key3).toBe('thisWillGoAway');
 
-      const q2 = new ParseQuery("Thing");
-      q2.select("other", "tbd", "subObject.key1", "subObject.key3");
-      objectToReturn = { objectId: 'T01', other: 'other2', subObject:{key1:"updatedValue"}};
-      return q2.find();
-    }).then((results) => {
-      expect(results[0].get("name")).toBe("Name");    //query didn't select this
-      expect(results[0].get("other")).toBe("other2"); //query selected and updated this
-      expect(results[0].has("tbd")).toBe(false);      //query selected this and it wasn't returned
-      //sub-objects should work similarly
-      expect(results[0].get("subObject").key1).toBe("updatedValue");
-      expect(results[0].get("subObject").key2).toBe("value2");
-      expect(results[0].get("subObject").key3).toBeUndefined();
-    }).then(() => {
-      expect(testObject.get("name")).toBe("Name");
-      expect(testObject.get("other")).toBe("other2");
-      expect(testObject.has("tbd")).toBe(false);
-      expect(testObject.get("subObject").key1).toBe("updatedValue");
-      expect(testObject.get("subObject").key2).toBe("value2");
-      expect(testObject.get("subObject").key3).toBeUndefined();
-      done();
-    }, (error) => {
-      done.fail(error);
-    });
+        const q2 = new ParseQuery('Thing');
+        q2.select('other', 'tbd', 'subObject.key1', 'subObject.key3');
+        objectToReturn = {
+          objectId: 'T01',
+          other: 'other2',
+          subObject: { key1: 'updatedValue' },
+        };
+        return q2.find();
+      })
+      .then(results => {
+        expect(results[0].get('name')).toBe('Name'); //query didn't select this
+        expect(results[0].get('other')).toBe('other2'); //query selected and updated this
+        expect(results[0].has('tbd')).toBe(false); //query selected this and it wasn't returned
+        //sub-objects should work similarly
+        expect(results[0].get('subObject').key1).toBe('updatedValue');
+        expect(results[0].get('subObject').key2).toBe('value2');
+        expect(results[0].get('subObject').key3).toBeUndefined();
+      })
+      .then(
+        () => {
+          expect(testObject.get('name')).toBe('Name');
+          expect(testObject.get('other')).toBe('other2');
+          expect(testObject.has('tbd')).toBe(false);
+          expect(testObject.get('subObject').key1).toBe('updatedValue');
+          expect(testObject.get('subObject').key2).toBe('value2');
+          expect(testObject.get('subObject').key3).toBeUndefined();
+          done();
+        },
+        error => {
+          done.fail(error);
+        }
+      );
   });
 
-  it('overrides cached object with first() results', (done) => {
-    jest.dontMock("../ParseObject");
+  it('overrides cached object with first() results', done => {
+    jest.dontMock('../ParseObject');
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
     CoreManager = require('../CoreManager');
@@ -2375,42 +2393,45 @@ describe('ParseQuery', () => {
       objectId: 'T01',
       name: 'Name',
       other: 'other',
-      className:"Thing",
-      createdAt: '2017-01-10T10:00:00Z'
+      className: 'Thing',
+      createdAt: '2017-01-10T10:00:00Z',
     };
 
     CoreManager.setQueryController({
       aggregate() {},
       find() {
         return Promise.resolve({
-          results: [objectToReturn]
+          results: [objectToReturn],
         });
-      }
+      },
     });
 
-    const q = new ParseQuery("Thing");
+    const q = new ParseQuery('Thing');
     let testObject;
-    q.first().then((result) => {
-      testObject = result;
+    q.first()
+      .then(result => {
+        testObject = result;
 
-      expect(testObject.get("name")).toBe("Name");
-      expect(testObject.get("other")).toBe("other");
+        expect(testObject.get('name')).toBe('Name');
+        expect(testObject.get('other')).toBe('other');
 
-      objectToReturn = { objectId: 'T01', name: 'Name2'};
-      const q2 = new ParseQuery("Thing");
-      return q2.first();
-    }).then((result) => {
-      expect(result.get("name")).toBe("Name2");
-      expect(result.has("other")).toBe(false);
-    }).then(() => {
-      expect(testObject.get("name")).toBe("Name2");
-      expect(testObject.has("other")).toBe(false);
-      done();
-    });
+        objectToReturn = { objectId: 'T01', name: 'Name2' };
+        const q2 = new ParseQuery('Thing');
+        return q2.first();
+      })
+      .then(result => {
+        expect(result.get('name')).toBe('Name2');
+        expect(result.has('other')).toBe(false);
+      })
+      .then(() => {
+        expect(testObject.get('name')).toBe('Name2');
+        expect(testObject.has('other')).toBe(false);
+        done();
+      });
   });
 
-  it('does not override unselected fields for first() on select query', (done) => {
-    jest.dontMock("../ParseObject");
+  it('does not override unselected fields for first() on select query', done => {
+    jest.dontMock('../ParseObject');
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
     CoreManager = require('../CoreManager');
@@ -2423,8 +2444,8 @@ describe('ParseQuery', () => {
       name: 'Name',
       other: 'other',
       tbd: 'exists',
-      className:"Thing",
-      subObject: {key1:"value", key2:"value2", key3:"thisWillGoAway"},
+      className: 'Thing',
+      subObject: { key1: 'value', key2: 'value2', key3: 'thisWillGoAway' },
       createdAt: '2017-01-10T10:00:00Z',
     };
 
@@ -2432,43 +2453,54 @@ describe('ParseQuery', () => {
       aggregate() {},
       find() {
         return Promise.resolve({
-          results: [objectToReturn]
+          results: [objectToReturn],
         });
-      }
+      },
     });
 
-    const q = new ParseQuery("Thing");
+    const q = new ParseQuery('Thing');
     let testObject;
-    return q.first().then((result) => {
-      testObject = result;
+    return q
+      .first()
+      .then(result => {
+        testObject = result;
 
-      expect(testObject.get("name")).toBe("Name");
-      expect(testObject.get("other")).toBe("other");
-      expect(testObject.has("tbd")).toBe(true);
+        expect(testObject.get('name')).toBe('Name');
+        expect(testObject.get('other')).toBe('other');
+        expect(testObject.has('tbd')).toBe(true);
 
-      const q2 = new ParseQuery("Thing");
-      q2.select("other", "tbd", "subObject.key1", "subObject.key3");
-      objectToReturn = { objectId: 'T01', other: 'other2', subObject:{key1:"updatedValue"}};
-      return q2.first();
-    }).then((result) => {
-      expect(result.get("name")).toBe("Name");    //query didn't select this
-      expect(result.get("other")).toBe("other2"); //query selected and updated this
-      expect(result.has("tbd")).toBe(false);      //query selected this and it wasn't returned
-      //sub-objects should work similarly
-      expect(result.get("subObject").key1).toBe("updatedValue");
-      expect(result.get("subObject").key2).toBe("value2");
-      expect(result.get("subObject").key3).toBeUndefined();
-    }).then(() => {
-      expect(testObject.get("name")).toBe("Name");
-      expect(testObject.get("other")).toBe("other2");
-      expect(testObject.has("tbd")).toBe(false);
-      expect(testObject.get("subObject").key1).toBe("updatedValue");
-      expect(testObject.get("subObject").key2).toBe("value2");
-      expect(testObject.get("subObject").key3).toBeUndefined();
-      done();
-    }, (error) => {
-      done.fail(error);
-    });
+        const q2 = new ParseQuery('Thing');
+        q2.select('other', 'tbd', 'subObject.key1', 'subObject.key3');
+        objectToReturn = {
+          objectId: 'T01',
+          other: 'other2',
+          subObject: { key1: 'updatedValue' },
+        };
+        return q2.first();
+      })
+      .then(result => {
+        expect(result.get('name')).toBe('Name'); //query didn't select this
+        expect(result.get('other')).toBe('other2'); //query selected and updated this
+        expect(result.has('tbd')).toBe(false); //query selected this and it wasn't returned
+        //sub-objects should work similarly
+        expect(result.get('subObject').key1).toBe('updatedValue');
+        expect(result.get('subObject').key2).toBe('value2');
+        expect(result.get('subObject').key3).toBeUndefined();
+      })
+      .then(
+        () => {
+          expect(testObject.get('name')).toBe('Name');
+          expect(testObject.get('other')).toBe('other2');
+          expect(testObject.has('tbd')).toBe(false);
+          expect(testObject.get('subObject').key1).toBe('updatedValue');
+          expect(testObject.get('subObject').key2).toBe('value2');
+          expect(testObject.get('subObject').key3).toBeUndefined();
+          done();
+        },
+        error => {
+          done.fail(error);
+        }
+      );
   });
 
   it('restores queries from json representation', () => {
@@ -2496,12 +2528,12 @@ describe('ParseQuery', () => {
       order: 'a,b,c',
       skip: 4,
       where: {
-        size: 'medium'
-      }
+        size: 'medium',
+      },
     });
   });
 
-  it('can issue a distinct query', (done) => {
+  it('can issue a distinct query', done => {
     CoreManager.setQueryController({
       find() {},
       aggregate(className, params, options) {
@@ -2509,25 +2541,27 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           distinct: 'size',
           where: {
-            size: 'small'
-          }
+            size: 'small',
+          },
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: ['L'],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
-    q.equalTo('size', 'small').distinct('size').then((results) => {
-      expect(results[0]).toBe('L');
-      done();
-    });
+    q.equalTo('size', 'small')
+      .distinct('size')
+      .then(results => {
+        expect(results[0]).toBe('L');
+        done();
+      });
   });
 
-  it('can pass options to a distinct query', (done) => {
+  it('can pass options to a distinct query', done => {
     CoreManager.setQueryController({
       find() {},
       aggregate(className, params, options) {
@@ -2535,29 +2569,30 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           distinct: 'size',
           where: {
-            size: 'small'
-          }
+            size: 'small',
+          },
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
-          results: ['L']
+          results: ['L'],
         });
-      }
+      },
     });
-
 
     const q = new ParseQuery('Item');
-    q.equalTo('size', 'small').distinct('size', {
-      sessionToken: '1234'
-    }).then((results) => {
-      expect(results[0]).toBe('L');
-      done();
-    });
+    q.equalTo('size', 'small')
+      .distinct('size', {
+        sessionToken: '1234',
+      })
+      .then(results => {
+        expect(results[0]).toBe('L');
+        done();
+      });
   });
 
-  it('can pass options to a distinct query with hint', (done) => {
+  it('can pass options to a distinct query with hint', done => {
     CoreManager.setQueryController({
       find() {},
       aggregate(className, params, options) {
@@ -2565,7 +2600,7 @@ describe('ParseQuery', () => {
         expect(params).toEqual({
           distinct: 'size',
           where: {
-            size: 'small'
+            size: 'small',
           },
           hint: '_id_',
         });
@@ -2573,19 +2608,21 @@ describe('ParseQuery', () => {
         expect(options.sessionToken).toEqual('1234');
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
-          results: ['L']
+          results: ['L'],
         });
-      }
+      },
     });
-
 
     const q = new ParseQuery('Item');
-    q.equalTo('size', 'small').hint('_id_').distinct('size', {
-      sessionToken: '1234'
-    }).then((results) => {
-      expect(results[0]).toBe('L');
-      done();
-    });
+    q.equalTo('size', 'small')
+      .hint('_id_')
+      .distinct('size', {
+        sessionToken: '1234',
+      })
+      .then(results => {
+        expect(results[0]).toBe('L');
+        done();
+      });
   });
 
   it('can issue a query to the controller', () => {
@@ -2604,11 +2641,8 @@ describe('ParseQuery', () => {
     expect(query._subqueryReadPreference).toBe('SECONDARY_PREFERRED');
   });
 
-
-  it('can issue an aggregate query with array pipeline', (done) => {
-    const pipeline = [
-      { group: { objectId: '$name' } }
-    ];
+  it('can issue an aggregate query with array pipeline', done => {
+    const pipeline = [{ group: { objectId: '$name' } }];
     CoreManager.setQueryController({
       find() {},
       aggregate(className, params, options) {
@@ -2619,20 +2653,18 @@ describe('ParseQuery', () => {
         return Promise.resolve({
           results: [],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
-    q.aggregate(pipeline).then((results) => {
+    q.aggregate(pipeline).then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('aggregate query array pipeline with equalTo', (done) => {
-    const pipeline = [
-      { group: { objectId: '$name' } }
-    ];
+  it('aggregate query array pipeline with equalTo', done => {
+    const pipeline = [{ group: { objectId: '$name' } }];
     MockRESTController.request.mockImplementationOnce(() => {
       return Promise.resolve({
         results: [],
@@ -2640,15 +2672,15 @@ describe('ParseQuery', () => {
     });
     const q = new ParseQuery('Item');
     q.equalTo('name', 'foo');
-    q.aggregate(pipeline).then((results) => {
+    q.aggregate(pipeline).then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('aggregate query object pipeline with equalTo', (done) => {
+  it('aggregate query object pipeline with equalTo', done => {
     const pipeline = {
-      group: { objectId: '$name' }
+      group: { objectId: '$name' },
     };
     MockRESTController.request.mockImplementationOnce(() => {
       return Promise.resolve({
@@ -2657,15 +2689,15 @@ describe('ParseQuery', () => {
     });
     const q = new ParseQuery('Item');
     q.equalTo('name', 'foo');
-    q.aggregate(pipeline).then((results) => {
+    q.aggregate(pipeline).then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('can issue an aggregate query with object pipeline', (done) => {
+  it('can issue an aggregate query with object pipeline', done => {
     const pipeline = {
-      group: { objectId: '$name' }
+      group: { objectId: '$name' },
     };
     CoreManager.setQueryController({
       find() {},
@@ -2677,31 +2709,31 @@ describe('ParseQuery', () => {
         return Promise.resolve({
           results: [],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
-    q.aggregate(pipeline).then((results) => {
+    q.aggregate(pipeline).then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('cannot issue an aggregate query with invalid pipeline', (done) => {
+  it('cannot issue an aggregate query with invalid pipeline', done => {
     const pipeline = 1234;
     CoreManager.setQueryController({
       find() {},
       aggregate(className, params, options) {
         expect(className).toBe('Item');
         expect(params).toEqual({
-          group: { objectId: '$name' }
+          group: { objectId: '$name' },
         });
         expect(options.useMasterKey).toEqual(true);
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
         });
-      }
+      },
     });
 
     try {
@@ -2712,10 +2744,8 @@ describe('ParseQuery', () => {
     }
   });
 
-  it('can pass options to an aggregate query', (done) => {
-    const pipeline = [
-      { group: { objectId: '$name' } }
-    ];
+  it('can pass options to an aggregate query', done => {
+    const pipeline = [{ group: { objectId: '$name' } }];
     CoreManager.setQueryController({
       find() {},
       aggregate(className, params, options) {
@@ -2724,21 +2754,21 @@ describe('ParseQuery', () => {
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
-          results: []
+          results: [],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
     q.aggregate(pipeline, {
-      sessionToken: '1234'
-    }).then((results) => {
+      sessionToken: '1234',
+    }).then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('can issue an aggregate query with read preference', async() => {
+  it('can issue an aggregate query with read preference', async () => {
     // Override controller
     CoreManager.setQueryController({
       find() {},
@@ -2747,9 +2777,9 @@ describe('ParseQuery', () => {
         expect(params.readPreference).toEqual('SECONDARY');
         expect(options.useMasterKey).toEqual(true);
         return Promise.resolve({
-          results: []
+          results: [],
         });
-      }
+      },
     });
     // Query
     const q = new ParseQuery('Item');
@@ -2759,10 +2789,8 @@ describe('ParseQuery', () => {
     expect(results).toEqual([]);
   });
 
-  it('can pass options to an aggregate query with hint', (done) => {
-    const pipeline = [
-      { group: { objectId: '$name' } }
-    ];
+  it('can pass options to an aggregate query with hint', done => {
+    const pipeline = [{ group: { objectId: '$name' } }];
     CoreManager.setQueryController({
       find() {},
       aggregate(className, params, options) {
@@ -2772,18 +2800,20 @@ describe('ParseQuery', () => {
         expect(options.useMasterKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
-          results: []
+          results: [],
         });
-      }
+      },
     });
 
     const q = new ParseQuery('Item');
-    q.hint('_id_').aggregate(pipeline, {
-      sessionToken: '1234'
-    }).then((results) => {
-      expect(results).toEqual([]);
-      done();
-    });
+    q.hint('_id_')
+      .aggregate(pipeline, {
+        sessionToken: '1234',
+      })
+      .then(results => {
+        expect(results).toEqual([]);
+        done();
+      });
   });
 
   it('can cancel query', async () => {
@@ -2792,15 +2822,18 @@ describe('ParseQuery', () => {
     };
 
     CoreManager.setQueryController({
-      find: function(name, params, options) {
+      find: function (name, params, options) {
         options.requestTask(mockRequestTask);
         return Promise.resolve({
-          results: []
+          results: [],
         });
       },
       aggregate: () => {},
     });
     const query = new ParseQuery('TestCancel');
+    expect(query._xhrRequest).toBeDefined();
+    expect(query._xhrRequest.task).toBe(null);
+    expect(query._xhrRequest.onchange()).toBeUndefined();
 
     jest.spyOn(mockRequestTask, 'abort');
     query.cancel();
@@ -2813,8 +2846,8 @@ describe('ParseQuery', () => {
     expect(mockRequestTask.abort).toHaveBeenCalledTimes(1);
   });
 
-  it('selecting sub-objects does not inject objects when sub-object does not exist', (done) => {
-    jest.dontMock("../ParseObject");
+  it('selecting sub-objects does not inject objects when sub-object does not exist', done => {
+    jest.dontMock('../ParseObject');
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
     CoreManager = require('../CoreManager');
@@ -2826,38 +2859,43 @@ describe('ParseQuery', () => {
       objectId: 'T01',
       name: 'Name',
       tbd: 'exists',
-      className:"Thing",
-      createdAt: '2017-01-10T10:00:00Z'
+      className: 'Thing',
+      createdAt: '2017-01-10T10:00:00Z',
     };
 
     CoreManager.setQueryController({
       aggregate() {},
       find() {
         return Promise.resolve({
-          results: [objectToReturn]
+          results: [objectToReturn],
         });
-      }
+      },
     });
 
-    const q = new ParseQuery("Thing");
-    q.select("other", "tbd", "subObject.key1")
+    const q = new ParseQuery('Thing');
+    q.select('other', 'tbd', 'subObject.key1');
     let testObject;
-    return q.find().then((results) => {
-      testObject = results[0];
+    return q
+      .find()
+      .then(results => {
+        testObject = results[0];
 
-      expect(testObject.get("name")).toBe("Name");
-      expect(testObject.has("other")).toBe(false);
-      expect(testObject.has("subObject")).toBe(false);
-
-    }).then(() => {
-      done();
-    }, (error) => {
-      done.fail(error);
-    });
+        expect(testObject.get('name')).toBe('Name');
+        expect(testObject.has('other')).toBe(false);
+        expect(testObject.has('subObject')).toBe(false);
+      })
+      .then(
+        () => {
+          done();
+        },
+        error => {
+          done.fail(error);
+        }
+      );
   });
 
-  it('removes missing sub objects from the cached object when they are selected', (done) => {
-    jest.dontMock("../ParseObject");
+  it('removes missing sub objects from the cached object when they are selected', done => {
+    jest.dontMock('../ParseObject');
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
     CoreManager = require('../CoreManager');
@@ -2869,50 +2907,68 @@ describe('ParseQuery', () => {
       objectId: 'T01',
       name: 'Name',
       tbd: 'exists',
-      className:"Thing",
-      subObject1: {foo:"bar"},
-      subObject2: {foo:"bar"},
-      subObject3: {foo:"bar"},
-      subObject5: {subSubObject:{foo:"foo", bar:"bar"}},
-      createdAt: '2017-01-10T10:00:00Z'
+      className: 'Thing',
+      subObject1: { foo: 'bar' },
+      subObject2: { foo: 'bar' },
+      subObject3: { foo: 'bar' },
+      subObject5: { subSubObject: { foo: 'foo', bar: 'bar' } },
+      createdAt: '2017-01-10T10:00:00Z',
     };
 
     CoreManager.setQueryController({
       aggregate() {},
       find() {
         return Promise.resolve({
-          results: [objectToReturn]
+          results: [objectToReturn],
         });
-      }
+      },
     });
 
-    const q = new ParseQuery("Thing");
+    const q = new ParseQuery('Thing');
     let testObject;
-    return q.find().then((results) => {
-      testObject = results[0];
+    return q
+      .find()
+      .then(results => {
+        testObject = results[0];
 
-      expect(testObject.has("subObject1")).toBe(true);
-      expect(testObject.has("subObject2")).toBe(true);
-      expect(testObject.has("subObject3")).toBe(true);
-      expect(testObject.has("subObject4")).toBe(false);
+        expect(testObject.has('subObject1')).toBe(true);
+        expect(testObject.has('subObject2')).toBe(true);
+        expect(testObject.has('subObject3')).toBe(true);
+        expect(testObject.has('subObject4')).toBe(false);
 
-      const q2 = new ParseQuery("Thing");
-      q2.select("name","subObject1", "subObject2.foo", "subObject4.foo", "subObject5.subSubObject.foo");
-      objectToReturn = { objectId: 'T01', name:"Name", subObject4: {foo:"bar"}, subObject5: {subSubObject:{}}};
-      return q2.find();
-    }).then(()=>{
-      expect(testObject.has("subObject1")).toBe(false); //selected and not returned
-      expect(testObject.has("subObject2")).toBe(false); //selected and not returned
-      expect(testObject.has("subObject3")).toBe(true); //not selected, so should still be there
-      expect(testObject.has("subObject4")).toBe(true); //selected and just added
-      expect(testObject.has("subObject5")).toBe(true);
-      expect(testObject.get("subObject5").subSubObject).toBeDefined();
-      expect(testObject.get("subObject5").subSubObject.bar).toBeDefined(); //not selected but a sibiling was, so should still be there
-    }).then(() => {
-      done();
-    }, (error) => {
-      done.fail(error);
-    });
+        const q2 = new ParseQuery('Thing');
+        q2.select(
+          'name',
+          'subObject1',
+          'subObject2.foo',
+          'subObject4.foo',
+          'subObject5.subSubObject.foo'
+        );
+        objectToReturn = {
+          objectId: 'T01',
+          name: 'Name',
+          subObject4: { foo: 'bar' },
+          subObject5: { subSubObject: {} },
+        };
+        return q2.find();
+      })
+      .then(() => {
+        expect(testObject.has('subObject1')).toBe(false); //selected and not returned
+        expect(testObject.has('subObject2')).toBe(false); //selected and not returned
+        expect(testObject.has('subObject3')).toBe(true); //not selected, so should still be there
+        expect(testObject.has('subObject4')).toBe(true); //selected and just added
+        expect(testObject.has('subObject5')).toBe(true);
+        expect(testObject.get('subObject5').subSubObject).toBeDefined();
+        expect(testObject.get('subObject5').subSubObject.bar).toBeDefined(); //not selected but a sibiling was, so should still be there
+      })
+      .then(
+        () => {
+          done();
+        },
+        error => {
+          done.fail(error);
+        }
+      );
   });
 
   it('full text search', () => {
@@ -2924,11 +2980,11 @@ describe('ParseQuery', () => {
         size: {
           $text: {
             $search: {
-              $term: "small"
-            }
-          }
-        }
-      }
+              $term: 'small',
+            },
+          },
+        },
+      },
     });
   });
 
@@ -2943,44 +2999,52 @@ describe('ParseQuery', () => {
         size: {
           $text: {
             $search: {
-              $term: "medium",
-            }
-          }
-        }
+              $term: 'medium',
+            },
+          },
+        },
       },
-      keys : "$score",
-      order : "$score"
+      keys: '$score',
+      order: '$score',
     });
   });
 
-  it('full text search key required', (done) => {
+  it('full text search key required', done => {
     const query = new ParseQuery('Item');
     expect(() => query.fullText()).toThrow('A key is required.');
     done();
   });
 
-  it('full text search value required', (done) => {
+  it('full text search value required', done => {
     const query = new ParseQuery('Item');
     expect(() => query.fullText('key')).toThrow('A search term is required');
     done();
   });
 
-  it('full text search value must be string', (done) => {
+  it('full text search value must be string', done => {
     const query = new ParseQuery('Item');
-    expect(() => query.fullText('key', [])).toThrow('The value being searched for must be a string.');
+    expect(() => query.fullText('key', [])).toThrow(
+      'The value being searched for must be a string.'
+    );
     done();
   });
 
-  it('full text search invalid option', (done) => {
+  it('full text search invalid option', done => {
     const query = new ParseQuery('Item');
-    expect(() => query.fullText('size', 'medium', { unknown: 'throwOption' })).toThrow('Unknown option: unknown');
+    expect(() => query.fullText('size', 'medium', { unknown: 'throwOption' })).toThrow(
+      'Unknown option: unknown'
+    );
     done();
   });
 
   it('full text search with all parameters', () => {
     const query = new ParseQuery('Item');
 
-    query.fullText('size', 'medium', { language: 'en', caseSensitive: false, diacriticSensitive: true });
+    query.fullText('size', 'medium', {
+      language: 'en',
+      caseSensitive: false,
+      diacriticSensitive: true,
+    });
 
     expect(query.toJSON()).toEqual({
       where: {
@@ -3019,7 +3083,6 @@ describe('ParseQuery', () => {
       order: '$score',
     });
   });
-
 });
 
 describe('ParseQuery LocalDatastore', () => {
@@ -3029,9 +3092,7 @@ describe('ParseQuery LocalDatastore', () => {
   });
 
   it('can query from local datastore', () => {
-    mockLocalDatastore
-      .checkIfEnabled
-      .mockImplementationOnce(() => true);
+    mockLocalDatastore.checkIfEnabled.mockImplementationOnce(() => true);
 
     const q = new ParseQuery('Item');
     expect(q._queriesLocalDatastore).toBe(false);
@@ -3042,9 +3103,7 @@ describe('ParseQuery LocalDatastore', () => {
   });
 
   it('can query from default pin', () => {
-    mockLocalDatastore
-      .checkIfEnabled
-      .mockImplementationOnce(() => true);
+    mockLocalDatastore.checkIfEnabled.mockImplementationOnce(() => true);
 
     const q = new ParseQuery('Item');
     expect(q._queriesLocalDatastore).toBe(false);
@@ -3059,9 +3118,7 @@ describe('ParseQuery LocalDatastore', () => {
   });
 
   it('can query from pin with name', () => {
-    mockLocalDatastore
-      .checkIfEnabled
-      .mockImplementationOnce(() => true);
+    mockLocalDatastore.checkIfEnabled.mockImplementationOnce(() => true);
 
     const q = new ParseQuery('Item');
     expect(q._queriesLocalDatastore).toBe(false);
@@ -3115,13 +3172,13 @@ describe('ParseQuery LocalDatastore', () => {
       objectId: 'objectId3',
     };
 
-    mockLocalDatastore
-      ._serializeObjectsFromPinName
-      .mockImplementationOnce(() => [obj1, obj2, obj3]);
+    mockLocalDatastore._serializeObjectsFromPinName.mockImplementationOnce(() => [
+      obj1,
+      obj2,
+      obj3,
+    ]);
 
-    mockLocalDatastore
-      .checkIfEnabled
-      .mockImplementationOnce(() => true);
+    mockLocalDatastore.checkIfEnabled.mockImplementationOnce(() => true);
 
     const q = new ParseQuery('Item');
     q.equalTo('count', 2);
@@ -3147,13 +3204,13 @@ describe('ParseQuery LocalDatastore', () => {
       objectId: 'objectId3',
     };
 
-    mockLocalDatastore
-      ._serializeObjectsFromPinName
-      .mockImplementationOnce(() => [obj1, obj2, obj3]);
+    mockLocalDatastore._serializeObjectsFromPinName.mockImplementationOnce(() => [
+      obj1,
+      obj2,
+      obj3,
+    ]);
 
-    mockLocalDatastore
-      .checkIfEnabled
-      .mockImplementationOnce(() => true);
+    mockLocalDatastore.checkIfEnabled.mockImplementationOnce(() => true);
 
     const q = new ParseQuery('Item');
     q.equalTo('count', 2);
@@ -3179,13 +3236,13 @@ describe('ParseQuery LocalDatastore', () => {
       objectId: 'objectId3',
     };
 
-    mockLocalDatastore
-      ._serializeObjectsFromPinName
-      .mockImplementationOnce(() => [obj1, obj2, obj3]);
+    mockLocalDatastore._serializeObjectsFromPinName.mockImplementationOnce(() => [
+      obj1,
+      obj2,
+      obj3,
+    ]);
 
-    mockLocalDatastore
-      .checkIfEnabled
-      .mockImplementationOnce(() => true);
+    mockLocalDatastore.checkIfEnabled.mockImplementationOnce(() => true);
 
     let q = new ParseQuery('Item');
     q.fromLocalDatastore();
@@ -3193,13 +3250,9 @@ describe('ParseQuery LocalDatastore', () => {
     expect(result.id).toEqual(obj1.objectId);
 
     jest.clearAllMocks();
-    mockLocalDatastore
-      ._serializeObjectsFromPinName
-      .mockImplementationOnce(() => []);
+    mockLocalDatastore._serializeObjectsFromPinName.mockImplementationOnce(() => []);
 
-    mockLocalDatastore
-      .checkIfEnabled
-      .mockImplementationOnce(() => true);
+    mockLocalDatastore.checkIfEnabled.mockImplementationOnce(() => true);
 
     q = new ParseQuery('Item');
     q.fromLocalDatastore();
@@ -3235,13 +3288,23 @@ describe('ParseQuery LocalDatastore', () => {
       updatedAt: new Date('2018-08-12T00:00:00.000Z'),
     };
 
-    mockLocalDatastore
-      ._serializeObjectsFromPinName
-      .mockImplementation(() => [obj1, obj2, obj3]);
+    const obj4 = {
+      className: 'Item',
+      objectId: 'objectId4',
+      password: 123,
+      number: 4,
+      createdAt: new Date('2018-08-12T00:00:00.000Z'),
+      updatedAt: new Date('2018-08-12T00:00:00.000Z'),
+    };
 
-    mockLocalDatastore
-      .checkIfEnabled
-      .mockImplementation(() => true);
+    mockLocalDatastore._serializeObjectsFromPinName.mockImplementation(() => [
+      obj1,
+      obj3,
+      obj2,
+      obj4,
+    ]);
+
+    mockLocalDatastore.checkIfEnabled.mockImplementation(() => true);
 
     let q = new ParseQuery('Item');
     q.ascending('number');
@@ -3250,25 +3313,19 @@ describe('ParseQuery LocalDatastore', () => {
     expect(results[0].get('number')).toEqual(2);
     expect(results[1].get('number')).toEqual(3);
     expect(results[2].get('number')).toEqual(4);
+    expect(results[3].get('number')).toEqual(4);
 
     q = new ParseQuery('Item');
     q.descending('number');
     q.fromLocalDatastore();
     results = await q.find();
     expect(results[0].get('number')).toEqual(4);
-    expect(results[1].get('number')).toEqual(3);
-    expect(results[2].get('number')).toEqual(2);
+    expect(results[1].get('number')).toEqual(4);
+    expect(results[2].get('number')).toEqual(3);
+    expect(results[3].get('number')).toEqual(2);
 
     q = new ParseQuery('Item');
-    q.descending('number');
-    q.fromLocalDatastore();
-    results = await q.find();
-    expect(results[0].get('number')).toEqual(4);
-    expect(results[1].get('number')).toEqual(3);
-    expect(results[2].get('number')).toEqual(2);
-
-    q = new ParseQuery('Item');
-    q.descending('_created_at');
+    q.ascending('_created_at');
     q.fromLocalDatastore();
     results = await q.find();
     expect(results[0].get('number')).toEqual(2);
@@ -3276,7 +3333,7 @@ describe('ParseQuery LocalDatastore', () => {
     expect(results[2].get('number')).toEqual(4);
 
     q = new ParseQuery('Item');
-    q.descending('_updated_at');
+    q.ascending('_updated_at');
     q.fromLocalDatastore();
     results = await q.find();
     expect(results[0].get('number')).toEqual(2);
@@ -3323,13 +3380,14 @@ describe('ParseQuery LocalDatastore', () => {
       string: 'd',
     };
 
-    mockLocalDatastore
-      ._serializeObjectsFromPinName
-      .mockImplementation(() => [obj1, obj2, obj3, obj4]);
+    mockLocalDatastore._serializeObjectsFromPinName.mockImplementation(() => [
+      obj1,
+      obj2,
+      obj3,
+      obj4,
+    ]);
 
-    mockLocalDatastore
-      .checkIfEnabled
-      .mockImplementation(() => true);
+    mockLocalDatastore.checkIfEnabled.mockImplementation(() => true);
 
     let q = new ParseQuery('Item');
     q.ascending('number,string');
@@ -3401,13 +3459,9 @@ describe('ParseQuery LocalDatastore', () => {
       string: 'b',
     };
 
-    mockLocalDatastore
-      ._serializeObjectsFromPinName
-      .mockImplementation(() => [obj1, obj2]);
+    mockLocalDatastore._serializeObjectsFromPinName.mockImplementation(() => [obj1, obj2]);
 
-    mockLocalDatastore
-      .checkIfEnabled
-      .mockImplementation(() => true);
+    mockLocalDatastore.checkIfEnabled.mockImplementation(() => true);
 
     let q = new ParseQuery('Item');
     q.limit(0);
@@ -3464,13 +3518,9 @@ describe('ParseQuery LocalDatastore', () => {
     };
 
     const objects = [obj1, obj2, obj3];
-    mockLocalDatastore
-      ._serializeObjectsFromPinName
-      .mockImplementation(() => objects);
+    mockLocalDatastore._serializeObjectsFromPinName.mockImplementation(() => objects);
 
-    mockLocalDatastore
-      .checkIfEnabled
-      .mockImplementation(() => true);
+    mockLocalDatastore.checkIfEnabled.mockImplementation(() => true);
 
     let q = new ParseQuery('Item');
     q.skip(0);
@@ -3542,13 +3592,9 @@ describe('ParseQuery LocalDatastore', () => {
     };
 
     const objects = [obj1, obj2, obj3];
-    mockLocalDatastore
-      ._serializeObjectsFromPinName
-      .mockImplementation(() => objects);
+    mockLocalDatastore._serializeObjectsFromPinName.mockImplementation(() => objects);
 
-    mockLocalDatastore
-      .checkIfEnabled
-      .mockImplementation(() => true);
+    mockLocalDatastore.checkIfEnabled.mockImplementation(() => true);
 
     let q = new ParseQuery('Item');
     q.skip(0);
@@ -3618,13 +3664,9 @@ describe('ParseQuery LocalDatastore', () => {
       bar: 1,
     };
 
-    mockLocalDatastore
-      ._serializeObjectsFromPinName
-      .mockImplementation(() => [obj1]);
+    mockLocalDatastore._serializeObjectsFromPinName.mockImplementation(() => [obj1]);
 
-    mockLocalDatastore
-      .checkIfEnabled
-      .mockImplementation(() => true);
+    mockLocalDatastore.checkIfEnabled.mockImplementation(() => true);
 
     const q = new ParseQuery('Item');
     q.select('foo');
@@ -3635,10 +3677,10 @@ describe('ParseQuery LocalDatastore', () => {
 
   it('can subscribe to query if client is already open', async () => {
     const mockLiveQueryClient = {
-      shouldOpen: function() {
+      shouldOpen: function () {
         return false;
       },
-      subscribe: function(query, sessionToken) {
+      subscribe: function (query, sessionToken) {
         const subscription = new LiveQuerySubscription('0', query, sessionToken);
         subscription.subscribePromise.resolve();
         return subscription;
@@ -3649,14 +3691,14 @@ describe('ParseQuery LocalDatastore', () => {
         return Promise.resolve({
           getSessionToken() {
             return 'token';
-          }
+          },
         });
-      }
+      },
     });
     CoreManager.set('LiveQueryController', {
       getDefaultLiveQueryClient() {
         return Promise.resolve(mockLiveQueryClient);
-      }
+      },
     });
     const query = new ParseQuery('TestObject');
     const subscription = await query.subscribe();
@@ -3667,11 +3709,11 @@ describe('ParseQuery LocalDatastore', () => {
 
   it('can subscribe to query if client is not open', async () => {
     const mockLiveQueryClient = {
-      shouldOpen: function() {
+      shouldOpen: function () {
         return true;
       },
-      open: function() {},
-      subscribe: function(query, sessionToken) {
+      open: function () {},
+      subscribe: function (query, sessionToken) {
         const subscription = new LiveQuerySubscription('0', query, sessionToken);
         subscription.subscribePromise.resolve();
         return subscription;
@@ -3682,14 +3724,14 @@ describe('ParseQuery LocalDatastore', () => {
         return Promise.resolve({
           getSessionToken() {
             return 'token';
-          }
+          },
         });
-      }
+      },
     });
     CoreManager.set('LiveQueryController', {
       getDefaultLiveQueryClient() {
         return Promise.resolve(mockLiveQueryClient);
-      }
+      },
     });
     const query = new ParseQuery('TestObject');
     const subscription = await query.subscribe();
@@ -3700,11 +3742,11 @@ describe('ParseQuery LocalDatastore', () => {
 
   it('can subscribe to query without sessionToken', async () => {
     const mockLiveQueryClient = {
-      shouldOpen: function() {
+      shouldOpen: function () {
         return true;
       },
-      open: function() {},
-      subscribe: function(query, sessionToken) {
+      open: function () {},
+      subscribe: function (query, sessionToken) {
         const subscription = new LiveQuerySubscription('0', query, sessionToken);
         subscription.subscribePromise.resolve();
         return subscription;
@@ -3713,12 +3755,12 @@ describe('ParseQuery LocalDatastore', () => {
     CoreManager.set('UserController', {
       currentUserAsync() {
         return Promise.resolve(null);
-      }
+      },
     });
     CoreManager.set('LiveQueryController', {
       getDefaultLiveQueryClient() {
         return Promise.resolve(mockLiveQueryClient);
-      }
+      },
     });
     const query = new ParseQuery('TestObject');
     const subscription = await query.subscribe();
@@ -3729,11 +3771,11 @@ describe('ParseQuery LocalDatastore', () => {
 
   it('can subscribe to query with sessionToken parameter', async () => {
     const mockLiveQueryClient = {
-      shouldOpen: function() {
+      shouldOpen: function () {
         return true;
       },
-      open: function() {},
-      subscribe: function(query, sessionToken) {
+      open: function () {},
+      subscribe: function (query, sessionToken) {
         const subscription = new LiveQuerySubscription('0', query, sessionToken);
         subscription.subscribePromise.resolve();
         return subscription;
@@ -3742,12 +3784,12 @@ describe('ParseQuery LocalDatastore', () => {
     CoreManager.set('UserController', {
       currentUserAsync() {
         return Promise.resolve(null);
-      }
+      },
     });
     CoreManager.set('LiveQueryController', {
       getDefaultLiveQueryClient() {
         return Promise.resolve(mockLiveQueryClient);
-      }
+      },
     });
     const query = new ParseQuery('TestObject');
     const subscription = await query.subscribe('r:test');

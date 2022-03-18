@@ -30,7 +30,7 @@ const mockLocalDatastore = {
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
 function generateSaveMock(prefix) {
-  return function(name, payload, options) {
+  return function (name, payload, options) {
     if (options && typeof options.progress === 'function') {
       options.progress(0.5, 5, 10, { type: 'upload' });
     }
@@ -48,10 +48,11 @@ describe('ParseFile', () => {
     CoreManager.setFileController({
       saveFile: generateSaveMock('http://files.parsetfss.com/a/'),
       saveBase64: generateSaveMock('http://files.parsetfss.com/a/'),
-      download: () => Promise.resolve({
-        base64: 'ParseA==',
-        contentType: 'image/png',
-      }),
+      download: () =>
+        Promise.resolve({
+          base64: 'ParseA==',
+          contentType: 'image/png',
+        }),
     });
   });
 
@@ -67,21 +68,23 @@ describe('ParseFile', () => {
 
   it('can extract data type from base64', () => {
     const file = new ParseFile('parse.txt', {
-      base64: 'data:image/png;base64,ParseA=='
+      base64: 'data:image/png;base64,ParseA==',
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('image/png');
   });
 
   it('can create files with file uri', () => {
-    const file = new ParseFile('parse-image', { uri:'http://example.com/image.png' });
+    const file = new ParseFile('parse-image', {
+      uri: 'http://example.com/image.png',
+    });
     expect(file._source.format).toBe('uri');
     expect(file._source.uri).toBe('http://example.com/image.png');
   });
 
   it('can extract data type from base64 with data type containing a number', () => {
     const file = new ParseFile('parse.m4a', {
-      base64: 'data:audio/m4a;base64,ParseA=='
+      base64: 'data:audio/m4a;base64,ParseA==',
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('audio/m4a');
@@ -89,7 +92,7 @@ describe('ParseFile', () => {
 
   it('can extract data type from base64 with a complex mime type', () => {
     const file = new ParseFile('parse.kml', {
-      base64: 'data:application/vnd.google-earth.kml+xml;base64,ParseA=='
+      base64: 'data:application/vnd.google-earth.kml+xml;base64,ParseA==',
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('application/vnd.google-earth.kml+xml');
@@ -97,7 +100,7 @@ describe('ParseFile', () => {
 
   it('can extract data type from base64 with a charset param', () => {
     const file = new ParseFile('parse.kml', {
-      base64: 'data:application/vnd.3gpp.pic-bw-var;charset=utf-8;base64,ParseA=='
+      base64: 'data:application/vnd.3gpp.pic-bw-var;charset=utf-8;base64,ParseA==',
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('application/vnd.3gpp.pic-bw-var');
@@ -122,31 +125,30 @@ describe('ParseFile', () => {
   });
 
   it('throws when creating a file with invalid data', () => {
-    expect(function() {
+    expect(function () {
       new ParseFile('parse.txt', 12);
     }).toThrow('Cannot create a Parse.File with that data.');
 
-    expect(function() {
+    expect(function () {
       new ParseFile('parse.txt', null);
     }).toThrow('Cannot create a Parse.File with that data.');
 
-    expect(function() {
+    expect(function () {
       new ParseFile('parse.txt', 'string');
     }).toThrow('Cannot create a Parse.File with that data.');
   });
 
   it('throws with invalid base64', () => {
-    expect(function() {
+    expect(function () {
       b64Digit(65);
     }).toThrow('Tried to encode large digit 65 in base64.');
   });
 
   it('returns secure url when specified', () => {
     const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
-    return file.save().then(function(result) {
+    return file.save().then(function (result) {
       expect(result).toBe(file);
-      expect(result.url({ forceSecure: true }))
-        .toBe('https://files.parsetfss.com/a/parse.txt');
+      expect(result.url({ forceSecure: true })).toBe('https://files.parsetfss.com/a/parse.txt');
     });
   });
 
@@ -159,7 +161,7 @@ describe('ParseFile', () => {
     const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     expect(file.name()).toBe('parse.txt');
     expect(file.url()).toBe(undefined);
-    return file.save().then(function(result) {
+    return file.save().then(function (result) {
       expect(result).toBe(file);
       expect(result.name()).toBe('parse.txt');
       expect(result.url()).toBe('http://files.parsetfss.com/a/parse.txt');
@@ -167,10 +169,12 @@ describe('ParseFile', () => {
   });
 
   it('updates fields when saved with uri', () => {
-    const file = new ParseFile('parse.png', { uri: 'https://example.com/image.png' });
+    const file = new ParseFile('parse.png', {
+      uri: 'https://example.com/image.png',
+    });
     expect(file.name()).toBe('parse.png');
     expect(file.url()).toBe(undefined);
-    return file.save().then(function(result) {
+    return file.save().then(function (result) {
       expect(result).toBe(file);
       expect(result.name()).toBe('parse.png');
       expect(result.url()).toBe('http://files.parsetfss.com/a/parse.png');
@@ -179,11 +183,11 @@ describe('ParseFile', () => {
 
   it('generates a JSON representation', () => {
     const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
-    return file.save().then(function(result) {
+    return file.save().then(function (result) {
       expect(result.toJSON()).toEqual({
         __type: 'File',
         name: 'parse.txt',
-        url: 'http://files.parsetfss.com/a/parse.txt'
+        url: 'http://files.parsetfss.com/a/parse.txt',
       });
     });
   });
@@ -192,14 +196,13 @@ describe('ParseFile', () => {
     const f = ParseFile.fromJSON({
       __type: 'File',
       name: 'parse.txt',
-      url: 'http://files.parsetfss.com/a/parse.txt'
+      url: 'http://files.parsetfss.com/a/parse.txt',
     });
     expect(f).toBeTruthy();
     expect(f.name()).toBe('parse.txt');
     expect(f.url()).toBe('http://files.parsetfss.com/a/parse.txt');
 
-    expect(ParseFile.fromJSON.bind(null, {}))
-      .toThrow('JSON object does not represent a ParseFile');
+    expect(ParseFile.fromJSON.bind(null, {})).toThrow('JSON object does not represent a ParseFile');
   });
 
   it('can test equality against another ParseFile', () => {
@@ -214,12 +217,12 @@ describe('ParseFile', () => {
     a = ParseFile.fromJSON({
       __type: 'File',
       name: 'parse.txt',
-      url: 'http://files.parsetfss.com/a/parse.txt'
+      url: 'http://files.parsetfss.com/a/parse.txt',
     });
     b = ParseFile.fromJSON({
       __type: 'File',
       name: 'parse.txt',
-      url: 'http://files.parsetfss.com/a/parse.txt'
+      url: 'http://files.parsetfss.com/a/parse.txt',
     });
 
     expect(a.equals(b)).toBe(true);
@@ -228,7 +231,7 @@ describe('ParseFile', () => {
     b = ParseFile.fromJSON({
       __type: 'File',
       name: 'parse.txt',
-      url: 'http://files.parsetfss.com/b/parse.txt'
+      url: 'http://files.parsetfss.com/b/parse.txt',
     });
 
     expect(a.equals(b)).toBe(false);
@@ -236,15 +239,17 @@ describe('ParseFile', () => {
   });
 
   it('reports progress during save when source is a File', () => {
-    const file = new ParseFile('progress.txt', new File(["Parse"], "progress.txt"));
+    const file = new ParseFile('progress.txt', new File(['Parse'], 'progress.txt'));
 
     const options = {
-      progress: function(){}
+      progress: function () {},
     };
     jest.spyOn(options, 'progress');
 
-    return file.save(options).then(function(f) {
-      expect(options.progress).toHaveBeenCalledWith(0.5, 5, 10, { type: 'upload' });
+    return file.save(options).then(function (f) {
+      expect(options.progress).toHaveBeenCalledWith(0.5, 5, 10, {
+        type: 'upload',
+      });
       expect(f).toBe(file);
       expect(f.name()).toBe('progress.txt');
       expect(f.url()).toBe('http://files.parsetfss.com/a/progress.txt');
@@ -256,14 +261,14 @@ describe('ParseFile', () => {
       abort: () => {},
     };
     CoreManager.setFileController({
-      saveFile: function(name, payload, options) {
+      saveFile: function (name, payload, options) {
         options.requestTask(mockRequestTask);
         return Promise.resolve({});
       },
       saveBase64: () => {},
       download: () => {},
     });
-    const file = new ParseFile('progress.txt', new File(["Parse"], "progress.txt"));
+    const file = new ParseFile('progress.txt', new File(['Parse'], 'progress.txt'));
 
     jest.spyOn(mockRequestTask, 'abort');
     file.cancel();
@@ -292,13 +297,13 @@ describe('ParseFile', () => {
       {
         file: expect.any(File),
         format: 'file',
-        type: ''
+        type: '',
       },
       {
         metadata: { foo: 'bar' },
         tags: { bar: 'foo' },
         requestTask: expect.any(Function),
-      },
+      }
     );
   });
 
@@ -352,20 +357,20 @@ describe('ParseFile', () => {
 describe('FileController', () => {
   beforeEach(() => {
     CoreManager.setFileController(defaultController);
-    const request = function(method, path) {
+    const request = function (method, path) {
       const name = path.substr(path.indexOf('/') + 1);
       return Promise.resolve({
         name: name,
-        url: 'https://files.parsetfss.com/a/' + name
+        url: 'https://files.parsetfss.com/a/' + name,
       });
     };
-    const ajax = function(method, path) {
+    const ajax = function (method, path) {
       const name = path.substr(path.indexOf('/') + 1);
       return Promise.resolve({
         response: {
           name: name,
-          url: 'https://files.parsetfss.com/a/' + name
-        }
+          url: 'https://files.parsetfss.com/a/' + name,
+        },
       });
     };
     CoreManager.setRESTController({ request: request, ajax: ajax });
@@ -373,7 +378,7 @@ describe('FileController', () => {
 
   it('saves files created with bytes', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
-    return file.save().then(function(f) {
+    return file.save().then(function (f) {
       expect(f).toBe(file);
       expect(f.name()).toBe('parse.txt');
       expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
@@ -386,7 +391,7 @@ describe('FileController', () => {
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
 
-    return file.save().then(function(f) {
+    return file.save().then(function (f) {
       expect(f).toBe(file);
       expect(f.name()).toBe('parse.txt');
       expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
@@ -394,17 +399,15 @@ describe('FileController', () => {
   });
 
   it('saveUri with uri type', async () => {
-    const file = new ParseFile('parse.png', { uri: 'https://example.com/image.png' });
-    const spy = jest.spyOn(
-      defaultController,
-      'download'
-    )
-      .mockImplementationOnce(() => {
-        return Promise.resolve({
-          base64: 'ParseA==',
-          contentType: 'image/png',
-        });
+    const file = new ParseFile('parse.png', {
+      uri: 'https://example.com/image.png',
+    });
+    const spy = jest.spyOn(defaultController, 'download').mockImplementationOnce(() => {
+      return Promise.resolve({
+        base64: 'ParseA==',
+        contentType: 'image/png',
       });
+    });
 
     const spy2 = jest.spyOn(defaultController, 'saveBase64');
     await file.save();
@@ -412,21 +415,21 @@ describe('FileController', () => {
     expect(defaultController.saveBase64).toHaveBeenCalledTimes(1);
     expect(defaultController.saveBase64.mock.calls[0][0]).toEqual('parse.png');
     expect(defaultController.saveBase64.mock.calls[0][1]).toEqual({
-      format: 'base64', base64: 'ParseA==', type: 'image/png'
+      format: 'base64',
+      base64: 'ParseA==',
+      type: 'image/png',
     });
     spy.mockRestore();
     spy2.mockRestore();
   });
 
   it('save with uri download abort', async () => {
-    const file = new ParseFile('parse.png', { uri: 'https://example.com/image.png' });
-    const spy = jest.spyOn(
-      defaultController,
-      'download'
-    )
-      .mockImplementationOnce(() => {
-        return Promise.resolve({});
-      });
+    const file = new ParseFile('parse.png', {
+      uri: 'https://example.com/image.png',
+    });
+    const spy = jest.spyOn(defaultController, 'download').mockImplementationOnce(() => {
+      return Promise.resolve({});
+    });
 
     const spy2 = jest.spyOn(defaultController, 'saveBase64');
     await file.save();
@@ -440,19 +443,18 @@ describe('FileController', () => {
     defaultController._setXHR(null);
     const mockResponse = Object.create(EventEmitter.prototype);
     EventEmitter.call(mockResponse);
-    mockResponse.setEncoding = function() {}
+    mockResponse.setEncoding = function () {};
     mockResponse.headers = {
-      'content-type': 'image/png'
+      'content-type': 'image/png',
     };
-    const spy = jest.spyOn(mockHttp, 'get')
-      .mockImplementationOnce((uri, cb) => {
-        cb(mockResponse);
-        mockResponse.emit('data', 'base64String');
-        mockResponse.emit('end');
-        return {
-          on: function() {}
-        };
-      });
+    const spy = jest.spyOn(mockHttp, 'get').mockImplementationOnce((uri, cb) => {
+      cb(mockResponse);
+      mockResponse.emit('data', 'base64String');
+      mockResponse.emit('end');
+      return {
+        on: function () {},
+      };
+    });
 
     const data = await defaultController.download('http://example.com/image.png');
     expect(data.base64).toBe('base64String');
@@ -468,19 +470,18 @@ describe('FileController', () => {
     const mockResponse = Object.create(EventEmitter.prototype);
     EventEmitter.call(mockRequest);
     EventEmitter.call(mockResponse);
-    mockResponse.setEncoding = function() {}
+    mockResponse.setEncoding = function () {};
     mockResponse.headers = {
-      'content-type': 'image/png'
+      'content-type': 'image/png',
     };
-    const spy = jest.spyOn(mockHttp, 'get')
-      .mockImplementationOnce((uri, cb) => {
-        cb(mockResponse);
-        return mockRequest;
-      });
+    const spy = jest.spyOn(mockHttp, 'get').mockImplementationOnce((uri, cb) => {
+      cb(mockResponse);
+      return mockRequest;
+    });
     const options = {
       requestTask: () => {},
     };
-    defaultController.download('http://example.com/image.png', options).then((data) => {
+    defaultController.download('http://example.com/image.png', options).then(data => {
       expect(data).toEqual({});
     });
     mockRequest.emit('abort');
@@ -491,19 +492,18 @@ describe('FileController', () => {
     defaultController._setXHR(null);
     const mockResponse = Object.create(EventEmitter.prototype);
     EventEmitter.call(mockResponse);
-    mockResponse.setEncoding = function() {}
+    mockResponse.setEncoding = function () {};
     mockResponse.headers = {
-      'content-type': 'image/png'
+      'content-type': 'image/png',
     };
-    const spy = jest.spyOn(mockHttps, 'get')
-      .mockImplementationOnce((uri, cb) => {
-        cb(mockResponse);
-        mockResponse.emit('data', 'base64String');
-        mockResponse.emit('end');
-        return {
-          on: function() {}
-        };
-      });
+    const spy = jest.spyOn(mockHttps, 'get').mockImplementationOnce((uri, cb) => {
+      cb(mockResponse);
+      mockResponse.emit('data', 'base64String');
+      mockResponse.emit('end');
+      return {
+        on: function () {},
+      };
+    });
 
     const data = await defaultController.download('https://example.com/image.png');
     expect(data.base64).toBe('base64String');
@@ -518,16 +518,16 @@ describe('FileController', () => {
       return {
         DONE: 4,
         open: jest.fn(),
-        send: jest.fn().mockImplementation(function() {
+        send: jest.fn().mockImplementation(function () {
           this.response = [61, 170, 236, 120];
           this.readyState = 2;
           this.onreadystatechange();
           this.readyState = 4;
           this.onreadystatechange();
         }),
-        getResponseHeader: function() {
+        getResponseHeader: function () {
           return 'image/png';
-        }
+        },
       };
     };
     defaultController._setXHR(mockXHR);
@@ -544,16 +544,16 @@ describe('FileController', () => {
       return {
         DONE: 4,
         open: jest.fn(),
-        send: jest.fn().mockImplementation(function() {
+        send: jest.fn().mockImplementation(function () {
           this.response = undefined;
           this.readyState = 2;
           this.onreadystatechange();
           this.readyState = 4;
           this.onreadystatechange();
         }),
-        getResponseHeader: function() {
+        getResponseHeader: function () {
           return 'image/png';
-        }
+        },
       };
     };
     defaultController._setXHR(mockXHR);
@@ -568,28 +568,28 @@ describe('FileController', () => {
     const mockXHR = function () {
       return {
         open: jest.fn(),
-        send: jest.fn().mockImplementation(function() {
+        send: jest.fn().mockImplementation(function () {
           this.response = [61, 170, 236, 120];
           this.readyState = 2;
           this.onreadystatechange();
         }),
-        getResponseHeader: function() {
+        getResponseHeader: function () {
           return 'image/png';
         },
-        abort: function() {
+        abort: function () {
           this.status = 0;
           this.response = undefined;
           this.readyState = 4;
-          this.onreadystatechange()
-        }
+          this.onreadystatechange();
+        },
       };
     };
     defaultController._setXHR(mockXHR);
     let _requestTask;
     const options = {
-      requestTask: (task) => _requestTask = task,
+      requestTask: task => (_requestTask = task),
     };
-    defaultController.download('https://example.com/image.png', options).then((data) => {
+    defaultController.download('https://example.com/image.png', options).then(data => {
       expect(data).toEqual({});
     });
     _requestTask.abort();
@@ -599,9 +599,9 @@ describe('FileController', () => {
     const mockXHR = function () {
       return {
         open: jest.fn(),
-        send: jest.fn().mockImplementation(function() {
+        send: jest.fn().mockImplementation(function () {
           this.onerror('error thrown');
-        })
+        }),
       };
     };
     defaultController._setXHR(mockXHR);
@@ -645,17 +645,13 @@ describe('FileController', () => {
     file._data = null;
     const result = await file.save();
 
-    const spy = jest.spyOn(
-      defaultController,
-      'download'
-    )
-      .mockImplementationOnce((uri, options) => {
-        options.requestTask(null);
-        return Promise.resolve({
-          base64: 'ParseA==',
-          contentType: 'image/png',
-        });
+    const spy = jest.spyOn(defaultController, 'download').mockImplementationOnce((uri, options) => {
+      options.requestTask(null);
+      return Promise.resolve({
+        base64: 'ParseA==',
+        contentType: 'image/png',
       });
+    });
 
     const data = await result.getData();
     expect(defaultController.download).toHaveBeenCalledTimes(1);
@@ -664,21 +660,21 @@ describe('FileController', () => {
   });
 
   it('saves files via ajax with sessionToken option', () => {
-    const request = function(method, path) {
+    const request = function (method, path) {
       const name = path.substr(path.indexOf('/') + 1);
       return Promise.resolve({
         name: name,
-        url: 'https://files.parsetfss.com/a/' + name
+        url: 'https://files.parsetfss.com/a/' + name,
       });
     };
-    const ajax = function(method, path, data, headers) {
-      expect(headers['X-Parse-Session-Token']).toBe('testing_sessionToken')
+    const ajax = function (method, path, data, headers) {
+      expect(headers['X-Parse-Session-Token']).toBe('testing_sessionToken');
       const name = path.substr(path.indexOf('/') + 1);
       return Promise.resolve({
         response: {
           name: name,
-          url: 'https://files.parsetfss.com/a/' + name
-        }
+          url: 'https://files.parsetfss.com/a/' + name,
+        },
       });
     };
     CoreManager.setRESTController({ request, ajax });
@@ -687,7 +683,7 @@ describe('FileController', () => {
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
 
-    return file.save({ sessionToken: 'testing_sessionToken' }).then(function(f) {
+    return file.save({ sessionToken: 'testing_sessionToken' }).then(function (f) {
       expect(f).toBe(file);
       expect(f.name()).toBe('parse.txt');
       expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
@@ -700,25 +696,25 @@ describe('FileController', () => {
         return Promise.resolve({
           getSessionToken() {
             return 'currentUserToken';
-          }
+          },
         });
-      }
+      },
     });
-    const request = function(method, path) {
+    const request = function (method, path) {
       const name = path.substr(path.indexOf('/') + 1);
       return Promise.resolve({
         name: name,
-        url: 'https://files.parsetfss.com/a/' + name
+        url: 'https://files.parsetfss.com/a/' + name,
       });
     };
-    const ajax = function(method, path, data, headers) {
-      expect(headers['X-Parse-Session-Token']).toBe('currentUserToken')
+    const ajax = function (method, path, data, headers) {
+      expect(headers['X-Parse-Session-Token']).toBe('currentUserToken');
       const name = path.substr(path.indexOf('/') + 1);
       return Promise.resolve({
         response: {
           name: name,
-          url: 'https://files.parsetfss.com/a/' + name
-        }
+          url: 'https://files.parsetfss.com/a/' + name,
+        },
       });
     };
     CoreManager.setRESTController({ request, ajax });
@@ -727,7 +723,7 @@ describe('FileController', () => {
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
 
-    return file.save().then(function(f) {
+    return file.save().then(function (f) {
       expect(f).toBe(file);
       expect(f.name()).toBe('parse.txt');
       expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
@@ -740,25 +736,25 @@ describe('FileController', () => {
         return Promise.resolve({
           getSessionToken() {
             return 'currentUserToken';
-          }
+          },
         });
-      }
+      },
     });
     const request = jest.fn((method, path) => {
       const name = path.substr(path.indexOf('/') + 1);
       return Promise.resolve({
         name: name,
-        url: 'https://files.parsetfss.com/a/' + name
+        url: 'https://files.parsetfss.com/a/' + name,
       });
     });
-    const ajax = function(method, path, data, headers, options) {
-      expect(options.sessionToken).toBe('currentUserToken')
+    const ajax = function (method, path, data, headers, options) {
+      expect(options.sessionToken).toBe('currentUserToken');
       const name = path.substr(path.indexOf('/') + 1);
       return Promise.resolve({
         response: {
           name: name,
-          url: 'https://files.parsetfss.com/a/' + name
-        }
+          url: 'https://files.parsetfss.com/a/' + name,
+        },
       });
     };
     CoreManager.setRESTController({ request, ajax });
@@ -786,7 +782,7 @@ describe('FileController', () => {
           },
         },
       },
-      { requestTask: expect.any(Function) },
+      { requestTask: expect.any(Function) }
     );
   });
 
@@ -797,10 +793,10 @@ describe('FileController', () => {
         expect(options.sessionToken).toBe('testToken');
         return {
           name: 'parse.txt',
-          url: 'http://files.parsetfss.com/a/parse.txt'
+          url: 'http://files.parsetfss.com/a/parse.txt',
         };
       }
-      return [ { success: { objectId: 'child' } } ];
+      return [{ success: { objectId: 'child' } }];
     });
     CoreManager.setRESTController({ ajax, request });
     CoreManager.setLocalDatastore(mockLocalDatastore);
@@ -815,38 +811,55 @@ describe('FileController', () => {
     expect(request).toHaveBeenCalled();
   });
 
-  it('should throw error if file deleted without name', async (done) => {
+  it('should throw error if file deleted without name', async done => {
     const file = new ParseFile('', [1, 2, 3]);
     try {
       await file.destroy();
     } catch (e) {
-      expect(e.message).toBe('Cannot delete an unsaved ParseFile.');
+      expect(e.code).toBe(ParseError.FILE_DELETE_UNNAMED_ERROR);
       done();
     }
+  });
+
+  it('should delete file with masterKey', async () => {
+    const file = new ParseFile('filename', [1, 2, 3]);
+    const ajax = jest.fn().mockResolvedValueOnce({ foo: 'bar' });
+    CoreManager.setRESTController({ ajax, request: () => {} });
+    CoreManager.set('MASTER_KEY', 'masterKey');
+    const result = await file.destroy({ useMasterKey: true });
+    expect(result).toEqual(file);
+    expect(ajax).toHaveBeenCalledWith('DELETE', 'https://api.parse.com/1/files/filename', '', {
+      'X-Parse-Application-ID': null,
+      'X-Parse-Master-Key': 'masterKey',
+    });
+    CoreManager.set('MASTER_KEY', null);
   });
 
   it('should delete file', async () => {
     const file = new ParseFile('filename', [1, 2, 3]);
     const ajax = jest.fn().mockResolvedValueOnce({ foo: 'bar' });
     CoreManager.setRESTController({ ajax, request: () => {} });
-    const result = await file.destroy();
+    CoreManager.set('MASTER_KEY', 'masterKey');
+    const result = await file.destroy({ useMasterKey: false });
     expect(result).toEqual(file);
     expect(ajax).toHaveBeenCalledWith('DELETE', 'https://api.parse.com/1/files/filename', '', {
-      "X-Parse-Application-ID": null,
-      "X-Parse-Master-Key": null,
+      'X-Parse-Application-ID': null,
     });
+    CoreManager.set('MASTER_KEY', null);
   });
 
   it('should handle delete file error', async () => {
     const file = new ParseFile('filename', [1, 2, 3]);
-    const ajax = jest.fn().mockResolvedValueOnce(Promise.reject(new ParseError(403, 'Cannot delete file.')));
+    const ajax = jest
+      .fn()
+      .mockResolvedValueOnce(Promise.reject(new ParseError(403, 'Cannot delete file.')));
     const handleError = jest.fn();
     CoreManager.setRESTController({ ajax, request: () => {}, handleError });
     const result = await file.destroy();
     expect(result).toEqual(file);
     expect(ajax).toHaveBeenCalledWith('DELETE', 'https://api.parse.com/1/files/filename', '', {
-      "X-Parse-Application-ID": null,
-      "X-Parse-Master-Key": null,
+      'X-Parse-Application-ID': null,
+      'X-Parse-Master-Key': null,
     });
     expect(handleError).toHaveBeenCalled();
   });
@@ -860,16 +873,15 @@ describe('FileController', () => {
     const result = await file.destroy();
     expect(result).toEqual(file);
     expect(ajax).toHaveBeenCalledWith('DELETE', 'https://api.parse.com/1/files/filename', '', {
-      "X-Parse-Application-ID": null,
-      "X-Parse-Master-Key": null,
+      'X-Parse-Application-ID': null,
+      'X-Parse-Master-Key': null,
     });
     expect(handleError).not.toHaveBeenCalled();
   });
 
-
   it('controller saveFile format errors', async () => {
     try {
-      await defaultController.saveFile('parse.txt', { format: 'base64'});
+      await defaultController.saveFile('parse.txt', { format: 'base64' });
       expect(true).toBe(false);
     } catch (e) {
       expect(e.message).toBe('saveFile can only be used with File-type sources.');
@@ -878,7 +890,7 @@ describe('FileController', () => {
 
   it('controller saveBase64 format errors', async () => {
     try {
-      await defaultController.saveBase64('parse.txt', { format: 'file'});
+      await defaultController.saveBase64('parse.txt', { format: 'file' });
       expect(true).toBe(false);
     } catch (e) {
       expect(e.message).toBe('saveBase64 can only be used with Base64-type sources.');
@@ -894,7 +906,7 @@ describe('FileController', () => {
     }
     global.FileReader = FileReader;
     try {
-      await defaultController.saveFile('parse.txt', { format: 'file'});
+      await defaultController.saveFile('parse.txt', { format: 'file' });
       expect(true).toBe(false);
     } catch (e) {
       expect(e).toBe('Could not load file.');

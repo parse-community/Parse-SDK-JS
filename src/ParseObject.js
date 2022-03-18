@@ -14,6 +14,7 @@ import canBeSerialized from './canBeSerialized';
 import decode from './decode';
 import encode from './encode';
 import escape from './escape';
+import EventuallyQueue from './EventuallyQueue';
 import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
@@ -30,7 +31,7 @@ import {
   AddOp,
   AddUniqueOp,
   RemoveOp,
-  RelationOp
+  RelationOp,
 } from './ParseOp';
 import ParseQuery from './ParseQuery';
 import ParseRelation from './ParseRelation';
@@ -42,24 +43,24 @@ import unsavedChildren from './unsavedChildren';
 import type { AttributeMap, OpsMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
 
-const uuidv4 = require('uuid/v4');
+const uuidv4 = require('./uuid');
 
 export type Pointer = {
-  __type: string;
-  className: string;
-  objectId: string;
+  __type: string,
+  className: string,
+  objectId: string,
 };
 
 type SaveParams = {
-  method: string;
-  path: string;
-  body: AttributeMap;
+  method: string,
+  path: string,
+  body: AttributeMap,
 };
 
-type SaveOptions = FullOptions & {
-  cascadeSave?: boolean;
-  context?: AttributeMap;
-}
+export type SaveOptions = FullOptions & {
+  cascadeSave?: boolean,
+  context?: AttributeMap,
+};
 
 // Mapping of class names to constructors, so we can populate objects from the
 // server with appropriate subclasses of ParseObject
@@ -70,7 +71,7 @@ let objectCount = 0;
 // On web clients, objects are single-instance: any two objects with the same Id
 // will have the same attributes. However, this may be dangerous default
 // behavior in a server scenario
-let singleInstance = (!CoreManager.get('IS_NODE'));
+let singleInstance = !CoreManager.get('IS_NODE');
 if (singleInstance) {
   CoreManager.setObjectStateController(SingleInstanceStateController);
 } else {
@@ -110,7 +111,11 @@ class ParseObject {
    * @param {object} attributes The initial set of data to store in the object.
    * @param {object} options The options for this object instance.
    */
-  constructor(className: ?string | { className: string, [attr: string]: mixed }, attributes?: { [attr: string]: mixed }, options?: { ignoreValidation: boolean }) {
+  constructor(
+    className: ?string | { className: string, [attr: string]: mixed },
+    attributes?: { [attr: string]: mixed },
+    options?: { ignoreValidation: boolean }
+  ) {
     // Enable legacy initializers
     if (typeof this.initialize === 'function') {
       this.initialize.apply(this, arguments);
@@ -136,7 +141,7 @@ class ParseObject {
       }
     }
     if (toSet && !this.set(toSet, options)) {
-      throw new Error('Can\'t create an invalid Parse Object');
+      throw new Error("Can't create an invalid Parse Object");
     }
   }
 
@@ -201,7 +206,7 @@ class ParseObject {
    *
    * @returns {Parse.Object|object}
    */
-  _getStateIdentifier(): ParseObject | {id: string, className: string} {
+  _getStateIdentifier(): ParseObject | { id: string, className: string } {
     if (singleInstance) {
       let id = this.id;
       if (!id) {
@@ -209,7 +214,7 @@ class ParseObject {
       }
       return {
         id: id,
-        className: this.className
+        className: this.className,
       };
     } else {
       return this;
@@ -244,7 +249,7 @@ class ParseObject {
     const pending = this._getPendingOps();
     const latest = pending[pending.length - 1];
     const keys = keysToClear || Object.keys(latest);
-    keys.forEach((key) => {
+    keys.forEach(key => {
       delete latest[key];
     });
   }
@@ -256,7 +261,8 @@ class ParseObject {
     const dirty = {};
     for (const attr in attributes) {
       const val = attributes[attr];
-      if (val &&
+      if (
+        val &&
         typeof val === 'object' &&
         !(val instanceof ParseObject) &&
         !(val instanceof ParseFile) &&
@@ -318,10 +324,18 @@ class ParseObject {
   }
 
   _getSaveParams(): SaveParams {
-    const method = this.id ? 'PUT' : 'POST';
+    let method = this.id ? 'PUT' : 'POST';
     const body = this._getSaveJSON();
     let path = 'classes/' + this.className;
-    if (this.id) {
+    if (CoreManager.get('ALLOW_CUSTOM_OBJECT_ID')) {
+      if (!this.createdAt) {
+        method = 'POST';
+        body.objectId = this.id;
+      } else {
+        method = 'PUT';
+        path += '/' + this.id;
+      }
+    } else if (this.id) {
       path += '/' + this.id;
     } else if (this.className === '_User') {
       path = 'users';
@@ -329,7 +343,7 @@ class ParseObject {
     return {
       method,
       body,
-      path
+      path,
     };
   }
 
@@ -395,14 +409,13 @@ class ParseObject {
     for (attr in pending) {
       if (pending[attr] instanceof RelationOp) {
         changes[attr] = pending[attr].applyTo(undefined, this, attr);
-      } else if (!(attr in response) && !attr.includes('.')) {
+      } else if (!(attr in response)) {
         // Only SetOps and UnsetOps should not come back with results
         changes[attr] = pending[attr].applyTo(undefined);
       }
     }
     for (attr in response) {
-      if ((attr === 'createdAt' || attr === 'updatedAt') &&
-          typeof response[attr] === 'string') {
+      if ((attr === 'createdAt' || attr === 'updatedAt') && typeof response[attr] === 'string') {
         changes[attr] = parseDate(response[attr]);
       } else if (attr === 'ACL') {
         changes[attr] = new ParseACL(response[attr]);
@@ -434,6 +447,10 @@ class ParseObject {
   _handleSaveError() {
     const stateController = CoreManager.getObjectStateController();
     stateController.mergeFirstPendingState(this._getStateIdentifier());
+  }
+
+  static _getClassMap() {
+    return classMap;
   }
 
   /** Public methods **/
@@ -483,7 +500,7 @@ class ParseObject {
       return true;
     }
     return (
-      (other instanceof ParseObject) &&
+      other instanceof ParseObject &&
       this.className === other.className &&
       this.id === other.id &&
       typeof this.id !== 'undefined'
@@ -566,7 +583,7 @@ class ParseObject {
     return {
       __type: 'Pointer',
       className: this.className,
-      objectId: this.id
+      objectId: this.id,
     };
   }
 
@@ -582,7 +599,7 @@ class ParseObject {
     return {
       __type: 'Object',
       className: this.className,
-      _localId: this._localId
+      _localId: this._localId,
     };
   }
 
@@ -709,7 +726,8 @@ class ParseObject {
         newOps[k] = new UnsetOp();
       } else if (changes[k] instanceof Op) {
         newOps[k] = changes[k];
-      } else if (changes[k] &&
+      } else if (
+        changes[k] &&
         typeof changes[k] === 'object' &&
         typeof changes[k].__op === 'string'
       ) {
@@ -734,15 +752,6 @@ class ParseObject {
     }
 
     const currentAttributes = this.attributes;
-
-    // Only set nested fields if exists
-    const serverData = this._getServerData();
-    if (typeof key === 'string' && key.includes('.')) {
-      const field = key.split('.')[0];
-      if (!serverData[field]) {
-        return this;
-      }
-    }
 
     // Calculate new values
     const newValues = {};
@@ -925,10 +934,7 @@ class ParseObject {
    * @returns {Parse.Object}
    */
   clone(): any {
-    const clone = new this.constructor();
-    if (!clone.className) {
-      clone.className = this.className;
-    }
+    const clone = new this.constructor(this.className);
     let attributes = this.attributes;
     if (typeof this.constructor.readOnlyAttributes === 'function') {
       const readonly = this.constructor.readOnlyAttributes() || [];
@@ -954,10 +960,7 @@ class ParseObject {
    * @returns {Parse.Object}
    */
   newInstance(): any {
-    const clone = new this.constructor();
-    if (!clone.className) {
-      clone.className = this.className;
-    }
+    const clone = new this.constructor(this.className);
     clone.id = this.id;
     if (singleInstance) {
       // Just return an object with the right id
@@ -1016,7 +1019,7 @@ class ParseObject {
       return false;
     }
     try {
-      const query = new ParseQuery(this.className)
+      const query = new ParseQuery(this.className);
       await query.get(this.id, options);
       return true;
     } catch (e) {
@@ -1048,13 +1051,10 @@ class ParseObject {
    */
   validate(attrs: AttributeMap): ParseError | boolean {
     if (attrs.hasOwnProperty('ACL') && !(attrs.ACL instanceof ParseACL)) {
-      return new ParseError(
-        ParseError.OTHER_CAUSE,
-        'ACL must be a Parse ACL.'
-      );
+      return new ParseError(ParseError.OTHER_CAUSE, 'ACL must be a Parse ACL.');
     }
     for (const key in attrs) {
-      if (!(/^[A-Za-z][0-9A-Za-z_.]*$/).test(key)) {
+      if (!/^[A-Za-z][0-9A-Za-z_.]*$/.test(key)) {
         return new ParseError(ParseError.INVALID_KEY_NAME);
       }
     }
@@ -1094,13 +1094,13 @@ class ParseObject {
    */
   revert(...keys: Array<string>): void {
     let keysToRevert;
-    if(keys.length) {
+    if (keys.length) {
       keysToRevert = [];
-      for(const key of keys) {
-        if(typeof(key) === "string") {
+      for (const key of keys) {
+        if (typeof key === 'string') {
           keysToRevert.push(key);
         } else {
-          throw new Error("Parse.Object#revert expects either no, or a list of string, arguments.");
+          throw new Error('Parse.Object#revert expects either no, or a list of string, arguments.');
         }
       }
     }
@@ -1159,7 +1159,7 @@ class ParseObject {
     if (options.hasOwnProperty('include')) {
       fetchOptions.include = [];
       if (Array.isArray(options.include)) {
-        options.include.forEach((key) => {
+        options.include.forEach(key => {
           if (Array.isArray(key)) {
             fetchOptions.include = fetchOptions.include.concat(key);
           } else {
@@ -1192,10 +1192,46 @@ class ParseObject {
    * @returns {Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetchWithInclude(keys: String|Array<string|Array<string>>, options: RequestOptions): Promise {
+  fetchWithInclude(keys: String | Array<string | Array<string>>, options: RequestOptions): Promise {
     options = options || {};
     options.include = keys;
     return this.fetch(options);
+  }
+
+  /**
+   * Saves this object to the server at some unspecified time in the future,
+   * even if Parse is currently inaccessible.
+   *
+   * Use this when you may not have a solid network connection, and don't need to know when the save completes.
+   * If there is some problem with the object such that it can't be saved, it will be silently discarded.
+   *
+   * Objects saved with this method will be stored locally in an on-disk cache until they can be delivered to Parse.
+   * They will be sent immediately if possible. Otherwise, they will be sent the next time a network connection is
+   * available. Objects saved this way will persist even after the app is closed, in which case they will be sent the
+   * next time the app is opened.
+   *
+   * @param {object} [options]
+   * Used to pass option parameters to method if arg1 and arg2 were both passed as strings.
+   * Valid options are:
+   * <ul>
+   * <li>sessionToken: A valid session token, used for making a request on
+   * behalf of a specific user.
+   * <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
+   * <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
+   * </ul>
+   * @returns {Promise} A promise that is fulfilled when the save
+   * completes.
+   */
+  async saveEventually(options: SaveOptions): Promise {
+    try {
+      await this.save(null, options);
+    } catch (e) {
+      if (e.message === 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+        await EventuallyQueue.save(this, options);
+        EventuallyQueue.poll();
+      }
+    }
+    return this;
   }
 
   /**
@@ -1210,9 +1246,11 @@ class ParseObject {
    * or<pre>
    * object.save(attrs, options);</pre>
    * or<pre>
+   * object.save(key, value);</pre>
+   * or<pre>
    * object.save(key, value, options);</pre>
    *
-   * For example, <pre>
+   * Example 1: <pre>
    * gameTurn.save({
    * player: "Jake Cutter",
    * diceRoll: 2
@@ -1221,6 +1259,9 @@ class ParseObject {
    * }, function(error) {
    * // The save failed.  Error is an instance of Parse.Error.
    * });</pre>
+   *
+   * Example 2: <pre>
+   * gameTurn.save("player", "Jake Cutter");</pre>
    *
    * @param {string | object | null} [arg1]
    * Valid options are:<ul>
@@ -1304,6 +1345,40 @@ class ParseObject {
   }
 
   /**
+   * Deletes this object from the server at some unspecified time in the future,
+   * even if Parse is currently inaccessible.
+   *
+   * Use this when you may not have a solid network connection,
+   * and don't need to know when the delete completes. If there is some problem with the object
+   * such that it can't be deleted, the request will be silently discarded.
+   *
+   * Delete instructions made with this method will be stored locally in an on-disk cache until they can be transmitted
+   * to Parse. They will be sent immediately if possible. Otherwise, they will be sent the next time a network connection
+   * is available. Delete requests will persist even after the app is closed, in which case they will be sent the
+   * next time the app is opened.
+   *
+   * @param {object} [options]
+   * Valid options are:<ul>
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
+   * </ul>
+   * @returns {Promise} A promise that is fulfilled when the destroy
+   *     completes.
+   */
+  async destroyEventually(options: RequestOptions): Promise {
+    try {
+      await this.destroy(options);
+    } catch (e) {
+      if (e.message === 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+        await EventuallyQueue.destroy(this, options);
+        EventuallyQueue.poll();
+      }
+    }
+    return this;
+  }
+
+  /**
    * Destroy this model on the server if it was already persisted.
    *
    * @param {object} options
@@ -1332,10 +1407,7 @@ class ParseObject {
     if (!this.id) {
       return Promise.resolve();
     }
-    return CoreManager.getObjectController().destroy(
-      this,
-      destroyOptions
-    );
+    return CoreManager.getObjectController().destroy(this, destroyOptions);
   }
 
   /**
@@ -1497,11 +1569,7 @@ class ParseObject {
     if (options.hasOwnProperty('include')) {
       queryOptions.include = ParseObject.handleIncludeOptions(options);
     }
-    return CoreManager.getObjectController().fetch(
-      list,
-      true,
-      queryOptions
-    );
+    return CoreManager.getObjectController().fetch(list, true, queryOptions);
   }
 
   /**
@@ -1533,7 +1601,11 @@ class ParseObject {
    * @static
    * @returns {Parse.Object[]}
    */
-  static fetchAllWithInclude(list: Array<ParseObject>, keys: String|Array<string|Array<string>>, options: RequestOptions) {
+  static fetchAllWithInclude(
+    list: Array<ParseObject>,
+    keys: String | Array<string | Array<string>>,
+    options: RequestOptions
+  ) {
     options = options || {};
     options.include = keys;
     return ParseObject.fetchAll(list, options);
@@ -1569,7 +1641,11 @@ class ParseObject {
    * @static
    * @returns {Parse.Object[]}
    */
-  static fetchAllIfNeededWithInclude(list: Array<ParseObject>, keys: String|Array<string|Array<string>>, options: RequestOptions) {
+  static fetchAllIfNeededWithInclude(
+    list: Array<ParseObject>,
+    keys: String | Array<string | Array<string>>,
+    options: RequestOptions
+  ) {
     options = options || {};
     options.include = keys;
     return ParseObject.fetchAllIfNeeded(list, options);
@@ -1606,17 +1682,13 @@ class ParseObject {
     if (options.hasOwnProperty('include')) {
       queryOptions.include = ParseObject.handleIncludeOptions(options);
     }
-    return CoreManager.getObjectController().fetch(
-      list,
-      false,
-      queryOptions
-    );
+    return CoreManager.getObjectController().fetch(list, false, queryOptions);
   }
 
   static handleIncludeOptions(options) {
     let include = [];
     if (Array.isArray(options.include)) {
-      options.include.forEach((key) => {
+      options.include.forEach(key => {
         if (Array.isArray(key)) {
           include = include.concat(key);
         } else {
@@ -1689,10 +1761,7 @@ class ParseObject {
     if (options.hasOwnProperty('context') && typeof options.context === 'object') {
       destroyOptions.context = options.context;
     }
-    return CoreManager.getObjectController().destroy(
-      list,
-      destroyOptions
-    );
+    return CoreManager.getObjectController().destroy(list, destroyOptions);
   }
 
   /**
@@ -1727,10 +1796,7 @@ class ParseObject {
     if (options.hasOwnProperty('context') && typeof options.context === 'object') {
       saveOptions.context = options.context;
     }
-    return CoreManager.getObjectController().save(
-      list,
-      saveOptions
-    );
+    return CoreManager.getObjectController().save(list, saveOptions);
   }
 
   /**
@@ -1759,19 +1825,23 @@ class ParseObject {
    * @param {object} json The JSON map of the Object's data
    * @param {boolean} override In single instance mode, all old server data
    *   is overwritten if this is set to true
+   * @param {boolean} dirty Whether the Parse.Object should set JSON keys to dirty
    * @static
    * @returns {Parse.Object} A Parse.Object reference
    */
-  static fromJSON(json: any, override?: boolean) {
+  static fromJSON(json: any, override?: boolean, dirty?: boolean) {
     if (!json.className) {
       throw new Error('Cannot create an object without a className');
     }
     const constructor = classMap[json.className];
-    const o = constructor ? new constructor() : new ParseObject(json.className);
+    const o = constructor ? new constructor(json.className) : new ParseObject(json.className);
     const otherAttributes = {};
     for (const attr in json) {
       if (attr !== 'className' && attr !== '__type') {
         otherAttributes[attr] = json[attr];
+        if (dirty) {
+          o.set(attr, json[attr]);
+        }
       }
     }
     if (override) {
@@ -1814,13 +1884,25 @@ class ParseObject {
     if (typeof constructor !== 'function') {
       throw new TypeError(
         'You must register the subclass constructor. ' +
-        'Did you attempt to register an instance of the subclass?'
+          'Did you attempt to register an instance of the subclass?'
       );
     }
     classMap[className] = constructor;
     if (!constructor.className) {
       constructor.className = className;
     }
+  }
+
+  /**
+   * Unegisters a subclass of Parse.Object with a specific class name.
+   *
+   * @param {string} className The class name of the subclass
+   */
+  static unregisterSubclass(className: string) {
+    if (typeof className !== 'string') {
+      throw new TypeError('The first argument must be a valid class name.');
+    }
+    delete classMap[className];
   }
 
   /**
@@ -1865,9 +1947,7 @@ class ParseObject {
       if (className && typeof className.className === 'string') {
         return ParseObject.extend(className.className, className, protoProps);
       } else {
-        throw new Error(
-          'Parse.Object.extend\'s first argument should be the className.'
-        );
+        throw new Error("Parse.Object.extend's first argument should be the className.");
       }
     }
     let adjustedClassName = className;
@@ -1882,7 +1962,7 @@ class ParseObject {
     } else if (classMap[adjustedClassName]) {
       parentProto = classMap[adjustedClassName].prototype;
     }
-    const ParseObjectSubclass = function(attributes, options) {
+    const ParseObjectSubclass = function (attributes, options) {
       this.className = adjustedClassName;
       this._objCount = objectCount++;
       // Enable legacy initializers
@@ -1890,9 +1970,9 @@ class ParseObject {
         this.initialize.apply(this, arguments);
       }
 
-      if (attributes && typeof attributes === 'object'){
+      if (attributes && typeof attributes === 'object') {
         if (!this.set(attributes || {}, options)) {
-          throw new Error('Can\'t create an invalid Parse Object');
+          throw new Error("Can't create an invalid Parse Object");
         }
       }
     };
@@ -1904,8 +1984,8 @@ class ParseObject {
         value: ParseObjectSubclass,
         enumerable: false,
         writable: true,
-        configurable: true
-      }
+        configurable: true,
+      },
     });
 
     if (protoProps) {
@@ -1915,7 +1995,7 @@ class ParseObject {
             value: protoProps[prop],
             enumerable: false,
             writable: true,
-            configurable: true
+            configurable: true,
           });
         }
       }
@@ -1928,18 +2008,18 @@ class ParseObject {
             value: classProps[prop],
             enumerable: false,
             writable: true,
-            configurable: true
+            configurable: true,
           });
         }
       }
     }
 
-    ParseObjectSubclass.extend = function(name, protoProps, classProps) {
+    ParseObjectSubclass.extend = function (name, protoProps, classProps) {
       if (typeof name === 'string') {
         return ParseObject.extend.call(ParseObjectSubclass, name, protoProps, classProps);
       }
       return ParseObject.extend.call(ParseObjectSubclass, adjustedClassName, name, protoProps);
-    }
+    };
     ParseObjectSubclass.createWithoutData = ParseObject.createWithoutData;
 
     classMap[adjustedClassName] = ParseObjectSubclass;
@@ -2104,7 +2184,11 @@ class ParseObject {
 }
 
 const DefaultController = {
-  fetch(target: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions): Promise<Array<void> | ParseObject> {
+  fetch(
+    target: ParseObject | Array<ParseObject>,
+    forceFetch: boolean,
+    options: RequestOptions
+  ): Promise<Array<void> | ParseObject> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (Array.isArray(target)) {
       if (target.length < 1) {
@@ -2115,7 +2199,7 @@ const DefaultController = {
       let className = null;
       const results = [];
       let error = null;
-      target.forEach((el) => {
+      target.forEach(el => {
         if (error) {
           return;
         }
@@ -2129,10 +2213,7 @@ const DefaultController = {
           );
         }
         if (!el.id) {
-          error = new ParseError(
-            ParseError.MISSING_OBJECT_ID,
-            'All objects must have an ID'
-          );
+          error = new ParseError(ParseError.MISSING_OBJECT_ID, 'All objects must have an ID');
         }
         if (forceFetch || !el.isDataAvailable()) {
           ids.push(el.id);
@@ -2149,9 +2230,9 @@ const DefaultController = {
         query.include(options.include);
       }
       query._limit = ids.length;
-      return query.find(options).then(async (objects) => {
+      return query.find(options).then(async objects => {
         const idMap = {};
-        objects.forEach((o) => {
+        objects.forEach(o => {
           idMap[o.id] = o;
         });
         for (let i = 0; i < objs.length; i++) {
@@ -2159,10 +2240,7 @@ const DefaultController = {
           if (!obj || !obj.id || !idMap[obj.id]) {
             if (forceFetch) {
               return Promise.reject(
-                new ParseError(
-                  ParseError.OBJECT_NOT_FOUND,
-                  'All objects must exist on the server.'
-                )
+                new ParseError(ParseError.OBJECT_NOT_FOUND, 'All objects must exist on the server.')
               );
             }
           }
@@ -2185,10 +2263,9 @@ const DefaultController = {
       });
     } else if (target instanceof ParseObject) {
       if (!target.id) {
-        return Promise.reject(new ParseError(
-          ParseError.MISSING_OBJECT_ID,
-          'Object does not have an ID'
-        ));
+        return Promise.reject(
+          new ParseError(ParseError.MISSING_OBJECT_ID, 'Object does not have an ID')
+        );
       }
       const RESTController = CoreManager.getRESTController();
       const params = {};
@@ -2200,7 +2277,7 @@ const DefaultController = {
         'classes/' + target.className + '/' + target._getId(),
         params,
         options
-      ).then(async (response) => {
+      ).then(async response => {
         target._clearPendingOps();
         target._clearServerData();
         target._finishFetch(response);
@@ -2211,8 +2288,12 @@ const DefaultController = {
     return Promise.resolve();
   },
 
-  async destroy(target: ParseObject | Array<ParseObject>, options: RequestOptions): Promise<Array<void> | ParseObject> {
-    const batchSize = (options && options.batchSize) ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
+  async destroy(
+    target: ParseObject | Array<ParseObject>,
+    options: RequestOptions
+  ): Promise<Array<void> | ParseObject> {
+    const batchSize =
+      options && options.batchSize ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
 
     const RESTController = CoreManager.getRESTController();
@@ -2221,7 +2302,7 @@ const DefaultController = {
         return Promise.resolve([]);
       }
       const batches = [[]];
-      target.forEach((obj) => {
+      target.forEach(obj => {
         if (!obj.id) {
           return;
         }
@@ -2236,23 +2317,25 @@ const DefaultController = {
       }
       let deleteCompleted = Promise.resolve();
       const errors = [];
-      batches.forEach((batch) => {
+      batches.forEach(batch => {
         deleteCompleted = deleteCompleted.then(() => {
-          return RESTController.request('POST', 'batch', {
-            requests: batch.map((obj) => {
-              return {
-                method: 'DELETE',
-                path: getServerUrlPath() + 'classes/' + obj.className + '/' + obj._getId(),
-                body: {}
-              };
-            })
-          }, options).then((results) => {
+          return RESTController.request(
+            'POST',
+            'batch',
+            {
+              requests: batch.map(obj => {
+                return {
+                  method: 'DELETE',
+                  path: getServerUrlPath() + 'classes/' + obj.className + '/' + obj._getId(),
+                  body: {},
+                };
+              }),
+            },
+            options
+          ).then(results => {
             for (let i = 0; i < results.length; i++) {
               if (results[i] && results[i].hasOwnProperty('error')) {
-                const err = new ParseError(
-                  results[i].error.code,
-                  results[i].error.error
-                );
+                const err = new ParseError(results[i].error.code, results[i].error.error);
                 err.object = batch[i];
                 errors.push(err);
               }
@@ -2286,12 +2369,14 @@ const DefaultController = {
   },
 
   save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
-    const batchSize = (options && options.batchSize) ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
+    const batchSize =
+      options && options.batchSize ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
     const mapIdForPin = {};
 
     const RESTController = CoreManager.getRESTController();
     const stateController = CoreManager.getObjectStateController();
+    const allowCustomObjectId = CoreManager.get('ALLOW_CUSTOM_OBJECT_ID');
 
     options = options || {};
     options.returnStatus = options.returnStatus || true;
@@ -2310,85 +2395,98 @@ const DefaultController = {
 
       const filesSaved: Array<ParseFile> = [];
       let pending: Array<ParseObject> = [];
-      unsaved.forEach((el) => {
+      unsaved.forEach(el => {
         if (el instanceof ParseFile) {
           filesSaved.push(el.save(options));
         } else if (el instanceof ParseObject) {
+          if (allowCustomObjectId && !el.id) {
+            throw new ParseError(
+              ParseError.MISSING_OBJECT_ID,
+              'objectId must not be empty, null or undefined'
+            );
+          }
           pending.push(el);
         }
       });
 
       return Promise.all(filesSaved).then(() => {
         let objectError = null;
-        return continueWhile(() => {
-          return pending.length > 0;
-        }, () => {
-          const batch = [];
-          const nextPending = [];
-          pending.forEach((el) => {
-            if (batch.length < batchSize && canBeSerialized(el)) {
-              batch.push(el);
-            } else {
-              nextPending.push(el);
+        return continueWhile(
+          () => {
+            return pending.length > 0;
+          },
+          () => {
+            const batch = [];
+            const nextPending = [];
+            pending.forEach(el => {
+              if (batch.length < batchSize && canBeSerialized(el)) {
+                batch.push(el);
+              } else {
+                nextPending.push(el);
+              }
+            });
+            pending = nextPending;
+            if (batch.length < 1) {
+              return Promise.reject(
+                new ParseError(ParseError.OTHER_CAUSE, 'Tried to save a batch with a cycle.')
+              );
             }
-          });
-          pending = nextPending;
-          if (batch.length < 1) {
-            return Promise.reject(
-              new ParseError(
-                ParseError.OTHER_CAUSE,
-                'Tried to save a batch with a cycle.'
-              )
-            );
-          }
 
-          // Queue up tasks for each object in the batch.
-          // When every task is ready, the API request will execute
-          const batchReturned = new resolvingPromise();
-          const batchReady = [];
-          const batchTasks = [];
-          batch.forEach((obj, index) => {
-            const ready = new resolvingPromise();
-            batchReady.push(ready);
-            const task = function() {
-              ready.resolve();
-              return batchReturned.then((responses) => {
-                if (responses[index].hasOwnProperty('success')) {
-                  const objectId = responses[index].success.objectId;
-                  const status = responses[index]._status;
-                  delete responses[index]._status;
-                  mapIdForPin[objectId] = obj._localId;
-                  obj._handleSaveResponse(responses[index].success, status);
-                } else {
-                  if (!objectError && responses[index].hasOwnProperty('error')) {
-                    const serverError = responses[index].error;
-                    objectError = new ParseError(serverError.code, serverError.error);
-                    // Cancel the rest of the save
-                    pending = [];
+            // Queue up tasks for each object in the batch.
+            // When every task is ready, the API request will execute
+            const batchReturned = new resolvingPromise();
+            const batchReady = [];
+            const batchTasks = [];
+            batch.forEach((obj, index) => {
+              const ready = new resolvingPromise();
+              batchReady.push(ready);
+              const task = function () {
+                ready.resolve();
+                return batchReturned.then(responses => {
+                  if (responses[index].hasOwnProperty('success')) {
+                    const objectId = responses[index].success.objectId;
+                    const status = responses[index]._status;
+                    delete responses[index]._status;
+                    mapIdForPin[objectId] = obj._localId;
+                    obj._handleSaveResponse(responses[index].success, status);
+                  } else {
+                    if (!objectError && responses[index].hasOwnProperty('error')) {
+                      const serverError = responses[index].error;
+                      objectError = new ParseError(serverError.code, serverError.error);
+                      // Cancel the rest of the save
+                      pending = [];
+                    }
+                    obj._handleSaveError();
                   }
-                  obj._handleSaveError();
-                }
-              });
-            };
-            stateController.pushPendingState(obj._getStateIdentifier());
-            batchTasks.push(stateController.enqueueTask(obj._getStateIdentifier(), task));
-          });
+                });
+              };
+              stateController.pushPendingState(obj._getStateIdentifier());
+              batchTasks.push(stateController.enqueueTask(obj._getStateIdentifier(), task));
+            });
 
-          when(batchReady).then(() => {
-            // Kick off the batch request
-            return RESTController.request('POST', 'batch', {
-              requests: batch.map((obj) => {
-                const params = obj._getSaveParams();
-                params.path = getServerUrlPath() + params.path;
-                return params;
+            when(batchReady)
+              .then(() => {
+                // Kick off the batch request
+                return RESTController.request(
+                  'POST',
+                  'batch',
+                  {
+                    requests: batch.map(obj => {
+                      const params = obj._getSaveParams();
+                      params.path = getServerUrlPath() + params.path;
+                      return params;
+                    }),
+                  },
+                  options
+                );
               })
-            }, options);
-          }).then(batchReturned.resolve, (error) => {
-            batchReturned.reject(new ParseError(ParseError.INCORRECT_TYPE, error.message));
-          });
+              .then(batchReturned.resolve, error => {
+                batchReturned.reject(new ParseError(ParseError.INCORRECT_TYPE, error.message));
+              });
 
-          return when(batchTasks);
-        }).then(async () => {
+            return when(batchTasks);
+          }
+        ).then(async () => {
           if (objectError) {
             return Promise.reject(objectError);
           }
@@ -2399,42 +2497,48 @@ const DefaultController = {
           return Promise.resolve(target);
         });
       });
-
     } else if (target instanceof ParseObject) {
+      if (allowCustomObjectId && !target.id) {
+        throw new ParseError(
+          ParseError.MISSING_OBJECT_ID,
+          'objectId must not be empty, null or undefined'
+        );
+      }
       // generate _localId in case if cascadeSave=false
       target._getId();
       const localId = target._localId;
       // copying target lets Flow guarantee the pointer isn't modified elsewhere
       const targetCopy = target;
-      const task = function() {
+      const task = function () {
         const params = targetCopy._getSaveParams();
-        return RESTController.request(
-          params.method,
-          params.path,
-          params.body,
-          options
-        ).then((response) => {
-          const status = response._status;
-          delete response._status;
-          targetCopy._handleSaveResponse(response, status);
-        }, (error) => {
-          targetCopy._handleSaveError();
-          return Promise.reject(error);
-        });
-      }
+        return RESTController.request(params.method, params.path, params.body, options).then(
+          response => {
+            const status = response._status;
+            delete response._status;
+            targetCopy._handleSaveResponse(response, status);
+          },
+          error => {
+            targetCopy._handleSaveError();
+            return Promise.reject(error);
+          }
+        );
+      };
 
       stateController.pushPendingState(target._getStateIdentifier());
-      return stateController.enqueueTask(target._getStateIdentifier(), task).then(async () => {
-        await localDatastore._updateLocalIdForObject(localId, target);
-        await localDatastore._updateObjectIfPinned(target);
-        return target;
-      }, (error) => {
-        return Promise.reject(error);
-      });
+      return stateController.enqueueTask(target._getStateIdentifier(), task).then(
+        async () => {
+          await localDatastore._updateLocalIdForObject(localId, target);
+          await localDatastore._updateObjectIfPinned(target);
+          return target;
+        },
+        error => {
+          return Promise.reject(error);
+        }
+      );
     }
     return Promise.resolve();
-  }
-}
+  },
+};
 
 CoreManager.setObjectController(DefaultController);
 

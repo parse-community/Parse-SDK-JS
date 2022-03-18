@@ -24,4 +24,4 @@ describe('parseDate', () => {
   it('returns null for invalid strings', () => {
     expect(parseDate('asdf')).toBe(null);
   });
-})
+});

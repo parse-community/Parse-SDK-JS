@@ -14,9 +14,11 @@ jest.dontMock('../encode');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseQuery');
+jest.dontMock('../Push');
 
 const Cloud = require('../Cloud');
 const CoreManager = require('../CoreManager');
+const Push = require('../Push');
 
 const defaultController = CoreManager.getCloudController();
 
@@ -25,93 +27,108 @@ describe('Cloud', () => {
     const run = jest.fn();
     const getJobsData = jest.fn();
     const startJob = jest.fn();
-    run.mockReturnValue(Promise.resolve({
-      result: {}
-    }));
-    getJobsData.mockReturnValue(Promise.resolve({
-      result: {}
-    }));
-    startJob.mockReturnValue(Promise.resolve({
-      result: {}
-    }));
+    run.mockReturnValue(
+      Promise.resolve({
+        result: {},
+      })
+    );
+    getJobsData.mockReturnValue(
+      Promise.resolve({
+        result: {},
+      })
+    );
+    startJob.mockReturnValue(
+      Promise.resolve({
+        result: {},
+      })
+    );
     CoreManager.setCloudController({ run, getJobsData, startJob });
   });
 
   it('run throws with an invalid function name', () => {
-    expect(Cloud.run)
-      .toThrow('Cloud function name must be a string.');
+    expect(Cloud.run).toThrow('Cloud function name must be a string.');
 
-    expect(Cloud.run.bind(null, ''))
-      .toThrow('Cloud function name must be a string.');
+    expect(Cloud.run.bind(null, '')).toThrow('Cloud function name must be a string.');
 
-    expect(Cloud.run.bind(null, {}))
-      .toThrow('Cloud function name must be a string.');
+    expect(Cloud.run.bind(null, {})).toThrow('Cloud function name must be a string.');
   });
 
   it('run passes function name and data along', () => {
     Cloud.run('myfunction', {});
 
-    expect(CoreManager.getCloudController().run.mock.calls[0])
-      .toEqual(['myfunction', {}, {}]);
+    expect(CoreManager.getCloudController().run.mock.calls[0]).toEqual(['myfunction', {}, {}]);
   });
 
   it('run passes options', () => {
     Cloud.run('myfunction', {}, { useMasterKey: false });
 
-    expect(CoreManager.getCloudController().run.mock.calls[0])
-      .toEqual(['myfunction', {}, {}]);
+    expect(CoreManager.getCloudController().run.mock.calls[0]).toEqual(['myfunction', {}, {}]);
 
     Cloud.run('myfunction', {}, { useMasterKey: true });
 
-    expect(CoreManager.getCloudController().run.mock.calls[1])
-      .toEqual(['myfunction', {}, { useMasterKey: true }]);
+    expect(CoreManager.getCloudController().run.mock.calls[1]).toEqual([
+      'myfunction',
+      {},
+      { useMasterKey: true },
+    ]);
 
     Cloud.run('myfunction', {}, { sessionToken: 'asdf1234' });
 
-    expect(CoreManager.getCloudController().run.mock.calls[2])
-      .toEqual(['myfunction', {}, { sessionToken: 'asdf1234' }]);
+    expect(CoreManager.getCloudController().run.mock.calls[2]).toEqual([
+      'myfunction',
+      {},
+      { sessionToken: 'asdf1234' },
+    ]);
 
     Cloud.run('myfunction', {}, { useMasterKey: true, sessionToken: 'asdf1234' });
 
-    expect(CoreManager.getCloudController().run.mock.calls[3])
-      .toEqual(['myfunction', {}, { useMasterKey: true, sessionToken: 'asdf1234' }]);
+    expect(CoreManager.getCloudController().run.mock.calls[3]).toEqual([
+      'myfunction',
+      {},
+      { useMasterKey: true, sessionToken: 'asdf1234' },
+    ]);
   });
 
   it('startJob throws with an invalid job name', () => {
-    expect(Cloud.startJob)
-      .toThrow('Cloud job name must be a string.');
+    expect(Cloud.startJob).toThrow('Cloud job name must be a string.');
 
-    expect(Cloud.startJob.bind(null, ''))
-      .toThrow('Cloud job name must be a string.');
+    expect(Cloud.startJob.bind(null, '')).toThrow('Cloud job name must be a string.');
 
-    expect(Cloud.startJob.bind(null, {}))
-      .toThrow('Cloud job name must be a string.');
+    expect(Cloud.startJob.bind(null, {})).toThrow('Cloud job name must be a string.');
   });
 
   it('startJob passes function name and data along', () => {
     Cloud.startJob('myJob', {});
 
-    expect(CoreManager.getCloudController().startJob.mock.calls[0])
-      .toEqual(['myJob', {}, { useMasterKey: true }]);
+    expect(CoreManager.getCloudController().startJob.mock.calls[0]).toEqual([
+      'myJob',
+      {},
+      { useMasterKey: true },
+    ]);
   });
 
   it('startJob passes options', () => {
     Cloud.startJob('myJob', {}, { useMasterKey: true });
 
-    expect(CoreManager.getCloudController().startJob.mock.calls[0])
-      .toEqual(['myJob', {}, { useMasterKey: true }]);
+    expect(CoreManager.getCloudController().startJob.mock.calls[0]).toEqual([
+      'myJob',
+      {},
+      { useMasterKey: true },
+    ]);
   });
 
   it('getJobsData passes options', () => {
     Cloud.getJobsData();
 
-    expect(CoreManager.getCloudController().getJobsData.mock.calls[0])
-      .toEqual([{ useMasterKey: true }]);
+    expect(CoreManager.getCloudController().getJobsData.mock.calls[0]).toEqual([
+      { useMasterKey: true },
+    ]);
 
     Cloud.getJobsData({ useMasterKey: true });
 
-    expect(CoreManager.getCloudController().getJobsData.mock.calls[0])
-      .toEqual([{ useMasterKey: true }]);
+    expect(CoreManager.getCloudController().getJobsData.mock.calls[0]).toEqual([
+      { useMasterKey: true },
+    ]);
   });
 });
 
@@ -119,53 +136,75 @@ describe('CloudController', () => {
   beforeEach(() => {
     CoreManager.setCloudController(defaultController);
     const request = jest.fn();
-    request.mockReturnValue(Promise.resolve({
-      success: true,
-      result: {}
-    }));
+    request.mockReturnValue(
+      Promise.resolve({
+        success: true,
+        result: {},
+      })
+    );
     const ajax = jest.fn();
     CoreManager.setRESTController({ request: request, ajax: ajax });
   });
 
   it('run passes encoded requests', () => {
-    Cloud.run('myfunction', { value: 12, when: new Date(Date.UTC(2015,0,1)) });
+    Cloud.run('myfunction', {
+      value: 12,
+      when: new Date(Date.UTC(2015, 0, 1)),
+    });
 
-    expect(CoreManager.getRESTController().request.mock.calls[0])
-      .toEqual(['POST', 'functions/myfunction', {
-        value: 12, when: { __type: 'Date', iso: '2015-01-01T00:00:00.000Z'}
-      }, { }]);
+    expect(CoreManager.getRESTController().request.mock.calls[0]).toEqual([
+      'POST',
+      'functions/myfunction',
+      {
+        value: 12,
+        when: { __type: 'Date', iso: '2015-01-01T00:00:00.000Z' },
+      },
+      {},
+    ]);
   });
 
   it('run passes options', () => {
     Cloud.run('myfunction', { value: 12 }, { useMasterKey: true });
 
-    expect(CoreManager.getRESTController().request.mock.calls[0])
-      .toEqual(['POST', 'functions/myfunction', {
-        value: 12
-      }, { useMasterKey: true }]);
+    expect(CoreManager.getRESTController().request.mock.calls[0]).toEqual([
+      'POST',
+      'functions/myfunction',
+      {
+        value: 12,
+      },
+      { useMasterKey: true },
+    ]);
 
     Cloud.run('myfunction', { value: 12 }, { sessionToken: 'asdf1234' });
 
-    expect(CoreManager.getRESTController().request.mock.calls[1])
-      .toEqual(['POST', 'functions/myfunction', {
-        value: 12
-      }, { sessionToken: 'asdf1234' }]);
+    expect(CoreManager.getRESTController().request.mock.calls[1]).toEqual([
+      'POST',
+      'functions/myfunction',
+      {
+        value: 12,
+      },
+      { sessionToken: 'asdf1234' },
+    ]);
   });
 
-  it('run invalid response', (done) => {
+  it('run invalid response', done => {
     const request = jest.fn();
-    request.mockReturnValue(Promise.resolve({
-      success: false
-    }));
+    request.mockReturnValue(
+      Promise.resolve({
+        success: false,
+      })
+    );
     const ajax = jest.fn();
     CoreManager.setRESTController({ request: request, ajax: ajax });
 
-    Cloud.run('myfunction').then(null).catch(() => {
-      done();
-    });
+    Cloud.run('myfunction')
+      .then(null)
+      .catch(() => {
+        done();
+      });
   });
 
-  it('run undefined response', (done) => {
+  it('run undefined response', done => {
     const request = jest.fn();
     request.mockReturnValue(Promise.resolve(undefined));
 
@@ -178,35 +217,55 @@ describe('CloudController', () => {
   });
 
   it('startJob passes encoded requests', () => {
-    Cloud.startJob('myJob', { value: 12, when: new Date(Date.UTC(2015,0,1)) });
+    Cloud.startJob('myJob', {
+      value: 12,
+      when: new Date(Date.UTC(2015, 0, 1)),
+    });
 
-    expect(CoreManager.getRESTController().request.mock.calls[0])
-      .toEqual(['POST', 'jobs/myJob', {
-        value: 12, when: { __type: 'Date', iso: '2015-01-01T00:00:00.000Z'}
-      }, { useMasterKey: true }]);
+    expect(CoreManager.getRESTController().request.mock.calls[0]).toEqual([
+      'POST',
+      'jobs/myJob',
+      {
+        value: 12,
+        when: { __type: 'Date', iso: '2015-01-01T00:00:00.000Z' },
+      },
+      { useMasterKey: true },
+    ]);
   });
 
   it('startJob passes options', () => {
     Cloud.startJob('myJob', { value: 12 }, { useMasterKey: true });
 
-    expect(CoreManager.getRESTController().request.mock.calls[0])
-      .toEqual(['POST', 'jobs/myJob', {
-        value: 12
-      }, { useMasterKey: true }]);
+    expect(CoreManager.getRESTController().request.mock.calls[0]).toEqual([
+      'POST',
+      'jobs/myJob',
+      {
+        value: 12,
+      },
+      { useMasterKey: true },
+    ]);
   });
 
   it('getJobsData passes no options', () => {
     Cloud.getJobsData();
 
-    expect(CoreManager.getRESTController().request.mock.calls[0])
-      .toEqual(['GET', 'cloud_code/jobs/data', null, { useMasterKey: true }]);
+    expect(CoreManager.getRESTController().request.mock.calls[0]).toEqual([
+      'GET',
+      'cloud_code/jobs/data',
+      null,
+      { useMasterKey: true },
+    ]);
   });
 
   it('getJobsData passes options', () => {
     Cloud.getJobsData({ useMasterKey: true });
 
-    expect(CoreManager.getRESTController().request.mock.calls[0])
-      .toEqual(['GET', 'cloud_code/jobs/data', null, { useMasterKey: true }]);
+    expect(CoreManager.getRESTController().request.mock.calls[0]).toEqual([
+      'GET',
+      'cloud_code/jobs/data',
+      null,
+      { useMasterKey: true },
+    ]);
   });
 
   it('accepts context on cloud function call', async () => {
@@ -220,7 +279,7 @@ describe('CloudController', () => {
     const controller = CoreManager.getRESTController();
     jest.spyOn(controller, 'request');
     // Save object
-    const context = {a: "a"};
+    const context = { a: 'a' };
     await Cloud.run('myfunction', {}, { context: context });
     // Validate
     expect(controller.request.mock.calls[0][3].context).toEqual(context);
@@ -228,13 +287,15 @@ describe('CloudController', () => {
 
   it('can get job status', async () => {
     const request = jest.fn();
-    request.mockReturnValue(Promise.resolve({
-      results: [{ className: '_JobStatus', objectId: 'jobId1234' }],
-    }));
+    request.mockReturnValue(
+      Promise.resolve({
+        results: [{ className: '_JobStatus', objectId: 'jobId1234' }],
+      })
+    );
     CoreManager.setRESTController({ request: request, ajax: jest.fn() });
 
     await Cloud.getJobStatus('jobId1234');
-    const [ method, path, data, options] = request.mock.calls[0];
+    const [method, path, data, options] = request.mock.calls[0];
     expect(method).toBe('GET');
     expect(path).toBe('classes/_JobStatus');
     expect(data).toEqual({
@@ -244,5 +305,49 @@ describe('CloudController', () => {
       },
     });
     expect(options.useMasterKey).toBe(true);
+  });
+
+  it('can get push status', async () => {
+    const request = jest.fn();
+    request.mockReturnValue(
+      Promise.resolve({
+        results: [{ className: '_PushStatus', objectId: 'pushId1234' }],
+      })
+    );
+    CoreManager.setRESTController({ request: request, ajax: jest.fn() });
+
+    await Push.getPushStatus('pushId1234');
+    const [method, path, data, options] = request.mock.calls[0];
+    expect(method).toBe('GET');
+    expect(path).toBe('classes/_PushStatus');
+    expect(data).toEqual({
+      limit: 1,
+      where: {
+        objectId: 'pushId1234',
+      },
+    });
+    expect(options.useMasterKey).toBe(true);
+  });
+
+  it('can get push status with masterKey', async () => {
+    const request = jest.fn();
+    request.mockReturnValue(
+      Promise.resolve({
+        results: [{ className: '_PushStatus', objectId: 'pushId1234' }],
+      })
+    );
+    CoreManager.setRESTController({ request: request, ajax: jest.fn() });
+
+    await Push.getPushStatus('pushId1234', { useMasterKey: false });
+    const [method, path, data, options] = request.mock.calls[0];
+    expect(method).toBe('GET');
+    expect(path).toBe('classes/_PushStatus');
+    expect(data).toEqual({
+      limit: 1,
+      where: {
+        objectId: 'pushId1234',
+      },
+    });
+    expect(options.useMasterKey).toBe(false);
   });
 });

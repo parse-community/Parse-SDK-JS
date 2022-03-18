@@ -19,7 +19,6 @@ const ParsePolygon = require('../ParsePolygon').default;
 const ParseUser = require('../ParseUser').default;
 
 describe('OfflineQuery', () => {
-
   it('matches blank queries', () => {
     const obj = new ParseObject('Item');
     const q = new ParseQuery('Item');
@@ -47,7 +46,7 @@ describe('OfflineQuery', () => {
     const q = new ParseQuery('Item');
     q.equalTo('$foo', 'bar');
     try {
-      matchesQuery(q.className, obj, [], q)
+      matchesQuery(q.className, obj, [], q);
     } catch (e) {
       expect(e.message).toBe('Invalid Key: $foo');
     }
@@ -56,15 +55,104 @@ describe('OfflineQuery', () => {
   it('matches queries date field', () => {
     const date = new Date();
     const obj = new ParseObject('Item');
-    obj.set('field', date)
+    obj.set('field', date);
     const q = new ParseQuery('Item');
     q.greaterThanOrEqualTo('field', date);
     expect(matchesQuery(q.className, obj, [], q)).toBe(true);
   });
 
+  it('matches queries relativeTime date field', () => {
+    const now = Date.now();
+    const obj = new ParseObject('Item', {
+      name: 'obj1',
+      ttl: new Date(now + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+    });
+
+    let q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: 'in 1 day' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: '1 day ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.lessThan('ttl', { $relativeTime: '5 days ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(false);
+
+    q = new ParseQuery('Item');
+    q.lessThan('ttl', { $relativeTime: '0 yr 0 wk 5 d 0 hr 0 min 0 sec ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(false);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: 'now' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: 'now' });
+    q.lessThan('ttl', { $relativeTime: 'in 3 day' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: '1 years 3 weeks 1 hours 3 minutes 2 seconds ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: '2 year 2 week 1 hour 4 day 3 minute 2 second ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: '2 yrs 2 wks 1 hrs 3 mins 2 secs ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: '0 yr 0 wk 0 d 24 hr 3 min 2 sec ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+  });
+
+  it('matches invalid queries relativeTime date field', () => {
+    const date = new Date('1995-12-17T03:24:00');
+    const obj = new ParseObject('Item');
+    obj.set('field', date);
+    const q = new ParseQuery('Item');
+    q.equalTo('field', { $relativeTime: 'in 0 day' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(false);
+  });
+
+  it('handles invalid queries relativeTime date errors', () => {
+    const obj = new ParseObject('Item');
+    obj.set('field', new Date('1995-12-17T03:24:00'));
+
+    const q = new ParseQuery('Item');
+    q.greaterThan('field', { $relativeTime: '1 unknown ago' });
+    expect(() => matchesQuery(q.className, obj, [], q)).toThrow(
+      "bad $relativeTime (field) value. Invalid interval: 'unknown'"
+    );
+
+    q.greaterThan('field', { $relativeTime: 'in 1 ago' });
+    expect(() => matchesQuery(q.className, obj, [], q)).toThrow(
+      "bad $relativeTime (field) value. Time cannot have both 'in' and 'ago'"
+    );
+
+    q.greaterThan('field', { $relativeTime: 'ago 1 in' });
+    expect(() => matchesQuery(q.className, obj, [], q)).toThrow(
+      "bad $relativeTime (field) value. Time should either start with 'in' or end with 'ago'"
+    );
+
+    q.greaterThan('field', { $relativeTime: '1 ago' });
+    expect(() => matchesQuery(q.className, obj, [], q)).toThrow(
+      'bad $relativeTime (field) value. Invalid time string. Dangling unit or number.'
+    );
+
+    q.greaterThan('field', { $relativeTime: 'in N/A days' });
+    expect(() => matchesQuery(q.className, obj, [], q)).toThrow(
+      "bad $relativeTime (field) value. 'n/a' is not an integer."
+    );
+  });
+
   it('matches queries relation', () => {
     const obj = new ParseObject('Item');
-    const relation = obj.relation("author");
+    const relation = obj.relation('author');
     const q = relation.query();
     expect(matchesQuery(q.className, obj, [], q)).toBe(false);
   });
@@ -99,11 +187,7 @@ describe('OfflineQuery', () => {
       longitude: -122.148377,
     });
     const obj = new ParseObject('Person');
-    obj
-      .set('score', 12)
-      .set('name', 'Bill')
-      .set('birthday', day)
-      .set('lastLocation', location);
+    obj.set('score', 12).set('name', 'Bill').set('birthday', day).set('lastLocation', location);
 
     let q = new ParseQuery('Person');
     q.equalTo('score', 12);
@@ -136,16 +220,22 @@ describe('OfflineQuery', () => {
     q = new ParseQuery('Person');
     q.equalTo('lastLocation', location);
     expect(matchesQuery(q.className, obj, [], q)).toBe(true);
-    q.equalTo('lastLocation', new ParseGeoPoint({
-      latitude: 37.4848,
-      longitude: -122.1483,
-    }));
+    q.equalTo(
+      'lastLocation',
+      new ParseGeoPoint({
+        latitude: 37.4848,
+        longitude: -122.1483,
+      })
+    );
     expect(matchesQuery(q.className, obj, [], q)).toBe(false);
 
-    q.equalTo('lastLocation', new ParseGeoPoint({
-      latitude: 37.484815,
-      longitude: -122.148377,
-    }));
+    q.equalTo(
+      'lastLocation',
+      new ParseGeoPoint({
+        latitude: 37.484815,
+        longitude: -122.148377,
+      })
+    );
     q.equalTo('score', 12);
     q.equalTo('name', 'Bill');
     q.equalTo('birthday', day);
@@ -204,10 +294,7 @@ describe('OfflineQuery', () => {
 
   it('matches on inequalities', () => {
     const player = new ParseObject('Person');
-    player
-      .set('score', 12)
-      .set('name', 'Bill')
-      .set('birthday', new Date(1980, 2, 4));
+    player.set('score', 12).set('name', 'Bill').set('birthday', new Date(1980, 2, 4));
 
     let q = new ParseQuery('Person');
     q.lessThan('score', 15);
@@ -246,9 +333,7 @@ describe('OfflineQuery', () => {
 
   it('matches an $or query', () => {
     const player = new ParseObject('Player');
-    player
-      .set('score', 12)
-      .set('name', 'Player 1');
+    player.set('score', 12).set('name', 'Player 1');
 
     const q = new ParseQuery('Player');
     q.equalTo('name', 'Player 1');
@@ -266,16 +351,14 @@ describe('OfflineQuery', () => {
 
   it('matches an $and query', () => {
     const player = new ParseObject('Player');
-    player
-      .set('score', 12)
-      .set('name', 'Player 1');
+    player.set('score', 12).set('name', 'Player 1');
 
     const q = new ParseQuery('Player');
     q.equalTo('name', 'Player 1');
     const q2 = new ParseQuery('Player');
-    q2.equalTo('score',  12);
+    q2.equalTo('score', 12);
     const q3 = new ParseQuery('Player');
-    q3.equalTo('score',  100);
+    q3.equalTo('score', 100);
     const andQuery1 = ParseQuery.and(q, q2);
     const andQuery2 = ParseQuery.and(q, q3);
     expect(matchesQuery(q.className, player, [], q)).toBe(true);
@@ -286,9 +369,7 @@ describe('OfflineQuery', () => {
 
   it('matches an $nor query', () => {
     const player = new ParseObject('Player');
-    player
-      .set('score', 12)
-      .set('name', 'Player 1');
+    player.set('score', 12).set('name', 'Player 1');
 
     const q = new ParseQuery('Player');
     q.equalTo('name', 'Player 1');
@@ -308,9 +389,7 @@ describe('OfflineQuery', () => {
 
   it('matches $regex queries', () => {
     const player = new ParseObject('Player');
-    player
-      .set('score', 12)
-      .set('name', 'Player 1');
+    player.set('score', 12).set('name', 'Player 1');
 
     let q = new ParseQuery('Player');
     q.startsWith('name', 'Play');
@@ -354,7 +433,11 @@ describe('OfflineQuery', () => {
     expect(matchesQuery(q.className, player, [], q)).toBe(false);
 
     q = new ParseQuery('Player');
-    q._addCondition('status', '$regex', { test: function() { return true } });
+    q._addCondition('status', '$regex', {
+      test: function () {
+        return true;
+      },
+    });
     expect(matchesQuery(q.className, player, [], q)).toBe(true);
   });
 
@@ -403,15 +486,12 @@ describe('OfflineQuery', () => {
     noLocation.set('name', 'Santa Clara');
 
     const nullLocation = new ParseObject('Checkin');
-    nullLocation
-      .set('name', 'Santa Clara')
-      .set('location', null);
-
+    nullLocation.set('name', 'Santa Clara').set('location', null);
 
     let q = new ParseQuery('Checkin').withinGeoBox(
       'location',
       new ParseGeoPoint(37.708813, -122.526398),
-      new ParseGeoPoint(37.822802, -122.373962),
+      new ParseGeoPoint(37.822802, -122.373962)
     );
 
     expect(matchesQuery(q.className, caltrainStation, [], q)).toBe(true);
@@ -422,7 +502,7 @@ describe('OfflineQuery', () => {
     q = new ParseQuery('Checkin').withinGeoBox(
       'location',
       new ParseGeoPoint(37.822802, -122.373962),
-      new ParseGeoPoint(37.708813, -122.526398),
+      new ParseGeoPoint(37.708813, -122.526398)
     );
 
     expect(matchesQuery(q.className, caltrainStation, [], q)).toBe(false);
@@ -431,7 +511,7 @@ describe('OfflineQuery', () => {
     q = new ParseQuery('Checkin').withinGeoBox(
       'location',
       new ParseGeoPoint(37.708813, -122.373962),
-      new ParseGeoPoint(37.822802, -122.526398),
+      new ParseGeoPoint(37.822802, -122.526398)
     );
 
     expect(matchesQuery(q.className, caltrainStation, [], q)).toBe(false);
@@ -440,9 +520,7 @@ describe('OfflineQuery', () => {
 
   it('matches on subobjects with dot notation', () => {
     const message = new ParseObject('Message');
-    message
-      .set('test', 'content')
-      .set('status', { x: 'read', y: 'delivered' });
+    message.set('test', 'content').set('status', { x: 'read', y: 'delivered' });
 
     let q = new ParseQuery('Message');
     q.equalTo('status.x', 'read');
@@ -509,13 +587,17 @@ describe('OfflineQuery', () => {
     message.set('profile', profile);
 
     let q = new ParseQuery('Message');
-    q.containedIn('profile', [ParseObject.fromJSON({ className: 'Profile', objectId: 'abc' }),
-      ParseObject.fromJSON({ className: 'Profile', objectId: 'def' })]);
+    q.containedIn('profile', [
+      ParseObject.fromJSON({ className: 'Profile', objectId: 'abc' }),
+      ParseObject.fromJSON({ className: 'Profile', objectId: 'def' }),
+    ]);
     expect(matchesQuery(q.className, message, [], q)).toBe(true);
 
     q = new ParseQuery('Message');
-    q.containedIn('profile', [ParseObject.fromJSON({ className: 'Profile', objectId: 'ghi' }),
-      ParseObject.fromJSON({ className: 'Profile', objectId: 'def' })]);
+    q.containedIn('profile', [
+      ParseObject.fromJSON({ className: 'Profile', objectId: 'ghi' }),
+      ParseObject.fromJSON({ className: 'Profile', objectId: 'def' }),
+    ]);
     expect(matchesQuery(q.className, message, [], q)).toBe(false);
   });
 
@@ -527,16 +609,20 @@ describe('OfflineQuery', () => {
     message.set('profile', profile);
 
     let q = new ParseQuery('Message');
-    q.notContainedIn('profile', [ParseObject.fromJSON({ className: 'Profile', objectId: 'def' }),
-      ParseObject.fromJSON({ className: 'Profile', objectId: 'ghi' })]);
+    q.notContainedIn('profile', [
+      ParseObject.fromJSON({ className: 'Profile', objectId: 'def' }),
+      ParseObject.fromJSON({ className: 'Profile', objectId: 'ghi' }),
+    ]);
     expect(matchesQuery(q.className, message, [], q)).toBe(true);
 
     profile.id = 'def';
     message = new ParseObject('Message');
     message.set('profile', profile);
     q = new ParseQuery('Message');
-    q.notContainedIn('profile', [ParseObject.fromJSON({ className: 'Profile', objectId: 'ghi' }),
-      ParseObject.fromJSON({ className: 'Profile', objectId: 'def' })]);
+    q.notContainedIn('profile', [
+      ParseObject.fromJSON({ className: 'Profile', objectId: 'ghi' }),
+      ParseObject.fromJSON({ className: 'Profile', objectId: 'def' }),
+    ]);
     expect(matchesQuery(q.className, message, [], q)).toBe(false);
   });
 
@@ -588,8 +674,12 @@ describe('OfflineQuery', () => {
     let mainQuery = new ParseQuery('Person');
 
     mainQuery.matchesKeyInQuery('hometown', 'location', query);
-    expect(matchesQuery(mainQuery.className, person1, [person1, person2, restaurant], mainQuery)).toBe(true);
-    expect(matchesQuery(mainQuery.className, person2, [person1, person2, restaurant], mainQuery)).toBe(false);
+    expect(
+      matchesQuery(mainQuery.className, person1, [person1, person2, restaurant], mainQuery)
+    ).toBe(true);
+    expect(
+      matchesQuery(mainQuery.className, person2, [person1, person2, restaurant], mainQuery)
+    ).toBe(false);
     expect(matchesQuery(mainQuery.className, person1, [], mainQuery)).toBe(false);
 
     query = new ParseQuery('Restaurant');
@@ -597,8 +687,17 @@ describe('OfflineQuery', () => {
     mainQuery = new ParseQuery('Person');
 
     mainQuery.doesNotMatchKeyInQuery('hometown', 'location', query);
-    expect(matchesQuery(mainQuery.className, person1, [person1, person2, restaurant._toFullJSON()], mainQuery)).toBe(false);
-    expect(matchesQuery(mainQuery.className, person2, [person1, person2, restaurant], mainQuery)).toBe(true);
+    expect(
+      matchesQuery(
+        mainQuery.className,
+        person1,
+        [person1, person2, restaurant._toFullJSON()],
+        mainQuery
+      )
+    ).toBe(false);
+    expect(
+      matchesQuery(mainQuery.className, person2, [person1, person2, restaurant], mainQuery)
+    ).toBe(true);
     expect(matchesQuery(mainQuery.className, person1, [], mainQuery)).toBe(false);
   });
 
@@ -619,16 +718,24 @@ describe('OfflineQuery', () => {
     subQuery.greaterThan('x', 5);
     let q = new ParseQuery('ParentObject');
     q.matchesQuery('child', subQuery);
-    expect(matchesQuery(q.className, parentObjects[0], [...parentObjects, ...childObjects], q)).toBe(false);
-    expect(matchesQuery(q.className, parentObjects[9], [...parentObjects, ...childObjects], q)).toBe(true);
+    expect(
+      matchesQuery(q.className, parentObjects[0], [...parentObjects, ...childObjects], q)
+    ).toBe(false);
+    expect(
+      matchesQuery(q.className, parentObjects[9], [...parentObjects, ...childObjects], q)
+    ).toBe(true);
     expect(matchesQuery(q.className, parentObjects[0], [], q)).toBe(false);
 
     subQuery = new ParseQuery('ChildObject');
     subQuery.greaterThan('x', 5);
     q = new ParseQuery('ParentObject');
     q.doesNotMatchQuery('child', subQuery);
-    expect(matchesQuery(q.className, parentObjects[0], [...parentObjects, ...childObjects], q)).toBe(true);
-    expect(matchesQuery(q.className, parentObjects[9], [...parentObjects, ...childObjects], q)).toBe(false);
+    expect(
+      matchesQuery(q.className, parentObjects[0], [...parentObjects, ...childObjects], q)
+    ).toBe(true);
+    expect(
+      matchesQuery(q.className, parentObjects[9], [...parentObjects, ...childObjects], q)
+    ).toBe(false);
     expect(matchesQuery(q.className, parentObjects[0], [], q)).toBe(true);
   });
 
@@ -649,7 +756,7 @@ describe('OfflineQuery', () => {
 
   it('should support withinPolygon query', () => {
     const sacramento = new ParseObject('Location');
-    sacramento.set('location', new ParseGeoPoint(38.52, -121.50));
+    sacramento.set('location', new ParseGeoPoint(38.52, -121.5));
     sacramento.set('name', 'Sacramento');
 
     const honolulu = new ParseObject('Location');
@@ -658,13 +765,13 @@ describe('OfflineQuery', () => {
 
     const sf = new ParseObject('Location');
     sf.set('location', new ParseGeoPoint(37.75, -122.68));
-    sf.set('name', 'San Francisco')
+    sf.set('name', 'San Francisco');
 
     const points = [
       new ParseGeoPoint(37.85, -122.33),
-      new ParseGeoPoint(37.85, -122.90),
-      new ParseGeoPoint(37.68, -122.90),
-      new ParseGeoPoint(37.68, -122.33)
+      new ParseGeoPoint(37.85, -122.9),
+      new ParseGeoPoint(37.68, -122.9),
+      new ParseGeoPoint(37.68, -122.33),
     ];
     const q = new ParseQuery('Location');
     q.withinPolygon('location', points);
@@ -675,9 +782,25 @@ describe('OfflineQuery', () => {
   });
 
   it('should support polygonContains query', () => {
-    const p1 = [[0,0], [0,1], [1,1], [1,0]];
-    const p2 = [[0,0], [0,2], [2,2], [2,0]];
-    const p3 = [[10,10], [10,15], [15,15], [15,10], [10,10]];
+    const p1 = [
+      [0, 0],
+      [0, 1],
+      [1, 1],
+      [1, 0],
+    ];
+    const p2 = [
+      [0, 0],
+      [0, 2],
+      [2, 2],
+      [2, 0],
+    ];
+    const p3 = [
+      [10, 10],
+      [10, 15],
+      [15, 15],
+      [15, 10],
+      [10, 10],
+    ];
 
     const polygon1 = new ParsePolygon(p1);
     const polygon2 = new ParsePolygon(p2);

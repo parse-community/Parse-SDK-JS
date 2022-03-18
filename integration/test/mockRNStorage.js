@@ -28,12 +28,12 @@ const mockRNStorage = {
   },
 
   multiGet(keys, cb) {
-    const objects = keys.map((key) => [key, mockStorage[key]]);
+    const objects = keys.map(key => [key, mockStorage[key]]);
     cb(undefined, objects);
   },
 
   multiRemove(keys, cb) {
-    keys.map((key) => delete mockStorage[key]);
+    keys.map(key => delete mockStorage[key]);
     cb(undefined);
   },
 

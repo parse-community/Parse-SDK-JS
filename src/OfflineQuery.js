@@ -3,7 +3,6 @@ const decode = require('./decode').default;
 const ParseError = require('./ParseError').default;
 const ParsePolygon = require('./ParsePolygon').default;
 const ParseGeoPoint = require('./ParseGeoPoint').default;
-
 /**
  * contains -- Determines if an object is contained in a list with special handling for Parse pointers.
  *
@@ -34,6 +33,7 @@ function transformObject(object) {
   }
   return object;
 }
+
 /**
  * matchesQuery -- Determines if an object would be returned by a Parse Query
  * It's a lightweight, where-clause only implementation of a full query engine.
@@ -81,6 +81,150 @@ function equalObjectsGeneric(obj, compareTo, eqlFn) {
 }
 
 /**
+ * @typedef RelativeTimeToDateResult
+ * @property {string} status The conversion status, `error` if conversion failed or
+ * `success` if conversion succeeded.
+ * @property {string} info The error message if conversion failed, or the relative
+ * time indication (`past`, `present`, `future`) if conversion succeeded.
+ * @property {Date|undefined} result The converted date, or `undefined` if conversion
+ * failed.
+ */
+/**
+ * Converts human readable relative date string, for example, 'in 10 days' to a date
+ * relative to now.
+ *
+ * @param {string} text The text to convert.
+ * @param {Date} [now=new Date()] The date from which add or subtract. Default is now.
+ * @returns {RelativeTimeToDateResult}
+ */
+function relativeTimeToDate(text, now = new Date()) {
+  text = text.toLowerCase();
+
+  let parts = text.split(' ');
+
+  // Filter out whitespace
+  parts = parts.filter(part => part !== '');
+
+  const future = parts[0] === 'in';
+  const past = parts[parts.length - 1] === 'ago';
+
+  if (!future && !past && text !== 'now') {
+    return {
+      status: 'error',
+      info: "Time should either start with 'in' or end with 'ago'",
+    };
+  }
+
+  if (future && past) {
+    return {
+      status: 'error',
+      info: "Time cannot have both 'in' and 'ago'",
+    };
+  }
+
+  // strip the 'ago' or 'in'
+  if (future) {
+    parts = parts.slice(1);
+  } else {
+    // past
+    parts = parts.slice(0, parts.length - 1);
+  }
+
+  if (parts.length % 2 !== 0 && text !== 'now') {
+    return {
+      status: 'error',
+      info: 'Invalid time string. Dangling unit or number.',
+    };
+  }
+
+  const pairs = [];
+  while (parts.length) {
+    pairs.push([parts.shift(), parts.shift()]);
+  }
+
+  let seconds = 0;
+  for (const [num, interval] of pairs) {
+    const val = Number(num);
+    if (!Number.isInteger(val)) {
+      return {
+        status: 'error',
+        info: `'${num}' is not an integer.`,
+      };
+    }
+
+    switch (interval) {
+    case 'yr':
+    case 'yrs':
+    case 'year':
+    case 'years':
+      seconds += val * 31536000; // 365 * 24 * 60 * 60
+      break;
+
+    case 'wk':
+    case 'wks':
+    case 'week':
+    case 'weeks':
+      seconds += val * 604800; // 7 * 24 * 60 * 60
+      break;
+
+    case 'd':
+    case 'day':
+    case 'days':
+      seconds += val * 86400; // 24 * 60 * 60
+      break;
+
+    case 'hr':
+    case 'hrs':
+    case 'hour':
+    case 'hours':
+      seconds += val * 3600; // 60 * 60
+      break;
+
+    case 'min':
+    case 'mins':
+    case 'minute':
+    case 'minutes':
+      seconds += val * 60;
+      break;
+
+    case 'sec':
+    case 'secs':
+    case 'second':
+    case 'seconds':
+      seconds += val;
+      break;
+
+    default:
+      return {
+        status: 'error',
+        info: `Invalid interval: '${interval}'`,
+      };
+    }
+  }
+
+  const milliseconds = seconds * 1000;
+  if (future) {
+    return {
+      status: 'success',
+      info: 'future',
+      result: new Date(now.valueOf() + milliseconds),
+    };
+  } else if (past) {
+    return {
+      status: 'success',
+      info: 'past',
+      result: new Date(now.valueOf() - milliseconds),
+    };
+  } else {
+    return {
+      status: 'success',
+      info: 'present',
+      result: new Date(now.valueOf()),
+    };
+  }
+}
+
+/**
  * Determines whether an object matches a single key's constraints
  *
  * @param className
@@ -100,7 +244,13 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
     const keyComponents = key.split('.');
     const subObjectKey = keyComponents[0];
     const keyRemainder = keyComponents.slice(1).join('.');
-    return matchesKeyConstraints(className, object[subObjectKey] || {}, objects, keyRemainder, constraints);
+    return matchesKeyConstraints(
+      className,
+      object[subObjectKey] || {},
+      objects,
+      keyRemainder,
+      constraints
+    );
   }
   let i;
   if (key === '$or') {
@@ -131,7 +281,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
     // Bail! We can't handle relational queries locally
     return false;
   }
-  if (!(/^[A-Za-z][0-9A-Za-z_]*$/).test(key)) {
+  if (!/^[A-Za-z][0-9A-Za-z_]*$/.test(key)) {
     throw new ParseError(ParseError.INVALID_KEY_NAME, `Invalid Key: ${key}`);
   }
   // Equality (or Array contains) cases
@@ -145,7 +295,11 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
   if (constraints.__type) {
     if (constraints.__type === 'Pointer') {
       return equalObjectsGeneric(object[key], constraints, function (obj, ptr) {
-        return typeof obj !== 'undefined' && ptr.className === obj.className && ptr.objectId === obj.objectId;
+        return (
+          typeof obj !== 'undefined' &&
+          ptr.className === obj.className &&
+          ptr.objectId === obj.objectId
+        );
       });
     }
     return equalObjectsGeneric(decode(object[key]), decode(constraints), equalObjects);
@@ -153,16 +307,31 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
   // More complex cases
   for (const condition in constraints) {
     compareTo = constraints[condition];
+
     if (compareTo.__type) {
       compareTo = decode(compareTo);
     }
+    // is it a $relativeTime? convert to date
+    if (compareTo['$relativeTime']) {
+      const parserResult = relativeTimeToDate(compareTo['$relativeTime']);
+      if (parserResult.status !== 'success') {
+        throw new ParseError(
+          ParseError.INVALID_JSON,
+          `bad $relativeTime (${key}) value. ${parserResult.info}`
+        );
+      }
+      compareTo = parserResult.result;
+    }
     // Compare Date Object or Date String
-    if (toString.call(compareTo) === '[object Date]' ||
-       (typeof compareTo === 'string' &&
-       new Date(compareTo) !== 'Invalid Date' &&
-       !isNaN(new Date(compareTo)))) {
+    if (
+      toString.call(compareTo) === '[object Date]' ||
+      (typeof compareTo === 'string' &&
+        new Date(compareTo) !== 'Invalid Date' &&
+        !isNaN(new Date(compareTo)))
+    ) {
       object[key] = new Date(object[key].iso ? object[key].iso : object[key]);
     }
+
     switch (condition) {
     case '$lt':
       if (object[key] >= compareTo) {
@@ -206,8 +375,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
         }
       }
       break;
-    case '$exists':
-    {
+    case '$exists': {
       const propertyExists = typeof object[key] !== 'undefined';
       const existenceIsRequired = constraints['$exists'];
       if (typeof constraints['$exists'] !== 'boolean') {
@@ -215,7 +383,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
         // tries to submit a non-boolean for $exits outside the SDKs, just ignore it.
         break;
       }
-      if (!propertyExists && existenceIsRequired || propertyExists && !existenceIsRequired) {
+      if ((!propertyExists && existenceIsRequired) || (propertyExists && !existenceIsRequired)) {
         return false;
       }
       break;
@@ -233,14 +401,17 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
         expString += compareTo.substring(escapeEnd + 2, escapeStart);
         escapeEnd = compareTo.indexOf('\\E', escapeStart);
         if (escapeEnd > -1) {
-          expString += compareTo.substring(escapeStart + 2, escapeEnd).replace(/\\\\\\\\E/g, '\\E').replace(/\W/g, '\\$&');
+          expString += compareTo
+            .substring(escapeStart + 2, escapeEnd)
+            .replace(/\\\\\\\\E/g, '\\E')
+            .replace(/\W/g, '\\$&');
         }
 
         escapeStart = compareTo.indexOf('\\Q', escapeEnd);
       }
       expString += compareTo.substring(Math.max(escapeStart, escapeEnd + 2));
       let modifiers = constraints.$options || '';
-      modifiers = modifiers.replace('x', '').replace('s', '')
+      modifiers = modifiers.replace('x', '').replace('s', '');
       // Parse Server / Mongo support x and s modifiers but JS RegExp doesn't
       const exp = new RegExp(expString, modifiers);
       if (!exp.test(object[key])) {
@@ -266,7 +437,12 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
         // Invalid box, crosses the date line
         return false;
       }
-      return object[key].latitude > southWest.latitude && object[key].latitude < northEast.latitude && object[key].longitude > southWest.longitude && object[key].longitude < northEast.longitude;
+      return (
+        object[key].latitude > southWest.latitude &&
+          object[key].latitude < northEast.latitude &&
+          object[key].longitude > southWest.longitude &&
+          object[key].longitude < northEast.longitude
+      );
     }
     case '$options':
       // Not a query type, but a way to add options to $regex. Ignore and
@@ -303,8 +479,10 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
 
       for (let i = 0; i < subQueryObjects.length; i += 1) {
         const subObject = transformObject(subQueryObjects[i]);
-        if (object[key].className === subObject.className &&
-            object[key].objectId === subObject.objectId) {
+        if (
+          object[key].className === subObject.className &&
+            object[key].objectId === subObject.objectId
+        ) {
           return true;
         }
       }
@@ -317,8 +495,10 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
 
       for (let i = 0; i < subQueryObjects.length; i += 1) {
         const subObject = transformObject(subQueryObjects[i]);
-        if (object[key].className === subObject.className &&
-            object[key].objectId === subObject.objectId) {
+        if (
+          object[key].className === subObject.className &&
+            object[key].objectId === subObject.objectId
+        ) {
           return false;
         }
       }
@@ -333,7 +513,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
       return true;
     }
     case '$geoWithin': {
-      const points = compareTo.$polygon.map((geoPoint) => [geoPoint.latitude, geoPoint.longitude]);
+      const points = compareTo.$polygon.map(geoPoint => [geoPoint.latitude, geoPoint.longitude]);
       const polygon = new ParsePolygon(points);
       return polygon.containsPoint(object[key]);
     }
@@ -355,13 +535,27 @@ function validateQuery(query: any) {
   if (query.toJSON) {
     q = query.toJSON().where;
   }
-  const specialQuerykeys = ['$and', '$or', '$nor', '_rperm', '_wperm', '_perishable_token', '_email_verify_token', '_email_verify_token_expires_at', '_account_lockout_expires_at', '_failed_login_count'];
+  const specialQuerykeys = [
+    '$and',
+    '$or',
+    '$nor',
+    '_rperm',
+    '_wperm',
+    '_perishable_token',
+    '_email_verify_token',
+    '_email_verify_token_expires_at',
+    '_account_lockout_expires_at',
+    '_failed_login_count',
+  ];
 
   Object.keys(q).forEach(key => {
     if (q && q[key] && q[key].$regex) {
       if (typeof q[key].$options === 'string') {
         if (!q[key].$options.match(/^[imxs]+$/)) {
-          throw new ParseError(ParseError.INVALID_QUERY, `Bad $options value for query: ${q[key].$options}`);
+          throw new ParseError(
+            ParseError.INVALID_QUERY,
+            `Bad $options value for query: ${q[key].$options}`
+          );
         }
       }
     }

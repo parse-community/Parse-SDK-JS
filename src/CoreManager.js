@@ -21,135 +21,141 @@ import type { PushData } from './Push';
 import type { RequestOptions, FullOptions } from './RESTController';
 
 type AnalyticsController = {
-  track: (name: string, dimensions: { [key: string]: string }) => Promise;
+  track: (name: string, dimensions: { [key: string]: string }) => Promise,
 };
 type CloudController = {
-  run: (name: string, data: mixed, options: RequestOptions) => Promise;
-  getJobsData: (options: RequestOptions) => Promise;
-  startJob: (name: string, data: mixed, options: RequestOptions) => Promise;
+  run: (name: string, data: mixed, options: RequestOptions) => Promise,
+  getJobsData: (options: RequestOptions) => Promise,
+  startJob: (name: string, data: mixed, options: RequestOptions) => Promise,
 };
 type ConfigController = {
-  current: () => Promise;
-  get: () => Promise;
-  save: (attrs: { [key: string]: any }) => Promise;
+  current: () => Promise,
+  get: () => Promise,
+  save: (attrs: { [key: string]: any }) => Promise,
 };
 type CryptoController = {
-  encrypt: (obj: any, secretKey: string) => string;
-  decrypt: (encryptedText: string, secretKey: any) => string;
+  encrypt: (obj: any, secretKey: string) => string,
+  decrypt: (encryptedText: string, secretKey: any) => string,
 };
 type FileController = {
-  saveFile: (name: string, source: FileSource, options: FullOptions) => Promise;
-  saveBase64: (name: string, source: FileSource, options: FullOptions) => Promise;
-  download: (uri: string) => Promise;
+  saveFile: (name: string, source: FileSource, options: FullOptions) => Promise,
+  saveBase64: (name: string, source: FileSource, options: FullOptions) => Promise,
+  download: (uri: string) => Promise,
 };
 type InstallationController = {
-  currentInstallationId: () => Promise;
+  currentInstallationId: () => Promise,
 };
 type ObjectController = {
-  fetch: (object: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions) => Promise;
-  save: (object: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) => Promise;
-  destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => Promise;
+  fetch: (
+    object: ParseObject | Array<ParseObject>,
+    forceFetch: boolean,
+    options: RequestOptions
+  ) => Promise,
+  save: (object: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) => Promise,
+  destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => Promise,
 };
 type ObjectStateController = {
-  getState: (obj: any) => ?State;
-  initializeState: (obj: any, initial?: State) => State;
-  removeState: (obj: any) => ?State;
-  getServerData: (obj: any) => AttributeMap;
-  setServerData: (obj: any, attributes: AttributeMap) => void;
-  getPendingOps: (obj: any) => Array<OpsMap>;
-  setPendingOp: (obj: any, attr: string, op: ?Op) => void;
-  pushPendingState: (obj: any) => void;
-  popPendingState: (obj: any) => OpsMap;
-  mergeFirstPendingState: (obj: any) => void;
-  getObjectCache: (obj: any) => ObjectCache;
-  estimateAttribute: (obj: any, attr: string) => mixed;
-  estimateAttributes: (obj: any) => AttributeMap;
-  commitServerChanges: (obj: any, changes: AttributeMap) => void;
-  enqueueTask: (obj: any, task: () => Promise) => Promise;
-  clearAllState: () => void;
-  duplicateState: (source: any, dest: any) => void;
+  getState: (obj: any) => ?State,
+  initializeState: (obj: any, initial?: State) => State,
+  removeState: (obj: any) => ?State,
+  getServerData: (obj: any) => AttributeMap,
+  setServerData: (obj: any, attributes: AttributeMap) => void,
+  getPendingOps: (obj: any) => Array<OpsMap>,
+  setPendingOp: (obj: any, attr: string, op: ?Op) => void,
+  pushPendingState: (obj: any) => void,
+  popPendingState: (obj: any) => OpsMap,
+  mergeFirstPendingState: (obj: any) => void,
+  getObjectCache: (obj: any) => ObjectCache,
+  estimateAttribute: (obj: any, attr: string) => mixed,
+  estimateAttributes: (obj: any) => AttributeMap,
+  commitServerChanges: (obj: any, changes: AttributeMap) => void,
+  enqueueTask: (obj: any, task: () => Promise) => Promise,
+  clearAllState: () => void,
+  duplicateState: (source: any, dest: any) => void,
 };
 type PushController = {
-  send: (data: PushData) => Promise;
+  send: (data: PushData) => Promise,
 };
 type QueryController = {
-  find: (className: string, params: QueryJSON, options: RequestOptions) => Promise;
-  aggregate: (className: string, params: any, options: RequestOptions) => Promise;
+  find: (className: string, params: QueryJSON, options: RequestOptions) => Promise,
+  aggregate: (className: string, params: any, options: RequestOptions) => Promise,
 };
 type RESTController = {
-  request: (method: string, path: string, data: mixed, options: RequestOptions) => Promise;
-  ajax: (method: string, url: string, data: any, headers?: any, options: FullOptions) => Promise;
+  request: (method: string, path: string, data: mixed, options: RequestOptions) => Promise,
+  ajax: (method: string, url: string, data: any, headers?: any, options: FullOptions) => Promise,
 };
 type SchemaController = {
-  purge: (className: string) => Promise;
-  get: (className: string, options: RequestOptions) => Promise;
-  delete: (className: string, options: RequestOptions) => Promise;
-  create: (className: string, params: any, options: RequestOptions) => Promise;
-  update: (className: string, params: any, options: RequestOptions) => Promise;
-  send(className: string, method: string, params: any, options: RequestOptions): Promise;
+  purge: (className: string) => Promise,
+  get: (className: string, options: RequestOptions) => Promise,
+  delete: (className: string, options: RequestOptions) => Promise,
+  create: (className: string, params: any, options: RequestOptions) => Promise,
+  update: (className: string, params: any, options: RequestOptions) => Promise,
+  send(className: string, method: string, params: any, options: RequestOptions): Promise,
 };
 type SessionController = {
-  getSession: (token: RequestOptions) => Promise;
+  getSession: (token: RequestOptions) => Promise,
 };
-type StorageController = {
-  async: 0;
-  getItem: (path: string) => ?string;
-  setItem: (path: string, value: string) => void;
-  removeItem: (path: string) => void;
-  getItemAsync?: (path: string) => Promise;
-  setItemAsync?: (path: string, value: string) => Promise;
-  removeItemAsync?: (path: string) => Promise;
-  clear: () => void;
-} | {
-  async: 1;
-  getItem?: (path: string) => ?string;
-  setItem?: (path: string, value: string) => void;
-  removeItem?: (path: string) => void;
-  getItemAsync: (path: string) => Promise;
-  setItemAsync: (path: string, value: string) => Promise;
-  removeItemAsync: (path: string) => Promise;
-  clear: () => void;
-};
+type StorageController =
+  | {
+      async: 0,
+      getItem: (path: string) => ?string,
+      setItem: (path: string, value: string) => void,
+      removeItem: (path: string) => void,
+      getItemAsync?: (path: string) => Promise,
+      setItemAsync?: (path: string, value: string) => Promise,
+      removeItemAsync?: (path: string) => Promise,
+      clear: () => void,
+    }
+  | {
+      async: 1,
+      getItem?: (path: string) => ?string,
+      setItem?: (path: string, value: string) => void,
+      removeItem?: (path: string) => void,
+      getItemAsync: (path: string) => Promise,
+      setItemAsync: (path: string, value: string) => Promise,
+      removeItemAsync: (path: string) => Promise,
+      clear: () => void,
+    };
 type LocalDatastoreController = {
-  fromPinWithName: (name: string) => ?any;
-  pinWithName: (name: string, objects: any) => void;
-  unPinWithName: (name: string) => void;
-  getAllContents: () => ?any;
-  clear: () => void;
+  fromPinWithName: (name: string) => ?any,
+  pinWithName: (name: string, objects: any) => void,
+  unPinWithName: (name: string) => void,
+  getAllContents: () => ?any,
+  clear: () => void,
 };
 type UserController = {
-  setCurrentUser: (user: ParseUser) => Promise;
-  currentUser: () => ?ParseUser;
-  currentUserAsync: () => Promise;
-  signUp: (user: ParseUser, attrs: AttributeMap, options: RequestOptions) => Promise;
-  logIn: (user: ParseUser, options: RequestOptions) => Promise;
-  become: (options: RequestOptions) => Promise;
-  hydrate: (userJSON: AttributeMap) => Promise;
-  logOut: (options: RequestOptions) => Promise;
-  me: (options: RequestOptions) => Promise;
-  requestPasswordReset: (email: string, options: RequestOptions) => Promise;
-  updateUserOnDisk: (user: ParseUser) => Promise;
-  upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => Promise;
-  linkWith: (user: ParseUser, authData: AuthData) => Promise;
-  removeUserFromDisk: () => Promise;
-  verifyPassword: (username: string, password: string, options: RequestOptions) => Promise;
-  requestEmailVerification: (email: string, options: RequestOptions) => Promise;
+  setCurrentUser: (user: ParseUser) => Promise,
+  currentUser: () => ?ParseUser,
+  currentUserAsync: () => Promise,
+  signUp: (user: ParseUser, attrs: AttributeMap, options: RequestOptions) => Promise,
+  logIn: (user: ParseUser, options: RequestOptions) => Promise,
+  become: (options: RequestOptions) => Promise,
+  hydrate: (userJSON: AttributeMap) => Promise,
+  logOut: (options: RequestOptions) => Promise,
+  me: (options: RequestOptions) => Promise,
+  requestPasswordReset: (email: string, options: RequestOptions) => Promise,
+  updateUserOnDisk: (user: ParseUser) => Promise,
+  upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => Promise,
+  linkWith: (user: ParseUser, authData: AuthData) => Promise,
+  removeUserFromDisk: () => Promise,
+  verifyPassword: (username: string, password: string, options: RequestOptions) => Promise,
+  requestEmailVerification: (email: string, options: RequestOptions) => Promise,
 };
 type HooksController = {
-  get: (type: string, functionName?: string, triggerName?: string) => Promise;
-  create: (hook: mixed) => Promise;
-  delete: (hook: mixed) => Promise;
-  update: (hook: mixed) => Promise;
-  send: (method: string, path: string, body?: mixed) => Promise;
+  get: (type: string, functionName?: string, triggerName?: string) => Promise,
+  create: (hook: mixed) => Promise,
+  delete: (hook: mixed) => Promise,
+  update: (hook: mixed) => Promise,
+  send: (method: string, path: string, body?: mixed) => Promise,
 };
 type WebSocketController = {
-  onopen: () => void;
-  onmessage: (message: any) => void;
-  onclose: () => void;
-  onerror: (error: any) => void;
-  send: (data: any) => void;
-  close: () => void;
-}
+  onopen: () => void,
+  onmessage: (message: any) => void,
+  onclose: () => void,
+  onerror: (error: any) => void,
+  send: (data: any) => void,
+  close: () => void,
+};
 type Config = {
   AnalyticsController?: AnalyticsController,
   CloudController?: CloudController,
@@ -172,10 +178,11 @@ type Config = {
 
 const config: Config & { [key: string]: mixed } = {
   // Defaults
-  IS_NODE: (typeof process !== 'undefined' &&
-            !!process.versions &&
-            !!process.versions.node &&
-            !process.versions.electron),
+  IS_NODE:
+    typeof process !== 'undefined' &&
+    !!process.versions &&
+    !!process.versions.node &&
+    !process.versions.electron,
   REQUEST_ATTEMPT_LIMIT: 5,
   REQUEST_BATCH_SIZE: 20,
   REQUEST_HEADERS: {},
@@ -192,11 +199,12 @@ const config: Config & { [key: string]: mixed } = {
   PERFORM_USER_REWRITE: true,
   FORCE_REVOCABLE_SESSION: false,
   ENCRYPTED_USER: false,
-  IDEMPOTENCY: false
+  IDEMPOTENCY: false,
+  ALLOW_CUSTOM_OBJECT_ID: false,
 };
 
 function requireMethods(name: string, methods: Array<string>, controller: any) {
-  methods.forEach((func) => {
+  methods.forEach(func => {
     if (typeof controller[func] !== 'function') {
       throw new Error(`${name} must implement ${func}()`);
     }
@@ -204,14 +212,14 @@ function requireMethods(name: string, methods: Array<string>, controller: any) {
 }
 
 module.exports = {
-  get: function(key: string): any {
+  get: function (key: string): any {
     if (config.hasOwnProperty(key)) {
       return config[key];
     }
     throw new Error('Configuration key not found: ' + key);
   },
 
-  set: function(key: string, value: any): void {
+  set: function (key: string, value: any): void {
     config[key] = value;
   },
 
@@ -281,24 +289,28 @@ module.exports = {
   },
 
   setObjectStateController(controller: ObjectStateController) {
-    requireMethods('ObjectStateController', [
-      'getState',
-      'initializeState',
-      'removeState',
-      'getServerData',
-      'setServerData',
-      'getPendingOps',
-      'setPendingOp',
-      'pushPendingState',
-      'popPendingState',
-      'mergeFirstPendingState',
-      'getObjectCache',
-      'estimateAttribute',
-      'estimateAttributes',
-      'commitServerChanges',
-      'enqueueTask',
-      'clearAllState',
-    ], controller);
+    requireMethods(
+      'ObjectStateController',
+      [
+        'getState',
+        'initializeState',
+        'removeState',
+        'getServerData',
+        'setServerData',
+        'getPendingOps',
+        'setPendingOp',
+        'pushPendingState',
+        'popPendingState',
+        'mergeFirstPendingState',
+        'getObjectCache',
+        'estimateAttribute',
+        'estimateAttributes',
+        'commitServerChanges',
+        'enqueueTask',
+        'clearAllState',
+      ],
+      controller
+    );
 
     config['ObjectStateController'] = controller;
   },
@@ -335,7 +347,11 @@ module.exports = {
   },
 
   setSchemaController(controller: SchemaController) {
-    requireMethods('SchemaController', ['get', 'create', 'update', 'delete', 'send', 'purge'], controller);
+    requireMethods(
+      'SchemaController',
+      ['get', 'create', 'update', 'delete', 'send', 'purge'],
+      controller
+    );
     config['SchemaController'] = controller;
   },
 
@@ -354,25 +370,27 @@ module.exports = {
 
   setStorageController(controller: StorageController) {
     if (controller.async) {
-      requireMethods('An async StorageController', [
-        'getItemAsync',
-        'setItemAsync',
-        'removeItemAsync',
-        'getAllKeysAsync'
-      ], controller);
+      requireMethods(
+        'An async StorageController',
+        ['getItemAsync', 'setItemAsync', 'removeItemAsync', 'getAllKeysAsync'],
+        controller
+      );
     } else {
-      requireMethods('A synchronous StorageController', [
-        'getItem',
-        'setItem',
-        'removeItem',
-        'getAllKeys'
-      ], controller);
+      requireMethods(
+        'A synchronous StorageController',
+        ['getItem', 'setItem', 'removeItem', 'getAllKeys'],
+        controller
+      );
     }
     config['StorageController'] = controller;
   },
 
   setLocalDatastoreController(controller: LocalDatastoreController) {
-    requireMethods('LocalDatastoreController', ['pinWithName', 'fromPinWithName', 'unPinWithName', 'getAllContents', 'clear'], controller);
+    requireMethods(
+      'LocalDatastoreController',
+      ['pinWithName', 'fromPinWithName', 'unPinWithName', 'getAllContents', 'clear'],
+      controller
+    );
     config['LocalDatastoreController'] = controller;
   },
 
@@ -409,21 +427,25 @@ module.exports = {
   },
 
   setUserController(controller: UserController) {
-    requireMethods('UserController', [
-      'setCurrentUser',
-      'currentUser',
-      'currentUserAsync',
-      'signUp',
-      'logIn',
-      'become',
-      'logOut',
-      'me',
-      'requestPasswordReset',
-      'upgradeToRevocableSession',
-      'requestEmailVerification',
-      'verifyPassword',
-      'linkWith',
-    ], controller);
+    requireMethods(
+      'UserController',
+      [
+        'setCurrentUser',
+        'currentUser',
+        'currentUserAsync',
+        'signUp',
+        'logIn',
+        'become',
+        'logOut',
+        'me',
+        'requestPasswordReset',
+        'upgradeToRevocableSession',
+        'requestEmailVerification',
+        'verifyPassword',
+        'linkWith',
+      ],
+      controller
+    );
     config['UserController'] = controller;
   },
 
@@ -432,11 +454,11 @@ module.exports = {
   },
 
   setLiveQueryController(controller: any) {
-    requireMethods('LiveQueryController', [
-      'setDefaultLiveQueryClient',
-      'getDefaultLiveQueryClient',
-      '_clearCachedDefaultClient',
-    ], controller);
+    requireMethods(
+      'LiveQueryController',
+      ['setDefaultLiveQueryClient', 'getDefaultLiveQueryClient', '_clearCachedDefaultClient'],
+      controller
+    );
     config['LiveQueryController'] = controller;
   },
 
@@ -445,16 +467,11 @@ module.exports = {
   },
 
   setHooksController(controller: HooksController) {
-    requireMethods('HooksController', [
-      'create',
-      'get',
-      'update',
-      'remove',
-    ], controller);
+    requireMethods('HooksController', ['create', 'get', 'update', 'remove'], controller);
     config['HooksController'] = controller;
   },
 
   getHooksController(): HooksController {
     return config['HooksController'];
-  }
-}
+  },
+};

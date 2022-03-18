@@ -8,40 +8,49 @@
  */
 
 jest.autoMockOff();
-const mockObject = function(className, id) {
+const mockObject = function (className, id) {
   this.className = className;
   this.id = id;
   this.attributes = {};
-  this.toPointer = function() {
+  this.toPointer = function () {
     return {
       className: this.className,
       __type: 'Pointer',
       objectId: this.id,
-    }
+    };
   };
 };
 jest.setMock('../ParseObject', mockObject);
 
+const mockCLP = function (clp) {
+  this.permissionsMap = clp;
+  this.toJSON = function () {
+    return { ...this.permissionsMap };
+  };
+};
+jest.setMock('../ParseCLP', mockCLP);
+
 const ParseObject = require('../ParseObject');
+const ParseCLP = require('../ParseCLP');
 const ParseSchema = require('../ParseSchema').default;
 const CoreManager = require('../CoreManager');
 
 const defaultController = CoreManager.getSchemaController();
 
 describe('ParseSchema', () => {
-  it('can create schema', (done) => {
+  it('can create schema', done => {
     const schema = new ParseSchema('SchemaTest');
     expect(schema.className).toEqual('SchemaTest');
     done();
   });
 
-  it('can create schema with User Class', (done) => {
+  it('can create schema with User Class', done => {
     const schema = new ParseSchema('User');
     expect(schema.className).toEqual('_User');
     done();
   });
 
-  it('cannot use schema without class', (done) => {
+  it('cannot use schema without class', done => {
     try {
       const schema = new ParseSchema();
       schema.assertClassName();
@@ -50,7 +59,7 @@ describe('ParseSchema', () => {
     }
   });
 
-  it('can create schema fields', (done) => {
+  it('can create schema fields', done => {
     const schema = new ParseSchema('SchemaTest');
     schema
       .addField('defaultFieldString')
@@ -83,14 +92,38 @@ describe('ParseSchema', () => {
     done();
   });
 
+  it('can create schema pointer and relation with addFields', () => {
+    const schema = new ParseSchema('SchemaTest');
+    schema
+      .addField('newPointer', 'Pointer', { targetClass: '_User' })
+      .addField('newRelation', 'Relation', { targetClass: '_User' });
+
+    expect(schema._fields.newPointer.type).toEqual('Pointer');
+    expect(schema._fields.newRelation.type).toEqual('Relation');
+    expect(schema._fields.newPointer.targetClass).toEqual('_User');
+    expect(schema._fields.newRelation.targetClass).toEqual('_User');
+  });
+
   it('can create schema fields required and default values', () => {
     const object = new ParseObject('TestObject', '1234');
     const schema = new ParseSchema('SchemaTest');
     schema
-      .addField('defaultFieldString', 'String', { required: true, defaultValue: 'hello' })
-      .addDate('dateField', { required: true, defaultValue: '2000-01-01T00:00:00.000Z' })
-      .addPointer('pointerField', 'TestObject', { required: true, defaultValue: object })
-      .addPointer('pointerJSONField', 'TestObject', { required: true, defaultValue: object.toPointer() });
+      .addField('defaultFieldString', 'String', {
+        required: true,
+        defaultValue: 'hello',
+      })
+      .addDate('dateField', {
+        required: true,
+        defaultValue: '2000-01-01T00:00:00.000Z',
+      })
+      .addPointer('pointerField', 'TestObject', {
+        required: true,
+        defaultValue: object,
+      })
+      .addPointer('pointerJSONField', 'TestObject', {
+        required: true,
+        defaultValue: object.toPointer(),
+      });
 
     expect(schema._fields.defaultFieldString.type).toEqual('String');
     expect(schema._fields.defaultFieldString.required).toEqual(true);
@@ -102,11 +135,14 @@ describe('ParseSchema', () => {
     expect(schema._fields.dateField).toEqual({
       type: 'Date',
       required: true,
-      defaultValue: { __type: 'Date', iso: new Date('2000-01-01T00:00:00.000Z') }
+      defaultValue: {
+        __type: 'Date',
+        iso: new Date('2000-01-01T00:00:00.000Z'),
+      },
     });
   });
 
-  it('can create schema indexes', (done) => {
+  it('can create schema indexes', done => {
     const schema = new ParseSchema('SchemaTest');
     schema.addIndex('testIndex', { name: 1 });
 
@@ -114,7 +150,7 @@ describe('ParseSchema', () => {
     done();
   });
 
-  it('can set schema class level permissions', (done) => {
+  it('can set schema class level permissions', done => {
     const schema = new ParseSchema('SchemaTest');
     expect(schema._clp).toBeUndefined();
     schema.setCLP(undefined);
@@ -129,14 +165,18 @@ describe('ParseSchema', () => {
       update: { requiresAuthentication: true },
       delete: {},
       addField: {},
-      protectedFields: {}
+      protectedFields: {},
     };
     schema.setCLP(clp);
     expect(schema._clp).toEqual(clp);
+
+    const clpObj = new ParseCLP(clp);
+    schema.setCLP(clpObj);
+    expect(schema._clp).toEqual(clpObj.toJSON());
     done();
   });
 
-  it('cannot add field with null name', (done) => {
+  it('cannot add field with null name', done => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addField(null, 'string');
@@ -145,7 +185,7 @@ describe('ParseSchema', () => {
     }
   });
 
-  it('cannot add field with invalid type', (done) => {
+  it('cannot add field with invalid type', done => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addField('testField', 'unknown');
@@ -154,16 +194,16 @@ describe('ParseSchema', () => {
     }
   });
 
-  it('cannot add index with null name', (done) => {
+  it('cannot add index with null name', done => {
     try {
       const schema = new ParseSchema('SchemaTest');
-      schema.addIndex(null, {'name': 1});
+      schema.addIndex(null, { name: 1 });
     } catch (e) {
       done();
     }
   });
 
-  it('cannot add index with null index', (done) => {
+  it('cannot add index with null index', done => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addIndex('testIndex', null);
@@ -172,7 +212,7 @@ describe('ParseSchema', () => {
     }
   });
 
-  it('cannot add pointer with null name', (done) => {
+  it('cannot add pointer with null name', done => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addPointer(null, 'targetClass');
@@ -181,7 +221,7 @@ describe('ParseSchema', () => {
     }
   });
 
-  it('cannot add pointer with null targetClass', (done) => {
+  it('cannot add pointer with null targetClass', done => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addPointer('pointerField', null);
@@ -190,7 +230,7 @@ describe('ParseSchema', () => {
     }
   });
 
-  it('cannot add relation with null name', (done) => {
+  it('cannot add relation with null name', done => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addRelation(null, 'targetClass');
@@ -199,7 +239,7 @@ describe('ParseSchema', () => {
     }
   });
 
-  it('cannot add relation with null targetClass', (done) => {
+  it('cannot add relation with null targetClass', done => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addRelation('relationField', null);
@@ -208,21 +248,21 @@ describe('ParseSchema', () => {
     }
   });
 
-  it('can delete schema field', (done) => {
+  it('can delete schema field', done => {
     const schema = new ParseSchema('SchemaTest');
     schema.deleteField('testField');
-    expect(schema._fields.testField).toEqual({ __op: 'Delete'});
+    expect(schema._fields.testField).toEqual({ __op: 'Delete' });
     done();
   });
 
-  it('can delete schema index', (done) => {
+  it('can delete schema index', done => {
     const schema = new ParseSchema('SchemaTest');
     schema.deleteIndex('testIndex');
-    expect(schema._indexes.testIndex).toEqual({ __op: 'Delete'});
+    expect(schema._indexes.testIndex).toEqual({ __op: 'Delete' });
     done();
   });
 
-  it('can save schema', (done) => {
+  it('can save schema', done => {
     CoreManager.setSchemaController({
       send() {},
       get() {},
@@ -233,8 +273,8 @@ describe('ParseSchema', () => {
         expect(className).toBe('SchemaTest');
         expect(params).toEqual({
           className: 'SchemaTest',
-          fields: { name: { type: 'String'} },
-          indexes: { testIndex: { name: 1 } }
+          fields: { name: { type: 'String' } },
+          indexes: { testIndex: { name: 1 } },
         });
         return Promise.resolve([]);
       },
@@ -242,14 +282,14 @@ describe('ParseSchema', () => {
 
     const schema = new ParseSchema('SchemaTest');
     schema.addField('name');
-    schema.addIndex('testIndex', {'name': 1});
-    schema.save().then((results) => {
+    schema.addIndex('testIndex', { name: 1 });
+    schema.save().then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('can update schema', (done) => {
+  it('can update schema', done => {
     CoreManager.setSchemaController({
       send() {},
       get() {},
@@ -260,8 +300,8 @@ describe('ParseSchema', () => {
         expect(className).toBe('SchemaTest');
         expect(params).toEqual({
           className: 'SchemaTest',
-          fields: { name: { type: 'String'} },
-          indexes: { testIndex: { name: 1 } }
+          fields: { name: { type: 'String' } },
+          indexes: { testIndex: { name: 1 } },
         });
         return Promise.resolve([]);
       },
@@ -269,14 +309,14 @@ describe('ParseSchema', () => {
 
     const schema = new ParseSchema('SchemaTest');
     schema.addField('name');
-    schema.addIndex('testIndex', {'name': 1});
-    schema.update().then((results) => {
+    schema.addIndex('testIndex', { name: 1 });
+    schema.update().then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('can delete schema', (done) => {
+  it('can delete schema', done => {
     CoreManager.setSchemaController({
       send() {},
       create() {},
@@ -290,13 +330,13 @@ describe('ParseSchema', () => {
     });
 
     const schema = new ParseSchema('SchemaTest');
-    schema.delete().then((results) => {
+    schema.delete().then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('can purge schema', (done) => {
+  it('can purge schema', done => {
     CoreManager.setSchemaController({
       send() {},
       create() {},
@@ -310,13 +350,13 @@ describe('ParseSchema', () => {
     });
 
     const schema = new ParseSchema('SchemaTest');
-    schema.purge().then((results) => {
+    schema.purge().then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('can get schema', (done) => {
+  it('can get schema', done => {
     CoreManager.setSchemaController({
       send() {},
       create() {},
@@ -330,13 +370,13 @@ describe('ParseSchema', () => {
     });
 
     const schema = new ParseSchema('SchemaTest');
-    schema.get().then((results) => {
+    schema.get().then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('cannot get empty schema', (done) => {
+  it('cannot get empty schema', done => {
     CoreManager.setSchemaController({
       send() {},
       create() {},
@@ -350,17 +390,20 @@ describe('ParseSchema', () => {
     });
 
     const schema = new ParseSchema('SchemaTest');
-    schema.get().then(() => {
-      // Should never reach
-      expect(true).toBe(false);
-      done();
-    }, (error) => {
-      expect(error.message).toBe('Schema not found.');
-      done();
-    });
+    schema.get().then(
+      () => {
+        // Should never reach
+        expect(true).toBe(false);
+        done();
+      },
+      error => {
+        expect(error.message).toBe('Schema not found.');
+        done();
+      }
+    );
   });
 
-  it('can get all schema', (done) => {
+  it('can get all schema', done => {
     CoreManager.setSchemaController({
       send() {},
       create() {},
@@ -370,18 +413,18 @@ describe('ParseSchema', () => {
       get(className) {
         expect(className).toBe('');
         return Promise.resolve({
-          results: ['all']
+          results: ['all'],
         });
       },
     });
 
-    ParseSchema.all().then((results) => {
+    ParseSchema.all().then(results => {
       expect(results[0]).toEqual('all');
       done();
     });
   });
 
-  it('cannot get all schema when empty', (done) => {
+  it('cannot get all schema when empty', done => {
     CoreManager.setSchemaController({
       send() {},
       create() {},
@@ -391,69 +434,72 @@ describe('ParseSchema', () => {
       get(className) {
         expect(className).toBe('');
         return Promise.resolve({
-          results: []
+          results: [],
         });
       },
     });
 
-    ParseSchema.all().then(() => {
-      // Should never reach
-      expect(true).toBe(false);
-      done();
-    }, (error) => {
-      expect(error.message).toBe('Schema not found.');
-      done();
-    });
+    ParseSchema.all().then(
+      () => {
+        // Should never reach
+        expect(true).toBe(false);
+        done();
+      },
+      error => {
+        expect(error.message).toBe('Schema not found.');
+        done();
+      }
+    );
   });
 });
 
 describe('SchemaController', () => {
   beforeEach(() => {
     CoreManager.setSchemaController(defaultController);
-    const request = function() {
+    const request = function () {
       return Promise.resolve([]);
     };
-    const ajax = function() {
+    const ajax = function () {
       return Promise.resolve([]);
     };
     CoreManager.setRESTController({ request: request, ajax: ajax });
   });
 
-  it('save schema', (done) => {
+  it('save schema', done => {
     const schema = new ParseSchema('SchemaTest');
-    schema.save().then((results) => {
+    schema.save().then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('get schema', (done) => {
+  it('get schema', done => {
     const schema = new ParseSchema('SchemaTest');
-    schema.get().then((results) => {
+    schema.get().then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('update schema', (done) => {
+  it('update schema', done => {
     const schema = new ParseSchema('SchemaTest');
-    schema.update().then((results) => {
+    schema.update().then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('delete schema', (done) => {
+  it('delete schema', done => {
     const schema = new ParseSchema('SchemaTest');
-    schema.delete().then((results) => {
+    schema.delete().then(results => {
       expect(results).toEqual([]);
       done();
     });
   });
 
-  it('purge schema', (done) => {
+  it('purge schema', done => {
     const schema = new ParseSchema('SchemaTest');
-    schema.purge().then((results) => {
+    schema.purge().then(results => {
       expect(results).toEqual([]);
       done();
     });

@@ -13,13 +13,13 @@ function mockObject(id, attributes) {
   this.id = id;
   this.attributes = attributes;
 }
-mockObject.registerSubclass = function() {};
+mockObject.registerSubclass = function () {};
 jest.setMock('../ParseObject', mockObject);
 
 function mockFile(url) {
   this._url = url;
 }
-mockFile.prototype.url = function() {
+mockFile.prototype.url = function () {
   return this._url;
 };
 jest.setMock('../ParseFile', mockFile);
@@ -42,29 +42,29 @@ describe('canBeSerialized', () => {
     const o = new ParseObject('oid', {
       a: 12,
       b: 'string',
-      c: false
+      c: false,
     });
     expect(canBeSerialized(o)).toBe(true);
   });
 
   it('returns false when a child is an unsaved object or file', () => {
     let o = new ParseObject('oid', {
-      a: new ParseObject()
+      a: new ParseObject(),
     });
     expect(canBeSerialized(o)).toBe(false);
 
     o = new ParseObject('oid', {
-      a: new ParseObject('oid2', {})
+      a: new ParseObject('oid2', {}),
     });
     expect(canBeSerialized(o)).toBe(true);
 
     o = new ParseObject('oid', {
-      a: new ParseFile()
+      a: new ParseFile(),
     });
     expect(canBeSerialized(o)).toBe(false);
 
     o = new ParseObject('oid', {
-      a: new ParseFile('http://files.parsetfss.com/a/parse.txt')
+      a: new ParseFile('http://files.parsetfss.com/a/parse.txt'),
     });
     expect(canBeSerialized(o)).toBe(true);
   });
@@ -72,7 +72,7 @@ describe('canBeSerialized', () => {
   it('returns true when all children have an id', () => {
     const child = new ParseObject('child', {});
     const parent = new ParseObject(undefined, {
-      child: child
+      child: child,
     });
     child.attributes.parent = parent;
     expect(canBeSerialized(parent)).toBe(true);
@@ -92,10 +92,10 @@ describe('canBeSerialized', () => {
       a: {
         a: {
           a: {
-            b: new ParseObject()
-          }
-        }
-      }
+            b: new ParseObject(),
+          },
+        },
+      },
     });
     expect(canBeSerialized(o)).toBe(false);
 
@@ -103,24 +103,34 @@ describe('canBeSerialized', () => {
       a: {
         a: {
           a: {
-            b: new ParseObject('oid2')
-          }
-        }
-      }
+            b: new ParseObject('oid2'),
+          },
+        },
+      },
     });
     expect(canBeSerialized(o)).toBe(true);
 
     o = new ParseObject('oid', {
-      a: [1, 2, 3, {
-        b: new ParseObject()
-      }]
+      a: [
+        1,
+        2,
+        3,
+        {
+          b: new ParseObject(),
+        },
+      ],
     });
     expect(canBeSerialized(o)).toBe(false);
 
     o = new ParseObject('oid', {
-      a: [1, 2, 3, {
-        b: new ParseObject('oid2')
-      }]
+      a: [
+        1,
+        2,
+        3,
+        {
+          b: new ParseObject('oid2'),
+        },
+      ],
     });
     expect(canBeSerialized(o)).toBe(true);
   });

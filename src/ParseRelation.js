@@ -47,21 +47,15 @@ class ParseRelation {
   _ensureParentAndKey(parent: ParseObject, key: string) {
     this.key = this.key || key;
     if (this.key !== key) {
-      throw new Error(
-        'Internal Error. Relation retrieved from two different keys.'
-      );
+      throw new Error('Internal Error. Relation retrieved from two different keys.');
     }
     if (this.parent) {
       if (this.parent.className !== parent.className) {
-        throw new Error(
-          'Internal Error. Relation retrieved from two different Objects.'
-        );
+        throw new Error('Internal Error. Relation retrieved from two different Objects.');
       }
       if (this.parent.id) {
         if (this.parent.id !== parent.id) {
-          throw new Error(
-            'Internal Error. Relation retrieved from two different Objects.'
-          );
+          throw new Error('Internal Error. Relation retrieved from two different Objects.');
         }
       } else if (parent.id) {
         this.parent = parent;
@@ -124,7 +118,7 @@ class ParseRelation {
   toJSON(): { __type: 'Relation', className: ?string } {
     return {
       __type: 'Relation',
-      className: this.targetClassName
+      className: this.targetClassName,
     };
   }
 
@@ -144,12 +138,12 @@ class ParseRelation {
       query = new ParseQuery(parent.className);
       query._extraOptions.redirectClassNameForKey = this.key;
     } else {
-      query = new ParseQuery(this.targetClassName)
+      query = new ParseQuery(this.targetClassName);
     }
     query._addCondition('$relatedTo', 'object', {
       __type: 'Pointer',
       className: parent.className,
-      objectId: parent.id
+      objectId: parent.id,
     });
     query._addCondition('$relatedTo', 'key', this.key);
 

@@ -10,7 +10,7 @@
 jest.dontMock('../AnonymousUtils');
 
 class MockUser {
-  constructor () {
+  constructor() {
     this.className = '_User';
     this.attributes = {};
   }
@@ -45,11 +45,7 @@ const AnonymousUtils = require('../AnonymousUtils').default;
 describe('AnonymousUtils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(
-      AnonymousUtils,
-      '_getAuthProvider'
-    )
-      .mockImplementation(() => mockProvider);
+    jest.spyOn(AnonymousUtils, '_getAuthProvider').mockImplementation(() => mockProvider);
   });
 
   it('can register provider', () => {
@@ -82,7 +78,11 @@ describe('AnonymousUtils', () => {
     jest.spyOn(MockUser, 'logInWith');
     AnonymousUtils.logIn();
     expect(MockUser.logInWith).toHaveBeenCalledTimes(1);
-    expect(MockUser.logInWith).toHaveBeenCalledWith('anonymous', mockProvider.getAuthData(), undefined);
+    expect(MockUser.logInWith).toHaveBeenCalledWith(
+      'anonymous',
+      mockProvider.getAuthData(),
+      undefined
+    );
     expect(AnonymousUtils._getAuthProvider).toHaveBeenCalledTimes(1);
   });
 });

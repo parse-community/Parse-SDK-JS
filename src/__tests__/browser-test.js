@@ -8,8 +8,10 @@ jest.dontMock('../Parse');
 jest.dontMock('../RESTController');
 jest.dontMock('../Storage');
 jest.dontMock('crypto-js/aes');
+jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
 const ParseError = require('../ParseError').default;
+const EventuallyQueue = require('../EventuallyQueue');
 
 class XMLHttpRequest {}
 class XDomainRequest {
@@ -34,7 +36,9 @@ describe('Browser', () => {
     jest.spyOn(console, 'log').mockImplementationOnce(() => {});
     jest.spyOn(Parse, '_initialize').mockImplementationOnce(() => {});
     Parse.initialize('A', 'B');
-    expect(console.log).toHaveBeenCalledWith("It looks like you're using the browser version of the SDK in a node.js environment. You should require('parse/node') instead.");
+    expect(console.log).toHaveBeenCalledWith(
+      "It looks like you're using the browser version of the SDK in a node.js environment. You should require('parse/node') instead."
+    );
     expect(Parse._initialize).toHaveBeenCalledTimes(1);
   });
 
@@ -46,6 +50,14 @@ describe('Browser', () => {
     Parse.initialize('A', 'B');
     expect(console.log).toHaveBeenCalledTimes(0);
     expect(Parse._initialize).toHaveBeenCalledTimes(1);
+  });
+
+  it('should start eventually queue poll on initialize', () => {
+    const Parse = require('../Parse');
+    jest.spyOn(console, 'log').mockImplementationOnce(() => {});
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    Parse.initialize('A', 'B');
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(0);
   });
 
   it('load StorageController', () => {
@@ -75,7 +87,13 @@ describe('Browser', () => {
       progress: () => {},
       requestTask: () => {},
     };
-    const { response } = await RESTController.ajax('POST', 'classes/TestObject', null, null, options);
+    const { response } = await RESTController.ajax(
+      'POST',
+      'classes/TestObject',
+      null,
+      null,
+      options
+    );
     expect(response.status).toBe(200);
     expect(called).toBe(true);
   });
@@ -101,7 +119,7 @@ describe('Browser', () => {
     } catch (e) {
       const errorResponse = JSON.stringify({
         code: ParseError.X_DOMAIN_REQUEST,
-        error: 'IE\'s XDomainRequest does not supply error info.'
+        error: "IE's XDomainRequest does not supply error info.",
       });
       expect(e.responseText).toEqual(errorResponse);
     }

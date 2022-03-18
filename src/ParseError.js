@@ -22,7 +22,7 @@ class ParseError extends Error {
     this.code = code;
     Object.defineProperty(this, 'message', {
       enumerable: true,
-      value: message
+      value: message,
     });
   }
 
@@ -309,7 +309,7 @@ ParseError.SCRIPT_FAILED = 141;
  * @property {number} VALIDATION_ERROR
  * @static
  */
-ParseError.VALIDATION_ERROR = 142
+ParseError.VALIDATION_ERROR = 142;
 
 /**
  * Error code indicating that invalid image data was provided.
@@ -344,6 +344,14 @@ ParseError.INVALID_PUSH_TIME_ERROR = 152;
 ParseError.FILE_DELETE_ERROR = 153;
 
 /**
+ * Error code indicating an error deleting an unnamed file.
+ *
+ * @property {number} FILE_DELETE_UNNAMED_ERROR
+ * @static
+ */
+ParseError.FILE_DELETE_UNNAMED_ERROR = 161;
+
+/**
  * Error code indicating that the application has exceeded its request
  * limit.
  *
@@ -368,6 +376,14 @@ ParseError.DUPLICATE_REQUEST = 159;
  * @static
  */
 ParseError.INVALID_EVENT_NAME = 160;
+
+/**
+ * Error code indicating that a field had an invalid value.
+ *
+ * @property {number} INVALID_VALUE
+ * @static
+ */
+ParseError.INVALID_VALUE = 162;
 
 /**
  * Error code indicating that the username is missing or empty.

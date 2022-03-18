@@ -13,12 +13,13 @@ import CoreManager from './CoreManager';
 import ParseQuery from './ParseQuery';
 
 import type { WhereClause } from './ParseQuery';
+import type { FullOptions } from './RESTController';
 
 export type PushData = {
-  where?: WhereClause | ParseQuery;
-  push_time?: Date | string;
-  expiration_time?: Date | string;
-  expiration_interval?: number;
+  where?: WhereClause | ParseQuery,
+  push_time?: Date | string,
+  expiration_time?: Date | string,
+  expiration_interval?: number,
 };
 
 /**
@@ -37,7 +38,7 @@ export type PushData = {
  *
  * @function send
  * @name Parse.Push.send
- * @param {object} data -  The data of the push notification.  Valid fields
+ * @param {object} data -  The data of the push notification. Valid fields
  * are:
  *   <ol>
  *     <li>channels - An Array of channels to push to.</li>
@@ -49,10 +50,15 @@ export type PushData = {
  *         a set of installations to push to.</li>
  *     <li>data - The data to send as part of the push.</li>
  *   <ol>
+ * @param {object} options Valid options
+ * are:<ul>
+ *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+ *     be used for this request.
+ * </ul>
  * @returns {Promise} A promise that is fulfilled when the push request
  *     completes.
  */
-export function send(data: PushData): Promise {
+export function send(data: PushData, options?: FullOptions = {}): Promise {
   if (data.where && data.where instanceof ParseQuery) {
     data.where = data.where.toJSON().where;
   }
@@ -66,23 +72,43 @@ export function send(data: PushData): Promise {
   }
 
   if (data.expiration_time && data.expiration_interval) {
-    throw new Error(
-      'expiration_time and expiration_interval cannot both be set.'
-    );
+    throw new Error('expiration_time and expiration_interval cannot both be set.');
   }
 
-  return CoreManager.getPushController().send(data);
+  const pushOptions = { useMasterKey: true };
+  if (options.hasOwnProperty('useMasterKey')) {
+    pushOptions.useMasterKey = options.useMasterKey;
+  }
+
+  return CoreManager.getPushController().send(data, pushOptions);
+}
+
+/**
+ * Gets push status by Id
+ *
+ * @function getPushStatus
+ * @name Parse.Push.getPushStatus
+ * @param {string} pushStatusId The Id of Push Status.
+ * @param {object} options Valid options
+ * are:<ul>
+ *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+ *     be used for this request.
+ * </ul>
+ * @returns {Parse.Object} Status of Push.
+ */
+export function getPushStatus(pushStatusId: string, options?: FullOptions = {}): Promise<string> {
+  const pushOptions = { useMasterKey: true };
+  if (options.hasOwnProperty('useMasterKey')) {
+    pushOptions.useMasterKey = options.useMasterKey;
+  }
+  const query = new ParseQuery('_PushStatus');
+  return query.get(pushStatusId, pushOptions);
 }
 
 const DefaultController = {
-  send(data: PushData) {
-    return CoreManager.getRESTController().request(
-      'POST',
-      'push',
-      data,
-      { useMasterKey: true }
-    );
-  }
-}
+  send(data: PushData, options?: FullOptions) {
+    return CoreManager.getRESTController().request('POST', 'push', data, options);
+  },
+};
 
 CoreManager.setPushController(DefaultController);

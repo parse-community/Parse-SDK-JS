@@ -1,10 +1,8 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
-
-const TestObject = Parse.Object.extend('TestObject');
+const uuidv4 = require('uuid/v4');
 
 class CustomUser extends Parse.User {
   constructor(attributes) {
@@ -38,85 +36,78 @@ const authResponse = {
 };
 global.FB = {
   init: () => {},
-  login: (cb) => {
+  login: cb => {
     cb({ authResponse });
   },
   getAuthResponse: () => authResponse,
 };
 
 describe('Parse User', () => {
-  beforeAll(() => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    Parse.Object.registerSubclass('_User', Parse.User);
+  afterAll(() => {
+    Parse.Object.unregisterSubclass('CustomUser');
   });
 
-  beforeEach((done) => {
-    let promise = Promise.resolve();
-    try {
-      promise = Parse.User.logOut();
-    } catch (e) { /**/ } // eslint-disable-line no-unused-vars
-    promise.then(() => {
-      return clear();
-    }).then(() => {
-      done();
-    });
-  });
-
-  it('can sign up users via static method', (done) => {
-    Parse.User.signUp('asdf', 'zxcv').then((user) => {
+  it('can sign up users via static method', done => {
+    Parse.User.signUp('asdf', 'zxcv').then(user => {
       assert(user.getSessionToken());
       expect(user.existed()).toBe(false);
       done();
     });
   });
 
-  it('can sign up via instance method', (done) => {
+  it('can sign up via instance method', done => {
     const user = new Parse.User();
     user.setPassword('asdf');
     user.setUsername('zxcv');
-    user.signUp().then((user) => {
+    user.signUp().then(user => {
       assert(user.getSessionToken());
       expect(user.existed()).toBe(false);
       done();
     });
   });
 
-  it('fails log in with wrong username', (done) => {
-    Parse.User.signUp('asdf', 'zxcv').then(() => {
-      return Parse.User.logIn('false_user', 'asdf3');
-    }).then(null, () => {
-      done();
-    });
+  it('fails log in with wrong username', done => {
+    Parse.User.signUp('asdf', 'zxcv')
+      .then(() => {
+        return Parse.User.logIn('false_user', 'asdf3');
+      })
+      .then(null, () => {
+        done();
+      });
   });
 
-  it('fails log in with wrong password', (done) => {
-    Parse.User.signUp('asdf', 'zxcv').then(() => {
-      return Parse.User.logIn('asdf', 'asdfWrong');
-    }).then(null, () => {
-      done();
-    });
+  it('fails log in with wrong password', done => {
+    Parse.User.signUp('asdf', 'zxcv')
+      .then(() => {
+        return Parse.User.logIn('asdf', 'asdfWrong');
+      })
+      .then(null, () => {
+        done();
+      });
   });
 
-  it('can log in a user', (done) => {
-    Parse.User.signUp('asdf', 'zxcv').then(() => {
-      return Parse.User.logIn('asdf', 'zxcv');
-    }).then((user) => {
-      assert.equal(user.get('username'), 'asdf');
-      expect(user.existed()).toBe(true);
-      done();
-    });
+  it('can log in a user', done => {
+    Parse.User.signUp('asdf', 'zxcv')
+      .then(() => {
+        return Parse.User.logIn('asdf', 'zxcv');
+      })
+      .then(user => {
+        assert.equal(user.get('username'), 'asdf');
+        expect(user.existed()).toBe(true);
+        done();
+      });
   });
 
-  it('can log in a user using POST method', (done) => {
-    Parse.User.signUp('asdf', 'zxcv').then(() => {
-      return Parse.User.logIn('asdf', 'zxcv', { usePost: true });
-    }).then((user) => {
-      assert.equal(user.get('username'), 'asdf');
-      expect(user.existed()).toBe(true);
-      done();
-    });
+  it('can log in a user using POST method', done => {
+    Parse.User.signUp('asdf', 'zxcv')
+      .then(() => {
+        return Parse.User.logIn('asdf', 'zxcv', { usePost: true });
+      })
+      .then(user => {
+        assert.equal(user.get('username'), 'asdf');
+        expect(user.existed()).toBe(true);
+        done();
+      });
   });
 
   it('can login users with installationId', async () => {
@@ -145,7 +136,9 @@ describe('Parse User', () => {
     expect(sessions[1].get('sessionToken')).toBe(loggedUser.getSessionToken());
 
     // Should clean up sessions
-    const installationUser = await Parse.User.logIn('parse', 'mypass', { installationId });
+    const installationUser = await Parse.User.logIn('parse', 'mypass', {
+      installationId,
+    });
     sessions = await sessionQuery.find({ useMasterKey: true });
     expect(sessions.length).toBe(2);
     expect(sessions[0].get('installationId')).toBe(currentInstallation);
@@ -154,38 +147,43 @@ describe('Parse User', () => {
     expect(sessions[1].get('sessionToken')).toBe(installationUser.getSessionToken());
   });
 
-  it('can become a user', (done) => {
+  it('can become a user', done => {
     Parse.User.enableUnsafeCurrentUser();
     let session = null;
     let newUser = null;
-    Parse.User.signUp('jason', 'parse', {'code': 'red'}).then((user) => {
-      newUser = user;
-      assert.equal(Parse.User.current(), newUser);
-      session = newUser.getSessionToken();
-      assert(session);
+    Parse.User.signUp('jason', 'parse', { code: 'red' })
+      .then(user => {
+        newUser = user;
+        assert.equal(Parse.User.current(), newUser);
+        session = newUser.getSessionToken();
+        assert(session);
 
-      return Parse.User.logOut();
-    }).then(() => {
-      assert(!Parse.User.current());
+        return Parse.User.logOut();
+      })
+      .then(() => {
+        assert(!Parse.User.current());
 
-      return Parse.User.become(session);
-    }).then((user) => {
-      assert.equal(Parse.User.current(), user);
-      assert(user);
-      assert.equal(user.id, newUser.id)
-      assert.equal(user.get('code'), 'red');
+        return Parse.User.become(session);
+      })
+      .then(user => {
+        assert.equal(Parse.User.current(), user);
+        assert(user);
+        assert.equal(user.id, newUser.id);
+        assert.equal(user.get('code'), 'red');
 
-      return Parse.User.logOut();
-    }).then(() => {
-      assert(!Parse.User.current());
+        return Parse.User.logOut();
+      })
+      .then(() => {
+        assert(!Parse.User.current());
 
-      return Parse.User.become('garbage');
-    }).then(null, () => {
-      done();
-    });
+        return Parse.User.become('garbage');
+      })
+      .then(null, () => {
+        done();
+      });
   });
 
-  it('cannot save non-authed user', (done) => {
+  it('cannot save non-authed user', done => {
     let user = new Parse.User();
     let notAuthed = null;
     user.set({
@@ -193,91 +191,109 @@ describe('Parse User', () => {
       email: 'asdf@example.com',
       username: 'zxcv',
     });
-    user.signUp().then((userAgain) => {
-      assert.equal(user, userAgain);
-      const query = new Parse.Query(Parse.User);
-      return query.get(user.id);
-    }).then((userNotAuthed) => {
-      notAuthed = userNotAuthed;
-      user = new Parse.User();
-      user.set({
-        username: 'hacker',
-        password: 'password',
+    user
+      .signUp()
+      .then(userAgain => {
+        assert.equal(user, userAgain);
+        const query = new Parse.Query(Parse.User);
+        return query.get(user.id);
+      })
+      .then(userNotAuthed => {
+        notAuthed = userNotAuthed;
+        user = new Parse.User();
+        user.set({
+          username: 'hacker',
+          password: 'password',
+        });
+        return user.signUp();
+      })
+      .then(userAgain => {
+        assert.equal(userAgain, user);
+        notAuthed.set('username', 'changed');
+        return notAuthed.save();
+      })
+      .then(null, e => {
+        assert.equal(e.code, Parse.Error.SESSION_MISSING);
+        done();
       });
-      return user.signUp();
-    }).then((userAgain) => {
-      assert.equal(userAgain, user);
-      notAuthed.set('username', 'changed');
-      return notAuthed.save();
-    }).then(null, (e) => {
-      assert.equal(e.code, Parse.Error.SESSION_MISSING);
-      done();
-    });
   });
 
-  it('cannot delete non-authed user', (done) => {
+  it('cannot delete non-authed user', done => {
     let user = new Parse.User();
     let notAuthed = null;
-    user.signUp({
-      password: 'asdf',
-      email: 'asdf@example.com',
-      username: 'zxcv',
-    }).then(() => {
-      const query = new Parse.Query(Parse.User);
-      return query.get(user.id);
-    }).then((userNotAuthed) => {
-      notAuthed = userNotAuthed;
-      user = new Parse.User();
-      return user.signUp({
-        username: 'hacker',
-        password: 'password',
+    user
+      .signUp({
+        password: 'asdf',
+        email: 'asdf@example.com',
+        username: 'zxcv',
+      })
+      .then(() => {
+        const query = new Parse.Query(Parse.User);
+        return query.get(user.id);
+      })
+      .then(userNotAuthed => {
+        notAuthed = userNotAuthed;
+        user = new Parse.User();
+        return user.signUp({
+          username: 'hacker',
+          password: 'password',
+        });
+      })
+      .then(userAgain => {
+        assert.equal(userAgain, user);
+        notAuthed.set('username', 'changed');
+        return notAuthed.destroy();
+      })
+      .then(null, e => {
+        assert.equal(e.code, Parse.Error.SESSION_MISSING);
+        done();
       });
-    }).then((userAgain) => {
-      assert.equal(userAgain, user);
-      notAuthed.set('username', 'changed');
-      return notAuthed.destroy();
-    }).then(null, (e) => {
-      assert.equal(e.code, Parse.Error.SESSION_MISSING);
-      done();
-    });
   });
 
-  it('cannot saveAll with non-authed user', (done) => {
+  it('cannot saveAll with non-authed user', done => {
     let user = new Parse.User();
     let notAuthed = null;
-    user.signUp({
-      password: 'asdf',
-      email: 'asdf@example.com',
-      username: 'zxcv',
-    }).then(() => {
-      const query = new Parse.Query(Parse.User);
-      return query.get(user.id);
-    }).then((userNotAuthed) => {
-      notAuthed = userNotAuthed;
-      user = new Parse.User();
-      return user.signUp({
-        username: 'hacker',
-        password: 'password',
+    user
+      .signUp({
+        password: 'asdf',
+        email: 'asdf@example.com',
+        username: 'zxcv',
+      })
+      .then(() => {
+        const query = new Parse.Query(Parse.User);
+        return query.get(user.id);
+      })
+      .then(userNotAuthed => {
+        notAuthed = userNotAuthed;
+        user = new Parse.User();
+        return user.signUp({
+          username: 'hacker',
+          password: 'password',
+        });
+      })
+      .then(() => {
+        const query = new Parse.Query(Parse.User);
+        return query.get(user.id);
+      })
+      .then(userNotAuthedNotChanged => {
+        notAuthed.set('username', 'changed');
+        const object = new TestObject();
+        return object.save({ user: userNotAuthedNotChanged });
+      })
+      .then(() => {
+        const item1 = new TestObject();
+        return item1.save({ number: 0 });
+      })
+      .then(item1 => {
+        item1.set('number', 1);
+        const item2 = new TestObject();
+        item2.set('number', 2);
+        return Parse.Object.saveAll([item1, item2, notAuthed]);
+      })
+      .then(null, e => {
+        assert.equal(e.code, Parse.Error.SESSION_MISSING);
+        done();
       });
-    }).then(() => {
-      const query = new Parse.Query(Parse.User);
-      return query.get(user.id);
-    }).then((userNotAuthedNotChanged) => {
-      notAuthed.set('username', 'changed');
-      const object = new TestObject();
-      return object.save({ user: userNotAuthedNotChanged });
-    }).then(() => {
-      const item1 = new TestObject();
-      return item1.save({ number: 0 });
-    }).then((item1) => {
-      item1.set('number', 1);
-      const item2 = new TestObject();
-      item2.set('number', 2);
-      return Parse.Object.saveAll([item1, item2, notAuthed]);
-    }).then(null, (e) => {
-      assert.equal(e.code, Parse.Error.SESSION_MISSING);
-      done();
-    });
   });
 
   it('can fetch non-auth user with include', async () => {
@@ -329,28 +345,31 @@ describe('Parse User', () => {
     assert.equal(Parse.User.current().get('child').get('field'), 'test');
   });
 
-  it('can store the current user', (done) => {
+  it('can store the current user', done => {
     Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
     user.set('password', 'asdf');
     user.set('email', 'asdf@example.com');
     user.set('username', 'zxcv');
-    user.signUp().then(() => {
-      const current = Parse.User.current();
-      assert.equal(user.id, current.id);
-      assert(user.getSessionToken());
+    user
+      .signUp()
+      .then(() => {
+        const current = Parse.User.current();
+        assert.equal(user.id, current.id);
+        assert(user.getSessionToken());
 
-      const currentAgain = Parse.User.current();
-      assert.equal(current, currentAgain);
+        const currentAgain = Parse.User.current();
+        assert.equal(current, currentAgain);
 
-      return Parse.User.logOut();
-    }).then(() => {
-      assert.equal(Parse.User.current(), null);
-      done();
-    });
+        return Parse.User.logOut();
+      })
+      .then(() => {
+        assert.equal(Parse.User.current(), null);
+        done();
+      });
   });
 
-  it('can test if a user is current', (done) => {
+  it('can test if a user is current', done => {
     Parse.User.enableUnsafeCurrentUser();
     const user1 = new Parse.User();
     const user2 = new Parse.User();
@@ -364,145 +383,172 @@ describe('Parse User', () => {
     user2.set('password', 'password');
     user3.set('password', 'password');
 
-    user1.signUp().then(() => {
-      assert(user1.isCurrent());
-      assert(!user2.isCurrent());
-      assert(!user3.isCurrent());
+    user1
+      .signUp()
+      .then(() => {
+        assert(user1.isCurrent());
+        assert(!user2.isCurrent());
+        assert(!user3.isCurrent());
 
-      return user2.signUp();
-    }).then(() => {
-      assert(!user1.isCurrent());
-      assert(user2.isCurrent());
-      assert(!user3.isCurrent());
+        return user2.signUp();
+      })
+      .then(() => {
+        assert(!user1.isCurrent());
+        assert(user2.isCurrent());
+        assert(!user3.isCurrent());
 
-      return user3.signUp();
-    }).then(() => {
-      assert(!user1.isCurrent());
-      assert(!user2.isCurrent());
-      assert(user3.isCurrent());
+        return user3.signUp();
+      })
+      .then(() => {
+        assert(!user1.isCurrent());
+        assert(!user2.isCurrent());
+        assert(user3.isCurrent());
 
-      return Parse.User.logIn('a', 'password');
-    }).then(() => {
-      assert(user1.isCurrent());
-      assert(!user2.isCurrent());
-      assert(!user3.isCurrent());
+        return Parse.User.logIn('a', 'password');
+      })
+      .then(() => {
+        assert(user1.isCurrent());
+        assert(!user2.isCurrent());
+        assert(!user3.isCurrent());
 
-      return Parse.User.logIn('b', 'password');
-    }).then(() => {
-      assert(!user1.isCurrent());
-      assert(user2.isCurrent());
-      assert(!user3.isCurrent());
+        return Parse.User.logIn('b', 'password');
+      })
+      .then(() => {
+        assert(!user1.isCurrent());
+        assert(user2.isCurrent());
+        assert(!user3.isCurrent());
 
-      return Parse.User.logIn('c', 'password');
-    }).then(() => {
-      assert(!user1.isCurrent());
-      assert(!user2.isCurrent());
-      assert(user3.isCurrent());
+        return Parse.User.logIn('c', 'password');
+      })
+      .then(() => {
+        assert(!user1.isCurrent());
+        assert(!user2.isCurrent());
+        assert(user3.isCurrent());
 
-      return Parse.User.logOut();
-    }).then(() => {
-      assert(!user3.isCurrent());
-      done();
-    });
+        return Parse.User.logOut();
+      })
+      .then(() => {
+        assert(!user3.isCurrent());
+        done();
+      });
   });
 
-  it('can query for users', (done) => {
+  it('can query for users', done => {
     const user = new Parse.User();
     user.set('password', 'asdf');
     user.set('email', 'asdf@exxample.com');
     user.set('username', 'zxcv');
-    user.signUp().then(() => {
-      const query = new Parse.Query(Parse.User);
-      return query.get(user.id);
-    }).then((u) => {
-      assert.equal(u.id, user.id);
-      return new Parse.Query(Parse.User).find();
-    }).then((users) => {
-      assert.equal(users.length, 1);
-      assert.equal(users[0].id, user.id);
-      done();
-    });
+    user
+      .signUp()
+      .then(() => {
+        const query = new Parse.Query(Parse.User);
+        return query.get(user.id);
+      })
+      .then(u => {
+        assert.equal(u.id, user.id);
+        return new Parse.Query(Parse.User).find();
+      })
+      .then(users => {
+        assert.equal(users.length, 1);
+        assert.equal(users[0].id, user.id);
+        done();
+      });
   });
 
-  it('preserves the session token when querying the current user', (done) => {
+  it('preserves the session token when querying the current user', done => {
     const user = new Parse.User();
     user.set('password', 'asdf');
     user.set('email', 'asdf@example.com');
     user.set('username', 'zxcv');
-    user.signUp().then(() => {
-      assert(user.has('sessionToken'));
-      const query = new Parse.Query(Parse.User);
-      return query.get(user.id);
-    }).then((u) => {
-      // Old object maintains token
-      assert(user.has('sessionToken'));
-      // New object doesn't have token
-      assert(!u.has('sessionToken'));
-      done();
-    });
+    user
+      .signUp()
+      .then(() => {
+        assert(user.has('sessionToken'));
+        const query = new Parse.Query(Parse.User);
+        return query.get(user.id);
+      })
+      .then(u => {
+        // Old object maintains token
+        assert(user.has('sessionToken'));
+        // New object doesn't have token
+        assert(!u.has('sessionToken'));
+        done();
+      });
   });
 
-  it('does not log in a user when saving', (done) => {
+  it('does not log in a user when saving', done => {
     Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
-    user.save({
-      password: 'asdf',
-      email: 'asdf@example.com',
-      username: 'zxcv',
-    }).then(() => {
-      assert(!Parse.User.current());
-      done();
-    });
+    user
+      .save({
+        password: 'asdf',
+        email: 'asdf@example.com',
+        username: 'zxcv',
+      })
+      .then(() => {
+        assert(!Parse.User.current());
+        done();
+      });
   });
 
-  it('can update users', (done) => {
+  it('can update users', done => {
+    Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
-    user.signUp({
-      password: 'asdf',
-      email: 'asdf@example.com',
-      username: 'zxcv',
-    }).then(() => {
-      user.set('username', 'test');
-      return user.save();
-    }).then(() => {
-      assert.equal(Object.keys(user.attributes).length, 6);
-      assert(user.attributes.hasOwnProperty('username'));
-      assert(user.attributes.hasOwnProperty('email'));
-      return user.destroy();
-    }).then(() => {
-      const query = new Parse.Query(Parse.User);
-      return query.get(user.id);
-    }).then(null, (e) => {
-      assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
-      done();
-    });
+    user
+      .signUp({
+        password: 'asdf',
+        email: 'asdf@example.com',
+        username: 'zxcv',
+      })
+      .then(() => {
+        user.set('username', 'test');
+        return user.save();
+      })
+      .then(() => {
+        assert.equal(Object.keys(user.attributes).length, 5);
+        assert(user.attributes.hasOwnProperty('username'));
+        assert(user.attributes.hasOwnProperty('email'));
+        return user.destroy();
+      })
+      .then(() => {
+        const query = new Parse.Query(Parse.User);
+        return query.get(user.id);
+      })
+      .then(null, e => {
+        assert.equal(e.code, Parse.Error.OBJECT_NOT_FOUND);
+        done();
+      });
   });
 
-  it('can count users', (done) => {
+  it('can count users', done => {
     const james = new Parse.User();
     james.set('username', 'james');
     james.set('password', 'mypass');
-    james.signUp().then(() => {
-      const kevin = new Parse.User();
-      kevin.set('username', 'kevin');
-      kevin.set('password', 'mypass');
-      return kevin.signUp();
-    }).then(() => {
-      const query = new Parse.Query(Parse.User);
-      return query.count();
-    }).then((c) => {
-      assert.equal(c, 2);
+    james
+      .signUp()
+      .then(() => {
+        const kevin = new Parse.User();
+        kevin.set('username', 'kevin');
+        kevin.set('password', 'mypass');
+        return kevin.signUp();
+      })
+      .then(() => {
+        const query = new Parse.Query(Parse.User);
+        return query.count();
+      })
+      .then(c => {
+        assert.equal(c, 2);
+        done();
+      });
+  });
+
+  it('can sign up user with container class', done => {
+    Parse.User.signUp('ilya', 'mypass', { array: ['hello'] }).then(() => {
       done();
     });
   });
 
-  it('can sign up user with container class', (done) => {
-    Parse.User.signUp('ilya', 'mypass', { 'array': ['hello'] }).then(() => {
-      done();
-    });
-  });
-
-  it('handles user subclassing', (done) => {
+  it('handles user subclassing', done => {
     const SuperUser = Parse.Object.extend('User');
     const user = new SuperUser();
     user.set('username', 'bob');
@@ -513,14 +559,14 @@ describe('Parse User', () => {
     });
   });
 
-  it('uses subclasses when doing signup', (done) => {
+  it('uses subclasses when doing signup', done => {
     const SuperUser = Parse.User.extend({
       secret() {
         return 1337;
-      }
+      },
     });
 
-    Parse.User.signUp('bob', 'welcome').then((user) => {
+    Parse.User.signUp('bob', 'welcome').then(user => {
       assert(user instanceof SuperUser);
       assert.equal(user.secret(), 1337);
       done();
@@ -727,7 +773,7 @@ describe('Parse User', () => {
     let user = await CustomUser.signUp('username', 'password');
     const token = user.getSessionToken();
 
-    user = await CustomUser.become(token)
+    user = await CustomUser.become(token);
     expect(user instanceof CustomUser).toBe(true);
     expect(user.doSomething()).toBe(5);
   });
@@ -738,7 +784,7 @@ describe('Parse User', () => {
     let user = await CustomUser.signUp('username', 'password');
     const token = user.getSessionToken();
 
-    user = await CustomUser.me(token)
+    user = await CustomUser.me(token);
     expect(user instanceof CustomUser).toBe(true);
     expect(user.doSomething()).toBe(5);
   });
@@ -760,8 +806,8 @@ describe('Parse User', () => {
     Parse.User.enableUnsafeCurrentUser();
 
     let user = new CustomUser();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
     user = await CustomUser.logInWith(provider.getAuthType(), provider.getAuthData());
     expect(user._isLinked(provider)).toBe(true);
@@ -773,8 +819,8 @@ describe('Parse User', () => {
     Parse.User.enableUnsafeCurrentUser();
 
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
     await user.linkWith(provider.getAuthType(), provider.getAuthData());
     expect(user._isLinked(provider)).toBe(true);
@@ -786,10 +832,12 @@ describe('Parse User', () => {
     Parse.User.disableUnsafeCurrentUser();
 
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.save(null, { useMasterKey: true });
-    await user.linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
+    await user.linkWith(provider.getAuthType(), provider.getAuthData(), {
+      useMasterKey: true,
+    });
     expect(user._isLinked(provider)).toBe(true);
     await user._unlinkFrom(provider, { useMasterKey: true });
     expect(user._isLinked(provider)).toBe(false);
@@ -799,24 +847,29 @@ describe('Parse User', () => {
     Parse.User.disableUnsafeCurrentUser();
 
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
     expect(user.isCurrent()).toBe(false);
 
     const sessionToken = user.getSessionToken();
-    await user.linkWith(provider.getAuthType(), provider.getAuthData(), { sessionToken });
+    await user.linkWith(provider.getAuthType(), provider.getAuthData(), {
+      sessionToken,
+    });
     expect(user._isLinked(provider)).toBe(true);
     await user._unlinkFrom(provider, { sessionToken });
     expect(user._isLinked(provider)).toBe(false);
   });
 
   it('linked account can login with authData', async () => {
+    Parse.User.disableUnsafeCurrentUser();
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.save(null, { useMasterKey: true });
-    await user.linkWith(provider.getAuthType(), provider.getAuthData(), { useMasterKey: true });
+    await user.linkWith(provider.getAuthType(), provider.getAuthData(), {
+      useMasterKey: true,
+    });
     expect(user._isLinked(provider)).toBe(true);
     expect(user.authenticated()).toBeFalsy();
     Parse.User.enableUnsafeCurrentUser();
@@ -826,8 +879,8 @@ describe('Parse User', () => {
 
   it('can linking un-authenticated user without master key', async () => {
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.save(null, { useMasterKey: true });
     await user.linkWith(provider.getAuthType(), provider.getAuthData());
     expect(user.getSessionToken()).toBeDefined();
@@ -855,8 +908,8 @@ describe('Parse User', () => {
     };
     Parse.User._registerAuthenticationProvider(provider);
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
     await user.linkWith(provider.getAuthType(), provider.getAuthData());
     expect(user._isLinked(provider)).toBe(true);
@@ -875,8 +928,8 @@ describe('Parse User', () => {
     Parse.User.enableUnsafeCurrentUser();
     Parse.FacebookUtils.init();
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
     await Parse.FacebookUtils.link(user);
     expect(Parse.FacebookUtils.isLinked(user)).toBe(true);
@@ -902,14 +955,14 @@ describe('Parse User', () => {
     Parse.User.enableUnsafeCurrentUser();
     const authData = {
       id: 227463280,
-      consumer_key: "5QiVwxr8FQHbo5CMw46Z0jquF",
-      consumer_secret: "p05FDlIRAnOtqJtjIt0xcw390jCcjj56QMdE9B52iVgOEb7LuK",
-      auth_token: "227463280-lngpMGXdnG36JiuzGfAYbKcZUPwjmcIV2NqL9hWc",
-      auth_token_secret: "G1tl1R0gaYKTyxw0uYJDKRoVhM16ifyLeMwIaKlFtPkQr"
+      consumer_key: '5QiVwxr8FQHbo5CMw46Z0jquF',
+      consumer_secret: 'p05FDlIRAnOtqJtjIt0xcw390jCcjj56QMdE9B52iVgOEb7LuK',
+      auth_token: '227463280-lngpMGXdnG36JiuzGfAYbKcZUPwjmcIV2NqL9hWc',
+      auth_token_secret: 'G1tl1R0gaYKTyxw0uYJDKRoVhM16ifyLeMwIaKlFtPkQr',
     };
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
 
     await user.linkWith('twitter', { authData });
@@ -926,14 +979,14 @@ describe('Parse User', () => {
     Parse.FacebookUtils.init();
     const authData = {
       id: 227463280,
-      consumer_key: "5QiVwxr8FQHbo5CMw46Z0jquF",
-      consumer_secret: "p05FDlIRAnOtqJtjIt0xcw390jCcjj56QMdE9B52iVgOEb7LuK",
-      auth_token: "227463280-lngpMGXdnG36JiuzGfAYbKcZUPwjmcIV2NqL9hWc",
-      auth_token_secret: "G1tl1R0gaYKTyxw0uYJDKRoVhM16ifyLeMwIaKlFtPkQr"
+      consumer_key: '5QiVwxr8FQHbo5CMw46Z0jquF',
+      consumer_secret: 'p05FDlIRAnOtqJtjIt0xcw390jCcjj56QMdE9B52iVgOEb7LuK',
+      auth_token: '227463280-lngpMGXdnG36JiuzGfAYbKcZUPwjmcIV2NqL9hWc',
+      auth_token_secret: 'G1tl1R0gaYKTyxw0uYJDKRoVhM16ifyLeMwIaKlFtPkQr',
     };
     const user = new Parse.User();
-    user.setUsername('Alice');
-    user.setPassword('sekrit');
+    user.setUsername(uuidv4());
+    user.setPassword(uuidv4());
     await user.signUp();
 
     await user.linkWith('twitter', { authData });
@@ -1003,7 +1056,7 @@ describe('Parse User', () => {
   it('fix GHSA-wvh7-5p38-2qfc', async () => {
     Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
-    user.setUsername('username');
+    user.setUsername('GHSA-wvh7-5p38-2qfc');
     user.setPassword('password');
     await user.signUp();
 

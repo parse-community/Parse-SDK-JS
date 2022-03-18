@@ -1,26 +1,13 @@
 'use strict';
 
 const assert = require('assert');
-const clear = require('./clear');
 const Parse = require('../../node');
 
 function testConfig() {
-  return Parse.Config.save(
-    { internal: "i", string: "s", number: 12 },
-    { internal: true }
-  );
+  return Parse.Config.save({ internal: 'i', string: 's', number: 12 }, { internal: true });
 }
 
 describe('Parse Config', () => {
-  beforeEach((done) => {
-    Parse.initialize('integration', null, 'notsosecret');
-    Parse.CoreManager.set('SERVER_URL', 'http://localhost:1337/parse');
-    Parse.Storage._clear();
-    clear().then(() => {
-      done();
-    });
-  });
-
   it('can create a config', async () => {
     const config = await testConfig();
 

@@ -10,7 +10,7 @@
  */
 
 import Storage from './Storage';
-const uuidv4 = require('uuid/v4');
+const uuidv4 = require('./uuid');
 
 let iidCache = null;
 
@@ -20,7 +20,7 @@ const InstallationController = {
       return Promise.resolve(iidCache);
     }
     const path = Storage.generatePath('installationId');
-    return Storage.getItemAsync(path).then((iid) => {
+    return Storage.getItemAsync(path).then(iid => {
       if (!iid) {
         iid = uuidv4();
         return Storage.setItemAsync(path, iid).then(() => {
@@ -39,7 +39,7 @@ const InstallationController = {
 
   _setInstallationIdCache(iid: string) {
     iidCache = iid;
-  }
+  },
 };
 
 module.exports = InstallationController;

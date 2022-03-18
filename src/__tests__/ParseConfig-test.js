@@ -38,7 +38,7 @@ describe('ParseConfig', () => {
     const c = new ParseConfig();
     c.attributes = {
       str: 'hello',
-      num: 44
+      num: 44,
     };
     expect(c.get('str')).toBe('hello');
     expect(c.get('num')).toBe(44);
@@ -49,7 +49,7 @@ describe('ParseConfig', () => {
     const c = new ParseConfig();
     c.attributes = {
       brackets: '<>',
-      phone: 'AT&T'
+      phone: 'AT&T',
     };
     expect(c.escape('brackets')).toBe('&lt;&gt;');
     expect(c.escape('phone')).toBe('AT&amp;T');
@@ -58,21 +58,24 @@ describe('ParseConfig', () => {
 
   it('can retrieve the current config from disk or cache', () => {
     const path = Storage.generatePath('currentConfig');
-    Storage.setItem(path, JSON.stringify({
-      count: 12,
-      point: {
-        __type: 'GeoPoint',
-        latitude: 20.02,
-        longitude: 30.03
-      }
-    }));
+    Storage.setItem(
+      path,
+      JSON.stringify({
+        count: 12,
+        point: {
+          __type: 'GeoPoint',
+          latitude: 20.02,
+          longitude: 30.03,
+        },
+      })
+    );
     expect(ParseConfig.current().attributes).toEqual({
       count: 12,
-      point: new ParseGeoPoint(20.02, 30.03)
+      point: new ParseGeoPoint(20.02, 30.03),
     });
     expect(ParseConfig.current().attributes).toEqual({
       count: 12,
-      point: new ParseGeoPoint(20.02, 30.03)
+      point: new ParseGeoPoint(20.02, 30.03),
     });
   });
 
@@ -90,23 +93,26 @@ describe('ParseConfig', () => {
     const currentStorage = CoreManager.getStorageController();
     CoreManager.setStorageController(mockAsyncStorage);
     const path = Storage.generatePath('currentConfig');
-    await Storage.setItemAsync(path, JSON.stringify({
-      count: 12,
-      point: {
-        __type: 'GeoPoint',
-        latitude: 20.02,
-        longitude: 30.03
-      }
-    }));
+    await Storage.setItemAsync(
+      path,
+      JSON.stringify({
+        count: 12,
+        point: {
+          __type: 'GeoPoint',
+          latitude: 20.02,
+          longitude: 30.03,
+        },
+      })
+    );
     const config = await ParseConfig.current();
     expect(config.attributes).toEqual({
       count: 12,
-      point: new ParseGeoPoint(20.02, 30.03)
+      point: new ParseGeoPoint(20.02, 30.03),
     });
     CoreManager.setStorageController(currentStorage);
   });
 
-  it('can get a config object from the network', (done) => {
+  it('can get a config object from the network', done => {
     CoreManager.setRESTController({
       request() {
         return Promise.resolve({
@@ -116,14 +122,14 @@ describe('ParseConfig', () => {
             file: {
               __type: 'File',
               name: 'parse.txt',
-              url: 'https://files.parsetfss.com/a/parse.txt'
-            }
-          }
+              url: 'https://files.parsetfss.com/a/parse.txt',
+            },
+          },
         });
       },
-      ajax() {}
+      ajax() {},
     });
-    ParseConfig.get().then((config) => {
+    ParseConfig.get().then(config => {
       expect(config.get('str')).toBe('hello');
       expect(config.get('num')).toBe(45);
       expect(config.get('file').name()).toBe('parse.txt');
@@ -134,35 +140,35 @@ describe('ParseConfig', () => {
         file: {
           __type: 'File',
           name: 'parse.txt',
-          url: 'https://files.parsetfss.com/a/parse.txt'
-        }
+          url: 'https://files.parsetfss.com/a/parse.txt',
+        },
       });
 
       done();
     });
   });
 
-  it('can save a config object with masterkey', (done) => {
+  it('can save a config object with masterkey', done => {
     //Load a request that match the get() & save() request
     CoreManager.setRESTController({
       request() {
         return Promise.resolve({
-          params : {
-            str : 'hello2',
-            num : 46
+          params: {
+            str: 'hello2',
+            num: 46,
           },
-          result: true
+          result: true,
         });
       },
-      ajax() {}
+      ajax() {},
     });
-    ParseConfig.save({str: 'hello2','num':46}).then((config) => {
+    ParseConfig.save({ str: 'hello2', num: 46 }).then(config => {
       expect(config.get('str')).toBe('hello2');
       expect(config.get('num')).toBe(46);
       const path = Storage.generatePath('currentConfig');
       expect(JSON.parse(Storage.getItem(path))).toEqual({
         str: 'hello2',
-        num: 46
+        num: 46,
       });
       done();
     });
@@ -182,7 +188,7 @@ describe('ParseConfig', () => {
           return Promise.resolve({
             params: {
               internal: 'i',
-              number: 12
+              number: 12,
             },
             result: true,
           });
@@ -194,17 +200,14 @@ describe('ParseConfig', () => {
           return Promise.resolve({
             params: {
               internal: 'i',
-              number: 12
+              number: 12,
             },
           });
         }
       },
-      ajax() {}
+      ajax() {},
     });
-    const config = await ParseConfig.save(
-      { internal: 'i', number: 12 },
-      { internal: true }
-    );
+    const config = await ParseConfig.save({ internal: 'i', number: 12 }, { internal: true });
     expect(config.get('internal')).toBe('i');
     expect(config.get('number')).toBe(12);
   });
@@ -219,11 +222,11 @@ describe('ParseConfig', () => {
         return Promise.resolve({
           params: {
             str: 'hello',
-            num: 45
-          }
+            num: 45,
+          },
         });
       },
-      ajax() {}
+      ajax() {},
     });
     const config = await ParseConfig.get({ useMasterKey: true });
     expect(config.get('str')).toBe('hello');
@@ -235,44 +238,47 @@ describe('ParseConfig', () => {
     });
   });
 
-  it('rejects save on invalid response', (done) => {
+  it('rejects save on invalid response', done => {
     CoreManager.setRESTController({
       request() {
-        return Promise.resolve({result: false});
+        return Promise.resolve({ result: false });
       },
-      ajax() {}
+      ajax() {},
     });
-    ParseConfig.save({str: 'hello2','num':46}).then((config) => {
-      expect(config).toBe(1)
-      done();
-    },(error) => {
-      expect(error.code).toBe(1)
-      done();
-    });
+    ParseConfig.save({ str: 'hello2', num: 46 }).then(
+      config => {
+        expect(config).toBe(1);
+        done();
+      },
+      error => {
+        expect(error.code).toBe(1);
+        done();
+      }
+    );
   });
 
-  it('rejects the promise when an invalid payload comes back', (done) => {
+  it('rejects the promise when an invalid payload comes back', done => {
     CoreManager.setRESTController({
       request() {
         return Promise.resolve(null);
       },
-      ajax() {}
+      ajax() {},
     });
-    ParseConfig.get().then(null, (error) => {
+    ParseConfig.get().then(null, error => {
       expect(error.code).toBe(107);
       expect(error.message).toBe('Config JSON response invalid.');
       done();
     });
   });
 
-  it('rejects the promise when the http request fails', (done) => {
+  it('rejects the promise when the http request fails', done => {
     CoreManager.setRESTController({
       request() {
         return Promise.reject('failure');
       },
-      ajax() {}
+      ajax() {},
     });
-    ParseConfig.get().then(null, (error) => {
+    ParseConfig.get().then(null, error => {
       expect(error).toBe('failure');
       done();
     });

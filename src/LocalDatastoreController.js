@@ -61,14 +61,14 @@ const LocalDatastoreController = {
     const keys = await Storage.getAllKeysAsync();
 
     const toRemove = [];
-    for(const key of keys){
+    for (const key of keys) {
       if (isLocalDatastoreKey(key)) {
         toRemove.push(key);
       }
     }
     const promises = toRemove.map(this.unPinWithName);
     return Promise.all(promises);
-  }
+  },
 };
 
 module.exports = LocalDatastoreController;

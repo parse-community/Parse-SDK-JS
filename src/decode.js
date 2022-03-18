@@ -17,7 +17,7 @@ import { opFromJSON } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
 export default function decode(value: any): any {
-  if (value === null || typeof value !== 'object') {
+  if (value === null || typeof value !== 'object' || value instanceof Date) {
     return value;
   }
   if (Array.isArray(value)) {
@@ -51,7 +51,7 @@ export default function decode(value: any): any {
   if (value.__type === 'GeoPoint') {
     return new ParseGeoPoint({
       latitude: value.latitude,
-      longitude: value.longitude
+      longitude: value.longitude,
     });
   }
   if (value.__type === 'Polygon') {

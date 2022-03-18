@@ -11,6 +11,7 @@ import decode from './decode';
 import encode from './encode';
 import CoreManager from './CoreManager';
 import CryptoController from './CryptoController';
+import EventuallyQueue from './EventuallyQueue';
 import InstallationController from './InstallationController';
 import * as ParseOp from './ParseOp';
 import RESTController from './RESTController';
@@ -33,11 +34,15 @@ const Parse = {
    * @static
    */
   initialize(applicationId: string, javaScriptKey: string) {
-    if (process.env.PARSE_BUILD === 'browser' && CoreManager.get('IS_NODE') && !process.env.SERVER_RENDERING) {
+    if (
+      process.env.PARSE_BUILD === 'browser' &&
+      CoreManager.get('IS_NODE') &&
+      !process.env.SERVER_RENDERING
+    ) {
       /* eslint-disable no-console */
       console.log(
-        'It looks like you\'re using the browser version of the SDK in a ' +
-        'node.js environment. You should require(\'parse/node\') instead.'
+        "It looks like you're using the browser version of the SDK in a " +
+          "node.js environment. You should require('parse/node') instead."
       );
       /* eslint-enable no-console */
     }
@@ -72,6 +77,16 @@ const Parse = {
    */
   setLocalDatastoreController(controller: any) {
     CoreManager.setLocalDatastoreController(controller);
+  },
+
+  /**
+   * Returns information regarding the current server's health
+   *
+   * @returns {Promise}
+   * @static
+   */
+  getServerHealth() {
+    return CoreManager.getRESTController().request('GET', 'health');
   },
 
   /**
@@ -183,15 +198,28 @@ const Parse = {
   get idempotency() {
     return CoreManager.get('IDEMPOTENCY');
   },
+
+  /**
+   * @member {boolean} Parse.allowCustomObjectId
+   * @static
+   */
+  set allowCustomObjectId(value) {
+    CoreManager.set('ALLOW_CUSTOM_OBJECT_ID', value);
+  },
+  get allowCustomObjectId() {
+    return CoreManager.get('ALLOW_CUSTOM_OBJECT_ID');
+  },
 };
 
 Parse.ACL = require('./ParseACL').default;
 Parse.Analytics = require('./Analytics');
 Parse.AnonymousUtils = require('./AnonymousUtils').default;
 Parse.Cloud = require('./Cloud');
+Parse.CLP = require('./ParseCLP').default;
 Parse.CoreManager = require('./CoreManager');
 Parse.Config = require('./ParseConfig').default;
 Parse.Error = require('./ParseError').default;
+Parse.EventuallyQueue = EventuallyQueue;
 Parse.FacebookUtils = require('./FacebookUtils').default;
 Parse.File = require('./ParseFile').default;
 Parse.GeoPoint = require('./ParseGeoPoint').default;
@@ -206,7 +234,7 @@ Parse.Op = {
   Add: ParseOp.AddOp,
   Remove: ParseOp.RemoveOp,
   AddUnique: ParseOp.AddUniqueOp,
-  Relation: ParseOp.RelationOp
+  Relation: ParseOp.RelationOp,
 };
 Parse.Push = require('./Push');
 Parse.Query = require('./ParseQuery').default;
@@ -218,41 +246,53 @@ Parse.Storage = require('./Storage');
 Parse.User = require('./ParseUser').default;
 Parse.LiveQuery = require('./ParseLiveQuery').default;
 Parse.LiveQueryClient = require('./LiveQueryClient').default;
+Parse.IndexedDB = require('./IndexedDBStorageController');
 
-Parse._request = function(...args) {
+Parse._request = function (...args) {
   return CoreManager.getRESTController().request.apply(null, args);
 };
-Parse._ajax = function(...args) {
+Parse._ajax = function (...args) {
   return CoreManager.getRESTController().ajax.apply(null, args);
 };
 // We attempt to match the signatures of the legacy versions of these methods
-Parse._decode = function(_, value) {
+Parse._decode = function (_, value) {
   return decode(value);
-}
-Parse._encode = function(value, _, disallowObjects) {
+};
+Parse._encode = function (value, _, disallowObjects) {
   return encode(value, disallowObjects);
-}
-Parse._getInstallationId = function() {
+};
+Parse._getInstallationId = function () {
   return CoreManager.getInstallationController().currentInstallationId();
-}
+};
 /**
  * Enable pinning in your application.
- * This must be called before your application can use pinning.
+ * This must be called after `Parse.initialize` in your application.
  *
+ * @param [polling] Allow pinging the server /health endpoint. Default true
+ * @param [ms] Milliseconds to ping the server. Default 2000ms
  * @static
  */
-Parse.enableLocalDatastore = function() {
-  Parse.LocalDatastore.isEnabled = true;
-}
+Parse.enableLocalDatastore = function (polling = true, ms: number = 2000) {
+  if (!Parse.applicationId) {
+    console.log("'enableLocalDataStore' must be called after 'initialize'");
+    return;
+  }
+  if (!Parse.LocalDatastore.isEnabled) {
+    Parse.LocalDatastore.isEnabled = true;
+    if (polling) {
+      EventuallyQueue.poll(ms);
+    }
+  }
+};
 /**
  * Flag that indicates whether Local Datastore is enabled.
  *
  * @static
  * @returns {boolean}
  */
-Parse.isLocalDatastoreEnabled = function() {
+Parse.isLocalDatastoreEnabled = function () {
   return Parse.LocalDatastore.isEnabled;
-}
+};
 /**
  * Gets all contents from Local Datastore
  *
@@ -263,14 +303,14 @@ Parse.isLocalDatastoreEnabled = function() {
  * @static
  * @returns {object}
  */
-Parse.dumpLocalDatastore = function() {
+Parse.dumpLocalDatastore = function () {
   if (!Parse.LocalDatastore.isEnabled) {
     console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
     return Promise.resolve({});
   } else {
     return Parse.LocalDatastore._getAllContents();
   }
-}
+};
 
 /**
  * Enable the current user encryption.
@@ -278,9 +318,9 @@ Parse.dumpLocalDatastore = function() {
  *
  * @static
  */
-Parse.enableEncryptedUser = function() {
+Parse.enableEncryptedUser = function () {
   Parse.encryptedUser = true;
-}
+};
 
 /**
  * Flag that indicates whether Encrypted User is enabled.
@@ -288,9 +328,9 @@ Parse.enableEncryptedUser = function() {
  * @static
  * @returns {boolean}
  */
-Parse.isEncryptedUserEnabled = function() {
+Parse.isEncryptedUserEnabled = function () {
   return Parse.encryptedUser;
-}
+};
 
 CoreManager.setCryptoController(CryptoController);
 CoreManager.setInstallationController(InstallationController);
@@ -299,9 +339,9 @@ CoreManager.setRESTController(RESTController);
 if (process.env.PARSE_BUILD === 'node') {
   Parse.initialize = Parse._initialize;
   Parse.Cloud = Parse.Cloud || {};
-  Parse.Cloud.useMasterKey = function() {
+  Parse.Cloud.useMasterKey = function () {
     CoreManager.set('USE_MASTER_KEY', true);
-  }
+  };
   Parse.Hooks = require('./ParseHooks');
 }
 

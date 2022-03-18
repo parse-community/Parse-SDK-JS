@@ -11,15 +11,15 @@ jest.dontMock('../CoreManager');
 jest.dontMock('../Push');
 jest.dontMock('./test_helpers/asyncHelper');
 
-const mockQuery = function() {
+const mockQuery = function () {
   this.where = {};
 };
 mockQuery.prototype = {
   toJSON() {
     return {
-      where: this.where
+      where: this.where,
     };
-  }
+  },
 };
 jest.setMock('../ParseQuery', mockQuery);
 
@@ -35,59 +35,61 @@ describe('Push', () => {
       send(data) {
         // Pipe data through so we can test it
         return Promise.resolve(data);
-      }
+      },
     });
   });
 
-  it('can be sent with a where clause', (done) => {
+  it('can be sent with a where clause', done => {
     const q = new ParseQuery();
     q.where = {
-      installationId: '123'
+      installationId: '123',
     };
 
     Push.send({
-      where: q
-    }).then((data) => {
+      where: q,
+    }).then(data => {
       expect(data.where).toEqual({
-        installationId: '123'
+        installationId: '123',
       });
       done();
     });
   });
 
-  it('can specify a push time with a Date', (done) => {
+  it('can specify a push time with a Date', done => {
     Push.send({
-      push_time: new Date(Date.UTC(2015, 1, 1))
-    }).then((data) => {
+      push_time: new Date(Date.UTC(2015, 1, 1)),
+    }).then(data => {
       expect(data.push_time).toBe('2015-02-01T00:00:00.000Z');
       done();
     });
   });
 
-  it('can specify a push time with a string', (done) => {
+  it('can specify a push time with a string', done => {
     Push.send({
       // Local timezone push
-      push_time: '2015-02-01T00:00:00.000'
-    }).then((data) => {
+      push_time: '2015-02-01T00:00:00.000',
+    }).then(data => {
       expect(data.push_time).toBe('2015-02-01T00:00:00.000');
       done();
     });
   });
 
-  it('can specify an expiration time', (done) => {
+  it('can specify an expiration time', done => {
     Push.send({
-      expiration_time: new Date(Date.UTC(2015, 1, 1))
-    }).then((data) => {
+      expiration_time: new Date(Date.UTC(2015, 1, 1)),
+    }).then(data => {
       expect(data.expiration_time).toBe('2015-02-01T00:00:00.000Z');
       done();
     });
   });
 
   it('cannot specify both an expiration time and an expiration interval', () => {
-    expect(Push.send.bind(null, {
-      expiration_time: new Date(),
-      expiration_interval: 518400
-    })).toThrow('expiration_time and expiration_interval cannot both be set.');
+    expect(
+      Push.send.bind(null, {
+        expiration_time: new Date(),
+        expiration_interval: 518400,
+      })
+    ).toThrow('expiration_time and expiration_interval cannot both be set.');
   });
 });
 
@@ -97,25 +99,28 @@ describe('PushController', () => {
     const request = jest.fn().mockReturnValue({
       _thenRunCallbacks() {
         return {
-          _thenRunCallbacks() {}
+          _thenRunCallbacks() {},
         };
-      }
+      },
     });
     CoreManager.setRESTController({
       request: request,
-      ajax: function() {}
+      ajax: function () {},
     });
 
-    Push.send({
-      push_time: new Date(Date.UTC(2015, 1, 1))
-    }, {
-      useMasterKey: true
-    });
+    Push.send(
+      {
+        push_time: new Date(Date.UTC(2015, 1, 1)),
+      },
+      {
+        useMasterKey: true,
+      }
+    );
     expect(CoreManager.getRESTController().request.mock.calls[0]).toEqual([
       'POST',
       'push',
       { push_time: '2015-02-01T00:00:00.000Z' },
-      { useMasterKey: true}
+      { useMasterKey: true },
     ]);
   });
 });

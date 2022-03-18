@@ -22,7 +22,7 @@ describe('ParseInstallation', () => {
     expect(installation.get('deviceToken')).toBe('token');
 
     expect(() => {
-      new ParseInstallation({ 'invalid#name' : 'foo'})
+      new ParseInstallation({ 'invalid#name': 'foo' });
     }).toThrow("Can't create an invalid Installation");
   });
 });

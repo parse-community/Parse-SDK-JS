@@ -34,7 +34,7 @@ export function when(promises) {
 
   const promise = new resolvingPromise();
 
-  const resolveOne = function() {
+  const resolveOne = function () {
     total--;
     if (total <= 0) {
       if (hadError) {
@@ -45,16 +45,19 @@ export function when(promises) {
     }
   };
 
-  const chain = function(object, index) {
-    if (object && typeof object.then  === 'function') {
-      object.then(function(result) {
-        results[index] = result;
-        resolveOne();
-      }, function(error) {
-        errors[index] = error;
-        hadError = true;
-        resolveOne();
-      });
+  const chain = function (object, index) {
+    if (object && typeof object.then === 'function') {
+      object.then(
+        function (result) {
+          results[index] = result;
+          resolveOne();
+        },
+        function (error) {
+          errors[index] = error;
+          hadError = true;
+          resolveOne();
+        }
+      );
     } else {
       results[index] = object;
       resolveOne();

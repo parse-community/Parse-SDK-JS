@@ -110,11 +110,14 @@ class ParseConfig {
   static save(attrs: { [key: string]: any }, masterKeyOnlyFlags: { [key: string]: any }) {
     const controller = CoreManager.getConfigController();
     //To avoid a mismatch with the local and the cloud config we get a new version
-    return controller.save(attrs, masterKeyOnlyFlags).then(() => {
-      return controller.get({ useMasterKey: true });
-    },(error) => {
-      return Promise.reject(error);
-    });
+    return controller.save(attrs, masterKeyOnlyFlags).then(
+      () => {
+        return controller.get({ useMasterKey: true });
+      },
+      error => {
+        return Promise.reject(error);
+      }
+    );
   }
 
   /**
@@ -137,7 +140,7 @@ function decodePayload(data) {
     if (json && typeof json === 'object') {
       return decode(json);
     }
-  } catch(e) {
+  } catch (e) {
     return null;
   }
 }
@@ -163,7 +166,7 @@ const DefaultController = {
       return config;
     }
     // Return a promise for async storage controllers
-    return Storage.getItemAsync(storagePath).then((configData) => {
+    return Storage.getItemAsync(storagePath).then(configData => {
       if (configData) {
         const attributes = decodePayload(configData);
         if (attributes) {
@@ -178,14 +181,9 @@ const DefaultController = {
   get(options: RequestOptions = {}) {
     const RESTController = CoreManager.getRESTController();
 
-    return RESTController.request(
-      'GET', 'config', {}, options
-    ).then((response) => {
+    return RESTController.request('GET', 'config', {}, options).then(response => {
       if (!response || !response.params) {
-        const error = new ParseError(
-          ParseError.INVALID_JSON,
-          'Config JSON response invalid.'
-        );
+        const error = new ParseError(ParseError.INVALID_JSON, 'Config JSON response invalid.');
         return Promise.reject(error);
       }
 
@@ -207,8 +205,8 @@ const DefaultController = {
   save(attrs: { [key: string]: any }, masterKeyOnlyFlags: { [key: string]: any }) {
     const RESTController = CoreManager.getRESTController();
     const encodedAttrs = {};
-    for(const key in attrs){
-      encodedAttrs[key] = encode(attrs[key])
+    for (const key in attrs) {
+      encodedAttrs[key] = encode(attrs[key]);
     }
     return RESTController.request(
       'PUT',
@@ -216,17 +214,17 @@ const DefaultController = {
       { params: encodedAttrs, masterKeyOnly: masterKeyOnlyFlags },
       { useMasterKey: true }
     ).then(response => {
-      if(response && response.result){
-        return Promise.resolve()
+      if (response && response.result) {
+        return Promise.resolve();
       } else {
         const error = new ParseError(
           ParseError.INTERNAL_SERVER_ERROR,
           'Error occured updating Config.'
         );
-        return Promise.reject(error)
+        return Promise.reject(error);
       }
-    })
-  }
+    });
+  },
 };
 
 CoreManager.setConfigController(DefaultController);

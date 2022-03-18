@@ -41,7 +41,7 @@ const StorageController = {
 
   clear() {
     localStorage.clear();
-  }
+  },
 };
 
 module.exports = StorageController;
