@@ -15,6 +15,31 @@ import CoreManager from './CoreManager';
 import ParseError from './ParseError';
 import { resolvingPromise } from './promiseUtils';
 
+/**
+ * Typedef for RequestOptions
+ *
+ * @typedef RequestOptions
+ * @property {boolean} [useMasterKey] If true, sign up with masterKey
+ * @property {string} [sessionToken] sessionToken
+ * @property {string} [installationId] InstallationId of user
+ * @property {boolean} [returnStatus] return status
+ * @property {number} [batchSize] batch size
+ * @property {any} [include] include
+ * @property {any} [context] context
+ * @property {boolean} [usePost] whether request should use POST
+ */
+
+/**
+ * Typedef for FullOptions
+ *
+ * @typedef FullOptions
+ * @property {boolean} [useMasterKey] If true, sign up with masterKey
+ * @property {string} [sessionToken] sessionToken
+ * @property {string} [installationId] InstallationId of user
+ * @property {void} [progress] progress
+ * @property {boolean} [usePost] whether request should use POST
+ */
+
 export type RequestOptions = {
   useMasterKey?: boolean,
   sessionToken?: string,
@@ -28,8 +53,6 @@ export type RequestOptions = {
 };
 
 export type FullOptions = {
-  success?: any,
-  error?: any,
   useMasterKey?: boolean,
   sessionToken?: string,
   installationId?: string,

@@ -34,17 +34,20 @@ const authProviders = {};
  * same functionality of a Parse.Object, but also extends it with various
  * user specific methods, like authentication, signing up, and validation of
  * uniqueness.</p>
- *
- * @augments Parse.Object
- * @alias Parse.User
  */
+
 class ParseUser extends ParseObject {
-  /* eslint-disable valid-jsdoc */
   /**
+   * <p>A Parse.User object is a local representation of a user persisted to the
+   * Parse cloud. This class is a subclass of a Parse.Object, and retains the
+   * same functionality of a Parse.Object, but also extends it with various
+   * user specific methods, like authentication, signing up, and validation of
+   * uniqueness.</p>
+   *
+   * @augments Parse.Object
    * @alias Parse.User
    * @param {object} [attributes] The initial set of data to store in the user.
    */
-  /* eslint-enable valid-jsdoc */
   constructor(attributes: ?AttributeMap) {
     super('_User');
     if (attributes && typeof attributes === 'object') {
@@ -85,9 +88,10 @@ class ParseUser extends ParseObject {
    *   <li>If provider is string, options is {@link http://docs.parseplatform.org/parse-server/guide/#supported-3rd-party-authentications authData}
    *   <li>If provider is AuthProvider, options is saveOpts
    * </ul>
-   * @param {object} saveOpts useMasterKey / sessionToken
+   * @param {object} [saveOpts] useMasterKey / sessionToken
    * @returns {Promise<Parse.User>} A promise that is fulfilled with the user is linked
    */
+
   linkWith(
     provider: any,
     options: { authData?: AuthData },
@@ -225,7 +229,7 @@ class ParseUser extends ParseObject {
    * Unlinks a user from a service.
    *
    * @param {string | AuthProvider} provider Name of auth provider or {@link https://parseplatform.org/Parse-SDK-JS/api/master/AuthProvider.html AuthProvider}
-   * @param {object} options MasterKey / SessionToken
+   * @param {FullOptions} [options] MasterKey / SessionToken
    * @returns {Promise<Parse.User>} A promise that is fulfilled when the unlinking
    *     finishes.
    */
@@ -414,10 +418,13 @@ class ParseUser extends ParseObject {
    * <p>A username and password must be set before calling signUp.</p>
    *
    * @param {object} attrs Extra fields to set on the new user, or null.
-   * @param {object} options
+   * @param {object} [options]
+   * @param {boolean} [options.useMasterKey]
+   * @param {string} [options.sessionToken]
    * @returns {Promise<Parse.User>} A promise that is fulfilled when the signup
    *     finishes.
    */
+
   signUp(attrs: AttributeMap, options?: FullOptions): Promise<ParseUser> {
     options = options || {};
 
@@ -440,10 +447,11 @@ class ParseUser extends ParseObject {
    *
    * <p>A username and password must be set before calling logIn.</p>
    *
-   * @param {object} [options]
+   * @param {FullOptions} [options]
    * @returns {Promise<Parse.User>} A promise that is fulfilled with the user when
    *     the login is complete.
    */
+
   logIn(options?: FullOptions): Promise<ParseUser> {
     options = options || {};
 
@@ -641,7 +649,7 @@ class ParseUser extends ParseObject {
    *
    * @param {string} username The username (or email) to log in with.
    * @param {string} password The password to log in with.
-   * @param {object} [options]
+   * @param {FullOptions} [options]
    * @static
    * @returns {Promise<Parse.User>} A promise that is fulfilled with the user when
    *     the login completes.
@@ -663,7 +671,7 @@ class ParseUser extends ParseObject {
    * <code>current</code>.
    *
    * @param {string} sessionToken The sessionToken to log in with.
-   * @param {object} [options]
+   * @param {RequestOptions} [options]
    * @static
    * @returns {Promise<Parse.User>} A promise that is fulfilled with the user when
    *     the login completes.
@@ -745,7 +753,7 @@ class ParseUser extends ParseObject {
    * session from disk, log out of linked services, and future calls to
    * <code>current</code> will return <code>null</code>.
    *
-   * @param {object} [options]
+   * @param {RequestOptions} [options]
    * @static
    * @returns {Promise<any>} A promise that is resolved when the session is
    *   destroyed on the server.
@@ -762,7 +770,7 @@ class ParseUser extends ParseObject {
    *
    * @param {string} email The email address associated with the user that
    *     forgot their password.
-   * @param {object} [options]
+   * @param {RequestOptions} [options]
    * @static
    * @returns {Promise<any>}
    */
@@ -783,7 +791,7 @@ class ParseUser extends ParseObject {
    *
    * @param {string} email The email address associated with the user that
    *     forgot their password.
-   * @param {object} [options]
+   * @param {RequestOptions} [options]
    * @static
    * @returns {Promise<any>}
    */

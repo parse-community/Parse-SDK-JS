@@ -20,14 +20,49 @@ import type { AuthData } from './ParseUser';
 import type { PushData } from './Push';
 import type { RequestOptions, FullOptions } from './RESTController';
 
+/**
+ * @typedef AnalyticsController
+ * @property {AnalyticsControllerTrackCallback} track
+ */
+
+/**
+ * @callback AnalyticsControllerTrackCallback
+ * @param {string} name
+ * @param {object.<string, string>} [dimensions]
+ * @returns {Promise<any>}
+ */
+
 type AnalyticsController = {
   track: (name: string, dimensions: { [key: string]: string }) => Promise,
 };
+
+/**
+ * @typedef CloudController
+ * @property {CloudControllerRunStart} run
+ * @property {CloudControllerGetJobsData} getJobsData
+ * @property {CloudControllerRunStart} startJob
+ */
+
+/**
+ * @callback CloudControllerRunStart
+ * @param {string} name
+ * @param {any} [data]
+ * @param {RequestOptions} [options]
+ * @returns {Promise<any>}
+ */
+
+/**
+ * @callback CloudControllerGetJobsData
+ * @param {RequestOptions} [options]
+ * @returns {Promise<any>}
+ */
+
 type CloudController = {
   run: (name: string, data: mixed, options: RequestOptions) => Promise,
   getJobsData: (options: RequestOptions) => Promise,
   startJob: (name: string, data: mixed, options: RequestOptions) => Promise,
 };
+
 type ConfigController = {
   current: () => Promise,
   get: () => Promise,

@@ -26,10 +26,10 @@ import type ParseRelation from './ParseRelation';
  * <p>Roles must have a name (which cannot be changed after creation of the
  * role), and must specify an ACL.</p>
  *
- * @augments Parse.Object
  */
 class ParseRole extends ParseObject {
   /**
+   * @augments Parse.Object
    * @alias Parse.Role
    * @param {string} name The name of the Role to create.
    * @param {Parse.ACL} acl The ACL for this role. Roles must have an ACL.

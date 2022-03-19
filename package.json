@@ -82,13 +82,14 @@
     "jest": "24.9.0",
     "jsdoc": "3.6.3",
     "jsdoc-babel": "0.5.0",
+    "jsdoc-plugin-intersection": "^1.0.4",
     "lint-staged": "10.5.3",
     "metro-react-native-babel-preset": "0.59.0",
     "parse-server": "github:parse-community/parse-server#alpha",
     "prettier": "2.2.1",
     "regenerator-runtime": "0.13.5",
-    "tsd-jsdoc": "2.5.0",
     "semantic-release": "17.4.6",
+    "tsd-jsdoc": "2.5.0",
     "vinyl-source-stream": "2.0.0"
   },
   "optionalDependencies": {

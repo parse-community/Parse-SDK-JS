@@ -36,7 +36,7 @@ import type { RequestOptions } from './RESTController';
  * @name Parse.Cloud.run
  * @param {string} name The function name.
  * @param {object} [data] The parameters to send to the cloud function.
- * @param {object} [options]
+ * @param {RequestOptions} [options]
  * @returns {Promise<any>} A promise that will be resolved with the result
  * of the function.
  */

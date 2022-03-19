@@ -52,6 +52,20 @@ const uuidv4 = require('./uuid');
  * @property {string} objectId
  */
 
+/**
+ * Typedef for SaveParams
+ *
+ * @typedef SaveParams
+ * @property {boolean} [cascadeSave] cascadeSave
+ * @property {Attributes} [content] context
+ */
+
+/**
+ *
+ * @typedef {FullOptions | SaveParams} SaveOptions
+ *
+ */
+
 export type Pointer = {
   __type: string,
   className: string,
@@ -124,6 +138,7 @@ class ParseObject {
    * @param {string} [className] The class name for the object
    * @param {object} [attributes]  The initial set of data to store in the object.
    * @param {object} [options] The options for this object instance.
+   * @param {boolean} [options.ignoreValidation] Ignore validation
    */
 
   constructor(
@@ -811,7 +826,7 @@ class ParseObject {
    * exist.
    *
    * @param {string} attr The string name of an attribute.
-   * @param [options]
+   * @param {object} [options]
    * @returns {(Parse.Object | boolean)}
    */
   unset(attr: string, options?: { [opt: string]: mixed }): ParseObject | boolean {
@@ -1151,7 +1166,7 @@ class ParseObject {
    * Fetch the model from the server. If the server's representation of the
    * model differs from its current attributes, they will be overriden.
    *
-   * @param {object} options
+   * @param {RequestOptions} [options]
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -1202,7 +1217,7 @@ class ParseObject {
    * notation to specify which fields in the included object are also fetched.
    *
    * @param {string | Array<string | Array<string>>} keys The name(s) of the key(s) to include.
-   * @param {object} [options]
+   * @param {RequestOptions} [options]
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -1230,7 +1245,7 @@ class ParseObject {
    * available. Objects saved this way will persist even after the app is closed, in which case they will be sent the
    * next time the app is opened.
    *
-   * @param {object} [options]
+   * @param {SaveOptions} [options]
    * Used to pass option parameters to method if arg1 and arg2 were both passed as strings.
    * Valid options are:
    * <ul>
@@ -1289,7 +1304,7 @@ class ParseObject {
    * <li>`String` Key - Key of attribute to update (requires arg2 to also be string)</li>
    * <li>`null` - Passing null for arg1 allows you to save the object with options passed in arg2.</li>
    * </ul>
-   * @param {string | object} [arg2]
+   * @param {string | SaveOptions} [arg2]
    * <ul>
    * <li>`String` Value - If arg1 was passed as a key, arg2 is the value that should be set on that key.</li>
    * <li>`Object` Options - Valid options are:
@@ -1303,7 +1318,7 @@ class ParseObject {
    * </ul>
    * </li>
    * </ul>
-   * @param {object} [arg3]
+   * @param {SaveOptions} [arg3]
    * Used to pass option parameters to method if arg1 and arg2 were both passed as strings.
    * Valid options are:
    * <ul>
@@ -1377,7 +1392,7 @@ class ParseObject {
    * is available. Delete requests will persist even after the app is closed, in which case they will be sent the
    * next time the app is opened.
    *
-   * @param {object} [options]
+   * @param {RequestOptions} [options]
    * Valid options are:<ul>
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
@@ -1601,23 +1616,17 @@ class ParseObject {
    * If any error is encountered, stops and calls the error handler.
    *
    * <pre>
-   *   Parse.Object.fetchAllWithInclude([object1, object2, ...], [pointer1, pointer2, ...])
-   *    .then((list) => {
-   *      // All the objects were fetched.
-   *    }, (error) => {
-   *      // An error occurred while fetching one of the objects.
-   *    });
+   * Parse.Object.fetchAllWithInclude([object1, object2, ...], [pointer1, pointer2, ...])
+   * .then((list) => {
+   * // All the objects were fetched.
+   * }, (error) => {
+   * // An error occurred while fetching one of the objects.
+   * });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {string | Array<string | Array<string>>} keys The name(s) of the key(s) to include.
-   * @param {object} [options]
-   * Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
+   * @param {RequestOptions} [options]
    * @static
    * @returns {Parse.Object[]}
    */
@@ -1641,23 +1650,17 @@ class ParseObject {
    * If any error is encountered, stops and calls the error handler.
    *
    * <pre>
-   *   Parse.Object.fetchAllIfNeededWithInclude([object1, object2, ...], [pointer1, pointer2, ...])
-   *    .then((list) => {
-   *      // All the objects were fetched.
-   *    }, (error) => {
-   *      // An error occurred while fetching one of the objects.
-   *    });
+   * Parse.Object.fetchAllIfNeededWithInclude([object1, object2, ...], [pointer1, pointer2, ...])
+   * .then((list) => {
+   * // All the objects were fetched.
+   * }, (error) => {
+   * // An error occurred while fetching one of the objects.
+   * });
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {string | Array<string | Array<string>>} keys The name(s) of the key(s) to include.
-   * @param {object} [options]
-   * Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
+   * @param {RequestOptions} [options]
    * @static
    * @returns {Parse.Object[]}
    */
@@ -1798,7 +1801,7 @@ class ParseObject {
    * </pre>
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
-   * @param {object} [options]
+   * @param {RequestOptions} [options]
    * @static
    * @returns {Parse.Object[]}
    */

@@ -45,6 +45,26 @@ export type QueryJSON = {
 };
 
 /**
+ * Typedef for QueryOptions
+ *
+ * @typedef QueryOptions
+ * @property {boolean} [useMasterKey] If true, sign up with masterKey
+ * @property {string} [sessionToken] sessionToken
+ * @property {any} [context] context
+ * @property {boolean} [json] json
+ */
+
+/**
+ * Typedef for BatchOptions
+ *
+ * @typedef BatchOptions
+ * @property {boolean} [useMasterKey] If true, sign up with masterKey
+ * @property {string} [sessionToken] sessionToken
+ * @property {any} [context] context
+ * @property {number} [batchSize] batchSize
+ */
+
+/**
  * Converts a string into a regex that matches it.
  * Surrounding with \Q .. \E does this, we just need to escape any \E's in
  * the text separately.
@@ -614,7 +634,7 @@ class ParseQuery {
    * the server. Unlike the <code>first</code> method, it never returns undefined.
    *
    * @param {string} objectId The id of the object to be fetched.
-   * @param {object} [options]
+   * @param {QueryOptions} [options]
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -657,7 +677,7 @@ class ParseQuery {
   /**
    * Retrieves a list of ParseObjects that satisfy this query.
    *
-   * @param {object} [options] Valid options
+   * @param {QueryOptions} [options] Valid options
    * are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -732,13 +752,7 @@ class ParseQuery {
    * Retrieves a complete list of ParseObjects that satisfy this query.
    * Using `eachBatch` under the hood to fetch all the valid objects.
    *
-   * @param {object} options Valid options are:<ul>
-   *   <li>batchSize: How many objects to yield in each batch (default: 100)
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
+   * @param {BatchOptions} [options]
    * @returns {Promise<Array<Parse.Object>>} A promise that is resolved with the results when
    * the query completes.
    */
@@ -754,6 +768,8 @@ class ParseQuery {
    * Counts the number of objects that match this query.
    *
    * @param {object} options
+   * @param {boolean} [options.useMasterKey]
+   * @param {string} [options.sessionToken]
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -791,11 +807,8 @@ class ParseQuery {
    * Executes a distinct query and returns unique values
    *
    * @param {string} key A field to find distinct values
-   * @param {object} [options]
-   * Valid options are:<ul>
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
+   * @param {object} options
+   * @param {string} [options.sessionToken]
    *
    * @returns {Promise<Array<any>>} A promise that is resolved with the query completes.
    */
@@ -822,13 +835,33 @@ class ParseQuery {
   }
 
   /**
+   * Typedef for Aggregation Options
+   *
+   * @typedef AggregationPipeline
+   * @property {Attributes | GroupParams} [group]
+   * @property {Attributes} [match]
+   * @property {Attributes} [project]
+   * @property {number} [limit]
+   * @property {number} [skip]
+   * @property {object.<string, (1|'-1')>} [sort]
+   * @property {object} [sample]
+   * @property {number} [sample.size]
+   */
+
+  /**
+   * Typedef for Aggregate Group
+   *
+   * @typedef GroupParams
+   * @property {string} [objectId]
+   */
+
+  /**
    * Executes an aggregate query and returns aggregate results
    *
-   * @param {(Array|object)} pipeline Array or Object of stages to process query
-   * @param {object} [options] Valid options are:<ul>
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
+   * @param {AggregationPipeline} pipeline Array or Object of stages to process query
+   * @param {object} options
+   * @param {boolean} [options.useMasterKey]
+   * @param {string} [options.sessionToken]
    *
    * @returns {Promise<Array<any>>} A promise that is resolved with the query completes.
    */
@@ -871,7 +904,7 @@ class ParseQuery {
    *
    * Returns the object if there is one, otherwise undefined.
    *
-   * @param {object} [options] Valid options are:<ul>
+   * @param {QueryOptions} [options] Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -947,14 +980,7 @@ class ParseQuery {
    *
    * @param {Function} callback Callback that will be called with each result
    *     of the query.
-   * @param {object} options Valid options are:<ul>
-   *   <li>batchSize: How many objects to yield in each batch (default: 100)
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
-   * </ul>
+   * @param {BatchOptions} [options]
    * @returns {Promise<void>} A promise that will be fulfilled once the
    *     iteration has completed.
    */
@@ -1045,12 +1071,7 @@ class ParseQuery {
    *
    * @param {Function} callback Callback that will be called with each result
    *     of the query.
-   * @param {object} [options] Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
+   * @param {BatchOptions} [options]
    * @returns {Promise<void>} A promise that will be fulfilled once the
    *     iteration has completed.
    */
@@ -1108,7 +1129,7 @@ class ParseQuery {
    *   <li>query: The query map was called upon.</li>
    * </ul>
    *
-   * @param {object} [options] Valid options are:<ul>
+   * @param {BatchOptions} [options] Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -1146,12 +1167,7 @@ class ParseQuery {
    *   <li>index: The index of the current Parse.Object being processed in the array.</li>
    * </ul>
    * @param {*} initialValue A value to use as the first argument to the first call of the callback. If no initialValue is supplied, the first object in the query will be used and skipped.
-   * @param {object} [options] Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
+   * @param {BatchOptions} [options]
    * @returns {Promise<Array<any>>} A promise that will be fulfilled once the
    *     iteration has completed.
    */
@@ -1197,12 +1213,7 @@ class ParseQuery {
    *   <li>query: The query filter was called upon.</li>
    * </ul>
    *
-   * @param {object} [options] Valid options are:<ul>
-   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-   *     be used for this request.
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
+   * @param {BatchOptions} [options] batch options
    * @returns {Promise<Array<Parse.Object>>} A promise that will be fulfilled once the
    *     iteration has completed.
    */
@@ -1512,6 +1523,15 @@ class ParseQuery {
   }
 
   /**
+   * Typedef for Full Text Options
+   *
+   * @typedef FullTextOptions
+   * @property {string} language The language that determines the list of stop words for the search and the rules for the stemmer and tokenizer.
+   * @property {boolean} caseSensitive A boolean flag to enable or disable case sensitive search.
+   * @property {boolean} diacriticSensitive A boolean flag to enable or disable diacritic sensitive search.
+   */
+
+  /**
    * Adds a constraint for finding string values that contain a provided
    * string. This may be slow for large datasets. Requires Parse-Server > 2.5.0
    *
@@ -1534,10 +1554,7 @@ class ParseQuery {
    *
    * @param {string} key The key that the string to match is stored in.
    * @param {string} value The string to search
-   * @param {object} [options] (Optional)
-   * @param {string} options.language The language that determines the list of stop words for the search and the rules for the stemmer and tokenizer.
-   * @param {boolean} options.caseSensitive A boolean flag to enable or disable case sensitive search.
-   * @param {boolean} options.diacriticSensitive A boolean flag to enable or disable diacritic sensitive search.
+   * @param {FullTextOptions} [options] The full text options
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   fullText(key: string, value: string, options: ?Object): ParseQuery {

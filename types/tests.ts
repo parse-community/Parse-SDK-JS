@@ -33,9 +33,7 @@ function test_object() {
         console.log("Class name should be 'Game");
     }
 
-    game.fetch({
-        success(g: Game) {},
-    });
+    game.fetch();
 
     // Create a new instance of that class.
     const gameScore = new GameScore();
@@ -229,7 +227,7 @@ async function test_live_query() {
 }
 
 function return_a_generic_query(): Parse.Query<Game> {
-    return new Parse.Query(GameScore);
+    return new Parse.Query(Game)
 }
 
 function test_anonymous_utils() {
@@ -490,12 +488,6 @@ async function test_cloud_functions() {
     Parse.Cloud.run(
         "hello",
         {},
-        {
-            success: (result: any) => {
-                // result
-            },
-            error: (error: any) => {},
-        },
     );
 
     // $ExpectType any
@@ -587,7 +579,6 @@ async function test_cloud_functions() {
         const isGet = request.isGet; // if the query is a get operation
 
         // All possible read preferences
-        request.readPreference = Parse.Cloud.ReadPreferenceOption.Primary;
         request.readPreference = Parse.Cloud.ReadPreferenceOption.PrimaryPreferred;
         request.readPreference = Parse.Cloud.ReadPreferenceOption.Secondary;
         request.readPreference = Parse.Cloud.ReadPreferenceOption.SecondaryPreferred;
@@ -630,9 +621,9 @@ async function test_cloud_functions() {
 
     Parse.Cloud.beforeDeleteFile((request: Parse.Cloud.FileTriggerRequest) => {});
 
-    Parse.Cloud.afterDeleteFile((request: Parse.Cloud.FileTriggerRequest) => {});
+    Parse.Cloud.afterDeleteFile((request: Parse.Cloud.FileTriggerRequest) => {})
 
-    Parse.Cloud.define("AFunc", (request: Parse.Cloud.FunctionRequest) => {
+    Parse.Cloud.define("AFunc", async (request: Parse.Cloud.FunctionRequest) => {
         return "Some result";
     });
 
@@ -1971,7 +1962,6 @@ function testUser() {
         new Parse.User({ example: 100 });
 
         // $ExpectError
-        // TODO -> Cannot work out how to fix
         new Parse.User<{ example: number }>();
 
         // $ExpectError

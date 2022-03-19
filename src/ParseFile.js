@@ -202,6 +202,7 @@ class ParseFile {
    * after you get the file from a Parse.Object.
    *
    * @param {object} [options] An object to specify url options
+   * @param {boolean} [options.forceSecure] Force secure
    * @returns {string}
    */
   url(options?: { forceSecure?: boolean }): ?string {
@@ -237,7 +238,7 @@ class ParseFile {
   /**
    * Saves the file to the Parse cloud.
    *
-   * @param {object} [options]
+   * @param {FullOptions} [options]
    *  * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -323,7 +324,7 @@ class ParseFile {
    * Deletes the file from the Parse cloud.
    * In Cloud Code and Node only with Master Key.
    *
-   * @param {object} [options]
+   * @param {FullOptions} [options]
    *  * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -345,6 +346,12 @@ class ParseFile {
       return this;
     });
   }
+
+  /**
+   * Returns a JSON representation of this file.
+   *
+   * @returns {object} The JSON representation of the file.
+   */
 
   toJSON(): { name: ?string, url: ?string } {
     return {

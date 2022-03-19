@@ -486,15 +486,15 @@
 
 /**
  * @typedef Parse.Cloud.TriggerRequest
- * @property {string} installationId If set, the installationId triggering the request.
+ * @property {string} [installationId] If set, the installationId triggering the request.
  * @property {boolean} master If true, means the master key was used.
- * @property {Parse.User} user If set, the user that made the request.
+ * @property {Parse.User} [user] If set, the user that made the request.
  * @property {Parse.Object} object The object triggering the hook.
  * @property {string} ip The IP address of the client making the request.
  * @property {object} headers The original HTTP headers for the request.
  * @property {string} triggerName The name of the trigger (`beforeSave`, `afterSave`, ...)
  * @property {object} log The current logger inside Parse Server.
- * @property {Parse.Object} original If set, the object, as currently stored.
+ * @property {Parse.Object} [original] If set, the object, as currently stored.
  * @property {object.<string, object>} context If set, the context of the request
  */
 
@@ -542,13 +542,13 @@
 
 /**
  * @typedef Parse.Cloud.LiveQueryEventTrigger
- * @property {string} installationId If set, the installationId triggering the request.
+ * @property {string} [installationId] If set, the installationId triggering the request.
  * @property {boolean} useMasterKey If true, means the master key was used.
- * @property {Parse.User} user If set, the user that made the request.
- * @property {string} sessionToken If set, the session of the user that made the request.
+ * @property {Parse.User} [user] If set, the user that made the request.
+ * @property {string} [sessionToken] If set, the session of the user that made the request.
  * @property {string} event The live query event that triggered the request.
  * @property {Parse.Object} object The object triggering the hook.
- * @property {Parse.Object} original If set, the object, as currently stored.
+ * @property {Parse.Object} [original] If set, the object, as currently stored.
  * @property {number} clients The number of clients connected.
  * @property {number} subscriptions The number of subscriptions connected.
  * @property {boolean} sendEvent If the LiveQuery event should be sent to the client. Set to false to prevent LiveQuery from pushing to the client.
@@ -562,9 +562,9 @@
 
 /**
  * @typedef Parse.Cloud.BeforeFindRequest
- * @property {string} installationId If set, the installationId triggering the request.
+ * @property {string} [installationId] If set, the installationId triggering the request.
  * @property {boolean} master If true, means the master key was used.
- * @property {Parse.User} user If set, the user that made the request.
+ * @property {Parse.User} [user] If set, the user that made the request.
  * @property {Parse.Query} query The query triggering the hook.
  * @property {string} ip The IP address of the client making the request.
  * @property {object} headers The original HTTP headers for the request.
@@ -576,12 +576,13 @@
  */
 
 /**
- * @typedef Parse.Cloud.ReadPreferenceOption
- * @property {string} Primary Primary read preference option
- * @property {string} PrimaryPreferred Prefer primary
- * @property {string} Secondary Secondary read preference option
- * @property {string} SecondaryPreferred Prefer secondary
- * @property {string} Nearest Nearest read preference option
+ * @enum
+ * @name Parse.Cloud.ReadPreferenceOption
+ * @property {'PRIMARY'} Primary Primary read preference option
+ * @property {'PRIMARY_PREFERRED'} PrimaryPreferred Prefer primary
+ * @property {'SECONDARY'} Secondary Secondary read preference option
+ * @property {'SECONDARY_PREFERRED'} SecondaryPreferred Prefer secondary
+ * @property {'NEAREST'} Nearest Nearest read preference option
  */
 
 /**
@@ -592,9 +593,9 @@
 
 /**
  * @typedef Parse.Cloud.AfterFindRequest
- * @property {string} installationId If set, the installationId triggering the request.
+ * @property {string} [installationId] If set, the installationId triggering the request.
  * @property {boolean} master If true, means the master key was used.
- * @property {Parse.User} user If set, the user that made the request.
+ * @property {Parse.User} [user] If set, the user that made the request.
  * @property {Parse.Query} query The query triggering the hook.
  * @property {Array<Parse.Object>} results The results the query yielded.
  * @property {string} ip The IP address of the client making the request.
@@ -606,14 +607,14 @@
 /**
  * @callback Parse.Cloud.FunctionRequestFunc
  * @param {Parse.Cloud.FunctionRequest} request The request object
- * @returns {Promise<any>}
+ * @returns {void}
  */
 
 /**
  * @typedef Parse.Cloud.FunctionRequest
- * @property {string} installationId If set, the installationId triggering the request.
+ * @property {string} [installationId] If set, the installationId triggering the request.
  * @property {boolean} master If true, means the master key was used.
- * @property {Parse.User} user If set, the user that made the request.
+ * @property {Parse.User} [user] If set, the user that made the request.
  * @property {object.<string, object>} params The params passed to the cloud function.
  * @property {object} log The current logger inside Parse Server.
  */
