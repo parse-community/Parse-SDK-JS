@@ -3,6 +3,7 @@
 const assert = require('assert');
 const Parse = require('../../node');
 const uuidv4 = require('uuid/v4');
+const { twitterAuthData } = require('./helper');
 
 class CustomUser extends Parse.User {
   constructor(attributes) {
@@ -952,30 +953,14 @@ describe('Parse User', () => {
   });
 
   it('can link with twitter', async () => {
-    /*
-      To generate the auth data below, the Twitter app "GitHub CI Test App" has
-      been created, managed by the @ParsePlatform Twitter account. In case this
-      test starts to fail because the token has become invalid, generate a new
-      token according to the OAuth process described in the Twitter docs[1].
-
-      [1] https://developer.twitter.com/en/docs/authentication/oauth-1-0a/obtaining-user-access-tokens
-    */
-    const authData = {
-      id: 1506726799266430985,
-      consumer_key: 'jeQw6luN2PEWREtoFDb0FdGYf',
-      consumer_secret: 'VSFENh1X5UC4MLEuduHLtJDnf8Ydsh5KuSR4zZQufFCAGNtzcs',
-      auth_token: '1506726799266430985-NKM9tqVbPXMnLhHTLYB98SNGtxxi6v',
-      auth_token_secret: 'JpDVIINbqV5TK0th9nKiS1IVokZfjRj06FrXxCrkggF07',
-    };
     Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
     user.setUsername(uuidv4());
     user.setPassword(uuidv4());
     await user.signUp();
 
-    await user.linkWith('twitter', { authData });
-
-    expect(user.get('authData').twitter.id).toBe(authData.id);
+    await user.linkWith('twitter', { twitterAuthData });
+    expect(user.get('authData').twitter.id).toBe(twitterAuthData.id);
     expect(user._isLinked('twitter')).toBe(true);
 
     await user._unlinkFrom('twitter');
@@ -985,25 +970,18 @@ describe('Parse User', () => {
   it('can link with twitter and facebook', async () => {
     Parse.User.enableUnsafeCurrentUser();
     Parse.FacebookUtils.init();
-    const authData = {
-      id: 1506726799266430985,
-      consumer_key: 'jeQw6luN2PEWREtoFDb0FdGYf',
-      consumer_secret: 'VSFENh1X5UC4MLEuduHLtJDnf8Ydsh5KuSR4zZQufFCAGNtzcs',
-      auth_token: '1506726799266430985-NKM9tqVbPXMnLhHTLYB98SNGtxxi6v',
-      auth_token_secret: 'JpDVIINbqV5TK0th9nKiS1IVokZfjRj06FrXxCrkggF07',
-    };
     const user = new Parse.User();
     user.setUsername(uuidv4());
     user.setPassword(uuidv4());
     await user.signUp();
 
-    await user.linkWith('twitter', { authData });
+    await user.linkWith('twitter', { twitterAuthData });
     await Parse.FacebookUtils.link(user);
 
     expect(Parse.FacebookUtils.isLinked(user)).toBe(true);
     expect(user._isLinked('twitter')).toBe(true);
 
-    expect(user.get('authData').twitter.id).toBe(authData.id);
+    expect(user.get('authData').twitter.id).toBe(twitterAuthData.id);
     expect(user.get('authData').facebook.id).toBe('test');
   });
 
