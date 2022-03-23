@@ -34,8 +34,8 @@ const defaultConfiguration = {
       appIds: 'test',
     },
     twitter: {
-      consumer_key: '5QiVwxr8FQHbo5CMw46Z0jquF',
-      consumer_secret: 'p05FDlIRAnOtqJtjIt0xcw390jCcjj56QMdE9B52iVgOEb7LuK',
+      consumer_key: 'jeQw6luN2PEWREtoFDb0FdGYf',
+      consumer_secret: 'VSFENh1X5UC4MLEuduHLtJDnf8Ydsh5KuSR4zZQufFCAGNtzcs',
     },
   },
   verbose: false,
