@@ -959,7 +959,7 @@ describe('Parse User', () => {
     user.setPassword(uuidv4());
     await user.signUp();
 
-    await user.linkWith('twitter', { twitterAuthData });
+    await user.linkWith('twitter', { authData: twitterAuthData });
     expect(user.get('authData').twitter.id).toBe(twitterAuthData.id);
     expect(user._isLinked('twitter')).toBe(true);
 
@@ -975,7 +975,7 @@ describe('Parse User', () => {
     user.setPassword(uuidv4());
     await user.signUp();
 
-    await user.linkWith('twitter', { twitterAuthData });
+    await user.linkWith('twitter', { authData: twitterAuthData });
     await Parse.FacebookUtils.link(user);
 
     expect(Parse.FacebookUtils.isLinked(user)).toBe(true);
