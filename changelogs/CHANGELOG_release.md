@@ -54,6 +54,8 @@ for (const className of classNames) {
 ### Bug Fixes
 - Fixes build for WeChat WeApp, to reduce package size, see [issue/#1331](https://github.com/parse-community/Parse-SDK-JS/issues/1331)
 
+- Fixes base64 formatting, see [issue/#1467](https://github.com/parse-community/Parse-SDK-JS/pull/1467)
+
 # [3.1.0](https://github.com/parse-community/Parse-SDK-JS/compare/3.0.0...3.1.0)
 
 ### Breaking Changes
