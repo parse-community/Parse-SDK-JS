@@ -67,11 +67,17 @@ describe('ParseFile', () => {
   });
 
   it('can extract data type from base64', () => {
-    const file = new ParseFile('parse.txt', {
+    const file1 = new ParseFile('parse.txt', {
       base64: 'data:image/png;base64,ParseA==',
     });
-    expect(file._source.base64).toBe('ParseA==');
-    expect(file._source.type).toBe('image/png');
+    expect(file1._source.base64).toBe('ParseA==');
+    expect(file1._source.type).toBe('image/png');
+
+    const file2 = new ParseFile('parse.txt', {
+      base64: 'data:application/pdf;filename=test.pdf;base64,ParseA==',
+    });
+    expect(file2._source.base64).toBe('ParseA==');
+    expect(file2._source.type).toBe('application/pdf');
   });
 
   it('can create files with file uri', () => {
