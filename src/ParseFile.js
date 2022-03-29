@@ -42,8 +42,6 @@ export type FileSource =
       type: string,
     };
 
-const dataUriRegexp = /^data:([a-zA-Z]+\/[-a-zA-Z0-9+.]+)(;charset=[a-zA-Z0-9\-\/]*)?;base64,/;
-
 function b64Digit(number: number): string {
   if (number < 26) {
     return String.fromCharCode(65 + number);
@@ -137,26 +135,18 @@ class ParseFile {
           type: specifiedType,
         };
       } else if (data && typeof data.base64 === 'string') {
-        const base64 = data.base64;
-        const commaIndex = base64.indexOf(',');
+        const base64 = data.base64.split(',').at(-1)
+        const type = specifiedType || data.split(':').at(1).split(';').at(0)
 
-        if (commaIndex !== -1) {
-          const matches = dataUriRegexp.exec(base64.slice(0, commaIndex + 1));
-          // if data URI with type and charset, there will be 4 matches.
-          this._data = base64.slice(commaIndex + 1);
-          this._source = {
-            format: 'base64',
-            base64: this._data,
-            type: matches[1],
-          };
-        } else {
-          this._data = base64;
-          this._source = {
-            format: 'base64',
-            base64: base64,
-            type: specifiedType,
-          };
+        if (!type) {
+          throw new Error('File must have a valid type.');
         }
+
+        this._source = {
+          format: 'base64',
+          base64,
+          type,
+        };
       } else {
         throw new TypeError('Cannot create a Parse.File with that data.');
       }
