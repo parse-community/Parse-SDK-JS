@@ -42,6 +42,16 @@ export type FileSource =
       type: string,
     };
 
+const base64Regex = new RegExp(
+  '([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))',
+  'i'
+);
+
+const dataUriRegex = new RegExp(
+  `^\\s*data:([a-zA-Z]+\\/[-a-zA-Z0-9+.]+(;[a-z-]+=[a-zA-Z0-9+.-]+)?)?(;base64)?,(${base64Regex.source})*\\s*$`,
+  'i'
+);
+
 function b64Digit(number: number): string {
   if (number < 26) {
     return String.fromCharCode(65 + number);
@@ -135,6 +145,12 @@ class ParseFile {
           type: specifiedType,
         };
       } else if (data && typeof data.base64 === 'string') {
+        // Check if data URI or base64 string is valid
+        const validationRegex = new RegExp(base64Regex.source + '|' + dataUriRegex.source, 'i');
+        if (!validationRegex.test(data.base64)) {
+          throw new Error('Files passed in must have valid data URIs or base64 encoded data.');
+        }
+
         const base64 = data.base64.split(',').at(-1);
         const type = specifiedType || data.base64.split(';').at(0).split(':').at(1) || '';
 
