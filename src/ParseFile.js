@@ -48,7 +48,7 @@ const base64Regex = new RegExp(
 );
 
 const dataUriRegex = new RegExp(
-  `^\\s*data:([a-zA-Z]+\\/[-a-zA-Z0-9+.]+(;[a-z-]+=[a-zA-Z0-9+.-]+)?)?(;base64)?,(${base64Regex.source})*\\s*$`,
+  `^data:([a-zA-Z]+\\/[-a-zA-Z0-9+.]+(;[a-z-]+=[a-zA-Z0-9+.-]+)?)?(;base64)?,(${base64Regex.source})*$`,
   'i'
 );
 
