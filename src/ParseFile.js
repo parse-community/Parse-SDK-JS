@@ -135,12 +135,8 @@ class ParseFile {
           type: specifiedType,
         };
       } else if (data && typeof data.base64 === 'string') {
-        const base64 = data.base64.split(',').at(-1)
-        const type = specifiedType || data.split(':').at(1).split(';').at(0)
-
-        if (!type) {
-          throw new Error('File must have a valid type.');
-        }
+        const base64 = data.base64.split(',').at(-1);
+        const type = specifiedType || data.base64.split(';').at(0).split(':').at(1) || '';
 
         this._source = {
           format: 'base64',
