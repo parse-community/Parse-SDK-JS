@@ -152,7 +152,14 @@ class ParseFile {
         }
 
         const base64 = data.base64.split(',').at(-1);
-        const type = specifiedType || data.base64.split(';').at(0).split(':').at(1) || 'text/plain';
+        let type = specifiedType || data.base64.split(';').at(0).split(':').at(1) || '';
+
+        // https://tools.ietf.org/html/rfc2397
+        // If <mediatype> is omitted, it defaults to text/plain;charset=US-ASCII.
+        // As a shorthand, "text/plain" can be omitted but the charset parameter supplied.
+        if (dataUriRegex.test(data.base64)) {
+          type ||= 'text/plain';
+        }
 
         this._source = {
           format: 'base64',

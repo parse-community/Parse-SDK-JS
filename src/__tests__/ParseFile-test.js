@@ -66,6 +66,14 @@ describe('ParseFile', () => {
     expect(file._source.type).toBe('');
   });
 
+  it('can set the default type to be text/plain when using base64', () => {
+    const file = new ParseFile('parse.txt', {
+      base64: 'data:;base64,ParseA==',
+    });
+    expect(file._source.base64).toBe('ParseA==');
+    expect(file._source.type).toBe('text/plain');
+  });
+
   it('can extract data type from base64', () => {
     const file = new ParseFile('parse.png', {
       base64: 'data:image/png;base64,ParseA==',
