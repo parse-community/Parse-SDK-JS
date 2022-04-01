@@ -152,7 +152,7 @@ class ParseFile {
         }
 
         const base64 = data.base64.split(',').at(-1);
-        const type = specifiedType || data.base64.split(';').at(0).split(':').at(1) || '';
+        const type = specifiedType || data.base64.split(';').at(0).split(':').at(1) || 'text/plain';
 
         this._source = {
           format: 'base64',
