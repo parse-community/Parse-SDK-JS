@@ -151,8 +151,9 @@ class ParseFile {
           throw new Error('Files passed in must have valid data URIs or base64 encoded data.');
         }
 
-        const base64 = data.base64.split(',').at(-1);
-        let type = specifiedType || data.base64.split(';').at(0).split(':').at(1) || '';
+        const base64 = data.base64.split(',').slice(-1)[0];
+        let type =
+          specifiedType || data.base64.split(';').slice(0, 1)[0].split(':').slice(1, 2)[0] || '';
 
         // https://tools.ietf.org/html/rfc2397
         // If <mediatype> is omitted, it defaults to text/plain;charset=US-ASCII.
