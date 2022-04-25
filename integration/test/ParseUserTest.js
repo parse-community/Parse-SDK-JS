@@ -3,6 +3,7 @@
 const assert = require('assert');
 const Parse = require('../../node');
 const uuidv4 = require('uuid/v4');
+const { twitterAuthData } = require('./helper');
 
 class CustomUser extends Parse.User {
   constructor(attributes) {
@@ -953,21 +954,13 @@ describe('Parse User', () => {
 
   it('can link with twitter', async () => {
     Parse.User.enableUnsafeCurrentUser();
-    const authData = {
-      id: 227463280,
-      consumer_key: '5QiVwxr8FQHbo5CMw46Z0jquF',
-      consumer_secret: 'p05FDlIRAnOtqJtjIt0xcw390jCcjj56QMdE9B52iVgOEb7LuK',
-      auth_token: '227463280-lngpMGXdnG36JiuzGfAYbKcZUPwjmcIV2NqL9hWc',
-      auth_token_secret: 'G1tl1R0gaYKTyxw0uYJDKRoVhM16ifyLeMwIaKlFtPkQr',
-    };
     const user = new Parse.User();
     user.setUsername(uuidv4());
     user.setPassword(uuidv4());
     await user.signUp();
 
-    await user.linkWith('twitter', { authData });
-
-    expect(user.get('authData').twitter.id).toBe(authData.id);
+    await user.linkWith('twitter', { authData: twitterAuthData });
+    expect(user.get('authData').twitter.id).toBe(twitterAuthData.id);
     expect(user._isLinked('twitter')).toBe(true);
 
     await user._unlinkFrom('twitter');
@@ -977,25 +970,18 @@ describe('Parse User', () => {
   it('can link with twitter and facebook', async () => {
     Parse.User.enableUnsafeCurrentUser();
     Parse.FacebookUtils.init();
-    const authData = {
-      id: 227463280,
-      consumer_key: '5QiVwxr8FQHbo5CMw46Z0jquF',
-      consumer_secret: 'p05FDlIRAnOtqJtjIt0xcw390jCcjj56QMdE9B52iVgOEb7LuK',
-      auth_token: '227463280-lngpMGXdnG36JiuzGfAYbKcZUPwjmcIV2NqL9hWc',
-      auth_token_secret: 'G1tl1R0gaYKTyxw0uYJDKRoVhM16ifyLeMwIaKlFtPkQr',
-    };
     const user = new Parse.User();
     user.setUsername(uuidv4());
     user.setPassword(uuidv4());
     await user.signUp();
 
-    await user.linkWith('twitter', { authData });
+    await user.linkWith('twitter', { authData: twitterAuthData });
     await Parse.FacebookUtils.link(user);
 
     expect(Parse.FacebookUtils.isLinked(user)).toBe(true);
     expect(user._isLinked('twitter')).toBe(true);
 
-    expect(user.get('authData').twitter.id).toBe(authData.id);
+    expect(user.get('authData').twitter.id).toBe(twitterAuthData.id);
     expect(user.get('authData').facebook.id).toBe('test');
   });
 
