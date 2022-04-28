@@ -152,6 +152,12 @@ describe('ParseFile', () => {
     expect(function () {
       new ParseFile('parse.txt', 'string');
     }).toThrow('Cannot create a Parse.File with that data.');
+
+    expect(function () {
+      new ParseFile('parse.txt', {
+        base64: 'abc',
+      });
+    }).toThrow('Cannot create a Parse.File without valid data URIs or base64 encoded data.');
   });
 
   it('throws with invalid base64', () => {

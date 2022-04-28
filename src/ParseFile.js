@@ -148,7 +148,9 @@ class ParseFile {
         // Check if data URI or base64 string is valid
         const validationRegex = new RegExp(base64Regex.source + '|' + dataUriRegex.source, 'i');
         if (!validationRegex.test(data.base64)) {
-          throw new Error('Files passed in must have valid data URIs or base64 encoded data.');
+          throw new Error(
+            'Cannot create a Parse.File without valid data URIs or base64 encoded data.'
+          );
         }
 
         const base64 = data.base64.split(',').slice(-1)[0];
