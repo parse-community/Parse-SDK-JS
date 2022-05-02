@@ -1,3 +1,10 @@
+## [3.4.2](https://github.com/parse-community/Parse-SDK-JS/compare/3.4.1...3.4.2) (2022-05-02)
+
+
+### Bug Fixes
+
+* security upgrade moment from 2.29.1 to 2.29.2 ([#1472](https://github.com/parse-community/Parse-SDK-JS/issues/1472)) ([893c2a5](https://github.com/parse-community/Parse-SDK-JS/commit/893c2a5b0504740d5001e5674b8eefbaab081764))
+
 ## [3.4.1](https://github.com/parse-community/Parse-SDK-JS/compare/3.4.0...3.4.1) (2022-01-01)
 
 
