@@ -46,7 +46,7 @@ describe('ParseRole', () => {
   });
 
   it('should throw error string with invalid name', () => {
-    expect(() => new ParseRole('invalid:name')).toThrow(
+    expect(() => new ParseRole('invalid:name', new ParseACL())).toThrow(
       new ParseError(
         ParseError.OTHER_CAUSE,
         "A role's name can be only contain alphanumeric characters, _, " + '-, and spaces.'
