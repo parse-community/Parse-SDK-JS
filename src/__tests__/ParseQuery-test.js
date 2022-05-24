@@ -3797,4 +3797,21 @@ describe('ParseQuery LocalDatastore', () => {
     expect(subscription.sessionToken).toBe('r:test');
     expect(subscription.query).toEqual(query);
   });
+
+  it('can query with dot notation', async () => {
+    CoreManager.set('DOT_NOTATION', true);
+    CoreManager.setQueryController({
+      aggregate() {},
+      find() {
+        return Promise.resolve({
+          results: [{ objectId: 'I1', size: 'small', name: 'Product 3' }],
+        });
+      },
+    });
+    const object = await new ParseQuery('Item').equalTo('size', 'small').first();
+    expect(object.id).toBe('I1');
+    expect(object.size).toBe('small');
+    expect(object.name).toBe('Product 3');
+    CoreManager.set('DOT_NOTATION', false);
+  });
 });

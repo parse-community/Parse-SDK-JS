@@ -2568,6 +2568,27 @@ describe('ParseObject', () => {
     xhrs[0].onreadystatechange();
     jest.runAllTicks();
   });
+  it('can save object with dot notation', async () => {
+    CoreManager.set('DOT_NOTATION', true);
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            objectId: 'P1',
+          },
+        },
+      ])
+    );
+    const obj = new ParseObject('TestObject');
+    obj.name = 'Foo';
+    await obj.save();
+    expect(obj.name).toBe('Foo');
+    expect(obj.toJSON()).toEqual({ name: 'Foo', objectId: 'P1' });
+    expect(obj.attributes).toEqual({ name: 'Foo' });
+    expect(obj.get('name')).toBe('Foo');
+    CoreManager.set('DOT_NOTATION', false);
+  });
 });
 
 describe('ObjectController', () => {

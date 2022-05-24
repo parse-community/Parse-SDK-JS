@@ -2089,6 +2089,36 @@ describe('Parse Object', () => {
     Parse.allowCustomObjectId = false;
   });
 
+  fit('allow dotNotation', async () => {
+    Parse.dotNotation = true;
+    const object = new Parse.Object('TestObject');
+    object.foo = 'bar';
+    await object.save();
+    expect(object.foo).toBe('bar');
+    expect(object.get('foo')).toBe('bar');
+    expect(Object.keys(object.toJSON()).sort()).toEqual([
+      'createdAt',
+      'foo',
+      'objectId',
+      'updatedAt',
+    ]);
+
+    const query = new Parse.Query('TestObject');
+    const result = await query.get(object.id);
+    expect(result.foo).toBe('bar');
+    expect(result.get('foo')).toBe('bar');
+    expect(result.id).toBe(object.id);
+
+    result.foo = 'baz';
+    expect(result.get('foo')).toBe('baz');
+    await result.save();
+
+    const afterSave = await query.get(object.id);
+    expect(afterSave.foo).toBe('baz');
+    expect(afterSave.get('foo')).toBe('baz');
+    Parse.dotNotation = false;
+  });
+
   it('allowCustomObjectId saveAll', async () => {
     await reconfigureServer({ allowCustomObjectId: true });
     Parse.allowCustomObjectId = true;

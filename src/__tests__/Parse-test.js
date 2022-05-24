@@ -85,6 +85,14 @@ describe('Parse module', () => {
     expect(Parse.idempotency).toBe(false);
   });
 
+  it('can set dotNotation', () => {
+    expect(Parse.dotNotation).toBe(false);
+    Parse.dotNotation = true;
+    expect(Parse.dotNotation).toBe(true);
+    Parse.dotNotation = false;
+    expect(Parse.dotNotation).toBe(false);
+  });
+
   it('can set LocalDatastoreController', () => {
     const controller = {
       fromPinWithName: function () {},

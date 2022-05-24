@@ -86,6 +86,40 @@ function getServerUrlPath() {
   const url = serverUrl.replace(/https?:\/\//, '');
   return url.substr(url.indexOf('/'));
 }
+const _internalFields = Object.freeze([
+  'objectId',
+  'id',
+  'className',
+  'attributes',
+  'createdAt',
+  'updatedAt',
+  'then',
+]);
+const proxyHandler = {
+  get(target, key, receiver) {
+    const value = target[key];
+    if (
+      typeof value === 'function' ||
+      key.toString().charAt(0) === '_' ||
+      _internalFields.includes(key.toString())
+    ) {
+      return Reflect.get(target, key, receiver);
+    }
+    return receiver.get(key) || Reflect.get(target, key, receiver);
+  },
+
+  set(target, key, value, receiver) {
+    const current = target[key];
+    if (
+      typeof current !== 'function' &&
+      !_internalFields.includes(key.toString()) &&
+      key.toString().charAt(0) !== '_'
+    ) {
+      receiver.set(key, value);
+    }
+    return Reflect.set(target, key, value, receiver);
+  },
+};
 
 /**
  * Creates a new model with defined attributes.
@@ -116,6 +150,8 @@ class ParseObject {
     attributes?: { [attr: string]: mixed },
     options?: { ignoreValidation: boolean }
   ) {
+    console.log('ISDOT=>', CoreManager.get('DOT_NOTATION'));
+    const proxy = CoreManager.get('DOT_NOTATION') ? new Proxy(this, proxyHandler) : this;
     // Enable legacy initializers
     if (typeof this.initialize === 'function') {
       this.initialize.apply(this, arguments);
@@ -140,9 +176,10 @@ class ParseObject {
         options = attributes;
       }
     }
-    if (toSet && !this.set(toSet, options)) {
+    if (toSet && !proxy.set(toSet, options)) {
       throw new Error("Can't create an invalid Parse Object");
     }
+    return proxy;
   }
 
   /**
@@ -159,21 +196,7 @@ class ParseObject {
 
   get attributes(): AttributeMap {
     const stateController = CoreManager.getObjectStateController();
-    return {...stateController.estimateAttributes(this._getStateIdentifier())};
-  }
-
-  set attributes(value): AttributeMap {
-    const attributesNow = this.attributes;
-    const internal = ["createdAt", "updatedAt", "_localId", "_objCount", "sessionToken"];
-    for (const key in value) {
-      if (internal.includes(key)) {
-        continue;
-      }
-      if (JSON.stringify(attributesNow[key] !== JSON.stringify(value[key]))) {
-        this.set(key, value[key]);
-      }
-    }
-    return this.attributes;
+    return Object.freeze(stateController.estimateAttributes(this._getStateIdentifier()));
   }
 
   /**
