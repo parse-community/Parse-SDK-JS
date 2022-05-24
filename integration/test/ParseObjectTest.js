@@ -2089,7 +2089,7 @@ describe('Parse Object', () => {
     Parse.allowCustomObjectId = false;
   });
 
-  fit('allow dotNotation', async () => {
+  it('allow dotNotation', async () => {
     Parse.dotNotation = true;
     const object = new Parse.Object('TestObject');
     object.foo = 'bar';
