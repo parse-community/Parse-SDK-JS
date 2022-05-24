@@ -159,7 +159,7 @@ class ParseObject {
 
   get attributes(): AttributeMap {
     const stateController = CoreManager.getObjectStateController();
-    return Object.freeze(stateController.estimateAttributes(this._getStateIdentifier()));
+    return {...stateController.estimateAttributes(this._getStateIdentifier())};
   }
 
   set attributes(value): AttributeMap {
