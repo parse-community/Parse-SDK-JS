@@ -150,7 +150,6 @@ class ParseObject {
     attributes?: { [attr: string]: mixed },
     options?: { ignoreValidation: boolean }
   ) {
-    console.log('ISDOT=>', CoreManager.get('DOT_NOTATION'));
     const proxy = CoreManager.get('DOT_NOTATION') ? new Proxy(this, proxyHandler) : this;
     // Enable legacy initializers
     if (typeof this.initialize === 'function') {
