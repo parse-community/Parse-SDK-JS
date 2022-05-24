@@ -2090,8 +2090,9 @@ describe('Parse Object', () => {
   });
 
   it('allow dotNotation', async () => {
+    await reconfigureServer({silent: false});
     Parse.dotNotation = true;
-    const object = new Parse.Object('TestObject');
+    const object = new Parse.Object('TestObject2');
     object.foo = 'bar';
     await object.save();
     expect(object.foo).toBe('bar');
@@ -2103,7 +2104,7 @@ describe('Parse Object', () => {
       'updatedAt',
     ]);
 
-    const query = new Parse.Query('TestObject');
+    const query = new Parse.Query('TestObject2');
     const result = await query.get(object.id);
     expect(result.foo).toBe('bar');
     expect(result.get('foo')).toBe('bar');
