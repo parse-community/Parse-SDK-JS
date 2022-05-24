@@ -162,6 +162,20 @@ class ParseObject {
     return Object.freeze(stateController.estimateAttributes(this._getStateIdentifier()));
   }
 
+  set attributes(value): AttributeMap {
+    const attributesNow = this.attributes;
+    const internal = ["createdAt", "updatedAt", "_localId", "_objCount", "sessionToken"];
+    for (const key in value) {
+      if (internal.includes(key)) {
+        continue;
+      }
+      if (JSON.stringify(attributesNow[key] !== JSON.stringify(value[key]))) {
+        this.set(key, value[key]);
+      }
+    }
+    return this.attributes;
+  }
+
   /**
    * The first time this object was saved on the server.
    *
