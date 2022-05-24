@@ -175,7 +175,7 @@ class ParseObject {
         options = attributes;
       }
     }
-    if (toSet && !proxy.set(toSet, options)) {
+    if (toSet && !this.set(toSet, options)) {
       throw new Error("Can't create an invalid Parse Object");
     }
     return proxy;
