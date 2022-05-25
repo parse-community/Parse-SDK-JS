@@ -2090,7 +2090,6 @@ describe('Parse Object', () => {
   });
 
   it('allow dotNotation', async () => {
-    await reconfigureServer({silent: false});
     Parse.dotNotation = true;
     const object = new Parse.Object('TestObject2');
     object.foo = 'bar';

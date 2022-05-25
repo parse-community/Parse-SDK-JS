@@ -1039,6 +1039,25 @@ describe('Parse User', () => {
     Parse.CoreManager.set('ENCRYPTED_KEY', null);
   });
 
+  it('allow dotNotation', async () => {
+    Parse.dotNotation = true;
+    const user = new Parse.User();
+    const username = uuidv4();
+    user.username = username;
+    user.password = username;
+    user.foo = 'bar'
+    await user.signUp();
+    expect(Object.keys(user.toJSON()).sort()).toEqual([ 'createdAt', 'foo', 'objectId', 'sessionToken', 'updatedAt', 'username' ]);
+    expect(user.username).toBe(username)
+    expect(user.password).toBe(username)
+    expect(user.foo).toBe('bar')
+    const userFromQuery = await new Parse.Query(Parse.User).first();
+    expect(userFromQuery.username).toBe(username);
+    expect(userFromQuery.password).toBeUndefined();
+    expect(userFromQuery.foo).toBe('bar');
+    Parse.dotNotation = false;
+  });
+
   it('fix GHSA-wvh7-5p38-2qfc', async () => {
     Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
