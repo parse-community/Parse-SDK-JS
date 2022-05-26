@@ -1999,6 +1999,7 @@ class ParseObject {
       parentProto = classMap[adjustedClassName].prototype;
     }
     const ParseObjectSubclass = function (attributes, options) {
+      const proxy = CoreManager.get('DOT_NOTATION') ? new Proxy(this, proxyHandler) : this;
       this.className = adjustedClassName;
       this._objCount = objectCount++;
       // Enable legacy initializers
@@ -2011,6 +2012,7 @@ class ParseObject {
           throw new Error("Can't create an invalid Parse Object");
         }
       }
+      return proxy;
     };
     ParseObjectSubclass.className = adjustedClassName;
     ParseObjectSubclass.__super__ = parentProto;
