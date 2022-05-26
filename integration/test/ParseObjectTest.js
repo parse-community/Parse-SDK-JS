@@ -2108,7 +2108,6 @@ describe('Parse Object', () => {
     expect(result.foo).toBe('bar');
     expect(result.get('foo')).toBe('bar');
     expect(result.id).toBe(object.id);
-
     result.foo = 'baz';
     expect(result.get('foo')).toBe('baz');
     await result.save();
@@ -2156,8 +2155,10 @@ describe('Parse Object', () => {
       'objectId',
       'updatedAt',
     ]);
-    const grandparentQuery = await new Parse.Query('DotGrandparent').include('parent', 'parent.child').first();
-    expect(grandparentQuery.parent.child.foo).toEqual('bar3')
+    const grandparentQuery = await new Parse.Query('DotGrandparent')
+      .include('parent', 'parent.child')
+      .first();
+    expect(grandparentQuery.parent.child.foo).toEqual('bar3');
     Parse.dotNotation = false;
   });
 
