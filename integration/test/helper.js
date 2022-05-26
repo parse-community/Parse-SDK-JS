@@ -14,6 +14,22 @@ const mountPath = '/parse';
 const serverURL = 'http://localhost:1337/parse';
 let didChangeConfiguration = false;
 
+/*
+  To generate the auth data below, the Twitter app "GitHub CI Test App" has
+  been created, managed by the @ParsePlatform Twitter account. In case this
+  test starts to fail because the token has become invalid, generate a new
+  token according to the OAuth process described in the Twitter docs[1].
+
+  [1] https://developer.twitter.com/en/docs/authentication/oauth-1-0a/obtaining-user-access-tokens
+*/
+const twitterAuthData = {
+  id: '1506726799266430985',
+  consumer_key: 'jeQw6luN2PEWREtoFDb0FdGYf',
+  consumer_secret: 'VSFENh1X5UC4MLEuduHLtJDnf8Ydsh5KuSR4zZQufFCAGNtzcs',
+  auth_token: '1506726799266430985-NKM9tqVbPXMnLhHTLYB98SNGtxxi6v',
+  auth_token_secret: 'JpDVIINbqV5TK0th9nKiS1IVokZfjRj06FrXxCrkggF07',
+};
+
 const defaultConfiguration = {
   databaseURI: 'mongodb://localhost:27017/integration',
   appId: 'integration',
@@ -34,8 +50,8 @@ const defaultConfiguration = {
       appIds: 'test',
     },
     twitter: {
-      consumer_key: '5QiVwxr8FQHbo5CMw46Z0jquF',
-      consumer_secret: 'p05FDlIRAnOtqJtjIt0xcw390jCcjj56QMdE9B52iVgOEb7LuK',
+      consumer_key: twitterAuthData.consumer_key,
+      consumer_secret: twitterAuthData.consumer_secret,
     },
   },
   verbose: false,
@@ -144,3 +160,5 @@ afterEach(async () => {
     await reconfigureServer();
   }
 });
+
+module.exports = { twitterAuthData };
