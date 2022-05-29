@@ -533,4 +533,13 @@ describe('Parse.ACL', () => {
     const obj1withInclude = await query.first();
     assert(obj1withInclude.get('other').get('ACL'));
   });
+
+  it('prevents save with invalid role name', async () => {
+    expect(() => new Parse.Role(':%#', new Parse.ACL())).toThrow(
+      new Parse.Error(
+        Parse.Error.OTHER_CAUSE,
+        `A role's name can be only contain alphanumeric characters, _, -, and spaces.`
+      )
+    );
+  });
 });

@@ -45,6 +45,15 @@ describe('ParseRole', () => {
     expect(role.getName()).toBe('');
   });
 
+  it('should throw error string with invalid name', () => {
+    expect(() => new ParseRole('invalid:name', new ParseACL())).toThrow(
+      new ParseError(
+        ParseError.OTHER_CAUSE,
+        "A role's name can be only contain alphanumeric characters, _, " + '-, and spaces.'
+      )
+    );
+  });
+
   it('can validate attributes', () => {
     const acl = new ParseACL({ aUserId: { read: true, write: true } });
     const role = new ParseRole('admin', acl);
