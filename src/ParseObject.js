@@ -115,7 +115,7 @@ const proxyHandler = {
       !_internalFields.includes(key.toString()) &&
       key.toString().charAt(0) !== '_'
     ) {
-      receiver.set(key, value);
+      return receiver.set(key, value);
     }
     return Reflect.set(target, key, value, receiver);
   },
