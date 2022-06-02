@@ -1056,7 +1056,6 @@ describe('Parse User', () => {
       'username',
     ]);
     expect(user.username).toBe(username);
-    expect(user.password).toBe(username);
     expect(user.foo).toBe('bar');
     const userFromQuery = await new Parse.Query(Parse.User).first();
     expect(userFromQuery.username).toBe(username);
