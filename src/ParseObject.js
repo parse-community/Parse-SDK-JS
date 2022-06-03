@@ -98,16 +98,15 @@ const _internalFields = Object.freeze([
 const proxyHandler = {
   get(target, key, receiver) {
     const value = target[key];
-    const isAttributes = Object.keys(target.attributes).includes(key);
+    const reflector = Reflect.get(target, key, receiver);
     if (
       typeof value === 'function' ||
       key.toString().charAt(0) === '_' ||
-      _internalFields.includes(key.toString()) ||
-      !isAttributes
+      _internalFields.includes(key.toString())
     ) {
-      return Reflect.get(target, key, receiver);
+      return reflector;
     }
-    return receiver.get(key);
+    return receiver.get(key) ?? reflector;
   },
 
   set(target, key, value, receiver) {
