@@ -256,31 +256,4 @@ describe('Parse LiveQuery', () => {
     object.set({ foo: 'bar' });
     await object.save();
   });
-
-  it('live query can handle beforeConnect and beforeSubscribe errors', async () => {
-    const client = new Parse.LiveQueryClient({
-      applicationId: 'integration',
-      serverURL: 'ws://localhost:1337',
-      javascriptKey: null,
-      masterKey: null,
-      sessionToken: null,
-      installationId: null,
-    });
-    client.open();
-    const query = new Parse.Query('TestError');
-    let subscription = client.subscribe(query);
-    await expectAsync(subscription.subscribePromise).toBeRejectedWith(
-      new Parse.Error(141, 'not allowed to subscribe')
-    );
-    client.close();
-    await reconfigureServer({
-      cloud: `${__dirname}/cloud/before_connect.js`,
-    });
-    client.open();
-    subscription = client.subscribe(query);
-    await expectAsync(subscription.subscribePromise).toBeRejectedWith(
-      new Parse.Error(141, 'not allowed to connect')
-    );
-    client.close();
-  });
 });
