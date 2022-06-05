@@ -431,10 +431,7 @@ class LiveQueryClient extends EventEmitter {
         data.original = ParseObject.fromJSON(data.original, false);
       }
       delete data.object.__type;
-      const parseObject = ParseObject.fromJSON(
-        data.object,
-        !(subscription.query && subscription.query._select) ? override : false
-      );
+      const parseObject = ParseObject.fromJSON(data.object, override);
 
       if (data.original) {
         subscription.emit(data.op, parseObject, data.original, response);
