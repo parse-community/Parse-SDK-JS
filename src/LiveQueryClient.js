@@ -218,13 +218,13 @@ class LiveQueryClient extends EventEmitter {
     const subscription = new LiveQuerySubscription(this.requestId, query, sessionToken);
     this.subscriptions.set(this.requestId, subscription);
     this.requestId += 1;
-    this.connectPromise.then(() => {
-      if (this.connectError) {
-        subscription.subscribePromise.reject(this.connectError);
-        return;
-      }
-      this.socket.send(JSON.stringify(subscribeRequest));
-    });
+    this.connectPromise
+      .then(() => {
+        this.socket.send(JSON.stringify(subscribeRequest));
+      })
+      .catch(error => {
+        subscription.subscribePromise.reject(error);
+      });
 
     return subscription;
   }
@@ -390,8 +390,7 @@ class LiveQueryClient extends EventEmitter {
     case OP_EVENTS.ERROR: {
       const parseError = new ParseError(data.code, data.error);
       if (!this.id) {
-        this.connectError = parseError;
-        this.connectPromise.resolve();
+        this.connectPromise.reject(parseError);
         this.state = CLIENT_STATE.DISCONNECTED;
       }
       if (data.requestId) {
