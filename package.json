@@ -33,7 +33,7 @@
     "@babel/runtime": "7.18.0",
     "idb-keyval": "6.0.3",
     "react-native-crypto-js": "1.0.0",
-    "uuid": "3.4.0",
+    "uuid": "8.3.2",
     "ws": "8.6.0",
     "xmlhttprequest": "1.8.0"
   },

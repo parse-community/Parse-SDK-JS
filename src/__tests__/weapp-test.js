@@ -19,7 +19,7 @@ const mockWeChat = require('./test_helpers/mockWeChat');
 
 global.wx = mockWeChat;
 
-jest.mock('uuid/v4', () => {
+jest.mock('uuid', () => {
   return () => 0;
 });
 
