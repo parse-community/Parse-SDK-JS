@@ -85,7 +85,7 @@
     "parse-server": "git+https://github.com/parse-community/parse-server#alpha",
     "prettier": "2.2.1",
     "regenerator-runtime": "0.13.5",
-    "semantic-release": "17.4.6",
+    "semantic-release": "19.0.3",
     "vinyl-source-stream": "2.0.0"
   },
   "optionalDependencies": {
