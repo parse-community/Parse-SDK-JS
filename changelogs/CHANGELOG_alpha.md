@@ -1,3 +1,17 @@
+## [3.4.3-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/3.4.3-alpha.1...3.4.3-alpha.2) (2022-05-29)
+
+
+### Bug Fixes
+
+* invalid name for `Parse.Role` throws incorrect error ([#1481](https://github.com/parse-community/Parse-SDK-JS/issues/1481)) ([8326a6f](https://github.com/parse-community/Parse-SDK-JS/commit/8326a6f1d7cda0ca8c6f1a3a7ea82448881e118e))
+
+## [3.4.3-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/3.4.2...3.4.3-alpha.1) (2022-05-02)
+
+
+### Bug Fixes
+
+* creating a Parse.File with base64 string fails for some file types ([#1467](https://github.com/parse-community/Parse-SDK-JS/issues/1467)) ([c07d6c9](https://github.com/parse-community/Parse-SDK-JS/commit/c07d6c99968163a72b6ab46e7970b7a5ca4ed540))
+
 ## [3.4.2-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/3.4.1...3.4.2-alpha.1) (2022-04-09)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "3.4.2",
+  "version": "3.4.3-alpha.2",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://parseplatform.org/",
   "keywords": [
@@ -30,11 +30,11 @@
   },
   "dependencies": {
     "@babel/runtime-corejs3": "7.17.8",
-    "@babel/runtime": "7.17.9",
+    "@babel/runtime": "7.18.0",
     "idb-keyval": "6.0.3",
     "react-native-crypto-js": "1.0.0",
     "uuid": "3.4.0",
-    "ws": "7.5.1",
+    "ws": "8.6.0",
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
@@ -82,7 +82,7 @@
     "jsdoc-babel": "0.5.0",
     "lint-staged": "10.5.3",
     "metro-react-native-babel-preset": "0.59.0",
-    "parse-server": "github:parse-community/parse-server#alpha",
+    "parse-server": "git+https://github.com/parse-community/parse-server#alpha",
     "prettier": "2.2.1",
     "regenerator-runtime": "0.13.5",
     "semantic-release": "17.4.6",
