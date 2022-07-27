@@ -66,6 +66,12 @@ describe('ParseFile', () => {
     expect(file._source.type).toBe('');
   });
 
+  it('can create files with base64 encoding (no padding)', () => {
+    const file = new ParseFile('parse.txt', { base64: 'SGVsbG8gV29ybGQh' });
+    expect(file._source.base64).toBe('SGVsbG8gV29ybGQh');
+    expect(file._source.type).toBe('');
+  });
+
   it('can set the default type to be text/plain when using base64', () => {
     const file = new ParseFile('parse.txt', {
       base64: 'data:;base64,ParseA==',
