@@ -42,7 +42,15 @@ export type FileSource =
       type: string,
     };
 
-const dataUriRegexp = /^data:([a-zA-Z]+\/[-a-zA-Z0-9+.]+)(;charset=[a-zA-Z0-9\-\/]*)?;base64,/;
+const base64Regex = new RegExp(
+  '([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/][AQgw]==)|([0-9a-zA-Z+/]{2}[AEIMQUYcgkosw048]=)|([0-9a-zA-Z+/]{4}))',
+  'i'
+);
+
+const dataUriRegex = new RegExp(
+  `^data:([a-zA-Z]+\\/[-a-zA-Z0-9+.]+(;[a-z-]+=[a-zA-Z0-9+.-]+)?)?(;base64)?,(${base64Regex.source})*$`,
+  'i'
+);
 
 function b64Digit(number: number): string {
   if (number < 26) {
@@ -137,26 +145,30 @@ class ParseFile {
           type: specifiedType,
         };
       } else if (data && typeof data.base64 === 'string') {
-        const base64 = data.base64;
-        const commaIndex = base64.indexOf(',');
-
-        if (commaIndex !== -1) {
-          const matches = dataUriRegexp.exec(base64.slice(0, commaIndex + 1));
-          // if data URI with type and charset, there will be 4 matches.
-          this._data = base64.slice(commaIndex + 1);
-          this._source = {
-            format: 'base64',
-            base64: this._data,
-            type: matches[1],
-          };
-        } else {
-          this._data = base64;
-          this._source = {
-            format: 'base64',
-            base64: base64,
-            type: specifiedType,
-          };
+        // Check if data URI or base64 string is valid
+        const validationRegex = new RegExp(base64Regex.source + '|' + dataUriRegex.source, 'i');
+        if (!validationRegex.test(data.base64)) {
+          throw new Error(
+            'Cannot create a Parse.File without valid data URIs or base64 encoded data.'
+          );
         }
+
+        const base64 = data.base64.split(',').slice(-1)[0];
+        let type =
+          specifiedType || data.base64.split(';').slice(0, 1)[0].split(':').slice(1, 2)[0] || '';
+
+        // https://tools.ietf.org/html/rfc2397
+        // If <mediatype> is omitted, it defaults to text/plain;charset=US-ASCII.
+        // As a shorthand, "text/plain" can be omitted but the charset parameter supplied.
+        if (dataUriRegex.test(data.base64)) {
+          type = type || 'text/plain';
+        }
+
+        this._source = {
+          format: 'base64',
+          base64,
+          type,
+        };
       } else {
         throw new TypeError('Cannot create a Parse.File with that data.');
       }

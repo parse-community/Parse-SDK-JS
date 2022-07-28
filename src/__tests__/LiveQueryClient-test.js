@@ -522,6 +522,43 @@ describe('LiveQueryClient', () => {
     spy.mockRestore();
   });
 
+  it('can handle select in websocket payload', () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken',
+    });
+    // Add mock subscription
+    const subscription = new events.EventEmitter();
+    subscription.query = new ParseQuery('Test').select('foo');
+    liveQueryClient.subscriptions.set(1, subscription);
+    const object = new ParseObject('Test');
+    const original = new ParseObject('Test');
+    object.set('key', 'value');
+    original.set('key', 'old');
+    const data = {
+      op: 'update',
+      clientId: 1,
+      requestId: 1,
+      object: object._toFullJSON(),
+      original: original._toFullJSON(),
+    };
+    const event = {
+      data: JSON.stringify(data),
+    };
+
+    const spy = jest
+      .spyOn(ParseObject, 'fromJSON')
+      .mockImplementationOnce(() => original)
+      .mockImplementationOnce(() => object);
+
+    liveQueryClient._handleWebSocketMessage(event);
+    expect(ParseObject.fromJSON.mock.calls[1][1]).toEqual(false);
+    spy.mockRestore();
+  });
+
   it('can handle WebSocket response unset field', async () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',

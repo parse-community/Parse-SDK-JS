@@ -1,0 +1,69 @@
+name: release-automated
+on:
+  push:
+    branches: [ release, alpha, beta, next-major ]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      current_tag: ${{ steps.tag.outputs.current_tag }}
+      trigger_branch: ${{ steps.branch.outputs.trigger_branch }}
+    steps:
+      - name: Determine trigger branch name
+        id: branch
+        run: echo "::set-output name=trigger_branch::${GITHUB_REF#refs/*/}"
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org/
+      - name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+              ${{ runner.os }}-node-
+      - run: npm ci
+      - run: npx semantic-release
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Determine tag on current commit
+        id: tag
+        run: echo "::set-output name=current_tag::$(git describe --tags --abbrev=0 --exact-match || echo '')"
+  
+  docs-publish:
+    needs: release
+    if: needs.release.outputs.current_tag != '' && github.ref == 'refs/heads/release'
+    runs-on: ubuntu-18.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+              ${{ runner.os }}-node-
+      - name: Generate Docs
+        run: |
+          npm ci
+          npm run release_docs
+        env:
+          SOURCE_TAG: ${{ needs.release.outputs.current_tag }}
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3.7.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs

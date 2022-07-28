@@ -62,11 +62,51 @@ describe('OfflineQuery', () => {
   });
 
   it('matches queries relativeTime date field', () => {
-    const date = new Date('1995-12-17T03:24:00');
-    const obj = new ParseObject('Item');
-    obj.set('field', date);
-    const q = new ParseQuery('Item');
-    q.lessThanOrEqualTo('field', { $relativeTime: 'in 0 day' });
+    const now = Date.now();
+    const obj = new ParseObject('Item', {
+      name: 'obj1',
+      ttl: new Date(now + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+    });
+
+    let q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: 'in 1 day' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: '1 day ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.lessThan('ttl', { $relativeTime: '5 days ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(false);
+
+    q = new ParseQuery('Item');
+    q.lessThan('ttl', { $relativeTime: '0 yr 0 wk 5 d 0 hr 0 min 0 sec ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(false);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: 'now' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: 'now' });
+    q.lessThan('ttl', { $relativeTime: 'in 3 day' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: '1 years 3 weeks 1 hours 3 minutes 2 seconds ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: '2 year 2 week 1 hour 4 day 3 minute 2 second ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: '2 yrs 2 wks 1 hrs 3 mins 2 secs ago' });
+    expect(matchesQuery(q.className, obj, [], q)).toBe(true);
+
+    q = new ParseQuery('Item');
+    q.greaterThan('ttl', { $relativeTime: '0 yr 0 wk 0 d 24 hr 3 min 2 sec ago' });
     expect(matchesQuery(q.className, obj, [], q)).toBe(true);
   });
 
@@ -77,6 +117,37 @@ describe('OfflineQuery', () => {
     const q = new ParseQuery('Item');
     q.equalTo('field', { $relativeTime: 'in 0 day' });
     expect(matchesQuery(q.className, obj, [], q)).toBe(false);
+  });
+
+  it('handles invalid queries relativeTime date errors', () => {
+    const obj = new ParseObject('Item');
+    obj.set('field', new Date('1995-12-17T03:24:00'));
+
+    const q = new ParseQuery('Item');
+    q.greaterThan('field', { $relativeTime: '1 unknown ago' });
+    expect(() => matchesQuery(q.className, obj, [], q)).toThrow(
+      "bad $relativeTime (field) value. Invalid interval: 'unknown'"
+    );
+
+    q.greaterThan('field', { $relativeTime: 'in 1 ago' });
+    expect(() => matchesQuery(q.className, obj, [], q)).toThrow(
+      "bad $relativeTime (field) value. Time cannot have both 'in' and 'ago'"
+    );
+
+    q.greaterThan('field', { $relativeTime: 'ago 1 in' });
+    expect(() => matchesQuery(q.className, obj, [], q)).toThrow(
+      "bad $relativeTime (field) value. Time should either start with 'in' or end with 'ago'"
+    );
+
+    q.greaterThan('field', { $relativeTime: '1 ago' });
+    expect(() => matchesQuery(q.className, obj, [], q)).toThrow(
+      'bad $relativeTime (field) value. Invalid time string. Dangling unit or number.'
+    );
+
+    q.greaterThan('field', { $relativeTime: 'in N/A days' });
+    expect(() => matchesQuery(q.className, obj, [], q)).toThrow(
+      "bad $relativeTime (field) value. 'n/a' is not an integer."
+    );
   });
 
   it('matches queries relation', () => {

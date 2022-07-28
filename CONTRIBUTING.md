@@ -52,7 +52,7 @@ Two different frameworks are used as the integration tests leverage a stateful s
 
 #### Unit tests
 
-Those tests are located in [/src/__tests__](/src/__tests__) and are responsible for ensuring each class is behaving as expected, without considering the rest of the system. For example, adding a new query helper function would probably require to add relevant tests that ensure the query is properly serialized to a valid Parse REST query object. Unit tests heavily leverage mocking and are an essential part of our testing harness.
+Those tests are located in [/src/\_\_tests\_\_](/src/__tests__) and are responsible for ensuring each class is behaving as expected, without considering the rest of the system. For example, adding a new query helper function would probably require to add relevant tests that ensure the query is properly serialized to a valid Parse REST query object. Unit tests heavily leverage mocking and are an essential part of our testing harness.
 
 To run unit tests, run `npm test`. If you have the vscode Jest plugin extension (as recommended), you can run your tests by clicking the *Debug* lens that appears near by the test.
 

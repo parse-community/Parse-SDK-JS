@@ -779,7 +779,7 @@ class ParseUser extends ParseObject {
    * Request an email verification.
    *
    * @param {string} email The email address associated with the user that
-   *     forgot their password.
+   *     needs to verify their email.
    * @param {object} options
    * @static
    * @returns {Promise}

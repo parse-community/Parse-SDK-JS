@@ -1,8 +1,7 @@
 name: ci
 on:
   push:
-    branches:
-      - master
+    branches: [ release, alpha, beta, next-major ]
   pull_request:
     branches:
       - '**'
@@ -23,11 +22,13 @@ jobs:
     env:      
       MONGODB_VERSION: 3.6.9
     steps:
+    - name: Fix usage of insecure GitHub protocol
+      run: sudo git config --system url."https://github".insteadOf "git://github"
     - uses: actions/checkout@v2
     - name: Use Node.js
       uses: actions/setup-node@v1
       with:
-        node-version: '10.14'
+        node-version: 14
     - name: Cache Node.js modules
       uses: actions/cache@v2
       with:

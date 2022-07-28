@@ -10,6 +10,7 @@ jest.dontMock('../ParseObject');
 jest.dontMock('../RESTController');
 jest.dontMock('../Socket.weapp');
 jest.dontMock('../Storage');
+jest.dontMock('../uuid');
 jest.dontMock('crypto-js/aes');
 jest.dontMock('./test_helpers/mockWeChat');
 
@@ -17,6 +18,10 @@ const CoreManager = require('../CoreManager');
 const mockWeChat = require('./test_helpers/mockWeChat');
 
 global.wx = mockWeChat;
+
+jest.mock('uuid/v4', () => {
+  return () => 0;
+});
 
 describe('WeChat', () => {
   beforeEach(() => {
@@ -53,6 +58,12 @@ describe('WeChat', () => {
     require('../LiveQueryClient');
     const websocket = CoreManager.getWebSocketController();
     expect(websocket).toEqual(socket);
+  });
+
+  it('load uuid module', () => {
+    const uuidv4 = require('../uuid');
+    expect(uuidv4()).not.toEqual(0);
+    expect(uuidv4()).not.toEqual(uuidv4());
   });
 
   describe('Socket', () => {
