@@ -43,7 +43,7 @@ export type FileSource =
     };
 
 const base64Regex = new RegExp(
-  '([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))',
+  '([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=)|([0-9a-zA-Z+/]{4}))',
   'i'
 );
 
