@@ -60,7 +60,19 @@ describe('ParseFile', () => {
     process.env.PARSE_BUILD = 'node';
   });
 
-  it('can create files with base64 encoding', () => {
+  it('can create files with base64 encoding (no padding)', () => {
+    const file = new ParseFile('parse.txt', { base64: 'YWJj' });
+    expect(file._source.base64).toBe('YWJj');
+    expect(file._source.type).toBe('');
+  });
+
+  it('can create files with base64 encoding (1 padding)', () => {
+    const file = new ParseFile('parse.txt', { base64: 'YWI=' });
+    expect(file._source.base64).toBe('YWI=');
+    expect(file._source.type).toBe('');
+  });
+
+  it('can create files with base64 encoding (2 padding)', () => {
     const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('');
