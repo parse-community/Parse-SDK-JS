@@ -1681,6 +1681,30 @@ describe('ParseUser', () => {
     expect(user.existed()).toBe(true);
   });
 
+  it('can signup with context', async () => {
+    CoreManager.setRESTController({
+      ajax() {},
+      request() {
+        return Promise.resolve(
+          {
+            objectId: 'uid3',
+            username: 'username',
+            sessionToken: '123abc',
+          },
+          200
+        );
+      },
+    });
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+    const context = { a: 'a' };
+    const user = new ParseUser();
+    user.setUsername('name');
+    user.setPassword('pass');
+    await user.signUp(null, { context });
+    expect(controller.request.mock.calls[0][3].context).toEqual(context);
+  });
+
   it('can verify user password', async () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
