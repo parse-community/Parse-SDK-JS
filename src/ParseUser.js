@@ -425,6 +425,12 @@ class ParseUser extends ParseObject {
     if (options.hasOwnProperty('installationId')) {
       signupOptions.installationId = options.installationId;
     }
+    if (
+      options.hasOwnProperty('context') &&
+      Object.prototype.toString.call(options.context) === '[object Object]'
+    ) {
+      signupOptions.context = options.context;
+    }
 
     const controller = CoreManager.getUserController();
     return controller.signUp(this, attrs, signupOptions);

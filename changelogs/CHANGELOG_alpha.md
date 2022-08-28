@@ -1,3 +1,18 @@
+## [3.4.4-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/3.4.4-alpha.1...3.4.4-alpha.2) (2022-08-16)
+
+
+### Bug Fixes
+
+* `Parse.User.signUp()` does not pass context to Cloud Code  ([#1527](https://github.com/parse-community/Parse-SDK-JS/issues/1527)) ([53edcfd](https://github.com/parse-community/Parse-SDK-JS/commit/53edcfd7ad1bd075a6097ba3c129c5f0998ffbfa))
+
+## [3.4.4-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/3.4.3...3.4.4-alpha.1) (2022-07-28)
+
+
+### Bug Fixes
+
+* creating a Parse.File with base64 string fails for some encodings ([#1517](https://github.com/parse-community/Parse-SDK-JS/issues/1517)) ([0439862](https://github.com/parse-community/Parse-SDK-JS/commit/0439862cd83dc37f8f3571b68fdaccb6b11b540d))
+* subscription to a LiveQuery containing `ParseQuery.select` overrides properties ([#1488](https://github.com/parse-community/Parse-SDK-JS/issues/1488)) ([b80eee4](https://github.com/parse-community/Parse-SDK-JS/commit/b80eee4b010b60d37b34b566880ed19f05d4c801))
+
 ## [3.4.3-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/3.4.3-alpha.2...3.4.3-alpha.3) (2022-07-02)
 
 
