@@ -2590,6 +2590,19 @@ describe('ParseObject', () => {
     CoreManager.set('DOT_NOTATION', false);
   });
 
+  it('can delete with dot notation', async () => {
+    CoreManager.set('DOT_NOTATION', true);
+    const obj = new ParseObject('TestObject');
+    obj.name = 'Foo';
+    expect(obj.attributes).toEqual({ name: 'Foo' });
+    expect(obj.get('name')).toBe('Foo');
+    delete obj.name;
+    expect(obj.op('name') instanceof ParseOp.UnsetOp).toEqual(true);
+    expect(obj.get('name')).toBeUndefined();
+    expect(obj.attributes).toEqual({});
+    CoreManager.set('DOT_NOTATION', false);
+  });
+
   it('dot notation should not assign directly', async () => {
     CoreManager.set('DOT_NOTATION', true);
     CoreManager.getRESTController()._setXHR(
@@ -2597,7 +2610,7 @@ describe('ParseObject', () => {
         {
           status: 200,
           response: {
-            objectId: 'P1',
+            objectId: 'P2',
           },
         },
       ])
@@ -2607,7 +2620,7 @@ describe('ParseObject', () => {
     expect(Object.keys(obj)).toEqual(['_objCount', 'className', '_localId']);
     await obj.save();
     expect(obj.name).toBe('Foo');
-    expect(obj.toJSON()).toEqual({ name: 'Foo', objectId: 'P1' });
+    expect(obj.toJSON()).toEqual({ name: 'Foo', objectId: 'P2' });
     expect(obj.attributes).toEqual({ name: 'Foo' });
     expect(obj.get('name')).toBe('Foo');
     expect(Object.keys(obj)).toEqual(['_objCount', 'className', 'id']);
