@@ -990,6 +990,9 @@ class ParseQuery {
     if (options.hasOwnProperty('context') && typeof options.context === 'object') {
       findOptions.context = options.context;
     }
+    if (options.hasOwnProperty('json')) {
+      findOptions.json = options.json;
+    }
 
     let finished = false;
     let previousResults = [];
