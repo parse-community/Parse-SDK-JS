@@ -2399,7 +2399,7 @@ const DefaultController = {
         if (el instanceof ParseFile) {
           filesSaved.push(el.save(options));
         } else if (el instanceof ParseObject) {
-          if (allowCustomObjectId && !el.id) {
+          if (allowCustomObjectId && Object.prototype.hasOwnProperty.call(el, 'id') && !el.id) {
             throw new ParseError(
               ParseError.MISSING_OBJECT_ID,
               'objectId must not be empty, null or undefined'
@@ -2498,7 +2498,7 @@ const DefaultController = {
         });
       });
     } else if (target instanceof ParseObject) {
-      if (allowCustomObjectId && !target.id) {
+      if (allowCustomObjectId && Object.prototype.hasOwnProperty.call(target, 'id') && !target.id) {
         throw new ParseError(
           ParseError.MISSING_OBJECT_ID,
           'objectId must not be empty, null or undefined'
