@@ -2400,10 +2400,7 @@ const DefaultController = {
           filesSaved.push(el.save(options));
         } else if (el instanceof ParseObject) {
           if (allowCustomObjectId && Object.prototype.hasOwnProperty.call(el, 'id') && !el.id) {
-            throw new ParseError(
-              ParseError.MISSING_OBJECT_ID,
-              'objectId must not be empty, null or undefined'
-            );
+            throw new ParseError(ParseError.MISSING_OBJECT_ID, 'objectId must not be empty');
           }
           pending.push(el);
         }
@@ -2499,10 +2496,7 @@ const DefaultController = {
       });
     } else if (target instanceof ParseObject) {
       if (allowCustomObjectId && Object.prototype.hasOwnProperty.call(target, 'id') && !target.id) {
-        throw new ParseError(
-          ParseError.MISSING_OBJECT_ID,
-          'objectId must not be empty, null or undefined'
-        );
+        throw new ParseError(ParseError.MISSING_OBJECT_ID, 'objectId must not be empty');
       }
       // generate _localId in case if cascadeSave=false
       target._getId();
