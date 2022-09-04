@@ -3810,23 +3810,24 @@ describe('ParseObject pin', () => {
   it('can allowCustomObjectId', async done => {
     CoreManager.set('ALLOW_CUSTOM_OBJECT_ID', true);
     const o = new ParseObject('Person');
+    o.id = '';
     let params = o._getSaveParams();
     expect(params).toEqual({
       method: 'POST',
-      body: { objectId: undefined },
+      body: { objectId: '' },
       path: 'classes/Person',
     });
     try {
       await o.save();
       done.fail();
     } catch (error) {
-      expect(error.message).toBe('objectId must not be empty, null or undefined');
+      expect(error.message).toBe('objectId must not be empty');
     }
     try {
       await ParseObject.saveAll([o]);
       done.fail();
     } catch (error) {
-      expect(error.message).toBe('objectId must not be empty, null or undefined');
+      expect(error.message).toBe('objectId must not be empty');
     }
     o._finishFetch({
       objectId: 'CUSTOM_ID',

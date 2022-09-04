@@ -2063,18 +2063,32 @@ describe('Parse Object', () => {
   it('allowCustomObjectId', async () => {
     await reconfigureServer({ allowCustomObjectId: true });
     Parse.allowCustomObjectId = true;
-    const customId = `${Date.now()}`;
-    const object = new Parse.Object('TestObject');
+
+    // Try to save without passing objectId
+    const object1 = new Parse.Object('TestObject');
     try {
-      await object.save();
+      await object1.save();
+    } catch (error) {
+      fail();
+    }
+
+    // Try to save empty objectId
+    const object2 = new Parse.Object('TestObject');
+    object2.id = '';
+    try {
+      await object2.save();
       fail();
     } catch (error) {
-      expect(error.message).toBe('objectId must not be empty, null or undefined');
+      expect(error.message).toBe('objectId must not be empty');
     }
-    object.id = customId;
-    object.set('foo', 'bar');
-    await object.save();
-    expect(object.id).toBe(customId);
+
+    // Try to save custom objectId
+    const customId = `${Date.now()}`;
+    const object3 = new Parse.Object('TestObject');
+    object3.id = customId;
+    object3.set('foo', 'bar');
+    await object3.save();
+    expect(object3.id).toBe(customId);
 
     const query = new Parse.Query('TestObject');
     const result = await query.get(customId);
@@ -2092,17 +2106,23 @@ describe('Parse Object', () => {
   it('allowCustomObjectId saveAll', async () => {
     await reconfigureServer({ allowCustomObjectId: true });
     Parse.allowCustomObjectId = true;
-    const customId1 = `${Date.now()}`;
-    const customId2 = `${Date.now()}`;
+
+    // Try to save empty objectId
     const obj1 = new TestObject({ foo: 'bar' });
+    obj1.id = '';
     const obj2 = new TestObject({ foo: 'baz' });
+    obj2.id = '';
     try {
       await Parse.Object.saveAll([obj1, obj2]);
       fail();
     } catch (error) {
-      expect(error.message).toBe('objectId must not be empty, null or undefined');
+      expect(error.message).toBe('objectId must not be empty');
     }
+
+    // Try to save custom objectId
+    const customId1 = `${Date.now()}`;
     obj1.id = customId1;
+    const customId2 = `${Date.now()}`;
     obj2.id = customId2;
     await Parse.Object.saveAll([obj1, obj2]);
     expect(obj1.id).toBe(customId1);
