@@ -2112,10 +2112,7 @@ describe('Parse Object', () => {
     obj1.id = '';
     const obj2 = new TestObject({ foo: 'baz' });
     obj2.id = '';
-    try {
-      await Parse.Object.saveAll([obj1, obj2]);
-      fail();
-    } catch (error) {
+    await expectAsync(Parse.Object.saveAll([obj1, obj2])).toBeRejectedWith(new ParseError(ParseError.MISSING_OBJECT_ID, 'objectId must not be empty'))
       expect(error.message).toBe('objectId must not be empty');
     }
 
