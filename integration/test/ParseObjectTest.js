@@ -2067,10 +2067,7 @@ describe('Parse Object', () => {
     // Try to save without passing objectId
     const object1 = new Parse.Object('TestObject');
     try {
-      await object1.save();
-    } catch (error) {
-      fail();
-    }
+    await object1.save();
 
     // Try to save empty objectId
     const object2 = new Parse.Object('TestObject');
