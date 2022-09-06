@@ -2066,7 +2066,6 @@ describe('Parse Object', () => {
 
     // Try to save without passing objectId
     const object1 = new Parse.Object('TestObject');
-    try {
     await object1.save();
 
     // Try to save empty objectId
@@ -2109,7 +2108,14 @@ describe('Parse Object', () => {
     obj1.id = '';
     const obj2 = new TestObject({ foo: 'baz' });
     obj2.id = '';
-    await expectAsync(Parse.Object.saveAll([obj1, obj2])).toBeRejectedWith(new ParseError(ParseError.MISSING_OBJECT_ID, 'objectId must not be empty'))
+    await expectAsync(Parse.Object.saveAll([obj1, obj2])).toBeRejectedWith(
+      new Parse.Error(Parse.Error.MISSING_OBJECT_ID, 'objectId must not be empty')
+    );
+
+    try {
+      await Parse.Object.saveAll([obj1, obj2]);
+      fail();
+    } catch (error) {
       expect(error.message).toBe('objectId must not be empty');
     }
 
