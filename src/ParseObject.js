@@ -2376,7 +2376,6 @@ const DefaultController = {
 
     const RESTController = CoreManager.getRESTController();
     const stateController = CoreManager.getObjectStateController();
-    const allowCustomObjectId = CoreManager.get('ALLOW_CUSTOM_OBJECT_ID');
 
     options = options || {};
     options.returnStatus = options.returnStatus || true;
@@ -2399,9 +2398,6 @@ const DefaultController = {
         if (el instanceof ParseFile) {
           filesSaved.push(el.save(options));
         } else if (el instanceof ParseObject) {
-          if (allowCustomObjectId && Object.prototype.hasOwnProperty.call(el, 'id') && !el.id) {
-            throw new ParseError(ParseError.MISSING_OBJECT_ID, 'objectId must not be empty');
-          }
           pending.push(el);
         }
       });
@@ -2495,9 +2491,6 @@ const DefaultController = {
         });
       });
     } else if (target instanceof ParseObject) {
-      if (allowCustomObjectId && Object.prototype.hasOwnProperty.call(target, 'id') && !target.id) {
-        throw new ParseError(ParseError.MISSING_OBJECT_ID, 'objectId must not be empty');
-      }
       // generate _localId in case if cascadeSave=false
       target._getId();
       const localId = target._localId;
