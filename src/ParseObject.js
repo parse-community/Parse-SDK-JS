@@ -90,16 +90,17 @@ const proxyHandler = {
   get(target, key, receiver) {
     const value = target[key];
     const reflector = Reflect.get(target, key, receiver);
-    if (proxyHandler._isInternal(key, value)) {
+    if (reflector || proxyHandler._isInternal(key, value)) {
       return reflector;
     }
-    return receiver.get(key) ?? reflector;
+    return receiver.get(key);
   },
 
   set(target, key, value, receiver) {
     const current = target[key];
-    if (proxyHandler._isInternal(key, current)) {
-      return Reflect.set(target, key, value, receiver);
+    const reflector = Reflect.set(target, key, value, receiver);
+    if (reflector || proxyHandler._isInternal(key, current)) {
+      return reflector;
     }
     return receiver.set(key, value);
   },
