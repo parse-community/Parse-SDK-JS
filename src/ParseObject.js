@@ -98,9 +98,8 @@ const proxyHandler = {
 
   set(target, key, value, receiver) {
     const current = target[key];
-    const reflector = Reflect.set(target, key, value, receiver);
-    if (reflector || proxyHandler._isInternal(key, current)) {
-      return reflector;
+    if (proxyHandler._isInternal(key, current)) {
+      return Reflect.set(target, key, value, receiver);
     }
     return receiver.set(key, value);
   },
