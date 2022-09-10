@@ -1,3 +1,11 @@
+# [3.5.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/3.4.4-alpha.2...3.5.0-alpha.1) (2022-09-08)
+
+
+### Features
+
+* add `json` option to `Parse.Query.each()` ([#1539](https://github.com/parse-community/Parse-SDK-JS/issues/1539)) ([89fd5ec](https://github.com/parse-community/Parse-SDK-JS/commit/89fd5ec6a8e210de3946434c6c88d6de87b6635c))
+* add json option to query.each ([299fb0d](https://github.com/parse-community/Parse-SDK-JS/commit/299fb0d49cbbd3c95c2e8a61744bd03e93c33d36))
+
 ## [3.4.4-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/3.4.4-alpha.1...3.4.4-alpha.2) (2022-08-16)
 
 
