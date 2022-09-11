@@ -2074,19 +2074,13 @@ describe('Parse Object', () => {
     // Try to save empty objectId
     object2.id = '';
     await expectAsync(object2.save()).toBeRejectedWith(
-      new Parse.Error(
-        Parse.Error.MISSING_OBJECT_ID,
-        'objectId must not be empty, null or undefined'
-      )
+      new Parse.Error(Parse.Error.MISSING_OBJECT_ID, 'objectId must not be empty or null')
     );
 
     // Try to save null objectId
     object2.id = null;
     await expectAsync(object2.save()).toBeRejectedWith(
-      new Parse.Error(
-        Parse.Error.MISSING_OBJECT_ID,
-        'objectId must not be empty, null or undefined'
-      )
+      new Parse.Error(Parse.Error.MISSING_OBJECT_ID, 'objectId must not be empty or null')
     );
 
     // Try to save custom objectId
@@ -2122,20 +2116,14 @@ describe('Parse Object', () => {
     obj1.id = '';
     obj2.id = '';
     await expectAsync(Parse.Object.saveAll([obj1, obj2])).toBeRejectedWith(
-      new Parse.Error(
-        Parse.Error.MISSING_OBJECT_ID,
-        'objectId must not be empty, null or undefined'
-      )
+      new Parse.Error(Parse.Error.MISSING_OBJECT_ID, 'objectId must not be empty or null')
     );
 
     // Try to save null objectId
     obj1.id = null;
     obj2.id = null;
     await expectAsync(Parse.Object.saveAll([obj1, obj2])).toBeRejectedWith(
-      new Parse.Error(
-        Parse.Error.MISSING_OBJECT_ID,
-        'objectId must not be empty, null or undefined'
-      )
+      new Parse.Error(Parse.Error.MISSING_OBJECT_ID, 'objectId must not be empty or null')
     );
 
     // Try to save custom objectId

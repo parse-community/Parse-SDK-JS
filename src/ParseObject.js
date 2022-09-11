@@ -2376,6 +2376,7 @@ const DefaultController = {
 
     const RESTController = CoreManager.getRESTController();
     const stateController = CoreManager.getObjectStateController();
+    const allowCustomObjectId = CoreManager.get('ALLOW_CUSTOM_OBJECT_ID');
 
     options = options || {};
     options.returnStatus = options.returnStatus || true;
@@ -2412,6 +2413,13 @@ const DefaultController = {
             const batch = [];
             const nextPending = [];
             pending.forEach(el => {
+              if (allowCustomObjectId && Object.prototype.hasOwnProperty.call(el, 'id') && !el.id) {
+                throw new ParseError(
+                  ParseError.MISSING_OBJECT_ID,
+                  'objectId must not be empty or null'
+                );
+              }
+
               if (batch.length < batchSize && canBeSerialized(el)) {
                 batch.push(el);
               } else {
@@ -2491,6 +2499,9 @@ const DefaultController = {
         });
       });
     } else if (target instanceof ParseObject) {
+      if (allowCustomObjectId && Object.prototype.hasOwnProperty.call(target, 'id') && !target.id) {
+        throw new ParseError(ParseError.MISSING_OBJECT_ID, 'objectId must not be empty or null');
+      }
       // generate _localId in case if cascadeSave=false
       target._getId();
       const localId = target._localId;
