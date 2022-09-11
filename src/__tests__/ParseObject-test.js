@@ -3821,13 +3821,13 @@ describe('ParseObject pin', () => {
       await o.save();
       done.fail();
     } catch (error) {
-      expect(error.message).toBe('objectId must not be empty');
+      expect(error.message).toBe('objectId must not be empty or null');
     }
     try {
       await ParseObject.saveAll([o]);
       done.fail();
     } catch (error) {
-      expect(error.message).toBe('objectId must not be empty');
+      expect(error.message).toBe('objectId must not be empty or null');
     }
     o._finishFetch({
       objectId: 'CUSTOM_ID',
