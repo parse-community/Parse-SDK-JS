@@ -2060,7 +2060,7 @@ describe('Parse Object', () => {
     expect(obj.get('string')).toBeInstanceOf(String);
   });
 
-  it('allowCustomObjectId', async done => {
+  it('allowCustomObjectId', async () => {
     await reconfigureServer({ allowCustomObjectId: true });
     Parse.allowCustomObjectId = true;
 
@@ -2101,11 +2101,9 @@ describe('Parse Object', () => {
     const afterSave = await query.get(customId);
     expect(afterSave.get('foo')).toBe('baz');
     Parse.allowCustomObjectId = false;
-
-    done();
   });
 
-  it('allowCustomObjectId saveAll', async done => {
+  it('allowCustomObjectId saveAll', async () => {
     await reconfigureServer({ allowCustomObjectId: true });
     Parse.allowCustomObjectId = true;
 
@@ -2141,7 +2139,5 @@ describe('Parse Object', () => {
       expect([customId1, customId2].includes(result.id));
     });
     Parse.allowCustomObjectId = false;
-
-    done();
   });
 });
