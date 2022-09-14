@@ -63,19 +63,19 @@ describe('ParseFile', () => {
   it('can create files with base64 encoding (no padding)', () => {
     const file = new ParseFile('parse.txt', { base64: 'YWJj' });
     expect(file._source.base64).toBe('YWJj');
-    expect(file._source.type).toBe('');
+    expect(file._source.type).toBe('text/plain');
   });
 
   it('can create files with base64 encoding (1 padding)', () => {
     const file = new ParseFile('parse.txt', { base64: 'YWI=' });
     expect(file._source.base64).toBe('YWI=');
-    expect(file._source.type).toBe('');
+    expect(file._source.type).toBe('text/plain');
   });
 
   it('can create files with base64 encoding (2 padding)', () => {
     const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     expect(file._source.base64).toBe('ParseA==');
-    expect(file._source.type).toBe('');
+    expect(file._source.type).toBe('text/plain');
   });
 
   it('can set the default type to be text/plain when using base64', () => {
@@ -164,12 +164,6 @@ describe('ParseFile', () => {
     expect(function () {
       new ParseFile('parse.txt', 'string');
     }).toThrow('Cannot create a Parse.File with that data.');
-
-    expect(function () {
-      new ParseFile('parse.txt', {
-        base64: 'abc',
-      });
-    }).toThrow('Cannot create a Parse.File without valid data URIs or base64 encoded data.');
   });
 
   it('throws with invalid base64', () => {
