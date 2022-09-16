@@ -194,6 +194,15 @@ describe('ParseSchema', () => {
     }
   });
 
+  it('can add date field with default value', () => {
+    const schema = new ParseSchema('NewSchemaTest');
+    const date = new Date();
+    schema.addDate('testField', { defaultValue: date });
+    schema.addField('testField2', 'Date', { defaultValue: date });
+    expect(schema._fields.testField.defaultValue).toEqual({ __type: 'Date', iso: date });
+    expect(schema._fields.testField2.defaultValue).toEqual({ __type: 'Date', iso: date });
+  });
+
   it('cannot add index with null name', done => {
     try {
       const schema = new ParseSchema('SchemaTest');
