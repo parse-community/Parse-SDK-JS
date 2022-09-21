@@ -1,3 +1,10 @@
+# [3.5.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/3.5.0-alpha.3...3.5.0-alpha.4) (2022-09-21)
+
+
+### Features
+
+* generate `Parse.Object.objectId` automatically when `allowCustomObjectId` is enabled and no `objectId` is passed ([#1540](https://github.com/parse-community/Parse-SDK-JS/issues/1540)) ([68f3ff5](https://github.com/parse-community/Parse-SDK-JS/commit/68f3ff5b9a471648dcd07d35c706004eaaa173ec))
+
 # [3.5.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/3.5.0-alpha.2...3.5.0-alpha.3) (2022-09-14)
 
 
