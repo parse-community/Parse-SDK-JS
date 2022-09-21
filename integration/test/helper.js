@@ -72,6 +72,7 @@ const defaultConfiguration = {
     enableForAuthenticatedUser: true,
   },
   revokeSessionOnPasswordReset: false,
+  allowCustomObjectId: false,
 };
 
 const openConnections = {};
