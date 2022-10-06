@@ -86,6 +86,50 @@ function getServerUrlPath() {
   const url = serverUrl.replace(/https?:\/\//, '');
   return url.substr(url.indexOf('/'));
 }
+const nestedHandler = {
+  updateParent(key, value) {
+    const levels = this._path.split('.');
+    levels.push(key);
+    const topLevel = levels[0];
+    levels.shift();
+    const scope = JSON.parse(JSON.stringify(this._parent[topLevel]));
+    let target = scope;
+    const max_level = levels.length - 1;
+    levels.some((level, i) => {
+      if (typeof level === 'undefined') {
+        return true;
+      }
+      if (i === max_level) {
+        target[level] = value;
+      } else {
+        const obj = target[level] || {};
+        target = obj;
+      }
+    });
+    this._parent[topLevel] = scope;
+  },
+  get(target, key, receiver) {
+    const reflector = Reflect.get(target, key, receiver);
+    const prop = target[key];
+    if (Object.prototype.toString.call(prop) === '[object Object]') {
+      const thisHandler = { ...nestedHandler };
+      thisHandler._path = `${this._path}.${key}`;
+      thisHandler._parent = this._parent;
+      return new Proxy({ ...prop }, thisHandler);
+    }
+    return reflector;
+  },
+  set(target, key, value) {
+    target[key] = value;
+    this.updateParent(key, value);
+    return true;
+  },
+  deleteProperty(target, key) {
+    const response = delete target[key];
+    this.updateParent(key);
+    return response;
+  },
+};
 const proxyHandler = {
   get(target, key, receiver) {
     const value = target[key];
@@ -93,7 +137,14 @@ const proxyHandler = {
     if (reflector || proxyHandler._isInternal(key, value)) {
       return reflector;
     }
-    return receiver.get(key);
+    const getValue = receiver.get(key);
+    if (Object.prototype.toString.call(getValue) === '[object Object]') {
+      const thisHandler = { ...nestedHandler };
+      thisHandler._path = key;
+      thisHandler._parent = receiver;
+      return new Proxy({ ...getValue }, thisHandler);
+    }
+    return getValue ?? reflector;
   },
 
   set(target, key, value, receiver) {
@@ -1146,6 +1197,19 @@ class ParseObject {
           keysToRevert.push(key);
         } else {
           throw new Error('Parse.Object#revert expects either no, or a list of string, arguments.');
+        }
+      }
+    }
+    if (CoreManager.get('DOT_NOTATION')) {
+      const fields = keysToRevert && keysToRevert.length ? [...keysToRevert] : this.dirtyKeys();
+      const cache = CoreManager.getObjectStateController().getObjectCache(
+        this._getStateIdentifier()
+      );
+      for (const field of fields) {
+        try {
+          this[field] = encode(JSON.parse(cache[field]));
+        } catch (e) {
+          this[field] = encode(cache[field]);
         }
       }
     }

@@ -2590,6 +2590,34 @@ describe('ParseObject', () => {
     CoreManager.set('DOT_NOTATION', false);
   });
 
+  it('can set and revert deep with dot notation', async () => {
+    CoreManager.set('DOT_NOTATION', true);
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: { objectId: 'I1', nested: { foo: { a: 1 } } },
+        },
+      ])
+    );
+    const object = await new ParseObject('Test').save();
+    expect(object.id).toBe('I1');
+    expect(object.nested.foo).toEqual({ a: 1 });
+    object.a = '123';
+    object.nested.foo.a = 2;
+    expect(object.nested.foo).toEqual({ a: 2 });
+    expect(object.dirtyKeys()).toEqual(['a', 'nested']);
+    object.revert('a');
+    expect(object.dirtyKeys()).toEqual(['nested']);
+    object.revert();
+    expect(object.nested.foo).toEqual({ a: 1 });
+    expect(object.a).toBeUndefined();
+    expect(object.dirtyKeys()).toEqual([]);
+    object.nested.foo.a = 2;
+    expect(object.nested.foo).toEqual({ a: 2 });
+    CoreManager.set('DOT_NOTATION', false);
+  });
+
   it('can delete with dot notation', async () => {
     CoreManager.set('DOT_NOTATION', true);
     const obj = new ParseObject('TestObject');
@@ -2600,6 +2628,14 @@ describe('ParseObject', () => {
     expect(obj.op('name') instanceof ParseOp.UnsetOp).toEqual(true);
     expect(obj.get('name')).toBeUndefined();
     expect(obj.attributes).toEqual({});
+    CoreManager.set('DOT_NOTATION', false);
+  });
+
+  it('can delete nested keys dot notation', async () => {
+    CoreManager.set('DOT_NOTATION', true);
+    const obj = new ParseObject('TestObject', { name: { foo: { bar: 'a' } } });
+    delete obj.name.foo.bar;
+    expect(obj.name.foo).toEqual({});
     CoreManager.set('DOT_NOTATION', false);
   });
 
