@@ -95,9 +95,10 @@ const nestedHandler = {
     const scope = JSON.parse(JSON.stringify(this._parent[topLevel]));
     let target = scope;
     const max_level = levels.length - 1;
-    levels.some((level, i) => {
+    for (let i = 0; i < levels.length; i++) {
+      const level = levels[i];
       if (typeof level === 'undefined') {
-        return true;
+        break;
       }
       if (i === max_level) {
         target[level] = value;
@@ -105,7 +106,7 @@ const nestedHandler = {
         const obj = target[level] || {};
         target = obj;
       }
-    });
+    }
     this._parent[topLevel] = scope;
   },
   get(target, key, receiver) {
@@ -152,7 +153,9 @@ const proxyHandler = {
     if (proxyHandler._isInternal(key, current)) {
       return Reflect.set(target, key, value, receiver);
     }
-    return receiver.set(key, value);
+    const returnValue = receiver.set(key, value);
+    receiver.dirtyKeys = receiver.dirtyKeys.bind(receiver);
+    return returnValue;
   },
 
   deleteProperty(target, key) {
@@ -1212,6 +1215,7 @@ class ParseObject {
           this[field] = encode(cache[field]);
         }
       }
+      this.dirtyKeys = this.dirtyKeys.bind(this);
     }
     this._clearPendingOps(keysToRevert);
   }
