@@ -16,6 +16,7 @@ jest.dontMock('../LocalDatastore');
 jest.dontMock('crypto-js/aes');
 jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
+global.indexedDB = require('./test_helpers/mockIndexedDB');
 const CoreManager = require('../CoreManager');
 const EventuallyQueue = require('../EventuallyQueue');
 const Parse = require('../Parse');
@@ -240,7 +241,6 @@ describe('Parse module', () => {
   });
 
   it('can get IndexedDB storage', () => {
-    console.log(Parse.IndexedDB);
     expect(Parse.IndexedDB).toBeDefined();
     CoreManager.setStorageController(Parse.IndexedDB);
     const currentStorage = CoreManager.getStorageController();
