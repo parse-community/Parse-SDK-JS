@@ -5,7 +5,7 @@
 
 import { createStore, del, set, get, clear, keys } from 'idb-keyval';
 
-if (window && window.indexedDB) {
+if (typeof window !== 'undefined' && window.indexedDB) {
   const ParseStore = createStore('parseDB', 'parseStore');
 
   const IndexedDBStorageController = {
