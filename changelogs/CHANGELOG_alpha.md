@@ -1,3 +1,10 @@
+# [3.5.0-alpha.5](https://github.com/parse-community/Parse-SDK-JS/compare/3.5.0-alpha.4...3.5.0-alpha.5) (2022-10-11)
+
+
+### Features
+
+* localDatastore support for unsorted distance queries ([#1570](https://github.com/parse-community/Parse-SDK-JS/issues/1570)) ([ea3e75f](https://github.com/parse-community/Parse-SDK-JS/commit/ea3e75f1bdeb6e8c3b3e46c909f827daef1978f0))
+
 # [3.5.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/3.5.0-alpha.3...3.5.0-alpha.4) (2022-09-21)
 
 
