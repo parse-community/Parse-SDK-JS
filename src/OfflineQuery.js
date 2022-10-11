@@ -521,15 +521,17 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
         const polygon = new ParsePolygon(points);
         return polygon.containsPoint(object[key]);
       }
-      // $centerSphere
-      const [WGS84Point, maxDistance] = compareTo.$centerSphere;
-      const centerPoint = new ParseGeoPoint({
-        latitude: WGS84Point[1],
-        longitude: WGS84Point[0],
-      });
-      const point = new ParseGeoPoint(object[key]);
-      const distance = point.radiansTo(centerPoint);
-      return distance <= maxDistance;
+      if (compareTo.$centerSphere) {
+        const [WGS84Point, maxDistance] = compareTo.$centerSphere;
+        const centerPoint = new ParseGeoPoint({
+          latitude: WGS84Point[1],
+          longitude: WGS84Point[0],
+        });
+        const point = new ParseGeoPoint(object[key]);
+        const distance = point.radiansTo(centerPoint);
+        return distance <= maxDistance;
+      }
+      break;
     }
     case '$geoIntersects': {
       const polygon = new ParsePolygon(object[key].coordinates);
