@@ -2735,6 +2735,26 @@ function runTest(controller) {
       assert.equal(objects.length, 1);
     });
 
+    it(`${controller.name} supports withinKilometers`, async () => {
+      const object = new TestObject();
+      const firstPoint = new Parse.GeoPoint({ latitude: 40.0, longitude: -30.0 });
+      object.set({ location: firstPoint });
+      await object.save();
+      await object.pin();
+
+      const sorted = false;
+      const query = new Parse.Query(TestObject);
+      query.withinKilometers(
+        'location',
+        new Parse.GeoPoint({ latitude: 40.0, longitude: -30.0 }),
+        2,
+        sorted
+      );
+      query.fromLocalDatastore();
+      const results = await query.find();
+      assert.equal(results.length, 1);
+    });
+
     it(`${controller.name} supports withinPolygon`, async () => {
       const sacramento = new TestObject();
       sacramento.set('location', new Parse.GeoPoint(38.52, -121.5));
