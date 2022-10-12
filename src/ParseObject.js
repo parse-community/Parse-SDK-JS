@@ -101,7 +101,11 @@ const nestedHandler = {
         break;
       }
       if (i === max_level) {
-        target[level] = value;
+        if (value == null) {
+          delete target[level];
+        } else {
+          target[level] = value;
+        }
       } else {
         const obj = target[level] || {};
         target = obj;
@@ -112,7 +116,10 @@ const nestedHandler = {
   get(target, key, receiver) {
     const reflector = Reflect.get(target, key, receiver);
     const prop = target[key];
-    if (Object.prototype.toString.call(prop) === '[object Object]' && !prop instanceof ParseObject) {
+    if (
+      Object.prototype.toString.call(prop) === '[object Object]' &&
+      !(prop instanceof ParseObject)
+    ) {
       const thisHandler = { ...nestedHandler };
       thisHandler._path = `${this._path}.${key}`;
       thisHandler._parent = this._parent;
@@ -139,7 +146,10 @@ const proxyHandler = {
       return reflector;
     }
     const getValue = receiver.get(key);
-    if (Object.prototype.toString.call(getValue) === '[object Object]' && !getValue instanceof ParseObject) {
+    if (
+      Object.prototype.toString.call(getValue) === '[object Object]' &&
+      !(getValue instanceof ParseObject)
+    ) {
       const thisHandler = { ...nestedHandler };
       thisHandler._path = key;
       thisHandler._parent = receiver;
