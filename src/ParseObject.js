@@ -163,9 +163,15 @@ const proxyHandler = {
     if (proxyHandler._isInternal(key, current)) {
       return Reflect.set(target, key, value, receiver);
     }
-    const returnValue = receiver.set(key, value);
+    if (
+      Object.prototype.toString.call(value) === '[object Object]' &&
+      value._proxy_op === 'fetch'
+    ) {
+      return true;
+    }
+    receiver.set(key, value);
     receiver.dirtyKeys = receiver.dirtyKeys.bind(receiver);
-    return returnValue;
+    return true;
   },
 
   deleteProperty(target, key) {
@@ -483,6 +489,14 @@ class ParseObject {
       decoded.updatedAt = decoded.createdAt;
     }
     stateController.commitServerChanges(this._getStateIdentifier(), decoded);
+    if (CoreManager.get('DOT_NOTATION')) {
+      for (const field in serverData) {
+        if (['objectId', 'ACL', 'createdAt', 'updatedAt'].includes(field)) {
+          continue;
+        }
+        this[field] = { _proxy_op: 'fetch' };
+      }
+    }
   }
 
   _setExisted(existed: boolean) {
@@ -1213,21 +1227,13 @@ class ParseObject {
         }
       }
     }
+    this._clearPendingOps(keysToRevert);
     if (CoreManager.get('DOT_NOTATION')) {
-      const fields = keysToRevert && keysToRevert.length ? [...keysToRevert] : this.dirtyKeys();
-      const cache = CoreManager.getObjectStateController().getObjectCache(
-        this._getStateIdentifier()
-      );
-      for (const field of fields) {
-        try {
-          this[field] = encode(JSON.parse(cache[field]));
-        } catch (e) {
-          this[field] = encode(cache[field]);
-        }
+      for (const field of keysToRevert) {
+        this[field] = { _proxy_op: 'fetch' };
       }
       this.dirtyKeys = this.dirtyKeys.bind(this);
     }
-    this._clearPendingOps(keysToRevert);
   }
 
   /**
