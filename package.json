@@ -91,6 +91,11 @@
   "optionalDependencies": {
     "crypto-js": "4.1.1"
   },
+  "overrides": {
+    "parse-server": {
+      "parse": "^3.5.0-alpha.6"
+    }
+  },
   "scripts": {
     "build": "node build_releases.js",
     "release": "node build_releases.js && npm publish",
