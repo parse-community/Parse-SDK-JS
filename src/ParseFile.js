@@ -42,16 +42,6 @@ export type FileSource =
       type: string,
     };
 
-const base64Regex = new RegExp(
-  '([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))',
-  'i'
-);
-
-const dataUriRegex = new RegExp(
-  `^data:([a-zA-Z]+\\/[-a-zA-Z0-9+.]+(;[a-z-]+=[a-zA-Z0-9+.-]+)?)?(;base64)?,(${base64Regex.source})*$`,
-  'i'
-);
-
 function b64Digit(number: number): string {
   if (number < 26) {
     return String.fromCharCode(65 + number);
@@ -145,29 +135,15 @@ class ParseFile {
           type: specifiedType,
         };
       } else if (data && typeof data.base64 === 'string') {
-        // Check if data URI or base64 string is valid
-        const validationRegex = new RegExp(base64Regex.source + '|' + dataUriRegex.source, 'i');
-        if (!validationRegex.test(data.base64)) {
-          throw new Error(
-            'Cannot create a Parse.File without valid data URIs or base64 encoded data.'
-          );
-        }
-
         const base64 = data.base64.split(',').slice(-1)[0];
-        let type =
-          specifiedType || data.base64.split(';').slice(0, 1)[0].split(':').slice(1, 2)[0] || '';
-
-        // https://tools.ietf.org/html/rfc2397
-        // If <mediatype> is omitted, it defaults to text/plain;charset=US-ASCII.
-        // As a shorthand, "text/plain" can be omitted but the charset parameter supplied.
-        if (dataUriRegex.test(data.base64)) {
-          type = type || 'text/plain';
-        }
-
+        const dataType =
+          specifiedType ||
+          data.base64.split(';').slice(0, 1)[0].split(':').slice(1, 2)[0] ||
+          'text/plain';
         this._source = {
           format: 'base64',
           base64,
-          type,
+          type: dataType,
         };
       } else {
         throw new TypeError('Cannot create a Parse.File with that data.');

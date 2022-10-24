@@ -1,10 +1,11 @@
 /**
  * @flow
  */
+/* global window */
 
 import { createStore, del, set, get, clear, keys } from 'idb-keyval';
 
-try {
+if (typeof window !== 'undefined' && window.indexedDB) {
   const ParseStore = createStore('parseDB', 'parseStore');
 
   const IndexedDBStorageController = {
@@ -27,6 +28,7 @@ try {
   };
 
   module.exports = IndexedDBStorageController;
-} catch (e) {
+} else {
   // IndexedDB not supported
+  module.exports = undefined;
 }

@@ -16,11 +16,18 @@ jest.dontMock('../LocalDatastore');
 jest.dontMock('crypto-js/aes');
 jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
+global.indexedDB = require('./test_helpers/mockIndexedDB');
 const CoreManager = require('../CoreManager');
 const EventuallyQueue = require('../EventuallyQueue');
-const Parse = require('../Parse');
 
 describe('Parse module', () => {
+  let Parse;
+  beforeEach(() => {
+    jest.isolateModules(() => {
+      Parse = require('../Parse');
+    });
+  });
+
   it('can be initialized with keys', () => {
     Parse.initialize('A', 'B');
     expect(CoreManager.get('APPLICATION_ID')).toBe('A');
@@ -165,6 +172,7 @@ describe('Parse module', () => {
     Parse.enableEncryptedUser();
     expect(Parse.encryptedUser).toBe(true);
     expect(Parse.isEncryptedUserEnabled()).toBe(true);
+    process.env.PARSE_BUILD = 'node';
   });
 
   it('can set an encrypt token as String', () => {
@@ -240,10 +248,13 @@ describe('Parse module', () => {
   });
 
   it('can get IndexedDB storage', () => {
-    console.log(Parse.IndexedDB);
-    expect(Parse.IndexedDB).toBeDefined();
-    CoreManager.setStorageController(Parse.IndexedDB);
+    expect(Parse.IndexedDB).toBeUndefined();
+    process.env.PARSE_BUILD = 'browser';
+    const ParseInstance = require('../Parse');
+    expect(ParseInstance.IndexedDB).toBeDefined();
+    CoreManager.setStorageController(ParseInstance.IndexedDB);
     const currentStorage = CoreManager.getStorageController();
-    expect(currentStorage).toEqual(Parse.IndexedDB);
+    expect(currentStorage).toEqual(ParseInstance.IndexedDB);
+    process.env.PARSE_BUILD = 'node';
   });
 });
