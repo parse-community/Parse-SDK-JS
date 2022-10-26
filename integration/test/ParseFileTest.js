@@ -114,4 +114,16 @@ describe('Parse.File', () => {
       assert.equal(e.code, Parse.Error.FILE_DELETE_ERROR);
     }
   });
+
+  it('failing test case for file upload with base64 data', async () => {
+    const file = new Parse.File('parse-server-logo', { base64: 'ParseA==' });
+    await file.save();
+    let data = await file.getData();
+    assert.equal(data, 'ParseA==');
+    file._data = null;
+    await file.save();
+    assert.equal(file._data, null);
+    data = await file.getData();
+    assert.equal(data, 'ParseA==');
+  });
 });
