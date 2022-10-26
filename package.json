@@ -93,7 +93,7 @@
   },
   "overrides": {
     "parse-server": {
-      "parse": "^3.5.0-alpha.6"
+      "parse": "git@github.com:musthafa1996/Parse-SDK-JS.git#file-upload-issue"
     }
   },
   "scripts": {
