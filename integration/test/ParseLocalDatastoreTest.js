@@ -2899,7 +2899,7 @@ describe('Parse LocalDatastore', () => {
     { name: 'Default', file: '../../lib/node/LocalDatastoreController' },
     {
       name: 'React-Native',
-      file: '../../lib/react-native/LocalDatastoreController.react-native',
+      file: '../../lib/node/LocalDatastoreController.react-native',
     },
   ];
 
