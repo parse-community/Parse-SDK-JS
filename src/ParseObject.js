@@ -2399,12 +2399,6 @@ const DefaultController = {
         if (el instanceof ParseFile) {
           filesSaved.push(el.save(options));
         } else if (el instanceof ParseObject) {
-          if (allowCustomObjectId && !el.id) {
-            throw new ParseError(
-              ParseError.MISSING_OBJECT_ID,
-              'objectId must not be empty, null or undefined'
-            );
-          }
           pending.push(el);
         }
       });
@@ -2419,6 +2413,13 @@ const DefaultController = {
             const batch = [];
             const nextPending = [];
             pending.forEach(el => {
+              if (allowCustomObjectId && Object.prototype.hasOwnProperty.call(el, 'id') && !el.id) {
+                throw new ParseError(
+                  ParseError.MISSING_OBJECT_ID,
+                  'objectId must not be empty or null'
+                );
+              }
+
               if (batch.length < batchSize && canBeSerialized(el)) {
                 batch.push(el);
               } else {
@@ -2498,11 +2499,8 @@ const DefaultController = {
         });
       });
     } else if (target instanceof ParseObject) {
-      if (allowCustomObjectId && !target.id) {
-        throw new ParseError(
-          ParseError.MISSING_OBJECT_ID,
-          'objectId must not be empty, null or undefined'
-        );
+      if (allowCustomObjectId && Object.prototype.hasOwnProperty.call(target, 'id') && !target.id) {
+        throw new ParseError(ParseError.MISSING_OBJECT_ID, 'objectId must not be empty or null');
       }
       // generate _localId in case if cascadeSave=false
       target._getId();

@@ -2060,59 +2060,135 @@ describe('Parse Object', () => {
     expect(obj.get('string')).toBeInstanceOf(String);
   });
 
-  it('allowCustomObjectId', async () => {
-    await reconfigureServer({ allowCustomObjectId: true });
-    Parse.allowCustomObjectId = true;
-    const customId = `${Date.now()}`;
-    const object = new Parse.Object('TestObject');
-    try {
+  describe('allowCustomObjectId', () => {
+    it('can save without setting an objectId', async () => {
+      await reconfigureServer({ allowCustomObjectId: true });
+      Parse.allowCustomObjectId = true;
+
+      const object = new Parse.Object('TestObject');
       await object.save();
-      fail();
-    } catch (error) {
-      expect(error.message).toBe('objectId must not be empty, null or undefined');
-    }
-    object.id = customId;
-    object.set('foo', 'bar');
-    await object.save();
-    expect(object.id).toBe(customId);
+      expect(object.id).toBeDefined();
 
-    const query = new Parse.Query('TestObject');
-    const result = await query.get(customId);
-    expect(result.get('foo')).toBe('bar');
-    expect(result.id).toBe(customId);
+      Parse.allowCustomObjectId = false;
+    });
 
-    result.set('foo', 'baz');
-    await result.save();
+    it('fails to save when objectId is empty', async () => {
+      await reconfigureServer({ allowCustomObjectId: true });
+      Parse.allowCustomObjectId = true;
 
-    const afterSave = await query.get(customId);
-    expect(afterSave.get('foo')).toBe('baz');
-    Parse.allowCustomObjectId = false;
+      const object = new Parse.Object('TestObject');
+      object.id = '';
+      await expectAsync(object.save()).toBeRejectedWith(
+        new Parse.Error(Parse.Error.MISSING_OBJECT_ID, 'objectId must not be empty or null')
+      );
+
+      Parse.allowCustomObjectId = false;
+    });
+
+    it('fails to save when objectId is null', async () => {
+      await reconfigureServer({ allowCustomObjectId: true });
+      Parse.allowCustomObjectId = true;
+
+      const object = new Parse.Object('TestObject');
+      object.id = null;
+      await expectAsync(object.save()).toBeRejectedWith(
+        new Parse.Error(Parse.Error.MISSING_OBJECT_ID, 'objectId must not be empty or null')
+      );
+
+      Parse.allowCustomObjectId = false;
+    });
+
+    it('can save with custom objectId', async () => {
+      await reconfigureServer({ allowCustomObjectId: true });
+      Parse.allowCustomObjectId = true;
+
+      const customId = `${Date.now()}`;
+      const object = new Parse.Object('TestObject');
+      object.id = customId;
+      object.set('foo', 'bar');
+      await object.save();
+      expect(object.id).toBe(customId);
+
+      const query = new Parse.Query('TestObject');
+      const result = await query.get(customId);
+      expect(result.get('foo')).toBe('bar');
+      expect(result.id).toBe(customId);
+
+      result.set('foo', 'baz');
+      await result.save();
+
+      const afterSave = await query.get(customId);
+      expect(afterSave.get('foo')).toBe('baz');
+
+      Parse.allowCustomObjectId = false;
+    });
   });
 
-  it('allowCustomObjectId saveAll', async () => {
-    await reconfigureServer({ allowCustomObjectId: true });
-    Parse.allowCustomObjectId = true;
-    const customId1 = `${Date.now()}`;
-    const customId2 = `${Date.now()}`;
-    const obj1 = new TestObject({ foo: 'bar' });
-    const obj2 = new TestObject({ foo: 'baz' });
-    try {
-      await Parse.Object.saveAll([obj1, obj2]);
-      fail();
-    } catch (error) {
-      expect(error.message).toBe('objectId must not be empty, null or undefined');
-    }
-    obj1.id = customId1;
-    obj2.id = customId2;
-    await Parse.Object.saveAll([obj1, obj2]);
-    expect(obj1.id).toBe(customId1);
-    expect(obj2.id).toBe(customId2);
+  describe('allowCustomObjectId saveAll', () => {
+    it('can save without setting an objectId', async () => {
+      await reconfigureServer({ allowCustomObjectId: true });
+      Parse.allowCustomObjectId = true;
 
-    const query = new Parse.Query(TestObject);
-    const results = await query.find();
-    results.forEach(result => {
-      expect([customId1, customId2].includes(result.id));
+      const obj1 = new TestObject({ foo: 'bar' });
+      const obj2 = new TestObject({ foo: 'baz' });
+      await Parse.Object.saveAll([obj1, obj2]);
+      expect(obj1.id).toBeDefined();
+      expect(obj2.id).toBeDefined();
+
+      Parse.allowCustomObjectId = false;
     });
-    Parse.allowCustomObjectId = false;
+
+    it('fails to save when objectId is empty', async () => {
+      await reconfigureServer({ allowCustomObjectId: true });
+      Parse.allowCustomObjectId = true;
+
+      const obj1 = new TestObject({ foo: 'bar' });
+      obj1.id = '';
+      const obj2 = new TestObject({ foo: 'baz' });
+      obj2.id = '';
+      await expectAsync(Parse.Object.saveAll([obj1, obj2])).toBeRejectedWith(
+        new Parse.Error(Parse.Error.MISSING_OBJECT_ID, 'objectId must not be empty or null')
+      );
+
+      Parse.allowCustomObjectId = false;
+    });
+
+    it('fails to save when objectId is null', async () => {
+      await reconfigureServer({ allowCustomObjectId: true });
+      Parse.allowCustomObjectId = true;
+
+      const obj1 = new TestObject({ foo: 'bar' });
+      obj1.id = null;
+      const obj2 = new TestObject({ foo: 'baz' });
+      obj2.id = null;
+      await expectAsync(Parse.Object.saveAll([obj1, obj2])).toBeRejectedWith(
+        new Parse.Error(Parse.Error.MISSING_OBJECT_ID, 'objectId must not be empty or null')
+      );
+
+      Parse.allowCustomObjectId = false;
+    });
+
+    it('can save with custom objectId', async () => {
+      await reconfigureServer({ allowCustomObjectId: true });
+      Parse.allowCustomObjectId = true;
+
+      const obj1 = new TestObject({ foo: 'bar' });
+      const customId1 = `${Date.now()}`;
+      obj1.id = customId1;
+      const obj2 = new TestObject({ foo: 'baz' });
+      const customId2 = `${Date.now()}`;
+      obj1.id = customId2;
+      await Parse.Object.saveAll([obj1, obj2]);
+      expect(obj1.id).toBeDefined();
+      expect(obj2.id).toBeDefined();
+
+      const query = new Parse.Query(TestObject);
+      const results = await query.find();
+      results.forEach(result => {
+        expect([customId1, customId2].includes(result.id));
+      });
+
+      Parse.allowCustomObjectId = false;
+    });
   });
 });
