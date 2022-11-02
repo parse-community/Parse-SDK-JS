@@ -123,7 +123,6 @@ class ParseFile {
           type: specifiedType,
         };
       } else if (typeof Blob !== 'undefined' && data instanceof Blob) {
-        this._data = data;
         this._source = {
           format: 'file',
           file: data,
@@ -138,7 +137,9 @@ class ParseFile {
       } else if (data && typeof data.base64 === 'string') {
         const base64 = data.base64.split(',').slice(-1)[0];
         const dataType =
-          specifiedType || data.base64.split(';').slice(0, 1)[0].split(':').slice(1, 2)[0] || 'text/plain';
+          specifiedType ||
+          data.base64.split(';').slice(0, 1)[0].split(':').slice(1, 2)[0] ||
+          'text/plain';
         this._data = base64;
         this._source = {
           format: 'base64',
