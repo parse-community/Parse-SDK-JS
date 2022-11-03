@@ -1,3 +1,11 @@
+## [3.5.1-beta.1](https://github.com/parse-community/Parse-SDK-JS/compare/3.5.0...3.5.1-beta.1) (2022-11-03)
+
+
+### Bug Fixes
+
+* File upload fails when uploading base64 data ([#1578](https://github.com/parse-community/Parse-SDK-JS/issues/1578)) ([03ee3ff](https://github.com/parse-community/Parse-SDK-JS/commit/03ee3ffd3e4798f9dd958ddc24b9f774cb875507))
+* React Native build does not maintain arrow functions and causes error with AsyncStorage ([#1587](https://github.com/parse-community/Parse-SDK-JS/issues/1587)) ([8aeaa4f](https://github.com/parse-community/Parse-SDK-JS/commit/8aeaa4f51e01f5763c497b5e86dca73835e2144b))
+
 # [3.5.0-beta.1](https://github.com/parse-community/Parse-SDK-JS/compare/3.4.4...3.5.0-beta.1) (2022-10-25)
 
 
