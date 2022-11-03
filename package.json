@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "3.5.0-beta.1",
+  "version": "3.5.0-alpha.6",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://parseplatform.org/",
   "keywords": [
@@ -90,11 +90,6 @@
   },
   "optionalDependencies": {
     "crypto-js": "4.1.1"
-  },
-  "overrides": {
-    "parse-server": {
-      "parse": "git+https://github.com/musthafa1996/Parse-SDK-JS.git#file-upload-issue"
-    }
   },
   "scripts": {
     "build": "node build_releases.js",
