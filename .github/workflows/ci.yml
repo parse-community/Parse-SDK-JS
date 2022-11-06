@@ -19,8 +19,18 @@ jobs:
   build:
     runs-on: ubuntu-18.04
     timeout-minutes: 30
-    env:      
+    env:
       MONGODB_VERSION: 3.6.9
+    strategy:
+      matrix:
+        include:
+          - name: Node 14
+            NODE_VERSION: 14.19.1
+          - name: Node 16
+            NODE_VERSION: 16.14.2
+          - name: Node 18
+            NODE_VERSION: 18.8.0
+      fail-fast: false
     steps:
     - name: Fix usage of insecure GitHub protocol
       run: sudo git config --system url."https://github".insteadOf "git://github"
@@ -28,7 +38,7 @@ jobs:
     - name: Use Node.js
       uses: actions/setup-node@v1
       with:
-        node-version: 14
+        node-version: ${{ matrix.node-version }}
     - name: Cache Node.js modules
       uses: actions/cache@v2
       with:
