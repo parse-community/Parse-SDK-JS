@@ -122,6 +122,9 @@
       "git add"
     ]
   },
+  "engines": {
+    "node": ">=14.21.0 <17 || >=18 <19"
+  },
   "jest": {
     "automock": true,
     "collectCoverage": true,
