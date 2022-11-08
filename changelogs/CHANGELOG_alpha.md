@@ -1,3 +1,10 @@
+## [3.5.1-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/3.5.1-alpha.1...3.5.1-alpha.2) (2022-11-07)
+
+
+### Bug Fixes
+
+* SDK builds incorrectly since release 3.5.0 causing various bugs ([#1600](https://github.com/parse-community/Parse-SDK-JS/issues/1600)) ([f15154f](https://github.com/parse-community/Parse-SDK-JS/commit/f15154f903478f997bf127be198097a58c602594))
+
 ## [3.5.1-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/3.5.0...3.5.1-alpha.1) (2022-11-03)
 
 
