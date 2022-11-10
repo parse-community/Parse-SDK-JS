@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "3.5.1",
+  "version": "4.0.0-alpha.1",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://parseplatform.org/",
   "keywords": [
