@@ -17,7 +17,7 @@ jobs:
         with:
           version: 1
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     timeout-minutes: 30
     env:
       MONGODB_VERSION: 3.6.9
