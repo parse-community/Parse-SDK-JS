@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "3.5.1-alpha.2",
+  "version": "4.0.0-alpha.1",
   "description": "The Parse JavaScript SDK",
   "homepage": "https://parseplatform.org/",
   "keywords": [
@@ -121,6 +121,9 @@
       "eslint --fix --cache",
       "git add"
     ]
+  },
+  "engines": {
+    "node": ">=14.21.0 <17 || >=18 <19"
   },
   "jest": {
     "automock": true,

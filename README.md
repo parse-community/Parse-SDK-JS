@@ -8,7 +8,7 @@
 [![Snyk Badge](https://snyk.io/test/github/parse-community/Parse-SDK-JS/badge.svg)](https://snyk.io/test/github/parse-community/Parse-SDK-JS)
 [![Coverage](http://codecov.io/github/parse-community/Parse-SDK-JS/coverage.svg?branch=alpha)](http://codecov.io/github/parse-community/Parse-SDK-JS?branch=alpha)
 
-[![Node Version](https://img.shields.io/badge/nodejs-12,_14,_15,_16,_18-green.svg?logo=node.js&style=flat)](https://nodejs.org/)
+[![Node Version](https://img.shields.io/badge/nodejs-14,_16,_18-green.svg?logo=node.js&style=flat)](https://nodejs.org/)
 [![auto-release](https://img.shields.io/badge/%F0%9F%9A%80-auto--release-9e34eb.svg)](https://github.com/parse-community/parse-dashboard/releases)
 
 [![npm latest version](https://img.shields.io/npm/v/parse/latest.svg)](https://www.npmjs.com/package/parse)
@@ -29,6 +29,7 @@ A library that gives you access to the powerful Parse Server backend from your J
 
 - [Getting Started](#getting-started)
   - [Using Parse on Different Platforms](#using-parse-on-different-platforms)
+- [Compatibility](#compatibility)
 - [Upgrading to Parse SDK 2.0.0](#upgrading-to-parse-sdk-200)
 - [3rd Party Authentications](#3rd-party-authentications)
 - [Want to ride the bleeding edge?](#want-to-ride-the-bleeding-edge)
@@ -88,6 +89,17 @@ $ npm install @types/parse
 ```
 
 Types are updated manually after every release. If a definition doesn't exist, please submit a pull request to [@types/parse][types-parse]
+
+## Compatibility
+
+### Node.js
+
+Parse JS SDK is continuously tested with the most recent releases of Node.js to ensure compatibility. We follow the [Node.js Long Term Support plan](https://github.com/nodejs/Release) and only test against versions that are officially supported and have not reached their end-of-life date.
+
+| Version    | Latest Version | End-of-Life | Compatible |
+|------------|----------------|-------------|------------|
+| Node.js 14 | 14.19.1        | April 2023  | ✅ Yes      |
+
 
 ## Upgrading to Parse SDK 2.0.0
 
