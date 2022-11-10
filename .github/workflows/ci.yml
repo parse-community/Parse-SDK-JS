@@ -42,7 +42,7 @@ jobs:
     - name: Use Node.js
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: ${{ matrix.NODE_VERSION }}
     - name: Cache Node.js modules
       uses: actions/cache@v2
       with:
