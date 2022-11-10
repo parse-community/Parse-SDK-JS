@@ -27,13 +27,13 @@ jobs:
           - name: Node 12
             NODE_VERSION: 12.22.11
           - name: Node 14
-            NODE_VERSION: 14.19.1
+            NODE_VERSION: 14.21.1
           - name: Node 15
             NODE_VERSION: 15.14.0
           - name: Node 16
-            NODE_VERSION: 16.14.2
+            NODE_VERSION: 16.18.1
           - name: Node 18
-            NODE_VERSION: 18.8.0
+            NODE_VERSION: 18.12.1
       fail-fast: false
     steps:
     - name: Fix usage of insecure GitHub protocol
