@@ -246,8 +246,9 @@ Parse.Storage = require('./Storage');
 Parse.User = require('./ParseUser').default;
 Parse.LiveQuery = require('./ParseLiveQuery').default;
 Parse.LiveQueryClient = require('./LiveQueryClient').default;
-Parse.IndexedDB = require('./IndexedDBStorageController');
-
+if (process.env.PARSE_BUILD === 'browser') {
+  Parse.IndexedDB = require('./IndexedDBStorageController');
+}
 Parse._request = function (...args) {
   return CoreManager.getRESTController().request.apply(null, args);
 };

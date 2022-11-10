@@ -241,6 +241,14 @@ class ParseSchema {
     if (options.defaultValue !== undefined) {
       fieldOptions.defaultValue = options.defaultValue;
     }
+    if (type === 'Date') {
+      if (options && options.defaultValue) {
+        fieldOptions.defaultValue = {
+          __type: 'Date',
+          iso: new Date(options.defaultValue),
+        };
+      }
+    }
     this._fields[name] = fieldOptions;
     return this;
   }
@@ -310,12 +318,6 @@ class ParseSchema {
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
   addDate(name: string, options: FieldOptions) {
-    if (options && options.defaultValue) {
-      options.defaultValue = {
-        __type: 'Date',
-        iso: new Date(options.defaultValue),
-      };
-    }
     return this.addField(name, 'Date', options);
   }
 

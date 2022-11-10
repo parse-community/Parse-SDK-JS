@@ -9,19 +9,14 @@
  * @flow
  * @private
  */
-
 import CoreManager from './CoreManager';
 
 const StorageController = {
   async: 1,
 
-  getAsyncStorage(): any {
-    return CoreManager.getAsyncStorage();
-  },
-
   getItemAsync(path: string): Promise {
     return new Promise((resolve, reject) => {
-      this.getAsyncStorage().getItem(path, function (err, value) {
+      CoreManager.getAsyncStorage().getItem(path, (err, value) => {
         if (err) {
           reject(err);
         } else {
@@ -33,7 +28,7 @@ const StorageController = {
 
   setItemAsync(path: string, value: string): Promise {
     return new Promise((resolve, reject) => {
-      this.getAsyncStorage().setItem(path, value, function (err, value) {
+      CoreManager.getAsyncStorage().setItem(path, value, (err, value) => {
         if (err) {
           reject(err);
         } else {
@@ -45,7 +40,7 @@ const StorageController = {
 
   removeItemAsync(path: string): Promise {
     return new Promise((resolve, reject) => {
-      this.getAsyncStorage().removeItem(path, function (err) {
+      CoreManager.getAsyncStorage().removeItem(path, (err) => {
         if (err) {
           reject(err);
         } else {
@@ -57,7 +52,7 @@ const StorageController = {
 
   getAllKeysAsync(): Promise {
     return new Promise((resolve, reject) => {
-      this.getAsyncStorage().getAllKeys(function (err, keys) {
+      CoreManager.getAsyncStorage().getAllKeys((err, keys) => {
         if (err) {
           reject(err);
         } else {
@@ -69,7 +64,7 @@ const StorageController = {
 
   multiGet(keys: Array<string>): Promise<Array<Array<string>>> {
     return new Promise((resolve, reject) => {
-      this.getAsyncStorage().multiGet(keys, function (err, result) {
+      CoreManager.getAsyncStorage().multiGet(keys, (err, result) => {
         if (err) {
           reject(err);
         } else {
@@ -81,7 +76,7 @@ const StorageController = {
 
   multiRemove(keys: Array<string>): Promise {
     return new Promise((resolve, reject) => {
-      this.getAsyncStorage().multiRemove(keys, function (err) {
+      CoreManager.getAsyncStorage().multiRemove(keys, (err) => {
         if (err) {
           reject(err);
         } else {
@@ -92,7 +87,7 @@ const StorageController = {
   },
 
   clear() {
-    return this.getAsyncStorage().clear();
+    return CoreManager.getAsyncStorage().clear();
   },
 };
 

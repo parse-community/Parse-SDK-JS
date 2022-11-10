@@ -12,7 +12,7 @@ const watch      = require('gulp-watch');
 const BUILD = process.env.PARSE_BUILD || 'browser';
 const VERSION = require('./package.json').version;
 
-const transformRuntime = ["@babel/plugin-transform-runtime", {
+const transformRuntime = ["@babel/transform-runtime", {
   "corejs": 3,
   "helpers": true,
   "regenerator": true,
@@ -22,12 +22,12 @@ const transformRuntime = ["@babel/plugin-transform-runtime", {
 const PRESETS = {
   'browser': [["@babel/preset-env", {
     "targets": "> 0.25%, not dead"
-  }], '@babel/preset-react'],
+  }]],
   'weapp': [["@babel/preset-env", {
     "targets": "> 0.25%, not dead"
-  }], '@babel/preset-react'],
+  }], '@babel/react'],
   'node': [["@babel/preset-env", {
-    "targets": { "node": "8" }
+    "targets": { "node": "14" }
   }]],
   'react-native': ['module:metro-react-native-babel-preset'],
 };
