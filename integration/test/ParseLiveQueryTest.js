@@ -303,4 +303,23 @@ describe('Parse LiveQuery', () => {
     );
     beforeConnect = () => {};
   });
+
+  it('connectPromise does throw', async () => {
+    const client = new Parse.LiveQueryClient({
+      applicationId: 'integration',
+      serverURL: 'ws://localhost:1337',
+      javascriptKey: null,
+      masterKey: null,
+      sessionToken: null,
+      installationId: null,
+    });
+    client.connectPromise = Promise.reject(new Parse.Error(141, 'connect error'));
+    client.open();
+    const query = new Parse.Query('TestError');
+    const subscription = client.subscribe(query);
+    await expectAsync(subscription.subscribePromise).toBeRejectedWith(
+      new Parse.Error(141, 'connect error')
+    );
+    client.close();
+  });
 });
