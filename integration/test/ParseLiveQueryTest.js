@@ -294,6 +294,9 @@ describe('Parse LiveQuery', () => {
     await expectAsync(subscription.subscribePromise).toBeRejectedWith(
       new Parse.Error(141, 'not allowed to connect')
     );
+    await expectAsync(query.subscribe()).toBeRejectedWith(
+      new Parse.Error(141, 'not allowed to connect')
+    );
     client.close();
     cloud._removeAllHooks();
   });
