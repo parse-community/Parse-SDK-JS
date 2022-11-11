@@ -265,7 +265,7 @@ describe('Parse LiveQuery', () => {
         });
       },
     });
-    const client = new Parse.LiveQueryClient({
+    let client = new Parse.LiveQueryClient({
       applicationId: 'integration',
       serverURL: 'ws://localhost:1337',
       javascriptKey: null,
@@ -288,7 +288,14 @@ describe('Parse LiveQuery', () => {
         Cloud.beforeConnect(() => beforeConnect());
       },
     });
-    client._handleReset();
+    client = new Parse.LiveQueryClient({
+      applicationId: 'integration',
+      serverURL: 'ws://localhost:1337',
+      javascriptKey: null,
+      masterKey: null,
+      sessionToken: null,
+      installationId: null,
+    });
     client.open();
     subscription = client.subscribe(query);
     await expectAsync(subscription.subscribePromise).toBeRejectedWith(
