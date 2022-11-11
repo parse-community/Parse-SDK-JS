@@ -13,7 +13,7 @@ const path = require('path');
 
 const port = 1337;
 const mountPath = '/parse';
-const serverURL = 'http://localhost:1337/parse';
+const serverURL = 'http://127.0.0.1:1337/parse';
 let didChangeConfiguration = false;
 
 /*
@@ -33,7 +33,7 @@ const twitterAuthData = {
 };
 
 const defaultConfiguration = {
-  databaseURI: 'mongodb://localhost:27017/integration',
+  databaseURI: 'mongodb://127.0.0.1:27017/integration',
   appId: 'integration',
   masterKey: 'notsosecret',
   serverURL,
@@ -130,7 +130,7 @@ const reconfigureServer = (changedConfiguration = {}) => {
           <script>
             (function() {
               Parse.initialize('integration');
-              Parse.serverURL = 'http://localhost:1337/parse';
+              Parse.serverURL = 'http://127.0.0.1:1337/parse';
             })();
           </script>
           </head>
