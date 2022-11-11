@@ -48,7 +48,3 @@ Parse.Cloud.job('CloudJob2', function () {
 Parse.Cloud.job('CloudJobFailing', function () {
   throw 'cloud job failed';
 });
-
-Parse.Cloud.beforeSubscribe('TestError', () => {
-  throw 'not allowed to subscribe';
-});
