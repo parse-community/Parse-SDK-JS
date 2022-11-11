@@ -258,7 +258,6 @@ describe('Parse LiveQuery', () => {
   });
 
   it('live query can handle beforeConnect and beforeSubscribe errors', async () => {
-    let cloud = null;
     await reconfigureServer({
       cloud({ Cloud }) {
         Cloud.beforeSubscribe('TestError', () => {
@@ -281,12 +280,12 @@ describe('Parse LiveQuery', () => {
       new Parse.Error(141, 'not allowed to subscribe')
     );
     client.close();
+    let beforeConnect = () => {
+      throw 'not allowed to connect';
+    };
     await reconfigureServer({
       cloud({ Cloud }) {
-        Cloud.beforeConnect(() => {
-          throw 'not allowed to connect';
-        });
-        cloud = Cloud;
+        Cloud.beforeConnect(() => beforeConnect());
       },
     });
     client.open();
@@ -301,7 +300,6 @@ describe('Parse LiveQuery', () => {
     );
     defaultClient.close();
     defaultClient._handleReset();
-    cloud._removeAllHooks();
-    await reconfigureServer();
+    beforeConnect = () => {};
   });
 });
