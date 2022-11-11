@@ -301,6 +301,6 @@ describe('Parse LiveQuery', () => {
     );
     defaultClient.close();
     defaultClient._handleReset();
-    cloud._removeAllHooks();
+    cloud.beforeConnect = () => {};
   });
 });
