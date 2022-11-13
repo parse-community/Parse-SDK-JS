@@ -118,8 +118,7 @@ const nestedHandler = {
     const prop = target[key];
     if (
       Object.prototype.toString.call(prop) === '[object Object]' &&
-      !(prop instanceof ParseObject) &&
-      !prop?.constructor?.name?.includes('Parse')
+      prop?.constructor?.name === 'Object'
     ) {
       const thisHandler = { ...nestedHandler };
       thisHandler._path = `${this._path}.${key}`;
@@ -149,8 +148,7 @@ const proxyHandler = {
     const getValue = receiver.get(key);
     if (
       Object.prototype.toString.call(getValue) === '[object Object]' &&
-      !(getValue instanceof ParseObject) &&
-      !getValue?.constructor?.name?.includes('Parse')
+      getValue?.constructor?.name === 'Object'
     ) {
       const thisHandler = { ...nestedHandler };
       thisHandler._path = key;
