@@ -57,7 +57,7 @@ const defaultConfiguration = {
     },
   },
   verbose: false,
-  silent: false,
+  silent: true,
   push: {
     android: {
       senderId: 'yolo',
