@@ -265,7 +265,7 @@ describe('Parse LiveQuery', () => {
         });
       },
     });
-    let client = new Parse.LiveQueryClient({
+    const client = new Parse.LiveQueryClient({
       applicationId: 'integration',
       serverURL: 'ws://localhost:1337',
       javascriptKey: null,
@@ -275,7 +275,7 @@ describe('Parse LiveQuery', () => {
     });
     client.open();
     const query = new Parse.Query('TestError');
-    let subscription = client.subscribe(query);
+    const subscription = client.subscribe(query);
     await expectAsync(subscription.subscribePromise).toBeRejectedWith(
       new Parse.Error(141, 'not allowed to subscribe')
     );
