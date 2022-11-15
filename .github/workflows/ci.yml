@@ -9,7 +9,7 @@ jobs:
   check-lock-file-version:
     name: NPM Lock File Version
     timeout-minutes: 5
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Check NPM lock file version
@@ -17,7 +17,7 @@ jobs:
         with:
           version: 1
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     env:      
       MONGODB_VERSION: 3.6.9
@@ -28,7 +28,7 @@ jobs:
     - name: Use Node.js
       uses: actions/setup-node@v1
       with:
-        node-version: 14
+        node-version: 14.21
     - name: Cache Node.js modules
       uses: actions/cache@v2
       with:
