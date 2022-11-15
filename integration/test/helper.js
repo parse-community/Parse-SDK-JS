@@ -10,10 +10,16 @@ const { TestUtils } = require('parse-server');
 const Parse = require('../../node');
 const fs = require('fs');
 const path = require('path');
+const dns = require('dns');
+
+// Ensure localhost resolves to ipv4 address first on node v17+
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 const port = 1337;
 const mountPath = '/parse';
-const serverURL = 'http://127.0.0.1:1337/parse';
+const serverURL = 'http://localhost:1337/parse';
 let didChangeConfiguration = false;
 
 /*
@@ -33,7 +39,7 @@ const twitterAuthData = {
 };
 
 const defaultConfiguration = {
-  databaseURI: 'mongodb://127.0.0.1:27017/integration',
+  databaseURI: 'mongodb://localhost:27017/integration',
   appId: 'integration',
   masterKey: 'notsosecret',
   serverURL,
@@ -130,7 +136,7 @@ const reconfigureServer = (changedConfiguration = {}) => {
           <script>
             (function() {
               Parse.initialize('integration');
-              Parse.serverURL = 'http://127.0.0.1:1337/parse';
+              Parse.serverURL = 'http://localhost:1337/parse';
             })();
           </script>
           </head>
