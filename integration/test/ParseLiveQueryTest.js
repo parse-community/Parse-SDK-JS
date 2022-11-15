@@ -53,7 +53,7 @@ describe('Parse LiveQuery', () => {
   it('can subscribe to query with null connect fields', async done => {
     const client = new Parse.LiveQueryClient({
       applicationId: 'integration',
-      serverURL: 'ws://127.0.0.1:1337',
+      serverURL: 'ws://localhost:1337',
       javascriptKey: null,
       masterKey: null,
       sessionToken: null,

@@ -4,7 +4,7 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
   beforeAll(async () => {
     const browser = await puppeteer.launch();
     page = await browser.newPage();
-    await page.goto(`http://127.0.0.1:1337/${fileName}`);
+    await page.goto(`http://localhost:1337/${fileName}`);
   });
   describe(`Parse Dist Test ${fileName}`, () => {
     it('can save an object', async () => {
