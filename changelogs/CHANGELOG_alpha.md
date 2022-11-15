@@ -1,3 +1,15 @@
+# [4.0.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.1...4.0.0-alpha.2) (2022-11-15)
+
+
+### Bug Fixes
+
+* `Parse.Query.subscribe()` does not return a rejected promise on error in Cloud Code Triggers `beforeConnect` or `beforeSubscribe` ([#1490](https://github.com/parse-community/Parse-SDK-JS/issues/1490)) ([96d7174](https://github.com/parse-community/Parse-SDK-JS/commit/96d71744e4a12088f98ad33a5f7a0c06c90a0a4c))
+
+
+### BREAKING CHANGES
+
+* Calling `Parse.Query.subscribe()` will now return a rejected promise if an error is thrown in Cloud Code Triggers `beforeConnect` or `beforeSubscribe`; in previous releases a resolved promise was returned, even if subscribing failed and it was necessary to create an `error.on` listener to handle these errors (#1490) ([96d7174](96d7174))
+
 # [4.0.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/3.5.1-alpha.2...4.0.0-alpha.1) (2022-11-10)
 
 
