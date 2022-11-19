@@ -1,3 +1,10 @@
+# [4.0.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.2...4.0.0-alpha.3) (2022-11-18)
+
+
+### Performance Improvements
+
+* Avoid CORS preflight request by removing upload listener when not used ([#1610](https://github.com/parse-community/Parse-SDK-JS/issues/1610)) ([6125419](https://github.com/parse-community/Parse-SDK-JS/commit/6125419e749866ffa814a4a3e696382206d5da09))
+
 # [4.0.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.1...4.0.0-alpha.2) (2022-11-15)
 
 
