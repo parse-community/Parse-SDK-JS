@@ -45,3 +45,6 @@ jobs:
       env:
         CI: true
     - run: bash <(curl -s https://codecov.io/bash)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
