@@ -29,11 +29,25 @@ describe('ParseError', () => {
   });
 
   it('message must be a string', () => {
+    /**
+     * error as object
+     */
     const someRandomError = { code: 420, message: 'time to chill' };
     const error = new ParseError(1337, someRandomError);
     expect(JSON.parse(JSON.stringify(error))).toEqual({
       message: JSON.stringify(someRandomError),
       code: 1337,
+    });
+
+    /**
+     * error as an Error instance
+     */
+    const someRandomError2 = new Error('time to relax');
+    const error2 = new ParseError(420, someRandomError2);
+
+    expect(JSON.parse(JSON.stringify(error2))).toEqual({
+      message: 'Error: time to relax',
+      code: 420,
     });
   });
 });
