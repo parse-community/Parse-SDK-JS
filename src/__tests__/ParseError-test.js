@@ -27,4 +27,13 @@ describe('ParseError', () => {
       code: 123,
     });
   });
+
+  it('message must be a string', () => {
+    const someRandomError = { code: 420, message: 'time to chill' };
+    const error = new ParseError(1337, someRandomError);
+    expect(JSON.parse(JSON.stringify(error))).toEqual({
+      message: JSON.stringify(someRandomError),
+      code: 1337,
+    });
+  });
 });

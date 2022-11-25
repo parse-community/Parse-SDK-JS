@@ -22,7 +22,7 @@ class ParseError extends Error {
     this.code = code;
     Object.defineProperty(this, 'message', {
       enumerable: true,
-      value: message,
+      value: typeof message === 'string' ? message : JSON.stringify(message),
     });
   }
 
