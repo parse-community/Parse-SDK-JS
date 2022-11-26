@@ -28,26 +28,50 @@ describe('ParseError', () => {
     });
   });
 
-  it('message must be a string', () => {
-    /**
-     * error as object
-     */
-    const someRandomError = { code: 420, message: 'time to chill' };
+  it('message can be a string', () => {
+    const someRandomError = 'oh no';
+
     const error = new ParseError(1337, someRandomError);
+
     expect(JSON.parse(JSON.stringify(error))).toEqual({
-      message: JSON.stringify(someRandomError),
+      message: someRandomError,
       code: 1337,
     });
+  });
 
-    /**
-     * error as an Error instance
-     */
-    const someRandomError2 = new Error('time to relax');
-    const error2 = new ParseError(420, someRandomError2);
+  it('message can be an object passed trough some external dependency', () => {
+    const someRandomError = { code: '420', message: 'time to chill', status: '🎮' };
 
-    expect(JSON.parse(JSON.stringify(error2))).toEqual({
-      message: 'Error: time to relax',
-      code: 420,
+    const error = new ParseError(1337, someRandomError);
+
+    expect(JSON.parse(JSON.stringify(error))).toEqual({
+      message: '420 time to chill 🎮',
+      code: 1337,
+    });
+  });
+
+  it('message can be an Error instance *receiving a string* passed trough some external dependency', () => {
+    const someRandomError = new Error('good point');
+
+    const error = new ParseError(1337, someRandomError);
+
+    expect(JSON.parse(JSON.stringify(error))).toEqual({
+      message: 'Error: good point',
+      code: 1337,
+    });
+  });
+
+  it('message can be an Error instance *receiving an object* passed trough some external dependency', () => {
+    const someRandomErrorWrong = new Error({
+      code: 'WRONG',
+      message: 'this is not how errors should be handled',
+    });
+
+    const error = new ParseError(1337, someRandomErrorWrong);
+
+    expect(JSON.parse(JSON.stringify(error))).toEqual({
+      message: '', // <-- Yeah because we can't parse errors used like that
+      code: 1337,
     });
   });
 });

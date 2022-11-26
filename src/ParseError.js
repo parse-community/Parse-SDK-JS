@@ -20,6 +20,15 @@ class ParseError extends Error {
   constructor(code, message) {
     super(message);
     this.code = code;
+
+    const stringify = obj => {
+      let log = '';
+      for (const k in obj) {
+        log += `${obj[k]} `;
+      }
+      return log.trim();
+    };
+
     Object.defineProperty(this, 'message', {
       enumerable: true,
       value:
@@ -27,9 +36,9 @@ class ParseError extends Error {
           ? message
           : typeof message === 'object' &&
             typeof message.toString === 'function' &&
-            message.toString() !== '[object Object]'
+            !message.toString().includes('[object Object]')
             ? message.toString()
-            : JSON.stringify(message),
+            : stringify(message),
     });
   }
 
