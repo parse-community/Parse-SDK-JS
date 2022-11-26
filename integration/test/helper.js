@@ -8,6 +8,8 @@ const CustomAuth = require('./CustomAuth');
 const sleep = require('./sleep');
 const { TestUtils } = require('parse-server');
 const Parse = require('../../node');
+const fs = require('fs');
+const path = require('path');
 
 const port = 1337;
 const mountPath = '/parse';
@@ -115,6 +117,27 @@ const reconfigureServer = (changedConfiguration = {}) => {
       });
       parseServer = ParseServer.start(newConfiguration);
       const app = parseServer.expressApp;
+      for (const fileName of ['parse.js', 'parse.min.js']) {
+        const file = fs
+          .readFileSync(path.resolve(__dirname, `./../../dist/${fileName}`))
+          .toString();
+        app.get(`/${fileName}`, (req, res) => {
+          res.send(`<html><head>
+          <meta charset="utf-8">
+          <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          <title>Parse Functionality Test</title>
+          <script>${file}</script>
+          <script>
+            (function() {
+              Parse.initialize('integration');
+              Parse.serverURL = 'http://localhost:1337/parse';
+            })();
+          </script>
+          </head>
+        <body>
+        </body></html>`);
+        });
+      }
       app.get('/clear/:fast', (req, res) => {
         const { fast } = req.params;
         TestUtils.destroyAllDataPermanently(fast).then(() => {
