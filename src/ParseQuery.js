@@ -40,6 +40,7 @@ export type QueryJSON = {
   hint?: mixed,
   explain?: boolean,
   readPreference?: string,
+  allowDiskUse?: Boolean,
   includeReadPreference?: string,
   subqueryReadPreference?: string,
 };
@@ -239,6 +240,7 @@ class ParseQuery {
   _count: boolean;
   _order: Array<string>;
   _readPreference: string;
+  _allowDiskUse: boolean;
   _includeReadPreference: string;
   _subqueryReadPreference: string;
   _queriesLocalDatastore: boolean;
@@ -278,6 +280,7 @@ class ParseQuery {
     this._limit = -1; // negative limit is not sent in the server request
     this._skip = 0;
     this._readPreference = null;
+    this._allowDiskUse = false;
     this._includeReadPreference = null;
     this._subqueryReadPreference = null;
     this._queriesLocalDatastore = false;
@@ -457,6 +460,9 @@ class ParseQuery {
     if (this._readPreference) {
       params.readPreference = this._readPreference;
     }
+    if (typeof this._allowDiskUse === 'boolean') {
+      params.allowDiskUse = this._allowDiskUse;
+    }
     if (this._includeReadPreference) {
       params.includeReadPreference = this._includeReadPreference;
     }
@@ -534,6 +540,10 @@ class ParseQuery {
       this._readPreference = json.readPreference;
     }
 
+    if (typeof json.allowDiskUse === 'boolean') {
+      this._allowDiskUse = json.allowDiskUse;
+    }
+
     if (json.includeReadPreference) {
       this._includeReadPreference = json.includeReadPreference;
     }
@@ -566,6 +576,7 @@ class ParseQuery {
             'subqueryReadPreference',
             'hint',
             'explain',
+            'allowDiskUse',
           ].indexOf(key) === -1
         ) {
           this._extraOptions[key] = json[key];
@@ -840,6 +851,7 @@ class ParseQuery {
       hint: this._hint,
       explain: this._explain,
       readPreference: this._readPreference,
+      allowDiskUse: this._allowDiskUse,
     };
     return controller.aggregate(this.className, params, aggregateOptions).then(results => {
       return results.results;
@@ -1952,6 +1964,17 @@ class ParseQuery {
     this._readPreference = readPreference;
     this._includeReadPreference = includeReadPreference;
     this._subqueryReadPreference = subqueryReadPreference;
+    return this;
+  }
+
+  /**
+   * Changes the allowDiskUse preference that the backend will use when performing the query to the database.
+   *
+   * @param {boolean} enabled enable/disable allowDiskUse
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
+   */
+  allowDiskUse(enabled: boolean): ParseQuery {
+    this._allowDiskUse = enabled;
     return this;
   }
 
