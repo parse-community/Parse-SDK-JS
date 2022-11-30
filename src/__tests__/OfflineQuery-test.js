@@ -471,6 +471,15 @@ describe('OfflineQuery', () => {
     expect(matchesQuery(q.className, pt, [], q)).toBe(true);
   });
 
+  it('matches $centerSphere queries', () => {
+    const pt = new ParseObject('Checkin');
+    pt.set('location', new ParseGeoPoint(40, 40));
+
+    const q = new ParseQuery('Checkin');
+    q.withinRadians('location', new ParseGeoPoint(30, 30), 0.3, false);
+    expect(matchesQuery(q.className, pt, [], q)).toBe(true);
+  });
+
   it('matches $within queries', () => {
     const caltrainStation = new ParseObject('Checkin');
     caltrainStation

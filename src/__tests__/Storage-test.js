@@ -17,6 +17,7 @@ const CoreManager = require('../CoreManager');
 
 global.wx = mockWeChat;
 global.localStorage = mockStorageInterface;
+global.indexedDB = mockIndexedDB;
 jest.mock('idb-keyval', () => {
   return mockIndexedDB;
 });
@@ -165,10 +166,12 @@ describe('React Native StorageController', () => {
   });
 });
 
-const IndexedDBStorageController = require('../IndexedDBStorageController');
-
-describe('React Native StorageController', () => {
+describe('IndexDB StorageController', () => {
+  let IndexedDBStorageController;
   beforeEach(() => {
+    jest.isolateModules(() => {
+      IndexedDBStorageController = require('../IndexedDBStorageController');
+    });
     IndexedDBStorageController.clear();
   });
 
@@ -202,6 +205,13 @@ describe('React Native StorageController', () => {
     expect(result).toBe('myValue');
     const keys = await IndexedDBStorageController.getAllKeysAsync();
     expect(keys[0]).toBe('myKey');
+  });
+
+  it('handle indexedDB is not defined', async () => {
+    global.indexedDB = undefined;
+    const dbController = require('../IndexedDBStorageController');
+    expect(dbController).toBeUndefined();
+    global.indexedDB = mockIndexedDB;
   });
 });
 

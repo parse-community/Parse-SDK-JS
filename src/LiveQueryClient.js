@@ -14,6 +14,7 @@ import EventEmitter from './EventEmitter';
 import ParseObject from './ParseObject';
 import LiveQuerySubscription from './LiveQuerySubscription';
 import { resolvingPromise } from './promiseUtils';
+import ParseError from './ParseError';
 
 // The LiveQuery client inner state
 const CLIENT_STATE = {
@@ -217,9 +218,13 @@ class LiveQueryClient extends EventEmitter {
     const subscription = new LiveQuerySubscription(this.requestId, query, sessionToken);
     this.subscriptions.set(this.requestId, subscription);
     this.requestId += 1;
-    this.connectPromise.then(() => {
-      this.socket.send(JSON.stringify(subscribeRequest));
-    });
+    this.connectPromise
+      .then(() => {
+        this.socket.send(JSON.stringify(subscribeRequest));
+      })
+      .catch(error => {
+        subscription.subscribePromise.reject(error);
+      });
 
     return subscription;
   }
@@ -382,10 +387,15 @@ class LiveQueryClient extends EventEmitter {
         setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN, response), 200);
       }
       break;
-    case OP_EVENTS.ERROR:
+    case OP_EVENTS.ERROR: {
+      const parseError = new ParseError(data.code, data.error);
+      if (!this.id) {
+        this.connectPromise.reject(parseError);
+        this.state = CLIENT_STATE.DISCONNECTED;
+      }
       if (data.requestId) {
         if (subscription) {
-          subscription.subscribePromise.resolve();
+          subscription.subscribePromise.reject(parseError);
           setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, data.error), 200);
         }
       } else {
@@ -398,6 +408,7 @@ class LiveQueryClient extends EventEmitter {
         this._handleReconnect();
       }
       break;
+    }
     case OP_EVENTS.UNSUBSCRIBED:
       // We have already deleted subscription in unsubscribe(), do nothing here
       break;

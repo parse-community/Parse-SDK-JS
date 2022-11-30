@@ -64,7 +64,7 @@ describe('Parse.File', () => {
     assert.equal(data, 'ParseA==');
   });
 
-  it('can get file data from base64', async () => {
+  it('can get file data from base64 (saved)', async () => {
     const file = new Parse.File('parse-server-logo', { base64: 'ParseA==' });
     await file.save();
     let data = await file.getData();
@@ -73,6 +73,12 @@ describe('Parse.File', () => {
     await file.save();
     assert.equal(file._data, null);
     data = await file.getData();
+    assert.equal(data, 'ParseA==');
+  });
+
+  it('can get file data from base64 (unsaved)', async () => {
+    const file = new Parse.File('parse-server-logo', { base64: 'ParseA==' });
+    const data = await file.getData();
     assert.equal(data, 'ParseA==');
   });
 
