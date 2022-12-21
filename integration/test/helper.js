@@ -10,6 +10,12 @@ const { TestUtils } = require('parse-server');
 const Parse = require('../../node');
 const fs = require('fs');
 const path = require('path');
+const dns = require('dns');
+
+// Ensure localhost resolves to ipv4 address first on node v17+
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 const port = 1337;
 const mountPath = '/parse';
