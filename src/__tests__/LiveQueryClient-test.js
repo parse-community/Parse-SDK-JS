@@ -307,7 +307,7 @@ describe('LiveQueryClient', () => {
     expect(liveQueryClient.subscriptions.size).toBe(1);
   });
 
-  it('can handle WebSocket error response message', () => {
+  it('can handle WebSocket error response message', async () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
       serverURL: 'ws://test',
@@ -329,13 +329,17 @@ describe('LiveQueryClient', () => {
       isChecked = true;
       expect(error).toEqual('error');
     });
-
-    liveQueryClient._handleWebSocketMessage(event);
+    try {
+      liveQueryClient._handleWebSocketMessage(event);
+      await liveQueryClient.connectPromise;
+    } catch (error) {
+      expect(error.message).toEqual('error');
+    }
 
     expect(isChecked).toBe(true);
   });
 
-  it('can handle WebSocket error while subscribing', () => {
+  it('can handle WebSocket error while subscribing', async () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
       serverURL: 'ws://test',
@@ -363,7 +367,12 @@ describe('LiveQueryClient', () => {
       expect(error).toEqual('error thrown');
     });
 
-    liveQueryClient._handleWebSocketMessage(event);
+    try {
+      liveQueryClient._handleWebSocketMessage(event);
+      await Promise.all([subscription.connectPromise, subscription.subscribePromise, liveQueryClient.connectPromise, liveQueryClient.subscribePromise]);
+    } catch (e) {
+      expect(e.message).toEqual('error thrown');
+    }
 
     jest.runOnlyPendingTimers();
     expect(isChecked).toBe(true);
@@ -740,7 +749,7 @@ describe('LiveQueryClient', () => {
     liveQueryClient._handleWebSocketError(error);
   });
 
-  it('can handle WebSocket reconnect on error event', () => {
+  it('can handle WebSocket reconnect on error event', async () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
       serverURL: 'ws://test',
@@ -764,7 +773,12 @@ describe('LiveQueryClient', () => {
       expect(error).toEqual(data.error);
     });
     const spy = jest.spyOn(liveQueryClient, '_handleReconnect');
-    liveQueryClient._handleWebSocketMessage(event);
+    try {
+      liveQueryClient._handleWebSocketMessage(event);
+      await liveQueryClient.connectPromise;
+    } catch (e) {
+      expect(e.message).toBe('Additional properties not allowed');
+    }
 
     expect(isChecked).toBe(true);
     expect(liveQueryClient._handleReconnect).toHaveBeenCalledTimes(1);

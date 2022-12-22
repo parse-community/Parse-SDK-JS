@@ -1,3 +1,10 @@
+# [4.0.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.3...4.0.0-alpha.4) (2022-12-21)
+
+
+### Features
+
+* Add Node 16 and 18 support ([#1598](https://github.com/parse-community/Parse-SDK-JS/issues/1598)) ([2c79a31](https://github.com/parse-community/Parse-SDK-JS/commit/2c79a31201d569b645eea475290c9ed0266227fc))
+
 # [4.0.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.2...4.0.0-alpha.3) (2022-11-18)
 
 
