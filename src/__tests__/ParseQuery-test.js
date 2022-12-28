@@ -1377,12 +1377,15 @@ describe('ParseQuery', () => {
     expect(result.name).toEqual('Product 3');
     expect(result.className).toEqual('Item');
 
-    await q.each((obj) => {
-      expect(obj.objectId).toBe('I1');
-      expect(obj.size).toBe('small');
-      expect(obj.name).toEqual('Product 3');
-      expect(obj.className).toEqual('Item');
-    }, { json: true });
+    await q.each(
+      obj => {
+        expect(obj.objectId).toBe('I1');
+        expect(obj.size).toBe('small');
+        expect(obj.name).toEqual('Product 3');
+        expect(obj.className).toEqual('Item');
+      },
+      { json: true }
+    );
   });
 
   it('will error when getting a nonexistent object', done => {

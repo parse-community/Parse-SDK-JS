@@ -369,7 +369,12 @@ describe('LiveQueryClient', () => {
 
     try {
       liveQueryClient._handleWebSocketMessage(event);
-      await Promise.all([subscription.connectPromise, subscription.subscribePromise, liveQueryClient.connectPromise, liveQueryClient.subscribePromise]);
+      await Promise.all([
+        subscription.connectPromise,
+        subscription.subscribePromise,
+        liveQueryClient.connectPromise,
+        liveQueryClient.subscribePromise,
+      ]);
     } catch (e) {
       expect(e.message).toEqual('error thrown');
     }

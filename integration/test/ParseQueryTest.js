@@ -71,12 +71,15 @@ describe('Parse Query', () => {
     assert.strictEqual(result.className, 'TestObject');
     assert.strictEqual(result.objectId, object.id);
 
-    await query.each((obj) => {
-      assert.strictEqual(obj instanceof Parse.Object, false);
-      assert.strictEqual(obj.foo, 'bar');
-      assert.strictEqual(obj.className, 'TestObject');
-      assert.strictEqual(obj.objectId, object.id);
-    }, { json: true });
+    await query.each(
+      obj => {
+        assert.strictEqual(obj instanceof Parse.Object, false);
+        assert.strictEqual(obj.foo, 'bar');
+        assert.strictEqual(obj.className, 'TestObject');
+        assert.strictEqual(obj.objectId, object.id);
+      },
+      { json: true }
+    );
   });
 
   it('can do query with count', async () => {

@@ -40,7 +40,7 @@ const StorageController = {
 
   removeItemAsync(path: string): Promise {
     return new Promise((resolve, reject) => {
-      CoreManager.getAsyncStorage().removeItem(path, (err) => {
+      CoreManager.getAsyncStorage().removeItem(path, err => {
         if (err) {
           reject(err);
         } else {
@@ -76,7 +76,7 @@ const StorageController = {
 
   multiRemove(keys: Array<string>): Promise {
     return new Promise((resolve, reject) => {
-      CoreManager.getAsyncStorage().multiRemove(keys, (err) => {
+      CoreManager.getAsyncStorage().multiRemove(keys, err => {
         if (err) {
           reject(err);
         } else {
