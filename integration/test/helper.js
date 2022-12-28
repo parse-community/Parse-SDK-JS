@@ -99,13 +99,11 @@ let server;
 
 const reconfigureServer = async (changedConfiguration = {}) => {
   if (server) {
-    return parseServer.handleShutdown().then(() => {
-      server.close(() => {
-        parseServer = undefined;
-        server = undefined;
-        return reconfigureServer(changedConfiguration);
-      });
-    });
+    await parseServer.handleShutdown();
+    await new Promise(resolve => server.close(resolve));
+    parseServer = undefined;
+    server = undefined;
+    return reconfigureServer(changedConfiguration);
   }
 
   didChangeConfiguration = Object.keys(changedConfiguration).length !== 0;
@@ -148,6 +146,7 @@ const reconfigureServer = async (changedConfiguration = {}) => {
       delete openConnections[key];
     });
   });
+  return parseServer;
 };
 global.DiffObject = Parse.Object.extend('DiffObject');
 global.Item = Parse.Object.extend('Item');
