@@ -793,7 +793,7 @@ class ParseQuery {
     const controller = CoreManager.getQueryController();
     const params = {
       distinct: key,
-      where: this._where,
+      $where: this._where,
       hint: this._hint,
     };
     return controller.aggregate(this.className, params, distinctOptions).then(results => {
