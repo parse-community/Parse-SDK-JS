@@ -2547,7 +2547,7 @@ describe('ParseQuery', () => {
         expect(className).toBe('Item');
         expect(params).toEqual({
           distinct: 'size',
-          where: {
+          $where: {
             size: 'small',
           },
         });
@@ -2575,7 +2575,7 @@ describe('ParseQuery', () => {
         expect(className).toBe('Item');
         expect(params).toEqual({
           distinct: 'size',
-          where: {
+          $where: {
             size: 'small',
           },
         });
@@ -2606,7 +2606,7 @@ describe('ParseQuery', () => {
         expect(className).toBe('Item');
         expect(params).toEqual({
           distinct: 'size',
-          where: {
+          $where: {
             size: 'small',
           },
           hint: '_id_',
