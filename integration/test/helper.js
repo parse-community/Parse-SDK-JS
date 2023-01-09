@@ -97,38 +97,26 @@ const destroyAliveConnections = function () {
 let parseServer;
 let server;
 
-const reconfigureServer = (changedConfiguration = {}) => {
-  return new Promise((resolve, reject) => {
-    if (server) {
-      return parseServer.handleShutdown().then(() => {
-        server.close(() => {
-          parseServer = undefined;
-          server = undefined;
-          reconfigureServer(changedConfiguration).then(resolve, reject);
-        });
-      });
-    }
-    try {
-      didChangeConfiguration = Object.keys(changedConfiguration).length !== 0;
-      const newConfiguration = Object.assign({}, defaultConfiguration, changedConfiguration || {}, {
-        serverStartComplete: error => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(parseServer);
-          }
-        },
-        mountPath,
-        port,
-      });
-      parseServer = ParseServer.start(newConfiguration);
-      const app = parseServer.expressApp;
-      for (const fileName of ['parse.js', 'parse.min.js']) {
-        const file = fs
-          .readFileSync(path.resolve(__dirname, `./../../dist/${fileName}`))
-          .toString();
-        app.get(`/${fileName}`, (req, res) => {
-          res.send(`<html><head>
+const reconfigureServer = async (changedConfiguration = {}) => {
+  if (server) {
+    await parseServer.handleShutdown();
+    await new Promise(resolve => server.close(resolve));
+    parseServer = undefined;
+    server = undefined;
+    return reconfigureServer(changedConfiguration);
+  }
+
+  didChangeConfiguration = Object.keys(changedConfiguration).length !== 0;
+  const newConfiguration = Object.assign({}, defaultConfiguration, changedConfiguration || {}, {
+    mountPath,
+    port,
+  });
+  parseServer = await ParseServer.startApp(newConfiguration);
+  const app = parseServer.expressApp;
+  for (const fileName of ['parse.js', 'parse.min.js']) {
+    const file = fs.readFileSync(path.resolve(__dirname, `./../../dist/${fileName}`)).toString();
+    app.get(`/${fileName}`, (req, res) => {
+      res.send(`<html><head>
           <meta charset="utf-8">
           <meta http-equiv="X-UA-Compatible" content="IE=edge">
           <title>Parse Functionality Test</title>
@@ -142,26 +130,23 @@ const reconfigureServer = (changedConfiguration = {}) => {
           </head>
         <body>
         </body></html>`);
-        });
-      }
-      app.get('/clear/:fast', (req, res) => {
-        const { fast } = req.params;
-        TestUtils.destroyAllDataPermanently(fast).then(() => {
-          res.send('{}');
-        });
-      });
-      server = parseServer.server;
-      server.on('connection', connection => {
-        const key = `${connection.remoteAddress}:${connection.remotePort}`;
-        openConnections[key] = connection;
-        connection.on('close', () => {
-          delete openConnections[key];
-        });
-      });
-    } catch (error) {
-      reject(error);
-    }
+    });
+  }
+  app.get('/clear/:fast', (req, res) => {
+    const { fast } = req.params;
+    TestUtils.destroyAllDataPermanently(fast).then(() => {
+      res.send('{}');
+    });
   });
+  server = parseServer.server;
+  server.on('connection', connection => {
+    const key = `${connection.remoteAddress}:${connection.remotePort}`;
+    openConnections[key] = connection;
+    connection.on('close', () => {
+      delete openConnections[key];
+    });
+  });
+  return parseServer;
 };
 global.DiffObject = Parse.Object.extend('DiffObject');
 global.Item = Parse.Object.extend('Item');
