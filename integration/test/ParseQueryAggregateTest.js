@@ -14,7 +14,7 @@ describe('Parse Aggregate Query', () => {
 
   it('aggregate pipeline object query', done => {
     const pipeline = {
-      group: { objectId: '$name' },
+      $group: { _id: '$name' },
     };
     const query = new Parse.Query(TestObject);
     query.aggregate(pipeline).then(results => {
@@ -24,7 +24,7 @@ describe('Parse Aggregate Query', () => {
   });
 
   it('aggregate pipeline array query', done => {
-    const pipeline = [{ group: { objectId: '$name' } }];
+    const pipeline = [{ $group: { _id: '$name' } }];
     const query = new Parse.Query(TestObject);
     query.aggregate(pipeline).then(results => {
       assert.equal(results.length, 3);
@@ -53,7 +53,7 @@ describe('Parse Aggregate Query', () => {
 
     const pipeline = [
       {
-        match: { name: 'Hello' },
+        $match: { name: 'Hello' },
       },
       {
         // Transform className$objectId to objectId and store in new field tempPointer
@@ -77,7 +77,7 @@ describe('Parse Aggregate Query', () => {
         },
       },
       {
-        match: { 'tempPointer.value': 2 },
+        $match: { 'tempPointer.value': 2 },
       },
     ];
     await Parse.Object.saveAll([pointer1, pointer2, pointer3, obj1, obj2, obj3]);
@@ -91,7 +91,7 @@ describe('Parse Aggregate Query', () => {
 
   it('aggregate pipeline on top of a simple query', async done => {
     const pipeline = {
-      group: { objectId: '$name' },
+      $group: { _id: '$name' },
     };
     let results = await new Parse.Query(TestObject).equalTo('name', 'foo').aggregate(pipeline);
 
