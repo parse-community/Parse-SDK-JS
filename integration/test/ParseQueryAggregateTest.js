@@ -57,13 +57,13 @@ describe('Parse Aggregate Query', () => {
       },
       {
         // Transform className$objectId to objectId and store in new field tempPointer
-        project: {
+        $project: {
           tempPointer: { $substr: ['$_p_pointer', 11, -1] }, // Remove TestObject$
         },
       },
       {
         // Left Join, replace objectId stored in tempPointer with an actual object
-        lookup: {
+        $lookup: {
           from: 'TestObject',
           localField: 'tempPointer',
           foreignField: '_id',
@@ -72,7 +72,7 @@ describe('Parse Aggregate Query', () => {
       },
       {
         // lookup returns an array, Deconstructs an array field to objects
-        unwind: {
+        $unwind: {
           path: '$tempPointer',
         },
       },
