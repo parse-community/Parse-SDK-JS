@@ -521,26 +521,24 @@ describe('Parse User', () => {
       });
   });
 
-  it('can count users', done => {
+  it('can count users', async () => {
     const james = new Parse.User();
     james.set('username', 'james');
     james.set('password', 'mypass');
-    james
-      .signUp()
-      .then(() => {
-        const kevin = new Parse.User();
-        kevin.set('username', 'kevin');
-        kevin.set('password', 'mypass');
-        return kevin.signUp();
-      })
-      .then(() => {
-        const query = new Parse.Query(Parse.User);
-        return query.count();
-      })
-      .then(c => {
-        assert.equal(c, 2);
-        done();
-      });
+    const acl = new Parse.ACL();
+    acl.setPublicReadAccess(true);
+    james.setACL(acl);
+    await james.signUp();
+    const kevin = new Parse.User();
+    kevin.set('username', 'kevin');
+    kevin.set('password', 'mypass');
+    kevin.setACL(acl);
+    await kevin.signUp();
+
+    const query = new Parse.Query(Parse.User);
+    const c = await query.count();
+
+    assert.equal(c, 2);
   });
 
   it('can sign up user with container class', done => {

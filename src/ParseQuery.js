@@ -832,7 +832,7 @@ class ParseQuery {
       if (!Array.isArray(pipeline)) {
         pipeline = [pipeline];
       }
-      pipeline.unshift({ match: this._where });
+      pipeline.unshift({ $match: this._where });
     }
 
     const params = {
