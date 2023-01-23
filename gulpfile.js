@@ -27,7 +27,7 @@ const PRESETS = {
     "targets": "> 0.25%, not dead"
   }], '@babel/react'],
   'node': [["@babel/preset-env", {
-    "targets": { "node": "8" }
+    "targets": { "node": "14" }
   }]],
   'react-native': ['module:metro-react-native-babel-preset'],
 };

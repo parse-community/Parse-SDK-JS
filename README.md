@@ -8,7 +8,7 @@
 [![Snyk Badge](https://snyk.io/test/github/parse-community/Parse-SDK-JS/badge.svg)](https://snyk.io/test/github/parse-community/Parse-SDK-JS)
 [![Coverage](http://codecov.io/github/parse-community/Parse-SDK-JS/coverage.svg?branch=alpha)](http://codecov.io/github/parse-community/Parse-SDK-JS?branch=alpha)
 
-[![Node Version](https://img.shields.io/badge/nodejs-12,_14,_15-green.svg?logo=node.js&style=flat)](https://nodejs.org/)
+[![Node Version](https://img.shields.io/badge/nodejs-14,_16,_18-green.svg?logo=node.js&style=flat)](https://nodejs.org/)
 [![auto-release](https://img.shields.io/badge/%F0%9F%9A%80-auto--release-9e34eb.svg)](https://github.com/parse-community/parse-dashboard/releases)
 
 [![npm latest version](https://img.shields.io/npm/v/parse/latest.svg)](https://www.npmjs.com/package/parse)
@@ -29,6 +29,7 @@ A library that gives you access to the powerful Parse Server backend from your J
 
 - [Getting Started](#getting-started)
   - [Using Parse on Different Platforms](#using-parse-on-different-platforms)
+- [Compatibility](#compatibility)
 - [Upgrading to Parse SDK 2.0.0](#upgrading-to-parse-sdk-200)
 - [3rd Party Authentications](#3rd-party-authentications)
 - [Want to ride the bleeding edge?](#want-to-ride-the-bleeding-edge)
@@ -71,7 +72,7 @@ For React Native applications, include `'parse/react-native.js'`:
 const Parse = require('parse/react-native.js');
 
 // On React Native >= 0.50 and Parse >= 1.11.0, set the Async
-const AsyncStorage = require('react-native').AsyncStorage;
+const AsyncStorage = require('@react-native-async-storage/async-storage');
 Parse.setAsyncStorage(AsyncStorage);
 ```
 
@@ -88,6 +89,20 @@ $ npm install @types/parse
 ```
 
 Types are updated manually after every release. If a definition doesn't exist, please submit a pull request to [@types/parse][types-parse]
+
+## Compatibility
+
+### Node.js
+
+Parse JS SDK is continuously tested with the most recent releases of Node.js to ensure compatibility. We follow the [Node.js Long Term Support plan](https://github.com/nodejs/Release) and only test against versions that are officially supported and have not reached their end-of-life date.
+
+| Version    | Latest Version | End-of-Life | Compatible |
+|------------|----------------|-------------|------------|
+| Node.js 14 | 14.19.1        | April 2023  | ✅ Yes      |
+| Node.js 16 | 16.19.0        | September 2023  | ✅ Yes      |
+| Node.js 18 | 18.12.1        | April 2025  | ✅ Yes      |
+| Node.js 19 | 19.3.0        | June 2023  | ✅ Yes      |
+
 
 ## Upgrading to Parse SDK 2.0.0
 
@@ -113,12 +128,12 @@ And don't forget, if you plan to deploy it remotely, you should run `npm install
 
 We really want Parse to be yours, to see it grow and thrive in the open source community. Please see the [Contributing to Parse Javascript SDK guide][contributing].
 
- 
+
 [3rd-party-auth]: http://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication
 [contributing]: https://github.com/parse-community/Parse-SDK-JS/blob/master/CONTRIBUTING.md
 [custom-auth-module]: https://docs.parseplatform.org/js/guide/#custom-authentication-module
 [link-with]: https://docs.parseplatform.org/js/guide/#linking-users
 [migration]: https://github.com/parse-community/Parse-SDK-JS/blob/master/2.0.0.md
 [open-collective-link]: https://opencollective.com/parse-server
-[types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse 
+[types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse
 [license-link]: LICENSE

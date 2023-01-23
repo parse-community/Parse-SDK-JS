@@ -570,6 +570,20 @@ describe('RESTController', () => {
     );
   });
 
+  it('does not set upload progress listener when callback is not provided to avoid CORS pre-flight', () => {
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      upload: jest.fn(),
+      send: jest.fn(),
+    };
+    RESTController._setXHR(function () {
+      return xhr;
+    });
+    RESTController.ajax('POST', 'users', {});
+    expect(xhr.upload.onprogress).toBeUndefined();
+  });
+
   it('does not upload progress when total is uncomputable', done => {
     const xhr = mockXHR([{ status: 200, response: { success: true } }], {
       progress: {
