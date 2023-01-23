@@ -124,10 +124,18 @@ const mockLocalDatastore = {
   _serializeObjectsFromPinName: jest.fn(),
   _serializeObject: jest.fn(),
   _transverseSerializeObject: jest.fn(),
-  _updateObjectIfPinned: jest.fn(),
   _destroyObjectIfPinned: jest.fn(),
-  _updateLocalIdForObject: jest.fn(),
-  updateFromServer: jest.fn(),
+  _updateLocalIdForObject: (localId, /** @type {ParseObject}*/ object) => {
+    // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
+    const objectKey = mockLocalDatastore.getKeyForObject(object);
+  },
+  _updateObjectIfPinned: jest.fn(),
+  getKeyForObject: (object) => {
+    // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
+    const objectId = object.objectId || object._getId();
+    const OBJECT_PREFIX = 'Parse_LDS_';
+    return `${OBJECT_PREFIX}${object.className}_${objectId}`;
+  }, updateFromServer: jest.fn(),
   _clear: jest.fn(),
   getKeyForObject: jest.fn(),
   checkIfEnabled: jest.fn(() => {

@@ -2492,6 +2492,7 @@ const DefaultController = {
             return Promise.reject(objectError);
           }
           for (const object of target) {
+            // Make sure that it is a ParseObject before updating it into the localDataStore
             if(object instanceof ParseObject) {
               await localDatastore._updateLocalIdForObject(mapIdForPin[object.id], object);
               await localDatastore._updateObjectIfPinned(object);
