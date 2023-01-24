@@ -126,6 +126,7 @@ const mockLocalDatastore = {
   _transverseSerializeObject: jest.fn(),
   _destroyObjectIfPinned: jest.fn(),
   _updateLocalIdForObject: (localId, /** @type {ParseObject}*/ object) => {
+    /* eslint-disable no-unused-vars */
     // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
     const objectKey = mockLocalDatastore.getKeyForObject(object);
   },
@@ -137,7 +138,6 @@ const mockLocalDatastore = {
     return `${OBJECT_PREFIX}${object.className}_${objectId}`;
   }, updateFromServer: jest.fn(),
   _clear: jest.fn(),
-  getKeyForObject: jest.fn(),
   checkIfEnabled: jest.fn(() => {
     if (!mockLocalDatastore.isEnabled) {
       console.error('Parse.enableLocalDatastore() must be called first');

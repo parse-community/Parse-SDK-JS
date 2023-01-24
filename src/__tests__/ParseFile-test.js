@@ -25,6 +25,7 @@ const mockHttps = require('https');
 
 const mockLocalDatastore = {
   _updateLocalIdForObject: (localId, /** @type {ParseObject}*/ object) => {
+    /* eslint-disable no-unused-vars */
     // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
     const objectKey = mockLocalDatastore.getKeyForObject(object);
   },
