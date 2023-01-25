@@ -83,17 +83,20 @@ describe('Parse Cloud', () => {
     });
   });
 
-  it('run job', done => {
+  it('run job', async () => {
     const params = { startedBy: 'Monty Python' };
-    Parse.Cloud.startJob('CloudJob1', params)
-      .then(jobStatusId => {
-        return Parse.Cloud.getJobStatus(jobStatusId);
-      })
-      .then(jobStatus => {
-        assert.equal(jobStatus.get('status'), 'succeeded');
-        assert.equal(jobStatus.get('params').startedBy, 'Monty Python');
-        done();
-      });
+    const jobStatusId = await Parse.Cloud.startJob('CloudJob1', params);
+
+    const checkJobStatus = async () => {
+      const result = await Parse.Cloud.getJobStatus(jobStatusId);
+      return result && result.get('status') === 'succeeded';
+    };
+    while (!(await checkJobStatus())) {
+      await sleep(100);
+    }
+    const jobStatus = await Parse.Cloud.getJobStatus(jobStatusId);
+    assert.equal(jobStatus.get('status'), 'succeeded');
+    assert.equal(jobStatus.get('params').startedBy, 'Monty Python');
   });
 
   it('run long job', async () => {
