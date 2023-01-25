@@ -1227,6 +1227,32 @@ function runTest(controller) {
       assert.equal(results[0].id, parent3.id);
     });
 
+    it(`${controller.name} can handle containsAll query on array`, async () => {
+      const object = new TestObject({ arrayField: [1, 2, 3, 4] });
+      await object.save();
+      await object.pin();
+
+      const query = new Parse.Query(TestObject);
+      query.containsAll('arrayField', [2, 3, 4]);
+      query.fromPin();
+      const results = await query.find();
+
+      expect(results.length).toBe(1);
+      expect(results[0].get('arrayField')).toEqual([1, 2, 3, 4]);
+    });
+
+    it(`${controller.name} can handle containedIn query on array`, async () => {
+      const object = new TestObject({ arrayField: [1, 2, 3] });
+      await object.save();
+      await object.pin();
+
+      const query = new Parse.Query(TestObject);
+      query.containedIn('arrayField', [3]);
+      query.fromPin();
+      const results = await query.find();
+      expect(results[0].get('arrayField')).toEqual([1, 2, 3]);
+    });
+
     it(`${controller.name} can test equality with undefined`, async () => {
       const query = new Parse.Query('BoxedNumber');
       query.equalTo('number', undefined);

@@ -24,6 +24,13 @@ function contains(haystack, needle) {
     }
     return false;
   }
+  if (Array.isArray(needle)) {
+    for (const need of needle) {
+      if (contains(haystack, need)) {
+        return true;
+      }
+    }
+  }
   return haystack.indexOf(needle) > -1;
 }
 
