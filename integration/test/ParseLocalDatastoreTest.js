@@ -1267,7 +1267,7 @@ function runTest(controller) {
       expect(results.length).toEqual(0);
     });
 
-    fit(`${controller.name} can handle notContainedIn query on array`, async () => {
+    it(`${controller.name} can handle notContainedIn query on array`, async () => {
       const obj1 = new TestObject({ arrayField: [1, 2, 3, 4] });
       const obj2 = new TestObject({ arrayField: [0, 2] });
       const obj3 = new TestObject({ arrayField: [1, 2, 3] });
