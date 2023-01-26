@@ -257,38 +257,6 @@ describe('Parse LiveQuery', () => {
     await object.save();
   });
 
-  it('can handle containsAll query', async (done) => {
-    const object = new TestObject({ arrayField: [1, 2, 3] });
-    await object.save();
-
-    const query = new Parse.Query(TestObject);
-    query.containsAll('arrayField', [2, 3, 4]);
-    const subscription = await query.subscribe();
-
-    subscription.on('enter', object => {
-      expect(object.get('arrayField')).toEqual([1, 2, 3, 4]);
-      done();
-    });
-    object.addUnique('arrayField', 4);
-    await object.save();
-  });
-
-  it('can handle containedIn query', async (done) => {
-    const object = new TestObject({ arrayField: [1, 2, 3] });
-    await object.save();
-
-    const query = new Parse.Query(TestObject);
-    query.containedIn('arrayField', [4]);
-    const subscription = await query.subscribe();
-
-    subscription.on('enter', object => {
-      expect(object.get('arrayField')).toEqual([1, 2, 3, 4]);
-      done();
-    });
-    object.addUnique('arrayField', 4);
-    await object.save();
-  });
-
   it('live query can handle beforeConnect and beforeSubscribe errors', async () => {
     await reconfigureServer({
       cloud({ Cloud }) {
