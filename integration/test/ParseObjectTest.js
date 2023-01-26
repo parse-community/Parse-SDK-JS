@@ -1674,6 +1674,7 @@ describe('Parse Object', () => {
     assert.equal(user.createdAt.getTime(), sameUser.createdAt.getTime());
     assert.equal(user.updatedAt.getTime(), sameUser.updatedAt.getTime());
     await Parse.User.logOut();
+    Parse.User.disableUnsafeCurrentUser();
   });
 
   it('can fetchAllIfNeededWithInclude', async () => {
@@ -2014,7 +2015,7 @@ describe('Parse Object', () => {
     assert.equal(user.isDataAvailable(), true);
 
     const query = new Parse.Query(Parse.User);
-    const fetched = await query.get(user.id);
+    const fetched = await query.get(user.id, { useMasterKey: true });
     assert.equal(fetched.isDataAvailable(), true);
   });
 
