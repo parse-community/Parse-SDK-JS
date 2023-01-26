@@ -252,6 +252,7 @@ describe('Parse User', () => {
   });
 
   it('cannot saveAll with non-authed user', done => {
+    Parse.User.enableUnsafeCurrentUser();
     let user = new Parse.User();
     let notAuthed = null;
     user
