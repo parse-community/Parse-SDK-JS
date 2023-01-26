@@ -185,6 +185,7 @@ describe('Parse User', () => {
   });
 
   it('cannot save non-authed user', done => {
+    Parse.User.enableUnsafeCurrentUser();
     let user = new Parse.User();
     let notAuthed = null;
     user.set({
@@ -220,6 +221,7 @@ describe('Parse User', () => {
   });
 
   it('cannot delete non-authed user', done => {
+    Parse.User.enableUnsafeCurrentUser();
     let user = new Parse.User();
     let notAuthed = null;
     user
@@ -436,6 +438,7 @@ describe('Parse User', () => {
   });
 
   it('can query for users', done => {
+    Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
     user.set('password', 'asdf');
     user.set('email', 'asdf@exxample.com');
@@ -458,6 +461,7 @@ describe('Parse User', () => {
   });
 
   it('preserves the session token when querying the current user', done => {
+    Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
     user.set('password', 'asdf');
     user.set('email', 'asdf@example.com');
