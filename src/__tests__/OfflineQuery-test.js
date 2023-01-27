@@ -610,6 +610,33 @@ describe('OfflineQuery', () => {
     expect(matchesQuery(q.className, message, [], q)).toBe(false);
   });
 
+  it('should support containedIn with array of pointers', () => {
+    const profile1 = new ParseObject('Profile');
+    profile1.id = 'yeahaw';
+    const profile2 = new ParseObject('Profile');
+    profile2.id = 'yes';
+
+    const message = new ParseObject('Message');
+    message.id = 'O2';
+    message.set('profiles', [profile1, profile2]);
+
+    let q = new ParseQuery('Message');
+    q.containedIn('profiles', [
+      ParseObject.fromJSON({ className: 'Profile', objectId: 'no' }),
+      ParseObject.fromJSON({ className: 'Profile', objectId: 'yes' }),
+    ]);
+
+    expect(matchesQuery(q.className, message, [], q)).toBe(true);
+
+    q = new ParseQuery('Message');
+    q.containedIn('profiles', [
+      ParseObject.fromJSON({ className: 'Profile', objectId: 'no' }),
+      ParseObject.fromJSON({ className: 'Profile', objectId: 'nope' }),
+    ]);
+
+    expect(matchesQuery(q.className, message, [], q)).toBe(false);
+  });
+
   it('should support notContainedIn with pointers', () => {
     const profile = new ParseObject('Profile');
     profile.id = 'abc';
