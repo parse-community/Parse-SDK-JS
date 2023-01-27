@@ -166,11 +166,14 @@ beforeAll(async () => {
 
 afterEach(async () => {
   await Parse.User.logOut();
+  // Connection close events are not immediate on node 10+... wait a bit
+  await sleep(0);
+  if (Object.keys(openConnections).length > 0) {
+    console.warn('There were open connections to the server left after the test finished');
+  }
   Parse.Storage._clear();
   await TestUtils.destroyAllDataPermanently(true);
   destroyAliveConnections();
-  // Connection close events are not immediate on node 10+... wait a bit
-  await sleep(0);
   if (didChangeConfiguration) {
     await reconfigureServer();
   }
