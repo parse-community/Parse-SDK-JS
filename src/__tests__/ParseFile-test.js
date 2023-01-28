@@ -971,7 +971,6 @@ describe('FileController', () => {
 
   it('can save unsaved Parse.File property when localDataStore is enabled.', async () => {
     mockLocalDatastore.isEnabled = true;
-    console.log('isenabled?', mockLocalDatastore.isEnabled);
     const obj = new ParseObject('Item');
     const aFile = new ParseFile('myFileName', [0, 0, 0, 0, 2, 3, 4, 5]);
     obj.set('myName', 'helloworld');
