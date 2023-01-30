@@ -1644,49 +1644,37 @@ describe('Parse Object', () => {
       });
   });
 
-  it('merges user attributes on fetchAll', done => {
+  it('merges user attributes on fetchAll', async () => {
     Parse.User.enableUnsafeCurrentUser();
-    let sameUser;
+    const acl = new Parse.ACL();
+    acl.setPublicReadAccess(true);
     let user = new Parse.User();
     user.set('username', 'asdf');
     user.set('password', 'zxcv');
     user.set('foo', 'bar');
-    user
-      .signUp()
-      .then(() => {
-        Parse.User.logOut();
-        const query = new Parse.Query(Parse.User);
-        return query.get(user.id);
-      })
-      .then(userAgain => {
-        user = userAgain;
-        sameUser = new Parse.User();
-        sameUser.set('username', 'asdf');
-        sameUser.set('password', 'zxcv');
-        return sameUser.logIn();
-      })
-      .then(() => {
-        assert(!user.getSessionToken());
-        assert(sameUser.getSessionToken());
-        sameUser.set('baz', 'qux');
-        return sameUser.save();
-      })
-      .then(() => {
-        return Parse.Object.fetchAll([user]);
-      })
-      .then(() => {
-        assert.equal(user.createdAt.getTime(), sameUser.createdAt.getTime());
-        assert.equal(user.updatedAt.getTime(), sameUser.updatedAt.getTime());
-        return Parse.User.logOut().then(
-          () => {
-            done();
-          },
-          () => {
-            done();
-          }
-        );
-      })
-      .catch(done.fail);
+    user.setACL(acl);
+    await user.signUp();
+
+    Parse.User.logOut();
+    const query = new Parse.Query(Parse.User);
+    user = await query.get(user.id);
+
+    const sameUser = new Parse.User();
+    sameUser.set('username', 'asdf');
+    sameUser.set('password', 'zxcv');
+    sameUser.setACL(acl);
+    await sameUser.logIn();
+
+    assert(!user.getSessionToken());
+    assert(sameUser.getSessionToken());
+    sameUser.set('baz', 'qux');
+    await sameUser.save();
+
+    await Parse.Object.fetchAll([user]);
+    assert.equal(user.createdAt.getTime(), sameUser.createdAt.getTime());
+    assert.equal(user.updatedAt.getTime(), sameUser.updatedAt.getTime());
+    await Parse.User.logOut();
+    Parse.User.disableUnsafeCurrentUser();
   });
 
   it('can fetchAllIfNeededWithInclude', async () => {
@@ -2027,7 +2015,7 @@ describe('Parse Object', () => {
     assert.equal(user.isDataAvailable(), true);
 
     const query = new Parse.Query(Parse.User);
-    const fetched = await query.get(user.id);
+    const fetched = await query.get(user.id, { useMasterKey: true });
     assert.equal(fetched.isDataAvailable(), true);
   });
 

@@ -17,18 +17,31 @@ jobs:
         with:
           version: 1
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:      
-      MONGODB_VERSION: 3.6.9
+    strategy:
+      matrix:
+        include:
+          - name: Node 14
+            NODE_VERSION: 14.21.1
+          - name: Node 16
+            NODE_VERSION: 16.18.1
+          - name: Node 18
+            NODE_VERSION: 18.12.1
+          - name: Node 19
+            NODE_VERSION: 19.3.0
+      fail-fast: false
     steps:
     - name: Fix usage of insecure GitHub protocol
       run: sudo git config --system url."https://github".insteadOf "git://github"
+    - name: Fix git protocol for Node 14
+      if: ${{ startsWith(matrix.NODE_VERSION, '14.') }}
+      run: sudo git config --system url."https://github".insteadOf "ssh://git@github"
     - uses: actions/checkout@v2
     - name: Use Node.js
       uses: actions/setup-node@v1
       with:
-        node-version: 14
+        node-version: ${{ matrix.NODE_VERSION }}
     - name: Cache Node.js modules
       uses: actions/cache@v2
       with:

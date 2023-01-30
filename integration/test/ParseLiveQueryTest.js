@@ -285,7 +285,7 @@ describe('Parse LiveQuery', () => {
   it('connectPromise does throw', async () => {
     await reconfigureServer({
       cloud({ Cloud }) {
-        Cloud.beforeConnect((params) => {
+        Cloud.beforeConnect(params => {
           if (params.sessionToken === 'testToken') {
             throw 'not allowed to connect';
           }

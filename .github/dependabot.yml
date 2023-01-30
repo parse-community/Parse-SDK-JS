@@ -15,3 +15,5 @@ updates:
     # Define dependencies to update
     allow:
       - dependency-name: "parse-server"
+      # Allow both direct and indirect updates for all packages
+      - dependency-type: "all"

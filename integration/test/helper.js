@@ -10,6 +10,12 @@ const { TestUtils } = require('parse-server');
 const Parse = require('../../node');
 const fs = require('fs');
 const path = require('path');
+const dns = require('dns');
+
+// Ensure localhost resolves to ipv4 address first on node v17+
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 const port = 1337;
 const mountPath = '/parse';
@@ -91,38 +97,26 @@ const destroyAliveConnections = function () {
 let parseServer;
 let server;
 
-const reconfigureServer = (changedConfiguration = {}) => {
-  return new Promise((resolve, reject) => {
-    if (server) {
-      return parseServer.handleShutdown().then(() => {
-        server.close(() => {
-          parseServer = undefined;
-          server = undefined;
-          reconfigureServer(changedConfiguration).then(resolve, reject);
-        });
-      });
-    }
-    try {
-      didChangeConfiguration = Object.keys(changedConfiguration).length !== 0;
-      const newConfiguration = Object.assign({}, defaultConfiguration, changedConfiguration || {}, {
-        serverStartComplete: error => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(parseServer);
-          }
-        },
-        mountPath,
-        port,
-      });
-      parseServer = ParseServer.start(newConfiguration);
-      const app = parseServer.expressApp;
-      for (const fileName of ['parse.js', 'parse.min.js']) {
-        const file = fs
-          .readFileSync(path.resolve(__dirname, `./../../dist/${fileName}`))
-          .toString();
-        app.get(`/${fileName}`, (req, res) => {
-          res.send(`<html><head>
+const reconfigureServer = async (changedConfiguration = {}) => {
+  if (server) {
+    await parseServer.handleShutdown();
+    await new Promise(resolve => server.close(resolve));
+    parseServer = undefined;
+    server = undefined;
+    return reconfigureServer(changedConfiguration);
+  }
+
+  didChangeConfiguration = Object.keys(changedConfiguration).length !== 0;
+  const newConfiguration = Object.assign({}, defaultConfiguration, changedConfiguration || {}, {
+    mountPath,
+    port,
+  });
+  parseServer = await ParseServer.startApp(newConfiguration);
+  const app = parseServer.expressApp;
+  for (const fileName of ['parse.js', 'parse.min.js']) {
+    const file = fs.readFileSync(path.resolve(__dirname, `./../../dist/${fileName}`)).toString();
+    app.get(`/${fileName}`, (req, res) => {
+      res.send(`<html><head>
           <meta charset="utf-8">
           <meta http-equiv="X-UA-Compatible" content="IE=edge">
           <title>Parse Functionality Test</title>
@@ -136,26 +130,23 @@ const reconfigureServer = (changedConfiguration = {}) => {
           </head>
         <body>
         </body></html>`);
-        });
-      }
-      app.get('/clear/:fast', (req, res) => {
-        const { fast } = req.params;
-        TestUtils.destroyAllDataPermanently(fast).then(() => {
-          res.send('{}');
-        });
-      });
-      server = parseServer.server;
-      server.on('connection', connection => {
-        const key = `${connection.remoteAddress}:${connection.remotePort}`;
-        openConnections[key] = connection;
-        connection.on('close', () => {
-          delete openConnections[key];
-        });
-      });
-    } catch (error) {
-      reject(error);
-    }
+    });
+  }
+  app.get('/clear/:fast', (req, res) => {
+    const { fast } = req.params;
+    TestUtils.destroyAllDataPermanently(fast).then(() => {
+      res.send('{}');
+    });
   });
+  server = parseServer.server;
+  server.on('connection', connection => {
+    const key = `${connection.remoteAddress}:${connection.remotePort}`;
+    openConnections[key] = connection;
+    connection.on('close', () => {
+      delete openConnections[key];
+    });
+  });
+  return parseServer;
 };
 global.DiffObject = Parse.Object.extend('DiffObject');
 global.Item = Parse.Object.extend('Item');
@@ -175,11 +166,14 @@ beforeAll(async () => {
 
 afterEach(async () => {
   await Parse.User.logOut();
+  // Connection close events are not immediate on node 10+... wait a bit
+  await sleep(0);
+  if (Object.keys(openConnections).length > 0) {
+    console.warn('There were open connections to the server left after the test finished');
+  }
   Parse.Storage._clear();
   await TestUtils.destroyAllDataPermanently(true);
   destroyAliveConnections();
-  // Connection close events are not immediate on node 10+... wait a bit
-  await sleep(0);
   if (didChangeConfiguration) {
     await reconfigureServer();
   }
