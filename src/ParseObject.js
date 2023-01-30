@@ -121,12 +121,6 @@ class ParseObject {
       this.initialize.apply(this, arguments);
     }
 
-    if (this._initializers) {
-      for (const initializer of this._initializers) {
-        initializer.apply(this, arguments);
-      }
-    }
-
     let toSet = null;
     this._objCount = objectCount++;
     if (typeof className === 'string') {
