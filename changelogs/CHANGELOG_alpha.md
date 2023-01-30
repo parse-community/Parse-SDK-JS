@@ -1,3 +1,10 @@
+# [4.0.0-alpha.7](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.6...4.0.0-alpha.7) (2023-01-30)
+
+
+### Bug Fixes
+
+* Request execution time keeps increasing over time when using `Parse.Object.extend` ([#1682](https://github.com/parse-community/Parse-SDK-JS/issues/1682)) ([f555c43](https://github.com/parse-community/Parse-SDK-JS/commit/f555c43841c95c2ae759342ea28cd69f7fd232a4))
+
 # [4.0.0-alpha.6](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.5...4.0.0-alpha.6) (2023-01-27)
 
 
