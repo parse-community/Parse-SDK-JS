@@ -121,6 +121,12 @@ class ParseObject {
       this.initialize.apply(this, arguments);
     }
 
+    if (this._initializers) {
+      for (const initializer of this._initializers) {
+        initializer.apply(this, arguments);
+      }
+    }
+
     let toSet = null;
     this._objCount = objectCount++;
     if (typeof className === 'string') {
@@ -1968,6 +1974,12 @@ class ParseObject {
         this.initialize.apply(this, arguments);
       }
 
+      if (this._initializers) {
+        for (const initializer of this._initializers) {
+          initializer.apply(this, arguments);
+        }
+      }
+
       if (attributes && typeof attributes === 'object') {
         if (!this.set(attributes || {}, options)) {
           throw new Error("Can't create an invalid Parse Object");
@@ -1991,6 +2003,15 @@ class ParseObject {
 
     if (protoProps) {
       for (const prop in protoProps) {
+        if (prop === 'initialize') {
+          Object.defineProperty(ParseObjectSubclass.prototype, '_initializers', {
+            value: [...(ParseObjectSubclass.prototype._initializers || []), protoProps[prop]],
+            enumerable: false,
+            writable: true,
+            configurable: true,
+          });
+          continue;
+        }
         if (prop !== 'className') {
           Object.defineProperty(ParseObjectSubclass.prototype, prop, {
             value: protoProps[prop],
@@ -2015,14 +2036,15 @@ class ParseObject {
       }
     }
 
-    ParseObjectSubclass.extend = function (name, protoProps, classProps) {
-      if (typeof name === 'string') {
-        return ParseObject.extend.call(ParseObjectSubclass, name, protoProps, classProps);
-      }
-      return ParseObject.extend.call(ParseObjectSubclass, adjustedClassName, name, protoProps);
-    };
-    ParseObjectSubclass.createWithoutData = ParseObject.createWithoutData;
-
+    if (!classMap[adjustedClassName]) {
+      ParseObjectSubclass.extend = function (name, protoProps, classProps) {
+        if (typeof name === 'string') {
+          return ParseObject.extend.call(ParseObjectSubclass, name, protoProps, classProps);
+        }
+        return ParseObject.extend.call(ParseObjectSubclass, adjustedClassName, name, protoProps);
+      };
+      ParseObjectSubclass.createWithoutData = ParseObject.createWithoutData;
+    }
     classMap[adjustedClassName] = ParseObjectSubclass;
     return ParseObjectSubclass;
   }
