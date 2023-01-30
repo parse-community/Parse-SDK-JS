@@ -1989,6 +1989,13 @@ class ParseObject {
     if (classMap[adjustedClassName]) {
       ParseObjectSubclass = classMap[adjustedClassName];
     } else {
+      ParseObjectSubclass.extend = function (name, protoProps, classProps) {
+        if (typeof name === 'string') {
+          return ParseObject.extend.call(ParseObjectSubclass, name, protoProps, classProps);
+        }
+        return ParseObject.extend.call(ParseObjectSubclass, adjustedClassName, name, protoProps);
+      };
+      ParseObjectSubclass.createWithoutData = ParseObject.createWithoutData;
       ParseObjectSubclass.className = adjustedClassName;
       ParseObjectSubclass.__super__ = parentProto;
       ParseObjectSubclass.prototype = Object.create(parentProto, {
@@ -2034,16 +2041,6 @@ class ParseObject {
           });
         }
       }
-    }
-
-    if (!classMap[adjustedClassName]) {
-      ParseObjectSubclass.extend = function (name, protoProps, classProps) {
-        if (typeof name === 'string') {
-          return ParseObject.extend.call(ParseObjectSubclass, name, protoProps, classProps);
-        }
-        return ParseObject.extend.call(ParseObjectSubclass, adjustedClassName, name, protoProps);
-      };
-      ParseObjectSubclass.createWithoutData = ParseObject.createWithoutData;
     }
     classMap[adjustedClassName] = ParseObjectSubclass;
     return ParseObjectSubclass;
