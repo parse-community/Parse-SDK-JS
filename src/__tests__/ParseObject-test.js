@@ -3516,6 +3516,24 @@ describe('ParseObject extensions', () => {
     ParseObject.enableSingleInstance();
   });
 
+  it('can extend object', () => {
+    const startExtend = Date.now();
+    for (let i = 0; i < 100000; i++) {
+      // eslint-disable-next-line
+      const Parent = ParseObject.extend('Parent');
+      // eslint-disable-next-line
+      const parent = new Parent();
+    }
+    expect(Date.now() - startExtend).toBeLessThan(200);
+
+    const startNew = Date.now();
+    for (let i = 0; i < 100000; i++) {
+      // eslint-disable-next-line
+      const parent = new ParseObject('Parent');
+    }
+    expect(Date.now() - startNew).toBeLessThan(200);
+  });
+
   it('can generate ParseObjects with a default className', () => {
     const YourObject = ParseObject.extend('YourObject');
     const yo = new YourObject();
