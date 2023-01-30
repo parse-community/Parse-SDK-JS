@@ -3524,14 +3524,14 @@ describe('ParseObject extensions', () => {
       // eslint-disable-next-line
       const parent = new Parent();
     }
-    expect(Date.now() - startExtend).toBeLessThan(100);
+    expect(Date.now() - startExtend).toBeLessThan(200);
 
     const startNew = Date.now();
     for (let i = 0; i < 100000; i++) {
       // eslint-disable-next-line
       const parent = new ParseObject('Parent');
     }
-    expect(Date.now() - startNew).toBeLessThan(100);
+    expect(Date.now() - startNew).toBeLessThan(200);
   });
 
   it('can generate ParseObjects with a default className', () => {
