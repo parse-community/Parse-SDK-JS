@@ -1959,10 +1959,8 @@ class ParseObject {
     let parentProto = ParseObject.prototype;
     if (this.hasOwnProperty('__super__') && this.__super__) {
       parentProto = this.prototype;
-    } else if (classMap[adjustedClassName]) {
-      parentProto = classMap[adjustedClassName].prototype;
     }
-    const ParseObjectSubclass = function (attributes, options) {
+    let ParseObjectSubclass = function (attributes, options) {
       this.className = adjustedClassName;
       this._objCount = objectCount++;
       // Enable legacy initializers
@@ -1976,17 +1974,20 @@ class ParseObject {
         }
       }
     };
-    ParseObjectSubclass.className = adjustedClassName;
-    ParseObjectSubclass.__super__ = parentProto;
-
-    ParseObjectSubclass.prototype = Object.create(parentProto, {
-      constructor: {
-        value: ParseObjectSubclass,
-        enumerable: false,
-        writable: true,
-        configurable: true,
-      },
-    });
+    if (classMap[adjustedClassName]) {
+      ParseObjectSubclass = classMap[adjustedClassName];
+    } else {
+      ParseObjectSubclass.className = adjustedClassName;
+      ParseObjectSubclass.__super__ = parentProto;
+      ParseObjectSubclass.prototype = Object.create(parentProto, {
+        constructor: {
+          value: ParseObjectSubclass,
+          enumerable: false,
+          writable: true,
+          configurable: true,
+        },
+      });
+    }
 
     if (protoProps) {
       for (const prop in protoProps) {
