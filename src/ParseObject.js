@@ -1,11 +1,4 @@
 /**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
  * @flow
  */
 
@@ -1959,15 +1952,19 @@ class ParseObject {
     let parentProto = ParseObject.prototype;
     if (this.hasOwnProperty('__super__') && this.__super__) {
       parentProto = this.prototype;
-    } else if (classMap[adjustedClassName]) {
-      parentProto = classMap[adjustedClassName].prototype;
     }
-    const ParseObjectSubclass = function (attributes, options) {
+    let ParseObjectSubclass = function (attributes, options) {
       this.className = adjustedClassName;
       this._objCount = objectCount++;
       // Enable legacy initializers
       if (typeof this.initialize === 'function') {
         this.initialize.apply(this, arguments);
+      }
+
+      if (this._initializers) {
+        for (const initializer of this._initializers) {
+          initializer.apply(this, arguments);
+        }
       }
 
       if (attributes && typeof attributes === 'object') {
@@ -1976,20 +1973,39 @@ class ParseObject {
         }
       }
     };
-    ParseObjectSubclass.className = adjustedClassName;
-    ParseObjectSubclass.__super__ = parentProto;
-
-    ParseObjectSubclass.prototype = Object.create(parentProto, {
-      constructor: {
-        value: ParseObjectSubclass,
-        enumerable: false,
-        writable: true,
-        configurable: true,
-      },
-    });
+    if (classMap[adjustedClassName]) {
+      ParseObjectSubclass = classMap[adjustedClassName];
+    } else {
+      ParseObjectSubclass.extend = function (name, protoProps, classProps) {
+        if (typeof name === 'string') {
+          return ParseObject.extend.call(ParseObjectSubclass, name, protoProps, classProps);
+        }
+        return ParseObject.extend.call(ParseObjectSubclass, adjustedClassName, name, protoProps);
+      };
+      ParseObjectSubclass.createWithoutData = ParseObject.createWithoutData;
+      ParseObjectSubclass.className = adjustedClassName;
+      ParseObjectSubclass.__super__ = parentProto;
+      ParseObjectSubclass.prototype = Object.create(parentProto, {
+        constructor: {
+          value: ParseObjectSubclass,
+          enumerable: false,
+          writable: true,
+          configurable: true,
+        },
+      });
+    }
 
     if (protoProps) {
       for (const prop in protoProps) {
+        if (prop === 'initialize') {
+          Object.defineProperty(ParseObjectSubclass.prototype, '_initializers', {
+            value: [...(ParseObjectSubclass.prototype._initializers || []), protoProps[prop]],
+            enumerable: false,
+            writable: true,
+            configurable: true,
+          });
+          continue;
+        }
         if (prop !== 'className') {
           Object.defineProperty(ParseObjectSubclass.prototype, prop, {
             value: protoProps[prop],
@@ -2013,15 +2029,6 @@ class ParseObject {
         }
       }
     }
-
-    ParseObjectSubclass.extend = function (name, protoProps, classProps) {
-      if (typeof name === 'string') {
-        return ParseObject.extend.call(ParseObjectSubclass, name, protoProps, classProps);
-      }
-      return ParseObject.extend.call(ParseObjectSubclass, adjustedClassName, name, protoProps);
-    };
-    ParseObjectSubclass.createWithoutData = ParseObject.createWithoutData;
-
     classMap[adjustedClassName] = ParseObjectSubclass;
     return ParseObjectSubclass;
   }

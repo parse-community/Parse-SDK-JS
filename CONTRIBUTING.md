@@ -106,15 +106,11 @@ Parse Community has a [responsible Vulnerability Disclosure Program](https://git
 
 This project adheres to the [Contributor Covenant Code of Conduct](https://github.com/parse-community/parse-server/blob/master/CODE_OF_CONDUCT.md). By participating, you are expected to honor this code.
 
-## License
-
-By contributing to the Parse JavaScript SDK, you agree that your contributions will be licensed under its license.
-
- [google-group]: https://groups.google.com/forum/#!forum/parse-developers
- [stack-overflow]: http://stackoverflow.com/tags/parse-server
- [bug-reports]: https://github.com/parse-community/parse-server/issues
- [rest-api]: https://docs.parseplatform.org/rest/guide
- [parse-api-console]: http://blog.parseplatform.org/announcements/introducing-the-parse-api-console/
- [stacktrace-or-gtfo]: http://i.imgur.com/jacoj.jpg
- [tests-dir]: /src/__tests__
- [integration-test-dir]: /integration/test
+[google-group]: https://groups.google.com/forum/#!forum/parse-developers
+[stack-overflow]: http://stackoverflow.com/tags/parse-server
+[bug-reports]: https://github.com/parse-community/parse-server/issues
+[rest-api]: https://docs.parseplatform.org/rest/guide
+[parse-api-console]: http://blog.parseplatform.org/announcements/introducing-the-parse-api-console/
+[stacktrace-or-gtfo]: http://i.imgur.com/jacoj.jpg
+[tests-dir]: /src/__tests__
+[integration-test-dir]: /integration/test
