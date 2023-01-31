@@ -1,8 +1,8 @@
 {
   "name": "parse",
   "version": "4.0.0-alpha.7",
-  "description": "The Parse JavaScript SDK",
-  "homepage": "https://parseplatform.org/",
+  "description": "Parse JavaScript SDK",
+  "homepage": "https://parseplatform.org",
   "keywords": [
     "cloud",
     "mobile",
@@ -29,10 +29,11 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime-corejs3": "7.17.8",
     "@babel/runtime": "7.18.0",
+    "@babel/runtime-corejs3": "7.17.8",
     "idb-keyval": "6.0.3",
     "react-native-crypto-js": "1.0.0",
+    "semantic-release": "19.0.5",
     "uuid": "3.4.0",
     "ws": "8.6.0",
     "xmlhttprequest": "1.8.0"
@@ -86,7 +87,6 @@
     "prettier": "2.2.1",
     "puppeteer": "19.2.2",
     "regenerator-runtime": "0.13.5",
-    "semantic-release": "20.1.0",
     "vinyl-source-stream": "2.0.0"
   },
   "optionalDependencies": {
