@@ -8,7 +8,7 @@
     "mobile",
     "api"
   ],
-  "license": "BSD-3-Clause",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/parse-community/Parse-SDK-JS"
@@ -22,7 +22,7 @@
     "dist/",
     "lib/",
     "LICENSE",
-    "PATENTS",
+    "NOTICE",
     "README.md"
   ],
   "browser": {
