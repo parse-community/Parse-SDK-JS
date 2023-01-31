@@ -59,7 +59,7 @@
     "babel-plugin-minify-dead-code-elimination": "0.5.2",
     "babel-plugin-transform-inline-environment-variables": "0.4.3",
     "browserify": "16.5.1",
-    "codecov": "3.7.1",
+    "codecov": "3.8.3",
     "core-js": "3.6.5",
     "cross-env": "7.0.2",
     "eslint": "7.32.0",
