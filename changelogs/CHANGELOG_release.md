@@ -1,3 +1,11 @@
+## [4.0.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0...4.0.1) (2023-01-31)
+
+
+### Bug Fixes
+
+* Local datastore query with `containedIn` not working when field is an array ([#1666](https://github.com/parse-community/Parse-SDK-JS/issues/1666)) ([2391bff](https://github.com/parse-community/Parse-SDK-JS/commit/2391bff36bd8b3f5357f069916375b979cde15b2))
+* Request execution time keeps increasing over time when using `Parse.Object.extend` ([#1682](https://github.com/parse-community/Parse-SDK-JS/issues/1682)) ([f555c43](https://github.com/parse-community/Parse-SDK-JS/commit/f555c43841c95c2ae759342ea28cd69f7fd232a4))
+
 # [4.0.0](https://github.com/parse-community/Parse-SDK-JS/compare/3.5.1...4.0.0) (2023-01-23)
 
 
