@@ -84,7 +84,7 @@
     "metro-react-native-babel-preset": "0.74.1",
     "parse-server": "git+https://github.com/parse-community/parse-server#alpha",
     "prettier": "2.2.1",
-    "puppeteer": "19.2.2",
+    "puppeteer": "19.6.2",
     "regenerator-runtime": "0.13.5",
     "semantic-release": "19.0.5",
     "vinyl-source-stream": "2.0.0"
