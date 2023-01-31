@@ -14,4 +14,7 @@ updates:
       prefix: "refactor"
     # Define dependencies to update
     allow:
+      # Allow updates on every commit of parse-server
       - dependency-name: "parse-server"
+      # Allow direct updates for all packages
+      - dependency-type: "direct"

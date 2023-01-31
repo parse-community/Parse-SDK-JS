@@ -1,6 +1,7 @@
 'use strict';
 
 const Parse = require('../../node');
+const sleep = require('./sleep');
 
 const Item = Parse.Object.extend('IdempotencyItem');
 const RESTController = Parse.CoreManager.getRESTController();
@@ -47,6 +48,13 @@ describe('Idempotency', () => {
       'Duplicate request'
     );
 
+    const checkJobStatus = async () => {
+      const result = await Parse.Cloud.getJobStatus(jobStatusId);
+      return result && result.get('status') === 'succeeded';
+    };
+    while (!(await checkJobStatus())) {
+      await sleep(100);
+    }
     const jobStatus = await Parse.Cloud.getJobStatus(jobStatusId);
     expect(jobStatus.get('status')).toBe('succeeded');
     expect(jobStatus.get('params').startedBy).toBe('Monty Python');
