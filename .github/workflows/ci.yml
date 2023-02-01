@@ -34,6 +34,9 @@ jobs:
     steps:
     - name: Fix usage of insecure GitHub protocol
       run: sudo git config --system url."https://github".insteadOf "git://github"
+    - name: Fix git protocol for Node 14
+      if: ${{ startsWith(matrix.NODE_VERSION, '14.') }}
+      run: sudo git config --system url."https://github".insteadOf "ssh://git@github"
     - uses: actions/checkout@v3
     - name: Use Node.js
       uses: actions/setup-node@v3
