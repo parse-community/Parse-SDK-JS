@@ -182,7 +182,7 @@ class LiveQueryClient extends EventEmitter {
    *
    * @param {object} query - the ParseQuery you want to subscribe to
    * @param {string} sessionToken (optional)
-   * @returns {LiveQuerySubscription} subscription
+   * @returns {LiveQuerySubscription | undefined}
    */
   subscribe(query: Object, sessionToken: ?string): LiveQuerySubscription {
     if (!query) {
