@@ -596,7 +596,6 @@ class ParseQuery {
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    *   <li>json: Return raw json without converting to Parse.Object
    * </ul>
-   *
    * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
@@ -639,7 +638,6 @@ class ParseQuery {
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    *   <li>json: Return raw json without converting to Parse.Object
    * </ul>
-   *
    * @returns {Promise} A promise that is resolved with the results when
    * the query completes.
    */
@@ -733,7 +731,6 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   *
    * @returns {Promise} A promise that is resolved with the count when
    * the query completes.
    */
@@ -769,7 +766,6 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   *
    * @returns {Promise} A promise that is resolved with the query completes.
    */
   distinct(key: string, options?: FullOptions): Promise<Array<mixed>> {
@@ -802,7 +798,6 @@ class ParseQuery {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    * </ul>
-   *
    * @returns {Promise} A promise that is resolved with the query completes.
    */
   aggregate(pipeline: mixed, options?: FullOptions): Promise<Array<mixed>> {
@@ -852,7 +847,6 @@ class ParseQuery {
    *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
    *   <li>json: Return raw json without converting to Parse.Object
    * </ul>
-   *
    * @returns {Promise} A promise that is resolved with the object when
    * the query completes.
    */
@@ -1084,7 +1078,6 @@ class ParseQuery {
    *   <li>index: The index of the current Parse.Object being processed in the array.</li>
    *   <li>query: The query map was called upon.</li>
    * </ul>
-   *
    * @param {object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -1173,7 +1166,6 @@ class ParseQuery {
    *   <li>index: The index of the current Parse.Object being processed in the array.</li>
    *   <li>query: The query filter was called upon.</li>
    * </ul>
-   *
    * @param {object} options Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -1200,7 +1192,7 @@ class ParseQuery {
     return array;
   }
 
-  /** Query Conditions **/
+  /* Query Conditions */
 
   /**
    * Adds a constraint to the query that requires a particular key's value to
@@ -1729,7 +1721,7 @@ class ParseQuery {
     return this._addCondition(key, '$geoIntersects', { $point: point });
   }
 
-  /** Query Orderings **/
+  /* Query Orderings */
 
   /**
    * Sorts the results in ascending order by the given key.
@@ -1806,7 +1798,7 @@ class ParseQuery {
     return this;
   }
 
-  /** Query Options **/
+  /* Query Options */
 
   /**
    * Sets the number of results to skip before returning any results.
