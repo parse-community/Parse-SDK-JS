@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../arrayContainsObject');
 jest.dontMock('../canBeSerialized');
 jest.dontMock('../CoreManager');
@@ -3525,6 +3516,24 @@ describe('ParseObject Subclasses', () => {
 describe('ParseObject extensions', () => {
   beforeEach(() => {
     ParseObject.enableSingleInstance();
+  });
+
+  it('can extend object', () => {
+    const startExtend = Date.now();
+    for (let i = 0; i < 100000; i++) {
+      // eslint-disable-next-line
+      const Parent = ParseObject.extend('Parent');
+      // eslint-disable-next-line
+      const parent = new Parent();
+    }
+    expect(Date.now() - startExtend).toBeLessThan(200);
+
+    const startNew = Date.now();
+    for (let i = 0; i < 100000; i++) {
+      // eslint-disable-next-line
+      const parent = new ParseObject('Parent');
+    }
+    expect(Date.now() - startNew).toBeLessThan(200);
   });
 
   it('can generate ParseObjects with a default className', () => {

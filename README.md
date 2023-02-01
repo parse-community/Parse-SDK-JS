@@ -17,7 +17,6 @@
 
 [![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)][open-collective-link]
 [![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)][open-collective-link]
-[![License](https://img.shields.io/badge/license-BSD-lightgrey.svg)][license-link]
 [![Forum](https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg)](https://community.parseplatform.org/c/client-sdks/javascript-sdk)
 [![Twitter](https://img.shields.io/twitter/follow/ParsePlatform.svg?label=Follow&style=social)](https://twitter.com/intent/follow?screen_name=ParsePlatform)
 
@@ -30,9 +29,9 @@ A library that gives you access to the powerful Parse Server backend from your J
 - [Getting Started](#getting-started)
   - [Using Parse on Different Platforms](#using-parse-on-different-platforms)
 - [Compatibility](#compatibility)
+  - [Node.js](#nodejs)
 - [Upgrading to Parse SDK 2.0.0](#upgrading-to-parse-sdk-200)
 - [3rd Party Authentications](#3rd-party-authentications)
-- [Want to ride the bleeding edge?](#want-to-ride-the-bleeding-edge)
   - [Experimenting](#experimenting)
 - [Contributing](#contributing)
 
@@ -136,4 +135,3 @@ We really want Parse to be yours, to see it grow and thrive in the open source c
 [migration]: https://github.com/parse-community/Parse-SDK-JS/blob/master/2.0.0.md
 [open-collective-link]: https://opencollective.com/parse-server
 [types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse
-[license-link]: LICENSE
