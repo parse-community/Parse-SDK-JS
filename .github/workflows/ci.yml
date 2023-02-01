@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Check NPM lock file version
         uses: mansona/npm-lockfile-version@v1
         with:
@@ -34,24 +34,17 @@ jobs:
     steps:
     - name: Fix usage of insecure GitHub protocol
       run: sudo git config --system url."https://github".insteadOf "git://github"
-    - name: Fix git protocol for Node 14
-      if: ${{ startsWith(matrix.NODE_VERSION, '14.') }}
-      run: sudo git config --system url."https://github".insteadOf "ssh://git@github"
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Use Node.js
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.NODE_VERSION }}
-    - name: Cache Node.js modules
-      uses: actions/cache@v2
+        cache: 'npm'
+    - name: Start MongoDB
+      uses: supercharge/mongodb-github-action@1.8.0
       with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-            ${{ runner.os }}-node-
+        mongodb-version: latest
     - run: npm ci
-    - run: npm install -g mongodb-runner
-    - run: mongodb-runner start
     - run: npm run lint
     - run: npm test -- --maxWorkers=4
     - run: npm run integration
