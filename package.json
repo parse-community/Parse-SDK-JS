@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@babel/runtime-corejs3": "7.17.8",
-    "@babel/runtime": "7.18.0",
+    "@babel/runtime": "7.20.13",
     "idb-keyval": "6.0.3",
     "react-native-crypto-js": "1.0.0",
     "uuid": "3.4.0",
@@ -76,7 +76,7 @@
     "husky": "4.3.8",
     "jasmine": "3.5.0",
     "jasmine-reporters": "2.3.2",
-    "jasmine-spec-reporter": "6.0.0",
+    "jasmine-spec-reporter": "7.0.0",
     "jest": "24.9.0",
     "jsdoc": "3.6.3",
     "jsdoc-babel": "0.5.0",
