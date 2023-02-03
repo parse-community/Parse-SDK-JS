@@ -246,7 +246,7 @@ describe('LiveQueryClient', () => {
     expect(isChecked).toBe(true);
   });
 
-  fit('can handle WebSocket unsubscribed response message', () => {
+  it('can handle WebSocket unsubscribed response message', () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
       serverURL: 'ws://test',
