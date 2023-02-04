@@ -11,11 +11,11 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Check NPM lock file version
         uses: mansona/npm-lockfile-version@v1
         with:
-          version: 1
+          version: 2
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -37,24 +37,22 @@ jobs:
     - name: Fix git protocol for Node 14
       if: ${{ startsWith(matrix.NODE_VERSION, '14.') }}
       run: sudo git config --system url."https://github".insteadOf "ssh://git@github"
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Use Node.js
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.NODE_VERSION }}
     - name: Cache Node.js modules
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        key: ${{ runner.os }}-node-${{ matrix.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-node-${{ matrix.NODE_VERSION }}-
     - run: npm ci
-    - run: npm install -g mongodb-runner
-    - run: mongodb-runner start
     - run: npm run lint
     - run: npm test -- --maxWorkers=4
-    - run: npm run integration
+    - run: npm run test:mongodb
       env:
         CI: true
     - run: bash <(curl -s https://codecov.io/bash)
