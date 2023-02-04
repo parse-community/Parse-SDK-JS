@@ -223,7 +223,7 @@ class LiveQueryClient extends EventEmitter {
   /**
    * After calling unsubscribe you'll stop receiving events from the subscription object.
    *
-   * @param {Object} subscription - subscription you would like to unsubscribe from.
+   * @param {object} subscription - subscription you would like to unsubscribe from.
    * @returns {Promise | undefined}
    */
   unsubscribe(subscription: Object): ?Promise {
