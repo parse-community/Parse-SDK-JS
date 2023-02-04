@@ -50,10 +50,9 @@ jobs:
         restore-keys: |
             ${{ runner.os }}-node-${{ matrix.NODE_VERSION }}-
     - run: npm ci
-    - run: npm run start:mongodb
     - run: npm run lint
     - run: npm test -- --maxWorkers=4
-    - run: npm run integration
+    - run: npm run test:mongodb
       env:
         CI: true
     - run: bash <(curl -s https://codecov.io/bash)
