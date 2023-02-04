@@ -1,3 +1,10 @@
+# [4.0.0-alpha.8](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.7...4.0.0-alpha.8) (2023-02-04)
+
+
+### Bug Fixes
+
+* `LiveQuerySubscription.unsubscribe` resolves promise before unsubscribing completes ([#1727](https://github.com/parse-community/Parse-SDK-JS/issues/1727)) ([1c96205](https://github.com/parse-community/Parse-SDK-JS/commit/1c96205cb3c162b21bf4508f7783400a28a99868))
+
 # [4.0.0-alpha.7](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.6...4.0.0-alpha.7) (2023-01-30)
 
 
