@@ -1,3 +1,10 @@
+# [4.0.0-alpha.9](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.8...4.0.0-alpha.9) (2023-02-04)
+
+
+### Bug Fixes
+
+* Saving a new `Parse.Object` with an unsaved `Parse.File` fails ([#1662](https://github.com/parse-community/Parse-SDK-JS/issues/1662)) ([16535a4](https://github.com/parse-community/Parse-SDK-JS/commit/16535a43f6c762983460aa837102a4c692de70bb))
+
 # [4.0.0-alpha.8](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.7...4.0.0-alpha.8) (2023-02-04)
 
 
