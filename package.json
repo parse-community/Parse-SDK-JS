@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@babel/runtime": "7.20.13",
-    "@babel/runtime-corejs3": "7.17.8",
+    "@babel/runtime-corejs3": "7.20.13",
     "idb-keyval": "6.0.3",
     "react-native-crypto-js": "1.0.0",
     "uuid": "9.0.0",
@@ -60,7 +60,7 @@
     "babel-plugin-transform-inline-environment-variables": "0.4.3",
     "browserify": "16.5.1",
     "codecov": "3.8.3",
-    "core-js": "3.6.5",
+    "core-js": "3.27.2",
     "cross-env": "7.0.2",
     "eslint": "7.32.0",
     "eslint-plugin-flowtype": "5.1.2",
@@ -125,7 +125,7 @@
     ]
   },
   "engines": {
-    "node": ">=14.21.0 <17 || >=18 <19"
+    "node": ">=14.21.0 <17 || >=18"
   },
   "jest": {
     "automock": true,
