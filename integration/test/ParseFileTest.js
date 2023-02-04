@@ -132,6 +132,7 @@ describe('Parse.File', () => {
 
     const query = new Parse.Query(TestObject);
     query.fromLocalDatastore();
+    query.equalTo('objectId', object.id);
     const results = await query.find();
 
     const url = results[0].get('file').url();
