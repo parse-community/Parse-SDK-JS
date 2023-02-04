@@ -1,3 +1,10 @@
+# [4.0.0-alpha.10](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.9...4.0.0-alpha.10) (2023-02-04)
+
+
+### Features
+
+* Upgrade Node Package Manager lock file `package-lock.json` to version 2 ([#1729](https://github.com/parse-community/Parse-SDK-JS/issues/1729)) ([e993786](https://github.com/parse-community/Parse-SDK-JS/commit/e993786cf0299b1150bf36afee1bc516e23e349a))
+
 # [4.0.0-alpha.9](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.8...4.0.0-alpha.9) (2023-02-04)
 
 
