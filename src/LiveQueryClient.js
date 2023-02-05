@@ -258,6 +258,7 @@ class LiveQueryClient extends EventEmitter {
     }
 
     this.socket = new WebSocketImplementation(this.serverURL);
+    this.socket.closingPromise = resolvingPromise();
 
     // Bind WebSocket callbacks
     this.socket.onopen = () => {
@@ -268,7 +269,8 @@ class LiveQueryClient extends EventEmitter {
       this._handleWebSocketMessage(event);
     };
 
-    this.socket.onclose = () => {
+    this.socket.onclose = (event) => {
+      this.socket.closingPromise.resolve(event);
       this._handleWebSocketClose();
     };
 
@@ -309,13 +311,14 @@ class LiveQueryClient extends EventEmitter {
    * This method will close the WebSocket connection to this LiveQueryClient,
    * cancel the auto reconnect and unsubscribe all subscriptions based on it.
    *
+   * @returns {Promise | undefined} CloseEvent {@link https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close_event}
    */
-  close() {
+  close(): ?Promise {
     if (this.state === CLIENT_STATE.INITIALIZED || this.state === CLIENT_STATE.DISCONNECTED) {
       return;
     }
     this.state = CLIENT_STATE.DISCONNECTED;
-    this.socket.close();
+    this.socket?.close();
     // Notify each subscription about the close
     for (const subscription of this.subscriptions.values()) {
       subscription.subscribed = false;
@@ -323,6 +326,7 @@ class LiveQueryClient extends EventEmitter {
     }
     this._handleReset();
     this.emit(CLIENT_EMMITER_TYPES.CLOSE);
+    return this.socket?.closingPromise;
   }
 
   // ensure we start with valid state if connect is called again after close

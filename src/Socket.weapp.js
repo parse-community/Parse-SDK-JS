@@ -13,8 +13,8 @@ module.exports = class SocketWeapp {
       this.onmessage(msg);
     });
 
-    wx.onSocketClose(() => {
-      this.onclose();
+    wx.onSocketClose((event) => {
+      this.onclose(event);
     });
 
     wx.onSocketError(error => {

@@ -9,6 +9,12 @@ describe('Parse LiveQuery', () => {
     Parse.User.enableUnsafeCurrentUser();
   });
 
+  afterEach(async () => {
+    const client = await Parse.CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
+    client.state = 'closed';
+    await client.close();
+  });
+
   it('can subscribe to query', async done => {
     const object = new TestObject();
     await object.save();
@@ -66,9 +72,9 @@ describe('Parse LiveQuery', () => {
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
     const subscription = await client.subscribe(query);
-    subscription.on('update', async object => {
+    subscription.on('update', async (object) => {
       assert.equal(object.get('foo'), 'bar');
-      client.close();
+      await client.close();
       done();
     });
     await subscription.subscribePromise;
@@ -279,7 +285,8 @@ describe('Parse LiveQuery', () => {
     await expectAsync(subscription.subscribePromise).toBeRejectedWith(
       new Parse.Error(141, 'not allowed to subscribe')
     );
-    client.close();
+    client.state = 'closed';
+    await client.close();
   });
 
   it('connectPromise does throw', async () => {
@@ -306,6 +313,7 @@ describe('Parse LiveQuery', () => {
     await expectAsync(subscription.subscribePromise).toBeRejectedWith(
       new Parse.Error(141, 'not allowed to connect')
     );
-    client.close();
+    client.state = 'closed';
+    await client.close();
   });
 });
