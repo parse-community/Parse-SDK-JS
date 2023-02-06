@@ -16,6 +16,7 @@ describe('Parse LiveQuery', () => {
   });
 
   it('can subscribe to query', async done => {
+    await reconfigureServer({ startLiveQueryServer: true });
     const object = new TestObject();
     await object.save();
     const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
@@ -34,6 +35,7 @@ describe('Parse LiveQuery', () => {
   });
 
   it('can subscribe to query with client', async done => {
+    await reconfigureServer({ startLiveQueryServer: true });
     const object = new TestObject();
     await object.save();
     const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
@@ -57,6 +59,7 @@ describe('Parse LiveQuery', () => {
   });
 
   it('can subscribe to query with null connect fields', async done => {
+    await reconfigureServer({ startLiveQueryServer: true });
     const client = new Parse.LiveQueryClient({
       applicationId: 'integration',
       serverURL: 'ws://localhost:1337',
@@ -83,6 +86,7 @@ describe('Parse LiveQuery', () => {
   });
 
   it('can subscribe to multiple queries', async () => {
+    await reconfigureServer({ startLiveQueryServer: true });
     const objectA = new TestObject();
     const objectB = new TestObject();
     await Parse.Object.saveAll([objectA, objectB]);
@@ -109,6 +113,7 @@ describe('Parse LiveQuery', () => {
   });
 
   it('can subscribe to multiple queries different class', async () => {
+    await reconfigureServer({ startLiveQueryServer: true });
     const objectA = new TestObject();
     const objectB = new DiffObject();
     await Parse.Object.saveAll([objectA, objectB]);
@@ -135,6 +140,7 @@ describe('Parse LiveQuery', () => {
   });
 
   it('can unsubscribe to multiple queries different class', async () => {
+    await reconfigureServer({ startLiveQueryServer: true });
     const objectA = new TestObject();
     const objectB = new DiffObject();
     await Parse.Object.saveAll([objectA, objectB]);
@@ -161,6 +167,7 @@ describe('Parse LiveQuery', () => {
   });
 
   it('can unsubscribe with await to multiple queries different class', async () => {
+    await reconfigureServer({ startLiveQueryServer: true });
     const objectA = new TestObject();
     const objectB = new DiffObject();
     await Parse.Object.saveAll([objectA, objectB]);
@@ -187,6 +194,7 @@ describe('Parse LiveQuery', () => {
   });
 
   it('can subscribe to ACL', async done => {
+    await reconfigureServer({ startLiveQueryServer: true });
     const user = await Parse.User.signUp('ooo', 'password');
     const ACL = new Parse.ACL(user);
 
@@ -206,6 +214,7 @@ describe('Parse LiveQuery', () => {
   });
 
   it('can subscribe to null sessionToken', async done => {
+    await reconfigureServer({ startLiveQueryServer: true });
     const user = await Parse.User.signUp('oooooo', 'password');
 
     const readOnly = Parse.User.readOnlyAttributes();
@@ -231,6 +240,7 @@ describe('Parse LiveQuery', () => {
   });
 
   it('can subscribe with open event', async done => {
+    await reconfigureServer({ startLiveQueryServer: true });
     const object = new TestObject();
     await object.save();
 
@@ -245,6 +255,7 @@ describe('Parse LiveQuery', () => {
   });
 
   it('can subscribe to query with fields', async done => {
+    await reconfigureServer({ startLiveQueryServer: true });
     const object = new TestObject();
     await object.save({ name: 'hello', age: 21 });
 
@@ -270,6 +281,7 @@ describe('Parse LiveQuery', () => {
           throw 'not allowed to subscribe';
         });
       },
+      startLiveQueryServer: true,
     });
     const client = new Parse.LiveQueryClient({
       applicationId: 'integration',
@@ -298,6 +310,7 @@ describe('Parse LiveQuery', () => {
           }
         });
       },
+      startLiveQueryServer: true,
     });
     const client = new Parse.LiveQueryClient({
       applicationId: 'integration',

@@ -47,7 +47,6 @@ const defaultConfiguration = {
   liveQuery: {
     classNames: ['TestObject', 'DiffObject'],
   },
-  startLiveQueryServer: true,
   auth: {
     myAuth: {
       module: CustomAuth,
