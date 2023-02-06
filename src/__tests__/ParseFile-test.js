@@ -858,13 +858,13 @@ describe('FileController', () => {
     expect(request).toHaveBeenCalled();
   });
 
-  it('should throw error if file deleted without name', async done => {
+  it('should throw error if file deleted without name', async () => {
+    expect.assertions(1);
     const file = new ParseFile('', [1, 2, 3]);
     try {
       await file.destroy();
     } catch (e) {
       expect(e.code).toBe(ParseError.FILE_DELETE_UNNAMED_ERROR);
-      done();
     }
   });
 
