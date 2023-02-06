@@ -1,3 +1,10 @@
+# [4.0.0-alpha.12](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.11...4.0.0-alpha.12) (2023-02-06)
+
+
+### Features
+
+* `LiveQueryClient.close` returns promise when WebSocket closes ([#1735](https://github.com/parse-community/Parse-SDK-JS/issues/1735)) ([979d660](https://github.com/parse-community/Parse-SDK-JS/commit/979d6607d5449dd3d3c5e51f36119bd05b25feaa))
+
 # [4.0.0-alpha.11](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.10...4.0.0-alpha.11) (2023-02-04)
 
 
