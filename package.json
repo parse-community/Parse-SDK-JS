@@ -82,7 +82,7 @@
     "jsdoc": "4.0.0",
     "jsdoc-babel": "0.5.0",
     "lint-staged": "10.5.3",
-    "metro-react-native-babel-preset": "0.74.1",
+    "metro-react-native-babel-preset": "0.75.0",
     "mongodb-runner": "4.10.0",
     "parse-server": "git+https://github.com/parse-community/parse-server#alpha",
     "prettier": "2.8.4",
