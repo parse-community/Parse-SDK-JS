@@ -54,7 +54,7 @@
     "@semantic-release/github": "8.0.7",
     "@semantic-release/npm": "9.0.2",
     "@semantic-release/release-notes-generator": "10.0.3",
-    "babel-jest": "29.4.2",
+    "babel-jest": "29.4.3",
     "babel-plugin-inline-package-json": "2.0.0",
     "babel-plugin-minify-dead-code-elimination": "0.5.2",
     "babel-plugin-transform-inline-environment-variables": "0.4.4",
