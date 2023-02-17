@@ -81,6 +81,9 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
         request.continue();
       });
       page.on('requestfailed', request => {
+        console.log(request);
+        console.log(request.failure());
+        console.log(request.url());
         if (request.failure().errorText  === 'net::ERR_ABORTED' && !request.url().includes('favicon.ico')) {
           abortedCount += 1;
           promise.resolve();
@@ -94,14 +97,13 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
         const base64 = await logo.getData();
 
         const file = new Parse.File('parse-base64.txt', { base64 });
-        file.save().then(() => {});
-
         const intervalId = setInterval(() => {
           if (file._requestTask && typeof file._requestTask.abort === 'function') {
             file.cancel();
             clearInterval(intervalId);
           }
         }, 1);
+        file.save().then(() => {});
       });
       await promise;
       expect(requestsCount).toBe(3);
