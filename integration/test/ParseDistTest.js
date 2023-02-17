@@ -84,19 +84,25 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
       const promise = resolvingPromise();
       await page.setRequestInterception(true);
       page.on('request', request => {
+        console.log('request', request);
+        console.log(request.url());
         if (!request.url().includes('favicon.ico')) {
           requestsCount += 1;
         }
         request.continue();
       });
       page.on('requestfailed', request => {
-        console.log(request);
+        console.log('requestfailed', request);
         console.log(request.failure());
         console.log(request.url());
         if (request.failure().errorText  === 'net::ERR_ABORTED' && !request.url().includes('favicon.ico')) {
           abortedCount += 1;
           promise.resolve();
         }
+      });
+      page.on('requestfinished', request => {
+        console.log('requestfinished', request);
+        console.log(request.url());
       });
       console.log('beforeEvaluation');
       const result = await page.evaluate(async () => {
