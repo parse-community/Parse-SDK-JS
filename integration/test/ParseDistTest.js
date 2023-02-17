@@ -87,7 +87,13 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
         }
       });
       await page.evaluate(async () => {
-        const file = new Parse.File('parse-base64.txt', { base64: 'ParseA==' });
+        const parseLogo =
+        'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
+        const logo = new Parse.File('parse-server-logo', { uri: parseLogo });
+        await logo.save();
+        const base64 = await logo.getData();
+
+        const file = new Parse.File('parse-base64.txt', { base64 });
         file.save().then(() => {});
 
         const intervalId = setInterval(() => {
@@ -98,7 +104,7 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
         }, 1);
       });
       await promise;
-      expect(requestsCount).toBe(1);
+      expect(requestsCount).toBe(3);
       expect(abortedCount).toBe(1);
     });
   });
