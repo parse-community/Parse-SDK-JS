@@ -12,7 +12,7 @@ const watch      = require('gulp-watch');
 const BUILD = process.env.PARSE_BUILD || 'browser';
 const VERSION = require('./package.json').version;
 
-const transformRuntime = ["@babel/transform-runtime", {
+const transformRuntime = ["@babel/plugin-transform-runtime", {
   "corejs": 3,
   "helpers": true,
   "regenerator": true,
