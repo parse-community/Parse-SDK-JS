@@ -6,8 +6,6 @@ let page = null;
 for (const fileName of ['parse.js', 'parse.min.js']) {
   describe(`Parse Dist Test ${fileName}`, () => {
     beforeEach(async () => {
-      // Uncomment to test, setting a timeout with `done` to keep the browser open
-      // browser = await puppeteer.launch({ args: ['--disable-web-security'], headless:false, devtools: true, userDataDir: path.resolve(__dirname, './myUserDataDir') });
       browser = await puppeteer.launch({ args: ['--disable-web-security'] });
       const context = await browser.createIncognitoBrowserContext();
       page = await context.newPage();
