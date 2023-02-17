@@ -99,7 +99,7 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
         }
       });
       console.log('beforeEvaluation');
-      await page.evaluate(async () => {
+      const result = await page.evaluate(async () => {
         const parseLogo =
         'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
         const logo = new Parse.File('parse-server-logo', { uri: parseLogo });
@@ -114,11 +114,12 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
             if (file._requestTask && typeof file._requestTask.abort === 'function') {
               file.cancel();
               clearInterval(intervalId);
-              resolve();
+              resolve('cancelled called');
             }
           }, 1);
         });
       });
+      console.log('eval', result);
       console.log('beforePromise');
       await promise;
       console.log('afterPromise');
