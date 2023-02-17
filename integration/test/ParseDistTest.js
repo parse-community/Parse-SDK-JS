@@ -62,7 +62,16 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
         'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
         const file = new Parse.File('parse-server-logo', { uri: parseLogo });
         file.save().then(() => {});
-        file.cancel();
+
+        return new Promise((resolve) => {
+          const intervalId = setInterval(() => {
+            if (file._requestTask && typeof file._requestTask.abort === 'function') {
+              file.cancel();
+              clearInterval(intervalId);
+              resolve();
+            }
+          }, 1);
+        });
       });
       await promise;
       expect(requestsCount).toBe(1);
@@ -89,6 +98,7 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
           promise.resolve();
         }
       });
+      console.log('beforeEvaluation');
       await page.evaluate(async () => {
         const parseLogo =
         'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
@@ -97,15 +107,21 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
         const base64 = await logo.getData();
 
         const file = new Parse.File('parse-base64.txt', { base64 });
-        const intervalId = setInterval(() => {
-          if (file._requestTask && typeof file._requestTask.abort === 'function') {
-            file.cancel();
-            clearInterval(intervalId);
-          }
-        }, 1);
         file.save().then(() => {});
+
+        return new Promise((resolve) => {
+          const intervalId = setInterval(() => {
+            if (file._requestTask && typeof file._requestTask.abort === 'function') {
+              file.cancel();
+              clearInterval(intervalId);
+              resolve();
+            }
+          }, 1);
+        });
       });
+      console.log('beforePromise');
       await promise;
+      console.log('afterPromise');
       expect(requestsCount).toBe(3);
       expect(abortedCount).toBe(1);
     });
