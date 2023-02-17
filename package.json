@@ -76,7 +76,7 @@
     "jasmine": "4.5.0",
     "jasmine-reporters": "2.5.2",
     "jasmine-spec-reporter": "7.0.0",
-    "jest": "29.4.2",
+    "jest": "29.4.3",
     "jest-environment-jsdom": "29.4.3",
     "jsdoc": "4.0.0",
     "jsdoc-babel": "0.5.0",
