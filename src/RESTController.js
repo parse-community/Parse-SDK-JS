@@ -194,11 +194,10 @@ const RESTController = {
           xhr,
         });
       };
-      xhr.send(data);
-
       if (options && typeof options.requestTask === 'function') {
         options.requestTask(xhr);
       }
+      xhr.send(data);
     };
     dispatch();
 
