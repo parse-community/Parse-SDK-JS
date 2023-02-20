@@ -1296,7 +1296,7 @@ class ParseQuery {
    * not be contained in the provided list of values.
    *
    * @param {string} key The key to check.
-   * @param {array} value The values that will not match.
+   * @param {Array<*>} value The values that will not match.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   notContainedIn(key: string, value: Array<mixed>): ParseQuery {
