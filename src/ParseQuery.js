@@ -1284,7 +1284,7 @@ class ParseQuery {
    * be contained in the provided list of values.
    *
    * @param {string} key The key to check.
-   * @param {array} value The values that will match.
+   * @param {Array<*>} value The values that will match.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   containedIn(key: string, value: Array<mixed>): ParseQuery {
