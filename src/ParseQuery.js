@@ -1284,10 +1284,10 @@ class ParseQuery {
    * be contained in the provided list of values.
    *
    * @param {string} key The key to check.
-   * @param {*} value The values that will match.
+   * @param {Array<*>} value The values that will match.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  containedIn(key: string, value: mixed): ParseQuery {
+  containedIn(key: string, value: Array<mixed>): ParseQuery {
     return this._addCondition(key, '$in', value);
   }
 
@@ -1296,10 +1296,10 @@ class ParseQuery {
    * not be contained in the provided list of values.
    *
    * @param {string} key The key to check.
-   * @param {*} value The values that will not match.
+   * @param {Array<*>} value The values that will not match.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  notContainedIn(key: string, value: mixed): ParseQuery {
+  notContainedIn(key: string, value: Array<mixed>): ParseQuery {
     return this._addCondition(key, '$nin', value);
   }
 
