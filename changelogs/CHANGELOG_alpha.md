@@ -1,3 +1,10 @@
+# [4.1.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/4.1.0-alpha.1...4.1.0-alpha.2) (2023-03-01)
+
+
+### Bug Fixes
+
+* `Parse.File.cancel` starts new attempt to save file ([#1781](https://github.com/parse-community/Parse-SDK-JS/issues/1781)) ([b755e42](https://github.com/parse-community/Parse-SDK-JS/commit/b755e42394db8b94b87b0dbefc6cf6f18189c46d))
+
 # [4.1.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.1...4.1.0-alpha.1) (2023-03-01)
 
 
