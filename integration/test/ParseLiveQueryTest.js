@@ -3,13 +3,20 @@
 const assert = require('assert');
 const Parse = require('../../node');
 const sleep = require('./sleep');
+const { resolvingPromise } = require('../../lib/node/promiseUtils');
 
 describe('Parse LiveQuery', () => {
   beforeEach(() => {
     Parse.User.enableUnsafeCurrentUser();
   });
 
-  it('can subscribe to query', async done => {
+  afterEach(async () => {
+    const client = await Parse.CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
+    client.state = 'closed';
+    await client.close();
+  });
+
+  it('can subscribe to query', async () => {
     const object = new TestObject();
     await object.save();
     const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
@@ -17,17 +24,18 @@ describe('Parse LiveQuery', () => {
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
     const subscription = await query.subscribe();
-
+    const promise = resolvingPromise();
     subscription.on('update', (object, original, response) => {
       assert.equal(object.get('foo'), 'bar');
       assert.equal(response.installationId, installationId);
-      done();
+      promise.resolve();
     });
     object.set({ foo: 'bar' });
     await object.save();
+    await promise;
   });
 
-  it('can subscribe to query with client', async done => {
+  it('can subscribe to query with client', async () => {
     const object = new TestObject();
     await object.save();
     const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
@@ -39,18 +47,19 @@ describe('Parse LiveQuery', () => {
       client.open();
     }
     const subscription = client.subscribe(query);
-
+    const promise = resolvingPromise();
     subscription.on('update', (object, original, response) => {
       assert.equal(object.get('foo'), 'bar');
       assert.equal(response.installationId, installationId);
-      done();
+      promise.resolve();
     });
     await subscription.subscribePromise;
     object.set({ foo: 'bar' });
     await object.save();
+    await promise;
   });
 
-  it('can subscribe to query with null connect fields', async done => {
+  it('can subscribe to query with null connect fields', async () => {
     const client = new Parse.LiveQueryClient({
       applicationId: 'integration',
       serverURL: 'ws://localhost:1337',
@@ -66,14 +75,16 @@ describe('Parse LiveQuery', () => {
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
     const subscription = await client.subscribe(query);
-    subscription.on('update', async object => {
+    const promise = resolvingPromise();
+    subscription.on('update', async (object) => {
       assert.equal(object.get('foo'), 'bar');
-      client.close();
-      done();
+      await client.close();
+      promise.resolve();
     });
     await subscription.subscribePromise;
     object.set({ foo: 'bar' });
     await object.save();
+    await promise;
   });
 
   it('can subscribe to multiple queries', async () => {
@@ -180,7 +191,7 @@ describe('Parse LiveQuery', () => {
     assert.equal(count, 1);
   });
 
-  it('can subscribe to ACL', async done => {
+  it('can subscribe to ACL', async () => {
     const user = await Parse.User.signUp('ooo', 'password');
     const ACL = new Parse.ACL(user);
 
@@ -191,15 +202,17 @@ describe('Parse LiveQuery', () => {
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
     const subscription = await query.subscribe(user.getSessionToken());
+    const promise = resolvingPromise();
     subscription.on('update', async object => {
       assert.equal(object.get('foo'), 'bar');
       await Parse.User.logOut();
-      done();
+      promise.resolve()
     });
     await object.save({ foo: 'bar' });
+    await promise;
   });
 
-  it('can subscribe to null sessionToken', async done => {
+  it('can subscribe to null sessionToken', async () => {
     const user = await Parse.User.signUp('oooooo', 'password');
 
     const readOnly = Parse.User.readOnlyAttributes();
@@ -213,32 +226,36 @@ describe('Parse LiveQuery', () => {
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
     const subscription = await query.subscribe();
+    const promise = resolvingPromise();
     subscription.on('update', async object => {
       assert.equal(object.get('foo'), 'bar');
       Parse.User.readOnlyAttributes = function () {
         return readOnly;
       };
       await Parse.User.logOut();
-      done();
+      promise.resolve();
     });
     await object.save({ foo: 'bar' });
+    await promise;
   });
 
-  it('can subscribe with open event', async done => {
+  it('can subscribe with open event', async () => {
     const object = new TestObject();
     await object.save();
 
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
     const subscription = await query.subscribe();
+    const promise = resolvingPromise();
     subscription.on('open', response => {
       assert(response.clientId);
       assert(response.installationId);
-      done();
+      promise.resolve();
     });
+    await promise;
   });
 
-  it('can subscribe to query with fields', async done => {
+  it('can subscribe to query with fields', async () => {
     const object = new TestObject();
     await object.save({ name: 'hello', age: 21 });
 
@@ -247,14 +264,16 @@ describe('Parse LiveQuery', () => {
     query.select(['name']);
     const subscription = await query.subscribe();
 
+    const promise = resolvingPromise();
     subscription.on('update', object => {
       assert.equal(object.get('name'), 'hello');
       assert.equal(object.get('age'), undefined);
       assert.equal(object.get('foo'), undefined);
-      done();
+      promise.resolve();
     });
     object.set({ foo: 'bar' });
     await object.save();
+    await promise;
   });
 
   it('live query can handle beforeConnect and beforeSubscribe errors', async () => {
@@ -279,7 +298,8 @@ describe('Parse LiveQuery', () => {
     await expectAsync(subscription.subscribePromise).toBeRejectedWith(
       new Parse.Error(141, 'not allowed to subscribe')
     );
-    client.close();
+    client.state = 'closed';
+    await client.close();
   });
 
   it('connectPromise does throw', async () => {
@@ -306,6 +326,7 @@ describe('Parse LiveQuery', () => {
     await expectAsync(subscription.subscribePromise).toBeRejectedWith(
       new Parse.Error(141, 'not allowed to connect')
     );
-    client.close();
+    client.state = 'closed';
+    await client.close();
   });
 });

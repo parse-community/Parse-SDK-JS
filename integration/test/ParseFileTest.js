@@ -120,4 +120,24 @@ describe('Parse.File', () => {
       assert.equal(e.code, Parse.Error.FILE_DELETE_ERROR);
     }
   });
+
+  it('can save file to localDatastore', async () => {
+    Parse.enableLocalDatastore();
+    const file = new Parse.File('parse-js-sdk', [61, 170, 236, 120]);
+    const object = new Parse.Object('TestObject');
+    await object.pin();
+
+    object.set('file', file);
+    await object.save();
+
+    const query = new Parse.Query(TestObject);
+    query.fromLocalDatastore();
+    query.equalTo('objectId', object.id);
+    const results = await query.find();
+
+    const url = results[0].get('file').url();
+    assert.equal(results.length, 1);
+    assert.notEqual(url, undefined);
+    assert.equal(url, file.url());
+  });
 });

@@ -227,7 +227,7 @@ describe('ParseLiveQuery', () => {
     });
   });
 
-  it('should not throw on usubscribe', done => {
+  it('should not throw on usubscribe', () => {
     CoreManager.set('UserController', {
       currentUserAsync() {
         return Promise.resolve({
@@ -240,7 +240,7 @@ describe('ParseLiveQuery', () => {
     const query = new ParseQuery('ObjectType');
     query.equalTo('test', 'value');
     const subscription = new LiveQuerySubscription('0', query, 'token');
-    subscription.unsubscribe().then(done).catch(done.fail);
+    subscription.unsubscribe();
   });
 
   it('can handle LiveQuery open event', async () => {

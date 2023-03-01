@@ -148,7 +148,7 @@ class ParseObject {
   _objCount: number;
   className: string;
 
-  /** Prototype getters / setters **/
+  /* Prototype getters / setters */
 
   get attributes(): AttributeMap {
     const stateController = CoreManager.getObjectStateController();
@@ -175,7 +175,7 @@ class ParseObject {
     return this._getServerData().updatedAt;
   }
 
-  /** Private methods **/
+  /* Private methods */
 
   /**
    * Returns a local or server Id used uniquely identify this object
@@ -446,7 +446,7 @@ class ParseObject {
     return classMap;
   }
 
-  /** Public methods **/
+  /* Public methods */
 
   initialize() {
     // NOOP
@@ -910,7 +910,7 @@ class ParseObject {
    * object.op("x") would return an instance of Parse.Op.Increment.
    *
    * @param attr {String} The key.
-   * @returns {Parse.Op} The operation, or undefined if none.
+   * @returns {Parse.Op | undefined} The operation, or undefined if none.
    */
   op(attr: string): ?Op {
     const pending = this._getPendingOps();
@@ -1518,7 +1518,7 @@ class ParseObject {
     return this;
   }
 
-  /** Static methods **/
+  /* Static methods */
 
   static _clearAllState() {
     const stateController = CoreManager.getObjectStateController();
@@ -2499,8 +2499,11 @@ const DefaultController = {
             return Promise.reject(objectError);
           }
           for (const object of target) {
-            await localDatastore._updateLocalIdForObject(mapIdForPin[object.id], object);
-            await localDatastore._updateObjectIfPinned(object);
+            // Make sure that it is a ParseObject before updating it into the localDataStore
+            if (object instanceof ParseObject) {
+              await localDatastore._updateLocalIdForObject(mapIdForPin[object.id], object);
+              await localDatastore._updateObjectIfPinned(object);
+            }
           }
           return Promise.resolve(target);
         });
