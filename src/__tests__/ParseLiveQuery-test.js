@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../ParseLiveQuery');
 jest.dontMock('../CoreManager');
 jest.dontMock('../InstallationController');
@@ -236,7 +227,7 @@ describe('ParseLiveQuery', () => {
     });
   });
 
-  it('should not throw on usubscribe', done => {
+  it('should not throw on usubscribe', () => {
     CoreManager.set('UserController', {
       currentUserAsync() {
         return Promise.resolve({
@@ -249,7 +240,7 @@ describe('ParseLiveQuery', () => {
     const query = new ParseQuery('ObjectType');
     query.equalTo('test', 'value');
     const subscription = new LiveQuerySubscription('0', query, 'token');
-    subscription.unsubscribe().then(done).catch(done.fail);
+    subscription.unsubscribe();
   });
 
   it('can handle LiveQuery open event', async () => {

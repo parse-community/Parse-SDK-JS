@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../ObjectStateMutations');
@@ -16,6 +7,7 @@ jest.dontMock('../ParseOp');
 jest.dontMock('../promiseUtils');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../TaskQueue');
+jest.dontMock('./test_helpers/flushPromises');
 
 const mockObject = function () {};
 mockObject.registerSubclass = function () {};
@@ -27,6 +19,7 @@ const ParseGeoPoint = require('../ParseGeoPoint').default;
 const ParseOps = require('../ParseOp');
 const SingleInstanceStateController = require('../SingleInstanceStateController');
 const TaskQueue = require('../TaskQueue');
+const flushPromises = require('./test_helpers/flushPromises');
 
 describe('SingleInstanceStateController', () => {
   it('returns null state for an unknown object', () => {
@@ -546,7 +539,7 @@ describe('SingleInstanceStateController', () => {
     expect(called).toEqual([true, false, false]);
     p2Resolve();
     await p2;
-    await new Promise(resolve => setImmediate(resolve));
+    await flushPromises();
     expect(called).toEqual([true, true, true]);
   });
 

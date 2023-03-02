@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../AnonymousUtils');
 jest.dontMock('../CoreManager');
 jest.dontMock('../CryptoController');
@@ -35,9 +26,11 @@ jest.mock('../uuid', () => {
   let value = 0;
   return () => value++;
 });
+jest.dontMock('./test_helpers/flushPromises');
 jest.dontMock('./test_helpers/mockXHR');
 jest.dontMock('./test_helpers/mockAsyncStorage');
 
+const flushPromises = require('./test_helpers/flushPromises');
 const mockAsyncStorage = require('./test_helpers/mockAsyncStorage');
 const CoreManager = require('../CoreManager');
 const CryptoController = require('../CryptoController');
@@ -51,10 +44,6 @@ const AnonymousUtils = require('../AnonymousUtils').default;
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 CoreManager.setCryptoController(CryptoController);
-
-function flushPromises() {
-  return new Promise(resolve => setImmediate(resolve));
-}
 
 describe('ParseUser', () => {
   beforeEach(() => {

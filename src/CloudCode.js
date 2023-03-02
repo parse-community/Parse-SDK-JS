@@ -245,7 +245,6 @@
  * @name Parse.Cloud.job
  * @param {string} name The name of the Background Job
  * @param {Function} func The Background Job to register. This function should take two parameters a {@link Parse.Cloud.JobRequest} and a {@link Parse.Cloud.JobStatus}
- *
  */
 
 /**

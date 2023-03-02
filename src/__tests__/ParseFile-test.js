@@ -1,11 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
 /* global File */
 jest.autoMockOff();
 jest.mock('http');
@@ -24,8 +16,21 @@ const mockHttp = require('http');
 const mockHttps = require('https');
 
 const mockLocalDatastore = {
-  _updateLocalIdForObject: jest.fn(),
+  _updateLocalIdForObject: jest.fn((localId, /** @type {ParseObject}*/ object) => {
+    if (!mockLocalDatastore.isEnabled) {
+      return;
+    }
+    /* eslint-disable no-unused-vars */
+    // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
+    const objectKey = mockLocalDatastore.getKeyForObject(object);
+  }),
   _updateObjectIfPinned: jest.fn(),
+  getKeyForObject: jest.fn((object) => {
+    // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
+    const OBJECT_PREFIX = 'Parse_LDS_';
+    const objectId = object.objectId || object._getId();
+    return `${OBJECT_PREFIX}${object.className}_${objectId}`;
+  }),
 };
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
@@ -45,6 +50,8 @@ const defaultController = CoreManager.getFileController();
 
 describe('ParseFile', () => {
   beforeEach(() => {
+    ParseObject.enableSingleInstance();
+    jest.clearAllMocks();
     CoreManager.setFileController({
       saveFile: generateSaveMock('http://files.parsetfss.com/a/'),
       saveBase64: generateSaveMock('http://files.parsetfss.com/a/'),
@@ -851,13 +858,13 @@ describe('FileController', () => {
     expect(request).toHaveBeenCalled();
   });
 
-  it('should throw error if file deleted without name', async done => {
+  it('should throw error if file deleted without name', async () => {
+    expect.assertions(1);
     const file = new ParseFile('', [1, 2, 3]);
     try {
       await file.destroy();
     } catch (e) {
       expect(e.code).toBe(ParseError.FILE_DELETE_UNNAMED_ERROR);
-      done();
     }
   });
 
@@ -952,5 +959,21 @@ describe('FileController', () => {
       expect(e).toBe('Could not load file.');
     }
     global.FileReader = fileReader;
+  });
+
+  it('can save unsaved Parse.File property when localDataStore is enabled.', async () => {
+    mockLocalDatastore.isEnabled = true;
+    const obj = new ParseObject('Item');
+    const aFile = new ParseFile('myFileName', [0, 0, 0, 0, 2, 3, 4, 5]);
+    obj.set('myName', 'helloworld');
+    obj.set('myFile', aFile);
+    let error = undefined;
+    try {
+      await obj.save();
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeUndefined();
+    expect(obj.get('myFile').name()).toBe('myFileName');
   });
 });

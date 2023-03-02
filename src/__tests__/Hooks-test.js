@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../ParseHooks');
 jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
@@ -138,117 +129,84 @@ describe('Hooks', () => {
     ]);
   });
 
-  it('shoud throw invalid create', async done => {
+  it('shoud throw invalid create', async () => {
+    expect.assertions(10);
     const p1 = Hooks.create({ functionName: 'myFunction' })
-      .then(() => {
-        done.fail('should not succeed');
-      })
       .catch(err => {
         expect(err.code).toBe(143);
         expect(err.error).toBe('invalid hook declaration');
       });
 
     const p2 = Hooks.create({ url: 'http://dummy.com' })
-      .then(() => {
-        done.fail('should not succeed');
-      })
       .catch(err => {
         expect(err.code).toBe(143);
         expect(err.error).toBe('invalid hook declaration');
       });
 
     const p3 = Hooks.create({ className: 'MyClass' })
-      .then(() => {
-        done.fail('should not succeed');
-      })
       .catch(err => {
         expect(err.code).toBe(143);
         expect(err.error).toBe('invalid hook declaration');
       });
 
     const p4 = Hooks.create({ className: 'MyClass', url: 'http://dummy.com' })
-      .then(() => {
-        done.fail('should not succeed');
-      })
       .catch(err => {
         expect(err.code).toBe(143);
         expect(err.error).toBe('invalid hook declaration');
       });
 
     const p5 = Hooks.create({ className: 'MyClass', triggerName: 'beforeSave' })
-      .then(() => {
-        done.fail('should not succeed');
-      })
       .catch(err => {
         expect(err.code).toBe(143);
         expect(err.error).toBe('invalid hook declaration');
       });
 
     await Promise.all([p1, p2, p3, p4, p5]);
-    done();
   });
 
-  it('shoud throw invalid update', async done => {
+  it('shoud throw invalid update', async () => {
+    expect.assertions(6);
     const p1 = Hooks.update({ functionssName: 'myFunction' })
-      .then(() => {
-        done.fail('should not succeed');
-      })
       .catch(err => {
         expect(err.code).toBe(143);
         expect(err.error).toBe('invalid hook declaration');
       });
 
     const p2 = Hooks.update({ className: 'MyClass' })
-      .then(() => {
-        done.fail('should not succeed');
-      })
       .catch(err => {
         expect(err.code).toBe(143);
         expect(err.error).toBe('invalid hook declaration');
       });
 
     const p3 = Hooks.update({ className: 'MyClass', url: 'http://dummy.com' })
-      .then(() => {
-        done.fail('should not succeed');
-      })
       .catch(err => {
         expect(err.code).toBe(143);
         expect(err.error).toBe('invalid hook declaration');
       });
     await Promise.all([p1, p2, p3]);
-    done();
   });
 
-  it('shoud throw invalid remove', async done => {
+  it('shoud throw invalid remove', async () => {
+    expect.assertions(6);
     const p1 = Hooks.remove({ functionssName: 'myFunction' })
-      .then(() => {
-        done.fail('should not succeed');
-      })
       .catch(err => {
         expect(err.code).toBe(143);
         expect(err.error).toBe('invalid hook declaration');
       });
 
     const p2 = Hooks.remove({ className: 'MyClass' })
-      .then(() => {
-        done.fail('should not succeed');
-      })
       .catch(err => {
         expect(err.code).toBe(143);
         expect(err.error).toBe('invalid hook declaration');
       });
 
     const p3 = Hooks.remove({ className: 'MyClass', url: 'http://dummy.com' })
-      .then(() => {
-        done.fail('should not succeed');
-      })
       .catch(err => {
         expect(err.code).toBe(143);
         expect(err.error).toBe('invalid hook declaration');
       });
 
     await Promise.all([p1, p2, p3]);
-    done();
   });
 
   it('should sendRequest', async () => {

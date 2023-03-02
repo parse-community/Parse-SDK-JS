@@ -1,11 +1,4 @@
 /**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
  * @flow
  */
 /* global XMLHttpRequest, Blob */
@@ -191,7 +184,7 @@ class ParseFile {
    * after you get the file from a Parse.Object.
    *
    * @param {object} options An object to specify url options
-   * @returns {string}
+   * @returns {string | undefined}
    */
   url(options?: { forceSecure?: boolean }): ?string {
     options = options || {};
@@ -227,7 +220,7 @@ class ParseFile {
    * Saves the file to the Parse cloud.
    *
    * @param {object} options
-   *  * Valid options are:<ul>
+   * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -244,9 +237,9 @@ class ParseFile {
    * });
    * </pre>
    * </ul>
-   * @returns {Promise} Promise that is resolved when the save finishes.
+   * @returns {Promise | undefined} Promise that is resolved when the save finishes.
    */
-  save(options?: FullOptions) {
+  save(options?: FullOptions): ?Promise {
     options = options || {};
     options.requestTask = task => (this._requestTask = task);
     options.metadata = this._metadata;
@@ -303,6 +296,7 @@ class ParseFile {
    */
   cancel() {
     if (this._requestTask && typeof this._requestTask.abort === 'function') {
+      this._requestTask._aborted = true;
       this._requestTask.abort();
     }
     this._requestTask = null;
@@ -313,7 +307,7 @@ class ParseFile {
    * In Cloud Code and Node only with Master Key.
    *
    * @param {object} options
-   *  * Valid options are:<ul>
+   * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    * <pre>

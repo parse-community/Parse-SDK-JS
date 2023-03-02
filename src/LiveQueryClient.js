@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- */
 /* global WebSocket */
 
 import CoreManager from './CoreManager';
@@ -191,7 +182,7 @@ class LiveQueryClient extends EventEmitter {
    *
    * @param {object} query - the ParseQuery you want to subscribe to
    * @param {string} sessionToken (optional)
-   * @returns {LiveQuerySubscription} subscription
+   * @returns {LiveQuerySubscription | undefined}
    */
   subscribe(query: Object, sessionToken: ?string): LiveQuerySubscription {
     if (!query) {
@@ -233,19 +224,20 @@ class LiveQueryClient extends EventEmitter {
    * After calling unsubscribe you'll stop receiving events from the subscription object.
    *
    * @param {object} subscription - subscription you would like to unsubscribe from.
+   * @returns {Promise | undefined}
    */
-  unsubscribe(subscription: Object) {
+  unsubscribe(subscription: Object): ?Promise {
     if (!subscription) {
       return;
     }
-
-    this.subscriptions.delete(subscription.id);
     const unsubscribeRequest = {
       op: OP_TYPES.UNSUBSCRIBE,
       requestId: subscription.id,
     };
-    this.connectPromise.then(() => {
-      this.socket.send(JSON.stringify(unsubscribeRequest));
+    return this.connectPromise.then(() => {
+      return this.socket.send(JSON.stringify(unsubscribeRequest));
+    }).then(() => {
+      return subscription.unsubscribePromise;
     });
   }
 
@@ -266,6 +258,7 @@ class LiveQueryClient extends EventEmitter {
     }
 
     this.socket = new WebSocketImplementation(this.serverURL);
+    this.socket.closingPromise = resolvingPromise();
 
     // Bind WebSocket callbacks
     this.socket.onopen = () => {
@@ -276,7 +269,8 @@ class LiveQueryClient extends EventEmitter {
       this._handleWebSocketMessage(event);
     };
 
-    this.socket.onclose = () => {
+    this.socket.onclose = (event) => {
+      this.socket.closingPromise.resolve(event);
       this._handleWebSocketClose();
     };
 
@@ -317,13 +311,14 @@ class LiveQueryClient extends EventEmitter {
    * This method will close the WebSocket connection to this LiveQueryClient,
    * cancel the auto reconnect and unsubscribe all subscriptions based on it.
    *
+   * @returns {Promise | undefined} CloseEvent {@link https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close_event}
    */
-  close() {
+  close(): ?Promise {
     if (this.state === CLIENT_STATE.INITIALIZED || this.state === CLIENT_STATE.DISCONNECTED) {
       return;
     }
     this.state = CLIENT_STATE.DISCONNECTED;
-    this.socket.close();
+    this.socket?.close();
     // Notify each subscription about the close
     for (const subscription of this.subscriptions.values()) {
       subscription.subscribed = false;
@@ -331,6 +326,7 @@ class LiveQueryClient extends EventEmitter {
     }
     this._handleReset();
     this.emit(CLIENT_EMMITER_TYPES.CLOSE);
+    return this.socket?.closingPromise;
   }
 
   // ensure we start with valid state if connect is called again after close
@@ -409,9 +405,14 @@ class LiveQueryClient extends EventEmitter {
       }
       break;
     }
-    case OP_EVENTS.UNSUBSCRIBED:
-      // We have already deleted subscription in unsubscribe(), do nothing here
+    case OP_EVENTS.UNSUBSCRIBED: {
+      if (subscription) {
+        this.subscriptions.delete(data.requestId);
+        subscription.subscribed = false;
+        subscription.unsubscribePromise.resolve();
+      }
       break;
+    }
     default: {
       // create, update, enter, leave, delete cases
       if (!subscription) {
