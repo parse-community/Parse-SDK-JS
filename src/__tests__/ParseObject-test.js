@@ -1861,22 +1861,22 @@ describe('ParseObject', () => {
     await result;
   });
 
-  it('will fail for a circular dependency of non-existing objects', async () => {
+  it('will fail for a circular dependency of non-existing objects', () => {
     const parent = new ParseObject('Item');
     const child = new ParseObject('Item');
     parent.set('child', child);
     child.set('parent', parent);
-    await expect(parent.save.bind(parent)).rejects.toEqual(new Error('Cannot create a pointer to an unsaved Object.'));
+    expect(parent.save.bind(parent)).toThrow('Cannot create a pointer to an unsaved Object.');
   });
 
-  it('will fail for deeper unsaved objects', async () => {
+  it('will fail for deeper unsaved objects', () => {
     const parent = new ParseObject('Item');
     const child = new ParseObject('Item');
     const grandchild = new ParseObject('Item');
     parent.set('child', child);
     child.set('child', grandchild);
 
-    await expect(parent.save.bind(parent)).rejects.toEqual(new Error('Cannot create a pointer to an unsaved Object.'));
+    expect(parent.save.bind(parent)).toThrow('Cannot create a pointer to an unsaved Object.');
   });
 
   it('does not mark shallow objects as dirty', () => {

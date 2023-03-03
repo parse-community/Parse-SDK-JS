@@ -1430,7 +1430,7 @@ class ParseObject {
    * @returns {Promise} A promise that is fulfilled when the save
    * completes.
    */
-  async save(
+  save(
     arg1: ?string | { [attr: string]: mixed },
     arg2: SaveOptions | mixed,
     arg3?: SaveOptions
@@ -1472,10 +1472,12 @@ class ParseObject {
     }
     const controller = CoreManager.getObjectController();
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
-    await controller.save(unsaved, saveOptions);
-    const response = await controller.save(this, saveOptions);
-    this._bindKeys();
-    return response;
+    return controller.save(unsaved, saveOptions).then(() => {
+      return controller.save(this, saveOptions);
+    }).then(res => {
+      this._bindKeys();
+      return res;
+    });
   }
 
   /**
