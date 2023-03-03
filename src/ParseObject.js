@@ -1222,7 +1222,7 @@ class ParseObject {
     }
     this._clearPendingOps(keysToRevert);
     if (CoreManager.get('DOT_NOTATION')) {
-      for (const field of keysToRevert) {
+      for (const field of keysToRevert || []) {
         this[field] = { _proxy_op: 'fetch' };
       }
       this.dirtyKeys = this.dirtyKeys.bind(this);
