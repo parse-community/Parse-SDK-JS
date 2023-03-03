@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../CoreManager');
 jest.dontMock('../encode');
 jest.dontMock('../decode');
@@ -1377,12 +1368,15 @@ describe('ParseQuery', () => {
     expect(result.name).toEqual('Product 3');
     expect(result.className).toEqual('Item');
 
-    await q.each((obj) => {
-      expect(obj.objectId).toBe('I1');
-      expect(obj.size).toBe('small');
-      expect(obj.name).toEqual('Product 3');
-      expect(obj.className).toEqual('Item');
-    }, { json: true });
+    await q.each(
+      obj => {
+        expect(obj.objectId).toBe('I1');
+        expect(obj.size).toBe('small');
+        expect(obj.name).toEqual('Product 3');
+        expect(obj.className).toEqual('Item');
+      },
+      { json: true }
+    );
   });
 
   it('will error when getting a nonexistent object', done => {
@@ -1758,7 +1752,6 @@ describe('ParseQuery', () => {
       const q = new ParseQuery('Item');
       await q.eachBatch(items => {
         items.map(item => results.push(item.attributes.size));
-        return new Promise(resolve => setImmediate(resolve));
       });
       expect(results).toEqual(['medium', 'small']);
     });
@@ -2341,7 +2334,7 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Thing');
     let testObject;
-    return q
+    q
       .find()
       .then(results => {
         testObject = results[0];
@@ -2467,7 +2460,7 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Thing');
     let testObject;
-    return q
+    q
       .first()
       .then(result => {
         testObject = result;
@@ -2882,7 +2875,7 @@ describe('ParseQuery', () => {
     const q = new ParseQuery('Thing');
     q.select('other', 'tbd', 'subObject.key1');
     let testObject;
-    return q
+    q
       .find()
       .then(results => {
         testObject = results[0];
@@ -2933,7 +2926,7 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Thing');
     let testObject;
-    return q
+    q
       .find()
       .then(results => {
         testObject = results[0];

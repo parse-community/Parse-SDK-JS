@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const Parse = require('../../node');
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const { twitterAuthData } = require('./helper');
 
 class CustomUser extends Parse.User {
@@ -185,6 +185,7 @@ describe('Parse User', () => {
   });
 
   it('cannot save non-authed user', done => {
+    Parse.User.enableUnsafeCurrentUser();
     let user = new Parse.User();
     let notAuthed = null;
     user.set({
@@ -220,6 +221,7 @@ describe('Parse User', () => {
   });
 
   it('cannot delete non-authed user', done => {
+    Parse.User.enableUnsafeCurrentUser();
     let user = new Parse.User();
     let notAuthed = null;
     user
@@ -252,6 +254,7 @@ describe('Parse User', () => {
   });
 
   it('cannot saveAll with non-authed user', done => {
+    Parse.User.enableUnsafeCurrentUser();
     let user = new Parse.User();
     let notAuthed = null;
     user
@@ -435,6 +438,7 @@ describe('Parse User', () => {
   });
 
   it('can query for users', done => {
+    Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
     user.set('password', 'asdf');
     user.set('email', 'asdf@exxample.com');
@@ -457,6 +461,7 @@ describe('Parse User', () => {
   });
 
   it('preserves the session token when querying the current user', done => {
+    Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
     user.set('password', 'asdf');
     user.set('email', 'asdf@example.com');
@@ -521,26 +526,24 @@ describe('Parse User', () => {
       });
   });
 
-  it('can count users', done => {
+  it('can count users', async () => {
     const james = new Parse.User();
     james.set('username', 'james');
     james.set('password', 'mypass');
-    james
-      .signUp()
-      .then(() => {
-        const kevin = new Parse.User();
-        kevin.set('username', 'kevin');
-        kevin.set('password', 'mypass');
-        return kevin.signUp();
-      })
-      .then(() => {
-        const query = new Parse.Query(Parse.User);
-        return query.count();
-      })
-      .then(c => {
-        assert.equal(c, 2);
-        done();
-      });
+    const acl = new Parse.ACL();
+    acl.setPublicReadAccess(true);
+    james.setACL(acl);
+    await james.signUp();
+    const kevin = new Parse.User();
+    kevin.set('username', 'kevin');
+    kevin.set('password', 'mypass');
+    kevin.setACL(acl);
+    await kevin.signUp();
+
+    const query = new Parse.Query(Parse.User);
+    const c = await query.count();
+
+    assert.equal(c, 2);
   });
 
   it('can sign up user with container class', done => {

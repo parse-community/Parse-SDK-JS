@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.autoMockOff();
 const mockObject = function (className, id) {
   this.className = className;
@@ -192,6 +183,15 @@ describe('ParseSchema', () => {
     } catch (e) {
       done();
     }
+  });
+
+  it('can add date field with default value', () => {
+    const schema = new ParseSchema('NewSchemaTest');
+    const date = new Date();
+    schema.addDate('testField', { defaultValue: date });
+    schema.addField('testField2', 'Date', { defaultValue: date });
+    expect(schema._fields.testField.defaultValue).toEqual({ __type: 'Date', iso: date });
+    expect(schema._fields.testField2.defaultValue).toEqual({ __type: 'Date', iso: date });
   });
 
   it('cannot add index with null name', done => {

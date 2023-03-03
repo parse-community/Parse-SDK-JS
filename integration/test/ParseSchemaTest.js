@@ -26,6 +26,19 @@ const defaultCLPS = {
 };
 
 describe('Schema', () => {
+  beforeEach(async () => {
+    try {
+      const schemas = await Parse.Schema.all();
+      for (const result of schemas) {
+        const schema = new Parse.Schema(result.className);
+        await schema.purge();
+        await schema.delete();
+      }
+    } catch (_) {
+      // Schema not found
+    }
+  });
+
   it('invalid get all no schema', done => {
     Parse.Schema.all()
       .then(() => {})

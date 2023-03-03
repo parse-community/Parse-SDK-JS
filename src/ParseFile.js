@@ -1,11 +1,4 @@
 /**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
  * @flow
  */
 /* global XMLHttpRequest, Blob */
@@ -41,16 +34,6 @@ export type FileSource =
       uri: string,
       type: string,
     };
-
-const base64Regex = new RegExp(
-  '([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/][AQgw]==)|([0-9a-zA-Z+/]{2}[AEIMQUYcgkosw048]=)|([0-9a-zA-Z+/]{4}))',
-  'i'
-);
-
-const dataUriRegex = new RegExp(
-  `^data:([a-zA-Z]+\\/[-a-zA-Z0-9+.]+(;[a-z-]+=[a-zA-Z0-9+.-]+)?)?(;base64)?,(${base64Regex.source})*$`,
-  'i'
-);
 
 function b64Digit(number: number): string {
   if (number < 26) {
@@ -145,29 +128,16 @@ class ParseFile {
           type: specifiedType,
         };
       } else if (data && typeof data.base64 === 'string') {
-        // Check if data URI or base64 string is valid
-        const validationRegex = new RegExp(base64Regex.source + '|' + dataUriRegex.source, 'i');
-        if (!validationRegex.test(data.base64)) {
-          throw new Error(
-            'Cannot create a Parse.File without valid data URIs or base64 encoded data.'
-          );
-        }
-
         const base64 = data.base64.split(',').slice(-1)[0];
-        let type =
-          specifiedType || data.base64.split(';').slice(0, 1)[0].split(':').slice(1, 2)[0] || '';
-
-        // https://tools.ietf.org/html/rfc2397
-        // If <mediatype> is omitted, it defaults to text/plain;charset=US-ASCII.
-        // As a shorthand, "text/plain" can be omitted but the charset parameter supplied.
-        if (dataUriRegex.test(data.base64)) {
-          type = type || 'text/plain';
-        }
-
+        const dataType =
+          specifiedType ||
+          data.base64.split(';').slice(0, 1)[0].split(':').slice(1, 2)[0] ||
+          'text/plain';
+        this._data = base64;
         this._source = {
           format: 'base64',
           base64,
-          type,
+          type: dataType,
         };
       } else {
         throw new TypeError('Cannot create a Parse.File with that data.');
@@ -214,7 +184,7 @@ class ParseFile {
    * after you get the file from a Parse.Object.
    *
    * @param {object} options An object to specify url options
-   * @returns {string}
+   * @returns {string | undefined}
    */
   url(options?: { forceSecure?: boolean }): ?string {
     options = options || {};
@@ -250,7 +220,7 @@ class ParseFile {
    * Saves the file to the Parse cloud.
    *
    * @param {object} options
-   *  * Valid options are:<ul>
+   * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
@@ -267,9 +237,9 @@ class ParseFile {
    * });
    * </pre>
    * </ul>
-   * @returns {Promise} Promise that is resolved when the save finishes.
+   * @returns {Promise | undefined} Promise that is resolved when the save finishes.
    */
-  save(options?: FullOptions) {
+  save(options?: FullOptions): ?Promise {
     options = options || {};
     options.requestTask = task => (this._requestTask = task);
     options.metadata = this._metadata;
@@ -326,6 +296,7 @@ class ParseFile {
    */
   cancel() {
     if (this._requestTask && typeof this._requestTask.abort === 'function') {
+      this._requestTask._aborted = true;
       this._requestTask.abort();
     }
     this._requestTask = null;
@@ -336,7 +307,7 @@ class ParseFile {
    * In Cloud Code and Node only with Master Key.
    *
    * @param {object} options
-   *  * Valid options are:<ul>
+   * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
    * <pre>

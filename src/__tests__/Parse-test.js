@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../CoreManager');
 jest.dontMock('../CryptoController');
 jest.dontMock('../decode');
@@ -16,6 +7,7 @@ jest.dontMock('../LocalDatastore');
 jest.dontMock('crypto-js/aes');
 jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
+global.indexedDB = require('./test_helpers/mockIndexedDB');
 const CoreManager = require('../CoreManager');
 const EventuallyQueue = require('../EventuallyQueue');
 const Parse = require('../Parse');
@@ -173,6 +165,7 @@ describe('Parse module', () => {
     Parse.enableEncryptedUser();
     expect(Parse.encryptedUser).toBe(true);
     expect(Parse.isEncryptedUserEnabled()).toBe(true);
+    process.env.PARSE_BUILD = 'node';
   });
 
   it('can set an encrypt token as String', () => {
@@ -248,10 +241,15 @@ describe('Parse module', () => {
   });
 
   it('can get IndexedDB storage', () => {
-    console.log(Parse.IndexedDB);
-    expect(Parse.IndexedDB).toBeDefined();
-    CoreManager.setStorageController(Parse.IndexedDB);
-    const currentStorage = CoreManager.getStorageController();
-    expect(currentStorage).toEqual(Parse.IndexedDB);
+    jest.isolateModules(() => {
+      expect(Parse.IndexedDB).toBeUndefined();
+      process.env.PARSE_BUILD = 'browser';
+      const ParseInstance = require('../Parse');
+      expect(ParseInstance.IndexedDB).toBeDefined();
+      CoreManager.setStorageController(ParseInstance.IndexedDB);
+      const currentStorage = CoreManager.getStorageController();
+      expect(currentStorage).toEqual(ParseInstance.IndexedDB);
+      process.env.PARSE_BUILD = 'node';
+    });
   });
 });

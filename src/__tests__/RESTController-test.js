@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.autoMockOff();
 jest.useFakeTimers();
 jest.mock('../uuid', () => {
@@ -16,6 +7,7 @@ jest.mock('../uuid', () => {
 
 const CoreManager = require('../CoreManager');
 const RESTController = require('../RESTController');
+const flushPromises = require('./test_helpers/flushPromises');
 const mockXHR = require('./test_helpers/mockXHR');
 const mockWeChat = require('./test_helpers/mockWeChat');
 
@@ -29,10 +21,6 @@ CoreManager.setInstallationController({
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 CoreManager.set('VERSION', 'V');
-
-function flushPromises() {
-  return new Promise(resolve => setImmediate(resolve));
-}
 
 describe('RESTController', () => {
   it('throws if there is no XHR implementation', () => {
@@ -90,7 +78,8 @@ describe('RESTController', () => {
     jest.runAllTimers();
   });
 
-  it('returns a connection error on network failure', async done => {
+  it('returns a connection error on network failure', async () => {
+    expect.assertions(2);
     RESTController._setXHR(
       mockXHR([{ status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }])
     );
@@ -99,14 +88,14 @@ describe('RESTController', () => {
       err => {
         expect(err.code).toBe(100);
         expect(err.message).toBe('XMLHttpRequest failed: "Unable to connect to the Parse API"');
-        done();
       }
     );
-    await new Promise(resolve => setImmediate(resolve));
+    await flushPromises();
     jest.runAllTimers();
   });
 
-  it('aborts after too many failures', async done => {
+  it('aborts after too many failures', async () => {
+    expect.assertions(1);
     RESTController._setXHR(
       mockXHR([
         { status: 500 },
@@ -119,9 +108,8 @@ describe('RESTController', () => {
     );
     RESTController.ajax('POST', 'users', {}).then(null, xhr => {
       expect(xhr).not.toBe(undefined);
-      done();
     });
-    await new Promise(resolve => setImmediate(resolve));
+    await flushPromises();
     jest.runAllTimers();
   });
 
@@ -568,6 +556,20 @@ describe('RESTController', () => {
         done();
       }
     );
+  });
+
+  it('does not set upload progress listener when callback is not provided to avoid CORS pre-flight', () => {
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      upload: jest.fn(),
+      send: jest.fn(),
+    };
+    RESTController._setXHR(function () {
+      return xhr;
+    });
+    RESTController.ajax('POST', 'users', {});
+    expect(xhr.upload.onprogress).toBeUndefined();
   });
 
   it('does not upload progress when total is uncomputable', done => {

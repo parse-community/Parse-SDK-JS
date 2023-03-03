@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 import decode from './decode';
 import encode from './encode';
 import CoreManager from './CoreManager';
@@ -257,8 +248,9 @@ Parse.Storage = require('./Storage');
 Parse.User = require('./ParseUser').default;
 Parse.LiveQuery = require('./ParseLiveQuery').default;
 Parse.LiveQueryClient = require('./LiveQueryClient').default;
-Parse.IndexedDB = require('./IndexedDBStorageController');
-
+if (process.env.PARSE_BUILD === 'browser') {
+  Parse.IndexedDB = require('./IndexedDBStorageController');
+}
 Parse._request = function (...args) {
   return CoreManager.getRESTController().request.apply(null, args);
 };

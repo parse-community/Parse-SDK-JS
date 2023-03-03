@@ -1,11 +1,4 @@
 /**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
  * @flow
  */
 /* global XMLHttpRequest, XDomainRequest */
@@ -169,24 +162,24 @@ const RESTController = {
         headers[key] = customHeaders[key];
       }
 
-      function handleProgress(type, event) {
-        if (options && typeof options.progress === 'function') {
+      if (options && typeof options.progress === 'function') {
+        const handleProgress = function (type, event) {
           if (event.lengthComputable) {
             options.progress(event.loaded / event.total, event.loaded, event.total, { type });
           } else {
             options.progress(null, null, null, { type });
           }
-        }
-      }
-
-      xhr.onprogress = event => {
-        handleProgress('download', event);
-      };
-
-      if (xhr.upload) {
-        xhr.upload.onprogress = event => {
-          handleProgress('upload', event);
         };
+
+        xhr.onprogress = event => {
+          handleProgress('download', event);
+        };
+
+        if (xhr.upload) {
+          xhr.upload.onprogress = event => {
+            handleProgress('upload', event);
+          };
+        }
       }
 
       xhr.open(method, url, true);

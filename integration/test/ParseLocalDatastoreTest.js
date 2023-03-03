@@ -1227,6 +1227,66 @@ function runTest(controller) {
       assert.equal(results[0].id, parent3.id);
     });
 
+    it(`${controller.name} can handle containsAll query on array`, async () => {
+      const obj1 = new TestObject({ arrayField: [1, 2, 3, 4] });
+      const obj2 = new TestObject({ arrayField: [0, 2] });
+      const obj3 = new TestObject({ arrayField: [1, 2, 3] });
+      await Parse.Object.saveAll([obj1, obj2, obj3]);
+      await Parse.Object.pinAll([obj1, obj2, obj3]);
+
+      let query = new Parse.Query(TestObject);
+      query.containsAll('arrayField', [1, 2]);
+      query.fromPin();
+      let results = await query.find();
+      expect(results.length).toBe(2);
+
+      query = new Parse.Query(TestObject);
+      query.containsAll('arrayField', [5, 6]);
+      query.fromPin();
+      results = await query.find();
+      expect(results.length).toBe(0);
+    });
+
+    it(`${controller.name} can handle containedIn query on array`, async () => {
+      const obj1 = new TestObject({ arrayField: [1, 2, 3, 4] });
+      const obj2 = new TestObject({ arrayField: [0, 2] });
+      const obj3 = new TestObject({ arrayField: [1, 2, 3] });
+      await Parse.Object.saveAll([obj1, obj2, obj3]);
+      await Parse.Object.pinAll([obj1, obj2, obj3]);
+
+      let query = new Parse.Query(TestObject);
+      query.containedIn('arrayField', [3]);
+      query.fromPin();
+      let results = await query.find();
+      expect(results.length).toEqual(2);
+
+      query = new Parse.Query(TestObject);
+      query.containedIn('arrayField', [5]);
+      query.fromPin();
+      results = await query.find();
+      expect(results.length).toEqual(0);
+    });
+
+    it(`${controller.name} can handle notContainedIn query on array`, async () => {
+      const obj1 = new TestObject({ arrayField: [1, 2, 3, 4] });
+      const obj2 = new TestObject({ arrayField: [0, 2] });
+      const obj3 = new TestObject({ arrayField: [1, 2, 3] });
+      await Parse.Object.saveAll([obj1, obj2, obj3]);
+      await Parse.Object.pinAll([obj1, obj2, obj3]);
+
+      let query = new Parse.Query(TestObject);
+      query.notContainedIn('arrayField', [3]);
+      query.fromPin();
+      let results = await query.find();
+      expect(results.length).toEqual(1);
+
+      query = new Parse.Query(TestObject);
+      query.notContainedIn('arrayField', [5]);
+      query.fromPin();
+      results = await query.find();
+      expect(results.length).toEqual(3);
+    });
+
     it(`${controller.name} can test equality with undefined`, async () => {
       const query = new Parse.Query('BoxedNumber');
       query.equalTo('number', undefined);
@@ -2733,6 +2793,26 @@ function runTest(controller) {
       q.fromLocalDatastore();
       objects = await q.find();
       assert.equal(objects.length, 1);
+    });
+
+    it(`${controller.name} supports withinKilometers`, async () => {
+      const object = new TestObject();
+      const firstPoint = new Parse.GeoPoint({ latitude: 40.0, longitude: -30.0 });
+      object.set({ location: firstPoint });
+      await object.save();
+      await object.pin();
+
+      const sorted = false;
+      const query = new Parse.Query(TestObject);
+      query.withinKilometers(
+        'location',
+        new Parse.GeoPoint({ latitude: 40.0, longitude: -30.0 }),
+        2,
+        sorted
+      );
+      query.fromLocalDatastore();
+      const results = await query.find();
+      assert.equal(results.length, 1);
     });
 
     it(`${controller.name} supports withinPolygon`, async () => {

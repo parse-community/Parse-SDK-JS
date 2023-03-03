@@ -22,12 +22,12 @@ const transformRuntime = ["@babel/plugin-transform-runtime", {
 const PRESETS = {
   'browser': [["@babel/preset-env", {
     "targets": "> 0.25%, not dead"
-  }], '@babel/preset-react'],
+  }]],
   'weapp': [["@babel/preset-env", {
     "targets": "> 0.25%, not dead"
-  }], '@babel/preset-react'],
+  }], '@babel/react'],
   'node': [["@babel/preset-env", {
-    "targets": { "node": "8" }
+    "targets": { "node": "14" }
   }]],
   'react-native': ['module:metro-react-native-babel-preset'],
 };
@@ -53,19 +53,20 @@ const FULL_HEADER = (
   '/**\n' +
   ' * Parse JavaScript SDK v' + VERSION + '\n' +
   ' *\n' +
-  ' * Copyright (c) 2015-present, Parse, LLC.\n' +
+  ' * Copyright 2015-present Parse Platform\n' +
   ' * All rights reserved.\n' +
   ' *\n' +
   ' * The source tree of this library can be found at\n' +
   ' *   https://github.com/ParsePlatform/Parse-SDK-JS\n' +
-  ' * This source code is licensed under the BSD-style license found in the\n' +
-  ' * LICENSE file in the root directory of this source tree. An additional grant\n' +
-  ' * of patent rights can be found in the PATENTS file in the same directory.\n' +
+  ' *\n' +
+  ' * This source code is licensed under the license found in the LICENSE\n' +
+  ' * file in the root directory of this source tree. Additional legal\n' +
+  ' * information can be found in the NOTICE file in the same directory.\n' +
   ' */\n'
 );
 
-gulp.task('compile', function() {
-  return gulp.src('src/*.js')
+function compileTask(stream) {
+  return stream
     .pipe(babel({
       presets: PRESETS[BUILD],
       plugins: PLUGINS[BUILD],
@@ -75,6 +76,10 @@ gulp.task('compile', function() {
       plugins: ['minify-dead-code-elimination'],
     }))
     .pipe(gulp.dest(path.join('lib', BUILD)));
+}
+
+gulp.task('compile', function() {
+  return compileTask(gulp.src('src/*.js'));
 });
 
 gulp.task('browserify', function(cb) {
@@ -131,14 +136,15 @@ gulp.task('minify-weapp', function() {
 });
 
 gulp.task('watch', function() {
-  return watch('src/*.js', { ignoreInitial: false, verbose: true })
-    .pipe(babel({
-      presets: PRESETS[BUILD],
-      plugins: PLUGINS[BUILD],
-    }))
-    // Second pass to kill BUILD-switched code
-    .pipe(babel({
-      plugins: ['minify-dead-code-elimination'],
-    }))
-    .pipe(gulp.dest(path.join('lib', BUILD)));
+  if (BUILD === 'browser') {
+    const watcher = gulp.watch('src/*.js', { ignoreInitial: false }, gulp.series('compile', 'browserify', 'minify'));
+    watcher.on('add', function(path) {
+      console.log(`File ${path} was added`);
+    });
+    watcher.on('change', function(path) {
+      console.log(`File ${path} was changed`);
+    });
+    return watcher;
+  }
+  return compileTask(watch('src/*.js', { ignoreInitial: false, verbose: true }));
 });
