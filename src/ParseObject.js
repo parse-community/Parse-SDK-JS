@@ -163,7 +163,7 @@ const proxyHandler = {
       return true;
     }
     receiver.set(key, value);
-    receiver.dirtyKeys = receiver.dirtyKeys.bind(receiver);
+    receiver.dirtyKeys.bind(receiver);
     return true;
   },
 
@@ -1225,7 +1225,7 @@ class ParseObject {
       for (const field of keysToRevert || []) {
         this[field] = { _proxy_op: 'fetch' };
       }
-      this.dirtyKeys = this.dirtyKeys.bind(this);
+      this.dirtyKeys.bind(this);
     }
   }
 
@@ -1463,7 +1463,7 @@ class ParseObject {
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
     await controller.save(unsaved, saveOptions);
     const response = await controller.save(this, saveOptions);
-    this.dirtyKeys = this.dirtyKeys.bind(this);
+    this.dirtyKeys.bind(this);
     return response;
   }
 
