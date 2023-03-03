@@ -163,7 +163,7 @@ const proxyHandler = {
       return true;
     }
     receiver.set(key, value);
-    receiver.dirtyKeys.bind(receiver);
+    receiver._bindKeys();
     return true;
   },
 
@@ -497,6 +497,17 @@ class ParseObject {
     const state = stateController.getState(this._getStateIdentifier());
     if (state) {
       state.existed = existed;
+    }
+  }
+
+  _bindKeys() {
+    if (!CoreManager.get('DOT_NOTATION')) {
+      return;
+    }
+    const bindingKeys = ['dirtyKeys'];
+    for (const key of bindingKeys) {
+      this[key] = this[key].bind(this);
+      delete this[key];
     }
   }
 
@@ -1225,7 +1236,7 @@ class ParseObject {
       for (const field of keysToRevert || []) {
         this[field] = { _proxy_op: 'fetch' };
       }
-      this.dirtyKeys.bind(this);
+      this._bindKeys();
     }
   }
 
@@ -1463,7 +1474,7 @@ class ParseObject {
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
     await controller.save(unsaved, saveOptions);
     const response = await controller.save(this, saveOptions);
-    this.dirtyKeys.bind(this);
+    this._bindKeys();
     return response;
   }
 
