@@ -11,6 +11,7 @@ jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('../OfflineQuery');
 jest.dontMock('../LiveQuerySubscription');
+jest.dontMock('../proxy');
 
 jest.mock('../uuid', () => {
   let value = 0;

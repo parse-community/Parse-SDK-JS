@@ -23,6 +23,7 @@ jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 jest.dontMock('../LocalDatastore');
+jest.dontMock('../proxy');
 
 jest.mock('../uuid', () => {
   let value = 0;
