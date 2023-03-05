@@ -2590,6 +2590,27 @@ describe('ParseObject', () => {
     CoreManager.set('DOT_NOTATION', false);
   });
 
+  it('can assign attributes', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            objectId: 'P1',
+          },
+        },
+      ])
+    );
+    const obj = new ParseObject('TestObject');
+    obj.attributes.name = 'Foo';
+    expect(obj.attributes.name).toEqual('Foo');
+    await obj.save();
+    expect(obj.get('name')).toBe('Foo');
+    expect(obj.toJSON()).toEqual({ name: 'Foo', objectId: 'P1' });
+    expect(obj.attributes).toEqual({ name: 'Foo' });
+    expect(obj.get('name')).toBe('Foo');
+  });
+
   it('can set and revert deep with dot notation', async () => {
     CoreManager.set('DOT_NOTATION', true);
     CoreManager.getRESTController()._setXHR(

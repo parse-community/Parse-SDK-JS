@@ -267,7 +267,16 @@ class ParseObject {
 
   get attributes(): AttributeMap {
     const stateController = CoreManager.getObjectStateController();
-    return Object.freeze(stateController.estimateAttributes(this._getStateIdentifier()));
+    const data = Object.freeze(stateController.estimateAttributes(this._getStateIdentifier()));
+    return new Proxy(data, {
+      get: (...args) => {
+        return Reflect.get(...args);
+      },
+      set: (_, prop, value) => {
+        this.set(prop, value);
+        return true;
+      },
+    });
   }
 
   /**
