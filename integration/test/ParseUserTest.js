@@ -1042,13 +1042,12 @@ describe('Parse User', () => {
     Parse.CoreManager.set('ENCRYPTED_KEY', null);
   });
 
-  it('allow dotNotation', async () => {
-    Parse.dotNotation = true;
+  it('allow binding', async () => {
     const user = new Parse.User();
     const username = uuidv4();
-    user.username = username;
-    user.password = username;
-    user.foo = 'bar';
+    user.bind.username = username;
+    user.bind.password = username;
+    user.bind.foo = 'bar';
     await user.signUp();
     expect(Object.keys(user.toJSON()).sort()).toEqual([
       'createdAt',
@@ -1058,13 +1057,12 @@ describe('Parse User', () => {
       'updatedAt',
       'username',
     ]);
-    expect(user.username).toBe(username);
-    expect(user.foo).toBe('bar');
+    expect(user.bind.username).toBe(username);
+    expect(user.bind.foo).toBe('bar');
     const userFromQuery = await new Parse.Query(Parse.User).first();
-    expect(userFromQuery.username).toBe(username);
-    expect(userFromQuery.password).toBeUndefined();
-    expect(userFromQuery.foo).toBe('bar');
-    Parse.dotNotation = false;
+    expect(userFromQuery.bind.username).toBe(username);
+    expect(userFromQuery.bind.password).toBeUndefined();
+    expect(userFromQuery.bind.foo).toBe('bar');
   });
 
   it('fix GHSA-wvh7-5p38-2qfc', async () => {
