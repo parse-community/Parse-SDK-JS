@@ -191,17 +191,6 @@ const Parse = {
   },
 
   /**
-   * @member {boolean} Parse.dotNotation
-   * @static
-   */
-  set dotNotation(value) {
-    CoreManager.set('DOT_NOTATION', value);
-  },
-  get dotNotation() {
-    return CoreManager.get('DOT_NOTATION');
-  },
-
-  /**
    * @member {boolean} Parse.allowCustomObjectId
    * @static
    */

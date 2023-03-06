@@ -14,7 +14,7 @@ import ParseError from './ParseError';
 import ParseFile from './ParseFile';
 import { when, continueWhile, resolvingPromise } from './promiseUtils';
 import { DEFAULT_PIN, PIN_PREFIX } from './LocalDatastoreUtils';
-import proxyHandler from './proxy'
+import proxyHandler from './proxy';
 
 import {
   opFromJSON,
@@ -110,7 +110,6 @@ class ParseObject {
     attributes?: { [attr: string]: mixed },
     options?: { ignoreValidation: boolean }
   ) {
-    const proxy = CoreManager.get('DOT_NOTATION') ? new Proxy(this, proxyHandler) : this;
     // Enable legacy initializers
     if (typeof this.initialize === 'function') {
       this.initialize.apply(this, arguments);
@@ -138,7 +137,7 @@ class ParseObject {
     if (toSet && !this.set(toSet, options)) {
       throw new Error("Can't create an invalid Parse Object");
     }
-    return proxy;
+    this._createProxy();
   }
 
   /**
@@ -155,16 +154,7 @@ class ParseObject {
 
   get attributes(): AttributeMap {
     const stateController = CoreManager.getObjectStateController();
-    const data = Object.freeze(stateController.estimateAttributes(this._getStateIdentifier()));
-    return new Proxy(data, {
-      get: (...args) => {
-        return Reflect.get(...args);
-      },
-      set: (_, prop, value) => {
-        this.set(prop, value);
-        return true;
-      },
-    });
+    return Object.freeze(stateController.estimateAttributes(this._getStateIdentifier()));
   }
 
   /**
@@ -379,14 +369,7 @@ class ParseObject {
       decoded.updatedAt = decoded.createdAt;
     }
     stateController.commitServerChanges(this._getStateIdentifier(), decoded);
-    if (CoreManager.get('DOT_NOTATION')) {
-      for (const field in serverData) {
-        if (['objectId', 'ACL', 'createdAt', 'updatedAt'].includes(field)) {
-          continue;
-        }
-        this[field] = { _proxy_op: 'fetch' };
-      }
-    }
+    this._createProxy();
   }
 
   _setExisted(existed: boolean) {
@@ -397,15 +380,8 @@ class ParseObject {
     }
   }
 
-  _bindKeys() {
-    if (!CoreManager.get('DOT_NOTATION')) {
-      return;
-    }
-    const bindingKeys = ['dirtyKeys'];
-    for (const key of bindingKeys) {
-      this[key] = this[key].bind(this);
-      delete this[key];
-    }
+  _createProxy() {
+    this.bind = new Proxy(this, proxyHandler);
   }
 
   _migrateId(serverId: string) {
@@ -945,7 +921,7 @@ class ParseObject {
    */
   op(attr: string): ?Op {
     const pending = this._getPendingOps();
-    for (let i = pending.length; i--;) {
+    for (let i = pending.length; i--; ) {
       if (pending[i][attr]) {
         return pending[i][attr];
       }
@@ -1129,12 +1105,7 @@ class ParseObject {
       }
     }
     this._clearPendingOps(keysToRevert);
-    if (CoreManager.get('DOT_NOTATION')) {
-      for (const field of keysToRevert || []) {
-        this[field] = { _proxy_op: 'fetch' };
-      }
-      this._bindKeys();
-    }
+    this._createProxy();
   }
 
   /**
@@ -1369,12 +1340,15 @@ class ParseObject {
     }
     const controller = CoreManager.getObjectController();
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
-    return controller.save(unsaved, saveOptions).then(() => {
-      return controller.save(this, saveOptions);
-    }).then(res => {
-      this._bindKeys();
-      return res;
-    });
+    return controller
+      .save(unsaved, saveOptions)
+      .then(() => {
+        return controller.save(this, saveOptions);
+      })
+      .then(res => {
+        this._createProxy();
+        return res;
+      });
   }
 
   /**
@@ -1994,7 +1968,6 @@ class ParseObject {
       parentProto = this.prototype;
     }
     let ParseObjectSubclass = function (attributes, options) {
-      const proxy = CoreManager.get('DOT_NOTATION') ? new Proxy(this, proxyHandler) : this;
       this.className = adjustedClassName;
       this._objCount = objectCount++;
       // Enable legacy initializers
@@ -2013,7 +1986,7 @@ class ParseObject {
           throw new Error("Can't create an invalid Parse Object");
         }
       }
-      return proxy;
+      this._createProxy();
     };
     if (classMap[adjustedClassName]) {
       ParseObjectSubclass = classMap[adjustedClassName];

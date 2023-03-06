@@ -52,12 +52,7 @@ const nestedHandler = {
 };
 const proxyHandler = {
   get(target, key, receiver) {
-    const value = target[key];
-    const reflector = Reflect.get(target, key, receiver);
-    if (reflector || proxyHandler._isInternal(key, value)) {
-      return reflector;
-    }
-    const getValue = receiver.get(key);
+    const getValue = target.get(key);
     if (
       Object.prototype.toString.call(getValue) === '[object Object]' &&
       getValue?.constructor?.name === 'Object'
@@ -67,48 +62,27 @@ const proxyHandler = {
       thisHandler._parent = receiver;
       return new Proxy({ ...getValue }, thisHandler);
     }
-    return getValue ?? reflector;
+    return getValue;
   },
 
-  set(target, key, value, receiver) {
-    const current = target[key];
-    if (proxyHandler._isInternal(key, current)) {
-      return Reflect.set(target, key, value, receiver);
-    }
-    if (
-      Object.prototype.toString.call(value) === '[object Object]' &&
-      value._proxy_op === 'fetch'
-    ) {
-      return true;
-    }
-    receiver.set(key, value);
-    receiver._bindKeys();
+  set(target, key, value) {
+    target.set(key, value);
     return true;
   },
 
   deleteProperty(target, key) {
-    const current = target[key];
-    if (proxyHandler._isInternal(key, current)) {
-      return delete target[key];
-    }
     return target.unset(key);
   },
+  ownKeys(target) {
+    // called once to get a list of properties
+    return Object.keys(target.attributes);
+  },
 
-  _isInternal(key, value) {
-    const internalFields = Object.freeze([
-      'objectId',
-      'id',
-      'className',
-      'attributes',
-      'createdAt',
-      'updatedAt',
-      'then',
-    ]);
-    return (
-      typeof value === 'function' ||
-      key.toString().charAt(0) === '_' ||
-      internalFields.includes(key.toString())
-    );
+  getOwnPropertyDescriptor() {
+    return {
+      enumerable: true,
+      configurable: true,
+    };
   },
 };
 export default proxyHandler;

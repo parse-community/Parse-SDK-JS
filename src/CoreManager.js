@@ -194,7 +194,6 @@ const config: Config & { [key: string]: mixed } = {
   ENCRYPTED_USER: false,
   IDEMPOTENCY: false,
   ALLOW_CUSTOM_OBJECT_ID: false,
-  DOT_NOTATION: false,
 };
 
 function requireMethods(name: string, methods: Array<string>, controller: any) {
