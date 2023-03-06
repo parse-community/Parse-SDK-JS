@@ -2570,7 +2570,6 @@ describe('ParseObject', () => {
     });
   });
   it('can save object with dot notation', async () => {
-    CoreManager.set('DOT_NOTATION', true);
     CoreManager.getRESTController()._setXHR(
       mockXHR([
         {
@@ -2582,38 +2581,16 @@ describe('ParseObject', () => {
       ])
     );
     const obj = new ParseObject('TestObject');
-    obj.name = 'Foo';
+    obj.bind.name = 'Foo';
+    expect(Object.keys(obj.bind)).toEqual(['name'])
     await obj.save();
-    expect(obj.name).toBe('Foo');
-    expect(obj.toJSON()).toEqual({ name: 'Foo', objectId: 'P1' });
-    expect(obj.attributes).toEqual({ name: 'Foo' });
-    expect(obj.get('name')).toBe('Foo');
-    CoreManager.set('DOT_NOTATION', false);
-  });
-
-  it('can assign attributes', async () => {
-    CoreManager.getRESTController()._setXHR(
-      mockXHR([
-        {
-          status: 200,
-          response: {
-            objectId: 'P1',
-          },
-        },
-      ])
-    );
-    const obj = new ParseObject('TestObject');
-    obj.attributes.name = 'Foo';
-    expect(obj.attributes.name).toEqual('Foo');
-    await obj.save();
-    expect(obj.get('name')).toBe('Foo');
+    expect(obj.bind.name).toBe('Foo');
     expect(obj.toJSON()).toEqual({ name: 'Foo', objectId: 'P1' });
     expect(obj.attributes).toEqual({ name: 'Foo' });
     expect(obj.get('name')).toBe('Foo');
   });
 
   it('can set and revert deep with dot notation', async () => {
-    CoreManager.set('DOT_NOTATION', true);
     CoreManager.getRESTController()._setXHR(
       mockXHR([
         {
@@ -2624,66 +2601,38 @@ describe('ParseObject', () => {
     );
     const object = await new ParseObject('Test').save();
     expect(object.id).toBe('I1');
-    expect(object.nested.foo).toEqual({ a: 1 });
-    object.a = '123';
-    object.nested.foo.a = 2;
-    expect(object.nested.foo).toEqual({ a: 2 });
+    expect(object.bind.nested.foo).toEqual({ a: 1 });
+    object.bind.a = '123';
+    object.bind.nested.foo.a = 2;
+    expect(object.bind.nested.foo).toEqual({ a: 2 });
     expect(object.dirtyKeys()).toEqual(['a', 'nested']);
     object.revert('a');
     expect(object.dirtyKeys()).toEqual(['nested']);
     object.revert();
-    expect(object.nested.foo).toEqual({ a: 1 });
-    expect(object.a).toBeUndefined();
+    expect(object.bind.nested.foo).toEqual({ a: 1 });
+    expect(object.bind.a).toBeUndefined();
     expect(object.dirtyKeys()).toEqual([]);
-    object.nested.foo.a = 2;
-    expect(object.nested.foo).toEqual({ a: 2 });
-    CoreManager.set('DOT_NOTATION', false);
+    object.bind.nested.foo.a = 2;
+    expect(object.bind.nested.foo).toEqual({ a: 2 });
   });
 
   it('can delete with dot notation', async () => {
-    CoreManager.set('DOT_NOTATION', true);
     const obj = new ParseObject('TestObject');
-    obj.name = 'Foo';
+    obj.bind.name = 'Foo';
     expect(obj.attributes).toEqual({ name: 'Foo' });
     expect(obj.get('name')).toBe('Foo');
-    delete obj.name;
+    delete obj.bind.name;
     expect(obj.op('name') instanceof ParseOp.UnsetOp).toEqual(true);
     expect(obj.get('name')).toBeUndefined();
     expect(obj.attributes).toEqual({});
-    CoreManager.set('DOT_NOTATION', false);
   });
 
   it('can delete nested keys dot notation', async () => {
-    CoreManager.set('DOT_NOTATION', true);
     const obj = new ParseObject('TestObject', { name: { foo: { bar: 'a' } } });
-    delete obj.name.foo.bar;
-    expect(obj.name.foo).toEqual({});
-    CoreManager.set('DOT_NOTATION', false);
+    delete obj.bind.name.foo.bar;
+    expect(obj.bind.name.foo).toEqual({});
   });
 
-  it('dot notation should not assign directly', async () => {
-    CoreManager.set('DOT_NOTATION', true);
-    CoreManager.getRESTController()._setXHR(
-      mockXHR([
-        {
-          status: 200,
-          response: {
-            objectId: 'P2',
-          },
-        },
-      ])
-    );
-    const obj = new ParseObject('TestObject');
-    obj.name = 'Foo';
-    expect(Object.keys(obj)).toEqual(['_objCount', 'className', '_localId']);
-    await obj.save();
-    expect(obj.name).toBe('Foo');
-    expect(obj.toJSON()).toEqual({ name: 'Foo', objectId: 'P2' });
-    expect(obj.attributes).toEqual({ name: 'Foo' });
-    expect(obj.get('name')).toBe('Foo');
-    expect(Object.keys(obj)).toEqual(['_objCount', 'className', 'id']);
-    CoreManager.set('DOT_NOTATION', false);
-  });
 });
 
 describe('ObjectController', () => {

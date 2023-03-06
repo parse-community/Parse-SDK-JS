@@ -3800,7 +3800,6 @@ describe('ParseQuery LocalDatastore', () => {
   });
 
   it('can query with dot notation', async () => {
-    CoreManager.set('DOT_NOTATION', true);
     CoreManager.setQueryController({
       aggregate() {},
       find() {
@@ -3811,8 +3810,7 @@ describe('ParseQuery LocalDatastore', () => {
     });
     const object = await new ParseQuery('Item').equalTo('size', 'small').first();
     expect(object.id).toBe('I1');
-    expect(object.size).toBe('small');
-    expect(object.name).toBe('Product 3');
-    CoreManager.set('DOT_NOTATION', false);
+    expect(object.bind.size).toBe('small');
+    expect(object.bind.name).toBe('Product 3');
   });
 });
