@@ -921,7 +921,7 @@ class ParseObject {
    */
   op(attr: string): ?Op {
     const pending = this._getPendingOps();
-    for (let i = pending.length; i--; ) {
+    for (let i = pending.length; i--;) {
       if (pending[i][attr]) {
         return pending[i][attr];
       }
