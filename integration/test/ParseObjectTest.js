@@ -2142,7 +2142,7 @@ describe('Parse Object', () => {
     parent.bind.foo = 'bar2';
     grandparent.bind.parent = parent;
     const child = new Parse.Object('DotChild');
-    child.foo = 'bar3';
+    child.bind.foo = 'bar3';
     parent.bind.child = child;
     await Parse.Object.saveAll([child, parent, grandparent]);
     expect(grandparent.bind.foo).toBe('bar1');
