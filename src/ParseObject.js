@@ -381,7 +381,6 @@ class ParseObject {
   }
 
   _createProxy() {
-    this.bind = Object.assign({}, this.attributes);
     this.bind = new Proxy(this, proxyHandler);
   }
 
@@ -1107,6 +1106,7 @@ class ParseObject {
     }
     this._clearPendingOps(keysToRevert);
     this._createProxy();
+    return this;
   }
 
   /**
