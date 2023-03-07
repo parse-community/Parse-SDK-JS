@@ -381,6 +381,7 @@ class ParseObject {
   }
 
   _createProxy() {
+    this.bind = Object.assign({}, this.attributes);
     this.bind = new Proxy(this, proxyHandler);
   }
 
