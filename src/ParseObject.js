@@ -157,7 +157,7 @@ class ParseObject {
    *
    * `object.get("key")` and `object.set("set")` is preffered for one way binding.
    *
-   * @property {object} id
+   * @property {object} bind
    */
   bind: AttributeMap;
 
