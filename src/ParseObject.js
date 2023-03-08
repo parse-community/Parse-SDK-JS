@@ -150,6 +150,17 @@ class ParseObject {
   _objCount: number;
   className: string;
 
+  /**
+   * Bind, used for two way directonal binding using
+   *
+   * When using a responsive framework that supports binding to an object's keys, use `object.bind.key` for dynamic updating of a Parse.Object
+   *
+   * `object.get("key")` and `object.set("set")` is preffered for one way binding.
+   *
+   * @property {object} id
+   */
+  bind: AttributeMap;
+
   /* Prototype getters / setters */
 
   get attributes(): AttributeMap {
