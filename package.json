@@ -80,7 +80,7 @@
     "jest-environment-jsdom": "29.5.0",
     "jsdoc": "4.0.2",
     "jsdoc-babel": "0.5.0",
-    "lint-staged": "13.1.2",
+    "lint-staged": "13.2.0",
     "metro-react-native-babel-preset": "0.76.0",
     "mongodb-runner": "4.10.0",
     "parse-server": "git+https://github.com/parse-community/parse-server#alpha",
