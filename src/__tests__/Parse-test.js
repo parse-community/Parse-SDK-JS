@@ -7,6 +7,7 @@ jest.dontMock('../LocalDatastore');
 jest.dontMock('crypto-js/aes');
 jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 jest.dontMock('../proxy');
+jest.dontMock('deepcopy');
 
 global.indexedDB = require('./test_helpers/mockIndexedDB');
 const CoreManager = require('../CoreManager');

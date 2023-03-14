@@ -24,6 +24,7 @@ jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('../proxy');
+jest.dontMock('deepcopy');
 
 jest.mock('../uuid', () => {
   let value = 0;
@@ -2631,6 +2632,12 @@ describe('ParseObject', () => {
     const obj = new ParseObject('TestObject', { name: { foo: { bar: 'a' } } });
     delete obj.bind.name.foo.bar;
     expect(obj.bind.name.foo).toEqual({});
+  });
+
+  it('can update nested array with dot notation', async () => {
+    const obj = new ParseObject('TestObject', { name: [{foo: { bar: 'a' } }] });
+    obj.bind.name[0].foo.bar = 'b';
+    expect(obj.get('name')).toEqual([{foo: { bar: 'b' } }]);
   });
 
 });

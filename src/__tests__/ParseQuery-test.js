@@ -12,6 +12,7 @@ jest.dontMock('../LocalDatastore');
 jest.dontMock('../OfflineQuery');
 jest.dontMock('../LiveQuerySubscription');
 jest.dontMock('../proxy');
+jest.dontMock('deepcopy');
 
 jest.mock('../uuid', () => {
   let value = 0;

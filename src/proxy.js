@@ -1,18 +1,19 @@
-import * as deepcopy from 'deepcopy';
+import deepcopy from 'deepcopy';
 const nestedHandler = {
   updateParent(key, value) {
     const levels = this._path.split('.');
     levels.push(key);
     const topLevel = levels[0];
     levels.shift();
-    const copiedParent = Array.isArray(this._parent[topLevel]) ? [...this._parent[topLevel]] : {...this._parent[topLevel]};
+    const copiedParent = Array.isArray(this._parent[topLevel])
+      ? [...this._parent[topLevel]]
+      : { ...this._parent[topLevel] };
     const scope = deepcopy(copiedParent);
     let target = scope;
     const max_level = levels.length - 1;
-    for (let i = 0; i < levels.length; i++) {
-      const level = levels[i];
+    levels.some((level, i) => {
       if (typeof level === 'undefined') {
-        break;
+        return true;
       }
       if (i === max_level) {
         if (value == null) {
@@ -21,23 +22,27 @@ const nestedHandler = {
           target[level] = value;
         }
       } else {
-        const obj = target[level] || {};
+        const obj = target[level] || (this._array ? [] : {});
         target = obj;
       }
-    }
+    });
     this._parent[topLevel] = scope;
   },
   get(target, key, receiver) {
     const reflector = Reflect.get(target, key, receiver);
     const prop = target[key];
     if (
-      Object.prototype.toString.call(prop) === '[object Object]' &&
-      prop?.constructor?.name === 'Object'
+      Array.isArray(prop) ||
+      (Object.prototype.toString.call(prop) === '[object Object]' &&
+        prop?.constructor?.name === 'Object')
     ) {
       const thisHandler = { ...nestedHandler };
       thisHandler._path = `${this._path}.${key}`;
       thisHandler._parent = this._parent;
-      return new Proxy({ ...prop }, thisHandler);
+      const isArray = Array.isArray(prop);
+      thisHandler._array = isArray;
+      const copied = isArray ? [...prop] : { ...prop };
+      return new Proxy(copied, thisHandler);
     }
     return reflector;
   },
