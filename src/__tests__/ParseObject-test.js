@@ -23,6 +23,8 @@ jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 jest.dontMock('../LocalDatastore');
+jest.dontMock('../proxy');
+jest.dontMock('deepcopy');
 
 jest.mock('../uuid', () => {
   let value = 0;
@@ -2568,6 +2570,76 @@ describe('ParseObject', () => {
       jest.runAllTicks();
     });
   });
+  it('can save object with dot notation', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: {
+            objectId: 'P1',
+          },
+        },
+      ])
+    );
+    const obj = new ParseObject('TestObject');
+    obj.bind.name = 'Foo';
+    expect(Object.keys(obj.bind)).toEqual(['name'])
+    await obj.save();
+    expect(obj.bind.name).toBe('Foo');
+    expect(obj.toJSON()).toEqual({ name: 'Foo', objectId: 'P1' });
+    expect(obj.attributes).toEqual({ name: 'Foo' });
+    expect(obj.get('name')).toBe('Foo');
+  });
+
+  it('can set and revert deep with dot notation', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: { objectId: 'I1', nested: { foo: { a: 1 } } },
+        },
+      ])
+    );
+    const object = await new ParseObject('Test').save();
+    expect(object.id).toBe('I1');
+    expect(object.bind.nested.foo).toEqual({ a: 1 });
+    object.bind.a = '123';
+    object.bind.nested.foo.a = 2;
+    expect(object.bind.nested.foo).toEqual({ a: 2 });
+    expect(object.dirtyKeys()).toEqual(['a', 'nested']);
+    object.revert('a');
+    expect(object.dirtyKeys()).toEqual(['nested']);
+    object.revert();
+    expect(object.bind.nested.foo).toEqual({ a: 1 });
+    expect(object.bind.a).toBeUndefined();
+    expect(object.dirtyKeys()).toEqual([]);
+    object.bind.nested.foo.a = 2;
+    expect(object.bind.nested.foo).toEqual({ a: 2 });
+  });
+
+  it('can delete with dot notation', async () => {
+    const obj = new ParseObject('TestObject');
+    obj.bind.name = 'Foo';
+    expect(obj.attributes).toEqual({ name: 'Foo' });
+    expect(obj.get('name')).toBe('Foo');
+    delete obj.bind.name;
+    expect(obj.op('name') instanceof ParseOp.UnsetOp).toEqual(true);
+    expect(obj.get('name')).toBeUndefined();
+    expect(obj.attributes).toEqual({});
+  });
+
+  it('can delete nested keys dot notation', async () => {
+    const obj = new ParseObject('TestObject', { name: { foo: { bar: 'a' } } });
+    delete obj.bind.name.foo.bar;
+    expect(obj.bind.name.foo).toEqual({});
+  });
+
+  it('can update nested array with dot notation', async () => {
+    const obj = new ParseObject('TestObject', { name: [{foo: { bar: 'a' } }] });
+    obj.bind.name[0].foo.bar = 'b';
+    expect(obj.get('name')).toEqual([{foo: { bar: 'b' } }]);
+  });
+
 });
 
 describe('ObjectController', () => {

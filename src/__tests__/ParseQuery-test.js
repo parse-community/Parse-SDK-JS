@@ -11,6 +11,8 @@ jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('../OfflineQuery');
 jest.dontMock('../LiveQuerySubscription');
+jest.dontMock('../proxy');
+jest.dontMock('deepcopy');
 
 jest.mock('../uuid', () => {
   let value = 0;
@@ -3796,5 +3798,20 @@ describe('ParseQuery LocalDatastore', () => {
     expect(subscription.id).toBe('0');
     expect(subscription.sessionToken).toBe('r:test');
     expect(subscription.query).toEqual(query);
+  });
+
+  it('can query with dot notation', async () => {
+    CoreManager.setQueryController({
+      aggregate() {},
+      find() {
+        return Promise.resolve({
+          results: [{ objectId: 'I1', size: 'small', name: 'Product 3' }],
+        });
+      },
+    });
+    const object = await new ParseQuery('Item').equalTo('size', 'small').first();
+    expect(object.id).toBe('I1');
+    expect(object.bind.size).toBe('small');
+    expect(object.bind.name).toBe('Product 3');
   });
 });

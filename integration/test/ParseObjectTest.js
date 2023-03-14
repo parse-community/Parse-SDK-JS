@@ -2108,6 +2108,75 @@ describe('Parse Object', () => {
     });
   });
 
+  it('allow binding', async () => {
+    const object = new Parse.Object('TestObject2');
+    object.bind.foo = 'bar';
+    await object.save();
+    expect(object.bind.foo).toBe('bar');
+    expect(object.get('foo')).toBe('bar');
+    expect(Object.keys(object.toJSON()).sort()).toEqual([
+      'createdAt',
+      'foo',
+      'objectId',
+      'updatedAt',
+    ]);
+
+    const query = new Parse.Query('TestObject2');
+    const result = await query.get(object.id);
+    expect(result.bind.foo).toBe('bar');
+    expect(result.get('foo')).toBe('bar');
+    expect(result.id).toBe(object.id);
+    result.bind.foo = 'baz';
+    expect(result.get('foo')).toBe('baz');
+    await result.save();
+
+    const afterSave = await query.get(object.id);
+    expect(afterSave.bind.foo).toBe('baz');
+    expect(afterSave.get('foo')).toBe('baz');
+  });
+
+  it('allow binding on pointers', async () => {
+    const grandparent = new Parse.Object('DotGrandparent');
+    grandparent.bind.foo = 'bar1';
+    const parent = new Parse.Object('DotParent');
+    parent.bind.foo = 'bar2';
+    grandparent.bind.parent = parent;
+    const child = new Parse.Object('DotChild');
+    child.bind.foo = 'bar3';
+    parent.bind.child = child;
+    await Parse.Object.saveAll([child, parent, grandparent]);
+    expect(grandparent.bind.foo).toBe('bar1');
+    expect(grandparent.bind.parent.bind.foo).toBe('bar2');
+    expect(grandparent.bind.parent.bind.child.bind.foo).toBe('bar3');
+    expect(grandparent.get('foo')).toBe('bar1');
+    expect(grandparent.get('parent').get('foo')).toBe('bar2');
+    expect(grandparent.get('parent').get('child').get('foo')).toBe('bar3');
+    expect(Object.keys(grandparent.toJSON()).sort()).toEqual([
+      'createdAt',
+      'foo',
+      'objectId',
+      'parent',
+      'updatedAt',
+    ]);
+    expect(Object.keys(grandparent.bind.parent.toJSON()).sort()).toEqual([
+      'child',
+      'createdAt',
+      'foo',
+      'objectId',
+      'updatedAt',
+    ]);
+    expect(Object.keys(grandparent.bind.parent.bind.child.toJSON()).sort()).toEqual([
+      'createdAt',
+      'foo',
+      'objectId',
+      'updatedAt',
+    ]);
+    const grandparentQuery = await new Parse.Query('DotGrandparent')
+      .include('parent', 'parent.child')
+      .first();
+    expect(grandparentQuery.bind.parent.bind.child.bind.foo).toEqual('bar3');
+  });
+
   describe('allowCustomObjectId saveAll', () => {
     it('can save without setting an objectId', async () => {
       await reconfigureServer({ allowCustomObjectId: true });

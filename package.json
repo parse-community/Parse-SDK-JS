@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@babel/runtime-corejs3": "7.21.0",
+    "deepcopy": "2.1.0",
     "idb-keyval": "6.2.0",
     "react-native-crypto-js": "1.0.0",
     "uuid": "9.0.0",

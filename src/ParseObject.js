@@ -14,6 +14,7 @@ import ParseError from './ParseError';
 import ParseFile from './ParseFile';
 import { when, continueWhile, resolvingPromise } from './promiseUtils';
 import { DEFAULT_PIN, PIN_PREFIX } from './LocalDatastoreUtils';
+import proxyHandler from './proxy';
 
 import {
   opFromJSON,
@@ -136,6 +137,7 @@ class ParseObject {
     if (toSet && !this.set(toSet, options)) {
       throw new Error("Can't create an invalid Parse Object");
     }
+    this._createProxy();
   }
 
   /**
@@ -147,6 +149,17 @@ class ParseObject {
   _localId: ?string;
   _objCount: number;
   className: string;
+
+  /**
+   * Bind, used for two way directonal binding using
+   *
+   * When using a responsive framework that supports binding to an object's keys, use `object.bind.key` for dynamic updating of a Parse.Object
+   *
+   * `object.get("key")` and `object.set("set")` is preffered for one way binding.
+   *
+   * @property {object} bind
+   */
+  bind: AttributeMap;
 
   /* Prototype getters / setters */
 
@@ -367,6 +380,7 @@ class ParseObject {
       decoded.updatedAt = decoded.createdAt;
     }
     stateController.commitServerChanges(this._getStateIdentifier(), decoded);
+    this._createProxy();
   }
 
   _setExisted(existed: boolean) {
@@ -375,6 +389,10 @@ class ParseObject {
     if (state) {
       state.existed = existed;
     }
+  }
+
+  _createProxy() {
+    this.bind = new Proxy(this, proxyHandler);
   }
 
   _migrateId(serverId: string) {
@@ -1098,6 +1116,8 @@ class ParseObject {
       }
     }
     this._clearPendingOps(keysToRevert);
+    this._createProxy();
+    return this;
   }
 
   /**
@@ -1332,9 +1352,15 @@ class ParseObject {
     }
     const controller = CoreManager.getObjectController();
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
-    return controller.save(unsaved, saveOptions).then(() => {
-      return controller.save(this, saveOptions);
-    });
+    return controller
+      .save(unsaved, saveOptions)
+      .then(() => {
+        return controller.save(this, saveOptions);
+      })
+      .then(res => {
+        this._createProxy();
+        return res;
+      });
   }
 
   /**
@@ -1972,6 +1998,7 @@ class ParseObject {
           throw new Error("Can't create an invalid Parse Object");
         }
       }
+      this._createProxy();
     };
     if (classMap[adjustedClassName]) {
       ParseObjectSubclass = classMap[adjustedClassName];
