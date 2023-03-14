@@ -1,10 +1,12 @@
+import * as deepcopy from 'deepcopy';
 const nestedHandler = {
   updateParent(key, value) {
     const levels = this._path.split('.');
     levels.push(key);
     const topLevel = levels[0];
     levels.shift();
-    const scope = structuredClone(this._parent[topLevel]);
+    const copiedParent = Array.isArray(this._parent[topLevel]) ? [...this._parent[topLevel]] : {...this._parent[topLevel]};
+    const scope = deepcopy(copiedParent);
     let target = scope;
     const max_level = levels.length - 1;
     for (let i = 0; i < levels.length; i++) {
