@@ -4,7 +4,7 @@ const nestedHandler = {
     levels.push(key);
     const topLevel = levels[0];
     levels.shift();
-    const scope = JSON.parse(JSON.stringify(this._parent[topLevel]));
+    const scope = structuredClone(this._parent[topLevel]);
     let target = scope;
     const max_level = levels.length - 1;
     for (let i = 0; i < levels.length; i++) {
