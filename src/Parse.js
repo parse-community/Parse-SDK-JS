@@ -200,6 +200,17 @@ const Parse = {
   get allowCustomObjectId() {
     return CoreManager.get('ALLOW_CUSTOM_OBJECT_ID');
   },
+
+  /**
+   * @member {boolean} Parse.nodeLogging
+   * @static
+   */
+  set nodeLogging(value) {
+    CoreManager.set('NODE_LOGGING', value);
+  },
+  get nodeLogging() {
+    return CoreManager.get('NODE_LOGGING');
+  },
 };
 
 Parse.ACL = require('./ParseACL').default;
