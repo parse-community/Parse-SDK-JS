@@ -87,7 +87,7 @@
     "prettier": "2.8.7",
     "puppeteer": "19.8.0",
     "regenerator-runtime": "0.13.11",
-    "semantic-release": "19.0.5",
+    "semantic-release": "21.0.0",
     "vinyl-source-stream": "2.0.0"
   },
   "optionalDependencies": {
