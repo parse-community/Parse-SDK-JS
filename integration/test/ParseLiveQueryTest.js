@@ -76,7 +76,7 @@ describe('Parse LiveQuery', () => {
     query.equalTo('objectId', object.id);
     const subscription = await client.subscribe(query);
     const promise = resolvingPromise();
-    subscription.on('update', async (object) => {
+    subscription.on('update', async object => {
       assert.equal(object.get('foo'), 'bar');
       await client.close();
       promise.resolve();
@@ -206,7 +206,7 @@ describe('Parse LiveQuery', () => {
     subscription.on('update', async object => {
       assert.equal(object.get('foo'), 'bar');
       await Parse.User.logOut();
-      promise.resolve()
+      promise.resolve();
     });
     await object.save({ foo: 'bar' });
     await promise;
@@ -274,6 +274,44 @@ describe('Parse LiveQuery', () => {
     object.set({ foo: 'bar' });
     await object.save();
     await promise;
+  });
+
+  it('can subscribe to query with watch', async () => {
+    const query = new Parse.Query(TestObject);
+    query.watch('yolo');
+    const subscription = await query.subscribe();
+    const spy = {
+      create(obj) {
+        if (!obj.get('yolo')) {
+          fail('create should not have been called');
+        }
+      },
+      update(object, original) {
+        if (object.get('yolo') === original.get('yolo')) {
+          fail('create should not have been called');
+        }
+      },
+    };
+    const createSpy = spyOn(spy, 'create').and.callThrough();
+    const updateSpy = spyOn(spy, 'update').and.callThrough();
+    subscription.on('create', spy.create);
+    subscription.on('update', spy.update);
+    const obj = new TestObject();
+    obj.set('foo', 'bar');
+    await obj.save();
+    obj.set('foo', 'xyz');
+    obj.set('yolo', 'xyz');
+    await obj.save();
+    const obj2 = new TestObject();
+    obj2.set('foo', 'bar');
+    obj2.set('yolo', 'bar');
+    await obj2.save();
+    obj2.set('foo', 'bart');
+    await obj2.save();
+    await sleep(1000);
+    await subscription.unsubscribe();
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    expect(updateSpy).toHaveBeenCalledTimes(1);
   });
 
   it('live query can handle beforeConnect and beforeSubscribe errors', async () => {
