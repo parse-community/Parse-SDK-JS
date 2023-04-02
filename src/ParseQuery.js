@@ -22,6 +22,7 @@ export type WhereClause = {
 
 export type QueryJSON = {
   where: WhereClause,
+  watch?: string,
   include?: string,
   excludeKeys?: string,
   keys?: string,
@@ -224,6 +225,7 @@ class ParseQuery {
    */
   className: string;
   _where: any;
+  _watch: Array<string>;
   _include: Array<string>;
   _exclude: Array<string>;
   _select: Array<string>;
@@ -265,6 +267,7 @@ class ParseQuery {
     }
 
     this._where = {};
+    this._watch = [];
     this._include = [];
     this._exclude = [];
     this._count = false;
@@ -426,6 +429,9 @@ class ParseQuery {
       where: this._where,
     };
 
+    if (this._watch.length) {
+      params.watch = this._watch.join(',');
+    }
     if (this._include.length) {
       params.include = this._include.join(',');
     }
@@ -493,6 +499,10 @@ class ParseQuery {
   withJSON(json: QueryJSON): ParseQuery {
     if (json.where) {
       this._where = json.where;
+    }
+
+    if (json.watch) {
+      this._watch = json.watch.split(',');
     }
 
     if (json.include) {
@@ -1916,6 +1926,25 @@ class ParseQuery {
         this._exclude = this._exclude.concat(key);
       } else {
         this._exclude.push(key);
+      }
+    });
+    return this;
+  }
+
+  /**
+   * Restricts live query to trigger only for watched fields.
+   *
+   * Requires Parse Server 6.0.0+
+   *
+   * @param {...string|Array<string>} keys The name(s) of the key(s) to watch.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
+   */
+  watch(...keys: Array<string | Array<string>>): ParseQuery {
+    keys.forEach(key => {
+      if (Array.isArray(key)) {
+        this._watch = this._watch.concat(key);
+      } else {
+        this._watch.push(key);
       }
     });
     return this;
