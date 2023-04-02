@@ -1,3 +1,10 @@
+# [4.1.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/4.1.0-alpha.2...4.1.0-alpha.3) (2023-04-02)
+
+
+### Features
+
+* Add `ParseQuery.watch` to trigger LiveQuery only on update of specific fields ([#1839](https://github.com/parse-community/Parse-SDK-JS/issues/1839)) ([7479343](https://github.com/parse-community/Parse-SDK-JS/commit/7479343abd8739fe03558ff9b2ce610c34c568ae))
+
 # [4.1.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/4.1.0-alpha.1...4.1.0-alpha.2) (2023-03-01)
 
 
