@@ -320,7 +320,7 @@ class LiveQueryClient extends EventEmitter {
       return;
     }
     this.state = CLIENT_STATE.DISCONNECTED;
-    this.socket?.close();
+    this.socket?.terminate();
     // Notify each subscription about the close
     for (const subscription of this.subscriptions.values()) {
       subscription.subscribed = false;
