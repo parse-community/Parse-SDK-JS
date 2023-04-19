@@ -65,8 +65,8 @@ const FULL_HEADER = (
   ' */\n'
 );
 
-gulp.task('compile', function() {
-  return gulp.src('src/*.js')
+function compileTask(stream) {
+  return stream
     .pipe(babel({
       presets: PRESETS[BUILD],
       plugins: PLUGINS[BUILD],
@@ -76,6 +76,10 @@ gulp.task('compile', function() {
       plugins: ['minify-dead-code-elimination'],
     }))
     .pipe(gulp.dest(path.join('lib', BUILD)));
+}
+
+gulp.task('compile', function() {
+  return compileTask(gulp.src('src/*.js'));
 });
 
 gulp.task('browserify', function(cb) {
@@ -132,14 +136,15 @@ gulp.task('minify-weapp', function() {
 });
 
 gulp.task('watch', function() {
-  return watch('src/*.js', { ignoreInitial: false, verbose: true })
-    .pipe(babel({
-      presets: PRESETS[BUILD],
-      plugins: PLUGINS[BUILD],
-    }))
-    // Second pass to kill BUILD-switched code
-    .pipe(babel({
-      plugins: ['minify-dead-code-elimination'],
-    }))
-    .pipe(gulp.dest(path.join('lib', BUILD)));
+  if (BUILD === 'browser') {
+    const watcher = gulp.watch('src/*.js', { ignoreInitial: false }, gulp.series('compile', 'browserify', 'minify'));
+    watcher.on('add', function(path) {
+      console.log(`File ${path} was added`);
+    });
+    watcher.on('change', function(path) {
+      console.log(`File ${path} was changed`);
+    });
+    return watcher;
+  }
+  return compileTask(watch('src/*.js', { ignoreInitial: false, verbose: true }));
 });
