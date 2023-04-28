@@ -1,3 +1,10 @@
+# [4.1.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/4.1.0-alpha.3...4.1.0-alpha.4) (2023-04-28)
+
+
+### Features
+
+* Add `Parse.User.loginAs` ([#1875](https://github.com/parse-community/Parse-SDK-JS/issues/1875)) ([381fcfc](https://github.com/parse-community/Parse-SDK-JS/commit/381fcfc7f9cfda70af7c6dc3a35de59b82b72258))
+
 # [4.1.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/4.1.0-alpha.2...4.1.0-alpha.3) (2023-04-02)
 
 
