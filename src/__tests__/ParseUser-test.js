@@ -360,6 +360,73 @@ describe('ParseUser', () => {
     });
   });
 
+  it('does not allow loginAs without id', (done) => {
+    try {
+      ParseUser.loginAs(null, null);
+    } catch (e) {
+      expect(e.message).toBe('Cannot log in as user with an empty user id')
+      done();
+    }
+  });
+
+  it('can login as a user with an objectId', async () => {
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('POST');
+        expect(path).toBe('loginAs');
+        expect(body.userId).toBe('uid4');
+        expect(options.useMasterKey).toBe(true);
+
+        return Promise.resolve(
+          {
+            objectId: 'uid4',
+            username: 'username',
+            sessionToken: '123abc',
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+
+    const user = await ParseUser.loginAs('uid4');
+    expect(user.id).toBe('uid4');
+    expect(user.isCurrent()).toBe(false);
+    expect(user.existed()).toBe(true);
+  });
+
+  it('can loginAs a user with async storage', async () => {
+    const currentStorage = CoreManager.getStorageController();
+    CoreManager.setStorageController(mockAsyncStorage);
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('POST');
+        expect(path).toBe('loginAs');
+        expect(body.userId).toBe('uid5');
+        expect(options.useMasterKey).toBe(true);
+        return Promise.resolve(
+          {
+            objectId: 'uid5',
+            username: 'username',
+            sessionToken: '123abc',
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+
+    const user = await ParseUser.loginAs('uid5');
+    expect(user.id).toBe('uid5');
+    expect(user.isCurrent()).toBe(true);
+    expect(user.existed()).toBe(true);
+    CoreManager.setStorageController(currentStorage);
+  });
+
   it('can become a user with a session token', done => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
