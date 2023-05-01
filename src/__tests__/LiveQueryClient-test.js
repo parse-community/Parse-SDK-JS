@@ -604,6 +604,7 @@ describe('LiveQueryClient', () => {
   });
 
   it('can handle WebSocket close message while disconnected', () => {
+    CoreManager.setWebSocketController();
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
       serverURL: 'ws://test',

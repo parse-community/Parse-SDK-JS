@@ -1078,6 +1078,32 @@ describe('ParseQuery', () => {
     expect(q2._exclude).toEqual(['foo', 'bar']);
   });
 
+  it('can watch keys', () => {
+    const q = new ParseQuery('Item');
+    q.watch('foo');
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      watch: 'foo',
+    });
+    const q2 = new ParseQuery('Item');
+    q2.withJSON(json);
+    expect(q2._watch).toEqual(['foo']);
+  });
+
+  it('can watch multiple keys', () => {
+    const q = new ParseQuery('Item');
+    q.watch(['foo', 'bar']);
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      watch: 'foo,bar',
+    });
+    const q2 = new ParseQuery('Item');
+    q2.withJSON(json);
+    expect(q2._watch).toEqual(['foo', 'bar']);
+  });
+
   it('can use extraOptions', () => {
     const q = new ParseQuery('Item');
     q._extraOptions.randomOption = 'test';
@@ -2334,8 +2360,7 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Thing');
     let testObject;
-    q
-      .find()
+    q.find()
       .then(results => {
         testObject = results[0];
 
@@ -2460,8 +2485,7 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Thing');
     let testObject;
-    q
-      .first()
+    q.first()
       .then(result => {
         testObject = result;
 
@@ -2875,8 +2899,7 @@ describe('ParseQuery', () => {
     const q = new ParseQuery('Thing');
     q.select('other', 'tbd', 'subObject.key1');
     let testObject;
-    q
-      .find()
+    q.find()
       .then(results => {
         testObject = results[0];
 
@@ -2926,8 +2949,7 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Thing');
     let testObject;
-    q
-      .find()
+    q.find()
       .then(results => {
         testObject = results[0];
 
