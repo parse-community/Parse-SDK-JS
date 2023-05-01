@@ -1,3 +1,38 @@
+# [4.0.0-alpha.12](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.11...4.0.0-alpha.12) (2023-02-06)
+
+
+### Features
+
+* `LiveQueryClient.close` returns promise when WebSocket closes ([#1735](https://github.com/parse-community/Parse-SDK-JS/issues/1735)) ([979d660](https://github.com/parse-community/Parse-SDK-JS/commit/979d6607d5449dd3d3c5e51f36119bd05b25feaa))
+
+# [4.0.0-alpha.11](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.10...4.0.0-alpha.11) (2023-02-04)
+
+
+### Bug Fixes
+
+* Node engine version upper range is <19 despite Node 19 support ([#1732](https://github.com/parse-community/Parse-SDK-JS/issues/1732)) ([febe187](https://github.com/parse-community/Parse-SDK-JS/commit/febe187a24fb56e83542c00ae39148575fc57c4b))
+
+# [4.0.0-alpha.10](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.9...4.0.0-alpha.10) (2023-02-04)
+
+
+### Features
+
+* Upgrade Node Package Manager lock file `package-lock.json` to version 2 ([#1729](https://github.com/parse-community/Parse-SDK-JS/issues/1729)) ([e993786](https://github.com/parse-community/Parse-SDK-JS/commit/e993786cf0299b1150bf36afee1bc516e23e349a))
+
+# [4.0.0-alpha.9](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.8...4.0.0-alpha.9) (2023-02-04)
+
+
+### Bug Fixes
+
+* Saving a new `Parse.Object` with an unsaved `Parse.File` fails ([#1662](https://github.com/parse-community/Parse-SDK-JS/issues/1662)) ([16535a4](https://github.com/parse-community/Parse-SDK-JS/commit/16535a43f6c762983460aa837102a4c692de70bb))
+
+# [4.0.0-alpha.8](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.7...4.0.0-alpha.8) (2023-02-04)
+
+
+### Bug Fixes
+
+* `LiveQuerySubscription.unsubscribe` resolves promise before unsubscribing completes ([#1727](https://github.com/parse-community/Parse-SDK-JS/issues/1727)) ([1c96205](https://github.com/parse-community/Parse-SDK-JS/commit/1c96205cb3c162b21bf4508f7783400a28a99868))
+
 # [4.0.0-alpha.7](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.0-alpha.6...4.0.0-alpha.7) (2023-01-30)
 
 

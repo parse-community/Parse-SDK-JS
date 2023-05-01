@@ -16,7 +16,8 @@ if (process.env.PARSE_BUILD === 'weapp') {
     return s.join('');
   };
 } else {
-  uuid = require('uuid/v4');
+  const { v4 } = require('uuid');
+  uuid = v4;
 }
 
 module.exports = uuid;

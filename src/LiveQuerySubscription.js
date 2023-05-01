@@ -99,6 +99,7 @@ class Subscription extends EventEmitter {
     this.query = query;
     this.sessionToken = sessionToken;
     this.subscribePromise = resolvingPromise();
+    this.unsubscribePromise = resolvingPromise();
     this.subscribed = false;
 
     // adding listener so process does not crash
@@ -115,8 +116,8 @@ class Subscription extends EventEmitter {
     return CoreManager.getLiveQueryController()
       .getDefaultLiveQueryClient()
       .then(liveQueryClient => {
-        liveQueryClient.unsubscribe(this);
         this.emit('close');
+        return liveQueryClient.unsubscribe(this);
       });
   }
 }
