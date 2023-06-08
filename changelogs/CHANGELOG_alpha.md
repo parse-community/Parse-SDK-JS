@@ -1,3 +1,10 @@
+# [4.2.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.1...4.2.0-alpha.2) (2023-06-08)
+
+
+### Bug Fixes
+
+* Hard-coding of `react-native` path does not work for workspace builds ([#1930](https://github.com/parse-community/Parse-SDK-JS/issues/1930)) ([8222f3c](https://github.com/parse-community/Parse-SDK-JS/commit/8222f3cc2a4a4ee0cdcaf30dd0f9a17e46de7d88))
+
 # [4.2.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.1.0...4.2.0-alpha.1) (2023-05-01)
 
 
