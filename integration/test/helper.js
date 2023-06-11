@@ -32,10 +32,8 @@ let didChangeConfiguration = false;
 */
 const twitterAuthData = {
   id: '1506726799266430985',
-  consumer_key: 'jeQw6luN2PEWREtoFDb0FdGYf',
-  consumer_secret: 'VSFENh1X5UC4MLEuduHLtJDnf8Ydsh5KuSR4zZQufFCAGNtzcs',
-  auth_token: '1506726799266430985-NKM9tqVbPXMnLhHTLYB98SNGtxxi6v',
-  auth_token_secret: 'JpDVIINbqV5TK0th9nKiS1IVokZfjRj06FrXxCrkggF07',
+  consumer_key: 'DZcqOwKVKLHqyZEFnRpGBx1QP',
+  consumer_secret: '09q5nvb1VnX5eeRxd65FLW6WTwVyWcEgot7GdFP9lvsBup3hv6',
 };
 
 const defaultConfiguration = {
