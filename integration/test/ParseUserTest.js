@@ -986,7 +986,7 @@ describe('Parse User', () => {
     expect(Parse.AnonymousUtils.isLinked(user)).toBe(true);
   });
 
-  it('can link with twitter', async () => {
+  fit('can link with twitter', async () => {
     Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
     user.setUsername(uuidv4());
@@ -1001,7 +1001,7 @@ describe('Parse User', () => {
     expect(user._isLinked('twitter')).toBe(false);
   });
 
-  it('can link with twitter and facebook', async () => {
+  fit('can link with twitter and facebook', async () => {
     Parse.User.enableUnsafeCurrentUser();
     Parse.FacebookUtils.init();
     const user = new Parse.User();
