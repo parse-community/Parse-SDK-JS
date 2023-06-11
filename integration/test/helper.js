@@ -31,9 +31,8 @@ let didChangeConfiguration = false;
   [1] https://developer.twitter.com/en/docs/authentication/oauth-1-0a/obtaining-user-access-tokens
 */
 const twitterAuthData = {
-  id: '1506726799266430985',
-  consumer_key: 'DZcqOwKVKLHqyZEFnRpGBx1QP',
-  consumer_secret: '09q5nvb1VnX5eeRxd65FLW6WTwVyWcEgot7GdFP9lvsBup3hv6',
+  consumer_key: 'jYA34RcTrIhSEFLSJRAbQE0bO',
+  consumer_secret: '0wFg9LXI2lC9iJZWV3GvKnoNQHlXx2BBTFXzHsci1yu0Nfpc3L',
 };
 
 const defaultConfiguration = {
