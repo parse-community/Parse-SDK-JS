@@ -1,7 +1,4 @@
-let uuid = null;
-
-if (process.env.PARSE_BUILD === 'weapp') {
-  uuid = function () {
+const uuid = function () {
     const s = [];
     const hexDigits = '0123456789abcdef';
 
@@ -15,9 +12,5 @@ if (process.env.PARSE_BUILD === 'weapp') {
 
     return s.join('');
   };
-} else {
-  const { v4 } = require('uuid');
-  uuid = v4;
-}
 
 module.exports = uuid;
