@@ -666,18 +666,18 @@ class ParseUser extends ParseObject {
    * @returns {Promise} A promise that is fulfilled with the user when
    *     the login completes.
    */
-   static logInWithAdditionalAuth(username: string, password: string, authData: AuthData, options?: FullOptions) {
+  static logInWithAdditionalAuth(username: string, password: string, authData: AuthData, options?: FullOptions) {
     if (typeof username !== 'string') {
       return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Username must be a string.'));
     }
     if (typeof password !== 'string') {
       return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Password must be a string.'));
     }
-    if (Object.prototype.toString.call(auth) !== '[object Object]') {
+    if (Object.prototype.toString.call(authData) !== '[object Object]') {
       return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Auth must be an object.'));
     }
     const user = new this();
-    user._finishFetch({ username: username, password: password, authData: auth });
+    user._finishFetch({ username: username, password: password, authData });
     return user.logIn(options);
   }
 
