@@ -1,0 +1,8 @@
+{
+  "extends": "dtslint/dtslint.json",
+  "rules": {
+    "ban-types": false,
+    "no-unnecessary-generics": false,
+    "no-redundant-jsdoc": false
+  }
+}
