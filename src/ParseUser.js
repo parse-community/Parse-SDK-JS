@@ -654,6 +654,34 @@ class ParseUser extends ParseObject {
   }
 
   /**
+   * Logs in a user with a username (or email) and password, and authData. On success, this
+   * saves the session to disk, so you can retrieve the currently logged in
+   * user using <code>current</code>.
+   *
+   * @param {string} username The username (or email) to log in with.
+   * @param {string} password The password to log in with.
+   * @param {object} authData The authData to log in with.
+   * @param {object} options
+   * @static
+   * @returns {Promise} A promise that is fulfilled with the user when
+   *     the login completes.
+   */
+   static logInWithAdditionalAuth(username: string, password: string, authData: AuthData, options?: FullOptions) {
+    if (typeof username !== 'string') {
+      return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Username must be a string.'));
+    }
+    if (typeof password !== 'string') {
+      return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Password must be a string.'));
+    }
+    if (Object.prototype.toString.call(auth) !== '[object Object]') {
+      return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Auth must be an object.'));
+    }
+    const user = new this();
+    user._finishFetch({ username: username, password: password, authData: auth });
+    return user.logIn(options);
+  }
+
+  /**
    * Logs in a user with an objectId. On success, this saves the session
    * to disk, so you can retrieve the currently logged in user using
    * <code>current</code>.
@@ -1098,6 +1126,7 @@ const DefaultController = {
     const auth = {
       username: user.get('username'),
       password: user.get('password'),
+      authData: user.get('authData'),
     };
     return RESTController.request(options.usePost ? 'POST' : 'GET', 'login', auth, options).then(
       response => {
