@@ -2359,17 +2359,16 @@ describe('Parse Query', () => {
     query.hint('_id_');
     query.explain();
     const explain = await query.find();
+    let indexName = '';
     // https://www.mongodb.com/docs/manual/reference/explain-results/#std-label-queryPlanner
     const plan = explain[0].queryPlanner.winningPlan;
-    let indexName = '';
-    
     if (plan.inputStage) {
       indexName = plan.inputStage.inputStage.indexName;
     } else {
       indexName = plan.queryPlan.inputStage.inputStage.indexName;
     }
     assert.equal(indexName, '_id_');
-    
+
     const explainFirst = await query.first();
     assert.equal(explainFirst.queryPlanner.winningPlan.inputStage.inputStage.indexName, '_id_');
   });
