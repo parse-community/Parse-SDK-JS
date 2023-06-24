@@ -1,11 +1,4 @@
 /**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
  * @flow
  */
 
@@ -53,6 +46,9 @@ export function run(name: string, data: mixed, options: RequestOptions): Promise
   }
   if (options.sessionToken) {
     requestOptions.sessionToken = options.sessionToken;
+  }
+  if (options.installationId) {
+    requestOptions.installationId = options.installationId;
   }
   if (options.context && typeof options.context === 'object') {
     requestOptions.context = options.context;

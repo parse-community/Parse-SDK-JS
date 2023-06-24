@@ -1,11 +1,4 @@
 /**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
  * @flow
  */
 
@@ -75,6 +68,7 @@ class ParseRole extends ParseObject {
    * @returns {(ParseObject|boolean)} true if the set succeeded.
    */
   setName(name: string, options?: mixed): ParseObject | boolean {
+    this._validateName(name);
     return this.set('name', name, options);
   }
 
@@ -108,6 +102,18 @@ class ParseRole extends ParseObject {
     return this.relation('roles');
   }
 
+  _validateName(newName) {
+    if (typeof newName !== 'string') {
+      throw new ParseError(ParseError.OTHER_CAUSE, "A role's name must be a String.");
+    }
+    if (!/^[0-9a-zA-Z\-_ ]+$/.test(newName)) {
+      throw new ParseError(
+        ParseError.OTHER_CAUSE,
+        "A role's name can be only contain alphanumeric characters, _, " + '-, and spaces.'
+      );
+    }
+  }
+
   validate(attrs: AttributeMap, options?: mixed): ParseError | boolean {
     const isInvalid = super.validate(attrs, options);
     if (isInvalid) {
@@ -125,14 +131,10 @@ class ParseRole extends ParseObject {
           "A role's name can only be set before it has been saved."
         );
       }
-      if (typeof newName !== 'string') {
-        return new ParseError(ParseError.OTHER_CAUSE, "A role's name must be a String.");
-      }
-      if (!/^[0-9a-zA-Z\-_ ]+$/.test(newName)) {
-        return new ParseError(
-          ParseError.OTHER_CAUSE,
-          "A role's name can be only contain alphanumeric characters, _, " + '-, and spaces.'
-        );
+      try {
+        this._validateName(newName);
+      } catch (e) {
+        return e;
       }
     }
     return false;

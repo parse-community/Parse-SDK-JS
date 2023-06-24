@@ -1,11 +1,4 @@
 /**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
  * @flow
  */
 
@@ -155,7 +148,7 @@ class ParseObject {
   _objCount: number;
   className: string;
 
-  /** Prototype getters / setters **/
+  /* Prototype getters / setters */
 
   get attributes(): AttributeMap {
     const stateController = CoreManager.getObjectStateController();
@@ -182,7 +175,7 @@ class ParseObject {
     return this._getServerData().updatedAt;
   }
 
-  /** Private methods **/
+  /* Private methods */
 
   /**
    * Returns a local or server Id used uniquely identify this object
@@ -453,7 +446,7 @@ class ParseObject {
     return classMap;
   }
 
-  /** Public methods **/
+  /* Public methods */
 
   initialize() {
     // NOOP
@@ -917,7 +910,7 @@ class ParseObject {
    * object.op("x") would return an instance of Parse.Op.Increment.
    *
    * @param attr {String} The key.
-   * @returns {Parse.Op} The operation, or undefined if none.
+   * @returns {Parse.Op | undefined} The operation, or undefined if none.
    */
   op(attr: string): ?Op {
     const pending = this._getPendingOps();
@@ -1525,7 +1518,7 @@ class ParseObject {
     return this;
   }
 
-  /** Static methods **/
+  /* Static methods */
 
   static _clearAllState() {
     const stateController = CoreManager.getObjectStateController();
@@ -1959,15 +1952,19 @@ class ParseObject {
     let parentProto = ParseObject.prototype;
     if (this.hasOwnProperty('__super__') && this.__super__) {
       parentProto = this.prototype;
-    } else if (classMap[adjustedClassName]) {
-      parentProto = classMap[adjustedClassName].prototype;
     }
-    const ParseObjectSubclass = function (attributes, options) {
+    let ParseObjectSubclass = function (attributes, options) {
       this.className = adjustedClassName;
       this._objCount = objectCount++;
       // Enable legacy initializers
       if (typeof this.initialize === 'function') {
         this.initialize.apply(this, arguments);
+      }
+
+      if (this._initializers) {
+        for (const initializer of this._initializers) {
+          initializer.apply(this, arguments);
+        }
       }
 
       if (attributes && typeof attributes === 'object') {
@@ -1976,20 +1973,39 @@ class ParseObject {
         }
       }
     };
-    ParseObjectSubclass.className = adjustedClassName;
-    ParseObjectSubclass.__super__ = parentProto;
-
-    ParseObjectSubclass.prototype = Object.create(parentProto, {
-      constructor: {
-        value: ParseObjectSubclass,
-        enumerable: false,
-        writable: true,
-        configurable: true,
-      },
-    });
+    if (classMap[adjustedClassName]) {
+      ParseObjectSubclass = classMap[adjustedClassName];
+    } else {
+      ParseObjectSubclass.extend = function (name, protoProps, classProps) {
+        if (typeof name === 'string') {
+          return ParseObject.extend.call(ParseObjectSubclass, name, protoProps, classProps);
+        }
+        return ParseObject.extend.call(ParseObjectSubclass, adjustedClassName, name, protoProps);
+      };
+      ParseObjectSubclass.createWithoutData = ParseObject.createWithoutData;
+      ParseObjectSubclass.className = adjustedClassName;
+      ParseObjectSubclass.__super__ = parentProto;
+      ParseObjectSubclass.prototype = Object.create(parentProto, {
+        constructor: {
+          value: ParseObjectSubclass,
+          enumerable: false,
+          writable: true,
+          configurable: true,
+        },
+      });
+    }
 
     if (protoProps) {
       for (const prop in protoProps) {
+        if (prop === 'initialize') {
+          Object.defineProperty(ParseObjectSubclass.prototype, '_initializers', {
+            value: [...(ParseObjectSubclass.prototype._initializers || []), protoProps[prop]],
+            enumerable: false,
+            writable: true,
+            configurable: true,
+          });
+          continue;
+        }
         if (prop !== 'className') {
           Object.defineProperty(ParseObjectSubclass.prototype, prop, {
             value: protoProps[prop],
@@ -2013,15 +2029,6 @@ class ParseObject {
         }
       }
     }
-
-    ParseObjectSubclass.extend = function (name, protoProps, classProps) {
-      if (typeof name === 'string') {
-        return ParseObject.extend.call(ParseObjectSubclass, name, protoProps, classProps);
-      }
-      return ParseObject.extend.call(ParseObjectSubclass, adjustedClassName, name, protoProps);
-    };
-    ParseObjectSubclass.createWithoutData = ParseObject.createWithoutData;
-
     classMap[adjustedClassName] = ParseObjectSubclass;
     return ParseObjectSubclass;
   }
@@ -2399,12 +2406,6 @@ const DefaultController = {
         if (el instanceof ParseFile) {
           filesSaved.push(el.save(options));
         } else if (el instanceof ParseObject) {
-          if (allowCustomObjectId && !el.id) {
-            throw new ParseError(
-              ParseError.MISSING_OBJECT_ID,
-              'objectId must not be empty, null or undefined'
-            );
-          }
           pending.push(el);
         }
       });
@@ -2419,6 +2420,13 @@ const DefaultController = {
             const batch = [];
             const nextPending = [];
             pending.forEach(el => {
+              if (allowCustomObjectId && Object.prototype.hasOwnProperty.call(el, 'id') && !el.id) {
+                throw new ParseError(
+                  ParseError.MISSING_OBJECT_ID,
+                  'objectId must not be empty or null'
+                );
+              }
+
               if (batch.length < batchSize && canBeSerialized(el)) {
                 batch.push(el);
               } else {
@@ -2491,18 +2499,18 @@ const DefaultController = {
             return Promise.reject(objectError);
           }
           for (const object of target) {
-            await localDatastore._updateLocalIdForObject(mapIdForPin[object.id], object);
-            await localDatastore._updateObjectIfPinned(object);
+            // Make sure that it is a ParseObject before updating it into the localDataStore
+            if (object instanceof ParseObject) {
+              await localDatastore._updateLocalIdForObject(mapIdForPin[object.id], object);
+              await localDatastore._updateObjectIfPinned(object);
+            }
           }
           return Promise.resolve(target);
         });
       });
     } else if (target instanceof ParseObject) {
-      if (allowCustomObjectId && !target.id) {
-        throw new ParseError(
-          ParseError.MISSING_OBJECT_ID,
-          'objectId must not be empty, null or undefined'
-        );
+      if (allowCustomObjectId && Object.prototype.hasOwnProperty.call(target, 'id') && !target.id) {
+        throw new ParseError(ParseError.MISSING_OBJECT_ID, 'objectId must not be empty or null');
       }
       // generate _localId in case if cascadeSave=false
       target._getId();

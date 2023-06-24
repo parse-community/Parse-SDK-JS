@@ -64,8 +64,9 @@ describe('Parse.File', () => {
     assert.equal(data, 'ParseA==');
   });
 
-  it('can get file data from base64', async () => {
+  it('can get file data from base64 (saved)', async () => {
     const file = new Parse.File('parse-server-logo', { base64: 'ParseA==' });
+    await file.save();
     let data = await file.getData();
     assert.equal(data, 'ParseA==');
     file._data = null;
@@ -75,10 +76,17 @@ describe('Parse.File', () => {
     assert.equal(data, 'ParseA==');
   });
 
+  it('can get file data from base64 (unsaved)', async () => {
+    const file = new Parse.File('parse-server-logo', { base64: 'ParseA==' });
+    const data = await file.getData();
+    assert.equal(data, 'ParseA==');
+  });
+
   it('can get file data from full base64', async () => {
     const file = new Parse.File('parse-server-logo', {
       base64: 'data:image/jpeg;base64,ParseA==',
     });
+    await file.save();
     let data = await file.getData();
     assert.equal(data, 'ParseA==');
     file._data = null;
@@ -111,5 +119,25 @@ describe('Parse.File', () => {
     } catch (e) {
       assert.equal(e.code, Parse.Error.FILE_DELETE_ERROR);
     }
+  });
+
+  it('can save file to localDatastore', async () => {
+    Parse.enableLocalDatastore();
+    const file = new Parse.File('parse-js-sdk', [61, 170, 236, 120]);
+    const object = new Parse.Object('TestObject');
+    await object.pin();
+
+    object.set('file', file);
+    await object.save();
+
+    const query = new Parse.Query(TestObject);
+    query.fromLocalDatastore();
+    query.equalTo('objectId', object.id);
+    const results = await query.find();
+
+    const url = results[0].get('file').url();
+    assert.equal(results.length, 1);
+    assert.notEqual(url, undefined);
+    assert.equal(url, file.url());
   });
 });

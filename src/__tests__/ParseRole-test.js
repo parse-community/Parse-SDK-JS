@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../ObjectStateMutations');
@@ -43,6 +34,15 @@ describe('ParseRole', () => {
     const role = new ParseRole();
     role.get = () => 1234;
     expect(role.getName()).toBe('');
+  });
+
+  it('should throw error string with invalid name', () => {
+    expect(() => new ParseRole('invalid:name', new ParseACL())).toThrow(
+      new ParseError(
+        ParseError.OTHER_CAUSE,
+        "A role's name can be only contain alphanumeric characters, _, " + '-, and spaces.'
+      )
+    );
   });
 
   it('can validate attributes', () => {

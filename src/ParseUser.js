@@ -1,11 +1,4 @@
 /**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
  * @flow
  */
 
@@ -425,6 +418,12 @@ class ParseUser extends ParseObject {
     if (options.hasOwnProperty('installationId')) {
       signupOptions.installationId = options.installationId;
     }
+    if (
+      options.hasOwnProperty('context') &&
+      Object.prototype.toString.call(options.context) === '[object Object]'
+    ) {
+      signupOptions.context = options.context;
+    }
 
     const controller = CoreManager.getUserController();
     return controller.signUp(this, attrs, signupOptions);
@@ -655,6 +654,25 @@ class ParseUser extends ParseObject {
   }
 
   /**
+   * Logs in a user with an objectId. On success, this saves the session
+   * to disk, so you can retrieve the currently logged in user using
+   * <code>current</code>.
+   *
+   * @param {string} userId The objectId for the user.
+   * @static
+   * @returns {Promise} A promise that is fulfilled with the user when
+   *     the login completes.
+   */
+  static loginAs(userId: string) {
+    if (!userId) {
+      throw new ParseError(ParseError.USERNAME_MISSING, 'Cannot log in as user with an empty user id');
+    }
+    const controller = CoreManager.getUserController();
+    const user = new this();
+    return controller.loginAs(user, userId);
+  }
+
+  /**
    * Logs in a user with a session token. On success, this saves the session
    * to disk, so you can retrieve the currently logged in user using
    * <code>current</code>.
@@ -779,7 +797,7 @@ class ParseUser extends ParseObject {
    * Request an email verification.
    *
    * @param {string} email The email address associated with the user that
-   *     forgot their password.
+   *     needs to verify their email.
    * @param {object} options
    * @static
    * @returns {Promise}
@@ -1096,6 +1114,18 @@ const DefaultController = {
         return DefaultController.setCurrentUser(user);
       }
     );
+  },
+
+  loginAs(user: ParseUser, userId: string): Promise<ParseUser> {
+    const RESTController = CoreManager.getRESTController();
+    return RESTController.request('POST', 'loginAs', { userId }, { useMasterKey: true }).then(response => {
+      user._finishFetch(response);
+      user._setExisted(true);
+      if (!canUseCurrentUser) {
+        return Promise.resolve(user);
+      }
+      return DefaultController.setCurrentUser(user);
+    });
   },
 
   become(user: ParseUser, options: RequestOptions): Promise<ParseUser> {

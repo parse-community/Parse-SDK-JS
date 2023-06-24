@@ -24,6 +24,13 @@ function contains(haystack, needle) {
     }
     return false;
   }
+  if (Array.isArray(needle)) {
+    for (const need of needle) {
+      if (contains(haystack, need)) {
+        return true;
+      }
+    }
+  }
   return haystack.indexOf(needle) > -1;
 }
 
@@ -81,13 +88,21 @@ function equalObjectsGeneric(obj, compareTo, eqlFn) {
 }
 
 /**
- * Converts human readable relative date string
- * ie: 'in 10 days' to a date relative to now
+ * @typedef RelativeTimeToDateResult
+ * @property {string} status The conversion status, `error` if conversion failed or
+ * `success` if conversion succeeded.
+ * @property {string} info The error message if conversion failed, or the relative
+ * time indication (`past`, `present`, `future`) if conversion succeeded.
+ * @property {Date|undefined} result The converted date, or `undefined` if conversion
+ * failed.
+ */
+/**
+ * Converts human readable relative date string, for example, 'in 10 days' to a date
+ * relative to now.
  *
- * @param {*} text
- * @param {*} now
- * @returns {status,info,result}
- * copied from parse-server/src/Adapters/Storage/Mongo/MongoTransform.js
+ * @param {string} text The text to convert.
+ * @param {Date} [now=new Date()] The date from which add or subtract. Default is now.
+ * @returns {RelativeTimeToDateResult}
  */
 function relativeTimeToDate(text, now = new Date()) {
   text = text.toLowerCase();
@@ -505,9 +520,25 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
       return true;
     }
     case '$geoWithin': {
-      const points = compareTo.$polygon.map(geoPoint => [geoPoint.latitude, geoPoint.longitude]);
-      const polygon = new ParsePolygon(points);
-      return polygon.containsPoint(object[key]);
+      if (compareTo.$polygon) {
+        const points = compareTo.$polygon.map(geoPoint => [
+          geoPoint.latitude,
+          geoPoint.longitude,
+        ]);
+        const polygon = new ParsePolygon(points);
+        return polygon.containsPoint(object[key]);
+      }
+      if (compareTo.$centerSphere) {
+        const [WGS84Point, maxDistance] = compareTo.$centerSphere;
+        const centerPoint = new ParseGeoPoint({
+          latitude: WGS84Point[1],
+          longitude: WGS84Point[0],
+        });
+        const point = new ParseGeoPoint(object[key]);
+        const distance = point.radiansTo(centerPoint);
+        return distance <= maxDistance;
+      }
+      break;
     }
     case '$geoIntersects': {
       const polygon = new ParsePolygon(object[key].coordinates);

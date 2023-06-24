@@ -70,6 +70,16 @@ describe('Parse Query', () => {
     assert.strictEqual(result.foo, 'bar');
     assert.strictEqual(result.className, 'TestObject');
     assert.strictEqual(result.objectId, object.id);
+
+    await query.each(
+      obj => {
+        assert.strictEqual(obj instanceof Parse.Object, false);
+        assert.strictEqual(obj.foo, 'bar');
+        assert.strictEqual(obj.className, 'TestObject');
+        assert.strictEqual(obj.objectId, object.id);
+      },
+      { json: true }
+    );
   });
 
   it('can do query with count', async () => {
@@ -1751,35 +1761,29 @@ describe('Parse Query', () => {
       });
   });
 
-  it('supports objects with length', async done => {
+  it('supports objects with length', async () => {
     const obj = new TestObject();
     obj.set('length', 5);
     assert.equal(obj.get('length'), 5);
-    try {
-      await obj.save();
-      done.fail();
-    } catch (e) {
-      assert.strictEqual(e.message, 'Invalid field name: length.');
-      done();
-    }
+    await expectAsync(obj.save()).toBeRejectedWithError('Invalid field name: length.');
   });
 
-  it('can include User fields', done => {
-    Parse.User.signUp('bob', 'password', { age: 21 })
-      .then(user => {
-        const obj = new TestObject();
-        return obj.save({ owner: user });
-      })
-      .then(obj => {
-        const query = new Parse.Query(TestObject);
-        query.include('owner');
-        return query.get(obj.id);
-      })
-      .then(objAgain => {
-        assert(objAgain.get('owner') instanceof Parse.User);
-        assert.equal(objAgain.get('owner').get('age'), 21);
-        done();
-      });
+  it('can include User fields', async () => {
+    const user = new Parse.User();
+    user.set('username', 'bob');
+    user.set('password', 'password');
+    user.set('age', 21);
+    const acl = new Parse.ACL();
+    acl.setPublicReadAccess(true);
+    user.setACL(acl);
+    await user.signUp();
+    const obj = new TestObject();
+    await obj.save({ owner: user });
+    const query = new Parse.Query(TestObject);
+    query.include('owner');
+    const objAgain = await query.get(obj.id);
+    assert(objAgain.get('owner') instanceof Parse.User);
+    assert.equal(objAgain.get('owner').get('age'), 21);
   });
 
   it('can build OR queries', done => {
@@ -2358,6 +2362,15 @@ describe('Parse Query', () => {
     assert.equal(explain[0].queryPlanner.winningPlan.inputStage.inputStage.indexName, '_id_');
     const explainFirst = await query.first();
     assert.equal(explainFirst.queryPlanner.winningPlan.inputStage.inputStage.indexName, '_id_');
+    let indexName = '';
+    // https://www.mongodb.com/docs/manual/reference/explain-results/#std-label-queryPlanner
+    const plan = explain.queryPlanner.winningPlan;
+    if (plan.inputStage) {
+      indexName = plan.inputStage.inputStage.indexName;
+    } else {
+      indexName = plan.queryPlan.inputStage.inputStage.indexName;
+    }
+    assert.equal(indexName, '_id_');
   });
 
   it('can query with select on null field', async () => {

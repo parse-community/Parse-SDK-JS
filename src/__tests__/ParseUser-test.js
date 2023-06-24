@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../AnonymousUtils');
 jest.dontMock('../CoreManager');
 jest.dontMock('../CryptoController');
@@ -35,9 +26,11 @@ jest.mock('../uuid', () => {
   let value = 0;
   return () => value++;
 });
+jest.dontMock('./test_helpers/flushPromises');
 jest.dontMock('./test_helpers/mockXHR');
 jest.dontMock('./test_helpers/mockAsyncStorage');
 
+const flushPromises = require('./test_helpers/flushPromises');
 const mockAsyncStorage = require('./test_helpers/mockAsyncStorage');
 const CoreManager = require('../CoreManager');
 const CryptoController = require('../CryptoController');
@@ -51,10 +44,6 @@ const AnonymousUtils = require('../AnonymousUtils').default;
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 CoreManager.setCryptoController(CryptoController);
-
-function flushPromises() {
-  return new Promise(resolve => setImmediate(resolve));
-}
 
 describe('ParseUser', () => {
   beforeEach(() => {
@@ -369,6 +358,73 @@ describe('ParseUser', () => {
       expect(u.get('count')).toBe(5);
       done();
     });
+  });
+
+  it('does not allow loginAs without id', (done) => {
+    try {
+      ParseUser.loginAs(null, null);
+    } catch (e) {
+      expect(e.message).toBe('Cannot log in as user with an empty user id')
+      done();
+    }
+  });
+
+  it('can login as a user with an objectId', async () => {
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('POST');
+        expect(path).toBe('loginAs');
+        expect(body.userId).toBe('uid4');
+        expect(options.useMasterKey).toBe(true);
+
+        return Promise.resolve(
+          {
+            objectId: 'uid4',
+            username: 'username',
+            sessionToken: '123abc',
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+
+    const user = await ParseUser.loginAs('uid4');
+    expect(user.id).toBe('uid4');
+    expect(user.isCurrent()).toBe(false);
+    expect(user.existed()).toBe(true);
+  });
+
+  it('can loginAs a user with async storage', async () => {
+    const currentStorage = CoreManager.getStorageController();
+    CoreManager.setStorageController(mockAsyncStorage);
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('POST');
+        expect(path).toBe('loginAs');
+        expect(body.userId).toBe('uid5');
+        expect(options.useMasterKey).toBe(true);
+        return Promise.resolve(
+          {
+            objectId: 'uid5',
+            username: 'username',
+            sessionToken: '123abc',
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+
+    const user = await ParseUser.loginAs('uid5');
+    expect(user.id).toBe('uid5');
+    expect(user.isCurrent()).toBe(true);
+    expect(user.existed()).toBe(true);
+    CoreManager.setStorageController(currentStorage);
   });
 
   it('can become a user with a session token', done => {
@@ -1679,6 +1735,30 @@ describe('ParseUser', () => {
     expect(user.id).toBe('uid3');
     expect(user.isCurrent()).toBe(false);
     expect(user.existed()).toBe(true);
+  });
+
+  it('can signup with context', async () => {
+    CoreManager.setRESTController({
+      ajax() {},
+      request() {
+        return Promise.resolve(
+          {
+            objectId: 'uid3',
+            username: 'username',
+            sessionToken: '123abc',
+          },
+          200
+        );
+      },
+    });
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+    const context = { a: 'a' };
+    const user = new ParseUser();
+    user.setUsername('name');
+    user.setPassword('pass');
+    await user.signUp(null, { context });
+    expect(controller.request.mock.calls[0][3].context).toEqual(context);
   });
 
   it('can verify user password', async () => {

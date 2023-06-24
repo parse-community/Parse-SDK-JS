@@ -1,0 +1,20 @@
+# Dependabot dependency updates
+# Docs: https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    # Location of package-lock.json
+    directory: "/"
+    # Check daily for updates
+    schedule:
+      interval: "daily"
+    commit-message:
+      # Set commit message prefix
+      prefix: "refactor"
+    # Define dependencies to update
+    allow:
+      # Allow updates on every commit of parse-server
+      - dependency-name: "parse-server"
+      # Allow direct updates for all packages
+      - dependency-type: "direct"

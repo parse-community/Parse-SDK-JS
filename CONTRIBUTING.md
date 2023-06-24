@@ -52,7 +52,7 @@ Two different frameworks are used as the integration tests leverage a stateful s
 
 #### Unit tests
 
-Those tests are located in [/src/__tests__](/src/__tests__) and are responsible for ensuring each class is behaving as expected, without considering the rest of the system. For example, adding a new query helper function would probably require to add relevant tests that ensure the query is properly serialized to a valid Parse REST query object. Unit tests heavily leverage mocking and are an essential part of our testing harness.
+Those tests are located in [/src/\_\_tests\_\_](/src/__tests__) and are responsible for ensuring each class is behaving as expected, without considering the rest of the system. For example, adding a new query helper function would probably require to add relevant tests that ensure the query is properly serialized to a valid Parse REST query object. Unit tests heavily leverage mocking and are an essential part of our testing harness.
 
 To run unit tests, run `npm test`. If you have the vscode Jest plugin extension (as recommended), you can run your tests by clicking the *Debug* lens that appears near by the test.
 
@@ -106,15 +106,11 @@ Parse Community has a [responsible Vulnerability Disclosure Program](https://git
 
 This project adheres to the [Contributor Covenant Code of Conduct](https://github.com/parse-community/parse-server/blob/master/CODE_OF_CONDUCT.md). By participating, you are expected to honor this code.
 
-## License
-
-By contributing to the Parse JavaScript SDK, you agree that your contributions will be licensed under its license.
-
- [google-group]: https://groups.google.com/forum/#!forum/parse-developers
- [stack-overflow]: http://stackoverflow.com/tags/parse-server
- [bug-reports]: https://github.com/parse-community/parse-server/issues
- [rest-api]: https://docs.parseplatform.org/rest/guide
- [parse-api-console]: http://blog.parseplatform.org/announcements/introducing-the-parse-api-console/
- [stacktrace-or-gtfo]: http://i.imgur.com/jacoj.jpg
- [tests-dir]: /src/__tests__
- [integration-test-dir]: /integration/test
+[google-group]: https://groups.google.com/forum/#!forum/parse-developers
+[stack-overflow]: http://stackoverflow.com/tags/parse-server
+[bug-reports]: https://github.com/parse-community/parse-server/issues
+[rest-api]: https://docs.parseplatform.org/rest/guide
+[parse-api-console]: http://blog.parseplatform.org/announcements/introducing-the-parse-api-console/
+[stacktrace-or-gtfo]: http://i.imgur.com/jacoj.jpg
+[tests-dir]: /src/__tests__
+[integration-test-dir]: /integration/test
