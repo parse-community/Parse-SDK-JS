@@ -77,11 +77,11 @@ declare class ParseQuery {
     _watch: Array<string>;
     _include: Array<string>;
     _exclude: Array<string>;
-    _select: Array<string>;
+    _select?: Array<string>;
     _limit: number;
     _skip: number;
     _count: boolean;
-    _order: Array<string>;
+    _order?: Array<string>;
     _readPreference: string | undefined | null;
     _includeReadPreference: string | undefined | null;
     _subqueryReadPreference: string | undefined | null;
@@ -918,7 +918,7 @@ declare class ParseQuery {
      *
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    cancel(): ParseQuery;
+    cancel(): ParseQuery | any;
     _setRequestTask(options: any): void;
 }
 export default ParseQuery;

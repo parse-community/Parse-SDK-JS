@@ -298,8 +298,8 @@ export class RemoveOp extends Op {
 
 export class RelationOp extends Op {
   _targetClassName: string | undefined | null = null;
-  relationsToAdd: Array<string> = [];
-  relationsToRemove: Array<string> = [];
+  relationsToAdd?: Array<string>;
+  relationsToRemove?: Array<string>;
 
   constructor(adds: Array<ParseObject | string>, removes: Array<ParseObject | string>) {
     super();

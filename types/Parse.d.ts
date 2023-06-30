@@ -4,6 +4,14 @@ import Object from './ParseObject';
 import Query from './ParseQuery';
 import Relation from './ParseRelation';
 import User from './ParseUser';
+/**
+ * Contains all Parse API classes and functions.
+ *
+ * @static
+ * @global
+ * @class
+ * @hideconstructor
+*/
 interface Parse {
     ACL: any;
     Parse?: Parse;

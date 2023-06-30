@@ -67,8 +67,8 @@ export declare class RemoveOp extends Op {
 }
 export declare class RelationOp extends Op {
     _targetClassName: string | undefined | null;
-    relationsToAdd: Array<string>;
-    relationsToRemove: Array<string>;
+    relationsToAdd?: Array<string>;
+    relationsToRemove?: Array<string>;
     constructor(adds: Array<ParseObject | string>, removes: Array<ParseObject | string>);
     _extractId(obj: string | ParseObject): string;
     applyTo(value: any, object?: {

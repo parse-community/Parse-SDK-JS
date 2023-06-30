@@ -228,11 +228,11 @@ class ParseQuery {
   _watch: Array<string>;
   _include: Array<string>;
   _exclude: Array<string>;
-  _select: Array<string> = [];
+  _select?: Array<string>;
   _limit: number;
   _skip: number;
   _count: boolean;
-  _order: Array<string> = [];
+  _order?: Array<string>;
   _readPreference: string | undefined | null;
   _includeReadPreference: string | undefined | null;
   _subqueryReadPreference: string | undefined | null;
@@ -2089,7 +2089,7 @@ class ParseQuery {
    *
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  cancel(): ParseQuery  {
+  cancel(): ParseQuery | any   {
     if (this._xhrRequest.task && typeof this._xhrRequest.task.abort === 'function') {
       this._xhrRequest.task._aborted = true;
       this._xhrRequest.task.abort();
@@ -2097,7 +2097,7 @@ class ParseQuery {
       this._xhrRequest.onchange = () => {};
       return this;
     }
-    return (this._xhrRequest.onchange = () => this.cancel())();
+    return (this._xhrRequest.onchange = () => this.cancel());
   }
 
   _setRequestTask(options) {
