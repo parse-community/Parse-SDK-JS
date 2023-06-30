@@ -7,8 +7,8 @@ import * as ParseOp from './ParseOp';
 import RESTController from './RESTController';
 import ACL from './ParseACL';
 import * as Analytics from './Analytics'
-import * as AnonymousUtils from './AnonymousUtils'
-import Cloud from './Cloud';
+import AnonymousUtils from './AnonymousUtils'
+import * as Cloud from './Cloud';
 import CLP from './ParseCLP';
 import CoreManager from './CoreManager';
 import Config from './ParseConfig'
@@ -116,8 +116,8 @@ const Parse: Parse = {
   ACL: ACL,
   Analytics: Analytics,
   AnonymousUtils:  AnonymousUtils,
-  Cloud:  Cloud,
-  CLP:  CLP,
+  Cloud: Cloud,
+  CLP: CLP,
   CoreManager:  CoreManager,
   Config:  Config,
   Error:  ParseError,

@@ -137,7 +137,7 @@ gulp.task('minify-weapp', function() {
 
 gulp.task('watch', function() {
   if (BUILD === 'browser') {
-    const watcher = gulp.watch('src/*.js', { ignoreInitial: false }, gulp.series('compile', 'browserify', 'minify'));
+    const watcher = gulp.watch('src/*.*(js|ts)', { ignoreInitial: false }, gulp.series('compile', 'browserify', 'minify'));
     watcher.on('add', function(path) {
       console.log(`File ${path} was added`);
     });
@@ -146,5 +146,5 @@ gulp.task('watch', function() {
     });
     return watcher;
   }
-  return compileTask(watch('src/*.js', { ignoreInitial: false, verbose: true }));
+  return compileTask(watch('src/*.*(js|ts)', { ignoreInitial: false, verbose: true }));
 });

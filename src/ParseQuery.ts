@@ -1382,15 +1382,15 @@ class ParseQuery {
    * @param {string} modifiers The regular expression mode.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  matches(key: string, regex: RegExp, modifiers: string): ParseQuery {
+  matches(key: string, regex: RegExp | string, modifiers: string): ParseQuery {
     this._addCondition(key, '$regex', regex);
     if (!modifiers) {
       modifiers = '';
     }
-    if (regex.ignoreCase) {
+    if ((regex as RegExp).ignoreCase) {
       modifiers += 'i';
     }
-    if (regex.multiline) {
+    if ((regex as RegExp).multiline) {
       modifiers += 'm';
     }
     if (modifiers.length) {
@@ -1571,7 +1571,7 @@ class ParseQuery {
     if (typeof prefix !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this.matches(key, new RegExp(this._regexStartWith(prefix)), modifiers);
+    return this.matches(key, this._regexStartWith(prefix), modifiers);
   }
 
   /**
@@ -1587,7 +1587,7 @@ class ParseQuery {
     if (typeof suffix !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
-    return this.matches(key, new RegExp(quote(suffix) + '$'), modifiers);
+    return this.matches(key, quote(suffix) + '$', modifiers);
   }
 
   /**
