@@ -4,19 +4,19 @@
 import { resolvingPromise } from './promiseUtils';
 
 type Task = {
-  task: () => Promise,
-  _completion: Promise,
+  task: () => Promise<any>,
+  _completion: resolvingPromise<Task>,
 };
 
 class TaskQueue {
-  queue: Array<Task>;
+  queue: Task[];
 
   constructor() {
     this.queue = [];
   }
 
-  enqueue(task: () => Promise): Promise {
-    const taskComplete = new resolvingPromise();
+  enqueue(task: () => Promise<any>): Promise<any> {
+    const taskComplete = resolvingPromise();
     this.queue.push({
       task: task,
       _completion: taskComplete,
@@ -55,3 +55,4 @@ class TaskQueue {
 }
 
 module.exports = TaskQueue;
+export default TaskQueue;

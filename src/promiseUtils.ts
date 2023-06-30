@@ -1,8 +1,13 @@
 // Create Deferred Promise
+export interface resolvingPromise<T> extends Promise<T> {
+  resolve?:(value?: any) => void;
+  reject?:(value?: any) => void;
+}
+
 export function resolvingPromise() {
-  let res;
-  let rej;
-  const promise = new Promise((resolve, reject) => {
+  let res: (value: any) => void | null;
+  let rej: (value: any) => void | null;
+  const promise: resolvingPromise<any> = new Promise((resolve, reject) => {
     res = resolve;
     rej = reject;
   });
@@ -32,7 +37,7 @@ export function when(promises) {
     return Promise.resolve(returnValue);
   }
 
-  const promise = new resolvingPromise();
+  const promise = resolvingPromise();
 
   const resolveOne = function () {
     total--;

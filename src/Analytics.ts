@@ -2,7 +2,6 @@
  * @flow
  */
 
-// @ts-ignore
 import CoreManager from './CoreManager';
 
 /**
