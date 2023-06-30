@@ -85,7 +85,7 @@
     "mongodb-runner": "4.10.0",
     "parse-server": "git+https://github.com/parse-community/parse-server#alpha",
     "prettier": "2.8.8",
-    "puppeteer": "20.4.0",
+    "puppeteer": "20.7.4",
     "regenerator-runtime": "0.13.11",
     "semantic-release": "19.0.5",
     "vinyl-source-stream": "2.0.0"
