@@ -529,7 +529,7 @@ declare class ParseQuery {
      * @param {string} modifiers The regular expression mode.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    matches(key: string, regex: RegExp, modifiers: string): ParseQuery;
+    matches(key: string, regex: RegExp | string, modifiers: string): ParseQuery;
     /**
      * Adds a constraint that requires that a key's value matches a Parse.Query
      * constraint.

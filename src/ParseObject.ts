@@ -147,7 +147,7 @@ class ParseObject {
   id?: string;
   _localId?: string;
   _objCount: number;
-  className: string = '';
+  className: string = undefined;
   _initializers?: ((...args: Array<any>) => void)[];
 
   /* Prototype getters / setters */
