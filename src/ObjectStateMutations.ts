@@ -43,7 +43,7 @@ export function setServerData(serverData: AttributeMap, attributes: AttributeMap
   }
 }
 
-export function setPendingOp(pendingOps: Array<OpsMap>, attr: string, op: ?Op) {
+export function setPendingOp(pendingOps: Array<OpsMap>, attr: string, op?: Op) {
   const last = pendingOps.length - 1;
   if (op) {
     pendingOps[last][attr] = op;
@@ -56,7 +56,7 @@ export function pushPendingState(pendingOps: Array<OpsMap>) {
   pendingOps.push({});
 }
 
-export function popPendingState(pendingOps: Array<OpsMap>): OpsMap {
+export function popPendingState(pendingOps: Array<OpsMap>): OpsMap | undefined {
   const first = pendingOps.shift();
   if (!pendingOps.length) {
     pendingOps[0] = {};
@@ -83,15 +83,15 @@ export function estimateAttribute(
   serverData: AttributeMap,
   pendingOps: Array<OpsMap>,
   className: string,
-  id: ?string,
+  id: string | undefined,
   attr: string
-): mixed {
+): any {
   let value = serverData[attr];
   for (let i = 0; i < pendingOps.length; i++) {
     if (pendingOps[i][attr]) {
       if (pendingOps[i][attr] instanceof RelationOp) {
         if (id) {
-          value = pendingOps[i][attr].applyTo(value, { className: className, id: id }, attr);
+          value = (pendingOps[i][attr] as RelationOp).applyTo(value, { className: className, id: id }, attr);
         }
       } else {
         value = pendingOps[i][attr].applyTo(value);
@@ -105,7 +105,7 @@ export function estimateAttributes(
   serverData: AttributeMap,
   pendingOps: Array<OpsMap>,
   className: string,
-  id: ?string
+  id?: string
 ): AttributeMap {
   const data = {};
   let attr;
@@ -116,7 +116,7 @@ export function estimateAttributes(
     for (attr in pendingOps[i]) {
       if (pendingOps[i][attr] instanceof RelationOp) {
         if (id) {
-          data[attr] = pendingOps[i][attr].applyTo(
+          data[attr] = (pendingOps[i][attr] as RelationOp).applyTo(
             data[attr],
             { className: className, id: id },
             attr

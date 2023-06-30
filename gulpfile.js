@@ -20,16 +20,16 @@ const transformRuntime = ["@babel/plugin-transform-runtime", {
 }];
 
 const PRESETS = {
-  'browser': [["@babel/preset-env", {
+  'browser': ["@babel/preset-typescript",["@babel/preset-env", {
     "targets": "> 0.25%, not dead"
   }]],
-  'weapp': [["@babel/preset-env", {
+  'weapp': ["@babel/preset-typescript",["@babel/preset-env", {
     "targets": "> 0.25%, not dead"
   }], '@babel/react'],
-  'node': [["@babel/preset-env", {
+  'node': ["@babel/preset-typescript",["@babel/preset-env", {
     "targets": { "node": "14" }
   }]],
-  'react-native': ['module:metro-react-native-babel-preset'],
+  'react-native': ["@babel/preset-typescript", 'module:metro-react-native-babel-preset'],
 };
 const PLUGINS = {
   'browser': [transformRuntime, '@babel/plugin-transform-flow-comments', '@babel/plugin-proposal-class-properties', 'inline-package-json',
@@ -79,7 +79,7 @@ function compileTask(stream) {
 }
 
 gulp.task('compile', function() {
-  return compileTask(gulp.src('src/*.js'));
+  return compileTask(gulp.src('src/*.*(js|ts)'));
 });
 
 gulp.task('browserify', function(cb) {
