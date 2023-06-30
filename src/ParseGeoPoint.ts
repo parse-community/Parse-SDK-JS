@@ -102,7 +102,7 @@ class ParseGeoPoint {
     };
   }
 
-  equals(other: mixed): boolean {
+  equals(other: any): boolean {
     return (
       other instanceof ParseGeoPoint &&
       this.latitude === other.latitude &&

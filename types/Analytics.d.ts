@@ -1,10 +1,6 @@
 /**
  * @flow
  */
-
-// @ts-ignore
-import CoreManager from './CoreManager';
-
 /**
  * Parse.Analytics provides an interface to Parse's logging and analytics
  * backend.
@@ -13,7 +9,6 @@ import CoreManager from './CoreManager';
  * @static
  * @hideconstructor
  */
-
 /**
  * Tracks the occurrence of a custom event with additional dimensions.
  * Parse will store a data point at the time of invocation with the given
@@ -45,30 +40,6 @@ import CoreManager from './CoreManager';
  * @returns {Promise} A promise that is resolved when the round-trip
  * to the server completes.
  */
-
-export function track(name: string, dimensions: { [key: string]: string }): Promise<any> {
-  name = name || '';
-  name = name.replace(/^\s*/, '');
-  name = name.replace(/\s*$/, '');
-  if (name.length === 0) {
-    throw new TypeError('A name for the custom event must be provided');
-  }
-
-  for (const key in dimensions) {
-    if (typeof key !== 'string' || typeof dimensions[key] !== 'string') {
-      throw new TypeError('track() dimensions expects keys and values of type "string".');
-    }
-  }
-
-  return CoreManager.getAnalyticsController().track(name, dimensions);
-}
-
-const DefaultController = {
-  track(name: string, dimensions: { [key: string]: string }) {
-    const path = 'events/' + name;
-    const RESTController = CoreManager.getRESTController();
-    return RESTController.request('POST', path, { dimensions: dimensions });
-  },
-};
-
-CoreManager.setAnalyticsController(DefaultController);
+export declare function track(name: string, dimensions: {
+    [key: string]: string;
+}): Promise<any>;

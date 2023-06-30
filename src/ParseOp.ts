@@ -297,7 +297,7 @@ export class RemoveOp extends Op {
 }
 
 export class RelationOp extends Op {
-  _targetClassName?: string | null = null;
+  _targetClassName: string | undefined | null = null;
   relationsToAdd: Array<string> = [];
   relationsToRemove: Array<string> = [];
 

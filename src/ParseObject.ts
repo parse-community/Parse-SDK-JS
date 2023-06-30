@@ -2204,7 +2204,7 @@ const DefaultController = {
       }
       const objs: ParseObject[] = [];
       const ids: string[] = [];
-      let className: string | null = null;
+      let className: string = '';
       const results: any[] = [];
       let error = null;
       target.forEach(el => {
@@ -2243,7 +2243,9 @@ const DefaultController = {
       return query.find(options).then(async objects => {
         const idMap: {[key: string]: ParseObject} = {};
         objects.forEach(o => {
-          idMap[o.id] = o;
+          if (o.id) {
+            idMap[o.id] = o;
+          }
         });
         for (let i = 0; i < objs.length; i++) {
           const obj = objs[i];
