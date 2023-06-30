@@ -40,27 +40,24 @@ import LiveQueryClient from './LiveQueryClient'
  * @hideconstructor
 */
 
-
-
-
-interface Parse {
-  ACL: any,
-  Parse?: Parse,
-  Analytics: any,
-  AnonymousUtils: any,
-  Cloud: any,
-  CLP: any,
-  CoreManager: any,
-  Config: any,
-  Error: any,
-  EventuallyQueue: any,
-  FacebookUtils: any,
-  File: any,
+interface ParseType {
+  ACL: typeof ACL,
+  Parse?: ParseType,
+  Analytics: typeof Analytics,
+  AnonymousUtils: typeof AnonymousUtils,
+  Cloud: typeof Cloud,
+  CLP: typeof CLP,
+  CoreManager: typeof CoreManager,
+  Config: typeof Config,
+  Error: typeof ParseError,
+  EventuallyQueue: typeof EventuallyQueue,
+  FacebookUtils: typeof FacebookUtils,
+  File: typeof File,
   GeoPoint: typeof GeoPoint,
   Hooks?: any,
-  Polygon: any,
-  Installation: any,
-  LocalDatastore: any,
+  Polygon: typeof Polygon,
+  Installation: typeof Installation,
+  LocalDatastore: typeof LocalDatastore,
   Object: typeof Object,
   Op: {
     Set: typeof ParseOp.SetOp,
@@ -71,16 +68,16 @@ interface Parse {
     AddUnique: typeof ParseOp.AddUniqueOp,
     Relation: typeof ParseOp.RelationOp,
   };
-  Push: any,
+  Push: typeof Push,
   Query: typeof Query,
   Relation: typeof Relation,
-  Role: any,
-  Schema: any,
-  Session: any,
-  Storage: any,
+  Role: typeof Role,
+  Schema: typeof Schema,
+  Session: typeof Session,
+  Storage: typeof Storage,
   User: typeof User,
-  LiveQuery: any,
-  LiveQueryClient: any,
+  LiveQuery: typeof LiveQuery,
+  LiveQueryClient: typeof LiveQueryClient,
 
   initialize(applicationId: string, javaScriptKey: string): void,
   _initialize(applicationId: string, javaScriptKey: string, masterKey?: string): void,
@@ -95,7 +92,7 @@ interface Parse {
   serverAuthToken: string,
   serverAuthType: string,
   liveQueryServerURL: string,
-  encryptedUser: string,
+  encryptedUser: boolean,
   secret: string,
   idempotency: boolean,
   allowCustomObjectId: boolean,
@@ -112,7 +109,7 @@ interface Parse {
   isEncryptedUserEnabled(): void,
 }
 
-const Parse: Parse = {
+const Parse: ParseType = {
   ACL: ACL,
   Analytics: Analytics,
   AnonymousUtils:  AnonymousUtils,
@@ -148,6 +145,9 @@ const Parse: Parse = {
   User:  User,
   LiveQuery:  LiveQuery,
   LiveQueryClient:  LiveQueryClient,
+  IndexedDB: undefined,
+  Hooks: undefined,
+  Parse: undefined,
 
 
   /**
@@ -292,10 +292,10 @@ const Parse: Parse = {
   },
 
   /**
-   * @member {string} Parse.encryptedUser
+   * @member {boolean} Parse.encryptedUser
    * @static
    */
-  set encryptedUser(value) {
+  set encryptedUser(value: boolean) {
     CoreManager.set('ENCRYPTED_USER', value);
   },
   get encryptedUser() {

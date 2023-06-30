@@ -49,7 +49,7 @@ const EventuallyQueue = {
    * @static
    * @see Parse.Object#saveEventually
    */
-  save(object: ParseObject, serverOptions: SaveOptions = {}): Promise {
+  save(object: ParseObject, serverOptions: SaveOptions = {}): Promise<void> {
     return this.enqueue('save', object, serverOptions);
   },
 
@@ -64,7 +64,7 @@ const EventuallyQueue = {
    * @static
    * @see Parse.Object#destroyEventually
    */
-  destroy(object: ParseObject, serverOptions: RequestOptions = {}): Promise {
+  destroy(object: ParseObject, serverOptions: RequestOptions = {}): Promise<void> {
     return this.enqueue('destroy', object, serverOptions);
   },
 
@@ -98,7 +98,7 @@ const EventuallyQueue = {
     action: string,
     object: ParseObject,
     serverOptions: SaveOptions | RequestOptions
-  ): Promise {
+  ): Promise<any> {
     const queueData = await this.getQueue();
     const queueId = this.generateQueueId(action, object);
 
@@ -142,7 +142,7 @@ const EventuallyQueue = {
    * @returns {Promise<Array>}
    * @static
    */
-  async getQueue(): Promise<Array> {
+  async getQueue(): Promise<any[]> {
     if (dirtyCache) {
       queueCache = JSON.parse((await this.load()) || '[]');
       dirtyCache = false;
@@ -188,7 +188,7 @@ const EventuallyQueue = {
    * @returns {Promise} A promise that is fulfilled when queue is cleared.
    * @static
    */
-  clear(): Promise {
+  clear(): Promise<any> {
     queueCache = [];
     return this.store([]);
   },
@@ -214,7 +214,7 @@ const EventuallyQueue = {
    * @returns {number}
    * @static
    */
-  async length(): number {
+  async length(): Promise<number> {
     const queueData = await this.getQueue();
     return queueData.length;
   },
@@ -373,3 +373,4 @@ const EventuallyQueue = {
 };
 
 module.exports = EventuallyQueue;
+export default EventuallyQueue;

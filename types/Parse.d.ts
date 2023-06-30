@@ -1,9 +1,30 @@
+import EventuallyQueue from './EventuallyQueue';
 import * as ParseOp from './ParseOp';
+import ACL from './ParseACL';
+import * as Analytics from './Analytics';
+import AnonymousUtils from './AnonymousUtils';
+import * as Cloud from './Cloud';
+import CLP from './ParseCLP';
+import CoreManager from './CoreManager';
+import Config from './ParseConfig';
+import ParseError from './ParseError';
+import FacebookUtils from './FacebookUtils';
+import File from './ParseFile';
 import GeoPoint from './ParseGeoPoint';
+import Polygon from './ParsePolygon';
+import Installation from './ParseInstallation';
+import LocalDatastore from './LocalDatastore';
 import Object from './ParseObject';
+import * as Push from './Push';
 import Query from './ParseQuery';
 import Relation from './ParseRelation';
+import Role from './ParseRole';
+import Schema from './ParseSchema';
+import Session from './ParseSession';
+import Storage from './Storage';
 import User from './ParseUser';
+import LiveQuery from './ParseLiveQuery';
+import LiveQueryClient from './LiveQueryClient';
 /**
  * Contains all Parse API classes and functions.
  *
@@ -12,24 +33,24 @@ import User from './ParseUser';
  * @class
  * @hideconstructor
 */
-interface Parse {
-    ACL: any;
-    Parse?: Parse;
-    Analytics: any;
-    AnonymousUtils: any;
-    Cloud: any;
-    CLP: any;
-    CoreManager: any;
-    Config: any;
-    Error: any;
-    EventuallyQueue: any;
-    FacebookUtils: any;
-    File: any;
+interface ParseType {
+    ACL: typeof ACL;
+    Parse?: ParseType;
+    Analytics: typeof Analytics;
+    AnonymousUtils: typeof AnonymousUtils;
+    Cloud: typeof Cloud;
+    CLP: typeof CLP;
+    CoreManager: typeof CoreManager;
+    Config: typeof Config;
+    Error: typeof ParseError;
+    EventuallyQueue: typeof EventuallyQueue;
+    FacebookUtils: typeof FacebookUtils;
+    File: typeof File;
     GeoPoint: typeof GeoPoint;
     Hooks?: any;
-    Polygon: any;
-    Installation: any;
-    LocalDatastore: any;
+    Polygon: typeof Polygon;
+    Installation: typeof Installation;
+    LocalDatastore: typeof LocalDatastore;
     Object: typeof Object;
     Op: {
         Set: typeof ParseOp.SetOp;
@@ -40,16 +61,16 @@ interface Parse {
         AddUnique: typeof ParseOp.AddUniqueOp;
         Relation: typeof ParseOp.RelationOp;
     };
-    Push: any;
+    Push: typeof Push;
     Query: typeof Query;
     Relation: typeof Relation;
-    Role: any;
-    Schema: any;
-    Session: any;
-    Storage: any;
+    Role: typeof Role;
+    Schema: typeof Schema;
+    Session: typeof Session;
+    Storage: typeof Storage;
     User: typeof User;
-    LiveQuery: any;
-    LiveQueryClient: any;
+    LiveQuery: typeof LiveQuery;
+    LiveQueryClient: typeof LiveQueryClient;
     initialize(applicationId: string, javaScriptKey: string): void;
     _initialize(applicationId: string, javaScriptKey: string, masterKey?: string): void;
     setAsyncStorage(storage: any): void;
@@ -62,7 +83,7 @@ interface Parse {
     serverAuthToken: string;
     serverAuthType: string;
     liveQueryServerURL: string;
-    encryptedUser: string;
+    encryptedUser: boolean;
     secret: string;
     idempotency: boolean;
     allowCustomObjectId: boolean;
@@ -78,5 +99,5 @@ interface Parse {
     enableEncryptedUser(): void;
     isEncryptedUserEnabled(): void;
 }
-declare const Parse: Parse;
+declare const Parse: ParseType;
 export default Parse;

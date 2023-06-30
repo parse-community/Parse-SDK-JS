@@ -438,7 +438,7 @@ declare class ParseObject {
      * @returns {Promise} A promise that is fulfilled when the fetch
      *     completes.
      */
-    fetchWithInclude(keys: String | Array<string | Array<string>>, options: RequestOptions): Promise<ParseObject>;
+    fetchWithInclude(keys: String | Array<string | Array<string>>, options?: RequestOptions): Promise<ParseObject>;
     /**
      * Saves this object to the server at some unspecified time in the future,
      * even if Parse is currently inaccessible.
@@ -901,7 +901,7 @@ declare class ParseObject {
      *     this method.
      * @returns {Parse.Object} A new subclass of Parse.Object.
      */
-    static extend(className: any, protoProps: any, classProps: any): any;
+    static extend(className: any, protoProps?: any, classProps?: any): any;
     /**
      * Enable single instance objects, where any local objects with the same Id
      * share the same attributes, and stay synchronized with each other.

@@ -42,7 +42,7 @@ class ParseRole extends ParseObject {
    *
    * @returns {string} the name of the role.
    */
-  getName(): ?string {
+  getName(): string | null | undefined {
     const name = this.get('name');
     if (name == null || typeof name === 'string') {
       return name;
@@ -67,7 +67,7 @@ class ParseRole extends ParseObject {
    *     callbacks.
    * @returns {(ParseObject|boolean)} true if the set succeeded.
    */
-  setName(name: string, options?: mixed): ParseObject | boolean {
+  setName(name: string, options?: any): ParseObject | boolean {
     this._validateName(name);
     return this.set('name', name, options);
   }
@@ -114,8 +114,8 @@ class ParseRole extends ParseObject {
     }
   }
 
-  validate(attrs: AttributeMap, options?: mixed): ParseError | boolean {
-    const isInvalid = super.validate(attrs, options);
+  validate(attrs: AttributeMap): ParseError | boolean {
+    const isInvalid = super.validate(attrs);
     if (isInvalid) {
       return isInvalid;
     }

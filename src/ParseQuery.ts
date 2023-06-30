@@ -14,7 +14,8 @@ import { DEFAULT_PIN } from './LocalDatastoreUtils';
 import type LiveQuerySubscription from './LiveQuerySubscription';
 import type { RequestOptions, FullOptions } from './RESTController';
 
-type BatchOptions = FullOptions & { batchSize?: number };
+type BatchOptions = FullOptions & { batchSize?: number, json?: boolean };
+type QueryOptions = FullOptions & { json?: boolean }
 
 export type WhereClause = {
   [attr: string]: any,
@@ -37,6 +38,13 @@ export type QueryJSON = {
   includeReadPreference?: string,
   subqueryReadPreference?: string,
 };
+
+interface FullTextOptions extends FullOptions {
+  term?: string,
+  language?: any,
+  caseSensitive?: any,
+  diacriticSensitive?: any,
+}
 
 /**
  * Converts a string into a regex that matches it.
@@ -246,7 +254,7 @@ class ParseQuery {
   /**
    * @param {(string | Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
    */
-  constructor(objectClass: string | ParseObject) {
+  constructor(objectClass: string | (new (...args: any[]) => ParseObject | ParseObject)) {
     if (typeof objectClass === 'string') {
       if (objectClass === 'User' && CoreManager.get('PERFORM_USER_REWRITE')) {
         this.className = '_User';
@@ -609,10 +617,10 @@ class ParseQuery {
    * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  get(objectId: string, options?: FullOptions): Promise<ParseObject> {
+  get(objectId: string, options?: QueryOptions): Promise<ParseObject> {
     this.equalTo('objectId', objectId);
 
-    const firstOptions: FullOptions = {};
+    const firstOptions: QueryOptions = {};
     if (options && options.hasOwnProperty('useMasterKey')) {
       firstOptions.useMasterKey = options.useMasterKey;
     }
@@ -651,8 +659,8 @@ class ParseQuery {
    * @returns {Promise} A promise that is resolved with the results when
    * the query completes.
    */
-  find(options: FullOptions = {}): Promise<Array<ParseObject>> {
-    const findOptions: FullOptions = {};
+  find(options: QueryOptions = {}): Promise<Array<ParseObject>> {
+    const findOptions: QueryOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       findOptions.useMasterKey = options.useMasterKey;
     }
@@ -854,9 +862,9 @@ class ParseQuery {
    * @returns {Promise} A promise that is resolved with the object when
    * the query completes.
    */
-  first(options: FullOptions = {}): Promise<ParseObject | void> {
+  first(options: QueryOptions = {}): Promise<ParseObject | void> {
 
-    const findOptions: FullOptions = {};
+    const findOptions: QueryOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       findOptions.useMasterKey = options.useMasterKey;
     }
@@ -970,7 +978,7 @@ class ParseQuery {
 
     query.ascending('objectId');
 
-    const findOptions: FullOptions = {};
+    const findOptions: BatchOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       findOptions.useMasterKey = options.useMasterKey;
     }
@@ -1513,7 +1521,7 @@ class ParseQuery {
    * @param {boolean} options.diacriticSensitive A boolean flag to enable or disable diacritic sensitive search.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  fullText(key: string, value: string, options: FullOptions = {}): ParseQuery {
+  fullText(key: string, value: string, options: FullTextOptions = {}): ParseQuery {
     if (!key) {
       throw new Error('A key is required.');
     }
@@ -1524,7 +1532,7 @@ class ParseQuery {
       throw new Error('The value being searched for must be a string.');
     }
 
-    const fullOptions: FullOptions = {};
+    const fullOptions: any = {};
     fullOptions.$term = value;
 
     for (const option in options) {
@@ -1567,7 +1575,7 @@ class ParseQuery {
    * @param {string} modifiers The regular expression mode.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  startsWith(key: string, prefix: string, modifiers: string): ParseQuery {
+  startsWith(key: string, prefix: string, modifiers?: string): ParseQuery {
     if (typeof prefix !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }

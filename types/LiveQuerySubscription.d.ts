@@ -1,7 +1,7 @@
 import EventEmitter from './EventEmitter';
-import CoreManager from './CoreManager';
 import { resolvingPromise } from './promiseUtils';
-
+import ParseQuery from './ParseQuery';
+import ParseObject from './ParseObject';
 /**
  * Creates a new LiveQuery Subscription.
  * Extends events.EventEmitter
@@ -87,39 +87,21 @@ import { resolvingPromise } from './promiseUtils';
  *
  * @alias Parse.LiveQuerySubscription
  */
-class Subscription extends EventEmitter {
-  /*
-   * @param {string} id - subscription id
-   * @param {string} query - query to subscribe to
-   * @param {string} sessionToken - optional session token
-   */
-  constructor(id, query, sessionToken) {
-    super();
-    this.id = id;
-    this.query = query;
-    this.sessionToken = sessionToken;
-    this.subscribePromise = resolvingPromise();
-    this.unsubscribePromise = resolvingPromise();
-    this.subscribed = false;
-
-    // adding listener so process does not crash
-    // best practice is for developer to register their own listener
-    this.on('error', () => {});
-  }
-
-  /**
-   * Close the subscription
-   *
-   * @returns {Promise}
-   */
-  unsubscribe(): Promise {
-    return CoreManager.getLiveQueryController()
-      .getDefaultLiveQueryClient()
-      .then(liveQueryClient => {
-        this.emit('close');
-        return liveQueryClient.unsubscribe(this);
-      });
-  }
+declare class Subscription extends EventEmitter {
+    id: string;
+    query: ParseQuery;
+    sessionToken: string;
+    subscribePromise: resolvingPromise<any>;
+    unsubscribePromise: resolvingPromise<any>;
+    subscribed: boolean;
+    emit: any;
+    constructor(id: string, query: ParseQuery, sessionToken: string);
+    /**
+     * Close the subscription
+     *
+     * @returns {Promise}
+     */
+    unsubscribe(): Promise<any>;
+    on(event: 'error' | 'open' | 'create' | 'update' | 'enter' | 'leave' | 'delete' | 'close', listener: (object: ParseObject) => void): any;
 }
-
 export default Subscription;

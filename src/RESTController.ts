@@ -2,6 +2,9 @@
  * @flow
  */
 /* global XMLHttpRequest, XDomainRequest */
+declare global {
+  var XDomainRequest: any;
+}
 const uuidv4 = require('./uuid');
 
 import CoreManager from './CoreManager';
@@ -28,6 +31,8 @@ export type FullOptions = {
   installationId?: string,
   progress?: any,
   usePost?: boolean,
+  context?: any,
+  requestTask?:(args1: any) => void,
 };
 
 let XHR = null;
@@ -205,7 +210,7 @@ const RESTController = {
     return promise;
   },
 
-  request(method: string, path: string, data: mixed, options?: RequestOptions) {
+  request(method: string, path: string, data: any, options?: RequestOptions) {
     options = options || {};
     let url = CoreManager.get('SERVER_URL');
     if (url[url.length - 1] !== '/') {
@@ -213,7 +218,7 @@ const RESTController = {
     }
     url += path;
 
-    const payload = {};
+    const payload: any = {};
     if (data && typeof data === 'object') {
       for (const k in data) {
         payload[k] = data[k];
@@ -334,3 +339,4 @@ const RESTController = {
 };
 
 module.exports = RESTController;
+export default RESTController;

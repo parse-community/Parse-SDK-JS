@@ -7,5 +7,5 @@
     "outDir": "types",
     "noImplicitAny": false,
   },
-  "include": ["src/Parse.ts"],
+  "include": ["src/Parse.ts"]
 }

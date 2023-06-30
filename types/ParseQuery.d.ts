@@ -4,6 +4,10 @@ import type LiveQuerySubscription from './LiveQuerySubscription';
 import type { FullOptions } from './RESTController';
 type BatchOptions = FullOptions & {
     batchSize?: number;
+    json?: boolean;
+};
+type QueryOptions = FullOptions & {
+    json?: boolean;
 };
 export type WhereClause = {
     [attr: string]: any;
@@ -25,6 +29,12 @@ export type QueryJSON = {
     includeReadPreference?: string;
     subqueryReadPreference?: string;
 };
+interface FullTextOptions extends FullOptions {
+    term?: string;
+    language?: any;
+    caseSensitive?: any;
+    diacriticSensitive?: any;
+}
 /**
  * Creates a new parse Parse.Query for the given Parse.Object subclass.
  *
@@ -96,7 +106,7 @@ declare class ParseQuery {
     /**
      * @param {(string | Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
      */
-    constructor(objectClass: string | ParseObject);
+    constructor(objectClass: string | (new (...args: any[]) => ParseObject | ParseObject));
     /**
      * Adds constraint that at least one of the passed in queries matches.
      *
@@ -189,7 +199,7 @@ declare class ParseQuery {
      * @returns {Promise} A promise that is resolved with the result when
      * the query completes.
      */
-    get(objectId: string, options?: FullOptions): Promise<ParseObject>;
+    get(objectId: string, options?: QueryOptions): Promise<ParseObject>;
     /**
      * Retrieves a list of ParseObjects that satisfy this query.
      *
@@ -205,7 +215,7 @@ declare class ParseQuery {
      * @returns {Promise} A promise that is resolved with the results when
      * the query completes.
      */
-    find(options?: FullOptions): Promise<Array<ParseObject>>;
+    find(options?: QueryOptions): Promise<Array<ParseObject>>;
     /**
      * Retrieves a complete list of ParseObjects that satisfy this query.
      * Using `eachBatch` under the hood to fetch all the valid objects.
@@ -274,7 +284,7 @@ declare class ParseQuery {
      * @returns {Promise} A promise that is resolved with the object when
      * the query completes.
      */
-    first(options?: FullOptions): Promise<ParseObject | void>;
+    first(options?: QueryOptions): Promise<ParseObject | void>;
     /**
      * Iterates over objects matching a query, calling a callback for each batch.
      * If the callback returns a promise, the iteration will not continue until
@@ -612,7 +622,7 @@ declare class ParseQuery {
      * @param {boolean} options.diacriticSensitive A boolean flag to enable or disable diacritic sensitive search.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    fullText(key: string, value: string, options?: FullOptions): ParseQuery;
+    fullText(key: string, value: string, options?: FullTextOptions): ParseQuery;
     /**
      * Method to sort the full text search by text score
      *
@@ -629,7 +639,7 @@ declare class ParseQuery {
      * @param {string} modifiers The regular expression mode.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    startsWith(key: string, prefix: string, modifiers: string): ParseQuery;
+    startsWith(key: string, prefix: string, modifiers?: string): ParseQuery;
     /**
      * Adds a constraint for finding string values that end with a provided
      * string.  This will be slow for large datasets.

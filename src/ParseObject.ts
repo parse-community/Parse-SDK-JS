@@ -1017,7 +1017,8 @@ class ParseObject {
       const query = new ParseQuery(this.className);
       await query.get(this.id, options);
       return true;
-    } catch (e: ParseError) {
+    } catch (e) {
+      e = e as ParseError;
       if (e.code === ParseError.OBJECT_NOT_FOUND) {
         return false;
       }
@@ -1187,8 +1188,7 @@ class ParseObject {
    * @returns {Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetchWithInclude(keys: String | Array<string | Array<string>>, options: RequestOptions): Promise<ParseObject> {
-    options = options || {};
+  fetchWithInclude(keys: String | Array<string | Array<string>>, options: RequestOptions = {}): Promise<ParseObject> {
     options.include = keys;
     return this.fetch(options);
   }
@@ -1220,7 +1220,8 @@ class ParseObject {
   async saveEventually(options: SaveOptions): Promise<ParseObject> {
     try {
       await this.save(null, options);
-    } catch (e: ParseError) {
+    } catch (e) {
+      e = e as ParseError;
       if (e.message === 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
         await EventuallyQueue.save(this, options);
         EventuallyQueue.poll();
@@ -1364,7 +1365,8 @@ class ParseObject {
   async destroyEventually(options: RequestOptions): Promise<ParseObject> {
     try {
       await this.destroy(options);
-    } catch (e: ParseError) {
+    } catch (e) {
+      e = e as ParseError;
       if (e.message === 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
         await EventuallyQueue.destroy(this, options);
         EventuallyQueue.poll();
@@ -1935,7 +1937,7 @@ class ParseObject {
    *     this method.
    * @returns {Parse.Object} A new subclass of Parse.Object.
    */
-  static extend(className: any, protoProps: any, classProps: any) {
+  static extend(className: any, protoProps?: any, classProps?: any) {
     if (typeof className !== 'string') {
       if (className && typeof className.className === 'string') {
         return ParseObject.extend(className.className, className, protoProps);
