@@ -60,6 +60,7 @@ const defaultConfiguration = {
     twitter: {
       consumer_key: twitterAuthData.consumer_key,
       consumer_secret: twitterAuthData.consumer_secret,
+      validateAuthData: () => {},
     },
   },
   verbose: false,
