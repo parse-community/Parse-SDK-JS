@@ -98,7 +98,7 @@
     "release": "node build_releases.js && npm publish",
     "test": "cross-env PARSE_BUILD=node jest",
     "test:mongodb": "npm run test:mongodb:runnerstart && npm run integration",
-    "test:mongodb:runnerstart": "mongodb-runner start",
+    "test:mongodb:runnerstart": "mongodb-runner start --port 27017",
     "posttest:mongodb": "mongodb-runner stop",
     "lint": "eslint --cache src/ integration/",
     "lint:fix": "eslint --fix --cache src/ integration/",
