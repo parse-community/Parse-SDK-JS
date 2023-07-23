@@ -1,3 +1,15 @@
+# [4.2.0-beta.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.1.0...4.2.0-beta.1) (2023-05-01)
+
+
+### Bug Fixes
+
+* `Parse.File.cancel` starts new attempt to save file ([#1781](https://github.com/parse-community/Parse-SDK-JS/issues/1781)) ([b755e42](https://github.com/parse-community/Parse-SDK-JS/commit/b755e42394db8b94b87b0dbefc6cf6f18189c46d))
+
+### Features
+
+* Add `Parse.User.loginAs` ([#1875](https://github.com/parse-community/Parse-SDK-JS/issues/1875)) ([381fcfc](https://github.com/parse-community/Parse-SDK-JS/commit/381fcfc7f9cfda70af7c6dc3a35de59b82b72258))
+* Add `ParseQuery.watch` to trigger LiveQuery only on update of specific fields ([#1839](https://github.com/parse-community/Parse-SDK-JS/issues/1839)) ([7479343](https://github.com/parse-community/Parse-SDK-JS/commit/7479343abd8739fe03558ff9b2ce610c34c568ae))
+
 # [4.1.0-beta.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.1...4.1.0-beta.1) (2023-03-01)
 
 

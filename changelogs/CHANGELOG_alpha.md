@@ -1,3 +1,50 @@
+# [4.2.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.3...4.2.0-alpha.4) (2023-07-23)
+
+
+### Features
+
+* Login with username, password and additional authentication data via `ParseUser.logInWithAdditionalAuth` ([#1955](https://github.com/parse-community/Parse-SDK-JS/issues/1955)) ([2bad411](https://github.com/parse-community/Parse-SDK-JS/commit/2bad4119c23372d1b38c811c4b4bb3d06b1b62f0))
+
+# [4.2.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.2...4.2.0-alpha.3) (2023-06-11)
+
+
+### Features
+
+* Add support to invoke a Cloud Function with a custom `installationId` via `Parse.Cloud.run` ([#1939](https://github.com/parse-community/Parse-SDK-JS/issues/1939)) ([eb70b93](https://github.com/parse-community/Parse-SDK-JS/commit/eb70b934b798cb37722c1ac36796596f5373f67d))
+
+# [4.2.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.1...4.2.0-alpha.2) (2023-06-08)
+
+
+### Bug Fixes
+
+* Hard-coding of `react-native` path does not work for workspace builds ([#1930](https://github.com/parse-community/Parse-SDK-JS/issues/1930)) ([8222f3c](https://github.com/parse-community/Parse-SDK-JS/commit/8222f3cc2a4a4ee0cdcaf30dd0f9a17e46de7d88))
+
+# [4.2.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.1.0...4.2.0-alpha.1) (2023-05-01)
+
+
+### Bug Fixes
+
+* `Parse.File.cancel` starts new attempt to save file ([#1781](https://github.com/parse-community/Parse-SDK-JS/issues/1781)) ([b755e42](https://github.com/parse-community/Parse-SDK-JS/commit/b755e42394db8b94b87b0dbefc6cf6f18189c46d))
+
+### Features
+
+* Add `Parse.User.loginAs` ([#1875](https://github.com/parse-community/Parse-SDK-JS/issues/1875)) ([381fcfc](https://github.com/parse-community/Parse-SDK-JS/commit/381fcfc7f9cfda70af7c6dc3a35de59b82b72258))
+* Add `ParseQuery.watch` to trigger LiveQuery only on update of specific fields ([#1839](https://github.com/parse-community/Parse-SDK-JS/issues/1839)) ([7479343](https://github.com/parse-community/Parse-SDK-JS/commit/7479343abd8739fe03558ff9b2ce610c34c568ae))
+
+# [4.1.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/4.1.0-alpha.3...4.1.0-alpha.4) (2023-04-28)
+
+
+### Features
+
+* Add `Parse.User.loginAs` ([#1875](https://github.com/parse-community/Parse-SDK-JS/issues/1875)) ([381fcfc](https://github.com/parse-community/Parse-SDK-JS/commit/381fcfc7f9cfda70af7c6dc3a35de59b82b72258))
+
+# [4.1.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/4.1.0-alpha.2...4.1.0-alpha.3) (2023-04-02)
+
+
+### Features
+
+* Add `ParseQuery.watch` to trigger LiveQuery only on update of specific fields ([#1839](https://github.com/parse-community/Parse-SDK-JS/issues/1839)) ([7479343](https://github.com/parse-community/Parse-SDK-JS/commit/7479343abd8739fe03558ff9b2ce610c34c568ae))
+
 # [4.1.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/4.1.0-alpha.1...4.1.0-alpha.2) (2023-03-01)
 
 

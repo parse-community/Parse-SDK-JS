@@ -47,6 +47,9 @@ export function run(name: string, data: mixed, options: RequestOptions): Promise
   if (options.sessionToken) {
     requestOptions.sessionToken = options.sessionToken;
   }
+  if (options.installationId) {
+    requestOptions.installationId = options.installationId;
+  }
   if (options.context && typeof options.context === 'object') {
     requestOptions.context = options.context;
   }

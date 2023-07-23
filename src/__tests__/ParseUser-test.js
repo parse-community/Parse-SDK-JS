@@ -326,6 +326,53 @@ describe('ParseUser', () => {
       });
   });
 
+  describe('loginWithAdditional', () => {
+    it('loginWithAdditonal fails with invalid payload', async () => {
+      ParseUser.enableUnsafeCurrentUser();
+      ParseUser._clearCache();
+      CoreManager.setRESTController({
+        request(method, path, body) {
+          expect(method).toBe('POST');
+          expect(path).toBe('login');
+          expect(body.username).toBe('username');
+          expect(body.password).toBe('password');
+          expect(body.authData).toEqual({ mfa: { key: '1234' } });
+
+          return Promise.resolve(
+            {
+              objectId: 'uid2',
+              username: 'username',
+              sessionToken: '123abc',
+              authDataResponse: {
+                mfa: { enabled: true },
+              },
+            },
+            200
+          );
+        },
+        ajax() {},
+      });
+      const response = await ParseUser.logInWithAdditionalAuth('username', 'password', {mfa: {key:'1234'}});
+      expect(response instanceof ParseUser).toBe(true);
+      expect(response.get('authDataResponse')).toEqual({mfa: { enabled: true }});
+    });
+
+    it('loginWithAdditonal fails with invalid payload', async () => {
+      ParseUser.enableUnsafeCurrentUser();
+      ParseUser._clearCache();
+      await expect(ParseUser.logInWithAdditionalAuth({}, 'password', {})).rejects.toThrowError(
+        new ParseError(ParseError.OTHER_CAUSE, 'Username must be a string.')
+      );
+      await expect(ParseUser.logInWithAdditionalAuth('username', {}, {})).rejects.toThrowError(
+        new ParseError(ParseError.OTHER_CAUSE, 'Password must be a string.')
+      );
+      await expect(ParseUser.logInWithAdditionalAuth('username', 'password', '')).rejects.toThrowError(
+        new ParseError(ParseError.OTHER_CAUSE, 'Auth must be an object.')
+      );
+    });
+  });
+
+
   it('preserves changes when logging in', done => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
@@ -358,6 +405,73 @@ describe('ParseUser', () => {
       expect(u.get('count')).toBe(5);
       done();
     });
+  });
+
+  it('does not allow loginAs without id', (done) => {
+    try {
+      ParseUser.loginAs(null, null);
+    } catch (e) {
+      expect(e.message).toBe('Cannot log in as user with an empty user id')
+      done();
+    }
+  });
+
+  it('can login as a user with an objectId', async () => {
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('POST');
+        expect(path).toBe('loginAs');
+        expect(body.userId).toBe('uid4');
+        expect(options.useMasterKey).toBe(true);
+
+        return Promise.resolve(
+          {
+            objectId: 'uid4',
+            username: 'username',
+            sessionToken: '123abc',
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+
+    const user = await ParseUser.loginAs('uid4');
+    expect(user.id).toBe('uid4');
+    expect(user.isCurrent()).toBe(false);
+    expect(user.existed()).toBe(true);
+  });
+
+  it('can loginAs a user with async storage', async () => {
+    const currentStorage = CoreManager.getStorageController();
+    CoreManager.setStorageController(mockAsyncStorage);
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request(method, path, body, options) {
+        expect(method).toBe('POST');
+        expect(path).toBe('loginAs');
+        expect(body.userId).toBe('uid5');
+        expect(options.useMasterKey).toBe(true);
+        return Promise.resolve(
+          {
+            objectId: 'uid5',
+            username: 'username',
+            sessionToken: '123abc',
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+
+    const user = await ParseUser.loginAs('uid5');
+    expect(user.id).toBe('uid5');
+    expect(user.isCurrent()).toBe(true);
+    expect(user.existed()).toBe(true);
+    CoreManager.setStorageController(currentStorage);
   });
 
   it('can become a user with a session token', done => {
