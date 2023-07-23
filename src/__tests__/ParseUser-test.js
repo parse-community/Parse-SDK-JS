@@ -326,6 +326,53 @@ describe('ParseUser', () => {
       });
   });
 
+  describe('loginWithAdditional', () => {
+    it('loginWithAdditonal fails with invalid payload', async () => {
+      ParseUser.enableUnsafeCurrentUser();
+      ParseUser._clearCache();
+      CoreManager.setRESTController({
+        request(method, path, body) {
+          expect(method).toBe('POST');
+          expect(path).toBe('login');
+          expect(body.username).toBe('username');
+          expect(body.password).toBe('password');
+          expect(body.authData).toEqual({ mfa: { key: '1234' } });
+
+          return Promise.resolve(
+            {
+              objectId: 'uid2',
+              username: 'username',
+              sessionToken: '123abc',
+              authDataResponse: {
+                mfa: { enabled: true },
+              },
+            },
+            200
+          );
+        },
+        ajax() {},
+      });
+      const response = await ParseUser.logInWithAdditionalAuth('username', 'password', {mfa: {key:'1234'}});
+      expect(response instanceof ParseUser).toBe(true);
+      expect(response.get('authDataResponse')).toEqual({mfa: { enabled: true }});
+    });
+
+    it('loginWithAdditonal fails with invalid payload', async () => {
+      ParseUser.enableUnsafeCurrentUser();
+      ParseUser._clearCache();
+      await expect(ParseUser.logInWithAdditionalAuth({}, 'password', {})).rejects.toThrowError(
+        new ParseError(ParseError.OTHER_CAUSE, 'Username must be a string.')
+      );
+      await expect(ParseUser.logInWithAdditionalAuth('username', {}, {})).rejects.toThrowError(
+        new ParseError(ParseError.OTHER_CAUSE, 'Password must be a string.')
+      );
+      await expect(ParseUser.logInWithAdditionalAuth('username', 'password', '')).rejects.toThrowError(
+        new ParseError(ParseError.OTHER_CAUSE, 'Auth must be an object.')
+      );
+    });
+  });
+
+
   it('preserves changes when logging in', done => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
