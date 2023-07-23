@@ -1,3 +1,10 @@
+# [4.2.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.3...4.2.0-alpha.4) (2023-07-23)
+
+
+### Features
+
+* Login with username, password and additional authentication data via `ParseUser.logInWithAdditionalAuth` ([#1955](https://github.com/parse-community/Parse-SDK-JS/issues/1955)) ([2bad411](https://github.com/parse-community/Parse-SDK-JS/commit/2bad4119c23372d1b38c811c4b4bb3d06b1b62f0))
+
 # [4.2.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.2...4.2.0-alpha.3) (2023-06-11)
 
 
