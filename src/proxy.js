@@ -5,10 +5,7 @@ const nestedHandler = {
     levels.push(key);
     const topLevel = levels[0];
     levels.shift();
-    const copiedParent = Array.isArray(this._parent[topLevel])
-      ? [...this._parent[topLevel]]
-      : { ...this._parent[topLevel] };
-    const scope = deepcopy(copiedParent);
+    const scope = deepcopy(this._parent[topLevel]);
     let target = scope;
     const max_level = levels.length - 1;
     levels.some((level, i) => {
@@ -36,13 +33,12 @@ const nestedHandler = {
       (Object.prototype.toString.call(prop) === '[object Object]' &&
         prop?.constructor?.name === 'Object')
     ) {
-      const thisHandler = { ...nestedHandler };
+      const thisHandler = deepcopy(nestedHandler);
       thisHandler._path = `${this._path}.${key}`;
       thisHandler._parent = this._parent;
       const isArray = Array.isArray(prop);
       thisHandler._array = isArray;
-      const copied = isArray ? [...prop] : { ...prop };
-      return new Proxy(copied, thisHandler);
+      return new Proxy(deepcopy(prop), thisHandler);
     }
     return reflector;
   },
@@ -64,10 +60,10 @@ const proxyHandler = {
       Object.prototype.toString.call(getValue) === '[object Object]' &&
       getValue?.constructor?.name === 'Object'
     ) {
-      const thisHandler = { ...nestedHandler };
+      const thisHandler = deepcopy(nestedHandler);
       thisHandler._path = key;
       thisHandler._parent = receiver;
-      return new Proxy({ ...getValue }, thisHandler);
+      return new Proxy(deepcopy(getValue), thisHandler);
     }
     return getValue;
   },
