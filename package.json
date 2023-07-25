@@ -84,7 +84,7 @@
     "metro-react-native-babel-preset": "0.76.4",
     "mongodb-runner": "5.4.3",
     "parse-server": "git+https://github.com/parse-community/parse-server#alpha",
-    "prettier": "2.8.8",
+    "prettier": "3.0.0",
     "puppeteer": "20.4.0",
     "regenerator-runtime": "0.13.11",
     "semantic-release": "19.0.5",
