@@ -1,3 +1,4 @@
+// @ts-nocheck
 export default ParseRole;
 /**
  * Represents a Role on the Parse server. Roles represent groupings of

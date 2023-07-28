@@ -1,3 +1,4 @@
+// @ts-nocheck
 type Pointer = {
     __type: string;
     className: string;

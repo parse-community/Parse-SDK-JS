@@ -6,7 +6,9 @@
     "emitDeclarationOnly": true,
     "outDir": "types",
     "noImplicitAny": false,
-    "allowJs": true
+    "allowJs": false
   },
-  "include": ["src/Parse.ts"]
+  "files": [
+    "src/ParseSession.ts"
+  ]
 }

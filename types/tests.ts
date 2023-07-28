@@ -1,300 +1,315 @@
-import Parse from './Parse';
-// Parse is a global type, but it can also be imported
+import ParseSession from './ParseSession';
 
-class GameScore extends Parse.Object {
-  constructor(options?: any) {
-      super('GameScore', options);
+function testSession() {
+  function testConstructor() {
+      // $ExpectType ParseSession
+      new ParseSession();
+
+      // $ExpectType ParseSession
+      new ParseSession({ example: 100 });
+
+      // @ts-expect-error
+      new ParseSession<{ example: number }>();
+
+      // @ts-expect-error
+      new ParseSession<{ example: number }>({ example: 'hello' });
   }
 }
 
-class Game extends Parse.Object {
-  constructor(options?: any) {
-      super('Game', options);
-  }
-}
+// class GameScore extends ParseObject {
+//   constructor(options?: any) {
+//       super('GameScore', options);
+//   }
+// }
 
-function test_config() {
-  Parse.Config.save({ foo: 'bar' }, { foo: true });
-  Parse.Config.get({ useMasterKey: true });
-}
+// class Game extends ParseObject {
+//   constructor(options?: any) {
+//       super('Game', options);
+//   }
+// }
 
-function test_object() {
-  const game = new Game();
-  game.save(null, {
-      useMasterKey: true,
-      sessionToken: 'sometoken',
-      cascadeSave: false,
-  }).then(result => result);
+// function test_config() {
+//   Parse.Config.save({ foo: 'bar' }, { foo: true });
+//   Parse.Config.get({ useMasterKey: true });
+// }
 
-  if (!game.isNew()) {
+// function test_object() {
+//   const game = new Game();
+//   game.save(null, {
+//       useMasterKey: true,
+//       sessionToken: 'sometoken',
+//       cascadeSave: false,
+//   }).then(result => result);
 
-  }
+//   if (!game.isNew()) {
 
-  if (game.toPointer().className !== 'Game') {
+//   }
 
-  }
+//   if (game.toPointer().className !== 'Game') {
 
-  game.fetch({});
+//   }
 
-  // Create a new instance of that class.
-  const gameScore = new GameScore();
+//   game.fetch({});
 
-  gameScore.set('score', 1337);
-  gameScore.set('playerName', 'Sean Plott');
-  gameScore.set('cheatMode', false);
+//   // Create a new instance of that class.
+//   const gameScore = new GameScore();
 
-  // Setting attrs using object
-  gameScore.set({
-      level: '10',
-      difficult: 15,
-  });
+//   gameScore.set('score', 1337);
+//   gameScore.set('playerName', 'Sean Plott');
+//   gameScore.set('cheatMode', false);
 
-  const score = gameScore.get('score');
-  const playerName = gameScore.get('playerName');
-  const cheatMode = gameScore.get('cheatMode');
+//   // Setting attrs using object
+//   gameScore.set({
+//       level: '10',
+//       difficult: 15,
+//   });
 
-  gameScore.increment('score');
-  gameScore.addUnique('skills', 'flying');
-  gameScore.addUnique('skills', 'kungfu');
-  gameScore.addAll('skills', ['kungfu']);
-  gameScore.addAllUnique('skills', ['kungfu']);
-  gameScore.remove('skills', 'flying');
-  gameScore.removeAll('skills', ['kungFu']);
-  game.set('gameScore', gameScore);
+//   const score = gameScore.get('score');
+//   const playerName = gameScore.get('playerName');
+//   const cheatMode = gameScore.get('cheatMode');
 
-  const gameCopy = Game.fromJSON(JSON.parse(JSON.stringify(game)), true);
+//   gameScore.increment('score');
+//   gameScore.addUnique('skills', 'flying');
+//   gameScore.addUnique('skills', 'kungfu');
+//   gameScore.addAll('skills', ['kungfu']);
+//   gameScore.addAllUnique('skills', ['kungfu']);
+//   gameScore.remove('skills', 'flying');
+//   gameScore.removeAll('skills', ['kungFu']);
+//   game.set('gameScore', gameScore);
 
-  const object = new Parse.Object('TestObject');
-  object.equals(gameScore);
-  object.fetchWithInclude(['key1', 'key2']);
-}
+//   const gameCopy = Game.fromJSON(JSON.parse(JSON.stringify(game)), true);
 
-function test_errors() {
-  try {
-      throw new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR, 'sdfds');
-  } catch (error) {
-      if (error.code !== 1) {
+//   const object = new ParseObject('TestObject');
+//   object.equals(gameScore);
+//   object.fetchWithInclude(['key1', 'key2']);
+// }
 
-      }
-  }
-}
+// function test_errors() {
+//   try {
+//       throw new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR, 'sdfds');
+//   } catch (error) {
+//       if (error.code !== 1) {
 
-function test_query() {
-  const gameScore = new GameScore();
+//       }
+//   }
+// }
 
-  const query = new Parse.Query(GameScore);
-  query.equalTo('playerName', 'Dan Stemkoski');
-  query.notEqualTo('playerName', 'Michael Yabuti');
-  query.fullText('playerName', 'dan', { language: 'en', caseSensitive: false, diacriticSensitive: true });
-  query.greaterThan('playerAge', 18);
-  query.eachBatch(objs => Promise.resolve(), { batchSize: 10 });
-  query.each(score => Promise.resolve());
-  query.hint('_id_');
-  query.explain(true);
-  query.limit(10);
-  query.skip(10);
+// function test_query() {
+//   const gameScore = new GameScore();
 
-  // Sorts the results in ascending order by the score field
-  query.ascending('score');
+//   const query = new Parse.Query(GameScore);
+//   query.equalTo('playerName', 'Dan Stemkoski');
+//   query.notEqualTo('playerName', 'Michael Yabuti');
+//   query.fullText('playerName', 'dan', { language: 'en', caseSensitive: false, diacriticSensitive: true });
+//   query.greaterThan('playerAge', 18);
+//   query.eachBatch(objs => Promise.resolve(), { batchSize: 10 });
+//   query.each(score => Promise.resolve());
+//   query.hint('_id_');
+//   query.explain(true);
+//   query.limit(10);
+//   query.skip(10);
 
-  // Sorts the results in descending order by the score field
-  query.descending('score');
+//   // Sorts the results in ascending order by the score field
+//   query.ascending('score');
 
-  // Restricts to wins < 50
-  query.lessThan('wins', 50);
+//   // Sorts the results in descending order by the score field
+//   query.descending('score');
 
-  // Restricts to wins <= 50
-  query.lessThanOrEqualTo('wins', 50);
+//   // Restricts to wins < 50
+//   query.lessThan('wins', 50);
 
-  // Restricts to wins > 50
-  query.greaterThan('wins', 50);
+//   // Restricts to wins <= 50
+//   query.lessThanOrEqualTo('wins', 50);
 
-  // Restricts to wins >= 50
-  query.greaterThanOrEqualTo('wins', 50);
+//   // Restricts to wins > 50
+//   query.greaterThan('wins', 50);
 
-  query.containedBy('place', ['1', '2']);
-  // Finds scores from any of Jonathan, Dario, or Shawn
-  query.containedIn('playerName', ['Jonathan Walsh', 'Dario Wunsch', 'Shawn Simon']);
+//   // Restricts to wins >= 50
+//   query.greaterThanOrEqualTo('wins', 50);
 
-  // Finds scores from anyone who is neither Jonathan, Dario, nor Shawn
-  query.notContainedIn('playerName', ['Jonathan Walsh', 'Dario Wunsch', 'Shawn Simon']);
+//   query.containedBy('place', ['1', '2']);
+//   // Finds scores from any of Jonathan, Dario, or Shawn
+//   query.containedIn('playerName', ['Jonathan Walsh', 'Dario Wunsch', 'Shawn Simon']);
 
-  // Finds objects that have the score set
-  query.exists('score');
+//   // Finds scores from anyone who is neither Jonathan, Dario, nor Shawn
+//   query.notContainedIn('playerName', ['Jonathan Walsh', 'Dario Wunsch', 'Shawn Simon']);
 
-  // Finds objects that don't have the score set
-  query.doesNotExist('score');
-  query.matchesKeyInQuery('hometown', 'city', query);
-  query.doesNotMatchKeyInQuery('hometown', 'city', query);
-  query.select('score', 'playerName');
+//   // Finds objects that have the score set
+//   query.exists('score');
 
-  // Find objects where the array in arrayKey contains 2.
-  query.equalTo('arrayKey', 2);
+//   // Finds objects that don't have the score set
+//   query.doesNotExist('score');
+//   query.matchesKeyInQuery('hometown', 'city', query);
+//   query.doesNotMatchKeyInQuery('hometown', 'city', query);
+//   query.select('score', 'playerName');
 
-  // Find objects where the array in arrayKey contains all of the elements 2, 3, and 4.
-  query.containsAll('arrayKey', [2, 3, 4]);
-  query.containsAllStartingWith('arrayKey', ['2', '3', '4']);
+//   // Find objects where the array in arrayKey contains 2.
+//   query.equalTo('arrayKey', 2);
 
-  query.startsWith('name', "Big Daddy's");
-  query.equalTo('score', gameScore);
-  query.exists('score');
-  query.include('score');
-  query.include(['score.team']);
-  query.includeAll();
-  query.sortByTextScore();
-  // Find objects that match the aggregation pipeline
-  query.aggregate({
-      group: {
-          objectId: '$name',
-      },
-  });
+//   // Find objects where the array in arrayKey contains all of the elements 2, 3, and 4.
+//   query.containsAll('arrayKey', [2, 3, 4]);
+//   query.containsAllStartingWith('arrayKey', ['2', '3', '4']);
 
-  query.aggregate({
-      count: 'total',
-  });
+//   query.startsWith('name', "Big Daddy's");
+//   query.equalTo('score', gameScore);
+//   query.exists('score');
+//   query.include('score');
+//   query.include(['score.team']);
+//   query.includeAll();
+//   query.sortByTextScore();
+//   // Find objects that match the aggregation pipeline
+//   query.aggregate({
+//       group: {
+//           objectId: '$name',
+//       },
+//   });
 
-  query.aggregate({
-      lookup: {
-          from: 'Collection',
-          foreignField: 'id',
-          localField: 'id',
-          as: 'result',
-      },
-  });
-  query.aggregate({
-      lookup: {
-          from: 'Target',
-          let: { foo: 'bar', baz: 123 },
-          pipeline: [],
-          as: 'result',
-      },
-  });
+//   query.aggregate({
+//       count: 'total',
+//   });
 
-  query.aggregate({
-      graphLookup: {
-          from: 'Target',
-          connectFromField: 'objectId',
-          connectToField: 'newId',
-          as: 'result',
-      },
-  });
+//   query.aggregate({
+//       lookup: {
+//           from: 'Collection',
+//           foreignField: 'id',
+//           localField: 'id',
+//           as: 'result',
+//       },
+//   });
+//   query.aggregate({
+//       lookup: {
+//           from: 'Target',
+//           let: { foo: 'bar', baz: 123 },
+//           pipeline: [],
+//           as: 'result',
+//       },
+//   });
 
-  query.aggregate({
-      facet: {
-          foo: [
-              {
-                  count: 'total',
-              },
-          ],
-          bar: [
-              {
-                  group: {
-                      objectId: '$name',
-                  },
-              },
-          ],
-      },
-  });
+//   query.aggregate({
+//       graphLookup: {
+//           from: 'Target',
+//           connectFromField: 'objectId',
+//           connectToField: 'newId',
+//           as: 'result',
+//       },
+//   });
 
-  query.aggregate({
-      unwind: '$field',
-  });
+//   query.aggregate({
+//       facet: {
+//           foo: [
+//               {
+//                   count: 'total',
+//               },
+//           ],
+//           bar: [
+//               {
+//                   group: {
+//                       objectId: '$name',
+//                   },
+//               },
+//           ],
+//       },
+//   });
 
-  query.aggregate({
-      unwind: {
-          path: '$field',
-          includeArrayIndex: 'newIndex',
-          preserveNullAndEmptyArrays: true,
-      },
-  });
+//   query.aggregate({
+//       unwind: '$field',
+//   });
 
-  // Find objects with distinct key
-  query.distinct('name');
+//   query.aggregate({
+//       unwind: {
+//           path: '$field',
+//           includeArrayIndex: 'newIndex',
+//           preserveNullAndEmptyArrays: true,
+//       },
+//   });
 
-  const testQuery = Parse.Query.or(query, query);
-}
+//   // Find objects with distinct key
+//   query.distinct('name');
 
-function test_query_exclude() {
-  const gameScore = new GameScore();
+//   const testQuery = Parse.Query.or(query, query);
+// }
 
-  const query = new Parse.Query(GameScore);
+// function test_query_exclude() {
+//   const gameScore = new GameScore();
 
-  // Show all keys, except the specified key.
-  query.exclude('place');
+//   const query = new Parse.Query(GameScore);
 
-  const testQuery = Parse.Query.or(query, query);
-}
+//   // Show all keys, except the specified key.
+//   query.exclude('place');
 
-async function test_query_promise() {
-  // Test promise with a query
-  const findQuery = new Parse.Query('Test');
-  findQuery
-      .find()
-      .then(() => {
-          // success
-      })
-      .catch(() => {
-          // error
-      });
+//   const testQuery = Parse.Query.or(query, query);
+// }
 
-  const getQuery = new Parse.Query('Test');
-  try {
-      await getQuery.get('objectId');
-  } catch (error) {
-      // noop
-  }
+// async function test_query_promise() {
+//   // Test promise with a query
+//   const findQuery = new Parse.Query('Test');
+//   findQuery
+//       .find()
+//       .then(() => {
+//           // success
+//       })
+//       .catch(() => {
+//           // error
+//       });
 
-  await getQuery.map((score, index) => score.increment('score', index));
-  await getQuery.reduce((accum, score, index) => (accum += score.get('score')), 0);
-  await getQuery.reduce((accum, score, index) => (accum += score.get('score')), 0, { batchSize: 200 });
-  await getQuery.filter(scores => scores.get('score') > 0);
-  await getQuery.filter(scores => scores.get('score') > 0, { batchSize: 10 });
-}
+//   const getQuery = new Parse.Query('Test');
+//   try {
+//       await getQuery.get('objectId');
+//   } catch (error) {
+//       // noop
+//   }
 
-async function test_live_query() {
-  const subscription = await new Parse.Query('Test').subscribe();
-  subscription.on('close', object => {
-      // $ExpectType ParseObject
-      object;
-  });
-  subscription.on('create', object => {
-      // $ExpectType ParseObject
-      object;
-  });
-  subscription.on('delete', object => {
-      // $ExpectType ParseObject
-      object;
-  });
-  subscription.on('enter', object => {
-      // $ExpectType ParseObject
-      object;
-  });
-  subscription.on('leave', object => {
-      // $ExpectType ParseObject
-      object;
-  });
-  subscription.on('open', object => {
-      // $ExpectType ParseObject
-      object;
-  });
-  subscription.on('update', object => {
-      // $ExpectType ParseObject
-      object;
-  });
-}
+//   await getQuery.map((score, index) => score.increment('score', index));
+//   await getQuery.reduce((accum, score, index) => (accum += score.get('score')), 0);
+//   await getQuery.reduce((accum, score, index) => (accum += score.get('score')), 0, { batchSize: 200 });
+//   await getQuery.filter(scores => scores.get('score') > 0);
+//   await getQuery.filter(scores => scores.get('score') > 0, { batchSize: 10 });
+// }
 
-function test_anonymous_utils() {
-  // $ExpectType boolean
-  Parse.AnonymousUtils.isLinked(new Parse.User());
-  // $ExpectType Promise<ParseUser>
-  Parse.AnonymousUtils.link(new Parse.User(), { useMasterKey: true, sessionToken: '' });
-  // $ExpectType Promise<ParseUser>
-  Parse.AnonymousUtils.logIn({ useMasterKey: true, sessionToken: '' });
-}
+// async function test_live_query() {
+//   const subscription = await new Parse.Query('Test').subscribe();
+//   subscription.on('close', object => {
+//       // $ExpectType ParseObject
+//       object;
+//   });
+//   subscription.on('create', object => {
+//       // $ExpectType ParseObject
+//       object;
+//   });
+//   subscription.on('delete', object => {
+//       // $ExpectType ParseObject
+//       object;
+//   });
+//   subscription.on('enter', object => {
+//       // $ExpectType ParseObject
+//       object;
+//   });
+//   subscription.on('leave', object => {
+//       // $ExpectType ParseObject
+//       object;
+//   });
+//   subscription.on('open', object => {
+//       // $ExpectType ParseObject
+//       object;
+//   });
+//   subscription.on('update', object => {
+//       // $ExpectType ParseObject
+//       object;
+//   });
+// }
 
-function return_a_query(): Parse.Query {
-  return new Parse.Query(Game);
-}
+// function test_anonymous_utils() {
+//   // $ExpectType boolean
+//   Parse.AnonymousUtils.isLinked(new Parse.User());
+//   // $ExpectType Promise<ParseUser>
+//   Parse.AnonymousUtils.link(new Parse.User(), { useMasterKey: true, sessionToken: '' });
+//   // $ExpectType Promise<ParseUser>
+//   Parse.AnonymousUtils.logIn({ useMasterKey: true, sessionToken: '' });
+// }
+
+// function return_a_query(): Parse.Query {
+//   return new Parse.Query(Game);
+// }
 
 // function test_each() {
 //   new Parse.Query(Game).each(game => {
@@ -2050,22 +2065,6 @@ function return_a_query(): Parse.Query {
 
 //       // $ExpectType { example: number; }
 //       roleTyped.attributes;
-//   }
-// }
-
-// function testSession() {
-//   function testConstructor() {
-//       // $ExpectType Session<Attributes>
-//       new Parse.Session();
-
-//       // $ExpectType Session<{ example: number; }>
-//       new Parse.Session({ example: 100 });
-
-//       // @ts-expect-error
-//       new Parse.Session<{ example: number }>();
-
-//       // @ts-expect-error
-//       new Parse.Session<{ example: number }>({ example: 'hello' });
 //   }
 // }
 

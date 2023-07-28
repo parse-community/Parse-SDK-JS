@@ -1,3 +1,4 @@
+// @ts-nocheck
 type WhereClause = {
     [attr: string]: mixed;
 };

@@ -18,4 +18,4 @@ type FullOptions = {
     progress?: any;
     usePost?: boolean;
 };
-export {};
+export { RequestOptions, FullOptions };

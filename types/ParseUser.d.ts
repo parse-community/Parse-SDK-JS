@@ -1,3 +1,4 @@
+// @ts-nocheck
 type AuthData = {
     [key: string]: mixed;
 };

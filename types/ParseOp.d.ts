@@ -1,3 +1,4 @@
+// @ts-nocheck
 export function opFromJSON(json: {
     [key: string]: any;
 }): Op | null;

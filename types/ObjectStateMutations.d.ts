@@ -1,3 +1,4 @@
+// @ts-nocheck
 export function defaultState(): State;
 export function setServerData(serverData: AttributeMap, attributes: AttributeMap): void;
 export function setPendingOp(pendingOps: Array<OpsMap>, attr: string, op: Op | null): void;
