@@ -1,0 +1,2 @@
+export = EventEmitter;
+export = EventEmitter;
