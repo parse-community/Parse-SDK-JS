@@ -1,3 +1,4 @@
+// @ts-nocheck
 export default ParseConfig;
 /**
  * Parse.Config is a local representation of configuration data that

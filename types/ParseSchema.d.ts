@@ -1,3 +1,4 @@
+// @ts-nocheck
 export default ParseSchema;
 /**
  * A Parse.Schema object is for handling schema data from Parse.

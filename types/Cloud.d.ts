@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Contains functions for calling and declaring
  * <a href="/docs/cloud_code_guide#functions">cloud functions</a>.

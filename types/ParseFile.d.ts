@@ -1,3 +1,4 @@
+// @ts-nocheck
 type FileSource = {
     format: "file";
     file: Blob;

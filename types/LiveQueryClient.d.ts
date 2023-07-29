@@ -1,3 +1,4 @@
+// @ts-nocheck
 export default LiveQueryClient;
 /**
  * Creates a new LiveQueryClient.

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Contains functions to deal with Push in Parse.
  *

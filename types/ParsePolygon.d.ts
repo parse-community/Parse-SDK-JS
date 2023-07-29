@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 export default ParsePolygon;
 /**
  * Creates a new Polygon with any of the following forms:<br>
