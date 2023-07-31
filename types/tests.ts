@@ -1,28 +1,13 @@
-import ParseSession from './ParseSession';
+import Parse from './Parse';
+// Parse is a global type, but it can also be imported
 
-function testSession() {
-  function testConstructor() {
-      // $ExpectType ParseSession
-      new ParseSession();
-
-      // $ExpectType ParseSession
-      new ParseSession({ example: 100 });
-
-      // @ts-expect-error
-      new ParseSession<{ example: number }>();
-
-      // @ts-expect-error
-      new ParseSession<{ example: number }>({ example: 'hello' });
-  }
-}
-
-// class GameScore extends ParseObject {
+// class GameScore extends Parse.Object {
 //   constructor(options?: any) {
 //       super('GameScore', options);
 //   }
 // }
 
-// class Game extends ParseObject {
+// class Game extends Parse.Object {
 //   constructor(options?: any) {
 //       super('Game', options);
 //   }
@@ -79,7 +64,7 @@ function testSession() {
 
 //   const gameCopy = Game.fromJSON(JSON.parse(JSON.stringify(game)), true);
 
-//   const object = new ParseObject('TestObject');
+//   const object = new Parse.Object('TestObject');
 //   object.equals(gameScore);
 //   object.fetchWithInclude(['key1', 'key2']);
 // }
@@ -2067,6 +2052,22 @@ function testSession() {
 //       roleTyped.attributes;
 //   }
 // }
+
+function testSession() {
+  function testConstructor() {
+      // $ExpectType ParseSession
+      new Parse.Session();
+
+      // $ExpectType ParseSession
+      new Parse.Session({ example: 100 });
+
+      // @ts-expect-error
+      new Parse.Session<{ example: number }>();
+
+      // @ts-expect-error
+      new Parse.Session<{ example: number }>({ example: 'hello' });
+  }
+}
 
 // function testUser() {
 //   function testConstructor() {

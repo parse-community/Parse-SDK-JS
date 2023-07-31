@@ -4,7 +4,7 @@ type Pointer = {
     className: string;
     objectId: string;
 };
-type SaveOptions = FullOptions & {
+export type SaveOptions = FullOptions & {
     cascadeSave?: boolean;
     context?: AttributeMap;
 };

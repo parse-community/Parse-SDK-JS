@@ -204,7 +204,7 @@ function requireMethods(name: string, methods: Array<string>, controller: any) {
   });
 }
 
-module.exports = {
+const CoreManager = {
   get: function (key: string): any {
     if (config.hasOwnProperty(key)) {
       return config[key];
@@ -468,3 +468,6 @@ module.exports = {
     return config['HooksController'];
   },
 };
+
+module.exports = CoreManager;
+export default CoreManager;
