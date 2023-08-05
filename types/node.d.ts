@@ -1,2 +1,3 @@
-import parse from "./Parse";
-export default parse;
+import * as parse from "./index";
+
+export = parse;
