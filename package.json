@@ -23,8 +23,7 @@
     "lib/",
     "LICENSE",
     "NOTICE",
-    "README.md",
-    "types/index.d.ts"
+    "README.md"
   ],
   "browser": {
     "react-native": false
