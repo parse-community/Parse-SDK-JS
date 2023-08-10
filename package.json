@@ -23,11 +23,13 @@
     "lib/",
     "LICENSE",
     "NOTICE",
-    "README.md"
+    "README.md",
+    "types/index.d.ts"
   ],
   "browser": {
     "react-native": false
   },
+  "types": "types",
   "dependencies": {
     "@babel/runtime-corejs3": "7.22.6",
     "idb-keyval": "6.2.1",

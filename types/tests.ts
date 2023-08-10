@@ -1,83 +1,83 @@
 import Parse from './Parse';
 // Parse is a global type, but it can also be imported
 
-// class GameScore extends Parse.Object {
-//   constructor(options?: any) {
-//       super('GameScore', options);
-//   }
-// }
+class GameScore extends Parse.Object {
+  constructor(options?: any) {
+      super('GameScore', options);
+  }
+}
 
-// class Game extends Parse.Object {
-//   constructor(options?: any) {
-//       super('Game', options);
-//   }
-// }
+class Game extends Parse.Object {
+  constructor(options?: any) {
+      super('Game', options);
+  }
+}
 
-// function test_config() {
-//   Parse.Config.save({ foo: 'bar' }, { foo: true });
-//   Parse.Config.get({ useMasterKey: true });
-// }
+function test_config() {
+  Parse.Config.save({ foo: 'bar' }, { foo: true });
+  Parse.Config.get({ useMasterKey: true });
+}
 
-// function test_object() {
-//   const game = new Game();
-//   game.save(null, {
-//       useMasterKey: true,
-//       sessionToken: 'sometoken',
-//       cascadeSave: false,
-//   }).then(result => result);
+function test_object() {
+  const game = new Game();
+  game.save(null, {
+      useMasterKey: true,
+      sessionToken: 'sometoken',
+      cascadeSave: false,
+  }).then(result => result);
 
-//   if (!game.isNew()) {
+  if (!game.isNew()) {
 
-//   }
+  }
 
-//   if (game.toPointer().className !== 'Game') {
+  if (game.toPointer().className !== 'Game') {
 
-//   }
+  }
 
-//   game.fetch({});
+  game.fetch({});
 
-//   // Create a new instance of that class.
-//   const gameScore = new GameScore();
+  // Create a new instance of that class.
+  const gameScore = new GameScore();
 
-//   gameScore.set('score', 1337);
-//   gameScore.set('playerName', 'Sean Plott');
-//   gameScore.set('cheatMode', false);
+  gameScore.set('score', 1337);
+  gameScore.set('playerName', 'Sean Plott');
+  gameScore.set('cheatMode', false);
 
-//   // Setting attrs using object
-//   gameScore.set({
-//       level: '10',
-//       difficult: 15,
-//   });
+  // Setting attrs using object
+  gameScore.set({
+      level: '10',
+      difficult: 15,
+  });
 
-//   const score = gameScore.get('score');
-//   const playerName = gameScore.get('playerName');
-//   const cheatMode = gameScore.get('cheatMode');
+  const score = gameScore.get('score');
+  const playerName = gameScore.get('playerName');
+  const cheatMode = gameScore.get('cheatMode');
 
-//   gameScore.increment('score');
-//   gameScore.addUnique('skills', 'flying');
-//   gameScore.addUnique('skills', 'kungfu');
-//   gameScore.addAll('skills', ['kungfu']);
-//   gameScore.addAllUnique('skills', ['kungfu']);
-//   gameScore.remove('skills', 'flying');
-//   gameScore.removeAll('skills', ['kungFu']);
-//   game.set('gameScore', gameScore);
+  gameScore.increment('score');
+  gameScore.addUnique('skills', 'flying');
+  gameScore.addUnique('skills', 'kungfu');
+  gameScore.addAll('skills', ['kungfu']);
+  gameScore.addAllUnique('skills', ['kungfu']);
+  gameScore.remove('skills', 'flying');
+  gameScore.removeAll('skills', ['kungFu']);
+  game.set('gameScore', gameScore);
 
-//   const gameCopy = Game.fromJSON(JSON.parse(JSON.stringify(game)), true);
+  const gameCopy = Game.fromJSON(JSON.parse(JSON.stringify(game)), true);
 
-//   const object = new Parse.Object('TestObject');
-//   object.equals(gameScore);
-//   object.fetchWithInclude(['key1', 'key2']);
-// }
+  const object = new Parse.Object('TestObject');
+  object.equals(gameScore);
+  object.fetchWithInclude(['key1', 'key2']);
+}
 
-// function test_errors() {
-//   try {
-//       throw new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR, 'sdfds');
-//   } catch (error) {
-//       if (error.code !== 1) {
+function test_errors() {
+  try {
+      throw new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR, 'sdfds');
+  } catch (error) {
+      if (error.code !== 1) {
 
-//       }
-//   }
-// }
+      }
+  }
+}
 
 // function test_query() {
 //   const gameScore = new GameScore();
@@ -2053,21 +2053,21 @@ import Parse from './Parse';
 //   }
 // }
 
-function testSession() {
-  function testConstructor() {
-      // $ExpectType ParseSession
-      new Parse.Session();
+// function testSession() {
+//   function testConstructor() {
+//       // $ExpectType ParseSession
+//       new Parse.Session();
 
-      // $ExpectType ParseSession
-      new Parse.Session({ example: 100 });
+//       // $ExpectType ParseSession
+//       new Parse.Session({ example: 100 });
 
-      // @ts-expect-error
-      new Parse.Session<{ example: number }>();
+//       // @ts-expect-error
+//       new Parse.Session<{ example: number }>();
 
-      // @ts-expect-error
-      new Parse.Session<{ example: number }>({ example: 'hello' });
-  }
-}
+//       // @ts-expect-error
+//       new Parse.Session<{ example: number }>({ example: 'hello' });
+//   }
+// }
 
 // function testUser() {
 //   function testConstructor() {

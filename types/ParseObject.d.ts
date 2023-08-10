@@ -567,7 +567,7 @@ declare class ParseObject {
      *     The only supported option is <code>error</code>.
      * @returns {(ParseObject|boolean)} true if the set succeeded.
      */
-    set(key: mixed, value: mixed, options?: mixed): ParseObject | boolean;
+    set(key: mixed, value?: mixed, options?: mixed): ParseObject | boolean;
     /**
      * Remove an attribute from the model. This is a noop if the attribute doesn't
      * exist.
@@ -783,7 +783,7 @@ declare class ParseObject {
      * @returns {Promise} A promise that is fulfilled when the fetch
      *     completes.
      */
-    fetchWithInclude(keys: String | Array<string | Array<string>>, options: RequestOptions): Promise<any>;
+    fetchWithInclude(keys: String | Array<string | Array<string>>, options?: RequestOptions): Promise<any>;
     /**
      * Saves this object to the server at some unspecified time in the future,
      * even if Parse is currently inaccessible.
@@ -873,8 +873,8 @@ declare class ParseObject {
      * completes.
      */
     save(arg1?: string | {
-        [attr: string]: mixed;
-    }, arg2?: SaveOptions | mixed, arg3?: SaveOptions): Promise<any>;
+        [attr: string]: object;
+    } | null, arg2?: SaveOptions | object, arg3?: SaveOptions): Promise<any>;
     /**
      * Deletes this object from the server at some unspecified time in the future,
      * even if Parse is currently inaccessible.

@@ -9,7 +9,6 @@
     "allowJs": false
   },
   "files": [
-    "src/Parse.ts",
-    "src/ParseSession.ts"
+    "src/Parse.ts"
   ]
 }
