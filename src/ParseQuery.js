@@ -1575,7 +1575,7 @@ class ParseQuery {
    * @param {string} modifiers The regular expression mode.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  startsWith(key: string, prefix: string, modifiers?: string): ParseQuery {
+  startsWith(key: string, prefix: string, modifiers: string): ParseQuery {
     if (typeof prefix !== 'string') {
       throw new Error('The value being searched for must be a string.');
     }
