@@ -1,7 +1,3 @@
-/**
- * @flow
- */
-
 import CoreManager from './CoreManager';
 import isRevocableSession from './isRevocableSession';
 import ParseObject from './ParseObject';
@@ -22,7 +18,7 @@ class ParseSession extends ParseObject {
   /**
    * @param {object} attributes The initial set of data to store in the user.
    */
-  constructor(attributes: ?AttributeMap) {
+  constructor(attributes?: any) {
     super('_Session');
     if (attributes && typeof attributes === 'object') {
       if (!this.set(attributes || {})) {

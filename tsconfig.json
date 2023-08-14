@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2015",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "types",
+    "noImplicitAny": false,
+    "allowJs": false
+  },
+  "files": [
+    "src/Parse.ts",
+    "src/ParseSession.ts"
+  ]
+}
