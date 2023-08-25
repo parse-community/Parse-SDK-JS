@@ -832,7 +832,7 @@ describe('ParseUser', () => {
       });
   });
 
-  it('removes the current user from disk when destroyed', done => {
+  it('removes the current user from disk when destroyed', async () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     Storage._clear();
@@ -848,25 +848,21 @@ describe('ParseUser', () => {
       ajax() {},
     });
 
-    ParseUser.signUp('destroyed', 'password')
-      .then(u => {
-        expect(u.isCurrent()).toBe(true);
-        CoreManager.setRESTController({
-          request() {
-            return Promise.resolve({}, 200);
-          },
-          ajax() {},
-        });
-        return u.destroy();
-      })
-      .then(() => {
-        expect(ParseUser.current()).toBe(null);
-        return ParseUser.currentAsync();
-      })
-      .then(current => {
-        expect(current).toBe(null);
-        done();
-      });
+    const u = await ParseUser.signUp('destroyed', 'password');
+    expect(u.isCurrent()).toBe(true);
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({}, 200);
+      },
+      ajax() {},
+    });
+    await u.destroy();
+
+    expect(ParseUser.current()).toBe(null);
+    const current = await ParseUser.currentAsync();
+
+    expect(current).toBe(null);
+    await u.destroy();
   });
 
   it('updates the current user on disk when fetched', done => {
@@ -1531,6 +1527,7 @@ describe('ParseUser', () => {
 
     user.set('authData', { customAuth: true });
     expect(user._isLinked(provider)).toBe(true);
+    expect(user._isLinked('customAuth')).toBe(true);
 
     user.set('authData', 1234);
     expect(user._isLinked(provider)).toBe(false);
