@@ -6,7 +6,7 @@ let EventEmitter;
 
 try {
   if (process.env.PARSE_BUILD === 'react-native') {
-    let EventEmitter = require('react-native/Libraries/vendor/emitter/EventEmitter');
+    EventEmitter = require('react-native/Libraries/vendor/emitter/EventEmitter');
     if (EventEmitter.default) {
       EventEmitter = EventEmitter.default;
     }
@@ -15,7 +15,6 @@ try {
     EventEmitter = require('events').EventEmitter;
   }
 } catch (_) {
-  // Event emitter not available
+  // EventEmitter unavailable
 }
-
 module.exports = EventEmitter;

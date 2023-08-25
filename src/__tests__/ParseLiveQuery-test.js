@@ -9,18 +9,22 @@ jest.dontMock('../EventEmitter');
 jest.dontMock('../promiseUtils');
 
 // Forces the loading
-const LiveQuery = require('../ParseLiveQuery').default;
+const ParseLiveQuery = require('../ParseLiveQuery').default;
 const CoreManager = require('../CoreManager');
+const EventEmitter = require('../EventEmitter');
 const ParseQuery = require('../ParseQuery').default;
 const LiveQuerySubscription = require('../LiveQuerySubscription').default;
 const mockLiveQueryClient = {
   open: jest.fn(),
   close: jest.fn(),
 };
+CoreManager.setEventEmitter(EventEmitter);
+const LiveQuery = new ParseLiveQuery()
 
 describe('ParseLiveQuery', () => {
   beforeEach(() => {
     const controller = CoreManager.getLiveQueryController();
+    CoreManager.setLiveQuery(LiveQuery);
     controller._clearCachedDefaultClient();
     CoreManager.set('InstallationController', {
       currentInstallationId() {
