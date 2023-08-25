@@ -216,6 +216,13 @@ const CoreManager = {
     config[key] = value;
   },
 
+  setIfNeeded: function (key: string, value: any): any {
+    if (!config.hasOwnProperty(key)) {
+      config[key] = value;
+    }
+    return config[key];
+  },
+
   /* Specialized Controller Setters/Getters */
 
   setAnalyticsController(controller: AnalyticsController) {
@@ -254,6 +261,14 @@ const CoreManager = {
     return config['CryptoController'];
   },
 
+  setEventEmitter(eventEmitter: any) {
+    config['EventEmitter'] = eventEmitter;
+  },
+
+  getEventEmitter(): any {
+    return config['EventEmitter'];
+  },
+
   setFileController(controller: FileController) {
     requireMethods('FileController', ['saveFile', 'saveBase64'], controller);
     config['FileController'] = controller;
@@ -270,6 +285,14 @@ const CoreManager = {
 
   getInstallationController(): InstallationController {
     return config['InstallationController'];
+  },
+
+  setLiveQuery(liveQuery: any) {
+    config['LiveQuery'] = liveQuery;
+  },
+
+  getLiveQuery(): any {
+    return config['LiveQuery'];
   },
 
   setObjectController(controller: ObjectController) {

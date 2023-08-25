@@ -11,6 +11,7 @@ import AnonymousUtils from './AnonymousUtils'
 import * as Cloud from './Cloud';
 import CLP from './ParseCLP';
 import CoreManager from './CoreManager';
+import EventEmitter from './EventEmitter';
 import Config from './ParseConfig'
 import ParseError from './ParseError'
 import FacebookUtils from './FacebookUtils'
@@ -76,7 +77,7 @@ interface ParseType {
   Session: typeof Session,
   Storage: typeof Storage,
   User: typeof User,
-  LiveQuery: typeof LiveQuery,
+  LiveQuery?: typeof LiveQuery,
   LiveQueryClient: typeof LiveQueryClient,
 
   initialize(applicationId: string, javaScriptKey: string): void,
@@ -143,12 +144,11 @@ const Parse: ParseType = {
   Session:  Session,
   Storage:  Storage,
   User:  User,
-  LiveQuery:  LiveQuery,
   LiveQueryClient:  LiveQueryClient,
+  LiveQuery:  undefined,
   IndexedDB: undefined,
   Hooks: undefined,
   Parse: undefined,
-
 
   /**
    * Call this method first to set up your authentication tokens for Parse.
@@ -179,6 +179,10 @@ const Parse: ParseType = {
     CoreManager.set('JAVASCRIPT_KEY', javaScriptKey);
     CoreManager.set('MASTER_KEY', masterKey);
     CoreManager.set('USE_MASTER_KEY', false);
+    CoreManager.setIfNeeded('EventEmitter', EventEmitter);
+
+    Parse.LiveQuery = new LiveQuery();
+    CoreManager.setIfNeeded('LiveQuery', Parse.LiveQuery);
   },
 
   /**
@@ -422,7 +426,6 @@ const Parse: ParseType = {
   isEncryptedUserEnabled () {
     return this.encryptedUser;
   },
-
 };
 
 if (process.env.PARSE_BUILD === 'browser') {
