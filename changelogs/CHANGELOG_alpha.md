@@ -1,3 +1,10 @@
+# [4.2.0-alpha.5](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.4...4.2.0-alpha.5) (2023-08-27)
+
+
+### Features
+
+* Add support for excluding keys in `ParseQuery.findAll` ([#2000](https://github.com/parse-community/Parse-SDK-JS/issues/2000)) ([012ba4c](https://github.com/parse-community/Parse-SDK-JS/commit/012ba4cdab1e3f853625f507c713cef2264a40dd))
+
 # [4.2.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.3...4.2.0-alpha.4) (2023-07-23)
 
 
