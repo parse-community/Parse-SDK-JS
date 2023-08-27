@@ -57,6 +57,7 @@ describe('ParseSchema', () => {
       .addString('stringField')
       .addNumber('numberField')
       .addBoolean('booleanField')
+      .addBytes('bytesField')
       .addDate('dateField')
       .addFile('fileField')
       .addGeoPoint('geoPointField')
@@ -70,6 +71,7 @@ describe('ParseSchema', () => {
     expect(schema._fields.stringField.type).toEqual('String');
     expect(schema._fields.numberField.type).toEqual('Number');
     expect(schema._fields.booleanField.type).toEqual('Boolean');
+    expect(schema._fields.bytesField.type).toEqual('Bytes');
     expect(schema._fields.dateField.type).toEqual('Date');
     expect(schema._fields.fileField.type).toEqual('File');
     expect(schema._fields.geoPointField.type).toEqual('GeoPoint');
@@ -103,6 +105,10 @@ describe('ParseSchema', () => {
         required: true,
         defaultValue: 'hello',
       })
+      .addBytes('bytesField', {
+        required: true,
+        defaultValue: 'ParseA==',
+      })
       .addDate('dateField', {
         required: true,
         defaultValue: '2000-01-01T00:00:00.000Z',
@@ -129,6 +135,14 @@ describe('ParseSchema', () => {
       defaultValue: {
         __type: 'Date',
         iso: new Date('2000-01-01T00:00:00.000Z'),
+      },
+    });
+    expect(schema._fields.bytesField).toEqual({
+      type: 'Bytes',
+      required: true,
+      defaultValue: {
+        __type: 'Bytes',
+        base64: 'ParseA==',
       },
     });
   });
