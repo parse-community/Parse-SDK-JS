@@ -1814,6 +1814,7 @@ describe('ParseQuery', () => {
       q.select('size', 'name');
       q.includeAll();
       q.hint('_id_');
+      q.exclude('foo')
 
       await q.findAll();
       expect(findMock).toHaveBeenCalledTimes(1);
@@ -1824,6 +1825,7 @@ describe('ParseQuery', () => {
         order: 'objectId',
         keys: 'size,name',
         include: '*',
+        excludeKeys: 'foo',
         hint: '_id_',
         where: {
           size: {

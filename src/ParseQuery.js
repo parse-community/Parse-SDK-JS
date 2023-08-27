@@ -948,13 +948,10 @@ class ParseQuery {
 
     const query = new ParseQuery(this.className);
     query._limit = options.batchSize || 100;
-    query._include = this._include.map(i => {
-      return i;
-    });
+    query._include = [...this._include];
+    query._exclude = [...this._exclude];
     if (this._select) {
-      query._select = this._select.map(s => {
-        return s;
-      });
+      query._select = [...this._select];
     }
     query._hint = this._hint;
     query._where = {};
