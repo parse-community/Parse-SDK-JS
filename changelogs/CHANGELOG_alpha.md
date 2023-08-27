@@ -1,3 +1,10 @@
+# [4.2.0-alpha.6](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.5...4.2.0-alpha.6) (2023-08-27)
+
+
+### Features
+
+* Add Bytes type to `Parse.Schema` ([#2001](https://github.com/parse-community/Parse-SDK-JS/issues/2001)) ([343d0d7](https://github.com/parse-community/Parse-SDK-JS/commit/343d0d729a57acdd3c9ba5c1dbe5738b3916ea04))
+
 # [4.2.0-alpha.5](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.4...4.2.0-alpha.5) (2023-08-27)
 
 
