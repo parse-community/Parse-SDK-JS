@@ -848,6 +848,33 @@ describe('OfflineQuery', () => {
     expect(matchesQuery(q.className, obj3, [], q)).toBe(false);
   });
 
+  it('should not support invalid $geoWithin query', () => {
+    const sacramento = new ParseObject('Location');
+    sacramento.set('location', new ParseGeoPoint(38.52, -121.5));
+    sacramento.set('name', 'Sacramento');
+
+    const honolulu = new ParseObject('Location');
+    honolulu.set('location', new ParseGeoPoint(21.35, -157.93));
+    honolulu.set('name', 'Honolulu');
+
+    const sf = new ParseObject('Location');
+    sf.set('location', new ParseGeoPoint(37.75, -122.68));
+    sf.set('name', 'San Francisco');
+
+    const points = [
+      new ParseGeoPoint(37.85, -122.33),
+      new ParseGeoPoint(37.85, -122.9),
+      new ParseGeoPoint(37.68, -122.9),
+      new ParseGeoPoint(37.68, -122.33),
+    ];
+    const q = new ParseQuery('Location');
+    q._addCondition('location', '$geoWithin', { $unknown: points });
+
+    expect(matchesQuery(q.className, sacramento, [], q)).toBe(false);
+    expect(matchesQuery(q.className, honolulu, [], q)).toBe(false);
+    expect(matchesQuery(q.className, sf, [], q)).toBe(false);
+  });
+
   it('should validate query', () => {
     let query = new ParseQuery('TestObject');
     query.equalTo('foo', 'bar');
