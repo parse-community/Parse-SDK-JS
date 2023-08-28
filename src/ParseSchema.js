@@ -12,6 +12,7 @@ const FIELD_TYPES = [
   'String',
   'Number',
   'Boolean',
+  'Bytes',
   'Date',
   'File',
   'GeoPoint',
@@ -242,6 +243,14 @@ class ParseSchema {
         };
       }
     }
+    if (type === 'Bytes') {
+      if (options && options.defaultValue) {
+        fieldOptions.defaultValue = {
+          __type: 'Bytes',
+          base64: options.defaultValue,
+        };
+      }
+    }
     this._fields[name] = fieldOptions;
     return this;
   }
@@ -301,6 +310,17 @@ class ParseSchema {
    */
   addBoolean(name: string, options: FieldOptions) {
     return this.addField(name, 'Boolean', options);
+  }
+
+  /**
+   * Adding Bytes Field
+   *
+   * @param {string} name Name of the field that will be created on Parse
+   * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+   * @returns {Parse.Schema} Returns the schema, so you can chain this call.
+   */
+  addBytes(name: string, options: FieldOptions) {
+    return this.addField(name, 'Bytes', options);
   }
 
   /**
