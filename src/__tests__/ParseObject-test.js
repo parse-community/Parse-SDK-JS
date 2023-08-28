@@ -2302,13 +2302,14 @@ describe('ParseObject', () => {
     });
     const p = new ParseObject('Person');
     p.id = 'pid';
-    const result = p.destroy().then(() => {
+    const result = p.destroy({ sessionToken: 't_1234' }).then(() => {
       expect(xhr.open.mock.calls[0]).toEqual([
         'POST',
         'https://api.parse.com/1/classes/Person/pid',
         true,
       ]);
       expect(JSON.parse(xhr.send.mock.calls[0])._method).toBe('DELETE');
+      expect(JSON.parse(xhr.send.mock.calls[0])._SessionToken).toBe('t_1234');
     });
     jest.runAllTicks();
     await flushPromises();
