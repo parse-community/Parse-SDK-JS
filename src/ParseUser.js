@@ -110,9 +110,15 @@ class ParseUser extends ParseObject {
         throw new Error('Invalid type: authData field should be an object');
       }
       authData[authType] = options.authData;
+      const oldAnonymousData = authData.anonymous;
+      this.stripAnonymity();
 
       const controller = CoreManager.getUserController();
-      return controller.linkWith(this, authData, saveOpts);
+      return controller.linkWith(this, authData, saveOpts).catch((e) => {
+        delete authData[authType];
+        this.restoreAnonimity(oldAnonymousData);
+        throw e;
+      });
     } else {
       return new Promise((resolve, reject) => {
         provider.authenticate({
@@ -310,6 +316,21 @@ class ParseUser extends ParseObject {
     return !!current && current.id === this.id;
   }
 
+  stripAnonymity() {
+    const authData = this.get('authData');
+    if (authData && typeof authData === 'object' && authData.hasOwnProperty('anonymous')) {
+      // We need to set anonymous to null instead of deleting it in order to remove it from Parse.
+      authData.anonymous = null;
+    }
+  }
+
+  restoreAnonimity(anonymousData: any) {
+    if (anonymousData) {
+      const authData = this.get('authData');
+      authData.anonymous = anonymousData;
+    }
+  }
+
   /**
    * Returns get("username").
    *
@@ -329,12 +350,7 @@ class ParseUser extends ParseObject {
    * @param {string} username
    */
   setUsername(username: string) {
-    // Strip anonymity
-    const authData = this.get('authData');
-    if (authData && typeof authData === 'object' && authData.hasOwnProperty('anonymous')) {
-      // We need to set anonymous to null instead of deleting it in order to remove it from Parse.
-      authData.anonymous = null;
-    }
+    this.stripAnonymity();
     this.set('username', username);
   }
 

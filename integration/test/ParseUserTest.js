@@ -979,11 +979,11 @@ describe('Parse User', () => {
     await Parse.FacebookUtils.link(user);
 
     expect(Parse.FacebookUtils.isLinked(user)).toBe(true);
-    expect(Parse.AnonymousUtils.isLinked(user)).toBe(true);
+    expect(Parse.AnonymousUtils.isLinked(user)).toBe(false);
     await Parse.FacebookUtils.unlink(user);
 
     expect(Parse.FacebookUtils.isLinked(user)).toBe(false);
-    expect(Parse.AnonymousUtils.isLinked(user)).toBe(true);
+    expect(Parse.AnonymousUtils.isLinked(user)).toBe(false);
   });
 
   it('can link with twitter', async () => {

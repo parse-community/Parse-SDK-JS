@@ -1,3 +1,10 @@
+# [4.2.0-alpha.7](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.6...4.2.0-alpha.7) (2023-08-29)
+
+
+### Bug Fixes
+
+* `ParseUser.linkWith` doesn't remove anonymous auth data ([#2007](https://github.com/parse-community/Parse-SDK-JS/issues/2007)) ([7e2585c](https://github.com/parse-community/Parse-SDK-JS/commit/7e2585c5eb84a396900553d55d6a919de4d9a2c0))
+
 # [4.2.0-alpha.6](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.5...4.2.0-alpha.6) (2023-08-27)
 
 
