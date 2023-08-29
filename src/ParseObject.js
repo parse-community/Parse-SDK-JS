@@ -1057,7 +1057,7 @@ class ParseObject {
   /**
    * Returns the ACL for this object.
    *
-   * @returns {Parse.ACL} An instance of Parse.ACL.
+   * @returns {Parse.ACL|null} An instance of Parse.ACL.
    * @see Parse.Object#get
    */
   getACL(): ?ParseACL {
