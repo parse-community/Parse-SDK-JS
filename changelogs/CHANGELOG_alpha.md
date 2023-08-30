@@ -1,3 +1,10 @@
+# [4.2.0-alpha.8](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.7...4.2.0-alpha.8) (2023-08-30)
+
+
+### Features
+
+* Add Cloud Code context accessibility to `ParseUser.logIn` ([#2010](https://github.com/parse-community/Parse-SDK-JS/issues/2010)) ([2446007](https://github.com/parse-community/Parse-SDK-JS/commit/2446007ede4cc5af79e34f27dc1fbcc574d5f717))
+
 # [4.2.0-alpha.7](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.6...4.2.0-alpha.7) (2023-08-29)
 
 
