@@ -1219,7 +1219,7 @@ class ParseObject {
     try {
       await this.save(null, options);
     } catch (e) {
-      if (e.message === 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+      if (e.message === CoreManager.get('CONNECTION_FAILED_MESSAGE')) {
         await EventuallyQueue.save(this, options);
         EventuallyQueue.poll();
       }
@@ -1363,7 +1363,7 @@ class ParseObject {
     try {
       await this.destroy(options);
     } catch (e) {
-      if (e.message === 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+      if (e.message === CoreManager.get('CONNECTION_FAILED_MESSAGE')) {
         await EventuallyQueue.destroy(this, options);
         EventuallyQueue.poll();
       }

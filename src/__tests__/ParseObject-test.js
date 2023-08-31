@@ -1585,6 +1585,22 @@ describe('ParseObject', () => {
     expect(EventuallyQueue.poll).toHaveBeenCalledTimes(1);
   });
 
+  it('can save the object eventually on network failure with custom connection message', async () => {
+    const defaultMessage = CoreManager.get('CONNECTION_FAILED_MESSAGE');
+    const message = 'Server is down!';
+    CoreManager.set('CONNECTION_FAILED_MESSAGE', message);
+    const p = new ParseObject('Person');
+    jest.spyOn(EventuallyQueue, 'save').mockImplementationOnce(() => Promise.resolve());
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(p, 'save').mockImplementationOnce(() => {
+      throw new ParseError(ParseError.CONNECTION_FAILED, message);
+    });
+    await p.saveEventually();
+    expect(EventuallyQueue.save).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(1);
+    CoreManager.set('CONNECTION_FAILED_MESSAGE', defaultMessage);
+  });
+
   it('should not save the object eventually on error', async () => {
     const p = new ParseObject('Person');
     jest.spyOn(EventuallyQueue, 'save').mockImplementationOnce(() => Promise.resolve());
@@ -2922,6 +2938,22 @@ describe('ObjectController', () => {
     await p.destroyEventually();
     expect(EventuallyQueue.destroy).toHaveBeenCalledTimes(1);
     expect(EventuallyQueue.poll).toHaveBeenCalledTimes(1);
+  });
+
+  it('can destroy the object eventually on network failure with custom connection message', async () => {
+    const defaultMessage = CoreManager.get('CONNECTION_FAILED_MESSAGE');
+    const message = 'Server is down!';
+    CoreManager.set('CONNECTION_FAILED_MESSAGE', message);
+    const p = new ParseObject('Person');
+    jest.spyOn(EventuallyQueue, 'destroy').mockImplementationOnce(() => Promise.resolve());
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(p, 'destroy').mockImplementationOnce(() => {
+      throw new ParseError(ParseError.CONNECTION_FAILED, message);
+    });
+    await p.destroyEventually();
+    expect(EventuallyQueue.destroy).toHaveBeenCalledTimes(1);
+    expect(EventuallyQueue.poll).toHaveBeenCalledTimes(1);
+    CoreManager.set('CONNECTION_FAILED_MESSAGE', defaultMessage);
   });
 
   it('should not destroy object eventually on error', async () => {

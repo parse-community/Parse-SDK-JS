@@ -72,10 +72,27 @@ describe('RESTController', () => {
       mockXHR([{ status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }])
     );
     RESTController.ajax('POST', 'users', {}).then(null, err => {
-      expect(err).toBe('Unable to connect to the Parse API');
+      expect(err.code).toBe(100);
+      expect(err.message).toBe('XMLHttpRequest failed: "Unable to connect to the Parse API"');
       done();
     });
     jest.runAllTimers();
+  });
+
+  it('retries on connection failure custom message', done => {
+    const defaultMessage = CoreManager.get('CONNECTION_FAILED_MESSAGE');
+    const message = 'Server is down!';
+    CoreManager.set('CONNECTION_FAILED_MESSAGE', message);
+    RESTController._setXHR(
+      mockXHR([{ status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }])
+    );
+    RESTController.ajax('POST', 'users', {}).then(null, err => {
+      expect(err.code).toBe(100);
+      expect(err.message).toBe(message);
+      done();
+    });
+    jest.runAllTimers();
+    CoreManager.set('CONNECTION_FAILED_MESSAGE', defaultMessage);
   });
 
   it('returns a connection error on network failure', async () => {
@@ -182,7 +199,7 @@ describe('RESTController', () => {
     RESTController._setXHR(XHR);
     RESTController.request('GET', 'classes/MyObject', {}, {}).then(null, error => {
       expect(error.code).toBe(100);
-      expect(error.message.indexOf('XMLHttpRequest failed')).toBe(0);
+      expect(error.message.indexOf('SyntaxError')).toBe(0);
       done();
     });
   });

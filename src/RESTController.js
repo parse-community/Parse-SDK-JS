@@ -132,7 +132,7 @@ const RESTController = {
             const delay = Math.round(Math.random() * 125 * Math.pow(2, attempts));
             setTimeout(dispatch, delay);
           } else if (xhr.status === 0) {
-            promise.reject('Unable to connect to the Parse API');
+            promise.reject(new ParseError(ParseError.CONNECTION_FAILED, CoreManager.get('CONNECTION_FAILED_MESSAGE')));
           } else {
             // After the retry limit is reached, fail
             promise.reject(xhr);
@@ -316,10 +316,7 @@ const RESTController = {
       }
     } else {
       const message = response.message ? response.message : response;
-      error = new ParseError(
-        ParseError.CONNECTION_FAILED,
-        'XMLHttpRequest failed: ' + JSON.stringify(message)
-      );
+      error = new ParseError(ParseError.CONNECTION_FAILED, message);
     }
     return Promise.reject(error);
   },

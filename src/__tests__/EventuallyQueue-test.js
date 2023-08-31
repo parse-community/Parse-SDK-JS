@@ -256,6 +256,27 @@ describe('EventuallyQueue', () => {
     expect(EventuallyQueue.remove).toHaveBeenCalledTimes(0);
   });
 
+  it('should not remove if queue destroy callback network fails with custom connection message', async () => {
+    const defaultMessage = CoreManager.get('CONNECTION_FAILED_MESSAGE');
+    const message = 'Server is down!';
+    CoreManager.set('CONNECTION_FAILED_MESSAGE', message);
+    const object = new ParseObject('TestObject');
+    jest.spyOn(object, 'destroy').mockImplementationOnce(() => {
+      throw new ParseError(ParseError.CONNECTION_FAILED, message);
+    });
+    jest.spyOn(EventuallyQueue, 'remove').mockImplementationOnce(() => {});
+    const queueObject = {
+      action: 'destroy',
+      queueId: 'queue1',
+      serverOptions: {},
+    };
+    await EventuallyQueue.sendQueueCallback(object, queueObject);
+    expect(object.destroy).toHaveBeenCalledTimes(1);
+    expect(object.destroy).toHaveBeenCalledWith({});
+    expect(EventuallyQueue.remove).toHaveBeenCalledTimes(0);
+    CoreManager.set('CONNECTION_FAILED_MESSAGE', defaultMessage);
+  });
+
   it('can handle send queue save callback with no object', async () => {
     jest.spyOn(EventuallyQueue, 'remove').mockImplementationOnce(() => {});
     const object = null;
@@ -325,6 +346,28 @@ describe('EventuallyQueue', () => {
     expect(object.save).toHaveBeenCalledTimes(1);
     expect(object.save).toHaveBeenCalledWith({ foo: 'bar' }, {});
     expect(EventuallyQueue.remove).toHaveBeenCalledTimes(0);
+  });
+
+  it('should not remove if queue save callback network fails with custom connection message', async () => {
+    const defaultMessage = CoreManager.get('CONNECTION_FAILED_MESSAGE');
+    const message = 'Server is down!';
+    CoreManager.set('CONNECTION_FAILED_MESSAGE', message);
+    const object = new ParseObject('TestObject');
+    jest.spyOn(object, 'save').mockImplementationOnce(() => {
+      throw new ParseError(ParseError.CONNECTION_FAILED, message);
+    });
+    jest.spyOn(EventuallyQueue, 'remove').mockImplementationOnce(() => {});
+    const queueObject = {
+      action: 'save',
+      queueId: 'queue2',
+      object: { foo: 'bar' },
+      serverOptions: {},
+    };
+    await EventuallyQueue.sendQueueCallback(object, queueObject);
+    expect(object.save).toHaveBeenCalledTimes(1);
+    expect(object.save).toHaveBeenCalledWith({ foo: 'bar' }, {});
+    expect(EventuallyQueue.remove).toHaveBeenCalledTimes(0);
+    CoreManager.set('CONNECTION_FAILED_MESSAGE', defaultMessage);
   });
 
   it('can handle send queue save callback if queue is old', async () => {

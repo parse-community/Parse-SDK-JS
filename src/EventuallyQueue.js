@@ -275,7 +275,7 @@ const EventuallyQueue = {
         await object.save(queueObject.object, queueObject.serverOptions);
         await this.remove(queueObject.queueId);
       } catch (e) {
-        if (e.message !== 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+        if (e.message !== CoreManager.get('CONNECTION_FAILED_MESSAGE')) {
           await this.remove(queueObject.queueId);
         }
       }
@@ -285,7 +285,7 @@ const EventuallyQueue = {
         await object.destroy(queueObject.serverOptions);
         await this.remove(queueObject.queueId);
       } catch (e) {
-        if (e.message !== 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+        if (e.message !== CoreManager.get('CONNECTION_FAILED_MESSAGE')) {
           await this.remove(queueObject.queueId);
         }
       }
