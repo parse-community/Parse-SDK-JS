@@ -177,7 +177,7 @@ const config: Config & { [key: string]: mixed } = {
     !!process.versions.node &&
     !process.versions.electron,
   REQUEST_ATTEMPT_LIMIT: 5,
-  CONNECTION_FAILED_MESSAGE: 'XMLHttpRequest failed: "Unable to connect to the Parse API"',
+  CONNECTION_FAILED_MESSAGE: 'The connection to the Parse servers failed.',
   REQUEST_BATCH_SIZE: 20,
   REQUEST_HEADERS: {},
   SERVER_URL: 'https://api.parse.com/1',

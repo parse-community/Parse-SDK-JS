@@ -73,7 +73,7 @@ describe('RESTController', () => {
     );
     RESTController.ajax('POST', 'users', {}).then(null, err => {
       expect(err.code).toBe(100);
-      expect(err.message).toBe('XMLHttpRequest failed: "Unable to connect to the Parse API"');
+      expect(err.message).toBe('The connection to the Parse servers failed.');
       done();
     });
     jest.runAllTimers();
@@ -104,7 +104,7 @@ describe('RESTController', () => {
       null,
       err => {
         expect(err.code).toBe(100);
-        expect(err.message).toBe('XMLHttpRequest failed: "Unable to connect to the Parse API"');
+        expect(err.message).toBe('The connection to the Parse servers failed.');
       }
     );
     await flushPromises();

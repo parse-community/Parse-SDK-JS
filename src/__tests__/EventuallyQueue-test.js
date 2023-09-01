@@ -241,7 +241,7 @@ describe('EventuallyQueue', () => {
     jest.spyOn(object, 'destroy').mockImplementationOnce(() => {
       throw new ParseError(
         ParseError.CONNECTION_FAILED,
-        'XMLHttpRequest failed: "Unable to connect to the Parse API"'
+        'The connection to the Parse servers failed.'
       );
     });
     jest.spyOn(EventuallyQueue, 'remove').mockImplementationOnce(() => {});
@@ -332,7 +332,7 @@ describe('EventuallyQueue', () => {
     jest.spyOn(object, 'save').mockImplementationOnce(() => {
       throw new ParseError(
         ParseError.CONNECTION_FAILED,
-        'XMLHttpRequest failed: "Unable to connect to the Parse API"'
+        'The connection to the Parse servers failed.'
       );
     });
     jest.spyOn(EventuallyQueue, 'remove').mockImplementationOnce(() => {});

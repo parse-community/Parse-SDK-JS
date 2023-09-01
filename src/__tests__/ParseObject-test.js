@@ -1577,7 +1577,7 @@ describe('ParseObject', () => {
     jest.spyOn(p, 'save').mockImplementationOnce(() => {
       throw new ParseError(
         ParseError.CONNECTION_FAILED,
-        'XMLHttpRequest failed: "Unable to connect to the Parse API"'
+        'The connection to the Parse servers failed.'
       );
     });
     await p.saveEventually();
@@ -2932,7 +2932,7 @@ describe('ObjectController', () => {
     jest.spyOn(p, 'destroy').mockImplementationOnce(() => {
       throw new ParseError(
         ParseError.CONNECTION_FAILED,
-        'XMLHttpRequest failed: "Unable to connect to the Parse API"'
+        'The connection to the Parse servers failed.'
       );
     });
     await p.destroyEventually();

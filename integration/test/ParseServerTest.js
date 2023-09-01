@@ -16,7 +16,7 @@ describe('ParseServer', () => {
     const object = new TestObject({ foo: 'bar' });
     await parseServer.handleShutdown();
     await new Promise((resolve) => parseServer.server.close(resolve));
-    await expectAsync(object.save()).toBeRejectedWithError('XMLHttpRequest failed: "Unable to connect to the Parse API"');
+    await expectAsync(object.save()).toBeRejectedWithError('The connection to the Parse servers failed.');
     await reconfigureServer({});
     await object.save();
     assert(object.id);
