@@ -1,5 +1,9 @@
+import CoreManager from './CoreManager';
+
 /**
  * Constructs a new Parse.Error object with the given code and message.
+ *
+ * Parse.CoreManager.set('PARSE_ERRORS', [{ code, message }]) can be use to override error messages for error codes except CONNECTION_FAILED (100).
  *
  * @alias Parse.Error
  */
@@ -11,9 +15,15 @@ class ParseError extends Error {
   constructor(code, message) {
     super(message);
     this.code = code;
+    let customMessage = message;
+    CoreManager.get('PARSE_ERRORS').forEach((error) => {
+      if (error.code === code && error.code !== ParseError.CONNECTION_FAILED) {
+        customMessage = error.message;
+      }
+    });
     Object.defineProperty(this, 'message', {
       enumerable: true,
-      value: message,
+      value: customMessage,
     });
   }
 
