@@ -30,14 +30,4 @@ describe('ParseError', () => {
     });
     CoreManager.set('PARSE_ERRORS', []);
   });
-
-  it('cannot override connection failed message', () => {
-    CoreManager.set('PARSE_ERRORS', [{ code: 100, message: 'Cannot connect to server' }]);
-    const error = new ParseError(100, 'some error message');
-    expect(JSON.parse(JSON.stringify(error))).toEqual({
-      message: 'some error message',
-      code: 100,
-    });
-    CoreManager.set('PARSE_ERRORS', []);
-  });
 });
