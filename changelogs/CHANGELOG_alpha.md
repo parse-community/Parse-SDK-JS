@@ -1,3 +1,10 @@
+# [4.2.0-alpha.9](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.8...4.2.0-alpha.9) (2023-09-01)
+
+
+### Features
+
+* Allow overriding `Parse.Error` message with custom message via new Core Manager option `PARSE_ERRORS` ([#2014](https://github.com/parse-community/Parse-SDK-JS/issues/2014)) ([be0c8a6](https://github.com/parse-community/Parse-SDK-JS/commit/be0c8a6ff90a7714487ae793e2b68ae04d0c8d0c))
+
 # [4.2.0-alpha.8](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.7...4.2.0-alpha.8) (2023-08-30)
 
 
