@@ -469,7 +469,12 @@ class ParseUser extends ParseObject {
     if (options.hasOwnProperty('usePost')) {
       loginOptions.usePost = options.usePost;
     }
-
+    if (
+      options.hasOwnProperty('context') &&
+      Object.prototype.toString.call(options.context) === '[object Object]'
+    ) {
+      loginOptions.context = options.context;
+    }
     const controller = CoreManager.getUserController();
     return controller.logIn(this, loginOptions);
   }
