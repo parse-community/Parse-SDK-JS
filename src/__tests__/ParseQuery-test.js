@@ -1,6 +1,7 @@
 jest.dontMock('../CoreManager');
 jest.dontMock('../encode');
 jest.dontMock('../decode');
+jest.dontMock('../EventEmitter');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseQuery');
@@ -40,6 +41,7 @@ const mockLocalDatastore = {
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
 let CoreManager = require('../CoreManager');
+const EventEmitter = require('../EventEmitter');
 const ParseError = require('../ParseError').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
 let ParseObject = require('../ParseObject');
@@ -52,6 +54,7 @@ const MockRESTController = {
 };
 
 const QueryController = CoreManager.getQueryController();
+CoreManager.setEventEmitter(EventEmitter);
 
 import { DEFAULT_PIN } from '../LocalDatastoreUtils';
 
