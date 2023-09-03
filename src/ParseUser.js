@@ -4,6 +4,7 @@
 
 import CoreManager from './CoreManager';
 import isRevocableSession from './isRevocableSession';
+import EventuallyQueue from './EventuallyQueue';
 import ParseError from './ParseError';
 import ParseObject from './ParseObject';
 import ParseSession from './ParseSession';
@@ -1014,6 +1015,7 @@ const DefaultController = {
       userData = crypto.encrypt(json, CoreManager.get('ENCRYPTED_KEY'));
     }
     return Storage.setItemAsync(path, userData).then(() => {
+      EventuallyQueue.poll();
       return user;
     });
   },

@@ -220,6 +220,52 @@ describe('Parse EventuallyQueue', () => {
     assert.strictEqual(results.length, 1);
   });
 
+  it('can saveEventually with expired session', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    await Parse.User.signUp('suser', 'somepass', null);
+
+    const readOnly = Parse.Session.readOnlyAttributes();
+    Parse.Session.readOnlyAttributes = null;
+    const expiresAt = new Date(new Date().setYear(2015));
+    const session = await Parse.Session.current();
+    session.set('expiresAt', expiresAt);
+    await session.save();
+
+    const parseServer = await reconfigureServer();
+    await new Promise((resolve) => parseServer.server.close(resolve));
+    const object = new TestObject();
+    object.set('hash', 'saveSecret');
+    await object.saveEventually();
+
+    // Queue processing
+    let length = await Parse.EventuallyQueue.length();
+    expect(Parse.EventuallyQueue.isPolling()).toBe(true);
+    expect(length).toBe(1);
+
+    await reconfigureServer({});
+
+    while (Parse.EventuallyQueue.isPolling()) { await sleep(1); }
+    while (Parse.EventuallyQueue.isProcessing()) { await sleep(1); }
+
+    // Object is still in queue
+    length = await Parse.EventuallyQueue.length();
+    expect(length).toBe(1);
+
+    // Trigger eventually queue
+    await Parse.User.logIn('suser', 'somepass');
+
+    const query = new Parse.Query(TestObject);
+    query.equalTo('hash', 'saveSecret');
+    let results = await query.find({ useMasterKey: true });
+    while (results.length === 0) {
+      results = await query.find({ useMasterKey: true });
+    }
+    expect(results.length).toBe(1);
+    Parse.Session.readOnlyAttributes = function () {
+      return readOnly;
+    };
+  });
+
   it('can destroyEventually', async () => {
     const parseServer = await reconfigureServer();
     const object = new TestObject({ hash: 'deleteSecret' });
@@ -248,5 +294,53 @@ describe('Parse EventuallyQueue', () => {
       results = await query.find();
     }
     assert.strictEqual(results.length, 0);
+  });
+
+  it('can destroyEventually with expired session', async () => {
+    const object = new TestObject();
+    object.set('hash', 'deleteSecret');
+    await object.save();
+
+    Parse.User.enableUnsafeCurrentUser();
+    await Parse.User.signUp('duser', 'somepass', null);
+
+    const readOnly = Parse.Session.readOnlyAttributes();
+    Parse.Session.readOnlyAttributes = null;
+    const expiresAt = new Date(new Date().setYear(2015));
+    const session = await Parse.Session.current();
+    session.set('expiresAt', expiresAt);
+    await session.save();
+
+    const parseServer = await reconfigureServer();
+    await new Promise((resolve) => parseServer.server.close(resolve));
+    await object.destroyEventually();
+
+    // Queue processing
+    let length = await Parse.EventuallyQueue.length();
+    expect(Parse.EventuallyQueue.isPolling()).toBe(true);
+    expect(length).toBe(1);
+
+    await reconfigureServer({});
+
+    while (Parse.EventuallyQueue.isPolling()) { await sleep(1); }
+    while (Parse.EventuallyQueue.isProcessing()) { await sleep(1); }
+
+    // Object is still in queue
+    length = await Parse.EventuallyQueue.length();
+    expect(length).toBe(1);
+
+    // Trigger eventually queue
+    await Parse.User.logIn('duser', 'somepass');
+
+    const query = new Parse.Query(TestObject);
+    query.equalTo('hash', 'deleteSecret');
+    let results = await query.find({ useMasterKey: true });
+    while (results.length === 0) {
+      results = await query.find({ useMasterKey: true });
+    }
+    expect(results.length).toBe(1);
+    Parse.Session.readOnlyAttributes = function () {
+      return readOnly;
+    };
   });
 });

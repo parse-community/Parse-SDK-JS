@@ -401,6 +401,13 @@ describe('EventuallyQueue', () => {
     expect(EventuallyQueue.isPolling()).toBe(true);
   });
 
+  it('can check processing status', () => {
+    const processing = EventuallyQueue.isProcessing();
+    EventuallyQueue._setProcessing(!processing);
+    expect(EventuallyQueue.isProcessing()).toBe(!processing);
+    EventuallyQueue._setProcessing(processing);
+  });
+
   it('can poll server', async () => {
     jest.spyOn(EventuallyQueue, 'sendQueue').mockImplementationOnce(() => {});
     RESTController._setXHR(mockXHR([{ status: 200, response: { status: 'ok' } }]));

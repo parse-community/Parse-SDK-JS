@@ -30,6 +30,7 @@ const QUEUE_KEY = 'Parse/Eventually/Queue';
 let queueCache = [];
 let dirtyCache = true;
 let polling = undefined;
+let processing = false;
 
 /**
  * Provides utility functions to queue objects that will be
@@ -235,6 +236,7 @@ const EventuallyQueue = {
     if (queueData.length === 0) {
       return false;
     }
+    processing = true;
     for (let i = 0; i < queueData.length; i += 1) {
       const queueObject = queueData[i];
       const { id, hash, className } = queueObject;
@@ -247,6 +249,7 @@ const EventuallyQueue = {
         await this.process.create(ObjectType, queueObject);
       }
     }
+    processing = false;
     return true;
   },
 
@@ -276,7 +279,7 @@ const EventuallyQueue = {
         await object.save(queueObject.object, queueObject.serverOptions);
         await this.remove(queueObject.queueId);
       } catch (e) {
-        if (e.code !== ParseError.CONNECTION_FAILED) {
+        if (![ParseError.CONNECTION_FAILED, ParseError.INVALID_SESSION_TOKEN].includes(e.code)) {
           await this.remove(queueObject.queueId);
         }
       }
@@ -286,7 +289,7 @@ const EventuallyQueue = {
         await object.destroy(queueObject.serverOptions);
         await this.remove(queueObject.queueId);
       } catch (e) {
-        if (e.code !== ParseError.CONNECTION_FAILED) {
+        if (![ParseError.CONNECTION_FAILED, ParseError.INVALID_SESSION_TOKEN].includes(e.code)) {
           await this.remove(queueObject.queueId);
         }
       }
@@ -348,20 +351,36 @@ const EventuallyQueue = {
     polling = flag;
   },
 
+  /**
+   * Return true if processing the queue.
+   *
+   * @function isProcessing
+   * @name Parse.EventuallyQueue.isProcessing
+   * @returns {boolean}
+   * @static
+   */
+  isProcessing(): boolean {
+    return processing;
+  },
+
+  _setProcessing(flag: boolean) {
+    processing = flag;
+  },
+
   process: {
     create(ObjectType, queueObject) {
       const object = new ObjectType();
       return EventuallyQueue.sendQueueCallback(object, queueObject);
     },
     async byId(ObjectType, queueObject) {
-      const { sessionToken } = queueObject.serverOptions;
+      const { sessionToken = '' } = queueObject.serverOptions;
       const query = new ParseQuery(ObjectType);
       query.equalTo('objectId', queueObject.id);
       const results = await query.find({ sessionToken });
       return EventuallyQueue.sendQueueCallback(results[0], queueObject);
     },
     async byHash(ObjectType, queueObject) {
-      const { sessionToken } = queueObject.serverOptions;
+      const { sessionToken = '' } = queueObject.serverOptions;
       const query = new ParseQuery(ObjectType);
       query.equalTo('hash', queueObject.hash);
       const results = await query.find({ sessionToken });
