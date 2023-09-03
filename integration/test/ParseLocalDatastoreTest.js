@@ -1,36 +1,52 @@
 'use strict';
 
 const assert = require('assert');
-const Parse = require('../../node');
 
 global.localStorage = require('./mockLocalStorage');
+global.WebSocket = require('ws');
 const mockRNStorage = require('./mockRNStorage');
-const LocalDatastoreUtils = require('../../lib/node/LocalDatastoreUtils');
+const serverURL = 'http://localhost:1337/parse';
 
-const { DEFAULT_PIN, PIN_PREFIX, isLocalDatastoreKey } = LocalDatastoreUtils;
-
-function LDS_KEY(object) {
-  return Parse.LocalDatastore.getKeyForObject(object);
-}
-function LDS_FULL_JSON(object) {
-  const json = object._toFullJSON();
-  if (object._localId) {
-    json._localId = object._localId;
-  }
-  return json;
-}
 function runTest(controller) {
+  const Parse = require(`../../${controller.name}`);
+  const LocalDatastoreUtils = require('../../lib/node/LocalDatastoreUtils');
+
+  const { DEFAULT_PIN, PIN_PREFIX, isLocalDatastoreKey } = LocalDatastoreUtils;
+
+  const Item = Parse.Object.extend('Item');
+  const TestObject = Parse.Object.extend('TestObject');
+
+  function LDS_KEY(object) {
+    return Parse.LocalDatastore.getKeyForObject(object);
+  }
+  function LDS_FULL_JSON(object) {
+    const json = object._toFullJSON();
+    if (object._localId) {
+      json._localId = object._localId;
+    }
+    return json;
+  }
+
   describe(`Parse Object Pinning (${controller.name})`, () => {
     beforeEach(async () => {
       const StorageController = require(controller.file);
       Parse.CoreManager.setAsyncStorage(mockRNStorage);
       Parse.CoreManager.setLocalDatastoreController(StorageController);
-      Parse.enableLocalDatastore();
+      Parse.CoreManager.setEventEmitter(require('events').EventEmitter);
+      Parse.User.enableUnsafeCurrentUser();
       await Parse.LocalDatastore._clear();
+      Parse.initialize('integration');
+      Parse.CoreManager.set('SERVER_URL', serverURL);
+      Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
+      const RESTController = Parse.CoreManager.getRESTController();
+      RESTController._setXHR(require('xmlhttprequest').XMLHttpRequest);
+      Parse.enableLocalDatastore();
     });
+
     function getStorageCount(storage) {
       return Object.keys(storage).reduce((acc, key) => acc + (isLocalDatastoreKey(key) ? 1 : 0), 1);
     }
+
     it(`${controller.name} can clear localDatastore`, async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
@@ -1060,8 +1076,15 @@ function runTest(controller) {
       const StorageController = require(controller.file);
       Parse.CoreManager.setAsyncStorage(mockRNStorage);
       Parse.CoreManager.setLocalDatastoreController(StorageController);
-      Parse.enableLocalDatastore();
+      Parse.CoreManager.setEventEmitter(require('events').EventEmitter);
       Parse.LocalDatastore._clear();
+      Parse.User.enableUnsafeCurrentUser();
+      Parse.initialize('integration');
+      Parse.CoreManager.set('SERVER_URL', serverURL);
+      Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
+      const RESTController = Parse.CoreManager.getRESTController();
+      RESTController._setXHR(require('xmlhttprequest').XMLHttpRequest);
+      Parse.enableLocalDatastore();
 
       const numbers = [];
       for (let i = 0; i < 10; i++) {
@@ -2949,20 +2972,10 @@ function runTest(controller) {
 }
 
 describe('Parse LocalDatastore', () => {
-  beforeEach(() => {
-    Parse.CoreManager.getInstallationController()._setInstallationIdCache('1234');
-    Parse.enableLocalDatastore();
-    Parse.User.enableUnsafeCurrentUser();
-  });
-
   const controllers = [
-    { name: 'Default', file: '../../lib/node/LocalDatastoreController' },
-    {
-      name: 'React-Native',
-      file: '../../lib/node/LocalDatastoreController.react-native',
-    },
+    { name: 'node', file: '../../lib/node/LocalDatastoreController' },
+    { name: 'react-native', file: '../../lib/react-native/LocalDatastoreController.react-native' },
   ];
-
   for (let i = 0; i < controllers.length; i += 1) {
     const controller = controllers[i];
     runTest(controller);

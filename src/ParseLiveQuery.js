@@ -1,12 +1,10 @@
 /**
  * @flow
  */
-
-import EventEmitter from './EventEmitter';
 import LiveQueryClient from './LiveQueryClient';
 import CoreManager from './CoreManager';
 
-function getLiveQueryClient(): LiveQueryClient {
+function getLiveQueryClient(): Promise<LiveQueryClient> {
   return CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
 }
 
@@ -37,31 +35,39 @@ function getLiveQueryClient(): LiveQueryClient {
  * @class Parse.LiveQuery
  * @static
  */
-const LiveQuery = new EventEmitter();
+class LiveQuery {
+  constructor() {
+    const EventEmitter = CoreManager.getEventEmitter();
+    this.emitter = new EventEmitter();
+    this.on = this.emitter.on;
+    this.emit = this.emitter.emit;
 
-/**
- * After open is called, the LiveQuery will try to send a connect request
- * to the LiveQuery server.
- */
-LiveQuery.open = async () => {
-  const liveQueryClient = await getLiveQueryClient();
-  liveQueryClient.open();
-};
+    // adding listener so process does not crash
+    // best practice is for developer to register their own listener
+    this.on('error', () => {});
+  }
 
-/**
- * When you're done using LiveQuery, you can call Parse.LiveQuery.close().
- * This function will close the WebSocket connection to the LiveQuery server,
- * cancel the auto reconnect, and unsubscribe all subscriptions based on it.
- * If you call query.subscribe() after this, we'll create a new WebSocket
- * connection to the LiveQuery server.
- */
-LiveQuery.close = async () => {
-  const liveQueryClient = await getLiveQueryClient();
-  liveQueryClient.close();
-};
+  /**
+   * After open is called, the LiveQuery will try to send a connect request
+   * to the LiveQuery server.
+   */
+  async open(): void {
+    const liveQueryClient = await getLiveQueryClient();
+    liveQueryClient.open();
+  }
 
-// Register a default onError callback to make sure we do not crash on error
-LiveQuery.on('error', () => {});
+  /**
+   * When you're done using LiveQuery, you can call Parse.LiveQuery.close().
+   * This function will close the WebSocket connection to the LiveQuery server,
+   * cancel the auto reconnect, and unsubscribe all subscriptions based on it.
+   * If you call query.subscribe() after this, we'll create a new WebSocket
+   * connection to the LiveQuery server.
+   */
+  async close(): void {
+    const liveQueryClient = await getLiveQueryClient();
+    liveQueryClient.close();
+  }
+}
 
 export default LiveQuery;
 
@@ -110,6 +116,8 @@ const DefaultLiveQueryController = {
       sessionToken,
       installationId,
     });
+    const LiveQuery = CoreManager.getLiveQuery();
+
     defaultLiveQueryClient.on('error', error => {
       LiveQuery.emit('error', error);
     });

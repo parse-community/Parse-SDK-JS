@@ -1,3 +1,45 @@
+# [4.2.0-alpha.10](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.9...4.2.0-alpha.10) (2023-09-03)
+
+
+### Features
+
+* Add support for custom EventEmitter ([#1999](https://github.com/parse-community/Parse-SDK-JS/issues/1999)) ([ca568a6](https://github.com/parse-community/Parse-SDK-JS/commit/ca568a61771e15afe67c9001f2a728205059f2ae))
+
+# [4.2.0-alpha.9](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.8...4.2.0-alpha.9) (2023-09-01)
+
+
+### Features
+
+* Allow overriding `Parse.Error` message with custom message via new Core Manager option `PARSE_ERRORS` ([#2014](https://github.com/parse-community/Parse-SDK-JS/issues/2014)) ([be0c8a6](https://github.com/parse-community/Parse-SDK-JS/commit/be0c8a6ff90a7714487ae793e2b68ae04d0c8d0c))
+
+# [4.2.0-alpha.8](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.7...4.2.0-alpha.8) (2023-08-30)
+
+
+### Features
+
+* Add Cloud Code context accessibility to `ParseUser.logIn` ([#2010](https://github.com/parse-community/Parse-SDK-JS/issues/2010)) ([2446007](https://github.com/parse-community/Parse-SDK-JS/commit/2446007ede4cc5af79e34f27dc1fbcc574d5f717))
+
+# [4.2.0-alpha.7](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.6...4.2.0-alpha.7) (2023-08-29)
+
+
+### Bug Fixes
+
+* `ParseUser.linkWith` doesn't remove anonymous auth data ([#2007](https://github.com/parse-community/Parse-SDK-JS/issues/2007)) ([7e2585c](https://github.com/parse-community/Parse-SDK-JS/commit/7e2585c5eb84a396900553d55d6a919de4d9a2c0))
+
+# [4.2.0-alpha.6](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.5...4.2.0-alpha.6) (2023-08-27)
+
+
+### Features
+
+* Add Bytes type to `Parse.Schema` ([#2001](https://github.com/parse-community/Parse-SDK-JS/issues/2001)) ([343d0d7](https://github.com/parse-community/Parse-SDK-JS/commit/343d0d729a57acdd3c9ba5c1dbe5738b3916ea04))
+
+# [4.2.0-alpha.5](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.4...4.2.0-alpha.5) (2023-08-27)
+
+
+### Features
+
+* Add support for excluding keys in `ParseQuery.findAll` ([#2000](https://github.com/parse-community/Parse-SDK-JS/issues/2000)) ([012ba4c](https://github.com/parse-community/Parse-SDK-JS/commit/012ba4cdab1e3f853625f507c713cef2264a40dd))
+
 # [4.2.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.3...4.2.0-alpha.4) (2023-07-23)
 
 

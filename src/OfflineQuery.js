@@ -538,7 +538,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
         const distance = point.radiansTo(centerPoint);
         return distance <= maxDistance;
       }
-      break;
+      return false;
     }
     case '$geoIntersects': {
       const polygon = new ParsePolygon(object[key].coordinates);
