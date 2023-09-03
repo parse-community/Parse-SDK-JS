@@ -1,3 +1,10 @@
+# [4.2.0-alpha.10](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.9...4.2.0-alpha.10) (2023-09-03)
+
+
+### Features
+
+* Add support for custom EventEmitter ([#1999](https://github.com/parse-community/Parse-SDK-JS/issues/1999)) ([ca568a6](https://github.com/parse-community/Parse-SDK-JS/commit/ca568a61771e15afe67c9001f2a728205059f2ae))
+
 # [4.2.0-alpha.9](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0-alpha.8...4.2.0-alpha.9) (2023-09-01)
 
 
