@@ -148,6 +148,27 @@ describe('Parse User', () => {
     expect(sessions[1].get('sessionToken')).toBe(installationUser.getSessionToken());
   });
 
+  it('can login with userId', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const user = await Parse.User.signUp('parsetest', 'parse', { code: 'red' });
+    assert.equal(Parse.User.current(), user);
+    await Parse.User.logOut();
+    assert(!Parse.User.current());
+
+    const newUser = await Parse.User.loginAs(user.id);
+    assert.equal(Parse.User.current(), newUser);
+    assert(newUser);
+    assert.equal(user.id, newUser.id);
+    assert.equal(user.get('code'), 'red');
+
+    await Parse.User.logOut();
+    assert(!Parse.User.current());
+    await expectAsync(Parse.User.loginAs('garbage')).toBeRejectedWithError(
+      'user not found'
+    );
+  });
+
   it('can become a user', done => {
     Parse.User.enableUnsafeCurrentUser();
     let session = null;
@@ -778,6 +799,16 @@ describe('Parse User', () => {
     const token = user.getSessionToken();
 
     user = await CustomUser.become(token);
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+  });
+
+  it('can loginAs user with subclass static', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    let user = await CustomUser.signUp('username', 'password');
+
+    user = await CustomUser.loginAs(user.id);
     expect(user instanceof CustomUser).toBe(true);
     expect(user.doSomething()).toBe(5);
   });

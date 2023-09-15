@@ -654,6 +654,25 @@ class ParseUser extends ParseObject {
   }
 
   /**
+   * Logs in a user with an objectId. On success, this saves the session
+   * to disk, so you can retrieve the currently logged in user using
+   * <code>current</code>.
+   *
+   * @param {string} userId The objectId for the user.
+   * @static
+   * @returns {Promise} A promise that is fulfilled with the user when
+   *     the login completes.
+   */
+  static loginAs(userId: string) {
+    if (!userId) {
+      throw new ParseError(ParseError.USERNAME_MISSING, 'Cannot log in as user with an empty user id');
+    }
+    const controller = CoreManager.getUserController();
+    const user = new this();
+    return controller.loginAs(user, userId);
+  }
+
+  /**
    * Logs in a user with a session token. On success, this saves the session
    * to disk, so you can retrieve the currently logged in user using
    * <code>current</code>.
@@ -1095,6 +1114,18 @@ const DefaultController = {
         return DefaultController.setCurrentUser(user);
       }
     );
+  },
+
+  loginAs(user: ParseUser, userId: string): Promise<ParseUser> {
+    const RESTController = CoreManager.getRESTController();
+    return RESTController.request('POST', 'loginAs', { userId }, { useMasterKey: true }).then(response => {
+      user._finishFetch(response);
+      user._setExisted(true);
+      if (!canUseCurrentUser) {
+        return Promise.resolve(user);
+      }
+      return DefaultController.setCurrentUser(user);
+    });
   },
 
   become(user: ParseUser, options: RequestOptions): Promise<ParseUser> {
