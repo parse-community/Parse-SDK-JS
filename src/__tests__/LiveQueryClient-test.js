@@ -35,6 +35,7 @@ const mockLocalDatastore = {
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
 const CoreManager = require('../CoreManager');
+const EventEmitter = require('../EventEmitter');
 const LiveQueryClient = require('../LiveQueryClient').default;
 const ParseObject = require('../ParseObject').default;
 const ParseQuery = require('../ParseQuery').default;
@@ -46,6 +47,7 @@ CoreManager.setLocalDatastore(mockLocalDatastore);
 describe('LiveQueryClient', () => {
   beforeEach(() => {
     mockLocalDatastore.isEnabled = false;
+    CoreManager.setEventEmitter(EventEmitter);
   });
 
   it('serverURL required', () => {
@@ -756,6 +758,21 @@ describe('LiveQueryClient', () => {
     spy.mockRestore();
   });
 
+  it('can handle WebSocket disconnect if already disconnected', async () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken',
+    });
+    const spy = jest.spyOn(liveQueryClient, '_handleReconnect');
+    liveQueryClient.state = 'disconnected';
+    liveQueryClient._handleWebSocketClose();
+    expect(liveQueryClient._handleReconnect).toHaveBeenCalledTimes(0);
+    spy.mockRestore();
+  });
+
   it('can subscribe', async () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',
@@ -884,6 +901,31 @@ describe('LiveQueryClient', () => {
     liveQueryClient.connectPromise.resolve();
     await liveQueryClient.connectPromise;
     expect(liveQueryClient.socket.send).toHaveBeenCalledTimes(0);
+  });
+
+  it('cannot subscribe on connection error', async () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken',
+    });
+    liveQueryClient.socket = {
+      send: jest.fn(),
+    };
+    const query = new ParseQuery('Test');
+    query.equalTo('key', 'value');
+
+    const subscription = liveQueryClient.subscribe(query);
+    liveQueryClient.connectPromise.reject(new Error('Unable to connect'));
+    liveQueryClient.connectPromise.catch(() => {});
+    try {
+      await subscription.subscribePromise;
+      expect(true).toBeFalse();
+    } catch (e) {
+      expect(e.message).toBe('Unable to connect');
+    }
   });
 
   it('can resubscribe', async () => {

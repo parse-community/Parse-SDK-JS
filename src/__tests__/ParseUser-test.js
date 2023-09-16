@@ -326,6 +326,53 @@ describe('ParseUser', () => {
       });
   });
 
+  describe('loginWithAdditional', () => {
+    it('loginWithAdditonal fails with invalid payload', async () => {
+      ParseUser.enableUnsafeCurrentUser();
+      ParseUser._clearCache();
+      CoreManager.setRESTController({
+        request(method, path, body) {
+          expect(method).toBe('POST');
+          expect(path).toBe('login');
+          expect(body.username).toBe('username');
+          expect(body.password).toBe('password');
+          expect(body.authData).toEqual({ mfa: { key: '1234' } });
+
+          return Promise.resolve(
+            {
+              objectId: 'uid2',
+              username: 'username',
+              sessionToken: '123abc',
+              authDataResponse: {
+                mfa: { enabled: true },
+              },
+            },
+            200
+          );
+        },
+        ajax() {},
+      });
+      const response = await ParseUser.logInWithAdditionalAuth('username', 'password', {mfa: {key:'1234'}});
+      expect(response instanceof ParseUser).toBe(true);
+      expect(response.get('authDataResponse')).toEqual({mfa: { enabled: true }});
+    });
+
+    it('loginWithAdditonal fails with invalid payload', async () => {
+      ParseUser.enableUnsafeCurrentUser();
+      ParseUser._clearCache();
+      await expect(ParseUser.logInWithAdditionalAuth({}, 'password', {})).rejects.toThrowError(
+        new ParseError(ParseError.OTHER_CAUSE, 'Username must be a string.')
+      );
+      await expect(ParseUser.logInWithAdditionalAuth('username', {}, {})).rejects.toThrowError(
+        new ParseError(ParseError.OTHER_CAUSE, 'Password must be a string.')
+      );
+      await expect(ParseUser.logInWithAdditionalAuth('username', 'password', '')).rejects.toThrowError(
+        new ParseError(ParseError.OTHER_CAUSE, 'Auth must be an object.')
+      );
+    });
+  });
+
+
   it('preserves changes when logging in', done => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
@@ -785,7 +832,7 @@ describe('ParseUser', () => {
       });
   });
 
-  it('removes the current user from disk when destroyed', done => {
+  it('removes the current user from disk when destroyed', async () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     Storage._clear();
@@ -801,25 +848,21 @@ describe('ParseUser', () => {
       ajax() {},
     });
 
-    ParseUser.signUp('destroyed', 'password')
-      .then(u => {
-        expect(u.isCurrent()).toBe(true);
-        CoreManager.setRESTController({
-          request() {
-            return Promise.resolve({}, 200);
-          },
-          ajax() {},
-        });
-        return u.destroy();
-      })
-      .then(() => {
-        expect(ParseUser.current()).toBe(null);
-        return ParseUser.currentAsync();
-      })
-      .then(current => {
-        expect(current).toBe(null);
-        done();
-      });
+    const u = await ParseUser.signUp('destroyed', 'password');
+    expect(u.isCurrent()).toBe(true);
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve({}, 200);
+      },
+      ajax() {},
+    });
+    await u.destroy();
+
+    expect(ParseUser.current()).toBe(null);
+    const current = await ParseUser.currentAsync();
+
+    expect(current).toBe(null);
+    await u.destroy();
   });
 
   it('updates the current user on disk when fetched', done => {
@@ -1142,6 +1185,143 @@ describe('ParseUser', () => {
     expect(ParseUser.currentAsync).toHaveBeenCalledTimes(1);
     expect(provider.restoreAuthentication).toHaveBeenCalledTimes(1);
     spy.mockRestore();
+  });
+
+  it('can strip anonymous user on linkWith', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve(
+          {
+            objectId: 'uidstrip',
+            sessionToken: 'r:123abc',
+            authData: {
+              anonymous: {
+                id: 'anonymousId',
+              },
+            },
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+    const user = await AnonymousUtils.logIn();
+
+    expect(user.get('authData').anonymous).toBeDefined();
+
+    ParseUser._setCurrentUserCache(user);
+
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve(
+          {
+            objectId: 'uidstrip',
+            sessionToken: 'r:123abc',
+            authData: {
+              test: {
+                id: 'id',
+                access_token: 'access_token',
+              },
+            },
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+    const provider = {
+      authenticate(options) {
+        if (options.success) {
+          options.success(this, {
+            id: 'id',
+            access_token: 'access_token',
+          });
+        }
+      },
+      restoreAuthentication() {},
+      getAuthType() {
+        return 'test';
+      },
+      deauthenticate() {},
+    };
+
+    await user.linkWith(provider, null, { useMasterKey: true });
+
+    expect(user.get('authData')).toEqual({
+      test: { id: 'id', access_token: 'access_token' },
+    });
+  });
+
+  it('can restore anonymous user on linkWith failure', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      request() {
+        return Promise.resolve(
+          {
+            objectId: 'uidrestore',
+            sessionToken: 'r:123abc',
+            authData: {
+              anonymous: {
+                id: 'anonymousId',
+              },
+            },
+          },
+          200
+        );
+      },
+      ajax() {},
+    });
+    const user = await AnonymousUtils.logIn();
+    expect(user.get('authData').anonymous).toBeDefined();
+
+    ParseUser._setCurrentUserCache(user);
+
+    const provider = {
+      authenticate(options) {
+        if (options.success) {
+          options.success(this, {
+            id: 'id',
+            access_token: 'access_token',
+          });
+        }
+      },
+      restoreAuthentication() {},
+      getAuthType() {
+        return 'test';
+      },
+      deauthenticate() {},
+    };
+
+    const UserController = CoreManager.getUserController();
+    CoreManager.setUserController({
+      linkWith(user) {
+        expect(user.get('authData').anonymous).toEqual(null);
+        return Promise.reject('authentication error');
+      },
+      currentUserAsync() {},
+      setCurrentUser() {},
+      currentUser() {},
+      signUp() {},
+      logIn() {},
+      become() {},
+      logOut() {},
+      me() {},
+      requestPasswordReset() {},
+      upgradeToRevocableSession() {},
+      requestEmailVerification() {},
+      verifyPassword() {},
+    });
+    try {
+      await user.linkWith(provider, null, { useMasterKey: true });
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e).toBe('authentication error');
+    }
+    expect(user.get('authData')).toEqual({ anonymous: { id: 'anonymousId' } });
+    CoreManager.setUserController(UserController);
   });
 
   it('can logout anonymous user', async () => {
@@ -1484,6 +1664,7 @@ describe('ParseUser', () => {
 
     user.set('authData', { customAuth: true });
     expect(user._isLinked(provider)).toBe(true);
+    expect(user._isLinked('customAuth')).toBe(true);
 
     user.set('authData', 1234);
     expect(user._isLinked(provider)).toBe(false);
@@ -1758,6 +1939,27 @@ describe('ParseUser', () => {
     user.setUsername('name');
     user.setPassword('pass');
     await user.signUp(null, { context });
+    expect(controller.request.mock.calls[0][3].context).toEqual(context);
+  });
+
+  it('can login with context', async () => {
+    CoreManager.setRESTController({
+      ajax() {},
+      request() {
+        return Promise.resolve(
+          {
+            objectId: 'uid33',
+            username: 'username',
+            sessionToken: '123abc',
+          },
+          200
+        );
+      },
+    });
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+    const context = { a: 'a' };
+    await ParseUser.logIn('username', 'password', { context });
     expect(controller.request.mock.calls[0][3].context).toEqual(context);
   });
 

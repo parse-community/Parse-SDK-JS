@@ -979,14 +979,18 @@ describe('Parse User', () => {
     await Parse.FacebookUtils.link(user);
 
     expect(Parse.FacebookUtils.isLinked(user)).toBe(true);
-    expect(Parse.AnonymousUtils.isLinked(user)).toBe(true);
+    expect(Parse.AnonymousUtils.isLinked(user)).toBe(false);
     await Parse.FacebookUtils.unlink(user);
 
     expect(Parse.FacebookUtils.isLinked(user)).toBe(false);
-    expect(Parse.AnonymousUtils.isLinked(user)).toBe(true);
+    expect(Parse.AnonymousUtils.isLinked(user)).toBe(false);
   });
 
   it('can link with twitter', async () => {
+    const server = await reconfigureServer();
+    const twitter = server.config.auth.twitter;
+    const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
+
     Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
     user.setUsername(uuidv4());
@@ -999,9 +1003,14 @@ describe('Parse User', () => {
 
     await user._unlinkFrom('twitter');
     expect(user._isLinked('twitter')).toBe(false);
+    expect(spy).toHaveBeenCalled();
   });
 
   it('can link with twitter and facebook', async () => {
+    const server = await reconfigureServer();
+    const twitter = server.config.auth.twitter;
+    const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
+
     Parse.User.enableUnsafeCurrentUser();
     Parse.FacebookUtils.init();
     const user = new Parse.User();
@@ -1017,6 +1026,7 @@ describe('Parse User', () => {
 
     expect(user.get('authData').twitter.id).toBe(twitterAuthData.id);
     expect(user.get('authData').facebook.id).toBe('test');
+    expect(spy).toHaveBeenCalled();
   });
 
   it('can verify user password via static method', async () => {

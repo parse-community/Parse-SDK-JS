@@ -199,6 +199,17 @@ describe('ObjectStateMutations', () => {
     expect(objectCache).toEqual({ data: '{"count":5}' });
   });
 
+  it('can commit nested changes from the server', () => {
+    const serverData = {};
+    const objectCache = {};
+    ObjectStateMutations.commitServerChanges(serverData, objectCache, {
+      'name.foo': 'bar',
+      data: { count: 5 },
+    });
+    expect(serverData).toEqual({ name: { foo: 'bar' }, data: { count: 5 }  });
+    expect(objectCache).toEqual({ data: '{"count":5}' });
+  });
+
   it('can generate a default state for implementations', () => {
     expect(ObjectStateMutations.defaultState()).toEqual({
       serverData: {},
