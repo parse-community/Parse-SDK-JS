@@ -1,5 +1,7 @@
 #!/bin/sh -e
 set -x
+# GITHUB_ACTIONS=true SOURCE_TAG=test ./release_docs.sh
+
 if [ "${GITHUB_ACTIONS}" = "" ];
 then
   echo "Cannot release docs without GITHUB_ACTIONS set"
