@@ -229,7 +229,7 @@ describe('CloudController', () => {
         value: 12,
         when: { __type: 'Date', iso: '2015-01-01T00:00:00.000Z' },
       },
-      { useMasterKey: true },
+      { returnStatus: true, useMasterKey: true },
     ]);
   });
 
@@ -242,7 +242,7 @@ describe('CloudController', () => {
       {
         value: 12,
       },
-      { useMasterKey: true },
+      { returnStatus: true, useMasterKey: true },
     ]);
   });
 
