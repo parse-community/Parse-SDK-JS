@@ -22,6 +22,12 @@ CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 CoreManager.set('VERSION', 'V');
 
+const headers = {
+  'x-parse-job-status-id': '1234',
+  'x-parse-push-status-id': '5678',
+  'access-control-expose-headers': 'X-Parse-Job-Status-Id, X-Parse-Push-Status-Id',
+};
+
 describe('RESTController', () => {
   it('throws if there is no XHR implementation', () => {
     RESTController._setXHR(null);
@@ -212,8 +218,8 @@ describe('RESTController', () => {
     XHR.prototype = {
       open: function () {},
       setRequestHeader: function () {},
-      getResponseHeader: function () {
-        return 1234;
+      getResponseHeader: function (header) {
+        return headers[header];
       },
       send: function () {
         this.status = 200;
@@ -221,13 +227,10 @@ describe('RESTController', () => {
         this.readyState = 4;
         this.onreadystatechange();
       },
-      getAllResponseHeaders: function () {
-        return 'x-parse-job-status-id: 1234';
-      },
     };
     RESTController._setXHR(XHR);
-    const response = await RESTController.request('GET', 'classes/MyObject', {}, {});
-    expect(response).toBe(1234);
+    const response = await RESTController.request('GET', 'classes/MyObject', {}, { returnStatus: true });
+    expect(response._headers['X-Parse-Job-Status-Id']).toBe('1234');
   });
 
   it('handles x-parse-push-status-id header', async () => {
@@ -235,8 +238,8 @@ describe('RESTController', () => {
     XHR.prototype = {
       open: function () {},
       setRequestHeader: function () {},
-      getResponseHeader: function () {
-        return 1234;
+      getResponseHeader: function (header) {
+        return headers[header];
       },
       send: function () {
         this.status = 200;
@@ -244,13 +247,10 @@ describe('RESTController', () => {
         this.readyState = 4;
         this.onreadystatechange();
       },
-      getAllResponseHeaders: function () {
-        return 'x-parse-push-status-id: 1234';
-      },
     };
     RESTController._setXHR(XHR);
-    const response = await RESTController.request('POST', 'push', {}, {});
-    expect(response).toBe(1234);
+    const response = await RESTController.request('POST', 'push', {}, { returnStatus: true });
+    expect(response._headers['X-Parse-Push-Status-Id']).toBe('5678');
   });
 
   it('handles invalid header', async () => {
