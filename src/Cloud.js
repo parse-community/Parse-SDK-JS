@@ -131,12 +131,14 @@ const DefaultController = {
     return RESTController.request('GET', 'cloud_code/jobs/data', null, options);
   },
 
-  startJob(name, data, options: RequestOptions) {
+  async startJob(name, data, options: RequestOptions) {
     const RESTController = CoreManager.getRESTController();
 
     const payload = encode(data, true);
+    options.returnStatus = true;
 
-    return RESTController.request('POST', 'jobs/' + name, payload, options);
+    const response = await RESTController.request('POST', 'jobs/' + name, payload, options);
+    return response._headers?.['X-Parse-Job-Status-Id'];
   },
 };
 

@@ -87,13 +87,7 @@ describe('Push', () => {
 describe('PushController', () => {
   it('forwards data along', () => {
     CoreManager.setPushController(defaultController);
-    const request = jest.fn().mockReturnValue({
-      _thenRunCallbacks() {
-        return {
-          _thenRunCallbacks() {},
-        };
-      },
-    });
+    const request = jest.fn().mockReturnValue({ _headers: {} });
     CoreManager.setRESTController({
       request: request,
       ajax: function () {},
@@ -111,7 +105,7 @@ describe('PushController', () => {
       'POST',
       'push',
       { push_time: '2015-02-01T00:00:00.000Z' },
-      { useMasterKey: true },
+      { returnStatus: true, useMasterKey: true },
     ]);
   });
 });
