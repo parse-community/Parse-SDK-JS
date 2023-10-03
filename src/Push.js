@@ -99,8 +99,10 @@ export function getPushStatus(pushStatusId: string, options?: FullOptions = {}):
 }
 
 const DefaultController = {
-  send(data: PushData, options?: FullOptions) {
-    return CoreManager.getRESTController().request('POST', 'push', data, options);
+  async send(data: PushData, options?: FullOptions) {
+    options.returnStatus = true;
+    const response = await CoreManager.getRESTController().request('POST', 'push', data, options);
+    return response._headers?.['X-Parse-Push-Status-Id'];
   },
 };
 
