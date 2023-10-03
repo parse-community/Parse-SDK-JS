@@ -1,3 +1,10 @@
+# [4.3.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.0-alpha.1...4.3.0-alpha.2) (2023-10-03)
+
+
+### Bug Fixes
+
+* Docs fail with `Cannot find module 'taffydb'` ([#2036](https://github.com/parse-community/Parse-SDK-JS/issues/2036)) ([dc91d0f](https://github.com/parse-community/Parse-SDK-JS/commit/dc91d0fc4f69639ba762f5af841477e8836c6927))
+
 # [4.3.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0...4.3.0-alpha.1) (2023-09-26)
 
 
