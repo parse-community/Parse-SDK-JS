@@ -25,6 +25,15 @@ jobs:
       - run: npm ci
       - name: Check types
         run: npm run test:types
+  check-docs:
+    name: Check Docs
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm ci
+      - name: Check Docs
+        run: npm run docs
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
