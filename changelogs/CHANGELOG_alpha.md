@@ -1,3 +1,10 @@
+# [4.3.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.0-alpha.2...4.3.0-alpha.3) (2023-10-04)
+
+
+### Bug Fixes
+
+* Connection failure in `Parse.Object.saveEventually` and `Parse.Object.destroyEventually` not handled on custom `Parse.Error.CONNECTION_FAILURE` message ([#2032](https://github.com/parse-community/Parse-SDK-JS/issues/2032)) ([4da3ebc](https://github.com/parse-community/Parse-SDK-JS/commit/4da3ebcc28b903a499c07bb194baae738de21d6f))
+
 # [4.3.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.0-alpha.1...4.3.0-alpha.2) (2023-10-03)
 
 
