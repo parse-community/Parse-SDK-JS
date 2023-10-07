@@ -1,3 +1,10 @@
+# [4.3.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.0-alpha.3...4.3.0-alpha.4) (2023-10-07)
+
+
+### Bug Fixes
+
+* Error in web context when `window.indexedDB` API is available but protected ([#2039](https://github.com/parse-community/Parse-SDK-JS/issues/2039)) ([360981f](https://github.com/parse-community/Parse-SDK-JS/commit/360981f8a529f3e10243413c8114373271bb6f43))
+
 # [4.3.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.0-alpha.2...4.3.0-alpha.3) (2023-10-04)
 
 
