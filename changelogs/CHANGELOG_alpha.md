@@ -1,3 +1,10 @@
+# [4.3.0-alpha.5](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.0-alpha.4...4.3.0-alpha.5) (2023-10-26)
+
+
+### Bug Fixes
+
+* Security upgrade crypto-js from 4.1.1 to 4.2.0 ([#2042](https://github.com/parse-community/Parse-SDK-JS/issues/2042)) ([681fbdf](https://github.com/parse-community/Parse-SDK-JS/commit/681fbdfcdd2e6d351e00400eccf41fe732b053ba))
+
 # [4.3.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.0-alpha.3...4.3.0-alpha.4) (2023-10-07)
 
 
