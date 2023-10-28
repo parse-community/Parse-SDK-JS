@@ -1,3 +1,10 @@
+# [4.3.0-alpha.6](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.0-alpha.5...4.3.0-alpha.6) (2023-10-28)
+
+
+### Bug Fixes
+
+* Security upgrade browserify-sign from 4.2.1 to 4.2.2 ([#2043](https://github.com/parse-community/Parse-SDK-JS/issues/2043)) ([fd50b9d](https://github.com/parse-community/Parse-SDK-JS/commit/fd50b9dbc9feb8b51eedfcdddce37ea1882ac438))
+
 # [4.3.0-alpha.5](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.0-alpha.4...4.3.0-alpha.5) (2023-10-26)
 
 
