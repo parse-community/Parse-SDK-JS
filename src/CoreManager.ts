@@ -14,12 +14,13 @@ import type ParseConfig from './ParseConfig';
 import type LiveQueryClient from './LiveQueryClient';
 
 type AnalyticsController = {
-  track: (name: string, dimensions: { [key: string]: string }) => Promise<void>,
+  track: (name: string, dimensions: { [key: string]: string }) => Promise<any>,
 };
 type CloudController = {
-  run: (name: string, data: any, options: RequestOptions) => Promise<void>,
-  getJobsData: (options: RequestOptions) => Promise<void>,
-  startJob: (name: string, data: any, options: RequestOptions) => Promise<void>,
+  run: (name: string, data: any, options: RequestOptions) => Promise<any>,
+  getJobsData: (options: RequestOptions) => Promise<any>,
+  /** Returns promise which resolves with JobStatusId of the job */
+  startJob: (name: string, data: any, options: RequestOptions) => Promise<string>,
 };
 type ConfigController = {
   current: () => Promise<ParseConfig>,

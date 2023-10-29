@@ -34,7 +34,7 @@ const Storage = {
     return controller.setItem(path, value);
   },
 
-  setItemAsync(path: string, value: string): Promise<void> {
+  setItemAsync(path: string, value: string | null): Promise<void> {
     const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.setItemAsync(path, value);

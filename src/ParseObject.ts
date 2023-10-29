@@ -2415,8 +2415,9 @@ const DefaultController = {
 
       let unsaved = target.concat();
       for (let i = 0; i < target.length; i++) {
-        if (target[i] instanceof ParseObject) {
-          unsaved = unsaved.concat(unsavedChildren(target[i], true));
+        const target_i = target[i];
+        if (target_i instanceof ParseObject) {
+          unsaved = unsaved.concat(unsavedChildren(target_i, true));
         }
       }
       unsaved = unique(unsaved);

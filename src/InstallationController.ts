@@ -5,7 +5,7 @@
 import Storage from './Storage';
 const uuidv4 = require('./uuid');
 
-let iidCache = null;
+let iidCache: string|null = null;
 
 const InstallationController = {
   currentInstallationId(): Promise<string> {
@@ -16,9 +16,9 @@ const InstallationController = {
     return Storage.getItemAsync(path).then(iid => {
       if (!iid) {
         iid = uuidv4();
-        return Storage.setItemAsync(path, iid).then(() => {
+        return Storage.setItemAsync(path, iid!).then(() => {
           iidCache = iid;
-          return iid;
+          return iid!;
         });
       }
       iidCache = iid;

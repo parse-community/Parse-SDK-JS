@@ -187,6 +187,8 @@ class ParseGeoPoint {
    * @returns {Parse.GeoPoint} User's current location
    */
   // TODO: Typescript; How does this thing work?
+  // Seems we're using the power of Javascript by returning a value from a synchronous callback, so the value ends up correct somehow in tests?
+  // Should this be `async` instead for safety? Since it's a callback pattern
   static current() {
     return navigator.geolocation.getCurrentPosition(location => {
       return new ParseGeoPoint(location.coords.latitude, location.coords.longitude);
