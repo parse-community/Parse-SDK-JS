@@ -18,7 +18,7 @@ import type { RequestOptions } from './RESTController';
  * @alias Parse.Config
  */
 
-class ParseConfig {
+export class ParseConfig {
   attributes: { [key: string]: any };
   _escapedAttributes: { [key: string]: any };
 
@@ -123,7 +123,7 @@ class ParseConfig {
   }
 }
 
-let currentConfig = null;
+let currentConfig: ParseConfig | null = null;
 
 const CURRENT_CONFIG_KEY = 'currentConfig';
 
@@ -139,7 +139,7 @@ function decodePayload(data) {
 }
 
 const DefaultController = {
-  current() {
+  current: async ()=> {
     if (currentConfig) {
       return currentConfig;
     }

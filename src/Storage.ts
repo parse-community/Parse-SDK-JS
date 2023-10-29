@@ -10,7 +10,7 @@ const Storage = {
     return !!controller.async;
   },
 
-  getItem(path: string): ?string {
+  getItem(path: string): string | null {
     const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       throw new Error('Synchronous storage is not supported by the current storage controller');
@@ -18,7 +18,7 @@ const Storage = {
     return controller.getItem(path);
   },
 
-  getItemAsync(path: string): Promise<string> {
+  getItemAsync(path: string): Promise<string | null> {
     const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.getItemAsync(path);
@@ -63,15 +63,15 @@ const Storage = {
     if (controller.async === 1) {
       throw new Error('Synchronous storage is not supported by the current storage controller');
     }
-    return controller.getAllKeys();
+    return controller.getAllKeys!();
   },
 
   getAllKeysAsync(): Promise<Array<string>> {
     const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
-      return controller.getAllKeysAsync();
+      return controller.getAllKeysAsync!();
     }
-    return Promise.resolve(controller.getAllKeys());
+    return Promise.resolve(controller.getAllKeys!());
   },
 
   generatePath(path: string): string {

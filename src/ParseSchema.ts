@@ -21,11 +21,13 @@ const FIELD_TYPES = [
   'Object',
   'Pointer',
   'Relation',
-];
+] as const;
 
+type ValidFieldType = typeof FIELD_TYPES[number];
 type FieldOptions = {
-  required: boolean,
-  defaultValue: mixed,
+  required?: boolean,
+  defaultValue?: any,
+  targetClass?: string,
 };
 
 /**
@@ -47,9 +49,9 @@ type FieldOptions = {
  */
 class ParseSchema {
   className: string;
-  _fields: { [key: string]: mixed };
-  _indexes: { [key: string]: mixed };
-  _clp: { [key: string]: mixed };
+  _fields: { [key: string]: any };
+  _indexes: { [key: string]: any };
+  _clp: { [key: string]: any };
 
   /**
    * @param {string} className Parse Class string.
@@ -212,7 +214,7 @@ class ParseSchema {
    * </ul>
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addField(name: string, type: string, options: FieldOptions = {}) {
+  addField(name: string, type: ValidFieldType, options: FieldOptions = {}) {
     type = type || 'String';
 
     if (!name) {
@@ -222,12 +224,15 @@ class ParseSchema {
       throw new Error(`${type} is not a valid type.`);
     }
     if (type === 'Pointer') {
-      return this.addPointer(name, options.targetClass, options);
+      return this.addPointer(name, options.targetClass!, options);
     }
     if (type === 'Relation') {
+      // TODO: Why does options exist here?
       return this.addRelation(name, options.targetClass, options);
     }
-    const fieldOptions = { type };
+    const fieldOptions: Partial<FieldOptions> & {
+      type: ValidFieldType,
+    } = { type };
 
     if (typeof options.required === 'boolean') {
       fieldOptions.required = options.required;
@@ -404,7 +409,9 @@ class ParseSchema {
     if (!targetClass) {
       throw new Error('You need to set the targetClass of the Pointer.');
     }
-    const fieldOptions = { type: 'Pointer', targetClass };
+    const fieldOptions: Partial<FieldOptions> & {
+      type: ValidFieldType,
+    } = { type: 'Pointer', targetClass };
 
     if (typeof options.required === 'boolean') {
       fieldOptions.required = options.required;
@@ -466,30 +473,30 @@ class ParseSchema {
 }
 
 const DefaultController = {
-  send(className: string, method: string, params: any = {}): Promise {
+  send(className: string, method: string, params: any = {}): Promise<void> {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request(method, `schemas/${className}`, params, {
       useMasterKey: true,
     });
   },
 
-  get(className: string): Promise {
+  get(className: string): Promise<ParseSchema> {
     return this.send(className, 'GET');
   },
 
-  create(className: string, params: any): Promise {
+  create(className: string, params: any): Promise<any> {
     return this.send(className, 'POST', params);
   },
 
-  update(className: string, params: any): Promise {
+  update(className: string, params: any): Promise<any> {
     return this.send(className, 'PUT', params);
   },
 
-  delete(className: string): Promise {
+  delete(className: string): Promise<any> {
     return this.send(className, 'DELETE');
   },
 
-  purge(className: string): Promise {
+  purge(className: string): Promise<any> {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request('DELETE', `purge/${className}`, {}, { useMasterKey: true });
   },

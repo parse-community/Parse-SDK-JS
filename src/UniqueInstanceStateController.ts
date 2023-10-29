@@ -11,7 +11,7 @@ import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMuta
 
 let objectState = new WeakMap();
 
-export function getState(obj: ParseObject): ?State {
+export function getState(obj: ParseObject): State | null | undefined {
   const classData = objectState.get(obj);
   return classData || null;
 }
@@ -35,7 +35,7 @@ export function initializeState(obj: ParseObject, initial?: State): State {
   return state;
 }
 
-export function removeState(obj: ParseObject): ?State {
+export function removeState(obj: ParseObject): State | null | undefined {
   const state = getState(obj);
   if (state === null) {
     return null;
@@ -65,7 +65,7 @@ export function getPendingOps(obj: ParseObject): Array<OpsMap> {
   return [{}];
 }
 
-export function setPendingOp(obj: ParseObject, attr: string, op: ?Op) {
+export function setPendingOp(obj: ParseObject, attr: string, op?: Op) {
   const pendingOps = initializeState(obj).pendingOps;
   ObjectStateMutations.setPendingOp(pendingOps, attr, op);
 }
@@ -93,7 +93,7 @@ export function getObjectCache(obj: ParseObject): ObjectCache {
   return {};
 }
 
-export function estimateAttribute(obj: ParseObject, attr: string): mixed {
+export function estimateAttribute(obj: ParseObject, attr: string): any {
   const serverData = getServerData(obj);
   const pendingOps = getPendingOps(obj);
   return ObjectStateMutations.estimateAttribute(
@@ -116,7 +116,7 @@ export function commitServerChanges(obj: ParseObject, changes: AttributeMap) {
   ObjectStateMutations.commitServerChanges(state.serverData, state.objectCache, changes);
 }
 
-export function enqueueTask(obj: ParseObject, task: () => Promise): Promise {
+export function enqueueTask(obj: ParseObject, task: () => Promise<any>): Promise<void> {
   const state = initializeState(obj);
   return state.tasks.enqueue(task);
 }

@@ -2,7 +2,7 @@
  * @flow
  */
 /* global XMLHttpRequest, XDomainRequest */
-const uuidv4 = require('./uuid');
+import uuidv4 from './uuid';
 
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
@@ -28,9 +28,10 @@ export type FullOptions = {
   installationId?: string,
   progress?: any,
   usePost?: boolean,
+  requestTask?: any,
 };
 
-let XHR = null;
+let XHR: typeof XMLHttpRequest = null;
 if (typeof XMLHttpRequest !== 'undefined') {
   XHR = XMLHttpRequest;
 }
@@ -42,12 +43,14 @@ if (process.env.PARSE_BUILD === 'weapp') {
 }
 
 let useXDomainRequest = false;
+// @ts-ignore
 if (typeof XDomainRequest !== 'undefined' && !('withCredentials' in new XMLHttpRequest())) {
   useXDomainRequest = true;
 }
 
 function ajaxIE9(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
   return new Promise((resolve, reject) => {
+    // @ts-ignore
     const xdr = new XDomainRequest();
     xdr.onload = function () {
       let response;
@@ -77,7 +80,9 @@ function ajaxIE9(method: string, url: string, data: any, headers?: any, options?
     };
     xdr.open(method, url);
     xdr.send(data);
+    // @ts-ignore
     if (options && typeof options.requestTask === 'function') {
+      // @ts-ignore
       options.requestTask(xdr);
     }
   });
@@ -101,7 +106,7 @@ const RESTController = {
 
       const xhr = new XHR();
       xhr.onreadystatechange = function () {
-        if (xhr.readyState !== 4 || handled || xhr._aborted) {
+        if (xhr.readyState !== 4 || handled || (xhr as any)._aborted) {
           return;
         }
         handled = true;
@@ -203,7 +208,7 @@ const RESTController = {
     return promise;
   },
 
-  request(method: string, path: string, data: mixed, options?: RequestOptions) {
+  request(method: string, path: string, data: any, options?: RequestOptions) {
     options = options || {};
     let url = CoreManager.get('SERVER_URL');
     if (url[url.length - 1] !== '/') {
@@ -211,7 +216,18 @@ const RESTController = {
     }
     url += path;
 
-    const payload = {};
+    type PayloadType = {
+      _context?: any,
+      _method?: string,
+      _ApplicationId: string,
+      _JavaScriptKey?: string,
+      _ClientVersion: string,
+      _MasterKey?: string,
+      _RevocableSession?: string,
+      _InstallationId?: string,
+      _SessionToken?: string,
+    };
+    const payload: Partial<PayloadType> = {};
     if (data && typeof data === 'object') {
       for (const k in data) {
         payload[k] = data[k];
@@ -254,7 +270,7 @@ const RESTController = {
     }
 
     const installationId = options.installationId;
-    let installationIdPromise;
+    let installationIdPromise: Promise<string>;
     if (installationId && typeof installationId === 'string') {
       installationIdPromise = Promise.resolve(installationId);
     } else {
@@ -297,7 +313,7 @@ const RESTController = {
       .catch(RESTController.handleError);
   },
 
-  handleError(response) {
+  handleError(response: any) {
     // Transform the error into an instance of ParseError by trying to parse
     // the error string as JSON
     let error;

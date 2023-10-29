@@ -102,7 +102,7 @@ class ParseGeoPoint {
     };
   }
 
-  equals(other: mixed): boolean {
+  equals(other: any): boolean {
     return (
       other instanceof ParseGeoPoint &&
       this.latitude === other.latitude &&
@@ -186,6 +186,7 @@ class ParseGeoPoint {
    * @static
    * @returns {Parse.GeoPoint} User's current location
    */
+  // TODO: Typescript; How does this thing work?
   static current() {
     return navigator.geolocation.getCurrentPosition(location => {
       return new ParseGeoPoint(location.coords.latitude, location.coords.longitude);

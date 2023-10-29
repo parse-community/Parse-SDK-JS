@@ -18,7 +18,7 @@ let objectState: {
   },
 } = {};
 
-export function getState(obj: ObjectIdentifier): ?State {
+export function getState(obj: ObjectIdentifier): State | null {
   const classData = objectState[obj.className];
   if (classData) {
     return classData[obj.id] || null;
@@ -41,7 +41,7 @@ export function initializeState(obj: ObjectIdentifier, initial?: State): State {
   return state;
 }
 
-export function removeState(obj: ObjectIdentifier): ?State {
+export function removeState(obj: ObjectIdentifier): State | null {
   const state = getState(obj);
   if (state === null) {
     return null;
@@ -71,7 +71,7 @@ export function getPendingOps(obj: ObjectIdentifier): Array<OpsMap> {
   return [{}];
 }
 
-export function setPendingOp(obj: ObjectIdentifier, attr: string, op: ?Op) {
+export function setPendingOp(obj: ObjectIdentifier, attr: string, op?: Op) {
   const pendingOps = initializeState(obj).pendingOps;
   ObjectStateMutations.setPendingOp(pendingOps, attr, op);
 }
@@ -99,7 +99,7 @@ export function getObjectCache(obj: ObjectIdentifier): ObjectCache {
   return {};
 }
 
-export function estimateAttribute(obj: ObjectIdentifier, attr: string): mixed {
+export function estimateAttribute(obj: ObjectIdentifier, attr: string): any {
   const serverData = getServerData(obj);
   const pendingOps = getPendingOps(obj);
   return ObjectStateMutations.estimateAttribute(
@@ -122,7 +122,7 @@ export function commitServerChanges(obj: ObjectIdentifier, changes: AttributeMap
   ObjectStateMutations.commitServerChanges(state.serverData, state.objectCache, changes);
 }
 
-export function enqueueTask(obj: ObjectIdentifier, task: () => Promise): Promise {
+export function enqueueTask(obj: ObjectIdentifier, task: () => Promise<any>): Promise<void> {
   const state = initializeState(obj);
   return state.tasks.enqueue(task);
 }

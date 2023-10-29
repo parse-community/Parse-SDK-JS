@@ -57,7 +57,7 @@ class ParseSession extends ParseObject {
     options = options || {};
     const controller = CoreManager.getSessionController();
 
-    const sessionOptions = {};
+    const sessionOptions : FullOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       sessionOptions.useMasterKey = options.useMasterKey;
     }

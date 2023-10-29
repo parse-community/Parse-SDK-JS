@@ -1,30 +1,31 @@
 // Create Deferred Promise
-export function resolvingPromise() {
-  let res;
-  let rej;
-  const promise = new Promise((resolve, reject) => {
+export function resolvingPromise<T = any>() {
+  let res: (val: T) => void;
+  let rej: (err: any) => void;
+  const promise = new Promise<T>((resolve, reject) => {
     res = resolve;
     rej = reject;
   });
-  promise.resolve = res;
-  promise.reject = rej;
-  return promise;
+  const ret: typeof promise & { resolve: (res: T) => void, reject: (err: any) => void } = promise as any;
+  ret.resolve = res!;
+  ret.reject = rej!;
+  return ret;
 }
 
-export function when(promises) {
-  let objects;
+export function when(promises: Promise<any> | Promise<any>[]) {
+  let objects: Promise<any>[];
   const arrayArgument = Array.isArray(promises);
   if (arrayArgument) {
     objects = promises;
   } else {
-    objects = arguments;
+    objects = [promises];
   }
 
   let total = objects.length;
   let hadError = false;
-  const results = [];
+  const results: any[] = [];
   const returnValue = arrayArgument ? [results] : results;
-  const errors = [];
+  const errors: any[] = [];
   results.length = objects.length;
   errors.length = objects.length;
 
@@ -32,7 +33,7 @@ export function when(promises) {
     return Promise.resolve(returnValue);
   }
 
-  const promise = new resolvingPromise();
+  const promise = resolvingPromise();
 
   const resolveOne = function () {
     total--;
@@ -45,7 +46,7 @@ export function when(promises) {
     }
   };
 
-  const chain = function (object, index) {
+  const chain = function (object: Promise<any>, index: number) {
     if (object && typeof object.then === 'function') {
       object.then(
         function (result) {
@@ -66,11 +67,10 @@ export function when(promises) {
   for (let i = 0; i < objects.length; i++) {
     chain(objects[i], i);
   }
-
   return promise;
 }
 
-export function continueWhile(test, emitter) {
+export function continueWhile(test: () => boolean, emitter: () => Promise<void | any>) {
   if (test()) {
     return emitter().then(() => {
       return continueWhile(test, emitter);

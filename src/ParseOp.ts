@@ -5,71 +5,73 @@
 import arrayContainsObject from './arrayContainsObject';
 import decode from './decode';
 import encode from './encode';
-import ParseObject from './ParseObject';
+import ParseObject, { Pointer } from './ParseObject';
 import ParseRelation from './ParseRelation';
 import unique from './unique';
 
-export function opFromJSON(json: { [key: string]: any }): ?Op {
+export function opFromJSON(json: { [key: string]: any }): Op | null {
   if (!json || !json.__op) {
     return null;
   }
   switch (json.__op) {
-  case 'Delete':
-    return new UnsetOp();
-  case 'Increment':
-    return new IncrementOp(json.amount);
-  case 'Add':
-    return new AddOp(decode(json.objects));
-  case 'AddUnique':
-    return new AddUniqueOp(decode(json.objects));
-  case 'Remove':
-    return new RemoveOp(decode(json.objects));
-  case 'AddRelation': {
-    const toAdd = decode(json.objects);
-    if (!Array.isArray(toAdd)) {
-      return new RelationOp([], []);
-    }
-    return new RelationOp(toAdd, []);
-  }
-  case 'RemoveRelation': {
-    const toRemove = decode(json.objects);
-    if (!Array.isArray(toRemove)) {
-      return new RelationOp([], []);
-    }
-    return new RelationOp([], toRemove);
-  }
-  case 'Batch': {
-    let toAdd = [];
-    let toRemove = [];
-    for (let i = 0; i < json.ops.length; i++) {
-      if (json.ops[i].__op === 'AddRelation') {
-        toAdd = toAdd.concat(decode(json.ops[i].objects));
-      } else if (json.ops[i].__op === 'RemoveRelation') {
-        toRemove = toRemove.concat(decode(json.ops[i].objects));
+    case 'Delete':
+      return new UnsetOp();
+    case 'Increment':
+      return new IncrementOp(json.amount);
+    case 'Add':
+      return new AddOp(decode(json.objects));
+    case 'AddUnique':
+      return new AddUniqueOp(decode(json.objects));
+    case 'Remove':
+      return new RemoveOp(decode(json.objects));
+    case 'AddRelation': {
+      const toAdd = decode(json.objects);
+      if (!Array.isArray(toAdd)) {
+        return new RelationOp([], []);
       }
+      return new RelationOp(toAdd, []);
     }
-    return new RelationOp(toAdd, toRemove);
-  }
+    case 'RemoveRelation': {
+      const toRemove = decode(json.objects);
+      if (!Array.isArray(toRemove)) {
+        return new RelationOp([], []);
+      }
+      return new RelationOp([], toRemove);
+    }
+    case 'Batch': {
+      let toAdd = [];
+      let toRemove = [];
+      for (let i = 0; i < json.ops.length; i++) {
+        if (json.ops[i].__op === 'AddRelation') {
+          toAdd = toAdd.concat(decode(json.ops[i].objects));
+        } else if (json.ops[i].__op === 'RemoveRelation') {
+          toRemove = toRemove.concat(decode(json.ops[i].objects));
+        }
+      }
+      return new RelationOp(toAdd, toRemove);
+    }
   }
   return null;
 }
 
 export class Op {
+  __op?: string;
+  objects?: any[];
   // Empty parent class
-  applyTo(value: mixed): mixed {} /* eslint-disable-line no-unused-vars */
-  mergeWith(previous: Op): ?Op {} /* eslint-disable-line no-unused-vars */
-  toJSON(): mixed {}
+  applyTo(...value: any): any { } /* eslint-disable-line no-unused-vars */
+  mergeWith(previous: Op): Op | void { } /* eslint-disable-line no-unused-vars */
+  toJSON(offline?: boolean): any { }
 }
 
 export class SetOp extends Op {
-  _value: ?mixed;
+  _value: any;
 
-  constructor(value: mixed) {
+  constructor(value: any) {
     super();
     this._value = value;
   }
 
-  applyTo(): mixed {
+  applyTo(): any {
     return this._value;
   }
 
@@ -77,7 +79,7 @@ export class SetOp extends Op {
     return new SetOp(this._value);
   }
 
-  toJSON(offline?: boolean) {
+  toJSON(offline?: boolean) : any {
     return encode(this._value, false, true, undefined, offline);
   }
 }
@@ -107,7 +109,7 @@ export class IncrementOp extends Op {
     this._amount = amount;
   }
 
-  applyTo(value: ?mixed): number {
+  applyTo(value: any): number {
     if (typeof value === 'undefined') {
       return this._amount;
     }
@@ -139,14 +141,14 @@ export class IncrementOp extends Op {
 }
 
 export class AddOp extends Op {
-  _value: Array<mixed>;
+  _value: Array<any>;
 
-  constructor(value: mixed | Array<mixed>) {
+  constructor(value: any | Array<any>) {
     super();
     this._value = Array.isArray(value) ? value : [value];
   }
 
-  applyTo(value: mixed): Array<mixed> {
+  applyTo(value: any): Array<any> {
     if (value == null) {
       return this._value;
     }
@@ -172,25 +174,25 @@ export class AddOp extends Op {
     throw new Error('Cannot merge Add Op with the previous Op');
   }
 
-  toJSON(): { __op: string, objects: mixed } {
+  toJSON(): { __op: string, objects: any } {
     return { __op: 'Add', objects: encode(this._value, false, true) };
   }
 }
 
 export class AddUniqueOp extends Op {
-  _value: Array<mixed>;
+  _value: Array<any>;
 
-  constructor(value: mixed | Array<mixed>) {
+  constructor(value: any | Array<any>) {
     super();
     this._value = unique(Array.isArray(value) ? value : [value]);
   }
 
-  applyTo(value: mixed | Array<mixed>): Array<mixed> {
+  applyTo(value: any | Array<any>): Array<any> {
     if (value == null) {
       return this._value || [];
     }
     if (Array.isArray(value)) {
-      const toAdd = [];
+      const toAdd: any[] = [];
       this._value.forEach(v => {
         if (v instanceof ParseObject) {
           if (!arrayContainsObject(value, v)) {
@@ -223,20 +225,20 @@ export class AddUniqueOp extends Op {
     throw new Error('Cannot merge AddUnique Op with the previous Op');
   }
 
-  toJSON(): { __op: string, objects: mixed } {
+  toJSON(): { __op: string, objects: any } {
     return { __op: 'AddUnique', objects: encode(this._value, false, true) };
   }
 }
 
 export class RemoveOp extends Op {
-  _value: Array<mixed>;
+  _value: Array<any>;
 
-  constructor(value: mixed | Array<mixed>) {
+  constructor(value: any | Array<any>) {
     super();
     this._value = unique(Array.isArray(value) ? value : [value]);
   }
 
-  applyTo(value: mixed | Array<mixed>): Array<mixed> {
+  applyTo(value: any | Array<any>): Array<any> {
     if (value == null) {
       return [];
     }
@@ -291,13 +293,13 @@ export class RemoveOp extends Op {
     throw new Error('Cannot merge Remove Op with the previous Op');
   }
 
-  toJSON(): { __op: string, objects: mixed } {
+  toJSON(): { __op: string, objects: any } {
     return { __op: 'Remove', objects: encode(this._value, false, true) };
   }
 }
 
 export class RelationOp extends Op {
-  _targetClassName: ?string;
+  _targetClassName: string | null;
   relationsToAdd: Array<string>;
   relationsToRemove: Array<string>;
 
@@ -327,16 +329,16 @@ export class RelationOp extends Op {
     if (this._targetClassName !== obj.className) {
       throw new Error(
         'Tried to create a Relation with 2 different object types: ' +
-          this._targetClassName +
-          ' and ' +
-          obj.className +
-          '.'
+        this._targetClassName +
+        ' and ' +
+        obj.className +
+        '.'
       );
     }
     return obj.id;
   }
 
-  applyTo(value: mixed, object?: { className: string, id: ?string }, key?: string): ?ParseRelation {
+  applyTo(value: any, object?: { className: string, id?: string }, key?: string): ParseRelation {
     if (!value) {
       if (!object || !key) {
         throw new Error(
@@ -359,10 +361,10 @@ export class RelationOp extends Op {
           if (this._targetClassName !== value.targetClassName) {
             throw new Error(
               'Related object must be a ' +
-                value.targetClassName +
-                ', but a ' +
-                this._targetClassName +
-                ' was passed in.'
+              value.targetClassName +
+              ', but a ' +
+              this._targetClassName +
+              ' was passed in.'
             );
           }
         } else {
@@ -386,10 +388,10 @@ export class RelationOp extends Op {
       if (previous._targetClassName && previous._targetClassName !== this._targetClassName) {
         throw new Error(
           'Related object must be of class ' +
-            previous._targetClassName +
-            ', but ' +
-            (this._targetClassName || 'null') +
-            ' was passed in.'
+          previous._targetClassName +
+          ', but ' +
+          (this._targetClassName || 'null') +
+          ' was passed in.'
         );
       }
       const newAdd = previous.relationsToAdd.concat([]);
@@ -427,18 +429,19 @@ export class RelationOp extends Op {
     throw new Error('Cannot merge Relation Op with the previous Op');
   }
 
-  toJSON(): { __op?: string, objects?: mixed, ops?: mixed } {
-    const idToPointer = id => {
-      return {
+  toJSON(): { __op?: string, objects?: any, ops?: any } {
+    const idToPointer = (id: string) => {
+      const ret: Pointer = {
         __type: 'Pointer',
-        className: this._targetClassName,
+        className: this._targetClassName!,
         objectId: id,
       };
+      return ret;
     };
 
-    let adds = null;
-    let removes = null;
-    let pointers = null;
+    let pointers: null | (Pointer[]) = null;
+    let adds: null | { __op: string, objects: null | (Pointer[]) } = null;
+    let removes: null | { __op: string, objects: null | (Pointer[]) } = null;
 
     if (this.relationsToAdd.length > 0) {
       pointers = this.relationsToAdd.map(idToPointer);
@@ -452,7 +455,6 @@ export class RelationOp extends Op {
     if (adds && removes) {
       return { __op: 'Batch', ops: [adds, removes] };
     }
-
     return adds || removes || {};
   }
 }

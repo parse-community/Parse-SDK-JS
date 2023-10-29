@@ -43,7 +43,7 @@ export function setServerData(serverData: AttributeMap, attributes: AttributeMap
   }
 }
 
-export function setPendingOp(pendingOps: Array<OpsMap>, attr: string, op: ?Op) {
+export function setPendingOp(pendingOps: Array<OpsMap>, attr: string, op?: Op) {
   const last = pendingOps.length - 1;
   if (op) {
     pendingOps[last][attr] = op;
@@ -83,9 +83,9 @@ export function estimateAttribute(
   serverData: AttributeMap,
   pendingOps: Array<OpsMap>,
   className: string,
-  id: ?string,
-  attr: string
-): mixed {
+  id: string|undefined,
+  attr: string|undefined
+): any {
   let value = serverData[attr];
   for (let i = 0; i < pendingOps.length; i++) {
     if (pendingOps[i][attr]) {
@@ -105,7 +105,7 @@ export function estimateAttributes(
   serverData: AttributeMap,
   pendingOps: Array<OpsMap>,
   className: string,
-  id: ?string
+  id?: string
 ): AttributeMap {
   const data = {};
   let attr;

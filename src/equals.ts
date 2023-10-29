@@ -3,7 +3,7 @@ import ParseFile from './ParseFile';
 import ParseGeoPoint from './ParseGeoPoint';
 import ParseObject from './ParseObject';
 
-export default function equals(a, b) {
+export default function equals(a: any, b: any): boolean {
   const toString = Object.prototype.toString;
   if (toString.call(a) === '[object Date]' || toString.call(b) === '[object Date]') {
     const dateA = new Date(a);

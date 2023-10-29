@@ -10,11 +10,12 @@ import ParseObject from './ParseObject';
 import { Op } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
+/** Encodes values to storage type */
 function encode(
-  value: mixed,
+  value: any,
   disallowObjects: boolean,
   forcePointers: boolean,
-  seen: Array<mixed>,
+  seen: Array<any>,
   offline: boolean
 ): any {
   if (value instanceof ParseObject) {
@@ -56,7 +57,7 @@ function encode(
     if (isNaN(value)) {
       throw new Error('Tried to encode an invalid date.');
     }
-    return { __type: 'Date', iso: (value: any).toJSON() };
+    return { __type: 'Date', iso: (value as any).toJSON() };
   }
   if (
     Object.prototype.toString.call(value) === '[object RegExp]' &&
@@ -82,11 +83,12 @@ function encode(
   return value;
 }
 
+/** Encodes values to storage type */
 export default function (
-  value: mixed,
+  value: any,
   disallowObjects?: boolean,
   forcePointers?: boolean,
-  seen?: Array<mixed>,
+  seen?: Array<any>,
   offline?: boolean
 ): any {
   return encode(value, !!disallowObjects, !!forcePointers, seen || [], offline);

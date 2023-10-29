@@ -1,4 +1,6 @@
+import type { EventEmitter } from 'events';
 import CoreManager from './CoreManager';
+import AnEventEmitter from './EventEmitter';
 import { resolvingPromise } from './promiseUtils';
 
 /**
@@ -84,26 +86,36 @@ import { resolvingPromise } from './promiseUtils';
  * });</pre></p>
  */
 class Subscription {
-  /*
+  id: string;
+  query: string;
+  sessionToken?: string;
+  subscribePromise: ReturnType<typeof resolvingPromise>;
+  unsubscribePromise: ReturnType<typeof resolvingPromise>;
+  subscribed: boolean;
+  emitter: EventEmitter;
+  on: EventEmitter['on'];
+  emit: EventEmitter['emit'];
+
+  /**
    * @param {string} id - subscription id
    * @param {string} query - query to subscribe to
    * @param {string} sessionToken - optional session token
    */
-  constructor(id, query, sessionToken) {
+  constructor(id: string, query: string, sessionToken?: string) {
     this.id = id;
     this.query = query;
     this.sessionToken = sessionToken;
     this.subscribePromise = resolvingPromise();
     this.unsubscribePromise = resolvingPromise();
     this.subscribed = false;
-    const EventEmitter = CoreManager.getEventEmitter();
+    const EventEmitter = CoreManager.getEventEmitter() as new () => EventEmitter;
     this.emitter = new EventEmitter();
 
     this.on = this.emitter.on;
     this.emit = this.emitter.emit;
     // adding listener so process does not crash
     // best practice is for developer to register their own listener
-    this.on('error', () => {});
+    this.on('error', () => { });
   }
 
   /**
@@ -111,7 +123,7 @@ class Subscription {
    *
    * @returns {Promise}
    */
-  unsubscribe(): Promise {
+  unsubscribe(): Promise<void> {
     return CoreManager.getLiveQueryController()
       .getDefaultLiveQueryClient()
       .then(liveQueryClient => {

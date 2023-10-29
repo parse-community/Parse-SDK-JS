@@ -36,12 +36,13 @@ import unsavedChildren from './unsavedChildren';
 import type { AttributeMap, OpsMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
 
-const uuidv4 = require('./uuid');
+import uuidv4 from './uuid';
 
 export type Pointer = {
   __type: string,
   className: string,
-  objectId: string,
+  objectId?: string,
+  _localId?: string
 };
 
 type SaveParams = {
@@ -53,6 +54,7 @@ type SaveParams = {
 export type SaveOptions = FullOptions & {
   cascadeSave?: boolean,
   context?: AttributeMap,
+  batchSize?: number
 };
 
 // Mapping of class names to constructors, so we can populate objects from the
@@ -80,6 +82,10 @@ function getServerUrlPath() {
   return url.substr(url.indexOf('/'));
 }
 
+type ObjectFetchOptions = {
+  useMasterKey?: boolean, sessionToken?: string, include?: string | string[], context?: AttributeMap,
+}
+
 /**
  * Creates a new model with defined attributes.
  *
@@ -105,8 +111,8 @@ class ParseObject {
    * @param {object} options The options for this object instance.
    */
   constructor(
-    className: ?string | { className: string, [attr: string]: mixed },
-    attributes?: { [attr: string]: mixed },
+    className?: string | { className: string, [attr: string]: any },
+    attributes?: { [attr: string]: any },
     options?: { ignoreValidation: boolean }
   ) {
     // Enable legacy initializers
@@ -114,7 +120,7 @@ class ParseObject {
       this.initialize.apply(this, arguments);
     }
 
-    let toSet = null;
+    let toSet: { [attr: string]: any } | null = null;
     this._objCount = objectCount++;
     if (typeof className === 'string') {
       this.className = className;
@@ -130,7 +136,7 @@ class ParseObject {
         }
       }
       if (attributes && typeof attributes === 'object') {
-        options = attributes;
+        options = attributes as any;
       }
     }
     if (toSet && !this.set(toSet, options)) {
@@ -143,8 +149,8 @@ class ParseObject {
    *
    * @property {string} id
    */
-  id: ?string;
-  _localId: ?string;
+  id?: string;
+  _localId?: string;
   _objCount: number;
   className: string;
 
@@ -161,7 +167,7 @@ class ParseObject {
    * @property {Date} createdAt
    * @returns {Date}
    */
-  get createdAt(): ?Date {
+  get createdAt(): Date | undefined {
     return this._getServerData().createdAt;
   }
 
@@ -171,7 +177,7 @@ class ParseObject {
    * @property {Date} updatedAt
    * @returns {Date}
    */
-  get updatedAt(): ?Date {
+  get updatedAt(): Date | undefined {
     return this._getServerData().updatedAt;
   }
 
@@ -280,7 +286,7 @@ class ParseObject {
   }
 
   _toFullJSON(seen?: Array<any>, offline?: boolean): AttributeMap {
-    const json: { [key: string]: mixed } = this.toJSON(seen, offline);
+    const json: { [key: string]: any } = this.toJSON(seen, offline);
     json.__type = 'Object';
     json.className = this.className;
     return json;
@@ -290,7 +296,7 @@ class ParseObject {
     const pending = this._getPendingOps();
     const dirtyObjects = this._getDirtyObjectAttributes();
     const json = {};
-    let attr;
+    let attr: string;
 
     for (attr in dirtyObjects) {
       let isDotNotation = false;
@@ -346,7 +352,12 @@ class ParseObject {
     }
     const stateController = CoreManager.getObjectStateController();
     stateController.initializeState(this._getStateIdentifier());
-    const decoded = {};
+    const decoded: Partial<{
+      createdAt?: Date,
+      updatedAt?: Date,
+      ACL?: any // TODO: Maybe type this better?
+      [key: string]: any
+    }> = {};
     for (const attr in serverData) {
       if (attr === 'ACL') {
         decoded[attr] = new ParseACL(serverData[attr]);
@@ -395,7 +406,11 @@ class ParseObject {
   }
 
   _handleSaveResponse(response: AttributeMap, status: number) {
-    const changes = {};
+    const changes: Partial<{
+      createdAt: string,
+      updatedAt: string,
+      [key: string]: any
+    }> = {};
     let attr;
     const stateController = CoreManager.getObjectStateController();
     const pending = stateController.popPendingState(this._getStateIdentifier());
@@ -462,7 +477,7 @@ class ParseObject {
   toJSON(seen: Array<any> | void, offline?: boolean): AttributeMap {
     const seenEntry = this.id ? this.className + ':' + this.id : this;
     seen = seen || [seenEntry];
-    const json = {};
+    const json: AttributeMap = {};
     const attrs = this.attributes;
     for (const attr in attrs) {
       if ((attr === 'createdAt' || attr === 'updatedAt') && attrs[attr].toJSON) {
@@ -488,7 +503,7 @@ class ParseObject {
    * @param {object} other - An other object ot compare
    * @returns {boolean}
    */
-  equals(other: mixed): boolean {
+  equals(other: any): boolean {
     if (this === other) {
       return true;
     }
@@ -602,7 +617,7 @@ class ParseObject {
    * @param {string} attr The string name of an attribute.
    * @returns {*}
    */
-  get(attr: string): mixed {
+  get(attr: string): any {
     return this.attributes[attr];
   }
 
@@ -689,22 +704,24 @@ class ParseObject {
    *     The only supported option is <code>error</code>.
    * @returns {(ParseObject|boolean)} true if the set succeeded.
    */
-  set(key: mixed, value: mixed, options?: mixed): ParseObject | boolean {
-    let changes = {};
+  set(keyOrAttributes: string | AttributeMap, valueOrOptions?: any, options?: any): ParseObject | boolean {
+    let changes: AttributeMap = {};
     const newOps = {};
-    if (key && typeof key === 'object') {
-      changes = key;
-      options = value;
+    let key: string;
+    if (keyOrAttributes && typeof keyOrAttributes === 'object') {
+      changes = keyOrAttributes;
+      options = valueOrOptions;
     } else if (typeof key === 'string') {
-      changes[key] = value;
+      changes[key] = valueOrOptions;
     } else {
+      // Key is weird; just return ourself
       return this;
     }
 
     options = options || {};
     let readonly = [];
-    if (typeof this.constructor.readOnlyAttributes === 'function') {
-      readonly = readonly.concat(this.constructor.readOnlyAttributes());
+    if (typeof ((this.constructor as any).readOnlyAttributes) === 'function') {
+      readonly = readonly.concat((this.constructor as any).readOnlyAttributes());
     }
     for (const k in changes) {
       if (k === 'createdAt' || k === 'updatedAt') {
@@ -787,7 +804,7 @@ class ParseObject {
    * @param options
    * @returns {(ParseObject | boolean)}
    */
-  unset(attr: string, options?: { [opt: string]: mixed }): ParseObject | boolean {
+  unset(attr: string, options?: { [opt: string]: any }): ParseObject | boolean {
     options = options || {};
     options.unset = true;
     return this.set(attr, null, options);
@@ -837,7 +854,7 @@ class ParseObject {
    * @param item {} The item to add.
    * @returns {(ParseObject | boolean)}
    */
-  add(attr: string, item: mixed): ParseObject | boolean {
+  add(attr: string, item: any): ParseObject | boolean {
     return this.set(attr, new AddOp([item]));
   }
 
@@ -849,7 +866,7 @@ class ParseObject {
    * @param items {Object[]} The items to add.
    * @returns {(ParseObject | boolean)}
    */
-  addAll(attr: string, items: Array<mixed>): ParseObject | boolean {
+  addAll(attr: string, items: Array<any>): ParseObject | boolean {
     return this.set(attr, new AddOp(items));
   }
 
@@ -862,7 +879,7 @@ class ParseObject {
    * @param item {} The object to add.
    * @returns {(ParseObject | boolean)}
    */
-  addUnique(attr: string, item: mixed): ParseObject | boolean {
+  addUnique(attr: string, item: any): ParseObject | boolean {
     return this.set(attr, new AddUniqueOp([item]));
   }
 
@@ -875,7 +892,7 @@ class ParseObject {
    * @param items {Object[]} The objects to add.
    * @returns {(ParseObject | boolean)}
    */
-  addAllUnique(attr: string, items: Array<mixed>): ParseObject | boolean {
+  addAllUnique(attr: string, items: Array<any>): ParseObject | boolean {
     return this.set(attr, new AddUniqueOp(items));
   }
 
@@ -887,7 +904,7 @@ class ParseObject {
    * @param item {} The object to remove.
    * @returns {(ParseObject | boolean)}
    */
-  remove(attr: string, item: mixed): ParseObject | boolean {
+  remove(attr: string, item: any): ParseObject | boolean {
     return this.set(attr, new RemoveOp([item]));
   }
 
@@ -899,7 +916,7 @@ class ParseObject {
    * @param items {Object[]} The object to remove.
    * @returns {(ParseObject | boolean)}
    */
-  removeAll(attr: string, items: Array<mixed>): ParseObject | boolean {
+  removeAll(attr: string, items: Array<any>): ParseObject | boolean {
     return this.set(attr, new RemoveOp(items));
   }
 
@@ -912,7 +929,7 @@ class ParseObject {
    * @param attr {String} The key.
    * @returns {Parse.Op | undefined} The operation, or undefined if none.
    */
-  op(attr: string): ?Op {
+  op(attr: string): Op | undefined {
     const pending = this._getPendingOps();
     for (let i = pending.length; i--;) {
       if (pending[i][attr]) {
@@ -926,11 +943,11 @@ class ParseObject {
    *
    * @returns {Parse.Object}
    */
-  clone(): any {
-    const clone = new this.constructor(this.className);
+  clone(): typeof this {
+    const clone = new (this.constructor as new (...args: ConstructorParameters<typeof ParseObject>) => this)(this.className);
     let attributes = this.attributes;
-    if (typeof this.constructor.readOnlyAttributes === 'function') {
-      const readonly = this.constructor.readOnlyAttributes() || [];
+    if (typeof (this.constructor as any).readOnlyAttributes === 'function') {
+      const readonly = (this.constructor as any).readOnlyAttributes() || [];
       // Attributes are frozen, so we have to rebuild an object,
       // rather than delete readonly keys
       const copy = {};
@@ -953,7 +970,7 @@ class ParseObject {
    * @returns {Parse.Object}
    */
   newInstance(): any {
-    const clone = new this.constructor(this.className);
+    const clone = new (this.constructor as new (...args: ConstructorParameters<typeof ParseObject>) => this)(this.className);
     clone.id = this.id;
     if (singleInstance) {
       // Just return an object with the right id
@@ -1060,7 +1077,7 @@ class ParseObject {
    * @returns {Parse.ACL|null} An instance of Parse.ACL.
    * @see Parse.Object#get
    */
-  getACL(): ?ParseACL {
+  getACL(): ParseACL | null {
     const acl = this.get('ACL');
     if (acl instanceof ParseACL) {
       return acl;
@@ -1076,7 +1093,7 @@ class ParseObject {
    * @returns {(ParseObject | boolean)} Whether the set passed validation.
    * @see Parse.Object#set
    */
-  setACL(acl: ParseACL, options?: mixed): ParseObject | boolean {
+  setACL(acl: ParseACL, options?: any): ParseObject | boolean {
     return this.set('ACL', acl, options);
   }
 
@@ -1109,8 +1126,8 @@ class ParseObject {
     const attributes = this.attributes;
     const erasable = {};
     let readonly = ['createdAt', 'updatedAt'];
-    if (typeof this.constructor.readOnlyAttributes === 'function') {
-      readonly = readonly.concat(this.constructor.readOnlyAttributes());
+    if (typeof (this.constructor as any).readOnlyAttributes === 'function') {
+      readonly = readonly.concat((this.constructor as any).readOnlyAttributes());
     }
     for (const attr in attributes) {
       if (readonly.indexOf(attr) < 0) {
@@ -1137,9 +1154,9 @@ class ParseObject {
    * @returns {Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetch(options: RequestOptions): Promise {
+  fetch(options: ObjectFetchOptions): Promise<any> {
     options = options || {};
-    const fetchOptions = {};
+    const fetchOptions: ObjectFetchOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       fetchOptions.useMasterKey = options.useMasterKey;
     }
@@ -1156,7 +1173,7 @@ class ParseObject {
           if (Array.isArray(key)) {
             fetchOptions.include = fetchOptions.include.concat(key);
           } else {
-            fetchOptions.include.push(key);
+            (fetchOptions.include as string[]).push(key);
           }
         });
       } else {
@@ -1185,7 +1202,7 @@ class ParseObject {
    * @returns {Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetchWithInclude(keys: String | Array<string | Array<string>>, options: RequestOptions): Promise {
+  fetchWithInclude(keys: String | Array<string | Array<string>>, options: RequestOptions): Promise<any> {
     options = options || {};
     options.include = keys;
     return this.fetch(options);
@@ -1215,7 +1232,7 @@ class ParseObject {
    * @returns {Promise} A promise that is fulfilled when the save
    * completes.
    */
-  async saveEventually(options: SaveOptions): Promise {
+  async saveEventually(options: SaveOptions): Promise<this> {
     try {
       await this.save(null, options);
     } catch (e) {
@@ -1291,12 +1308,12 @@ class ParseObject {
    * completes.
    */
   save(
-    arg1: ?string | { [attr: string]: mixed },
-    arg2: SaveOptions | mixed,
+    arg1: undefined | string | { [attr: string]: any },
+    arg2: SaveOptions | any,
     arg3?: SaveOptions
-  ): Promise {
-    let attrs;
-    let options;
+  ): Promise<this> {
+    let attrs: { [attr: string]: any };
+    let options: SaveOptions;
     if (typeof arg1 === 'object' || typeof arg1 === 'undefined') {
       attrs = arg1;
       if (typeof arg2 === 'object') {
@@ -1317,7 +1334,7 @@ class ParseObject {
     }
 
     options = options || {};
-    const saveOptions = {};
+    const saveOptions: SaveOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       saveOptions.useMasterKey = !!options.useMasterKey;
     }
@@ -1334,7 +1351,7 @@ class ParseObject {
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
     return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
-    });
+    }) as Promise<ParseObject> as Promise<this>;
   }
 
   /**
@@ -1359,7 +1376,7 @@ class ParseObject {
    * @returns {Promise} A promise that is fulfilled when the destroy
    *     completes.
    */
-  async destroyEventually(options: RequestOptions): Promise {
+  async destroyEventually(options: RequestOptions): Promise<this> {
     try {
       await this.destroy(options);
     } catch (e) {
@@ -1385,9 +1402,9 @@ class ParseObject {
    * @returns {Promise} A promise that is fulfilled when the destroy
    *     completes.
    */
-  destroy(options: RequestOptions): Promise {
+  destroy(options: RequestOptions): Promise<void | ParseObject> {
     options = options || {};
-    const destroyOptions = {};
+    const destroyOptions: RequestOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       destroyOptions.useMasterKey = options.useMasterKey;
     }
@@ -1400,7 +1417,7 @@ class ParseObject {
     if (!this.id) {
       return Promise.resolve();
     }
-    return CoreManager.getObjectController().destroy(this, destroyOptions);
+    return CoreManager.getObjectController().destroy(this, destroyOptions) as Promise<ParseObject>;
   }
 
   /**
@@ -1552,7 +1569,7 @@ class ParseObject {
    * @returns {Parse.Object[]}
    */
   static fetchAll(list: Array<ParseObject>, options: RequestOptions = {}) {
-    const queryOptions = {};
+    const queryOptions: RequestOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       queryOptions.useMasterKey = options.useMasterKey;
     }
@@ -1662,10 +1679,8 @@ class ParseObject {
    * @static
    * @returns {Parse.Object[]}
    */
-  static fetchAllIfNeeded(list: Array<ParseObject>, options) {
-    options = options || {};
-
-    const queryOptions = {};
+  static fetchAllIfNeeded(list: Array<ParseObject>, options: ObjectFetchOptions = {}) {
+    const queryOptions: ObjectFetchOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       queryOptions.useMasterKey = options.useMasterKey;
     }
@@ -1740,8 +1755,8 @@ class ParseObject {
    * @returns {Promise} A promise that is fulfilled when the destroyAll
    * completes.
    */
-  static destroyAll(list: Array<ParseObject>, options = {}) {
-    const destroyOptions = {};
+  static destroyAll(list: Array<ParseObject>, options: SaveOptions = {}) {
+    const destroyOptions: SaveOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       destroyOptions.useMasterKey = options.useMasterKey;
     }
@@ -1775,8 +1790,8 @@ class ParseObject {
    * @static
    * @returns {Parse.Object[]}
    */
-  static saveAll(list: Array<ParseObject>, options: RequestOptions = {}) {
-    const saveOptions = {};
+  static saveAll(list: Array<ParseObject>, options: SaveOptions = {}) {
+    const saveOptions: SaveOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       saveOptions.useMasterKey = options.useMasterKey;
     }
@@ -1806,7 +1821,7 @@ class ParseObject {
    * @static
    * @returns {Parse.Object} A Parse.Object reference.
    */
-  static createWithoutData(id: string) {
+  static createWithoutData(id: string): ParseObject {
     const obj = new this();
     obj.id = id;
     return obj;
@@ -1822,13 +1837,13 @@ class ParseObject {
    * @static
    * @returns {Parse.Object} A Parse.Object reference
    */
-  static fromJSON(json: any, override?: boolean, dirty?: boolean) {
+  static fromJSON(json: any, override?: boolean, dirty?: boolean): ParseObject {
     if (!json.className) {
       throw new Error('Cannot create an object without a className');
     }
     const constructor = classMap[json.className];
     const o = constructor ? new constructor(json.className) : new ParseObject(json.className);
-    const otherAttributes = {};
+    const otherAttributes: AttributeMap = {};
     for (const attr in json) {
       if (attr !== 'className' && attr !== '__type') {
         otherAttributes[attr] = json[attr];
@@ -1877,7 +1892,7 @@ class ParseObject {
     if (typeof constructor !== 'function') {
       throw new TypeError(
         'You must register the subclass constructor. ' +
-          'Did you attempt to register an instance of the subclass?'
+        'Did you attempt to register an instance of the subclass?'
       );
     }
     classMap[className] = constructor;
@@ -1950,7 +1965,7 @@ class ParseObject {
     }
 
     let parentProto = ParseObject.prototype;
-    if (this.hasOwnProperty('__super__') && this.__super__) {
+    if (this.hasOwnProperty('__super__') && (this as any).__super__) {
       parentProto = this.prototype;
     }
     let ParseObjectSubclass = function (attributes, options) {
@@ -1976,15 +1991,16 @@ class ParseObject {
     if (classMap[adjustedClassName]) {
       ParseObjectSubclass = classMap[adjustedClassName];
     } else {
-      ParseObjectSubclass.extend = function (name, protoProps, classProps) {
+      // TODO: Maybe there is a more elegant solution to this?
+      (ParseObjectSubclass as any).extend = function (name: string, protoProps: any, classProps: any) {
         if (typeof name === 'string') {
           return ParseObject.extend.call(ParseObjectSubclass, name, protoProps, classProps);
         }
         return ParseObject.extend.call(ParseObjectSubclass, adjustedClassName, name, protoProps);
       };
-      ParseObjectSubclass.createWithoutData = ParseObject.createWithoutData;
-      ParseObjectSubclass.className = adjustedClassName;
-      ParseObjectSubclass.__super__ = parentProto;
+      (ParseObjectSubclass as any).createWithoutData = ParseObject.createWithoutData;
+      (ParseObjectSubclass as any).className = adjustedClassName;
+      (ParseObjectSubclass as any).__super__ = parentProto;
       ParseObjectSubclass.prototype = Object.create(parentProto, {
         constructor: {
           value: ParseObjectSubclass,
@@ -2195,16 +2211,18 @@ const DefaultController = {
     target: ParseObject | Array<ParseObject>,
     forceFetch: boolean,
     options: RequestOptions
-  ): Promise<Array<void> | ParseObject> {
+  ): Promise<Array<ParseObject | undefined> | ParseObject | undefined> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (Array.isArray(target)) {
       if (target.length < 1) {
         return Promise.resolve([]);
       }
-      const objs = [];
-      const ids = [];
-      let className = null;
-      const results = [];
+      /** Resulting Parse.Objects that have data */
+      const objs: ParseObject[] = [];
+      /** IDs to fetch */
+      const ids: string[] = [];
+      let className: null | string = null;
+      const results: ParseObject[] = [];
       let error = null;
       target.forEach(el => {
         if (error) {
@@ -2231,14 +2249,15 @@ const DefaultController = {
       if (error) {
         return Promise.reject(error);
       }
+      // Construct a ParseQuery that finds objects with matching IDs
       const query = new ParseQuery(className);
       query.containedIn('objectId', ids);
       if (options && options.include) {
         query.include(options.include);
       }
       query._limit = ids.length;
-      return query.find(options).then(async objects => {
-        const idMap = {};
+      return query.find(options).then(async (objects: ParseObject[]) => {
+        const idMap: Record<string, ParseObject> = {};
         objects.forEach(o => {
           idMap[o.id] = o;
         });
@@ -2253,7 +2272,7 @@ const DefaultController = {
           }
         }
         if (!singleInstance) {
-          // If single instance objects are disabled, we need to replace the
+          // If single instance objects are disabled, we need to replace the objects in the results array.
           for (let i = 0; i < results.length; i++) {
             const obj = results[i];
             if (obj && obj.id && idMap[obj.id]) {
@@ -2275,7 +2294,7 @@ const DefaultController = {
         );
       }
       const RESTController = CoreManager.getRESTController();
-      const params = {};
+      const params: RequestOptions = {};
       if (options && options.include) {
         params.include = options.include.join();
       }
@@ -2292,13 +2311,14 @@ const DefaultController = {
         return target;
       });
     }
-    return Promise.resolve();
+    // Not Array, and not ParseObject; return undefined/void.
+    return Promise.resolve(undefined);
   },
 
   async destroy(
     target: ParseObject | Array<ParseObject>,
-    options: RequestOptions
-  ): Promise<Array<void> | ParseObject> {
+    options: SaveOptions
+  ): Promise<Array<ParseObject> | ParseObject> {
     const batchSize =
       options && options.batchSize ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
@@ -2308,7 +2328,7 @@ const DefaultController = {
       if (target.length < 1) {
         return Promise.resolve([]);
       }
-      const batches = [[]];
+      const batches: ParseObject[][] = [[]];
       target.forEach(obj => {
         if (!obj.id) {
           return;
@@ -2400,7 +2420,7 @@ const DefaultController = {
       }
       unsaved = unique(unsaved);
 
-      const filesSaved: Array<ParseFile> = [];
+      const filesSaved: Array<Promise<ParseFile>> = [];
       let pending: Array<ParseObject> = [];
       unsaved.forEach(el => {
         if (el instanceof ParseFile) {

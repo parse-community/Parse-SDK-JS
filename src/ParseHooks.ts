@@ -10,15 +10,15 @@ export function getTriggers() {
   return CoreManager.getHooksController().get('triggers');
 }
 
-export function getFunction(name) {
+export function getFunction(name: string) {
   return CoreManager.getHooksController().get('functions', name);
 }
 
-export function getTrigger(className, triggerName) {
+export function getTrigger(className: string, triggerName: string) {
   return CoreManager.getHooksController().get('triggers', className, triggerName);
 }
 
-export function createFunction(functionName, url) {
+export function createFunction(functionName: string, url: string) {
   return create({ functionName: functionName, url: url });
 }
 
@@ -34,7 +34,7 @@ export function updateFunction(functionName, url) {
   return update({ functionName: functionName, url: url });
 }
 
-export function updateTrigger(className, triggerName, url) {
+export function updateTrigger(className: string, triggerName: string, url: string) {
   return update({ className: className, triggerName: triggerName, url: url });
 }
 
@@ -54,8 +54,10 @@ export function remove(hook) {
   return CoreManager.getHooksController().remove(hook);
 }
 
+export type HookDeclaration = { functionName: string, url: string } | { className: string, triggerName: string, url: string };
+export type HookDeleteArg = { functionName: string } | { className: string, triggerName: string };
 const DefaultController = {
-  get(type, functionName, triggerName) {
+  get(type: string, functionName?: string, triggerName?: string) {
     let url = '/hooks/' + type;
     if (functionName) {
       url += '/' + functionName;
@@ -66,11 +68,11 @@ const DefaultController = {
     return this.sendRequest('GET', url);
   },
 
-  create(hook) {
-    let url;
-    if (hook.functionName && hook.url) {
+  create(hook: HookDeclaration) {
+    let url: string;
+    if ('functionName' in hook && hook.url) {
       url = '/hooks/functions';
-    } else if (hook.className && hook.triggerName && hook.url) {
+    } else if ('className' in hook && hook.triggerName && hook.url) {
       url = '/hooks/triggers';
     } else {
       return Promise.reject({ error: 'invalid hook declaration', code: 143 });
@@ -78,9 +80,9 @@ const DefaultController = {
     return this.sendRequest('POST', url, hook);
   },
 
-  remove(hook) {
-    let url;
-    if (hook.functionName) {
+  remove(hook: { functionName: string } | { className: string, triggerName: string }) {
+    let url: string;
+    if ('functionName' in hook) {
       url = '/hooks/functions/' + hook.functionName;
       delete hook.functionName;
     } else if (hook.className && hook.triggerName) {
@@ -93,12 +95,12 @@ const DefaultController = {
     return this.sendRequest('PUT', url, { __op: 'Delete' });
   },
 
-  update(hook) {
-    let url;
-    if (hook.functionName && hook.url) {
+  update(hook: HookDeclaration) {
+    let url: string;
+    if ('functionName' in hook && hook.url) {
       url = '/hooks/functions/' + hook.functionName;
       delete hook.functionName;
-    } else if (hook.className && hook.triggerName && hook.url) {
+    } else if ('className' in hook && hook.triggerName && hook.url) {
       url = '/hooks/triggers/' + hook.className + '/' + hook.triggerName;
       delete hook.className;
       delete hook.triggerName;
@@ -108,7 +110,7 @@ const DefaultController = {
     return this.sendRequest('PUT', url, hook);
   },
 
-  sendRequest(method, url, body) {
+  sendRequest(method: string, url: string, body?: any) {
     return CoreManager.getRESTController()
       .request(method, url, body, { useMasterKey: true })
       .then(res => {

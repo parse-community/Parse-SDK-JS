@@ -9,12 +9,13 @@ import ParseObject from './ParseObject';
 import { opFromJSON } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
+/** Decodes values from storage type */
 export default function decode(value: any): any {
   if (value === null || typeof value !== 'object' || value instanceof Date) {
     return value;
   }
   if (Array.isArray(value)) {
-    const dup = [];
+    const dup: any = [];
     value.forEach((v, i) => {
       dup[i] = decode(v);
     });
