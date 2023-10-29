@@ -473,14 +473,14 @@ class ParseSchema {
 }
 
 const DefaultController = {
-  send(className: string, method: string, params: any = {}): Promise<void> {
+  send(className: string, method: string, params: any = {}): Promise<any> {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request(method, `schemas/${className}`, params, {
       useMasterKey: true,
     });
   },
 
-  get(className: string): Promise<ParseSchema> {
+  get(className: string): Promise<{ results: ParseSchema[] }> {
     return this.send(className, 'GET');
   },
 

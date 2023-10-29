@@ -77,7 +77,9 @@ class ParseRelation {
     if (objects.length === 0) {
       return parent;
     }
-    parent.set(this.key, change);
+    if (this.key) {
+      parent.set(this.key, change);
+    }
     this.targetClassName = change._targetClassName;
     return parent;
   }
@@ -99,7 +101,9 @@ class ParseRelation {
     if (objects.length === 0) {
       return;
     }
-    this.parent.set(this.key, change);
+    if (this.key) {
+      this.parent.set(this.key, change);
+    }
     this.targetClassName = change._targetClassName;
   }
 

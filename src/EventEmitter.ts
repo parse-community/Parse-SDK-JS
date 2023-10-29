@@ -21,5 +21,5 @@ try {
 } catch (_) {
   // EventEmitter unavailable
 }
-module.exports = EventEmitter;
-export default EventEmitter;
+module.exports = EventEmitter!;
+export default EventEmitter!;

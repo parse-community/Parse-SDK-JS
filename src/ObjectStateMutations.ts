@@ -56,7 +56,7 @@ export function pushPendingState(pendingOps: Array<OpsMap>) {
   pendingOps.push({});
 }
 
-export function popPendingState(pendingOps: Array<OpsMap>): OpsMap {
+export function popPendingState(pendingOps: Array<OpsMap>): OpsMap | undefined {
   const first = pendingOps.shift();
   if (!pendingOps.length) {
     pendingOps[0] = {};
@@ -83,8 +83,8 @@ export function estimateAttribute(
   serverData: AttributeMap,
   pendingOps: Array<OpsMap>,
   className: string,
-  id: string|undefined,
-  attr: string|undefined
+  id: string | undefined,
+  attr: string
 ): any {
   let value = serverData[attr];
   for (let i = 0; i < pendingOps.length; i++) {

@@ -57,7 +57,7 @@ class ParseSession extends ParseObject {
     options = options || {};
     const controller = CoreManager.getSessionController();
 
-    const sessionOptions : FullOptions = {};
+    const sessionOptions: FullOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       sessionOptions.useMasterKey = options.useMasterKey;
     }
@@ -65,7 +65,7 @@ class ParseSession extends ParseObject {
       if (!user) {
         return Promise.reject('There is no current user.');
       }
-      sessionOptions.sessionToken = user.getSessionToken();
+      sessionOptions.sessionToken = user.getSessionToken() || undefined;
       return controller.getSession(sessionOptions);
     });
   }

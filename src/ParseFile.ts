@@ -6,7 +6,7 @@ import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
 import ParseError from './ParseError'
 
-let XHR: typeof XMLHttpRequest = null;
+let XHR: typeof XMLHttpRequest = null as any;
 if (typeof XMLHttpRequest !== 'undefined') {
   XHR = XMLHttpRequest;
 }
@@ -26,7 +26,7 @@ export type FileSource =
   | {
     format: 'base64',
     base64: string,
-    type: string,
+    type?: string,
   }
   | {
     format: 'uri',
@@ -53,7 +53,7 @@ function b64Digit(number: number): string {
   throw new TypeError('Tried to encode large digit ' + number + ' in base64.');
 }
 
-type FileSaveOptions = FullOptions & {
+export type FileSaveOptions = FullOptions & {
   metadata?: { [key: string]: any }
   tags?: { [key: string]: any }
 }
@@ -71,8 +71,8 @@ class ParseFile {
   _previousSave?: Promise<ParseFile>;
   _data?: string;
   _requestTask?: any;
-  _metadata?: Object;
-  _tags?: Object;
+  _metadata: Object;
+  _tags: Object;
 
   /**
    * @param name {String} The file's name. This will be prefixed by a unique
@@ -170,7 +170,7 @@ class ParseFile {
     const controller = CoreManager.getFileController();
     const result = await controller.download(this._url, options);
     this._data = result.base64;
-    return this._data;
+    return this._data!;
   }
 
   /**
@@ -208,7 +208,7 @@ class ParseFile {
    *
    * @returns {object}
    */
-  metadata(): Object {
+  metadata() {
     return this._metadata;
   }
 
@@ -217,7 +217,7 @@ class ParseFile {
    *
    * @returns {object}
    */
-  tags(): Object {
+  tags() {
     return this._tags;
   }
 
@@ -256,7 +256,7 @@ class ParseFile {
         this._previousSave = controller.saveFile(this._name, this._source, options).then(res => {
           this._name = res.name;
           this._url = res.url;
-          this._data = null;
+          this._data = undefined;
           this._requestTask = null;
           return this;
         });
@@ -270,14 +270,14 @@ class ParseFile {
             const newSource = {
               format: 'base64' as const,
               base64: result.base64,
-              type: result.contentType,
+              type: result.contentType!,
             };
             this._data = result.base64;
             this._requestTask = null;
             return controller.saveBase64(this._name, newSource, options);
           })
           .then((res: { name?: string, url?: string }) => {
-            this._name = res.name;
+            this._name = res.name!;
             this._url = res.url;
             this._requestTask = null;
             return this;
@@ -324,11 +324,11 @@ class ParseFile {
     }
     const destroyOptions = { useMasterKey: true };
     if (options.hasOwnProperty('useMasterKey')) {
-      destroyOptions.useMasterKey = options.useMasterKey;
+      destroyOptions.useMasterKey = options.useMasterKey!;
     }
     const controller = CoreManager.getFileController();
     return controller.deleteFile(this._name, destroyOptions).then(() => {
-      this._data = null;
+      this._data = undefined;
       this._requestTask = null;
       return this;
     });
@@ -415,7 +415,7 @@ class ParseFile {
   }
 
   static encodeBase64(bytes: Array<number> | Uint8Array): string {
-    const chunks = [];
+    const chunks: string[] = [];
     chunks.length = Math.ceil(bytes.length / 3);
     for (let i = 0; i < chunks.length; i++) {
       const b1 = bytes[i * 3];
@@ -458,12 +458,12 @@ const DefaultController = {
     const newSource = {
       format: 'base64' as const,
       base64: data,
-      type: source.type || (source.file ? source.file.type : null),
+      type: source.type || (source.file ? source.file.type : undefined),
     };
     return await DefaultController.saveBase64(name, newSource, options);
   },
 
-  saveBase64: function (name: string, source: FileSource, options?: FileSaveOptions) {
+  saveBase64: function (name: string, source: FileSource, options: FileSaveOptions = {}) {
     if (source.format !== 'base64') {
       throw new Error('saveBase64 can only be used with Base64-type sources.');
     }
@@ -542,7 +542,7 @@ const DefaultController = {
     const headers = {
       'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
     };
-    if (options.useMasterKey) {
+    if (options?.useMasterKey) {
       headers['X-Parse-Master-Key'] = CoreManager.get('MASTER_KEY');
     }
     let url = CoreManager.get('SERVER_URL');

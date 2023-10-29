@@ -190,9 +190,9 @@ class LiveQueryClient {
    * @param {string} sessionToken (optional)
    * @returns {LiveQuerySubscription | undefined}
    */
-  subscribe(query: ParseQuery, sessionToken?: string): LiveQuerySubscription | undefined {
+  subscribe(query: ParseQuery, sessionToken?: string): LiveQuerySubscription {
     if (!query) {
-      return;
+      throw new ParseError(ParseError.INCORRECT_TYPE, 'Subscribe requires a query.')
     }
     const className = query.className;
     const queryJSON = query.toJSON();

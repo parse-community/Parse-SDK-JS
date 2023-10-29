@@ -1,6 +1,6 @@
 import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
 import type ParseFile from './ParseFile';
-import type { FileSource } from './ParseFile';
+import type { FileSaveOptions, FileSource } from './ParseFile';
 import type { Op } from './ParseOp';
 import type ParseObject from './ParseObject';
 import type { QueryJSON } from './ParseQuery';
@@ -12,6 +12,7 @@ import type ParseSession from './ParseSession';
 import type { HookDeclaration, HookDeleteArg } from './ParseHooks';
 import type ParseConfig from './ParseConfig';
 import type LiveQueryClient from './LiveQueryClient';
+import type ParseSchema from './ParseSchema';
 
 type AnalyticsController = {
   track: (name: string, dimensions: { [key: string]: string }) => Promise<any>,
@@ -32,8 +33,8 @@ type CryptoController = {
   decrypt: (encryptedText: string, secretKey: any) => string,
 };
 type FileController = {
-  saveFile: (name: string, source: FileSource, options: FullOptions) => Promise<any>,
-  saveBase64: (name: string, source: FileSource, options: FullOptions) => Promise<{ name: string, url: string }>,
+  saveFile: (name: string, source: FileSource, options?: FullOptions) => Promise<any>,
+  saveBase64: (name: string, source: FileSource, options?: FileSaveOptions) => Promise<{ name: string, url: string }>,
   download: (uri: string, options?: any) => Promise<{ base64?: string, contentType?: string }>,
   deleteFile: (name: string, options?: { useMasterKey?: boolean }) => Promise<void>,
 };
@@ -46,19 +47,19 @@ type ObjectController = {
     forceFetch: boolean,
     options: RequestOptions
   ) => Promise<any>,
-  save: (object: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) => Promise<ParseObject | Array<ParseObject> | ParseFile>,
+  save: (object: ParseObject | Array<ParseObject | ParseFile> | null, options: RequestOptions) => Promise<ParseObject | Array<ParseObject> | ParseFile>,
   destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => Promise<ParseObject | Array<ParseObject>>,
 };
 type ObjectStateController = {
-  getState: (obj: any) => State | undefined,
+  getState: (obj: any) => State | null,
   initializeState: (obj: any, initial?: State) => State,
-  removeState: (obj: any) => State | undefined,
+  removeState: (obj: any) => State | null,
   getServerData: (obj: any) => AttributeMap,
   setServerData: (obj: any, attributes: AttributeMap) => void,
   getPendingOps: (obj: any) => Array<OpsMap>,
   setPendingOp: (obj: any, attr: string, op?: Op) => void,
   pushPendingState: (obj: any) => void,
-  popPendingState: (obj: any) => OpsMap,
+  popPendingState: (obj: any) => OpsMap | undefined,
   mergeFirstPendingState: (obj: any) => void,
   getObjectCache: (obj: any) => ObjectCache,
   estimateAttribute: (obj: any, attr: string) => any,
@@ -81,8 +82,8 @@ type RESTController = {
   handleError: (err?: any) => void,
 };
 type SchemaController = {
-  purge: (className: string) => Promise<void>,
-  get: (className: string, options?: RequestOptions) => Promise<any>,
+  purge: (className: string) => Promise<any>,
+  get: (className: string, options?: RequestOptions) => Promise<{ results: ParseSchema[] }>,
   delete: (className: string, options?: RequestOptions) => Promise<void>,
   create: (className: string, params: any, options?: RequestOptions) => Promise<any>,
   update: (className: string, params: any, options?: RequestOptions) => Promise<any>,
@@ -125,8 +126,8 @@ type LocalDatastoreController = {
 };
 type UserController = {
   setCurrentUser: (user: ParseUser) => Promise<void>,
-  currentUser: () => ParseUser | undefined,
-  currentUserAsync: () => Promise<ParseUser>,
+  currentUser: () => ParseUser | null,
+  currentUserAsync: () => Promise<ParseUser | null>,
   signUp: (user: ParseUser, attrs: AttributeMap, options: RequestOptions) => Promise<ParseUser>,
   logIn: (user: ParseUser, options: RequestOptions) => Promise<ParseUser>,
   loginAs: (user: ParseUser, userId: string) => Promise<ParseUser>,
@@ -143,12 +144,12 @@ type UserController = {
   requestEmailVerification: (email: string, options: RequestOptions) => Promise<void>,
 };
 type HooksController = {
-  get: (type: string, functionName?: string, triggerName?: string) => Promise<void>,
-  create: (hook: HookDeclaration) => Promise<void>,
-  remove: (hook: HookDeleteArg) => Promise<void>,
-  update: (hook: HookDeclaration) => Promise<void>,
+  get: (type: string, functionName?: string, triggerName?: string) => Promise<any>,
+  create: (hook: HookDeclaration) => Promise<any>,
+  remove: (hook: HookDeleteArg) => Promise<any>,
+  update: (hook: HookDeclaration) => Promise<any>,
   // Renamed to sendRequest since ParseHooks file & tests file uses this. (originally declared as just "send")
-  sendRequest?: (method: string, path: string, body?: any) => Promise<void>,
+  sendRequest?: (method: string, path: string, body?: any) => Promise<any>,
 };
 type LiveQueryControllerType = {
   setDefaultLiveQueryClient(liveQueryClient: LiveQueryClient): void;
@@ -313,7 +314,7 @@ const CoreManager = {
   },
 
   getAnalyticsController(): AnalyticsController {
-    return config['AnalyticsController'];
+    return config['AnalyticsController']!;
   },
 
   setCloudController(controller: CloudController) {
@@ -322,7 +323,7 @@ const CoreManager = {
   },
 
   getCloudController(): CloudController {
-    return config['CloudController'];
+    return config['CloudController']!;
   },
 
   setConfigController(controller: ConfigController) {
@@ -331,7 +332,7 @@ const CoreManager = {
   },
 
   getConfigController(): ConfigController {
-    return config['ConfigController'];
+    return config['ConfigController']!;
   },
 
   setCryptoController(controller: CryptoController) {
@@ -357,7 +358,7 @@ const CoreManager = {
   },
 
   getFileController(): FileController {
-    return config['FileController'];
+    return config['FileController']!;
   },
 
   setInstallationController(controller: InstallationController) {
@@ -366,7 +367,7 @@ const CoreManager = {
   },
 
   getInstallationController(): InstallationController {
-    return config['InstallationController'];
+    return config['InstallationController']!;
   },
 
   setLiveQuery(liveQuery: any) {
@@ -383,7 +384,7 @@ const CoreManager = {
   },
 
   getObjectController(): ObjectController {
-    return config['ObjectController'];
+    return config['ObjectController']!;
   },
 
   setObjectStateController(controller: ObjectStateController) {
@@ -414,7 +415,7 @@ const CoreManager = {
   },
 
   getObjectStateController(): ObjectStateController {
-    return config['ObjectStateController'];
+    return config['ObjectStateController']!;
   },
 
   setPushController(controller: PushController) {
@@ -423,7 +424,7 @@ const CoreManager = {
   },
 
   getPushController(): PushController {
-    return config['PushController'];
+    return config['PushController']!;
   },
 
   setQueryController(controller: QueryController) {
@@ -432,7 +433,7 @@ const CoreManager = {
   },
 
   getQueryController(): QueryController {
-    return config['QueryController'];
+    return config['QueryController']!;
   },
 
   setRESTController(controller: RESTController) {
@@ -441,7 +442,7 @@ const CoreManager = {
   },
 
   getRESTController(): RESTController {
-    return config['RESTController'];
+    return config['RESTController']!;
   },
 
   setSchemaController(controller: SchemaController) {
@@ -454,7 +455,7 @@ const CoreManager = {
   },
 
   getSchemaController(): SchemaController {
-    return config['SchemaController'];
+    return config['SchemaController']!;
   },
 
   setSessionController(controller: SessionController) {
@@ -463,7 +464,7 @@ const CoreManager = {
   },
 
   getSessionController(): SessionController {
-    return config['SessionController'];
+    return config['SessionController']!;
   },
 
   setStorageController(controller: StorageController) {
@@ -493,7 +494,7 @@ const CoreManager = {
   },
 
   getLocalDatastoreController(): LocalDatastoreController {
-    return config['LocalDatastoreController'];
+    return config['LocalDatastoreController']!;
   },
 
   setLocalDatastore(store: any) {
@@ -505,7 +506,7 @@ const CoreManager = {
   },
 
   getStorageController(): StorageController {
-    return config['StorageController'];
+    return config['StorageController']!;
   },
 
   setAsyncStorage(storage: AsyncStorageType) {
@@ -521,7 +522,7 @@ const CoreManager = {
   },
 
   getWebSocketController(): new (url: string | URL, protocols?: string | string[] | undefined) => WebSocketController {
-    return config['WebSocketController'];
+    return config['WebSocketController']!;
   },
 
   setUserController(controller: UserController) {
@@ -548,7 +549,7 @@ const CoreManager = {
   },
 
   getUserController(): UserController {
-    return config['UserController'];
+    return config['UserController']!;
   },
 
   setLiveQueryController(controller: LiveQueryControllerType) {
@@ -561,7 +562,7 @@ const CoreManager = {
   },
 
   getLiveQueryController(): LiveQueryControllerType {
-    return config['LiveQueryController'];
+    return config['LiveQueryController']!;
   },
 
   setHooksController(controller: HooksController) {
@@ -570,7 +571,7 @@ const CoreManager = {
   },
 
   getHooksController(): HooksController {
-    return config['HooksController'];
+    return config['HooksController']!;
   },
 };
 

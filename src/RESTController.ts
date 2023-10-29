@@ -31,7 +31,7 @@ export type FullOptions = {
   requestTask?: any,
 };
 
-let XHR: typeof XMLHttpRequest = null;
+let XHR: typeof XMLHttpRequest = null as any;
 if (typeof XMLHttpRequest !== 'undefined') {
   XHR = XMLHttpRequest;
 }
@@ -117,8 +117,8 @@ const RESTController = {
             response = JSON.parse(xhr.responseText);
             headers = {};
             if (typeof xhr.getResponseHeader === 'function' && xhr.getResponseHeader('access-control-expose-headers')) {
-              const responseHeaders = xhr.getResponseHeader('access-control-expose-headers').split(', ');
-              responseHeaders.forEach(header => {
+              const responseHeaders = xhr.getResponseHeader('access-control-expose-headers')?.split(', ');
+              responseHeaders?.forEach(header => {
                 headers[header] = xhr.getResponseHeader(header.toLowerCase());
               });
             }
@@ -348,3 +348,4 @@ const RESTController = {
 };
 
 module.exports = RESTController;
+export default RESTController;

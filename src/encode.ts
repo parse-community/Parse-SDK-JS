@@ -16,7 +16,7 @@ function encode(
   disallowObjects: boolean,
   forcePointers: boolean,
   seen: Array<any>,
-  offline: boolean
+  offline?: boolean
 ): any {
   if (value instanceof ParseObject) {
     if (disallowObjects) {

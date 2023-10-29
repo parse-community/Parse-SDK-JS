@@ -97,7 +97,7 @@ function quote(s: string): string {
  * @returns {string}
  */
 function _getClassNameFromQueries(queries: Array<ParseQuery>): string | null {
-  let className = null;
+  let className: string | null = null;
   queries.forEach(q => {
     if (!className) {
       className = q.className;
@@ -270,9 +270,9 @@ class ParseQuery {
   _skip: number;
   _count: boolean;
   _order: Array<string>;
-  _readPreference: string;
-  _includeReadPreference: string;
-  _subqueryReadPreference: string;
+  _readPreference: string | null;
+  _includeReadPreference: string | null;
+  _subqueryReadPreference: string | null;
   _queriesLocalDatastore: boolean;
   _localDatastorePinName: any;
   _extraOptions: { [key: string]: any };
@@ -715,7 +715,7 @@ class ParseQuery {
       if (this._explain) {
         return response.results;
       }
-      const results = response.results.map(data => {
+      const results = response.results!.map(data => {
         // In cases of relations, the server may send back a className
         // on the top level of the payload
         const override = response.className || this.className;
@@ -729,7 +729,7 @@ class ParseQuery {
         if (select) {
           handleSelectResult(data, select);
         }
-        if (options.json) {
+        if (options?.json) {
           return data;
         } else {
           return ParseObject.fromJSON(data, !select);
@@ -800,7 +800,7 @@ class ParseQuery {
     params.count = 1;
 
     return controller.find(this.className, params, findOptions).then(result => {
-      return result.count;
+      return result.count!;
     });
   }
 
@@ -831,7 +831,7 @@ class ParseQuery {
       hint: this._hint,
     };
     return controller.aggregate(this.className, params, distinctOptions).then(results => {
-      return results.results;
+      return results.results!;
     });
   }
 
@@ -874,7 +874,7 @@ class ParseQuery {
       readPreference: this._readPreference,
     };
     return controller.aggregate(this.className, params, aggregateOptions).then(results => {
-      return results.results;
+      return results.results!;
     });
   }
 
@@ -894,9 +894,7 @@ class ParseQuery {
    * @returns {Promise} A promise that is resolved with the object when
    * the query completes.
    */
-  first(options?: QueryOptions): Promise<ParseObject | void> {
-    options = options || {};
-
+  first(options: QueryOptions = {}): Promise<ParseObject | void> {
     const findOptions: QueryOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       findOptions.useMasterKey = options.useMasterKey;
@@ -926,7 +924,7 @@ class ParseQuery {
     }
 
     return controller.find(this.className, params, findOptions).then(response => {
-      const objects = response.results;
+      const objects = response.results!;
       if (!objects[0]) {
         return undefined;
       }
@@ -1023,7 +1021,7 @@ class ParseQuery {
     }
 
     let finished = false;
-    let previousResults = [];
+    let previousResults: ParseObject[] = [];
     return continueWhile(
       () => {
         return !finished;
@@ -1132,7 +1130,7 @@ class ParseQuery {
     callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any,
     options?: BatchOptions
   ): Promise<Array<any>> {
-    const array = [];
+    const array: any[] = [];
     let index = 0;
     await this.each(object => {
       return Promise.resolve(callback(object, index, this)).then(result => {
@@ -1220,7 +1218,7 @@ class ParseQuery {
     callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean,
     options?: BatchOptions
   ): Promise<Array<ParseObject>> {
-    const array = [];
+    const array: ParseObject[] = [];
     let index = 0;
     await this.each(object => {
       return Promise.resolve(callback(object, index, this)).then(flag => {
@@ -1996,8 +1994,8 @@ class ParseQuery {
     subqueryReadPreference?: string
   ): ParseQuery {
     this._readPreference = readPreference;
-    this._includeReadPreference = includeReadPreference;
-    this._subqueryReadPreference = subqueryReadPreference;
+    this._includeReadPreference = includeReadPreference || null;
+    this._subqueryReadPreference = subqueryReadPreference || null;
     return this;
   }
 
@@ -2011,7 +2009,7 @@ class ParseQuery {
   async subscribe(sessionToken?: string): Promise<LiveQuerySubscription> {
     const currentUser = await CoreManager.getUserController().currentUserAsync();
     if (!sessionToken) {
-      sessionToken = currentUser ? currentUser.getSessionToken() : undefined;
+      sessionToken = currentUser ? currentUser.getSessionToken() || undefined : undefined;
     }
     const liveQueryClient = await CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
     if (liveQueryClient.shouldOpen()) {
@@ -2037,7 +2035,7 @@ class ParseQuery {
    */
   static or(...queries: Array<ParseQuery>): ParseQuery {
     const className = _getClassNameFromQueries(queries);
-    const query = new ParseQuery(className);
+    const query = new ParseQuery(className!); // Cast to !; Checked inside ParseQuery constructor anyway
     query._orQuery(queries);
     return query;
   }
@@ -2056,7 +2054,7 @@ class ParseQuery {
    */
   static and(...queries: Array<ParseQuery>): ParseQuery {
     const className = _getClassNameFromQueries(queries);
-    const query = new ParseQuery(className);
+    const query = new ParseQuery(className!); // Cast to !; Checked inside ParseQuery constructor anyway
     query._andQuery(queries);
     return query;
   }
@@ -2075,7 +2073,7 @@ class ParseQuery {
    */
   static nor(...queries: Array<ParseQuery>): ParseQuery {
     const className = _getClassNameFromQueries(queries);
-    const query = new ParseQuery(className);
+    const query = new ParseQuery(className!); // Cast to !; Checked inside ParseQuery constructor anyway
     query._norQuery(queries);
     return query;
   }
@@ -2115,7 +2113,7 @@ class ParseQuery {
    * @param {string} name The name of query source.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  fromPinWithName(name?: string): ParseQuery {
+  fromPinWithName(name?: string | null): ParseQuery {
     const localDatastore = CoreManager.getLocalDatastore();
     if (localDatastore.checkIfEnabled()) {
       this._queriesLocalDatastore = true;

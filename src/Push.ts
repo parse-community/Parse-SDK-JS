@@ -71,7 +71,7 @@ export function send(data: PushData, options: FullOptions = {}): Promise<string>
 
   const pushOptions = { useMasterKey: true };
   if (options.hasOwnProperty('useMasterKey')) {
-    pushOptions.useMasterKey = options.useMasterKey;
+    pushOptions.useMasterKey = options.useMasterKey!;
   }
 
   return CoreManager.getPushController().send(data, pushOptions);
@@ -93,7 +93,7 @@ export function send(data: PushData, options: FullOptions = {}): Promise<string>
 export function getPushStatus(pushStatusId: string, options: FullOptions = {}): Promise<ParseObject> {
   const pushOptions = { useMasterKey: true };
   if (options.hasOwnProperty('useMasterKey')) {
-    pushOptions.useMasterKey = options.useMasterKey;
+    pushOptions.useMasterKey = options.useMasterKey!;
   }
   const query = new ParseQuery('_PushStatus');
   return query.get(pushStatusId, pushOptions);

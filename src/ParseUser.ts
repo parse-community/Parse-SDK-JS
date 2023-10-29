@@ -30,7 +30,7 @@ type AuthProviderType = {
 const CURRENT_USER_KEY = 'currentUser';
 let canUseCurrentUser = !CoreManager.get('IS_NODE');
 let currentUserCacheMatchesDisk = false;
-let currentUserCache = null;
+let currentUserCache: ParseUser | null = null;
 
 const authProviders: { [key: string]: AuthProviderType } = {};
 
@@ -93,7 +93,7 @@ class ParseUser extends ParseObject {
    */
   linkWith(
     provider: AuthProviderType,
-    options: { authData?: AuthData },
+    options: { authData?: AuthData | null },
     saveOpts: FullOptions = {}
   ): Promise<ParseUser> {
     saveOpts.sessionToken = saveOpts.sessionToken || this.getSessionToken() || '';
@@ -134,7 +134,7 @@ class ParseUser extends ParseObject {
       });
     } else {
       return new Promise((resolve, reject) => {
-        provider.authenticate({
+        provider.authenticate!({
           success: (provider, result) => {
             const opts: { authData?: AuthData } = {};
             opts.authData = result;
@@ -479,7 +479,7 @@ class ParseUser extends ParseObject {
       loginOptions.installationId = options.installationId;
     }
     if (options.hasOwnProperty('usePost')) {
-      loginOptions.usePost = options.usePost;
+      loginOptions.usePost = options.usePost!;
     }
     if (
       options.hasOwnProperty('context') &&

@@ -7,7 +7,7 @@ import ParseUser from './ParseUser';
 
 type Entity = ParseUser | ParseRole | string;
 type UsersMap = { [userId: string]: boolean | any };
-export type PermissionsMap = { writeUserFields?: string[], readUserFields?: string[], [permission: string]: UsersMap };
+export type PermissionsMap = { writeUserFields?: string[], readUserFields?: string[] } & { [permission: string]: UsersMap };
 
 const PUBLIC_KEY = '*';
 
@@ -265,7 +265,7 @@ class ParseCLP {
     let name = role;
     if (role instanceof ParseRole) {
       // Normalize to the String name
-      name = role.getName();
+      name = role.getName()!;
     }
     if (typeof name !== 'string') {
       throw new TypeError('role must be a Parse.Role or a String');
@@ -276,7 +276,7 @@ class ParseCLP {
   _parseEntity(entity: Entity) {
     let userId = entity;
     if (userId instanceof ParseUser) {
-      userId = userId.id;
+      userId = userId.id!;
       if (!userId) {
         throw new Error('Cannot get access for a Parse.User without an id.');
       }
@@ -358,7 +358,7 @@ class ParseCLP {
     }
   }
 
-  _getGroupPointerPermissions(operation: 'readUserFields' | 'writeUserFields'): string[] {
+  _getGroupPointerPermissions(operation: 'readUserFields' | 'writeUserFields'): string[] | undefined {
     return this.permissionsMap[operation];
   }
 
@@ -375,7 +375,7 @@ class ParseCLP {
    * @returns {string[]} User pointer fields
    */
   getReadUserFields(): string[] {
-    return this._getGroupPointerPermissions('readUserFields');
+    return this._getGroupPointerPermissions('readUserFields') || [];
   }
 
   /**
@@ -391,7 +391,7 @@ class ParseCLP {
    * @returns {string[]} User pointer fields
    */
   getWriteUserFields(): string[] {
-    return this._getGroupPointerPermissions('writeUserFields');
+    return this._getGroupPointerPermissions('writeUserFields') || [];
   }
 
   /**

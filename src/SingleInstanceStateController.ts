@@ -81,7 +81,7 @@ export function pushPendingState(obj: ObjectIdentifier) {
   ObjectStateMutations.pushPendingState(pendingOps);
 }
 
-export function popPendingState(obj: ObjectIdentifier): OpsMap {
+export function popPendingState(obj: ObjectIdentifier): OpsMap | undefined {
   const pendingOps = initializeState(obj).pendingOps;
   return ObjectStateMutations.popPendingState(pendingOps);
 }

@@ -11,7 +11,7 @@ import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMuta
 
 let objectState = new WeakMap();
 
-export function getState(obj: ParseObject): State | null | undefined {
+export function getState(obj: ParseObject): State | null {
   const classData = objectState.get(obj);
   return classData || null;
 }
@@ -35,7 +35,7 @@ export function initializeState(obj: ParseObject, initial?: State): State {
   return state;
 }
 
-export function removeState(obj: ParseObject): State | null | undefined {
+export function removeState(obj: ParseObject): State | null {
   const state = getState(obj);
   if (state === null) {
     return null;
@@ -75,7 +75,7 @@ export function pushPendingState(obj: ParseObject) {
   ObjectStateMutations.pushPendingState(pendingOps);
 }
 
-export function popPendingState(obj: ParseObject): OpsMap {
+export function popPendingState(obj: ParseObject): OpsMap | undefined {
   const pendingOps = initializeState(obj).pendingOps;
   return ObjectStateMutations.popPendingState(pendingOps);
 }

@@ -370,10 +370,10 @@ class ParseObject {
       }
     }
     if (decoded.createdAt && typeof decoded.createdAt === 'string') {
-      decoded.createdAt = parseDate(decoded.createdAt);
+      decoded.createdAt = parseDate(decoded.createdAt) || undefined;
     }
     if (decoded.updatedAt && typeof decoded.updatedAt === 'string') {
-      decoded.updatedAt = parseDate(decoded.updatedAt);
+      decoded.updatedAt = parseDate(decoded.updatedAt) || undefined;
     }
     if (!decoded.updatedAt && decoded.createdAt) {
       decoded.updatedAt = decoded.createdAt;
@@ -415,12 +415,14 @@ class ParseObject {
     let attr;
     const stateController = CoreManager.getObjectStateController();
     const pending = stateController.popPendingState(this._getStateIdentifier());
-    for (attr in pending) {
-      if (pending[attr] instanceof RelationOp) {
-        changes[attr] = pending[attr].applyTo(undefined, this, attr);
-      } else if (!(attr in response)) {
-        // Only SetOps and UnsetOps should not come back with results
-        changes[attr] = pending[attr].applyTo(undefined);
+    if (pending) {
+      for (attr in pending) {
+        if (pending[attr] instanceof RelationOp) {
+          changes[attr] = pending[attr].applyTo(undefined, this, attr);
+        } else if (!(attr in response)) {
+          // Only SetOps and UnsetOps should not come back with results
+          changes[attr] = pending[attr].applyTo(undefined);
+        }
       }
     }
     for (attr in response) {
@@ -708,7 +710,7 @@ class ParseObject {
   set(keyOrAttributes: string | AttributeMap, valueOrOptions?: any, options?: any): ParseObject | boolean {
     let changes: AttributeMap = {};
     const newOps = {};
-    let key: string;
+    let key: string | undefined;
     if (keyOrAttributes && typeof keyOrAttributes === 'object') {
       changes = keyOrAttributes;
       options = valueOrOptions;
@@ -720,7 +722,8 @@ class ParseObject {
     }
 
     options = options || {};
-    let readonly = [];
+    /** Readonly attributes of the object class */
+    let readonly: string[] = [];
     if (typeof ((this.constructor as any).readOnlyAttributes) === 'function') {
       readonly = readonly.concat((this.constructor as any).readOnlyAttributes());
     }
@@ -1172,13 +1175,13 @@ class ParseObject {
       if (Array.isArray(options.include)) {
         options.include.forEach(key => {
           if (Array.isArray(key)) {
-            fetchOptions.include = fetchOptions.include.concat(key);
+            fetchOptions.include = fetchOptions.include!.concat(key);
           } else {
             (fetchOptions.include as string[]).push(key);
           }
         });
       } else {
-        fetchOptions.include.push(options.include);
+        fetchOptions.include.push(options.include!); // already checked hasOwnProperty('include')
       }
     }
     const controller = CoreManager.getObjectController();
@@ -1309,14 +1312,14 @@ class ParseObject {
    * completes.
    */
   save(
-    arg1: undefined | string | { [attr: string]: any },
+    arg1: undefined | string | { [attr: string]: any } | null,
     arg2: SaveOptions | any,
     arg3?: SaveOptions
   ): Promise<this> {
-    let attrs: { [attr: string]: any };
-    let options: SaveOptions;
-    if (typeof arg1 === 'object' || typeof arg1 === 'undefined') {
-      attrs = arg1;
+    let attrs: { [attr: string]: any } | null;
+    let options: SaveOptions | undefined;
+    if (typeof arg1 === 'object' || typeof arg1 === 'undefined' || arg1 == null) {
+      attrs = (arg1 as { [attr: string]: any }) || null;
       if (typeof arg2 === 'object') {
         options = arg2;
       }
@@ -1694,8 +1697,8 @@ class ParseObject {
     return CoreManager.getObjectController().fetch(list, false, queryOptions);
   }
 
-  static handleIncludeOptions(options) {
-    let include = [];
+  static handleIncludeOptions(options: { include?: string | string[] }) {
+    let include: string[] = [];
     if (Array.isArray(options.include)) {
       options.include.forEach(key => {
         if (Array.isArray(key)) {
@@ -1705,7 +1708,7 @@ class ParseObject {
         }
       });
     } else {
-      include.push(options.include);
+      include.push(options.include!);
     }
     return include;
   }
@@ -2224,7 +2227,7 @@ const DefaultController = {
       const ids: string[] = [];
       let className: null | string = null;
       const results: ParseObject[] = [];
-      let error = null;
+      let error: ParseError | null = null;
       target.forEach(el => {
         if (error) {
           return;
@@ -2242,7 +2245,7 @@ const DefaultController = {
           error = new ParseError(ParseError.MISSING_OBJECT_ID, 'All objects must have an ID');
         }
         if (forceFetch || !el.isDataAvailable()) {
-          ids.push(el.id);
+          ids.push(el.id!); // Already checked e.id above.
           objs.push(el);
         }
         results.push(el);
@@ -2251,7 +2254,7 @@ const DefaultController = {
         return Promise.reject(error);
       }
       // Construct a ParseQuery that finds objects with matching IDs
-      const query = new ParseQuery(className);
+      const query = new ParseQuery(className!);
       query.containedIn('objectId', ids);
       if (options && options.include) {
         query.include(options.include);
@@ -2260,7 +2263,7 @@ const DefaultController = {
       return query.find(options).then(async (objects: ParseObject[]) => {
         const idMap: Record<string, ParseObject> = {};
         objects.forEach(o => {
-          idMap[o.id] = o;
+          idMap[o.id!] = o;
         });
         for (let i = 0; i < objs.length; i++) {
           const obj = objs[i];
@@ -2344,7 +2347,7 @@ const DefaultController = {
         batches.pop();
       }
       let deleteCompleted = Promise.resolve();
-      const errors = [];
+      const errors: ParseError[] = [];
       batches.forEach(batch => {
         deleteCompleted = deleteCompleted.then(() => {
           return RESTController.request(
@@ -2396,7 +2399,7 @@ const DefaultController = {
     return Promise.resolve(target);
   },
 
-  save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions) {
+  save(target: ParseObject | Array<ParseObject | ParseFile> | null, options: RequestOptions) {
     const batchSize =
       options && options.batchSize ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
@@ -2422,7 +2425,7 @@ const DefaultController = {
       }
       unsaved = unique(unsaved);
 
-      const filesSaved: Array<Promise<ParseFile>> = [];
+      const filesSaved: Array<Promise<ParseFile> | undefined> = [];
       let pending: Array<ParseObject> = [];
       unsaved.forEach(el => {
         if (el instanceof ParseFile) {
@@ -2433,14 +2436,14 @@ const DefaultController = {
       });
 
       return Promise.all(filesSaved).then(() => {
-        let objectError = null;
+        let objectError: null | ParseError = null;
         return continueWhile(
           () => {
             return pending.length > 0;
           },
           () => {
-            const batch = [];
-            const nextPending = [];
+            const batch: ParseObject[] = [];
+            const nextPending: ParseObject[] = [];
             pending.forEach(el => {
               if (allowCustomObjectId && Object.prototype.hasOwnProperty.call(el, 'id') && !el.id) {
                 throw new ParseError(
@@ -2465,8 +2468,8 @@ const DefaultController = {
             // Queue up tasks for each object in the batch.
             // When every task is ready, the API request will execute
             const batchReturned = resolvingPromise();
-            const batchReady = [];
-            const batchTasks = [];
+            const batchReady: ReturnType<typeof resolvingPromise<void>>[] = [];
+            const batchTasks: Promise<void>[] = [];
             batch.forEach((obj, index) => {
               const ready = resolvingPromise<void>();
               batchReady.push(ready);
@@ -2525,7 +2528,7 @@ const DefaultController = {
           for (const object of target) {
             // Make sure that it is a ParseObject before updating it into the localDataStore
             if (object instanceof ParseObject) {
-              await localDatastore._updateLocalIdForObject(mapIdForPin[object.id], object);
+              await localDatastore._updateLocalIdForObject(mapIdForPin[object.id!], object);
               await localDatastore._updateObjectIfPinned(object);
             }
           }

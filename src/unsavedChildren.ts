@@ -24,7 +24,7 @@ export default function unsavedChildren(
   allowDeepUnsaved?: boolean
 ): Array<ParseFile | ParseObject> {
   const encountered = {
-    objects: {},
+    objects: {} as Record<string, ParseObject | true>,
     files: [],
   };
   const identifier = obj.className + ':' + obj._getId();
@@ -35,10 +35,10 @@ export default function unsavedChildren(
       traverse(attributes[attr], encountered, false, !!allowDeepUnsaved);
     }
   }
-  const unsaved = [];
+  const unsaved: ParseObject[] = [];
   for (const id in encountered.objects) {
     if (id !== identifier && encountered.objects[id] !== true) {
-      unsaved.push(encountered.objects[id]);
+      unsaved.push(encountered.objects[id] as ParseObject);
     }
   }
   return unsaved.concat(encountered.files);

@@ -195,7 +195,7 @@ const DefaultController = {
     });
   },
 
-  save(attrs: { [key: string]: any }, masterKeyOnlyFlags: { [key: string]: any }) {
+  save(attrs?: { [key: string]: any }, masterKeyOnlyFlags?: { [key: string]: any }) {
     const RESTController = CoreManager.getRESTController();
     const encodedAttrs = {};
     for (const key in attrs) {

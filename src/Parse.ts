@@ -78,7 +78,7 @@ interface ParseType {
   Session: typeof Session,
   Storage: typeof Storage,
   User: typeof User,
-  LiveQuery?: typeof LiveQuery,
+  LiveQuery?: LiveQuery,
   LiveQueryClient: typeof LiveQueryClient,
 
   initialize(applicationId: string, javaScriptKey: string): void,
@@ -103,7 +103,7 @@ interface ParseType {
   _ajax(...args: any[]): void,
   _decode(...args: any[]): void,
   _encode(...args: any[]): void,
-  _getInstallationId?(): string,
+  _getInstallationId?(): Promise<string>,
   enableLocalDatastore(polling: boolean, ms: number): void,
   isLocalDatastoreEnabled(): boolean,
   dumpLocalDatastore(): void,
