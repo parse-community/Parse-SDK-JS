@@ -150,7 +150,9 @@ export function estimateAttributes(
 function nestedSet(obj, key, value) {
   const path = key.split('.');
   for (let i = 0; i < path.length - 1; i++) {
-    if (!(path[i] in obj)) obj[path[i]] = {};
+    if (!(path[i] in obj)) {
+      obj[path[i]] = {};
+    }
     obj = obj[path[i]];
   }
   if (typeof value === 'undefined') {

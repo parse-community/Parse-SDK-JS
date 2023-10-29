@@ -148,6 +148,27 @@ describe('Parse User', () => {
     expect(sessions[1].get('sessionToken')).toBe(installationUser.getSessionToken());
   });
 
+  it('can login with userId', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    const user = await Parse.User.signUp('parsetest', 'parse', { code: 'red' });
+    assert.equal(Parse.User.current(), user);
+    await Parse.User.logOut();
+    assert(!Parse.User.current());
+
+    const newUser = await Parse.User.loginAs(user.id);
+    assert.equal(Parse.User.current(), newUser);
+    assert(newUser);
+    assert.equal(user.id, newUser.id);
+    assert.equal(user.get('code'), 'red');
+
+    await Parse.User.logOut();
+    assert(!Parse.User.current());
+    await expectAsync(Parse.User.loginAs('garbage')).toBeRejectedWithError(
+      'user not found'
+    );
+  });
+
   it('can become a user', done => {
     Parse.User.enableUnsafeCurrentUser();
     let session = null;
@@ -782,6 +803,16 @@ describe('Parse User', () => {
     expect(user.doSomething()).toBe(5);
   });
 
+  it('can loginAs user with subclass static', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+
+    let user = await CustomUser.signUp('username', 'password');
+
+    user = await CustomUser.loginAs(user.id);
+    expect(user instanceof CustomUser).toBe(true);
+    expect(user.doSomething()).toBe(5);
+  });
+
   it('can get user (me) with subclass static', async () => {
     Parse.User.enableUnsafeCurrentUser();
 
@@ -948,14 +979,18 @@ describe('Parse User', () => {
     await Parse.FacebookUtils.link(user);
 
     expect(Parse.FacebookUtils.isLinked(user)).toBe(true);
-    expect(Parse.AnonymousUtils.isLinked(user)).toBe(true);
+    expect(Parse.AnonymousUtils.isLinked(user)).toBe(false);
     await Parse.FacebookUtils.unlink(user);
 
     expect(Parse.FacebookUtils.isLinked(user)).toBe(false);
-    expect(Parse.AnonymousUtils.isLinked(user)).toBe(true);
+    expect(Parse.AnonymousUtils.isLinked(user)).toBe(false);
   });
 
   it('can link with twitter', async () => {
+    const server = await reconfigureServer();
+    const twitter = server.config.auth.twitter;
+    const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
+
     Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
     user.setUsername(uuidv4());
@@ -968,9 +1003,14 @@ describe('Parse User', () => {
 
     await user._unlinkFrom('twitter');
     expect(user._isLinked('twitter')).toBe(false);
+    expect(spy).toHaveBeenCalled();
   });
 
   it('can link with twitter and facebook', async () => {
+    const server = await reconfigureServer();
+    const twitter = server.config.auth.twitter;
+    const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
+
     Parse.User.enableUnsafeCurrentUser();
     Parse.FacebookUtils.init();
     const user = new Parse.User();
@@ -986,6 +1026,7 @@ describe('Parse User', () => {
 
     expect(user.get('authData').twitter.id).toBe(twitterAuthData.id);
     expect(user.get('authData').facebook.id).toBe('test');
+    expect(spy).toHaveBeenCalled();
   });
 
   it('can verify user password via static method', async () => {

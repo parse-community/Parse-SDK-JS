@@ -2,13 +2,14 @@
   "root": true,
   "extends": [
     "eslint:recommended",
-    "plugin:jsdoc/recommended"
+    "plugin:jsdoc/recommended",
+    "plugin:flowtype/recommended"
   ],
   "env": {
     "node": true,
     "es6": true
   },
-  "parser": "babel-eslint",
+  "parser": "@babel/eslint-parser",
   "globals": { 
     "wx": true 
   },
@@ -18,7 +19,8 @@
   ],
   "parserOptions": {
     "ecmaVersion": 6,
-    "sourceType": "module"
+    "sourceType": "module",
+    "requireConfigFile": false
   },
   "rules": {
     "indent": ["error", 2],
@@ -34,11 +36,13 @@
     "no-console": 0,
     "no-prototype-builtins": "off",
     "require-atomic-updates": "off",
+    "flowtype/no-types-missing-file-annotation": 0,
     "jsdoc/require-jsdoc": 0,
     "jsdoc/require-returns-description": 0,
     "jsdoc/require-param-description": 0,
     "jsdoc/require-property-description": 0,
     "jsdoc/require-param-type": 0,
+    "jsdoc/tag-lines": 0,
     "jsdoc/check-param-names": [
       "error",
       {

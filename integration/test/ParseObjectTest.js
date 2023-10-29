@@ -1108,7 +1108,7 @@ describe('Parse Object', () => {
       });
   });
 
-  it('can skip cascade saving as per request', async done => {
+  it('can skip cascade saving as per request', async () => {
     const Parent = Parse.Object.extend('Parent');
     const Child = Parse.Object.extend('Child');
 
@@ -1142,8 +1142,6 @@ describe('Parse Object', () => {
     await parent.save(null, { cascadeSave: false });
     const john = await new Parse.Query(Child).doesNotExist('lastname').first();
     expect(john.get('lastname')).toBeUndefined();
-
-    done();
   });
 
   it('can do two saves at the same time', done => {
@@ -1956,7 +1954,7 @@ describe('Parse Object', () => {
     }
   });
 
-  it('can clone with relation', async done => {
+  it('can clone with relation', async () => {
     const testObject = new TestObject();
     const o = new TestObject();
     await o.save();
@@ -1982,8 +1980,6 @@ describe('Parse Object', () => {
 
     relations = await o2.relation('aRelation').query().find();
     assert.equal(relations.length, 1);
-
-    done();
   });
 
   it('isDataAvailable', async () => {

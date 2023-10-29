@@ -22,6 +22,7 @@ export type WhereClause = {
 
 export type QueryJSON = {
   where: WhereClause,
+  watch?: string,
   include?: string,
   excludeKeys?: string,
   keys?: string,
@@ -224,6 +225,7 @@ class ParseQuery {
    */
   className: string;
   _where: any;
+  _watch: Array<string>;
   _include: Array<string>;
   _exclude: Array<string>;
   _select: Array<string>;
@@ -265,6 +267,7 @@ class ParseQuery {
     }
 
     this._where = {};
+    this._watch = [];
     this._include = [];
     this._exclude = [];
     this._count = false;
@@ -426,6 +429,9 @@ class ParseQuery {
       where: this._where,
     };
 
+    if (this._watch.length) {
+      params.watch = this._watch.join(',');
+    }
     if (this._include.length) {
       params.include = this._include.join(',');
     }
@@ -493,6 +499,10 @@ class ParseQuery {
   withJSON(json: QueryJSON): ParseQuery {
     if (json.where) {
       this._where = json.where;
+    }
+
+    if (json.watch) {
+      this._watch = json.watch.split(',');
     }
 
     if (json.include) {
@@ -938,13 +948,10 @@ class ParseQuery {
 
     const query = new ParseQuery(this.className);
     query._limit = options.batchSize || 100;
-    query._include = this._include.map(i => {
-      return i;
-    });
+    query._include = [...this._include];
+    query._exclude = [...this._exclude];
     if (this._select) {
-      query._select = this._select.map(s => {
-        return s;
-      });
+      query._select = [...this._select];
     }
     query._hint = this._hint;
     query._where = {};
@@ -1284,10 +1291,10 @@ class ParseQuery {
    * be contained in the provided list of values.
    *
    * @param {string} key The key to check.
-   * @param {*} value The values that will match.
+   * @param {Array<*>} value The values that will match.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  containedIn(key: string, value: mixed): ParseQuery {
+  containedIn(key: string, value: Array<mixed>): ParseQuery {
     return this._addCondition(key, '$in', value);
   }
 
@@ -1296,10 +1303,10 @@ class ParseQuery {
    * not be contained in the provided list of values.
    *
    * @param {string} key The key to check.
-   * @param {*} value The values that will not match.
+   * @param {Array<*>} value The values that will not match.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  notContainedIn(key: string, value: mixed): ParseQuery {
+  notContainedIn(key: string, value: Array<mixed>): ParseQuery {
     return this._addCondition(key, '$nin', value);
   }
 
@@ -1916,6 +1923,25 @@ class ParseQuery {
         this._exclude = this._exclude.concat(key);
       } else {
         this._exclude.push(key);
+      }
+    });
+    return this;
+  }
+
+  /**
+   * Restricts live query to trigger only for watched fields.
+   *
+   * Requires Parse Server 6.0.0+
+   *
+   * @param {...string|Array<string>} keys The name(s) of the key(s) to watch.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
+   */
+  watch(...keys: Array<string | Array<string>>): ParseQuery {
+    keys.forEach(key => {
+      if (Array.isArray(key)) {
+        this._watch = this._watch.concat(key);
+      } else {
+        this._watch.push(key);
       }
     });
     return this;

@@ -1621,6 +1621,23 @@ describe('Parse Query', () => {
     assert.equal(result.get('slice'), 'pizza');
   });
 
+  it('can exclude keys in findAll', async () => {
+    const object = new TestObject({
+      hello: 'world',
+      foo: 'bar',
+      slice: 'pizza',
+    });
+    await object.save();
+
+    const query = new Parse.Query(TestObject);
+    query.exclude('foo');
+    query.equalTo('objectId', object.id);
+    const [result] = await query.findAll();
+    assert.equal(result.get('foo'), undefined);
+    assert.equal(result.get('hello'), 'world');
+    assert.equal(result.get('slice'), 'pizza');
+  });
+
   it('uses subclasses when creating objects', done => {
     const ParentObject = Parse.Object.extend({ className: 'ParentObject' });
     let ChildObject = Parse.Object.extend('ChildObject', {
@@ -1761,17 +1778,11 @@ describe('Parse Query', () => {
       });
   });
 
-  it('supports objects with length', async done => {
+  it('supports objects with length', async () => {
     const obj = new TestObject();
     obj.set('length', 5);
     assert.equal(obj.get('length'), 5);
-    try {
-      await obj.save();
-      done.fail();
-    } catch (e) {
-      assert.strictEqual(e.message, 'Invalid field name: length.');
-      done();
-    }
+    await expectAsync(obj.save()).toBeRejectedWithError('Invalid field name: length.');
   });
 
   it('can include User fields', async () => {

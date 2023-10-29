@@ -1,7 +1,6 @@
 /* global WebSocket */
 
 import CoreManager from './CoreManager';
-import EventEmitter from './EventEmitter';
 import ParseObject from './ParseObject';
 import LiveQuerySubscription from './LiveQuerySubscription';
 import { resolvingPromise } from './promiseUtils';
@@ -63,7 +62,6 @@ const generateInterval = k => {
 
 /**
  * Creates a new LiveQueryClient.
- * Extends events.EventEmitter
  * <a href="https://nodejs.org/api/events.html#events_class_eventemitter">cloud functions</a>.
  *
  * A wrapper of a standard WebSocket client. We add several useful methods to
@@ -105,7 +103,7 @@ const generateInterval = k => {
  *
  * @alias Parse.LiveQueryClient
  */
-class LiveQueryClient extends EventEmitter {
+class LiveQueryClient {
   attempts: number;
   id: number;
   requestId: number;
@@ -138,8 +136,6 @@ class LiveQueryClient extends EventEmitter {
     sessionToken,
     installationId,
   }) {
-    super();
-
     if (!serverURL || serverURL.indexOf('ws') !== 0) {
       throw new Error(
         'You need to set a proper Parse LiveQuery server url before using LiveQueryClient'
@@ -160,7 +156,11 @@ class LiveQueryClient extends EventEmitter {
     this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
     this.state = CLIENT_STATE.INITIALIZED;
+    const EventEmitter = CoreManager.getEventEmitter();
+    this.emitter = new EventEmitter();
 
+    this.on = this.emitter.on;
+    this.emit = this.emitter.emit;
     // adding listener so process does not crash
     // best practice is for developer to register their own listener
     this.on('error', () => {});
@@ -191,7 +191,8 @@ class LiveQueryClient extends EventEmitter {
     const className = query.className;
     const queryJSON = query.toJSON();
     const where = queryJSON.where;
-    const fields = queryJSON.keys ? queryJSON.keys.split(',') : undefined;
+    const fields = queryJSON.keys?.split(',');
+    const watch = queryJSON.watch?.split(',');
     const subscribeRequest = {
       op: OP_TYPES.SUBSCRIBE,
       requestId: this.requestId,
@@ -199,6 +200,7 @@ class LiveQueryClient extends EventEmitter {
         className,
         where,
         fields,
+        watch,
       },
     };
 
@@ -258,6 +260,7 @@ class LiveQueryClient extends EventEmitter {
     }
 
     this.socket = new WebSocketImplementation(this.serverURL);
+    this.socket.closingPromise = resolvingPromise();
 
     // Bind WebSocket callbacks
     this.socket.onopen = () => {
@@ -268,7 +271,8 @@ class LiveQueryClient extends EventEmitter {
       this._handleWebSocketMessage(event);
     };
 
-    this.socket.onclose = () => {
+    this.socket.onclose = (event) => {
+      this.socket.closingPromise.resolve(event);
       this._handleWebSocketClose();
     };
 
@@ -309,13 +313,14 @@ class LiveQueryClient extends EventEmitter {
    * This method will close the WebSocket connection to this LiveQueryClient,
    * cancel the auto reconnect and unsubscribe all subscriptions based on it.
    *
+   * @returns {Promise | undefined} CloseEvent {@link https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close_event}
    */
-  close() {
+  close(): ?Promise {
     if (this.state === CLIENT_STATE.INITIALIZED || this.state === CLIENT_STATE.DISCONNECTED) {
       return;
     }
     this.state = CLIENT_STATE.DISCONNECTED;
-    this.socket.close();
+    this.socket?.close();
     // Notify each subscription about the close
     for (const subscription of this.subscriptions.values()) {
       subscription.subscribed = false;
@@ -323,6 +328,7 @@ class LiveQueryClient extends EventEmitter {
     }
     this._handleReset();
     this.emit(CLIENT_EMMITER_TYPES.CLOSE);
+    return this.socket?.closingPromise;
   }
 
   // ensure we start with valid state if connect is called again after close

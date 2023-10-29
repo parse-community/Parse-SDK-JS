@@ -12,7 +12,7 @@ const watch      = require('gulp-watch');
 const BUILD = process.env.PARSE_BUILD || 'browser';
 const VERSION = require('./package.json').version;
 
-const transformRuntime = ["@babel/transform-runtime", {
+const transformRuntime = ["@babel/plugin-transform-runtime", {
   "corejs": 3,
   "helpers": true,
   "regenerator": true,
@@ -20,16 +20,16 @@ const transformRuntime = ["@babel/transform-runtime", {
 }];
 
 const PRESETS = {
-  'browser': [["@babel/preset-env", {
+  'browser': ["@babel/preset-typescript", ["@babel/preset-env", {
     "targets": "> 0.25%, not dead"
   }]],
-  'weapp': [["@babel/preset-env", {
+  'weapp': ["@babel/preset-typescript", ["@babel/preset-env", {
     "targets": "> 0.25%, not dead"
   }], '@babel/react'],
-  'node': [["@babel/preset-env", {
+  'node': ["@babel/preset-typescript", ["@babel/preset-env", {
     "targets": { "node": "14" }
   }]],
-  'react-native': ['module:metro-react-native-babel-preset'],
+  'react-native': ["@babel/preset-typescript", 'module:metro-react-native-babel-preset'],
 };
 const PLUGINS = {
   'browser': [transformRuntime, '@babel/plugin-transform-flow-comments', '@babel/plugin-proposal-class-properties', 'inline-package-json',
@@ -65,8 +65,8 @@ const FULL_HEADER = (
   ' */\n'
 );
 
-gulp.task('compile', function() {
-  return gulp.src('src/*.js')
+function compileTask(stream) {
+  return stream
     .pipe(babel({
       presets: PRESETS[BUILD],
       plugins: PLUGINS[BUILD],
@@ -76,6 +76,10 @@ gulp.task('compile', function() {
       plugins: ['minify-dead-code-elimination'],
     }))
     .pipe(gulp.dest(path.join('lib', BUILD)));
+}
+
+gulp.task('compile', function() {
+  return compileTask(gulp.src('src/*.*(js|ts)'));
 });
 
 gulp.task('browserify', function(cb) {
@@ -132,14 +136,15 @@ gulp.task('minify-weapp', function() {
 });
 
 gulp.task('watch', function() {
-  return watch('src/*.js', { ignoreInitial: false, verbose: true })
-    .pipe(babel({
-      presets: PRESETS[BUILD],
-      plugins: PLUGINS[BUILD],
-    }))
-    // Second pass to kill BUILD-switched code
-    .pipe(babel({
-      plugins: ['minify-dead-code-elimination'],
-    }))
-    .pipe(gulp.dest(path.join('lib', BUILD)));
+  if (BUILD === 'browser') {
+    const watcher = gulp.watch('src/*.*(js|ts)', { ignoreInitial: false }, gulp.series('compile', 'browserify', 'minify'));
+    watcher.on('add', function(path) {
+      console.log(`File ${path} was added`);
+    });
+    watcher.on('change', function(path) {
+      console.log(`File ${path} was changed`);
+    });
+    return watcher;
+  }
+  return compileTask(watch('src/*.*(js|ts)', { ignoreInitial: false, verbose: true }));
 });

@@ -80,6 +80,15 @@ describe('Cloud', () => {
     ]);
   });
 
+  it('run passes installationId option', () => {
+    Cloud.run('myfunction', {}, { installationId: 'asdf1234' });
+    expect(CoreManager.getCloudController().run.mock.calls[0]).toEqual([
+      'myfunction',
+      {},
+      { installationId: 'asdf1234' },
+    ]);
+  });
+
   it('startJob throws with an invalid job name', () => {
     expect(Cloud.startJob).toThrow('Cloud job name must be a string.');
 
@@ -220,7 +229,7 @@ describe('CloudController', () => {
         value: 12,
         when: { __type: 'Date', iso: '2015-01-01T00:00:00.000Z' },
       },
-      { useMasterKey: true },
+      { returnStatus: true, useMasterKey: true },
     ]);
   });
 
@@ -233,7 +242,7 @@ describe('CloudController', () => {
       {
         value: 12,
       },
-      { useMasterKey: true },
+      { returnStatus: true, useMasterKey: true },
     ]);
   });
 
