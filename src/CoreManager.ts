@@ -75,7 +75,7 @@ type QueryController = {
   aggregate(className: string, params: any, options: RequestOptions): Promise<{ results?: Array<any> }>;
 };
 type RESTController = {
-  request: (method: string, path: string, data: any, options?: RequestOptions) => Promise<any>,
+  request: (method: string, path: string, data?: any, options?: RequestOptions) => Promise<any>,
   ajax: (method: string, url: string, data: any, headers?: any, options?: FullOptions) => Promise<void>,
   handleError: (err?: any) => void,
 };
@@ -154,7 +154,71 @@ type LiveQueryControllerType = {
   getDefaultLiveQueryClient(): Promise<LiveQueryClient>;
   _clearCachedDefaultClient(): void;
 }
+/** Based on https://github.com/react-native-async-storage/async-storage/blob/main/packages/default-storage-backend/src/types.ts */
+type AsyncStorageType = {
+  /** Fetches an item for a `key` and invokes a callback upon completion. */
+  getItem: (
+    key: string,
+    callback?: (error?: Error | null, result?: string | null) => void
+  ) => Promise<string | null>;
+  /** Sets the value for a `key` and invokes a callback upon completion. */
+  setItem: (key: string, value: string, callback?: (error?: Error | null) => void) => Promise<void>;
+  /** Removes an item for a `key` and invokes a callback upon completion. */
+  removeItem: (key: string, callback?: (error?: Error | null) => void) => Promise<void>;
+  /** Merges an existing `key` value with an input value, assuming both values are stringified JSON. */
+  mergeItem: (key: string, value: string, callback?: (error?: Error | null) => void) => Promise<void>;
+  /**
+   * Erases *all* `AsyncStorage` for all clients, libraries, etc. You probably
+   * don't want to call this; use `removeItem` or `multiRemove` to clear only
+   * your app's keys.
+   */
+  clear: (callback?: (error?: Error | null) => void) => Promise<void>;
+  /** Gets *all* keys known to your app; for all callers, libraries, etc. */
+  getAllKeys: (
+    callback?: (error?: Error | null, result?: readonly string[] | null) => void
+  ) => Promise<readonly string[]>;
+  /**
+   * This allows you to batch the fetching of items given an array of `key`
+   * inputs. Your callback will be invoked with an array of corresponding
+   * key-value pairs found.
+   */
+  multiGet: (
+    keys: readonly string[],
+    callback?: (errors?: readonly (Error | null)[] | null, result?: readonly [string, string][]) => void
+  ) => Promise<readonly [string, string | null][]>;
 
+  /**
+   * Use this as a batch operation for storing multiple key-value pairs. When
+   * the operation completes you'll get a single callback with any errors.
+   *
+   * See https://react-native-async-storage.github.io/async-storage/docs/api#multiset
+   */
+  multiSet: (
+    keyValuePairs: [string, string][],
+    callback?: (errors?: readonly (Error | null)[] | null) => void
+  ) => Promise<readonly [string, string | null][]>;
+
+  /**
+   * Call this to batch the deletion of all keys in the `keys` array.
+   *
+   * See https://react-native-async-storage.github.io/async-storage/docs/api#multiremove
+   */
+  multiRemove: (
+    keys: readonly string[],
+    callback?: (errors?: readonly (Error | null)[] | null) => void
+  ) => Promise<void>;
+
+  /**
+   * Batch operation to merge in existing and new values for a given set of
+   * keys. This assumes that the values are stringified JSON.
+   *
+   * See https://react-native-async-storage.github.io/async-storage/docs/api#multimerge
+   */
+  multiMerge: (
+    keyValuePairs: [string, string][],
+    callback?: (errors?: readonly (Error | null)[] | null) => void
+  ) => Promise<void>;
+};
 export type WebSocketController = {
   onopen: () => void,
   onmessage: (message: any) => void,
@@ -181,7 +245,8 @@ type Config = {
   UserController?: UserController,
   HooksController?: HooksController,
   WebSocketController?: new (url: string | URL, protocols?: string | string[] | undefined) => WebSocketController,
-  LiveQueryController?: LiveQueryControllerType
+  LiveQueryController?: LiveQueryControllerType,
+  AsyncStorage?: AsyncStorageType
 };
 
 const config: Config & { [key: string]: any } = {
@@ -442,7 +507,7 @@ const CoreManager = {
     return config['StorageController'];
   },
 
-  setAsyncStorage(storage: any) {
+  setAsyncStorage(storage: AsyncStorageType) {
     config['AsyncStorage'] = storage;
   },
 

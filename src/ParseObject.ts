@@ -1951,7 +1951,7 @@ class ParseObject {
    *     this method.
    * @returns {Parse.Object} A new subclass of Parse.Object.
    */
-  static extend(className: any, protoProps: any, classProps: any) {
+  static extend(className: any, protoProps?: any, classProps?: any) {
     if (typeof className !== 'string') {
       if (className && typeof className.className === 'string') {
         return ParseObject.extend(className.className, className, protoProps);

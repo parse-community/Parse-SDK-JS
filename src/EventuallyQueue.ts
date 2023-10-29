@@ -27,9 +27,9 @@ type QueueObject = {
 type Queue = Array<QueueObject>;
 
 const QUEUE_KEY = 'Parse/Eventually/Queue';
-let queueCache = [];
+let queueCache: QueueObject[] = [];
 let dirtyCache = true;
-let polling = undefined;
+let polling: ReturnType<typeof setInterval> | undefined = undefined;
 
 /**
  * Provides utility functions to queue objects that will be
@@ -50,7 +50,7 @@ const EventuallyQueue = {
    * @static
    * @see Parse.Object#saveEventually
    */
-  save(object: ParseObject, serverOptions: SaveOptions = {}): Promise {
+  save(object: ParseObject, serverOptions: SaveOptions = {}): Promise<void> {
     return this.enqueue('save', object, serverOptions);
   },
 
@@ -65,7 +65,7 @@ const EventuallyQueue = {
    * @static
    * @see Parse.Object#destroyEventually
    */
-  destroy(object: ParseObject, serverOptions: RequestOptions = {}): Promise {
+  destroy(object: ParseObject, serverOptions: RequestOptions = {}): Promise<void> {
     return this.enqueue('destroy', object, serverOptions);
   },
 
@@ -99,7 +99,7 @@ const EventuallyQueue = {
     action: string,
     object: ParseObject,
     serverOptions: SaveOptions | RequestOptions
-  ): Promise {
+  ): Promise<void> {
     const queueData = await this.getQueue();
     const queueId = this.generateQueueId(action, object);
 
@@ -127,7 +127,7 @@ const EventuallyQueue = {
     return this.setQueue(queueData);
   },
 
-  store(data) {
+  store(data: QueueObject[]) {
     return Storage.setItemAsync(QUEUE_KEY, JSON.stringify(data));
   },
 
@@ -143,7 +143,7 @@ const EventuallyQueue = {
    * @returns {Promise<Array>}
    * @static
    */
-  async getQueue(): Promise<Array> {
+  async getQueue(): Promise<QueueObject[]> {
     if (dirtyCache) {
       queueCache = JSON.parse((await this.load()) || '[]');
       dirtyCache = false;
@@ -189,7 +189,7 @@ const EventuallyQueue = {
    * @returns {Promise} A promise that is fulfilled when queue is cleared.
    * @static
    */
-  clear(): Promise {
+  clear(): Promise<void> {
     queueCache = [];
     return this.store([]);
   },
@@ -215,7 +215,7 @@ const EventuallyQueue = {
    * @returns {number}
    * @static
    */
-  async length(): number {
+  async length(): Promise<number> {
     const queueData = await this.getQueue();
     return queueData.length;
   },
@@ -264,33 +264,33 @@ const EventuallyQueue = {
       return this.remove(queueObject.queueId);
     }
     switch (queueObject.action) {
-    case 'save':
-      // Queued update was overwritten by other request. Do not save
-      if (
-        typeof object.updatedAt !== 'undefined' &&
-          object.updatedAt > new Date(queueObject.object.createdAt)
-      ) {
-        return this.remove(queueObject.queueId);
-      }
-      try {
-        await object.save(queueObject.object, queueObject.serverOptions);
-        await this.remove(queueObject.queueId);
-      } catch (e) {
-        if (e.code !== ParseError.CONNECTION_FAILED) {
-          await this.remove(queueObject.queueId);
+      case 'save':
+        // Queued update was overwritten by other request. Do not save
+        if (
+          typeof object.updatedAt !== 'undefined' &&
+          object.updatedAt > new Date(queueObject.object.createdAt!)
+        ) {
+          return this.remove(queueObject.queueId);
         }
-      }
-      break;
-    case 'destroy':
-      try {
-        await object.destroy(queueObject.serverOptions);
-        await this.remove(queueObject.queueId);
-      } catch (e) {
-        if (e.code !== ParseError.CONNECTION_FAILED) {
+        try {
+          await object.save(queueObject.object, queueObject.serverOptions);
           await this.remove(queueObject.queueId);
+        } catch (e) {
+          if (e.code !== ParseError.CONNECTION_FAILED) {
+            await this.remove(queueObject.queueId);
+          }
         }
-      }
-      break;
+        break;
+      case 'destroy':
+        try {
+          await object.destroy(queueObject.serverOptions);
+          await this.remove(queueObject.queueId);
+        } catch (e) {
+          if (e.code !== ParseError.CONNECTION_FAILED) {
+            await this.remove(queueObject.queueId);
+          }
+        }
+        break;
     }
   },
 
@@ -344,16 +344,17 @@ const EventuallyQueue = {
     return !!polling;
   },
 
+  /** Used only for haxx debug */
   _setPolling(flag: boolean) {
-    polling = flag;
+    polling = flag as any;
   },
 
   process: {
-    create(ObjectType, queueObject) {
+    create(ObjectType: typeof ParseObject, queueObject) {
       const object = new ObjectType();
       return EventuallyQueue.sendQueueCallback(object, queueObject);
     },
-    async byId(ObjectType, queueObject) {
+    async byId(ObjectType: string | ParseObject | (typeof ParseObject), queueObject) {
       const { sessionToken } = queueObject.serverOptions;
       const query = new ParseQuery(ObjectType);
       query.equalTo('objectId', queueObject.id);

@@ -45,7 +45,7 @@ export default function unsavedChildren(
 }
 
 function traverse(
-  obj: ParseObject,
+  obj: ParseObject | ParseFile | ParseRelation | Array<ParseObject | ParseFile | ParseRelation>,
   encountered: EncounterMap,
   shouldThrow: boolean,
   allowDeepUnsaved: boolean

@@ -283,7 +283,7 @@ class ParseQuery {
   /**
    * @param {(string | Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
    */
-  constructor(objectClass: string | ParseObject) {
+  constructor(objectClass: string | ParseObject | (typeof ParseObject)) {
     if (typeof objectClass === 'string') {
       if (objectClass === 'User' && CoreManager.get('PERFORM_USER_REWRITE')) {
         this.className = '_User';
@@ -295,7 +295,7 @@ class ParseQuery {
     } else if (typeof objectClass === 'function') {
       const objectClz = (objectClass) as typeof ParseObject;
       if (typeof objectClz.className === 'string') {
-        this.className = objectClass;
+        this.className = objectClz.className;
       } else {
         const obj = new objectClz();
         this.className = obj.className;

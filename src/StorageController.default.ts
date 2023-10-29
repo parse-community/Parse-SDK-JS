@@ -8,7 +8,7 @@ const memMap = {};
 const StorageController = {
   async: 0,
 
-  getItem(path: string): ?string {
+  getItem(path: string): string | null {
     if (memMap.hasOwnProperty(path)) {
       return memMap[path];
     }
