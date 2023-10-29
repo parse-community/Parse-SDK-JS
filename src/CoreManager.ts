@@ -11,6 +11,7 @@ import type { RequestOptions, FullOptions } from './RESTController';
 import type ParseSession from './ParseSession';
 import type { HookDeclaration, HookDeleteArg } from './ParseHooks';
 import type ParseConfig from './ParseConfig';
+import type LiveQueryClient from './LiveQueryClient';
 
 type AnalyticsController = {
   track: (name: string, dimensions: { [key: string]: string }) => Promise<void>,
@@ -67,11 +68,11 @@ type ObjectStateController = {
   duplicateState: (source: any, dest: any) => void,
 };
 type PushController = {
-  send: (data: PushData) => Promise<void>,
+  send: (data: PushData, options?: FullOptions) => Promise<any>,
 };
 type QueryController = {
-  find: (className: string, params: QueryJSON, options: RequestOptions) => Promise<void>,
-  aggregate: (className: string, params: any, options: RequestOptions) => Promise<void>,
+  find(className: string, params: QueryJSON, options: RequestOptions): Promise<{ results?: Array<ParseObject>, className?: string, count?: number }>;
+  aggregate(className: string, params: any, options: RequestOptions): Promise<{ results?: Array<any> }>;
 };
 type RESTController = {
   request: (method: string, path: string, data: any, options?: RequestOptions) => Promise<any>,
@@ -125,18 +126,19 @@ type UserController = {
   setCurrentUser: (user: ParseUser) => Promise<void>,
   currentUser: () => ParseUser | undefined,
   currentUserAsync: () => Promise<ParseUser>,
-  signUp: (user: ParseUser, attrs: AttributeMap, options: RequestOptions) => Promise<void>,
-  logIn: (user: ParseUser, options: RequestOptions) => Promise<void>,
-  become: (options: RequestOptions) => Promise<void>,
-  hydrate: (userJSON: AttributeMap) => Promise<void>,
+  signUp: (user: ParseUser, attrs: AttributeMap, options: RequestOptions) => Promise<ParseUser>,
+  logIn: (user: ParseUser, options: RequestOptions) => Promise<ParseUser>,
+  loginAs: (user: ParseUser, userId: string) => Promise<ParseUser>,
+  become: (user: ParseUser, options: RequestOptions) => Promise<ParseUser>,
+  hydrate: (user: ParseUser, userJSON: AttributeMap) => Promise<ParseUser>,
   logOut: (options: RequestOptions) => Promise<void>,
-  me: (options: RequestOptions) => Promise<void>,
+  me: (user: ParseUser, options: RequestOptions) => Promise<ParseUser>,
   requestPasswordReset: (email: string, options: RequestOptions) => Promise<void>,
-  updateUserOnDisk: (user: ParseUser) => Promise<void>,
+  updateUserOnDisk: (user: ParseUser) => Promise<ParseUser>,
   upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => Promise<void>,
-  linkWith: (user: ParseUser, authData: AuthData) => Promise<void>,
-  removeUserFromDisk: () => Promise<void>,
-  verifyPassword: (username: string, password: string, options: RequestOptions) => Promise<void>,
+  linkWith: (user: ParseUser, authData: AuthData, options?: FullOptions) => Promise<ParseUser>,
+  removeUserFromDisk: () => Promise<ParseUser | void>,
+  verifyPassword: (username: string, password: string, options: RequestOptions) => Promise<ParseUser>,
   requestEmailVerification: (email: string, options: RequestOptions) => Promise<void>,
 };
 type HooksController = {
@@ -147,10 +149,16 @@ type HooksController = {
   // Renamed to sendRequest since ParseHooks file & tests file uses this. (originally declared as just "send")
   sendRequest?: (method: string, path: string, body?: any) => Promise<void>,
 };
-type WebSocketController = {
+type LiveQueryControllerType = {
+  setDefaultLiveQueryClient(liveQueryClient: LiveQueryClient): void;
+  getDefaultLiveQueryClient(): Promise<LiveQueryClient>;
+  _clearCachedDefaultClient(): void;
+}
+
+export type WebSocketController = {
   onopen: () => void,
   onmessage: (message: any) => void,
-  onclose: () => void,
+  onclose: (arg?: any) => void,
   onerror: (error: any) => void,
   send: (data: any) => void,
   close: () => void,
@@ -172,7 +180,8 @@ type Config = {
   LocalDatastoreController?: LocalDatastoreController,
   UserController?: UserController,
   HooksController?: HooksController,
-  WebSocketController?: WebSocketController,
+  WebSocketController?: new (url: string | URL, protocols?: string | string[] | undefined) => WebSocketController,
+  LiveQueryController?: LiveQueryControllerType
 };
 
 const config: Config & { [key: string]: any } = {
@@ -441,11 +450,11 @@ const CoreManager = {
     return config['AsyncStorage'];
   },
 
-  setWebSocketController(controller: WebSocketController) {
+  setWebSocketController(controller: new (url: string | URL, protocols?: string | string[] | undefined) => WebSocketController) {
     config['WebSocketController'] = controller;
   },
 
-  getWebSocketController(): WebSocketController {
+  getWebSocketController(): new (url: string | URL, protocols?: string | string[] | undefined) => WebSocketController {
     return config['WebSocketController'];
   },
 
@@ -476,7 +485,7 @@ const CoreManager = {
     return config['UserController'];
   },
 
-  setLiveQueryController(controller: any) {
+  setLiveQueryController(controller: LiveQueryControllerType) {
     requireMethods(
       'LiveQueryController',
       ['setDefaultLiveQueryClient', 'getDefaultLiveQueryClient', '_clearCachedDefaultClient'],
@@ -485,7 +494,7 @@ const CoreManager = {
     config['LiveQueryController'] = controller;
   },
 
-  getLiveQueryController(): any {
+  getLiveQueryController(): LiveQueryControllerType {
     return config['LiveQueryController'];
   },
 

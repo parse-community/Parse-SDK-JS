@@ -2,6 +2,7 @@ import type { EventEmitter } from 'events';
 import CoreManager from './CoreManager';
 import AnEventEmitter from './EventEmitter';
 import { resolvingPromise } from './promiseUtils';
+import type ParseQuery from './ParseQuery';
 
 /**
  * Creates a new LiveQuery Subscription.
@@ -86,11 +87,11 @@ import { resolvingPromise } from './promiseUtils';
  * });</pre></p>
  */
 class Subscription {
-  id: string;
-  query: string;
+  id: string | number;
+  query: ParseQuery;
   sessionToken?: string;
-  subscribePromise: ReturnType<typeof resolvingPromise>;
-  unsubscribePromise: ReturnType<typeof resolvingPromise>;
+  subscribePromise: ReturnType<typeof resolvingPromise<void>>;
+  unsubscribePromise: ReturnType<typeof resolvingPromise<void>>;
   subscribed: boolean;
   emitter: EventEmitter;
   on: EventEmitter['on'];
@@ -101,7 +102,7 @@ class Subscription {
    * @param {string} query - query to subscribe to
    * @param {string} sessionToken - optional session token
    */
-  constructor(id: string, query: string, sessionToken?: string) {
+  constructor(id: string | number, query: ParseQuery, sessionToken?: string) {
     this.id = id;
     this.query = query;
     this.sessionToken = sessionToken;

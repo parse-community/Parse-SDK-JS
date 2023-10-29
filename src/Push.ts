@@ -3,6 +3,7 @@
  */
 
 import CoreManager from './CoreManager';
+import ParseObject from './ParseObject';
 import ParseQuery from './ParseQuery';
 
 import type { WhereClause } from './ParseQuery';
@@ -49,9 +50,9 @@ export type PushData = {
  *     be used for this request.
  * </ul>
  * @returns {Promise} A promise that is fulfilled when the push request
- *     completes.
+ *     completes., returns `pushStatusId`
  */
-export function send(data: PushData, options?: FullOptions = {}): Promise {
+export function send(data: PushData, options: FullOptions = {}): Promise<string> {
   if (data.where && data.where instanceof ParseQuery) {
     data.where = data.where.toJSON().where;
   }
@@ -89,7 +90,7 @@ export function send(data: PushData, options?: FullOptions = {}): Promise {
  * </ul>
  * @returns {Parse.Object} Status of Push.
  */
-export function getPushStatus(pushStatusId: string, options?: FullOptions = {}): Promise<string> {
+export function getPushStatus(pushStatusId: string, options: FullOptions = {}): Promise<ParseObject> {
   const pushOptions = { useMasterKey: true };
   if (options.hasOwnProperty('useMasterKey')) {
     pushOptions.useMasterKey = options.useMasterKey;
@@ -100,8 +101,8 @@ export function getPushStatus(pushStatusId: string, options?: FullOptions = {}):
 
 const DefaultController = {
   async send(data: PushData, options?: FullOptions) {
-    options.returnStatus = true;
-    const response = await CoreManager.getRESTController().request('POST', 'push', data, options);
+    const myOptions = { ...options, returnStatus: true };
+    const response = await CoreManager.getRESTController().request('POST', 'push', data, myOptions);
     return response._headers?.['X-Parse-Push-Status-Id'];
   },
 };

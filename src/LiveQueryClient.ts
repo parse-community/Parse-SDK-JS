@@ -1,10 +1,12 @@
 /* global WebSocket */
 
-import CoreManager from './CoreManager';
+import CoreManager, { WebSocketController } from './CoreManager';
 import ParseObject from './ParseObject';
 import LiveQuerySubscription from './LiveQuerySubscription';
 import { resolvingPromise } from './promiseUtils';
 import ParseError from './ParseError';
+import type { EventEmitter } from 'events';
+import type ParseQuery from './ParseQuery';
 
 // The LiveQuery client inner state
 const CLIENT_STATE = {
@@ -109,15 +111,19 @@ class LiveQueryClient {
   requestId: number;
   applicationId: string;
   serverURL: string;
-  javascriptKey: ?string;
-  masterKey: ?string;
-  sessionToken: ?string;
-  installationId: ?string;
+  javascriptKey?: string;
+  masterKey?: string;
+  sessionToken?: string;
+  installationId?: string;
   additionalProperties: boolean;
-  connectPromise: Promise;
-  subscriptions: Map;
-  socket: any;
+  connectPromise: ReturnType<typeof resolvingPromise<void>>;
+  subscriptions: Map<number, LiveQuerySubscription>;
+  socket: WebSocketController & { closingPromise?: ReturnType<typeof resolvingPromise<void>> };
   state: string;
+  reconnectHandle: null | ReturnType<typeof setTimeout> = null;
+  emitter: EventEmitter;
+  on: EventEmitter['on'];
+  emit: EventEmitter['emit'];
 
   /**
    * @param {object} options
@@ -156,14 +162,14 @@ class LiveQueryClient {
     this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
     this.state = CLIENT_STATE.INITIALIZED;
-    const EventEmitter = CoreManager.getEventEmitter();
+    const EventEmitter = CoreManager.getEventEmitter() as new () => EventEmitter;
     this.emitter = new EventEmitter();
 
     this.on = this.emitter.on;
     this.emit = this.emitter.emit;
     // adding listener so process does not crash
     // best practice is for developer to register their own listener
-    this.on('error', () => {});
+    this.on('error', () => { });
   }
 
   shouldOpen(): any {
@@ -184,7 +190,7 @@ class LiveQueryClient {
    * @param {string} sessionToken (optional)
    * @returns {LiveQuerySubscription | undefined}
    */
-  subscribe(query: Object, sessionToken: ?string): LiveQuerySubscription {
+  subscribe(query: ParseQuery, sessionToken?: string): LiveQuerySubscription | undefined {
     if (!query) {
       return;
     }
@@ -202,6 +208,7 @@ class LiveQueryClient {
         fields,
         watch,
       },
+      sessionToken: undefined as string | undefined
     };
 
     if (sessionToken) {
@@ -228,7 +235,7 @@ class LiveQueryClient {
    * @param {object} subscription - subscription you would like to unsubscribe from.
    * @returns {Promise | undefined}
    */
-  unsubscribe(subscription: Object): ?Promise {
+  async unsubscribe(subscription: LiveQuerySubscription): Promise<void> {
     if (!subscription) {
       return;
     }
@@ -272,7 +279,7 @@ class LiveQueryClient {
     };
 
     this.socket.onclose = (event) => {
-      this.socket.closingPromise.resolve(event);
+      this.socket.closingPromise!.resolve(event);
       this._handleWebSocketClose();
     };
 
@@ -297,6 +304,7 @@ class LiveQueryClient {
           where,
           fields,
         },
+        sessionToken: undefined as string | undefined
       };
 
       if (sessionToken) {
@@ -315,7 +323,7 @@ class LiveQueryClient {
    *
    * @returns {Promise | undefined} CloseEvent {@link https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close_event}
    */
-  close(): ?Promise {
+  async close(): Promise<void> {
     if (this.state === CLIENT_STATE.INITIALIZED || this.state === CLIENT_STATE.DISCONNECTED) {
       return;
     }
@@ -348,6 +356,7 @@ class LiveQueryClient {
       javascriptKey: this.javascriptKey,
       masterKey: this.masterKey,
       sessionToken: this.sessionToken,
+      installationId: undefined as string | undefined
     };
     if (this.additionalProperties) {
       connectRequest.installationId = this.installationId;
@@ -360,95 +369,95 @@ class LiveQueryClient {
     if (typeof data === 'string') {
       data = JSON.parse(data);
     }
-    let subscription = null;
+    let subscription: null | LiveQuerySubscription = null;
     if (data.requestId) {
-      subscription = this.subscriptions.get(data.requestId);
+      subscription = this.subscriptions.get(data.requestId) || null;
     }
     const response = {
       clientId: data.clientId,
       installationId: data.installationId,
     };
     switch (data.op) {
-    case OP_EVENTS.CONNECTED:
-      if (this.state === CLIENT_STATE.RECONNECTING) {
-        this.resubscribe();
-      }
-      this.emit(CLIENT_EMMITER_TYPES.OPEN);
-      this.id = data.clientId;
-      this.connectPromise.resolve();
-      this.state = CLIENT_STATE.CONNECTED;
-      break;
-    case OP_EVENTS.SUBSCRIBED:
-      if (subscription) {
-        subscription.subscribed = true;
-        subscription.subscribePromise.resolve();
-        setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN, response), 200);
-      }
-      break;
-    case OP_EVENTS.ERROR: {
-      const parseError = new ParseError(data.code, data.error);
-      if (!this.id) {
-        this.connectPromise.reject(parseError);
-        this.state = CLIENT_STATE.DISCONNECTED;
-      }
-      if (data.requestId) {
-        if (subscription) {
-          subscription.subscribePromise.reject(parseError);
-          setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, data.error), 200);
+      case OP_EVENTS.CONNECTED:
+        if (this.state === CLIENT_STATE.RECONNECTING) {
+          this.resubscribe();
         }
-      } else {
-        this.emit(CLIENT_EMMITER_TYPES.ERROR, data.error);
-      }
-      if (data.error === 'Additional properties not allowed') {
-        this.additionalProperties = false;
-      }
-      if (data.reconnect) {
-        this._handleReconnect();
-      }
-      break;
-    }
-    case OP_EVENTS.UNSUBSCRIBED: {
-      if (subscription) {
-        this.subscriptions.delete(data.requestId);
-        subscription.subscribed = false;
-        subscription.unsubscribePromise.resolve();
-      }
-      break;
-    }
-    default: {
-      // create, update, enter, leave, delete cases
-      if (!subscription) {
+        this.emit(CLIENT_EMMITER_TYPES.OPEN);
+        this.id = data.clientId;
+        this.connectPromise.resolve();
+        this.state = CLIENT_STATE.CONNECTED;
+        break;
+      case OP_EVENTS.SUBSCRIBED:
+        if (subscription) {
+          subscription.subscribed = true;
+          subscription.subscribePromise.resolve();
+          setTimeout(() => subscription!.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN, response), 200);
+        }
+        break;
+      case OP_EVENTS.ERROR: {
+        const parseError = new ParseError(data.code, data.error);
+        if (!this.id) {
+          this.connectPromise.reject(parseError);
+          this.state = CLIENT_STATE.DISCONNECTED;
+        }
+        if (data.requestId) {
+          if (subscription) {
+            subscription.subscribePromise.reject(parseError);
+            setTimeout(() => subscription!.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, data.error), 200);
+          }
+        } else {
+          this.emit(CLIENT_EMMITER_TYPES.ERROR, data.error);
+        }
+        if (data.error === 'Additional properties not allowed') {
+          this.additionalProperties = false;
+        }
+        if (data.reconnect) {
+          this._handleReconnect();
+        }
         break;
       }
-      let override = false;
-      if (data.original) {
-        override = true;
-        delete data.original.__type;
-        // Check for removed fields
-        for (const field in data.original) {
-          if (!(field in data.object)) {
-            data.object[field] = undefined;
-          }
+      case OP_EVENTS.UNSUBSCRIBED: {
+        if (subscription) {
+          this.subscriptions.delete(data.requestId);
+          subscription.subscribed = false;
+          subscription.unsubscribePromise.resolve();
         }
-        data.original = ParseObject.fromJSON(data.original, false);
+        break;
       }
-      delete data.object.__type;
-      const parseObject = ParseObject.fromJSON(
-        data.object,
-        !(subscription.query && subscription.query._select) ? override : false
-      );
+      default: {
+        // create, update, enter, leave, delete cases
+        if (!subscription) {
+          break;
+        }
+        let override = false;
+        if (data.original) {
+          override = true;
+          delete data.original.__type;
+          // Check for removed fields
+          for (const field in data.original) {
+            if (!(field in data.object)) {
+              data.object[field] = undefined;
+            }
+          }
+          data.original = ParseObject.fromJSON(data.original, false);
+        }
+        delete data.object.__type;
+        const parseObject = ParseObject.fromJSON(
+          data.object,
+          !(subscription.query && subscription.query._select) ? override : false
+        );
 
-      if (data.original) {
-        subscription.emit(data.op, parseObject, data.original, response);
-      } else {
-        subscription.emit(data.op, parseObject, response);
-      }
+        if (data.original) {
+          subscription.emit(data.op, parseObject, data.original, response);
+        } else {
+          subscription.emit(data.op, parseObject, response);
+        }
 
-      const localDatastore = CoreManager.getLocalDatastore();
-      if (override && localDatastore.isEnabled) {
-        localDatastore._updateObjectIfPinned(parseObject).then(() => {});
+        const localDatastore = CoreManager.getLocalDatastore();
+        if (override && localDatastore.isEnabled) {
+          localDatastore._updateObjectIfPinned(parseObject).then(() => { });
+        }
       }
-    }
     }
   }
 
@@ -506,12 +515,12 @@ if (process.env.PARSE_BUILD === 'node') {
   CoreManager.setWebSocketController(require('ws'));
 } else if (process.env.PARSE_BUILD === 'browser') {
   CoreManager.setWebSocketController(
-    typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null
+    typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null as any
   );
 } else if (process.env.PARSE_BUILD === 'weapp') {
   CoreManager.setWebSocketController(require('./Socket.weapp'));
 } else if (process.env.PARSE_BUILD === 'react-native') {
-  CoreManager.setWebSocketController(WebSocket);
+  CoreManager.setWebSocketController(WebSocket as any);
 }
 
 export default LiveQueryClient;

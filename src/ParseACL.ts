@@ -101,7 +101,7 @@ class ParseACL {
 
   _setAccess(accessType: string, userId: ParseUser | ParseRole | string, allowed: boolean) {
     if (userId instanceof ParseUser) {
-      userId = userId.id;
+      userId = userId.id!;
     } else if (userId instanceof ParseRole) {
       const name = userId.getName();
       if (!name) {
@@ -138,7 +138,7 @@ class ParseACL {
 
   _getAccess(accessType: string, userId: ParseUser | ParseRole | string): boolean {
     if (userId instanceof ParseUser) {
-      userId = userId.id;
+      userId = userId.id!;
       if (!userId) {
         throw new Error('Cannot get access for a ParseUser without an ID');
       }
@@ -250,7 +250,7 @@ class ParseACL {
   getRoleReadAccess(role: ParseRole | string): boolean {
     if (role instanceof ParseRole) {
       // Normalize to the String name
-      role = role.getName();
+      role = role.getName()!;
     }
     if (typeof role !== 'string') {
       throw new TypeError('role must be a ParseRole or a String');
@@ -270,7 +270,7 @@ class ParseACL {
   getRoleWriteAccess(role: ParseRole | string): boolean {
     if (role instanceof ParseRole) {
       // Normalize to the String name
-      role = role.getName();
+      role = role.getName()!;
     }
     if (typeof role !== 'string') {
       throw new TypeError('role must be a ParseRole or a String');
@@ -289,7 +289,7 @@ class ParseACL {
   setRoleReadAccess(role: ParseRole | string, allowed: boolean) {
     if (role instanceof ParseRole) {
       // Normalize to the String name
-      role = role.getName();
+      role = role.getName()!;
     }
     if (typeof role !== 'string') {
       throw new TypeError('role must be a ParseRole or a String');
@@ -308,7 +308,7 @@ class ParseACL {
   setRoleWriteAccess(role: ParseRole | string, allowed: boolean) {
     if (role instanceof ParseRole) {
       // Normalize to the String name
-      role = role.getName();
+      role = role.getName()!;
     }
     if (typeof role !== 'string') {
       throw new TypeError('role must be a ParseRole or a String');

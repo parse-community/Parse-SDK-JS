@@ -153,6 +153,7 @@ class ParseObject {
   _localId?: string;
   _objCount: number;
   className: string;
+  static className: string;
 
   /* Prototype getters / setters */
 

@@ -3,7 +3,7 @@ import type { EventEmitter as EventEmitterType } from 'events';
  * This is a simple wrapper to unify EventEmitter implementations across platforms.
  */
 
-let EventEmitter: new (...args: ConstructorParameters<typeof EventEmitterType>) => EventEmitterType;
+let EventEmitter: typeof EventEmitterType;
 
 try {
   if (process.env.PARSE_BUILD === 'react-native') {
