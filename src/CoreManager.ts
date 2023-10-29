@@ -13,6 +13,7 @@ import type { HookDeclaration, HookDeleteArg } from './ParseHooks';
 import type ParseConfig from './ParseConfig';
 import type LiveQueryClient from './LiveQueryClient';
 import type ParseSchema from './ParseSchema';
+import type { StorageController } from './Storage';
 
 type AnalyticsController = {
   track: (name: string, dimensions: { [key: string]: string }) => Promise<any>,
@@ -78,7 +79,7 @@ type QueryController = {
 };
 type RESTController = {
   request: (method: string, path: string, data?: any, options?: RequestOptions) => Promise<any>,
-  ajax: (method: string, url: string, data: any, headers?: any, options?: FullOptions) => Promise<void>,
+  ajax: (method: string, url: string, data: any, headers?: any, options?: FullOptions) => Promise<any>,
   handleError: (err?: any) => void,
 };
 type SchemaController = {
@@ -92,37 +93,14 @@ type SchemaController = {
 type SessionController = {
   getSession: (token: RequestOptions) => Promise<ParseSession>,
 };
-type StorageController =
-  | {
-    async: 0,
-    getItem: (path: string) => string | null,
-    setItem: (path: string, value: string) => void,
-    removeItem: (path: string) => void,
-    getItemAsync?: (path: string) => Promise<string | null>,
-    setItemAsync?: (path: string, value: string) => Promise<void>,
-    removeItemAsync?: (path: string) => Promise<void>,
-    clear: () => void,
-    getAllKeys?: () => Array<string>
-    getAllKeysAsync?: () => Promise<Array<string>>
-  }
-  | {
-    async: 1,
-    getItem?: (path: string) => string | null,
-    setItem?: (path: string, value: string) => void,
-    removeItem?: (path: string) => void,
-    getItemAsync: (path: string) => Promise<string | null>,
-    setItemAsync: (path: string, value: string) => Promise<void>,
-    removeItemAsync: (path: string) => Promise<void>,
-    clear: () => void,
-    getAllKeys?: () => Array<string>
-    getAllKeysAsync?: () => Promise<Array<string>>
-  };
 type LocalDatastoreController = {
   fromPinWithName: (name: string) => any | undefined,
   pinWithName: (name: string, objects: any) => void,
   unPinWithName: (name: string) => void,
   getAllContents: () => any | undefined,
   clear: () => void,
+  // Use for testing
+  // getRawStorage(): Promise<Object>,
 };
 type UserController = {
   setCurrentUser: (user: ParseUser) => Promise<void>,

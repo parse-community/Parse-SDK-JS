@@ -4,6 +4,32 @@
 
 import CoreManager from './CoreManager';
 
+export type StorageController =
+  | {
+    async: 0,
+    getItem: (path: string) => string | null,
+    setItem: (path: string, value: string) => void,
+    removeItem: (path: string) => void,
+    getItemAsync?: (path: string) => Promise<string | null>,
+    setItemAsync?: (path: string, value: string) => Promise<void>,
+    removeItemAsync?: (path: string) => Promise<void>,
+    clear: () => void,
+    getAllKeys?: () => Array<string>
+    getAllKeysAsync?: () => Promise<Array<string>>
+  }
+  | {
+    async: 1,
+    getItem?: (path: string) => string | null,
+    setItem?: (path: string, value: string) => void,
+    removeItem?: (path: string) => void,
+    getItemAsync: (path: string) => Promise<string | null>,
+    setItemAsync: (path: string, value: string) => Promise<void>,
+    removeItemAsync: (path: string) => Promise<void>,
+    clear: () => void,
+    getAllKeys?: () => Array<string>
+    getAllKeysAsync?: () => Promise<Array<string>>
+  };
+
 const Storage = {
   async(): boolean {
     const controller = CoreManager.getStorageController();

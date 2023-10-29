@@ -47,7 +47,10 @@ interface ParseType {
   Parse?: ParseType,
   Analytics: typeof Analytics,
   AnonymousUtils: typeof AnonymousUtils,
-  Cloud: typeof Cloud,
+  Cloud: typeof Cloud & {
+    /** only availabe in server environments */
+    useMasterKey?: () => void
+  },
   CLP: typeof CLP,
   CoreManager: typeof CoreManager,
   Config: typeof Config,
@@ -114,39 +117,39 @@ interface ParseType {
 const Parse: ParseType = {
   ACL: ACL,
   Analytics: Analytics,
-  AnonymousUtils:  AnonymousUtils,
+  AnonymousUtils: AnonymousUtils,
   Cloud: Cloud,
   CLP: CLP,
-  CoreManager:  CoreManager,
-  Config:  Config,
-  Error:  ParseError,
-  EventuallyQueue:  EventuallyQueue,
+  CoreManager: CoreManager,
+  Config: Config,
+  Error: ParseError,
+  EventuallyQueue: EventuallyQueue,
   FacebookUtils: FacebookUtils,
-  File:  File,
-  GeoPoint:  GeoPoint,
-  Polygon:  Polygon,
-  Installation:  Installation,
-  LocalDatastore:  LocalDatastore,
-  Object:  Object,
+  File: File,
+  GeoPoint: GeoPoint,
+  Polygon: Polygon,
+  Installation: Installation,
+  LocalDatastore: LocalDatastore,
+  Object: Object,
   Op: {
-    Set:  ParseOp.SetOp,
-    Unset:  ParseOp.UnsetOp,
-    Increment:  ParseOp.IncrementOp,
-    Add:  ParseOp.AddOp,
-    Remove:  ParseOp.RemoveOp,
-    AddUnique:  ParseOp.AddUniqueOp,
-    Relation:  ParseOp.RelationOp,
+    Set: ParseOp.SetOp,
+    Unset: ParseOp.UnsetOp,
+    Increment: ParseOp.IncrementOp,
+    Add: ParseOp.AddOp,
+    Remove: ParseOp.RemoveOp,
+    AddUnique: ParseOp.AddUniqueOp,
+    Relation: ParseOp.RelationOp,
   },
-  Push:  Push,
-  Query:  Query,
-  Relation:  Relation,
-  Role:  Role,
-  Schema:  Schema,
-  Session:  Session,
-  Storage:  Storage,
-  User:  User,
-  LiveQueryClient:  LiveQueryClient,
-  LiveQuery:  undefined,
+  Push: Push,
+  Query: Query,
+  Relation: Relation,
+  Role: Role,
+  Schema: Schema,
+  Session: Session,
+  Storage: Storage,
+  User: User,
+  LiveQueryClient: LiveQueryClient,
+  LiveQuery: undefined,
   IndexedDB: undefined,
   Hooks: undefined,
   Parse: undefined,
@@ -168,7 +171,7 @@ const Parse: ParseType = {
       /* eslint-disable no-console */
       console.log(
         "It looks like you're using the browser version of the SDK in a " +
-          "node.js environment. You should require('parse/node') instead."
+        "node.js environment. You should require('parse/node') instead."
       );
       /* eslint-enable no-console */
     }
@@ -361,7 +364,7 @@ const Parse: ParseType = {
     return encode(value, disallowObjects);
   },
 
-  _getInstallationId () {
+  _getInstallationId() {
     return CoreManager.getInstallationController().currentInstallationId();
   },
   /**
@@ -390,7 +393,7 @@ const Parse: ParseType = {
    * @static
    * @returns {boolean}
    */
-  isLocalDatastoreEnabled () {
+  isLocalDatastoreEnabled() {
     return this.LocalDatastore.isEnabled;
   },
   /**
@@ -418,7 +421,7 @@ const Parse: ParseType = {
    *
    * @static
    */
-  enableEncryptedUser () {
+  enableEncryptedUser() {
     this.encryptedUser = true;
   },
 
@@ -428,7 +431,7 @@ const Parse: ParseType = {
    * @static
    * @returns {boolean}
    */
-  isEncryptedUserEnabled () {
+  isEncryptedUserEnabled() {
     return this.encryptedUser;
   },
 };
@@ -439,7 +442,7 @@ CoreManager.setRESTController(RESTController);
 
 if (process.env.PARSE_BUILD === 'node') {
   Parse.initialize = Parse._initialize;
-  Parse.Cloud = Parse.Cloud || {};
+  Parse.Cloud = Parse.Cloud || {} as any;
   Parse.Cloud.useMasterKey = function () {
     CoreManager.set('USE_MASTER_KEY', true);
   };

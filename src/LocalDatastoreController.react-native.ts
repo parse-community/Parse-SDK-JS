@@ -86,3 +86,4 @@ const LocalDatastoreController = {
 };
 
 module.exports = LocalDatastoreController;
+export default LocalDatastoreController;

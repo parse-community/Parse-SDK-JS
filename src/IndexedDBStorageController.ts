@@ -4,12 +4,14 @@
 /* global window */
 
 import { createStore, del, set, get, clear, keys } from 'idb-keyval';
+import type { StorageController } from './Storage';
 
+let IndexedDBStorageController: StorageController;
 if (typeof window !== 'undefined' && window.indexedDB) {
   try {
     const ParseStore = createStore('parseDB', 'parseStore');
 
-    const IndexedDBStorageController = {
+    IndexedDBStorageController = {
       async: 1,
       getItemAsync(path: string) {
         return get(path, ParseStore);
@@ -37,3 +39,4 @@ if (typeof window !== 'undefined' && window.indexedDB) {
   // IndexedDB not supported
   module.exports = undefined;
 }
+export default IndexedDBStorageController;

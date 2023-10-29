@@ -5,7 +5,7 @@ import { isLocalDatastoreKey } from './LocalDatastoreUtils';
 import Storage from './Storage';
 
 const LocalDatastoreController = {
-  async fromPinWithName(name: string): Array<Object> {
+  async fromPinWithName(name: string): Promise<Array<Object>> {
     const values = await Storage.getItemAsync(name);
     if (!values) {
       return [];
@@ -23,7 +23,7 @@ const LocalDatastoreController = {
     return Storage.removeItemAsync(name);
   },
 
-  async getAllContents(): Object {
+  async getAllContents(): Promise<Object> {
     const keys = await Storage.getAllKeysAsync();
     return keys.reduce(async (previousPromise, key) => {
       const LDS = await previousPromise;
@@ -40,7 +40,7 @@ const LocalDatastoreController = {
   },
 
   // Used for testing
-  async getRawStorage(): Object {
+  async getRawStorage(): Promise<Object> {
     const keys = await Storage.getAllKeysAsync();
     return keys.reduce(async (previousPromise, key) => {
       const LDS = await previousPromise;
@@ -50,7 +50,7 @@ const LocalDatastoreController = {
     }, Promise.resolve({}));
   },
 
-  async clear(): Promise {
+  async clear(): Promise<any> {
     const keys = await Storage.getAllKeysAsync();
 
     const toRemove = [];
@@ -65,3 +65,4 @@ const LocalDatastoreController = {
 };
 
 module.exports = LocalDatastoreController;
+export default LocalDatastoreController;

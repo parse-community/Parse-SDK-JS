@@ -394,7 +394,7 @@ class ParseQuery {
     return '^' + quote(string);
   }
 
-  async _handleOfflineQuery(params: any) {
+  async _handleOfflineQuery(params: QueryJSON) {
     OfflineQuery.validateQuery(this);
     const localDatastore = CoreManager.getLocalDatastore();
     const objects = await localDatastore._serializeObjectsFromPinName(this._localDatastorePinName);
