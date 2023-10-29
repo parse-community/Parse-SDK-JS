@@ -74,7 +74,7 @@ type QueryController = {
   aggregate: (className: string, params: any, options: RequestOptions) => Promise<void>,
 };
 type RESTController = {
-  request: (method: string, path: string, data: any, options: RequestOptions) => Promise<any>,
+  request: (method: string, path: string, data: any, options?: RequestOptions) => Promise<any>,
   ajax: (method: string, url: string, data: any, headers?: any, options?: FullOptions) => Promise<void>,
   handleError: (err?: any) => void,
 };

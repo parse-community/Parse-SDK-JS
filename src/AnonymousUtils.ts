@@ -4,7 +4,7 @@
 
 import ParseUser from './ParseUser';
 import type { RequestOptions } from './RESTController';
-const uuidv4 = require('./uuid');
+import uuidv4 from './uuid';
 
 let registered = false;
 
