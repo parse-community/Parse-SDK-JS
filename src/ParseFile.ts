@@ -4,8 +4,7 @@
 /* global XMLHttpRequest, Blob */
 import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
-
-const ParseError = require('./ParseError').default;
+import ParseError from './ParseError'
 
 let XHR: typeof XMLHttpRequest = null;
 if (typeof XMLHttpRequest !== 'undefined') {
@@ -126,7 +125,7 @@ class ParseFile {
           file: data,
           type: specifiedType,
         };
-      } else if (data && typeof (data as Uri).uri === 'string' && (data as Uri).uri !== undefined) {
+      } else if (data && typeof (data as Uri).uri === 'string') {
         this._source = {
           format: 'uri',
           uri: (data as Uri).uri,

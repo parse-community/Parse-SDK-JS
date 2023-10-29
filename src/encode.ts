@@ -57,7 +57,7 @@ function encode(
     if (isNaN(value)) {
       throw new Error('Tried to encode an invalid date.');
     }
-    return { __type: 'Date', iso: (value as any).toJSON() };
+    return { __type: 'Date', iso: (value as Date).toJSON() };
   }
   if (
     Object.prototype.toString.call(value) === '[object RegExp]' &&

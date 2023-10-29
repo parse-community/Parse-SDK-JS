@@ -42,7 +42,7 @@ class ParseRole extends ParseObject {
    *
    * @returns {string} the name of the role.
    */
-  getName(): string | null | undefined {
+  getName(): string | null {
     const name = this.get('name');
     if (name == null || typeof name === 'string') {
       return name;

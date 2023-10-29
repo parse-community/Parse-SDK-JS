@@ -2464,11 +2464,11 @@ const DefaultController = {
 
             // Queue up tasks for each object in the batch.
             // When every task is ready, the API request will execute
-            const batchReturned = new resolvingPromise();
+            const batchReturned = resolvingPromise();
             const batchReady = [];
             const batchTasks = [];
             batch.forEach((obj, index) => {
-              const ready = new resolvingPromise();
+              const ready = resolvingPromise<void>();
               batchReady.push(ready);
               const task = function () {
                 ready.resolve();

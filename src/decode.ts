@@ -15,7 +15,7 @@ export default function decode(value: any): any {
     return value;
   }
   if (Array.isArray(value)) {
-    const dup: any = [];
+    const dup: any[] = [];
     value.forEach((v, i) => {
       dup[i] = decode(v);
     });

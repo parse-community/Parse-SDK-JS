@@ -147,7 +147,14 @@ export function estimateAttributes(
   return data;
 }
 
-function nestedSet(obj, key, value) {
+/**
+ * Allows setting properties/variables deep in an object.
+ * @param obj The object to assign the value to
+ * @param key The key to assign. If it's in a deeper path, then use dot notation (`prop1.prop2.prop3`)
+ * Note that intermediate object(s) in the nested path are automatically created if they don't exist.
+ * @param value The value to assign. If it's an `undefined` then the key is deleted.
+ */
+function nestedSet(obj: AttributeMap, key: string, value: any) {
   const path = key.split('.');
   for (let i = 0; i < path.length - 1; i++) {
     if (!(path[i] in obj)) {

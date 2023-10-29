@@ -11,6 +11,8 @@ export type PermissionsMap = { writeUserFields?: string[], readUserFields?: stri
 
 const PUBLIC_KEY = '*';
 
+// TODO: Typescript; This seems like a convenient way to define things quick & easily..
+// But it is quite type-unsafe right now. Seems to only be used in this file too.
 const VALID_PERMISSIONS: Map<string, UsersMap> = new Map<string, UsersMap>();
 VALID_PERMISSIONS.set('get', {});
 VALID_PERMISSIONS.set('find', {});
