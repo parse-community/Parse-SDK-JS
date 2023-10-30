@@ -3,11 +3,13 @@
  */
 /* global FB */
 import ParseUser from './ParseUser';
+import type { AuthProviderType } from './ParseUser';
+import '@types/facebook-js-sdk'
 
 let initialized = false;
 let requestedPermissions;
 let initOptions;
-const provider = {
+const provider: AuthProviderType = {
   authenticate(options) {
     if (typeof FB === 'undefined') {
       options.error(this, 'Facebook SDK not found.');
@@ -38,7 +40,7 @@ const provider = {
 
   restoreAuthentication(authData) {
     if (authData) {
-      const newOptions = {};
+      const newOptions: typeof initOptions = {};
       if (initOptions) {
         for (const key in initOptions) {
           newOptions[key] = initOptions[key];
@@ -107,13 +109,13 @@ const FacebookUtils = {
       }
     }
     if (initOptions.status && typeof console !== 'undefined') {
-      const warn = console.warn || console.log || function () {}; // eslint-disable-line no-console
+      const warn = console.warn || console.log || function () { }; // eslint-disable-line no-console
       warn.call(
         console,
         'The "status" flag passed into' +
-          ' FB.init, when set to true, can interfere with Parse Facebook' +
-          ' integration, so it has been suppressed. Please call' +
-          ' FB.getLoginStatus() explicitly if you require this behavior.'
+        ' FB.init, when set to true, can interfere with Parse Facebook' +
+        ' integration, so it has been suppressed. Please call' +
+        ' FB.getLoginStatus() explicitly if you require this behavior.'
       );
     }
     initOptions.status = false;

@@ -14,9 +14,9 @@ import type { RequestOptions, FullOptions } from './RESTController';
 
 export type AuthData = { [key: string]: any };
 
-type AuthProviderType = {
+export type AuthProviderType = {
   authenticate?(options: {
-    error?: (provider: AuthProviderType, error: string) => void,
+    error?: (provider: AuthProviderType, error: string | any) => void,
     success?: (provider: AuthProviderType, result: AuthData) => void,
   }): void,
 
