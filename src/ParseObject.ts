@@ -707,15 +707,15 @@ class ParseObject {
    *     The only supported option is <code>error</code>.
    * @returns {(ParseObject|boolean)} true if the set succeeded.
    */
-  set(keyOrAttributes: string | AttributeMap, valueOrOptions?: any, options?: any): ParseObject | boolean {
-    let changes: AttributeMap = {};
+  set(key: any, value?: any, options?: any): ParseObject | boolean {
+    // TODO: Improve types here without breaking stuff.
+    let changes = {};
     const newOps = {};
-    let key: string | undefined;
-    if (keyOrAttributes && typeof keyOrAttributes === 'object') {
-      changes = keyOrAttributes;
-      options = valueOrOptions;
+    if (key && typeof key === 'object') {
+      changes = key;
+      options = value;
     } else if (typeof key === 'string') {
-      changes[key] = valueOrOptions;
+      changes[key] = value;
     } else {
       // Key is weird; just return ourself
       return this;
