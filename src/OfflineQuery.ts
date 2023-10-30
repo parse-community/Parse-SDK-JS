@@ -599,3 +599,4 @@ const OfflineQuery = {
 };
 
 module.exports = OfflineQuery;
+export default OfflineQuery;
