@@ -1,10 +1,7 @@
-import decode from './decode';
-import encode from './encode';
 import CryptoController from './CryptoController';
 import EventuallyQueue from './EventuallyQueue';
 import IndexedDBStorageController from './IndexedDBStorageController';
 import InstallationController from './InstallationController';
-import * as ParseOp from './ParseOp';
 import RESTController from './RESTController';
 import ACL from './ParseACL';
 import * as Analytics from './Analytics'
@@ -21,7 +18,7 @@ import GeoPoint from './ParseGeoPoint'
 import Polygon from './ParsePolygon'
 import Installation from './ParseInstallation'
 import LocalDatastore from './LocalDatastore'
-import Object from './ParseObject'
+import ParseObject from './ParseObject'
 import * as Push from './Push'
 import Query from './ParseQuery'
 import Relation from './ParseRelation'
@@ -32,6 +29,10 @@ import Storage from './Storage'
 import User from './ParseUser'
 import LiveQuery from './ParseLiveQuery'
 import LiveQueryClient from './LiveQueryClient'
+// Need to reorder these last due to them requiring ParseObject/ParseRole, etc to be defined first
+import * as ParseOp from './ParseOp';
+import decode from './decode';
+import encode from './encode';
 
 /**
  * Contains all Parse API classes and functions.
@@ -63,7 +64,7 @@ interface ParseType {
   Polygon: typeof Polygon,
   Installation: typeof Installation,
   LocalDatastore: typeof LocalDatastore,
-  Object: typeof Object,
+  Object: typeof ParseObject,
   Op: {
     Set: typeof ParseOp.SetOp,
     Unset: typeof ParseOp.UnsetOp,
@@ -130,7 +131,7 @@ const Parse: ParseType = {
   Polygon: Polygon,
   Installation: Installation,
   LocalDatastore: LocalDatastore,
-  Object: Object,
+  Object: ParseObject,
   Op: {
     Set: ParseOp.SetOp,
     Unset: ParseOp.UnsetOp,
