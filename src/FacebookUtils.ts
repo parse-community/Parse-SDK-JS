@@ -4,7 +4,6 @@
 /* global FB */
 import ParseUser from './ParseUser';
 import type { AuthProviderType } from './ParseUser';
-import '@types/facebook-js-sdk'
 
 let initialized = false;
 let requestedPermissions;
