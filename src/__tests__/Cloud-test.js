@@ -301,7 +301,9 @@ describe('CloudController', () => {
     expect(data).toEqual({
       limit: 1,
       where: {
-        objectId: 'jobId1234',
+        objectId: {
+          $eq: 'jobId1234',
+        },
       },
     });
     expect(options.useMasterKey).toBe(true);
@@ -323,7 +325,9 @@ describe('CloudController', () => {
     expect(data).toEqual({
       limit: 1,
       where: {
-        objectId: 'pushId1234',
+        objectId: {
+          $eq: 'pushId1234',
+        },
       },
     });
     expect(options.useMasterKey).toBe(true);
@@ -345,7 +349,9 @@ describe('CloudController', () => {
     expect(data).toEqual({
       limit: 1,
       where: {
-        objectId: 'pushId1234',
+        objectId: {
+          $eq: 'pushId1234',
+        },
       },
     });
     expect(options.useMasterKey).toBe(false);

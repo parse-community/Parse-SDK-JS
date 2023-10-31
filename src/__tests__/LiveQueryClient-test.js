@@ -804,7 +804,9 @@ describe('LiveQueryClient', () => {
       query: {
         className: 'Test',
         where: {
-          key: 'value',
+          key: {
+            $eq: 'value',
+          },
         },
       },
     });
@@ -843,7 +845,9 @@ describe('LiveQueryClient', () => {
       query: {
         className: 'Test',
         where: {
-          key: 'value',
+          key: {
+            $eq: 'value',
+          },
         },
       },
     });
@@ -956,7 +960,9 @@ describe('LiveQueryClient', () => {
       query: {
         className: 'Test',
         where: {
-          key: 'value',
+          key: {
+            $eq: 'value',
+          },
         },
       },
     });
@@ -991,7 +997,9 @@ describe('LiveQueryClient', () => {
       query: {
         className: 'Test',
         where: {
-          key: 'value',
+          key: {
+            $eq: 'value',
+          },
         },
       },
     });

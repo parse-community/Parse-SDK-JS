@@ -1218,7 +1218,8 @@ class ParseQuery {
       return this.doesNotExist(key);
     }
 
-    this._where[key] = encode(value, false, true);
+    // this._where[key] = encode(value, false, true);
+    this._addCondition(key, '$eq', value);
     return this;
   }
 
