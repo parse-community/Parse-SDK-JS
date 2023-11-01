@@ -25,7 +25,7 @@ type CloudController = {
   startJob: (name: string, data: any, options: RequestOptions) => Promise<string>,
 };
 type ConfigController = {
-  current: () => Promise<ParseConfig>,
+  current: () => Promise<ParseConfig> | ParseConfig,
   get: (opts?: RequestOptions) => Promise<ParseConfig>,
   save: (attrs: { [key: string]: any }, masterKeyOnlyFlags?: { [key: string]: any }) => Promise<void>,
 };

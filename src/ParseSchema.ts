@@ -227,8 +227,7 @@ class ParseSchema {
       return this.addPointer(name, options.targetClass!, options);
     }
     if (type === 'Relation') {
-      // TODO: Why does options exist here?
-      return this.addRelation(name, options.targetClass, options);
+      return this.addRelation(name, options.targetClass);
     }
     const fieldOptions: Partial<FieldOptions> & {
       type: ValidFieldType,

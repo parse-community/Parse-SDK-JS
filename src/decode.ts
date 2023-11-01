@@ -32,7 +32,7 @@ export default function decode(value: any): any {
   }
   if (value.__type === 'Relation') {
     // The parent and key fields will be populated by the parent
-    const relation = new ParseRelation(undefined, undefined);
+    const relation = new ParseRelation(null, null); // null, null; since tests expect this.
     relation.targetClassName = value.className;
     return relation;
   }

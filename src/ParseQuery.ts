@@ -2135,8 +2135,8 @@ class ParseQuery {
       this._xhrRequest.onchange = () => { };
       return this;
     }
-    // TODO: Typescript.. How does this work? Does this even make sense?
-    return (this._xhrRequest.onchange = () => this.cancel());
+    this._xhrRequest.onchange = () => this.cancel();
+    return this;
   }
 
   _setRequestTask(options) {

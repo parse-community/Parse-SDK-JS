@@ -139,7 +139,7 @@ function decodePayload(data) {
 }
 
 const DefaultController = {
-  current: async ()=> {
+  current: ()=> {
     if (currentConfig) {
       return currentConfig;
     }
