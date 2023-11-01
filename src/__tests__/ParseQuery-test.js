@@ -1322,6 +1322,14 @@ describe('ParseQuery', () => {
     q.explain();
     q.equalTo('size', 'small')
       .find()
+      .then(results => {
+        expect(results[0].objectId).toBe('I1');
+        expect(results[0].size).toBe('small');
+        expect(results[0].name).toEqual('Product 3');
+        done();
+      });
+    q.equalTo('size', 'small')
+      .first()
       .then(result => {
         expect(result.objectId).toBe('I1');
         expect(result.size).toBe('small');

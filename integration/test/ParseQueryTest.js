@@ -2378,13 +2378,16 @@ describe('Parse Query', () => {
     const explain = await query.find();
     let indexName = '';
     // https://www.mongodb.com/docs/manual/reference/explain-results/#std-label-queryPlanner
-    const plan = explain.queryPlanner.winningPlan;
+    const plan = explain[0].queryPlanner.winningPlan;
     if (plan.inputStage) {
       indexName = plan.inputStage.inputStage.indexName;
     } else {
       indexName = plan.queryPlan.inputStage.inputStage.indexName;
     }
     assert.equal(indexName, '_id_');
+
+    const explainFirst = await query.first();
+    assert.equal(explainFirst.queryPlanner.winningPlan.inputStage.inputStage.indexName, '_id_');
   });
 
   it('can query with select on null field', async () => {
