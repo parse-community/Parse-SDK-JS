@@ -128,7 +128,7 @@ export function estimateAttributes(
           const fields = attr.split('.');
           const first = fields[0];
           const last = fields[fields.length - 1];
-          data[first] = { ...serverData[first] };
+          if (data[first] === serverData[first]) data[first] = { ...serverData[first] }; // Do a deep copy
           let object = { ...data };
           for (let i = 0; i < fields.length - 1; i++) {
             const key = fields[i];
