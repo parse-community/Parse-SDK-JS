@@ -2,6 +2,9 @@ jest.dontMock('../decode');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParsePolygon');
+// Additional unmocks;
+jest.dontMock('../ParseObject');
+jest.dontMock('../CoreManager');
 
 const decode = require('../decode').default;
 
@@ -74,7 +77,7 @@ describe('decode', () => {
     expect(obj.constructor.mock.calls[0]).toEqual([null, null]);
     expect(obj.targetClassName).toBe('Delivery');
   });
-
+  const spy = jest.spyOn(ParseObject, 'fromJSON');
   it('decodes Pointers', () => {
     const data = {
       __type: 'Pointer',
@@ -82,17 +85,18 @@ describe('decode', () => {
       objectId: '1001',
     };
     decode(data);
-    expect(ParseObject.fromJSON.mock.calls[0][0]).toEqual(data);
+    expect(spy.mock.calls[0][0]).toEqual(data);
   });
 
   it('decodes ParseObjects', () => {
+    // const spy = jest.spyOn(ParseObject, 'fromJSON');
     const data = {
       __type: 'Object',
       className: 'Item',
       objectId: '1001',
     };
     decode(data);
-    expect(ParseObject.fromJSON.mock.calls[1][0]).toEqual(data);
+    expect(spy.mock.calls[1][0]).toEqual(data);
   });
 
   it('iterates over arrays', () => {
