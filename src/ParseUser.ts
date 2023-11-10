@@ -512,7 +512,7 @@ class ParseUser extends ParseObject {
    * the current user when it is destroyed
    *
    * @param {...any} args
-   * @returns {Parse.User|void} seems to depend on implementation (default = void).
+   * @returns {Parse.User|void}
    */
   async destroy(...args: Array<any>): Promise<ParseUser | void> {
     await super.destroy.apply(this, args);

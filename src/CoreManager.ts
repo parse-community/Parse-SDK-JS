@@ -230,7 +230,6 @@ type Config = {
 };
 
 const config: Config & { [key: string]: any } = {
-  // Defaults
   IS_NODE:
     typeof process !== 'undefined' &&
     !!process.versions &&

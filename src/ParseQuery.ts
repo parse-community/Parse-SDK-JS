@@ -2035,7 +2035,7 @@ class ParseQuery {
    */
   static or(...queries: Array<ParseQuery>): ParseQuery {
     const className = _getClassNameFromQueries(queries);
-    const query = new ParseQuery(className!); // Cast to !; Checked inside ParseQuery constructor anyway
+    const query = new ParseQuery(className!);
     query._orQuery(queries);
     return query;
   }
@@ -2054,7 +2054,7 @@ class ParseQuery {
    */
   static and(...queries: Array<ParseQuery>): ParseQuery {
     const className = _getClassNameFromQueries(queries);
-    const query = new ParseQuery(className!); // Cast to !; Checked inside ParseQuery constructor anyway
+    const query = new ParseQuery(className!);
     query._andQuery(queries);
     return query;
   }
@@ -2073,7 +2073,7 @@ class ParseQuery {
    */
   static nor(...queries: Array<ParseQuery>): ParseQuery {
     const className = _getClassNameFromQueries(queries);
-    const query = new ParseQuery(className!); // Cast to !; Checked inside ParseQuery constructor anyway
+    const query = new ParseQuery(className!);
     query._norQuery(queries);
     return query;
   }

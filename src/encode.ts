@@ -10,7 +10,6 @@ import ParseObject from './ParseObject';
 import { Op } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
-/** Encodes values to storage type */
 function encode(
   value: any,
   disallowObjects: boolean,
@@ -83,7 +82,6 @@ function encode(
   return value;
 }
 
-/** Encodes values to storage type */
 export default function (
   value: any,
   disallowObjects?: boolean,
