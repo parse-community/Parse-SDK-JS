@@ -1,7 +1,6 @@
 /**
  * @flow
  */
-import ParseACL from './ParseACL'; // eslint-disable-line no-unused-vars
 import ParseFile from './ParseFile';
 import ParseGeoPoint from './ParseGeoPoint';
 import ParsePolygon from './ParsePolygon';
@@ -9,12 +8,13 @@ import ParseObject from './ParseObject';
 import { opFromJSON } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
+/** Decodes values from storage type */
 export default function decode(value: any): any {
   if (value === null || typeof value !== 'object' || value instanceof Date) {
     return value;
   }
   if (Array.isArray(value)) {
-    const dup = [];
+    const dup: any[] = [];
     value.forEach((v, i) => {
       dup[i] = decode(v);
     });
@@ -31,7 +31,7 @@ export default function decode(value: any): any {
   }
   if (value.__type === 'Relation') {
     // The parent and key fields will be populated by the parent
-    const relation = new ParseRelation(null, null);
+    const relation = new ParseRelation(null, null); // null, null; since tests expect this.
     relation.targetClassName = value.className;
     return relation;
   }
