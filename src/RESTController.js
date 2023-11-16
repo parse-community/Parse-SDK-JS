@@ -110,20 +110,18 @@ const RESTController = {
           let response;
           try {
             response = JSON.parse(xhr.responseText);
-
-            if (typeof xhr.getResponseHeader === 'function') {
-              if ((xhr.getAllResponseHeaders() || '').includes('x-parse-job-status-id: ')) {
-                response = xhr.getResponseHeader('x-parse-job-status-id');
-              }
-              if ((xhr.getAllResponseHeaders() || '').includes('x-parse-push-status-id: ')) {
-                response = xhr.getResponseHeader('x-parse-push-status-id');
-              }
+            headers = {};
+            if (typeof xhr.getResponseHeader === 'function' && xhr.getResponseHeader('access-control-expose-headers')) {
+              const responseHeaders = xhr.getResponseHeader('access-control-expose-headers').split(', ');
+              responseHeaders.forEach(header => {
+                headers[header] = xhr.getResponseHeader(header.toLowerCase());
+              });
             }
           } catch (e) {
             promise.reject(e.toString());
           }
           if (response) {
-            promise.resolve({ response, status: xhr.status, xhr });
+            promise.resolve({ response, headers, status: xhr.status, xhr });
           }
         } else if (xhr.status >= 500 || xhr.status === 0) {
           // retry on 5XX or node-xmlhttprequest error
@@ -287,9 +285,9 @@ const RESTController = {
 
         const payloadString = JSON.stringify(payload);
         return RESTController.ajax(method, url, payloadString, {}, options).then(
-          ({ response, status }) => {
+          ({ response, status, headers, xhr }) => {
             if (options.returnStatus) {
-              return { ...response, _status: status };
+              return { ...response, _status: status, _headers: headers, _xhr: xhr };
             } else {
               return response;
             }

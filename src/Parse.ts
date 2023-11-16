@@ -2,6 +2,7 @@ import decode from './decode';
 import encode from './encode';
 import CryptoController from './CryptoController';
 import EventuallyQueue from './EventuallyQueue';
+import IndexedDBStorageController from './IndexedDBStorageController';
 import InstallationController from './InstallationController';
 import * as ParseOp from './ParseOp';
 import RESTController from './RESTController';
@@ -183,6 +184,10 @@ const Parse: ParseType = {
 
     Parse.LiveQuery = new LiveQuery();
     CoreManager.setIfNeeded('LiveQuery', Parse.LiveQuery);
+
+    if (process.env.PARSE_BUILD === 'browser') {
+      Parse.IndexedDB = CoreManager.setIfNeeded('IndexedDBStorageController', IndexedDBStorageController);
+    }
   },
 
   /**
@@ -427,10 +432,6 @@ const Parse: ParseType = {
     return this.encryptedUser;
   },
 };
-
-if (process.env.PARSE_BUILD === 'browser') {
-  Parse.IndexedDB = require('./IndexedDBStorageController');
-}
 
 CoreManager.setCryptoController(CryptoController);
 CoreManager.setInstallationController(InstallationController);

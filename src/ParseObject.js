@@ -1219,7 +1219,7 @@ class ParseObject {
     try {
       await this.save(null, options);
     } catch (e) {
-      if (e.message === 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+      if (e.code === ParseError.CONNECTION_FAILED) {
         await EventuallyQueue.save(this, options);
         EventuallyQueue.poll();
       }
@@ -1363,7 +1363,7 @@ class ParseObject {
     try {
       await this.destroy(options);
     } catch (e) {
-      if (e.message === 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+      if (e.code === ParseError.CONNECTION_FAILED) {
         await EventuallyQueue.destroy(this, options);
         EventuallyQueue.poll();
       }
@@ -2455,6 +2455,8 @@ const DefaultController = {
                     const objectId = responses[index].success.objectId;
                     const status = responses[index]._status;
                     delete responses[index]._status;
+                    delete responses[index]._headers;
+                    delete responses[index]._xhr;
                     mapIdForPin[objectId] = obj._localId;
                     obj._handleSaveResponse(responses[index].success, status);
                   } else {
@@ -2523,6 +2525,8 @@ const DefaultController = {
           response => {
             const status = response._status;
             delete response._status;
+            delete response._headers;
+            delete response._xhr;
             targetCopy._handleSaveResponse(response, status);
           },
           error => {

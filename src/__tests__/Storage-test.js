@@ -12,6 +12,7 @@ global.indexedDB = mockIndexedDB;
 jest.mock('idb-keyval', () => {
   return mockIndexedDB;
 });
+const idbKeyVal = require('idb-keyval');
 
 const BrowserStorageController = require('../StorageController.browser');
 
@@ -203,6 +204,17 @@ describe('IndexDB StorageController', () => {
     const dbController = require('../IndexedDBStorageController');
     expect(dbController).toBeUndefined();
     global.indexedDB = mockIndexedDB;
+  });
+
+  it('handle indexedDB is not accessible', async () => {
+    jest.isolateModules(() => {
+      global.indexedDB = mockIndexedDB;
+      jest.spyOn(idbKeyVal, 'createStore')
+        .mockImplementationOnce(() => { throw new Error('Protected'); });
+      const dbController = require('../IndexedDBStorageController');
+      expect(dbController).toBeUndefined();
+      expect(idbKeyVal.createStore).toHaveBeenCalled();
+    });
   });
 });
 
