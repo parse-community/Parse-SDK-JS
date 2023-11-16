@@ -5,6 +5,7 @@
  */
 
 import CoreManager from './CoreManager';
+import ParseError from './ParseError';
 import ParseObject from './ParseObject';
 import ParseQuery from './ParseQuery';
 import Storage from './Storage';
@@ -275,7 +276,7 @@ const EventuallyQueue = {
         await object.save(queueObject.object, queueObject.serverOptions);
         await this.remove(queueObject.queueId);
       } catch (e) {
-        if (e.message !== 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+        if (e.code !== ParseError.CONNECTION_FAILED) {
           await this.remove(queueObject.queueId);
         }
       }
@@ -285,7 +286,7 @@ const EventuallyQueue = {
         await object.destroy(queueObject.serverOptions);
         await this.remove(queueObject.queueId);
       } catch (e) {
-        if (e.message !== 'XMLHttpRequest failed: "Unable to connect to the Parse API"') {
+        if (e.code !== ParseError.CONNECTION_FAILED) {
           await this.remove(queueObject.queueId);
         }
       }
@@ -373,3 +374,4 @@ const EventuallyQueue = {
 };
 
 module.exports = EventuallyQueue;
+export default EventuallyQueue;

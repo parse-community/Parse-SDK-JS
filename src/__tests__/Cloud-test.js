@@ -80,6 +80,15 @@ describe('Cloud', () => {
     ]);
   });
 
+  it('run passes installationId option', () => {
+    Cloud.run('myfunction', {}, { installationId: 'asdf1234' });
+    expect(CoreManager.getCloudController().run.mock.calls[0]).toEqual([
+      'myfunction',
+      {},
+      { installationId: 'asdf1234' },
+    ]);
+  });
+
   it('startJob throws with an invalid job name', () => {
     expect(Cloud.startJob).toThrow('Cloud job name must be a string.');
 

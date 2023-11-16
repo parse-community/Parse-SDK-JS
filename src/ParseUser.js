@@ -110,9 +110,15 @@ class ParseUser extends ParseObject {
         throw new Error('Invalid type: authData field should be an object');
       }
       authData[authType] = options.authData;
+      const oldAnonymousData = authData.anonymous;
+      this.stripAnonymity();
 
       const controller = CoreManager.getUserController();
-      return controller.linkWith(this, authData, saveOpts);
+      return controller.linkWith(this, authData, saveOpts).catch((e) => {
+        delete authData[authType];
+        this.restoreAnonimity(oldAnonymousData);
+        throw e;
+      });
     } else {
       return new Promise((resolve, reject) => {
         provider.authenticate({
@@ -310,6 +316,21 @@ class ParseUser extends ParseObject {
     return !!current && current.id === this.id;
   }
 
+  stripAnonymity() {
+    const authData = this.get('authData');
+    if (authData && typeof authData === 'object' && authData.hasOwnProperty('anonymous')) {
+      // We need to set anonymous to null instead of deleting it in order to remove it from Parse.
+      authData.anonymous = null;
+    }
+  }
+
+  restoreAnonimity(anonymousData: any) {
+    if (anonymousData) {
+      const authData = this.get('authData');
+      authData.anonymous = anonymousData;
+    }
+  }
+
   /**
    * Returns get("username").
    *
@@ -329,12 +350,7 @@ class ParseUser extends ParseObject {
    * @param {string} username
    */
   setUsername(username: string) {
-    // Strip anonymity
-    const authData = this.get('authData');
-    if (authData && typeof authData === 'object' && authData.hasOwnProperty('anonymous')) {
-      // We need to set anonymous to null instead of deleting it in order to remove it from Parse.
-      authData.anonymous = null;
-    }
+    this.stripAnonymity();
     this.set('username', username);
   }
 
@@ -453,7 +469,12 @@ class ParseUser extends ParseObject {
     if (options.hasOwnProperty('usePost')) {
       loginOptions.usePost = options.usePost;
     }
-
+    if (
+      options.hasOwnProperty('context') &&
+      Object.prototype.toString.call(options.context) === '[object Object]'
+    ) {
+      loginOptions.context = options.context;
+    }
     const controller = CoreManager.getUserController();
     return controller.logIn(this, loginOptions);
   }
@@ -650,6 +671,34 @@ class ParseUser extends ParseObject {
     }
     const user = new this();
     user._finishFetch({ username: username, password: password });
+    return user.logIn(options);
+  }
+
+  /**
+   * Logs in a user with a username (or email) and password, and authData. On success, this
+   * saves the session to disk, so you can retrieve the currently logged in
+   * user using <code>current</code>.
+   *
+   * @param {string} username The username (or email) to log in with.
+   * @param {string} password The password to log in with.
+   * @param {object} authData The authData to log in with.
+   * @param {object} options
+   * @static
+   * @returns {Promise} A promise that is fulfilled with the user when
+   *     the login completes.
+   */
+  static logInWithAdditionalAuth(username: string, password: string, authData: AuthData, options?: FullOptions) {
+    if (typeof username !== 'string') {
+      return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Username must be a string.'));
+    }
+    if (typeof password !== 'string') {
+      return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Password must be a string.'));
+    }
+    if (Object.prototype.toString.call(authData) !== '[object Object]') {
+      return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Auth must be an object.'));
+    }
+    const user = new this();
+    user._finishFetch({ username: username, password: password, authData });
     return user.logIn(options);
   }
 
@@ -1098,6 +1147,7 @@ const DefaultController = {
     const auth = {
       username: user.get('username'),
       password: user.get('password'),
+      authData: user.get('authData'),
     };
     return RESTController.request(options.usePost ? 'POST' : 'GET', 'login', auth, options).then(
       response => {
