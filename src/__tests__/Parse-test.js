@@ -237,6 +237,7 @@ describe('Parse module', () => {
       expect(Parse.IndexedDB).toBeUndefined();
       process.env.PARSE_BUILD = 'browser';
       const ParseInstance = require('../Parse');
+      ParseInstance.initialize('test', 'test');
       expect(ParseInstance.IndexedDB).toBeDefined();
       CoreManager.setStorageController(ParseInstance.IndexedDB);
       const currentStorage = CoreManager.getStorageController();

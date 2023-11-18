@@ -1,3 +1,14 @@
+## [4.3.1-beta.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.0...4.3.1-beta.1) (2023-11-16)
+
+
+### Bug Fixes
+
+* Connection failure in `Parse.Object.saveEventually` and `Parse.Object.destroyEventually` not handled on custom `Parse.Error.CONNECTION_FAILURE` message ([#2032](https://github.com/parse-community/Parse-SDK-JS/issues/2032)) ([4da3ebc](https://github.com/parse-community/Parse-SDK-JS/commit/4da3ebcc28b903a499c07bb194baae738de21d6f))
+* Docs fail with `Cannot find module 'taffydb'` ([#2036](https://github.com/parse-community/Parse-SDK-JS/issues/2036)) ([dc91d0f](https://github.com/parse-community/Parse-SDK-JS/commit/dc91d0fc4f69639ba762f5af841477e8836c6927))
+* Error in web context when `window.indexedDB` API is available but protected ([#2039](https://github.com/parse-community/Parse-SDK-JS/issues/2039)) ([360981f](https://github.com/parse-community/Parse-SDK-JS/commit/360981f8a529f3e10243413c8114373271bb6f43))
+* Security upgrade browserify-sign from 4.2.1 to 4.2.2 ([#2043](https://github.com/parse-community/Parse-SDK-JS/issues/2043)) ([fd50b9d](https://github.com/parse-community/Parse-SDK-JS/commit/fd50b9dbc9feb8b51eedfcdddce37ea1882ac438))
+* Security upgrade crypto-js from 4.1.1 to 4.2.0 ([#2042](https://github.com/parse-community/Parse-SDK-JS/issues/2042)) ([681fbdf](https://github.com/parse-community/Parse-SDK-JS/commit/681fbdfcdd2e6d351e00400eccf41fe732b053ba))
+
 # [4.3.0-beta.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0...4.3.0-beta.1) (2023-09-16)
 
 
