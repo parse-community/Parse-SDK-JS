@@ -43,7 +43,7 @@ describe('Parse Relation', () => {
       });
   });
 
-  it('can do consecutive adds (#2056)', async () => {
+  it('can do consecutive adds', async () => {
     const ChildObject = Parse.Object.extend('ChildObject');
     const childObjects = [];
     for (let i = 0; i < 2; i++) {
