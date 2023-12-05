@@ -19,13 +19,8 @@ jobs:
         with:
           node-version: 18
           registry-url: https://registry.npmjs.org/
-      - name: Cache Node.js modules
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-              ${{ runner.os }}-node-
+          cache: npm
+
       - run: npm ci
       - run: npx semantic-release
         env:
@@ -35,7 +30,7 @@ jobs:
       - name: Determine tag on current commit
         id: tag
         run: echo "::set-output name=current_tag::$(git describe --tags --abbrev=0 --exact-match || echo '')"
-  
+
   docs-publish:
     needs: release
     if: needs.release.outputs.current_tag != '' && github.ref == 'refs/heads/release'
@@ -49,13 +44,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16
-      - name: Cache Node.js modules
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-              ${{ runner.os }}-node-
+          cache: npm
       - name: Generate Docs
         run: |
           npm ci
