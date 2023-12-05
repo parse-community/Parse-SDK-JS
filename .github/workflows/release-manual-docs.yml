@@ -4,7 +4,7 @@ on:
     inputs:
       tag:
         default: ''
-        description: 'Version tag:' 
+        description: 'Version tag:'
 jobs:
   docs-publish:
     if: github.event.inputs.tag != ''
@@ -17,7 +17,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: 16
+          node-version: 20
       - name: Cache Node.js modules
         uses: actions/cache@v2
         with:
