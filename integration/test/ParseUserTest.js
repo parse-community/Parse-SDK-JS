@@ -4,6 +4,7 @@ const assert = require('assert');
 const Parse = require('../../node');
 const { v4: uuidv4 } = require('uuid');
 const { twitterAuthData } = require('./helper');
+const MockEmailAdapterWithOptions = require('./support/MockEmailAdapterWithOptions');
 
 class CustomUser extends Parse.User {
   constructor(attributes) {
@@ -1063,11 +1064,11 @@ describe('Parse User', () => {
       appName: 'AppName',
       verifyUserEmails: true,
       preventLoginWithUnverifiedEmail: true,
-      emailAdapter: {
-        sendVerificationEmail: () => Promise.resolve(),
-        sendPasswordResetEmail: () => Promise.resolve(),
-        sendMail: () => Promise.resolve(),
-      },
+      emailAdapter: MockEmailAdapterWithOptions({
+        fromAddress: 'parse@example.com',
+        apiKey: 'k',
+        domain: 'd',
+      }),
     });
     await Parse.User.signUp('asd123', 'xyz123');
     const res = await Parse.User.verifyPassword('asd123', 'xyz123', { useMasterKey: true, ignoreUnverifiedEmail: true });
