@@ -1058,6 +1058,16 @@ describe('Parse User', () => {
   });
 
   fit('can verify user password for user with unverified email', async () => {
+    await reconfigureServer({
+      publicServerURL: 'http://localhost:8378/',
+      verifyUserEmails: true,
+      preventLoginWithUnverifiedEmail: true,
+      emailAdapter: {
+        sendVerificationEmail: () => Promise.resolve(),
+        sendPasswordResetEmail: () => Promise.resolve(),
+        sendMail: () => Promise.resolve(),
+      },
+    });
     await Parse.User.signUp('asd123', 'xyz123');
     const res = await Parse.User.verifyPassword('asd123', 'xyz123', { useMasterKey: true, ignoreUnverifiedEmail: true });
     expect(typeof res).toBe('object');
