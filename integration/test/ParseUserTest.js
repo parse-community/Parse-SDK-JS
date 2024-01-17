@@ -1057,6 +1057,13 @@ describe('Parse User', () => {
     }
   });
 
+  fit('can verify user password for user with unverified email', async () => {
+    await Parse.User.signUp('asd123', 'xyz123');
+    const res = await Parse.User.verifyPassword('asd123', 'xyz123', { useMasterKey: true, ignoreUnverifiedEmail: true });
+    expect(typeof res).toBe('object');
+    expect(res.username).toBe('asd123');
+  });
+
   it('can encrypt user', async () => {
     Parse.User.enableUnsafeCurrentUser();
     Parse.enableEncryptedUser();
