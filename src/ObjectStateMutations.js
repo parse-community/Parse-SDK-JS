@@ -82,16 +82,15 @@ export function mergeFirstPendingState(pendingOps: Array<OpsMap>) {
 export function estimateAttribute(
   serverData: AttributeMap,
   pendingOps: Array<OpsMap>,
-  className: string,
-  id: ?string,
+  object: ParseObject,
   attr: string
 ): mixed {
   let value = serverData[attr];
   for (let i = 0; i < pendingOps.length; i++) {
     if (pendingOps[i][attr]) {
       if (pendingOps[i][attr] instanceof RelationOp) {
-        if (id) {
-          value = pendingOps[i][attr].applyTo(value, { className: className, id: id }, attr);
+        if (object.id) {
+          value = pendingOps[i][attr].applyTo(value, object, attr);
         }
       } else {
         value = pendingOps[i][attr].applyTo(value);
@@ -104,8 +103,7 @@ export function estimateAttribute(
 export function estimateAttributes(
   serverData: AttributeMap,
   pendingOps: Array<OpsMap>,
-  className: string,
-  id: ?string
+  object: ParseObject
 ): AttributeMap {
   const data = {};
   let attr;
@@ -115,12 +113,8 @@ export function estimateAttributes(
   for (let i = 0; i < pendingOps.length; i++) {
     for (attr in pendingOps[i]) {
       if (pendingOps[i][attr] instanceof RelationOp) {
-        if (id) {
-          data[attr] = pendingOps[i][attr].applyTo(
-            data[attr],
-            { className: className, id: id },
-            attr
-          );
+        if (object.id) {
+          data[attr] = pendingOps[i][attr].applyTo(data[attr], object, attr);
         }
       } else {
         if (attr.includes('.')) {

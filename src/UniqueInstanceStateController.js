@@ -96,19 +96,13 @@ export function getObjectCache(obj: ParseObject): ObjectCache {
 export function estimateAttribute(obj: ParseObject, attr: string): mixed {
   const serverData = getServerData(obj);
   const pendingOps = getPendingOps(obj);
-  return ObjectStateMutations.estimateAttribute(
-    serverData,
-    pendingOps,
-    obj.className,
-    obj.id,
-    attr
-  );
+  return ObjectStateMutations.estimateAttribute(serverData, pendingOps, obj, attr);
 }
 
 export function estimateAttributes(obj: ParseObject): AttributeMap {
   const serverData = getServerData(obj);
   const pendingOps = getPendingOps(obj);
-  return ObjectStateMutations.estimateAttributes(serverData, pendingOps, obj.className, obj.id);
+  return ObjectStateMutations.estimateAttributes(serverData, pendingOps, obj);
 }
 
 export function commitServerChanges(obj: ParseObject, changes: AttributeMap) {
