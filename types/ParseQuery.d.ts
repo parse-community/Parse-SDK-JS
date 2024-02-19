@@ -18,6 +18,7 @@ type QueryJSON = {
     readPreference?: string;
     includeReadPreference?: string;
     subqueryReadPreference?: string;
+    comment?: string,
 };
 export default ParseQuery;
 /**
@@ -140,6 +141,7 @@ declare class ParseQuery {
     _hint: mixed;
     _explain: boolean;
     _xhrRequest: any;
+    _comment: string;
     /**
      * Adds constraint that at least one of the passed in queries matches.
      *
@@ -915,6 +917,14 @@ declare class ParseQuery {
      */
     cancel(): ParseQuery;
     _setRequestTask(options: any): void;
+    /**
+     * Sets a comment to the query so that the query 
+     * can be identified when using a the profiler for MongoDB.
+     *
+     * @param {string} value a comment can make your profile data easier to interpret and trace.
+     * @returns {Parse.Query} Returns the query, so you can chain this call.
+     */
+    comment(value: string): ParseQuery;
 }
 import { FullOptions } from './RESTController';
 import ParseObject from './ParseObject';

@@ -3824,4 +3824,15 @@ describe('ParseQuery LocalDatastore', () => {
     expect(subscription.sessionToken).toBe('r:test');
     expect(subscription.query).toEqual(query);
   });
+
+  it('can add comment to query', () => {
+    const query = new ParseQuery('TestObject');
+    const comment = 'Hello Parse';
+    query.comment(comment);
+    expect(query.toJSON()).toEqual({
+      where: {},
+      comment: comment,
+    });
+  });
+
 });
