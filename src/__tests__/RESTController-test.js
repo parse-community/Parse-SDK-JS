@@ -528,6 +528,54 @@ describe('RESTController', () => {
     CoreManager.set('SERVER_AUTH_TOKEN', null);
   });
 
+  it('sends auth header when auth header option is provided', async () => {
+    const credentialsHeader = header => 'Authorization' === header[0];
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn(),
+    };
+    RESTController._setXHR(function () {
+      return xhr;
+    });
+    RESTController.request(
+      'GET',
+      'classes/MyObject',
+      {},
+      { authorizationHeader: 'Bearer some_random_token' }
+    );
+    await flushPromises();
+    expect(xhr.setRequestHeader.mock.calls.filter(credentialsHeader)).toEqual([
+      ['Authorization', 'Bearer some_random_token'],
+    ]);
+  });
+
+  it('auth header option overrides CoreManager auth header', async () => {
+    CoreManager.set('SERVER_AUTH_TYPE', 'Bearer');
+    CoreManager.set('SERVER_AUTH_TOKEN', 'some_random_token');
+    const credentialsHeader = header => 'Authorization' === header[0];
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn(),
+    };
+    RESTController._setXHR(function () {
+      return xhr;
+    });
+    RESTController.request(
+      'GET',
+      'classes/MyObject',
+      {},
+      { authorizationHeader: 'Bearer some_other_random_token' }
+    );
+    await flushPromises();
+    expect(xhr.setRequestHeader.mock.calls.filter(credentialsHeader)).toEqual([
+      ['Authorization', 'Bearer some_other_random_token'],
+    ]);
+    CoreManager.set('SERVER_AUTH_TYPE', null);
+    CoreManager.set('SERVER_AUTH_TOKEN', null);
+  });
+
   it('reports upload/download progress of the AJAX request when callback is provided', done => {
     const xhr = mockXHR([{ status: 200, response: { success: true } }], {
       progress: {
