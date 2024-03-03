@@ -6,6 +6,7 @@ import * as ObjectStateMutations from './ObjectStateMutations';
 
 import type { Op } from './ParseOp';
 import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
+import ParseObject from './ParseObject';
 
 type ObjectIdentifier = {
   className: string,
@@ -99,22 +100,16 @@ export function getObjectCache(obj: ObjectIdentifier): ObjectCache {
   return {};
 }
 
-export function estimateAttribute(obj: ObjectIdentifier, attr: string): mixed {
+export function estimateAttribute(obj: ParseObject, attr: string): mixed {
   const serverData = getServerData(obj);
   const pendingOps = getPendingOps(obj);
-  return ObjectStateMutations.estimateAttribute(
-    serverData,
-    pendingOps,
-    obj.className,
-    obj.id,
-    attr
-  );
+  return ObjectStateMutations.estimateAttribute(serverData, pendingOps, obj, attr);
 }
 
-export function estimateAttributes(obj: ObjectIdentifier): AttributeMap {
+export function estimateAttributes(obj: ParseObject): AttributeMap {
   const serverData = getServerData(obj);
   const pendingOps = getPendingOps(obj);
-  return ObjectStateMutations.estimateAttributes(serverData, pendingOps, obj.className, obj.id);
+  return ObjectStateMutations.estimateAttributes(serverData, pendingOps, obj);
 }
 
 export function commitServerChanges(obj: ObjectIdentifier, changes: AttributeMap) {

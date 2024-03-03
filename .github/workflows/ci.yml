@@ -60,13 +60,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.NODE_VERSION }}
-    - name: Cache Node.js modules
-      uses: actions/cache@v3
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ matrix.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-            ${{ runner.os }}-node-${{ matrix.NODE_VERSION }}-
+        cache: npm
     - run: npm ci
     - run: npm run lint
     - run: npm test -- --maxWorkers=4
