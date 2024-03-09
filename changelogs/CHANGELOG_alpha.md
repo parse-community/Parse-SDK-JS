@@ -1,3 +1,15 @@
+# [5.0.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.1-alpha.2...5.0.0-alpha.1) (2024-03-09)
+
+
+### Features
+
+* Add support for Node 20, remove support for Node 14 and 16 ([#2063](https://github.com/parse-community/Parse-SDK-JS/issues/2063)) ([74eb4d5](https://github.com/parse-community/Parse-SDK-JS/commit/74eb4d5f7d255f0f4e5d69758067f2a7d3caf014))
+
+
+### BREAKING CHANGES
+
+* Removes support for Node 14 and 16. ([74eb4d5](74eb4d5))
+
 ## [4.3.1-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.1-alpha.1...4.3.1-alpha.2) (2024-02-15)
 
 
