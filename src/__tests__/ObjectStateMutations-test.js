@@ -81,13 +81,17 @@ describe('ObjectStateMutations', () => {
       ObjectStateMutations.estimateAttribute(
         serverData,
         pendingOps,
-        'someClass',
-        'someId',
+        { className: 'someClass', id: 'someId' },
         'counter'
       )
     ).toBe(14);
     expect(
-      ObjectStateMutations.estimateAttribute(serverData, pendingOps, 'someClass', 'someId', 'name')
+      ObjectStateMutations.estimateAttribute(
+        serverData,
+        pendingOps,
+        { className: 'someClass', id: 'someId' },
+        'name'
+      )
     ).toBe('foo');
 
     pendingOps.push({
@@ -98,21 +102,24 @@ describe('ObjectStateMutations', () => {
       ObjectStateMutations.estimateAttribute(
         serverData,
         pendingOps,
-        'someClass',
-        'someId',
+        { className: 'someClass', id: 'someId' },
         'counter'
       )
     ).toBe(15);
     expect(
-      ObjectStateMutations.estimateAttribute(serverData, pendingOps, 'someClass', 'someId', 'name')
+      ObjectStateMutations.estimateAttribute(
+        serverData,
+        pendingOps,
+        { className: 'someClass', id: 'someId' },
+        'name'
+      )
     ).toBe('override');
 
     pendingOps.push({ likes: new ParseOps.RelationOp([], []) });
     const relation = ObjectStateMutations.estimateAttribute(
       serverData,
       pendingOps,
-      'someClass',
-      'someId',
+      { className: 'someClass', id: 'someId' },
       'likes'
     );
     expect(relation.parent.id).toBe('someId');
@@ -142,12 +149,10 @@ describe('ObjectStateMutations', () => {
     });
 
     pendingOps.push({ likes: new ParseOps.RelationOp([], []) });
-    const attributes = ObjectStateMutations.estimateAttributes(
-      serverData,
-      pendingOps,
-      'someClass',
-      'someId'
-    );
+    const attributes = ObjectStateMutations.estimateAttributes(serverData, pendingOps, {
+      className: 'someClass',
+      id: 'someId',
+    });
     expect(attributes.likes.parent.id).toBe('someId');
     expect(attributes.likes.parent.className).toBe('someClass');
     expect(attributes.likes.key).toBe('likes');
@@ -206,7 +211,7 @@ describe('ObjectStateMutations', () => {
       'name.foo': 'bar',
       data: { count: 5 },
     });
-    expect(serverData).toEqual({ name: { foo: 'bar' }, data: { count: 5 }  });
+    expect(serverData).toEqual({ name: { foo: 'bar' }, data: { count: 5 } });
     expect(objectCache).toEqual({ data: '{"count":5}' });
   });
 
