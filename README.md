@@ -99,7 +99,6 @@ Parse JS SDK is continuously tested with the most recent releases of Node.js to 
 |------------|----------------|-------------|------------|
 | Node.js 18 | 18.19.0        | April 2025  | ✅ Yes     |
 | Node.js 20 | 20.10.0        | April 2026  | ✅ Yes     |
-| Node.js 21 | 21.4.0         | June 2024   | ✅ Yes     |
 
 
 ## Upgrading to Parse SDK 2.0.0
