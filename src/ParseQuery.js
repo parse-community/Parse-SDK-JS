@@ -2132,7 +2132,7 @@ class ParseQuery {
    */
   comment(value: string): ParseQuery {
     if (typeof value !== 'string') {
-      throw new Error('The value being searched for must be a string.');
+      throw new Error('The value of a comment to be sent with this query must be a string.');
     }
     this._comment = value;
     return this;
