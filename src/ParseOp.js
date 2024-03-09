@@ -336,18 +336,12 @@ export class RelationOp extends Op {
     return obj.id;
   }
 
-  applyTo(value: mixed, object?: { className: string, id: ?string }, key?: string): ?ParseRelation {
+  applyTo(value: mixed, parent: ParseObject, key?: string): ?ParseRelation {
     if (!value) {
-      if (!object || !key) {
+      if (!parent || !key) {
         throw new Error(
           'Cannot apply a RelationOp without either a previous value, or an object and a key'
         );
-      }
-      const parent = new ParseObject(object.className);
-      if (object.id && object.id.indexOf('local') === 0) {
-        parent._localId = object.id;
-      } else if (object.id) {
-        parent.id = object.id;
       }
       const relation = new ParseRelation(parent, key);
       relation.targetClassName = this._targetClassName;

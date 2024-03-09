@@ -1,3 +1,10 @@
+## [4.3.1-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.1-alpha.1...4.3.1-alpha.2) (2024-02-15)
+
+
+### Bug Fixes
+
+* Calling `Parse.Object.relation.add` multiple times adds only the first object ([#2078](https://github.com/parse-community/Parse-SDK-JS/issues/2078)) ([0f98117](https://github.com/parse-community/Parse-SDK-JS/commit/0f981175c8f5155a631a0fcf9837ef5b285b2f55))
+
 ## [4.3.1-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.0...4.3.1-alpha.1) (2023-11-18)
 
 
