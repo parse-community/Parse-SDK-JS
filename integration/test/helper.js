@@ -82,6 +82,7 @@ const defaultConfiguration = {
   },
   revokeSessionOnPasswordReset: false,
   allowCustomObjectId: false,
+  allowClientClassCreation: true,
 };
 
 const openConnections = {};
