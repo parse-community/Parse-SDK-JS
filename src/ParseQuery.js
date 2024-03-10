@@ -2131,6 +2131,11 @@ class ParseQuery {
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   comment(value: string): ParseQuery {
+    if (typeof value === 'undefined') {
+      delete this._comment;
+      this._comment = value;
+      return this;
+    }
     if (typeof value !== 'string') {
       throw new Error('The value of a comment to be sent with this query must be a string.');
     }

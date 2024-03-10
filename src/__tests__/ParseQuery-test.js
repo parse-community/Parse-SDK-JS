@@ -3835,4 +3835,41 @@ describe('ParseQuery LocalDatastore', () => {
     });
   });
 
+  it('can add comment to query from json', () => {
+    const query = new ParseQuery('Item');
+    const comment = 'Hello Parse';
+    query.comment(comment);
+    const json = query.toJSON();
+    expect(json).toEqual({
+      where: {},
+      comment: comment,
+    });
+    const query2 = new ParseQuery('Item');
+    query2.withJSON(json);
+    expect(query2._comment).toEqual(comment);
+  });
+
+  it('comment can only be string', () => {
+    const obj1 = {
+      className: 'Item',
+      objectId: 'objectId1',
+      password: 123,
+      number: 3,
+      string: 'a',
+    };
+    const query = new ParseQuery('TestObject');
+    expect(query.comment.bind(query, obj1)).toThrow(
+      'The value of a comment to be sent with this query must be a string.'
+    );
+  });
+
+  it('clear comment when no value passed', () => {
+    const query = new ParseQuery('Item');
+    const comment = 'Hello Parse';
+    query.comment(comment);
+    expect(query._comment).toBe(comment);
+    query.comment();
+    expect(query._comment).toBeUndefined();
+  });
+
 });
