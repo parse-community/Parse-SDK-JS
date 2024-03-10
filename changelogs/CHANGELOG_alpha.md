@@ -1,3 +1,15 @@
+# [5.0.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/5.0.0-alpha.1...5.0.0-alpha.2) (2024-03-10)
+
+
+### Features
+
+* Add compatibility with Parse Server 7 ([#2089](https://github.com/parse-community/Parse-SDK-JS/issues/2089)) ([86600bc](https://github.com/parse-community/Parse-SDK-JS/commit/86600bc5abc4ca705b7e252b3714579b2e4c1598))
+
+
+### BREAKING CHANGES
+
+* Parse JS SDK 5 requires Parse Server 7 and is incompatible with Parse Server 6. ([86600bc](86600bc))
+
 # [5.0.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.1-alpha.2...5.0.0-alpha.1) (2024-03-09)
 
 
