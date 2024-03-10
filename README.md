@@ -97,8 +97,8 @@ Parse JS SDK is compatible with the following versions of Parse Server.
 
 | Parse JS SDK | Parse Server |
 |--------------|--------------|
-| <= 4.x.x     | 6.x.x        |
-| 5.x.x        | 7.x.x        |
+| 4.x.x        | <= 6.x.x     |
+| 5.x.x        | >= 7.x.x     |
 
 ### Node.js
 
