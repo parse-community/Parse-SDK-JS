@@ -29,8 +29,8 @@ A library that gives you access to the powerful Parse Server backend from your J
 - [Getting Started](#getting-started)
   - [Using Parse on Different Platforms](#using-parse-on-different-platforms)
 - [Compatibility](#compatibility)
+  - [Parse Server](#parse-server)
   - [Node.js](#nodejs)
-- [Upgrading to Parse SDK 2.0.0](#upgrading-to-parse-sdk-200)
 - [3rd Party Authentications](#3rd-party-authentications)
   - [Experimenting](#experimenting)
 - [Contributing](#contributing)
@@ -91,21 +91,23 @@ Types are updated manually after every release. If a definition doesn't exist, p
 
 ## Compatibility
 
+### Parse Server
+
+Parse JS SDK is compatible with the following versions of Parse Server.
+
+| Parse JS SDK | Parse Server |
+|--------------|--------------|
+| 4.x.x        | <= 6.x.x     |
+| 5.x.x        | >= 7.x.x     |
+
 ### Node.js
 
 Parse JS SDK is continuously tested with the most recent releases of Node.js to ensure compatibility. We follow the [Node.js Long Term Support plan](https://github.com/nodejs/Release) and only test against versions that are officially supported and have not reached their end-of-life date.
 
 | Version    | Latest Version | End-of-Life | Compatible |
 |------------|----------------|-------------|------------|
-| Node.js 18 | 18.19.0        | April 2025  | ✅ Yes     |
-| Node.js 20 | 20.10.0        | April 2026  | ✅ Yes     |
-
-
-## Upgrading to Parse SDK 2.0.0
-
-With Parse SDK 2.0.0, gone are the backbone style callbacks and Parse.Promises.
-
-We have curated a [migration guide][migration] that should help you migrate your code.
+| Node.js 18 | 18.19.0        | April 2025  | ✅ Yes      |
+| Node.js 20 | 20.10.0        | April 2026  | ✅ Yes      |
 
 ## 3rd Party Authentications
 
@@ -130,6 +132,5 @@ We really want Parse to be yours, to see it grow and thrive in the open source c
 [contributing]: https://github.com/parse-community/Parse-SDK-JS/blob/master/CONTRIBUTING.md
 [custom-auth-module]: https://docs.parseplatform.org/js/guide/#custom-authentication-module
 [link-with]: https://docs.parseplatform.org/js/guide/#linking-users
-[migration]: https://github.com/parse-community/Parse-SDK-JS/blob/master/2.0.0.md
 [open-collective-link]: https://opencollective.com/parse-server
 [types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse

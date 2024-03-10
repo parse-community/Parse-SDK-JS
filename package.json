@@ -85,7 +85,7 @@
     "lint-staged": "13.2.2",
     "metro-react-native-babel-preset": "0.76.4",
     "mongodb-runner": "5.4.3",
-    "parse-server": "git+https://github.com/parse-community/parse-server#alpha",
+    "parse-server": "7.0.0-alpha.26",
     "prettier": "3.0.2",
     "puppeteer": "20.4.0",
     "regenerator-runtime": "0.13.11",
