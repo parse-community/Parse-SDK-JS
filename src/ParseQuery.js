@@ -36,6 +36,7 @@ export type QueryJSON = {
   readPreference?: string,
   includeReadPreference?: string,
   subqueryReadPreference?: string,
+  comment?: string,
 };
 
 /**
@@ -242,6 +243,7 @@ class ParseQuery {
   _hint: mixed;
   _explain: boolean;
   _xhrRequest: any;
+  _comment: string;
 
   /**
    * @param {(string | Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
@@ -283,6 +285,7 @@ class ParseQuery {
       task: null,
       onchange: () => {},
     };
+    this._comment = null;
   }
 
   /**
@@ -468,6 +471,9 @@ class ParseQuery {
     if (this._explain) {
       params.explain = true;
     }
+    if(this._comment) {
+      params.comment = this._comment;
+    }
     for (const key in this._extraOptions) {
       params[key] = this._extraOptions[key];
     }
@@ -553,6 +559,10 @@ class ParseQuery {
       this._explain = !!json.explain;
     }
 
+    if(json.comment) {
+      this._comment = json.comment;
+    }
+
     for (const key in json) {
       if (json.hasOwnProperty(key)) {
         if (
@@ -569,6 +579,7 @@ class ParseQuery {
             'subqueryReadPreference',
             'hint',
             'explain',
+            'comment',
           ].indexOf(key) === -1
         ) {
           this._extraOptions[key] = json[key];
@@ -2110,6 +2121,25 @@ class ParseQuery {
       this._xhrRequest.task = task;
       this._xhrRequest.onchange();
     };
+  }
+
+  /**
+   * Sets a comment to the query so that the query
+   *can be identified when using a the profiler for MongoDB.
+   *
+   * @param {string} value a comment can make your profile data easier to interpret and trace.
+   * @returns {Parse.Query} Returns the query, so you can chain this call.
+   */
+  comment(value: string): ParseQuery {
+    if (value == null) {
+      delete this._comment;
+      return this;
+    }
+    if (typeof value !== 'string') {
+      throw new Error('The value of a comment to be sent with this query must be a string.');
+    }
+    this._comment = value;
+    return this;
   }
 }
 
