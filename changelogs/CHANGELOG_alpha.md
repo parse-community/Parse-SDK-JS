@@ -1,3 +1,10 @@
+# [5.0.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/5.0.0-alpha.2...5.0.0-alpha.3) (2024-03-11)
+
+
+### Features
+
+* Add comment to MongoDB query via `Parse.Query.comment` ([#2088](https://github.com/parse-community/Parse-SDK-JS/issues/2088)) ([a970913](https://github.com/parse-community/Parse-SDK-JS/commit/a9709136983b3c90ca88a8721b9cc54593c245cc))
+
 # [5.0.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/5.0.0-alpha.1...5.0.0-alpha.2) (2024-03-10)
 
 
