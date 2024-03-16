@@ -117,7 +117,7 @@ const EventuallyQueue = {
     queueData[index] = {
       queueId,
       action,
-      object: object.toJSON(),
+      object: object._getSaveJSON(),
       serverOptions,
       id: object.id,
       className: object.className,
