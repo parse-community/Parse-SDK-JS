@@ -25,6 +25,9 @@ class MockObject {
   toJSON() {
     return this.attributes;
   }
+  _getSaveJSON() {
+      return this.attributes;
+  }
   static extend(className) {
     class MockSubclass {
       constructor() {
