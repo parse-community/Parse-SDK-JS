@@ -19,6 +19,9 @@ function mockXHR(results, options = {}) {
     getRequestHeader: function (key) {
       return headers[key];
     },
+    getAllResponseHeaders: function() {
+      return Object.keys(headers).map(key => `${key}: ${headers[key]}`).join('\n');
+    },
     upload: function () {},
     send: function () {
       this.status = results[attempts].status;
