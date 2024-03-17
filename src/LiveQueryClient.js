@@ -191,7 +191,7 @@ class LiveQueryClient {
     const className = query.className;
     const queryJSON = query.toJSON();
     const where = queryJSON.where;
-    const fields = queryJSON.keys?.split(',');
+    const keys = queryJSON.keys?.split(',');
     const watch = queryJSON.watch?.split(',');
     const subscribeRequest = {
       op: OP_TYPES.SUBSCRIBE,
@@ -199,7 +199,7 @@ class LiveQueryClient {
       query: {
         className,
         where,
-        fields,
+        keys,
         watch,
       },
     };
