@@ -40,33 +40,20 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: Node 14
-            NODE_VERSION: 14.21.1
-          - name: Node 16
-            NODE_VERSION: 16.18.1
           - name: Node 18
-            NODE_VERSION: 18.12.1
-          - name: Node 19
-            NODE_VERSION: 19.3.0
+            NODE_VERSION: 18.19.0
+          - name: Node 20
+            NODE_VERSION: 20.10.0
       fail-fast: false
     steps:
     - name: Fix usage of insecure GitHub protocol
       run: sudo git config --system url."https://github".insteadOf "git://github"
-    - name: Fix git protocol for Node 14
-      if: ${{ startsWith(matrix.NODE_VERSION, '14.') }}
-      run: sudo git config --system url."https://github".insteadOf "ssh://git@github"
     - uses: actions/checkout@v3
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.NODE_VERSION }}
-    - name: Cache Node.js modules
-      uses: actions/cache@v3
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ matrix.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-            ${{ runner.os }}-node-${{ matrix.NODE_VERSION }}-
+        cache: npm
     - run: npm ci
     - run: npm run lint
     - run: npm test -- --maxWorkers=4
