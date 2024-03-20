@@ -1,3 +1,22 @@
+# [5.0.0-beta.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.1...5.0.0-beta.1) (2024-03-17)
+
+
+### Bug Fixes
+
+* Calling `Parse.Object.relation.add` multiple times adds only the first object ([#2078](https://github.com/parse-community/Parse-SDK-JS/issues/2078)) ([0f98117](https://github.com/parse-community/Parse-SDK-JS/commit/0f981175c8f5155a631a0fcf9837ef5b285b2f55))
+
+### Features
+
+* Add comment to MongoDB query via `Parse.Query.comment` ([#2088](https://github.com/parse-community/Parse-SDK-JS/issues/2088)) ([a970913](https://github.com/parse-community/Parse-SDK-JS/commit/a9709136983b3c90ca88a8721b9cc54593c245cc))
+* Add compatibility with Parse Server 7 ([#2089](https://github.com/parse-community/Parse-SDK-JS/issues/2089)) ([86600bc](https://github.com/parse-community/Parse-SDK-JS/commit/86600bc5abc4ca705b7e252b3714579b2e4c1598))
+* Add support for Node 20, remove support for Node 14 and 16 ([#2063](https://github.com/parse-community/Parse-SDK-JS/issues/2063)) ([74eb4d5](https://github.com/parse-community/Parse-SDK-JS/commit/74eb4d5f7d255f0f4e5d69758067f2a7d3caf014))
+
+
+### BREAKING CHANGES
+
+* Parse JS SDK 5 requires Parse Server 7 and is incompatible with Parse Server 6. ([86600bc](86600bc))
+* Removes support for Node 14 and 16. ([74eb4d5](74eb4d5))
+
 ## [4.3.1-beta.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.0...4.3.1-beta.1) (2023-11-16)
 
 
