@@ -907,6 +907,16 @@ describe('ParseObject', () => {
     });
   });
 
+  it('validates attributes on save()', async () => {
+    const o = new ParseObject('Listing');
+    try {
+      await o.save({ '$$$': 'o_O' });
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.code).toBe(ParseError.INVALID_KEY_NAME);
+    }
+  });
+
   it('ignores validation if ignoreValidation option is passed to set()', () => {
     const o = new ParseObject('Listing');
     expect(o.set('$$$', 'o_O', { ignoreValidation: true })).toBe(o);
