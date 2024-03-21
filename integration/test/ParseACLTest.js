@@ -8,9 +8,11 @@ describe('Parse.ACL', () => {
     Parse.User.enableUnsafeCurrentUser();
   });
 
-  it('acl must be valid', () => {
+  it('can handle invalid acl', () => {
     const user = new Parse.User();
-    assert.equal(user.setACL(`Ceci n'est pas un ACL.`), false);
+    user.setACL(`Ceci n'est pas un ACL.`)
+    assert.equal(user.getACL(), null);
+    assert.equal(user.get('ACL'), null);
   });
 
   it('can refresh object with acl', async () => {
@@ -25,6 +27,20 @@ describe('Parse.ACL', () => {
 
     const o = await object.fetch();
     assert(o);
+  });
+
+  it('can set ACL from json', async () => {
+    Parse.User.enableUnsafeCurrentUser();
+    const user = new Parse.User();
+    const object = new TestObject();
+    user.set('username', 'torn');
+    user.set('password', 'acl');
+    await user.signUp();
+    const acl = new Parse.ACL(user);
+    object.setACL(acl);
+    const json = object.toJSON();
+    await object.save(json);
+    assert.equal(acl.equals(object.getACL()), true);
   });
 
   it('disables public get access', async () => {

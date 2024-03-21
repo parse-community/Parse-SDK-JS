@@ -364,6 +364,13 @@ describe('ParseObject', () => {
     expect(o.getACL()).toEqual(ACL);
   });
 
+  it('encodes ACL from json', () => {
+    const ACL = new ParseACL({ user1: { read: true } });
+    const o = new ParseObject('Item');
+    o.set({ ACL: ACL.toJSON() });
+    expect(o.getACL()).toEqual(ACL);
+  });
+
   it('can be rendered to JSON', () => {
     let o = new ParseObject('Item');
     o.set({
@@ -871,12 +878,6 @@ describe('ParseObject', () => {
     const o = new ParseObject('Listing');
     expect(
       o.validate({
-        ACL: 'not an acl',
-      })
-    ).toEqual(new ParseError(ParseError.OTHER_CAUSE, 'ACL must be a Parse ACL.'));
-
-    expect(
-      o.validate({
         'invalid!key': 12,
       })
     ).toEqual(new ParseError(ParseError.INVALID_KEY_NAME));
@@ -896,8 +897,6 @@ describe('ParseObject', () => {
 
   it('validates attributes on set()', () => {
     const o = new ParseObject('Listing');
-    expect(o.set('ACL', 'not an acl')).toBe(false);
-    expect(o.set('ACL', { '*': { read: true, write: false } })).toBe(o);
     expect(o.set('$$$', 'o_O')).toBe(false);
 
     o.set('$$$', 'o_O', {
@@ -1616,27 +1615,21 @@ describe('ParseObject', () => {
     });
   });
 
-  it('accepts attribute changes on save', done => {
+  it('accepts attribute changes on save', async () => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([
-        {
-          status: 200,
-          response: { objectId: 'newattributes' },
-        },
+        { status: 200, response: { objectId: 'newattributes' } },
+        { status: 200, response: { objectId: 'newattributes' } },
       ])
     );
     let o = new ParseObject('Item');
-    o.save({ key: 'value' })
-      .then(() => {
-        expect(o.get('key')).toBe('value');
+    await o.save({ key: 'value' })
+    expect(o.get('key')).toBe('value');
 
-        o = new ParseObject('Item');
-        return o.save({ ACL: 'not an acl' });
-      })
-      .then(null, error => {
-        expect(error.code).toBe(-1);
-        done();
-      });
+    o = new ParseObject('Item');
+    await o.save({ ACL: 'not an acl' });
+    expect(o.getACL()).toBe(null);
+    expect(o.get('ACL')).toBe(null);
   });
 
   it('accepts context on save', async () => {

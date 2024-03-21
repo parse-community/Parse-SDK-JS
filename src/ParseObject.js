@@ -603,6 +603,10 @@ class ParseObject {
    * @returns {*}
    */
   get(attr: string): mixed {
+    if (attr === 'ACL') {
+      const acl = this.attributes[attr];
+      return acl instanceof ParseACL ? acl : null;
+    }
     return this.attributes[attr];
   }
 
@@ -1043,9 +1047,6 @@ class ParseObject {
    * @see Parse.Object#set
    */
   validate(attrs: AttributeMap): ParseError | boolean {
-    if (attrs.hasOwnProperty('ACL') && !(attrs.ACL instanceof ParseACL)) {
-      return new ParseError(ParseError.OTHER_CAUSE, 'ACL must be a Parse ACL.');
-    }
     for (const key in attrs) {
       if (!/^[A-Za-z][0-9A-Za-z_.]*$/.test(key)) {
         return new ParseError(ParseError.INVALID_KEY_NAME);
