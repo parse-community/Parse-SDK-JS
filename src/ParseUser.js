@@ -882,15 +882,8 @@ class ParseUser extends ParseObject {
       return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Password must be a string.'));
     }
 
-    options = options || {};
-
-    const verificationOption = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      verificationOption.useMasterKey = options.useMasterKey;
-    }
-
     const controller = CoreManager.getUserController();
-    return controller.verifyPassword(username, password, verificationOption);
+    return controller.verifyPassword(username, password, options || {});
   }
 
   /**
