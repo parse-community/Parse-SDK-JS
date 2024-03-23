@@ -11,6 +11,7 @@ const Parse = require('../../node');
 const fs = require('fs');
 const path = require('path');
 const dns = require('dns');
+const MockEmailAdapterWithOptions = require('./support/MockEmailAdapterWithOptions');
 
 // Ensure localhost resolves to ipv4 address first on node v17+
 if (dns.setDefaultResultOrder) {
@@ -39,6 +40,8 @@ const twitterAuthData = {
 };
 
 const defaultConfiguration = {
+  appName: 'AppName',
+  publicServerURL: 'http://localhost:1337/',
   databaseURI: 'mongodb://localhost:27017/integration',
   appId: 'integration',
   masterKey: 'notsosecret',
@@ -82,6 +85,11 @@ const defaultConfiguration = {
   },
   revokeSessionOnPasswordReset: false,
   allowCustomObjectId: false,
+  emailAdapter: MockEmailAdapterWithOptions({
+    fromAddress: 'parse@example.com',
+    apiKey: 'k',
+    domain: 'd',
+  }),
 };
 
 const openConnections = {};

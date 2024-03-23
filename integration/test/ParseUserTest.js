@@ -4,7 +4,6 @@ const assert = require('assert');
 const Parse = require('../../node');
 const { v4: uuidv4 } = require('uuid');
 const { twitterAuthData } = require('./helper');
-const MockEmailAdapterWithOptions = require('./support/MockEmailAdapterWithOptions');
 
 class CustomUser extends Parse.User {
   constructor(attributes) {
@@ -1058,20 +1057,13 @@ describe('Parse User', () => {
     }
   });
 
-  fit('can verify user password for user with unverified email', async () => {
+  it('can verify user password for user with unverified email', async () => {
     await reconfigureServer({
-      publicServerURL: 'http://localhost:8378/',
-      appName: 'AppName',
       verifyUserEmails: true,
       preventLoginWithUnverifiedEmail: true,
-      emailAdapter: MockEmailAdapterWithOptions({
-        fromAddress: 'parse@example.com',
-        apiKey: 'k',
-        domain: 'd',
-      }),
     });
     await Parse.User.signUp('asd123', 'xyz123');
-    const res = await Parse.User.verifyPassword('asd123', 'xyz123', { useMasterKey: true, ignoreUnverifiedEmail: true });
+    const res = await Parse.User.verifyPassword('asd123', 'xyz123', { useMasterKey: true, ignoreEmailVerification: true });
     expect(typeof res).toBe('object');
     expect(res.username).toBe('asd123');
   });
