@@ -85,6 +85,7 @@ const defaultConfiguration = {
   },
   revokeSessionOnPasswordReset: false,
   allowCustomObjectId: false,
+  allowClientClassCreation: true,
   emailAdapter: MockEmailAdapterWithOptions({
     fromAddress: 'parse@example.com',
     apiKey: 'k',

@@ -2401,4 +2401,19 @@ describe('Parse Query', () => {
     expect(results[1].get('arrayField')).toEqual([{ subfield: 1 }]);
     expect(results[2].get('arrayField')).toEqual(null);
   });
+
+  it('can query and send a comment', async () => {
+    const obj1 = new TestObject({ number: 1 });
+    const obj2 = new TestObject({ number: 2 });
+    const obj3 = new TestObject({ number: 3 });
+    await Parse.Object.saveAll([obj1, obj2, obj3]);
+
+    const query = new Parse.Query(TestObject);
+    const comment = 'Hello Parse';
+    query.comment(comment);
+    query.explain();
+    const explain = await query.find();
+    assert.equal(explain.command.comment, comment);
+  });
+
 });

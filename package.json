@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "4.3.1-alpha.1",
+  "version": "5.0.0-beta.1",
   "description": "Parse JavaScript SDK",
   "homepage": "https://parseplatform.org",
   "keywords": [
@@ -33,7 +33,7 @@
     "idb-keyval": "6.2.1",
     "react-native-crypto-js": "1.0.0",
     "uuid": "9.0.1",
-    "ws": "8.15.0",
+    "ws": "8.16.0",
     "xmlhttprequest": "1.8.0"
   },
   "devDependencies": {
@@ -85,7 +85,7 @@
     "lint-staged": "13.2.2",
     "metro-react-native-babel-preset": "0.76.4",
     "mongodb-runner": "5.4.3",
-    "parse-server": "git+https://github.com/parse-community/parse-server#alpha",
+    "parse-server": "7.0.0-alpha.26",
     "prettier": "3.0.2",
     "puppeteer": "20.4.0",
     "regenerator-runtime": "0.13.11",
@@ -131,7 +131,7 @@
     ]
   },
   "engines": {
-    "node": ">=14.21.0 <17 || >=18 <20"
+    "node": ">=18 <21"
   },
   "jest": {
     "automock": true,
