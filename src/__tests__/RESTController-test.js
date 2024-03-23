@@ -221,6 +221,9 @@ describe('RESTController', () => {
       getResponseHeader: function (header) {
         return headers[header];
       },
+      getAllResponseHeaders: function() {
+        return Object.keys(headers).map(key => `${key}: ${headers[key]}`).join('\n');
+      },
       send: function () {
         this.status = 200;
         this.responseText = '{}';
@@ -240,6 +243,9 @@ describe('RESTController', () => {
       setRequestHeader: function () {},
       getResponseHeader: function (header) {
         return headers[header];
+      },
+      getAllResponseHeaders: function() {
+        return Object.keys(headers).map(key => `${key}: ${headers[key]}`).join('\n');
       },
       send: function () {
         this.status = 200;
