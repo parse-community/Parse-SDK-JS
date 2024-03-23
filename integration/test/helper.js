@@ -40,8 +40,6 @@ const twitterAuthData = {
 };
 
 const defaultConfiguration = {
-  appName: 'AppName',
-  publicServerURL: 'http://localhost:1337/',
   databaseURI: 'mongodb://localhost:27017/integration',
   appId: 'integration',
   masterKey: 'notsosecret',

@@ -1059,6 +1059,8 @@ describe('Parse User', () => {
 
   it('can verify user password for user with unverified email', async () => {
     await reconfigureServer({
+      appName: 'AppName',
+      publicServerURL: 'http://localhost:1337/',
       verifyUserEmails: true,
       preventLoginWithUnverifiedEmail: true,
     });
