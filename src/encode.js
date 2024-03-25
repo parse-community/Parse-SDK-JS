@@ -10,13 +10,29 @@ import ParseObject from './ParseObject';
 import { Op } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
+const MAX_RECURSIVE_CALLS = 999;
+
 function encode(
   value: mixed,
   disallowObjects: boolean,
   forcePointers: boolean,
   seen: Array<mixed>,
-  offline: boolean
+  offline: boolean,
+  counter: number = 0
 ): any {
+  counter++;
+
+  if (counter > MAX_RECURSIVE_CALLS) {
+    console.error('Maximum recursive calls exceeded in encode function. Potential infinite recursion detected.');
+    console.error('Value causing potential infinite recursion:', value);
+    console.error('Disallow objects:', disallowObjects);
+    console.error('Force pointers:', forcePointers);
+    console.error('Seen:', seen);
+    console.error('Offline:', offline);
+
+    throw new Error('Maximum recursive calls exceeded in encode function. Potential infinite recursion detected.');
+  }
+
   if (value instanceof ParseObject) {
     if (disallowObjects) {
       throw new Error('Parse Objects not allowed here');
@@ -67,14 +83,14 @@ function encode(
 
   if (Array.isArray(value)) {
     return value.map(v => {
-      return encode(v, disallowObjects, forcePointers, seen, offline);
+      return encode(v, disallowObjects, forcePointers, seen, offline, counter);
     });
   }
 
   if (value && typeof value === 'object') {
     const output = {};
     for (const k in value) {
-      output[k] = encode(value[k], disallowObjects, forcePointers, seen, offline);
+      output[k] = encode(value[k], disallowObjects, forcePointers, seen, offline, counter);
     }
     return output;
   }
@@ -89,5 +105,5 @@ export default function (
   seen?: Array<mixed>,
   offline?: boolean
 ): any {
-  return encode(value, !!disallowObjects, !!forcePointers, seen || [], offline);
+  return encode(value, !!disallowObjects, !!forcePointers, seen || [], offline, 0);
 }
