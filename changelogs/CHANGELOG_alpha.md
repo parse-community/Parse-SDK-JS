@@ -1,3 +1,10 @@
+# [5.0.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/5.0.0-alpha.3...5.0.0-alpha.4) (2024-03-23)
+
+
+### Features
+
+* Add password validation for user with unverified email via `Parse.User.verifyPassword` using master key and option `ignoreEmailVerification: true` ([#2076](https://github.com/parse-community/Parse-SDK-JS/issues/2076)) ([b0adf7e](https://github.com/parse-community/Parse-SDK-JS/commit/b0adf7e02ab0beea2cd9b759d0f788c69d291491))
+
 # [5.0.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/5.0.0-alpha.2...5.0.0-alpha.3) (2024-03-11)
 
 
