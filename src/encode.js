@@ -10,6 +10,9 @@ import ParseObject from './ParseObject';
 import { Op } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
+const MAX_RECURSIVE_CALLS = 999;
+let recursiveCallsCount = 0;
+
 function encode(
   value: mixed,
   disallowObjects: boolean,
@@ -17,6 +20,20 @@ function encode(
   seen: Array<mixed>,
   offline: boolean
 ): any {
+  recursiveCallsCount++;
+
+  if (recursiveCallsCount > MAX_RECURSIVE_CALLS) {
+    const errorMessage = 'Maximum recursive calls exceeded in encode function. Potential infinite recursion detected.';
+    console.warn(errorMessage);
+    console.debug('Value causing potential infinite recursion:', value);
+    console.debug('Disallow objects:', disallowObjects);
+    console.debug('Force pointers:', forcePointers);
+    console.debug('Seen:', seen);
+    console.debug('Offline:', offline);
+
+    throw new Error(errorMessage);
+  }
+
   if (value instanceof ParseObject) {
     if (disallowObjects) {
       throw new Error('Parse Objects not allowed here');
@@ -89,5 +106,6 @@ export default function (
   seen?: Array<mixed>,
   offline?: boolean
 ): any {
+  recursiveCallsCount = 0;
   return encode(value, !!disallowObjects, !!forcePointers, seen || [], offline);
 }
