@@ -11,7 +11,6 @@ describe('Parse.ACL', () => {
   it('acl must be valid', () => {
     const user = new Parse.User();
     assert.equal(user.setACL(`Ceci n'est pas un ACL.`), false);
-    console.log(user.getACL());
   });
 
   it('can refresh object with acl', async () => {

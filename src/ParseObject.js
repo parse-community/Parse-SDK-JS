@@ -1319,7 +1319,6 @@ class ParseObject {
         return Promise.reject(validationError);
       }
     }
-
     const saveOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       saveOptions.useMasterKey = !!options.useMasterKey;
