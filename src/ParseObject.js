@@ -1308,15 +1308,17 @@ class ParseObject {
       options = arg3;
     }
 
-    if (attrs) {
-      const validation = this.validate(attrs);
-      if (validation) {
-        return Promise.reject(validation);
-      }
-      this.set(attrs, options);
-    }
-
     options = options || {};
+    if (attrs) {
+      let validationError;
+      options.error = (_, validation) => {
+        validationError = validation;
+      };
+      const success = this.set(attrs, options);
+      if (!success) {
+        return Promise.reject(validationError);
+      }
+    }
     const saveOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       saveOptions.useMasterKey = !!options.useMasterKey;

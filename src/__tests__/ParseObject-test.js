@@ -364,6 +364,13 @@ describe('ParseObject', () => {
     expect(o.getACL()).toEqual(ACL);
   });
 
+  it('encodes ACL from json', () => {
+    const ACL = new ParseACL({ user1: { read: true } });
+    const o = new ParseObject('Item');
+    o.set({ ACL: ACL.toJSON() });
+    expect(o.getACL()).toEqual(ACL);
+  });
+
   it('can be rendered to JSON', () => {
     let o = new ParseObject('Item');
     o.set({
