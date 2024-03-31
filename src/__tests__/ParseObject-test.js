@@ -878,6 +878,12 @@ describe('ParseObject', () => {
     const o = new ParseObject('Listing');
     expect(
       o.validate({
+        ACL: 'not an acl',
+      })
+    ).toEqual(new ParseError(ParseError.OTHER_CAUSE, 'ACL must be a Parse ACL.'));
+
+    expect(
+      o.validate({
         'invalid!key': 12,
       })
     ).toEqual(new ParseError(ParseError.INVALID_KEY_NAME));
@@ -897,6 +903,8 @@ describe('ParseObject', () => {
 
   it('validates attributes on set()', () => {
     const o = new ParseObject('Listing');
+    expect(o.set('ACL', 'not an acl')).toBe(false);
+    expect(o.set('ACL', { '*': { read: true, write: false } })).toBe(o);
     expect(o.set('$$$', 'o_O')).toBe(false);
 
     o.set('$$$', 'o_O', {
@@ -905,13 +913,6 @@ describe('ParseObject', () => {
         expect(err.code).toBe(105);
       },
     });
-  });
-
-  it('validates attributes on save()', async () => {
-    const o = new ParseObject('Listing');
-    await expect(o.save({ '$$$': 'o_O' })).rejects.toEqual(
-      new ParseError(ParseError.INVALID_KEY_NAME)
-    );
   });
 
   it('ignores validation if ignoreValidation option is passed to set()', () => {
@@ -1622,21 +1623,27 @@ describe('ParseObject', () => {
     });
   });
 
-  it('accepts attribute changes on save', async () => {
+  it('accepts attribute changes on save', done => {
     CoreManager.getRESTController()._setXHR(
       mockXHR([
-        { status: 200, response: { objectId: 'newattributes' } },
-        { status: 200, response: { objectId: 'newattributes' } },
+        {
+          status: 200,
+          response: { objectId: 'newattributes' },
+        },
       ])
     );
     let o = new ParseObject('Item');
-    await o.save({ key: 'value' })
-    expect(o.get('key')).toBe('value');
+    o.save({ key: 'value' })
+      .then(() => {
+        expect(o.get('key')).toBe('value');
 
-    o = new ParseObject('Item');
-    await o.save({ ACL: 'not an acl' });
-    expect(o.getACL()).toBe(null);
-    expect(o.get('ACL')).toBe(null);
+        o = new ParseObject('Item');
+        return o.save({ ACL: 'not an acl' });
+      })
+      .then(null, error => {
+        expect(error.code).toBe(-1);
+        done();
+      });
   });
 
   it('accepts context on save', async () => {

@@ -603,10 +603,6 @@ class ParseObject {
    * @returns {*}
    */
   get(attr: string): mixed {
-    if (attr === 'ACL') {
-      const acl = this.attributes[attr];
-      return acl instanceof ParseACL ? acl : null;
-    }
     return this.attributes[attr];
   }
 
@@ -1047,6 +1043,9 @@ class ParseObject {
    * @see Parse.Object#set
    */
   validate(attrs: AttributeMap): ParseError | boolean {
+    if (attrs.hasOwnProperty('ACL') && !(attrs.ACL instanceof ParseACL)) {
+      return new ParseError(ParseError.OTHER_CAUSE, 'ACL must be a Parse ACL.');
+    }
     for (const key in attrs) {
       if (!/^[A-Za-z][0-9A-Za-z_.]*$/.test(key)) {
         return new ParseError(ParseError.INVALID_KEY_NAME);
@@ -1309,15 +1308,18 @@ class ParseObject {
       options = arg3;
     }
 
+    options = options || {};
     if (attrs) {
-      const validation = this.validate(attrs);
-      if (validation) {
-        return Promise.reject(validation);
+      let validationError;
+      options.error = (_, validation) => {
+        validationError = validation;
+      };
+      const success = this.set(attrs, options);
+      if (!success) {
+        return Promise.reject(validationError);
       }
-      this.set(attrs, options);
     }
 
-    options = options || {};
     const saveOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       saveOptions.useMasterKey = !!options.useMasterKey;
