@@ -1,3 +1,11 @@
+# [5.1.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.0.0...5.1.0-alpha.1) (2024-03-31)
+
+
+### Features
+
+* Add password validation for user with unverified email via `Parse.User.verifyPassword` using master key and option `ignoreEmailVerification: true` ([#2076](https://github.com/parse-community/Parse-SDK-JS/issues/2076)) ([b0adf7e](https://github.com/parse-community/Parse-SDK-JS/commit/b0adf7e02ab0beea2cd9b759d0f788c69d291491))
+* Add support for setting `Parse.ACL` from json ([#2097](https://github.com/parse-community/Parse-SDK-JS/issues/2097)) ([72bc9ac](https://github.com/parse-community/Parse-SDK-JS/commit/72bc9ac3bfb23443a03742fe47a3b1b2713f8c96))
+
 # [5.0.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/5.0.0-alpha.3...5.0.0-alpha.4) (2024-03-23)
 
 
