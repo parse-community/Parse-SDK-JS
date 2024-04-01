@@ -23,14 +23,15 @@ function encode(
   counter++;
 
   if (counter > MAX_RECURSIVE_CALLS) {
-    console.error('Maximum recursive calls exceeded in encode function. Potential infinite recursion detected.');
+    const message = 'Maximum recursive calls exceeded in encode function. Potential infinite recursion detected.';
+    console.error(message);
     console.error('Value causing potential infinite recursion:', value);
     console.error('Disallow objects:', disallowObjects);
     console.error('Force pointers:', forcePointers);
     console.error('Seen:', seen);
     console.error('Offline:', offline);
 
-    throw new Error('Maximum recursive calls exceeded in encode function. Potential infinite recursion detected.');
+    throw new Error(message);
   }
 
   if (value instanceof ParseObject) {

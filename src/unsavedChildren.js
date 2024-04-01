@@ -6,6 +6,8 @@ import ParseFile from './ParseFile';
 import ParseObject from './ParseObject';
 import ParseRelation from './ParseRelation';
 
+const MAX_RECURSIVE_CALLS = 999;
+
 type EncounterMap = {
   objects: { [identifier: string]: ParseObject | boolean },
   files: Array<ParseFile>,
@@ -48,8 +50,20 @@ function traverse(
   obj: ParseObject,
   encountered: EncounterMap,
   shouldThrow: boolean,
-  allowDeepUnsaved: boolean
+  allowDeepUnsaved: boolean,
+  counter: number = 0
 ) {
+  counter++;
+
+  if (counter > MAX_RECURSIVE_CALLS) {
+    const message = 'Maximum recursive calls exceeded in traverse function. Potential infinite recursion detected.';
+    console.error(message);
+    console.error('Object causing potential infinite recursion:', obj);
+    console.error('Encountered objects:', encountered);
+
+    throw new Error(message);
+  }
+
   if (obj instanceof ParseObject) {
     if (!obj.id && shouldThrow) {
       throw new Error('Cannot create a pointer to an unsaved Object.');
@@ -60,7 +74,7 @@ function traverse(
       const attributes = obj.attributes;
       for (const attr in attributes) {
         if (typeof attributes[attr] === 'object') {
-          traverse(attributes[attr], encountered, !allowDeepUnsaved, allowDeepUnsaved);
+          traverse(attributes[attr], encountered, !allowDeepUnsaved, allowDeepUnsaved, counter);
         }
       }
     }
@@ -78,13 +92,13 @@ function traverse(
   if (Array.isArray(obj)) {
     obj.forEach(el => {
       if (typeof el === 'object') {
-        traverse(el, encountered, shouldThrow, allowDeepUnsaved);
+        traverse(el, encountered, shouldThrow, allowDeepUnsaved, counter);
       }
     });
   }
   for (const k in obj) {
     if (typeof obj[k] === 'object') {
-      traverse(obj[k], encountered, shouldThrow, allowDeepUnsaved);
+      traverse(obj[k], encountered, shouldThrow, allowDeepUnsaved, counter);
     }
   }
 }
