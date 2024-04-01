@@ -3865,19 +3865,6 @@ describe('ParseObject pin', () => {
   });
 
   it('handles unsaved circular references', async () => {
-    const xhrs = [];
-    RESTController._setXHR(function () {
-      const xhr = {
-        setRequestHeader: jest.fn(),
-        open: jest.fn(),
-        send: jest.fn(),
-        status: 200,
-        readyState: 4,
-      };
-      xhrs.push(xhr);
-      return xhr;
-    });
-
     const a = {};
     const b = {};
     a.b = b;
