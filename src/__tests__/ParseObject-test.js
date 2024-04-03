@@ -3875,7 +3875,7 @@ describe('ParseObject pin', () => {
     expect(() => {
       object.save();
     }).toThrowError(
-      'Maximum recursive calls exceeded in traverse function. Potential infinite recursion detected.'
+      'Traversing object failed due to high number of recursive calls, likely caused by circular reference within object.'
     );
   });
 
@@ -3885,6 +3885,6 @@ describe('ParseObject pin', () => {
 
     expect(() => {
       encode(circularObject, false, false, [], false);
-    }).toThrowError('Maximum recursive calls exceeded in encode function. Potential infinite recursion detected.');
+    }).toThrowError('Encoding object failed due to high number of recursive calls, likely caused by circular reference within object.');
   });
 });
