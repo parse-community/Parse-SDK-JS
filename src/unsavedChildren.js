@@ -56,7 +56,7 @@ function traverse(
   counter++;
 
   if (counter > MAX_RECURSIVE_CALLS) {
-    const message = 'Maximum recursive calls exceeded in traverse function. Potential infinite recursion detected.';
+    const message = 'Traversing object failed due to high number of recursive calls, likely caused by circular reference within object.';
     console.error(message);
     console.error('Object causing potential infinite recursion:', obj);
     console.error('Encountered objects:', encountered);
