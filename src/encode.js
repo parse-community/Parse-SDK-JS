@@ -23,7 +23,7 @@ function encode(
   counter++;
 
   if (counter > MAX_RECURSIVE_CALLS) {
-    const message = 'Maximum recursive calls exceeded in encode function. Potential infinite recursion detected.';
+    const message = 'Encoding object failed due to high number of recursive calls, likely caused by circular reference within object.';
     console.error(message);
     console.error('Value causing potential infinite recursion:', value);
     console.error('Disallow objects:', disallowObjects);
