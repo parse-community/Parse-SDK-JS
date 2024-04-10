@@ -58,8 +58,8 @@ function traverse(
   if (counter > MAX_RECURSIVE_CALLS) {
     const message = 'Traversing object failed due to high number of recursive calls, likely caused by circular reference within object.';
     console.error(message);
-    console.error('Object causing potential infinite recursion:', obj);
     console.error('Encountered objects:', encountered);
+    console.error('Object causing potential infinite recursion:', obj);
 
     throw new Error(message);
   }
@@ -89,16 +89,11 @@ function traverse(
   if (obj instanceof ParseRelation) {
     return;
   }
-  if (Array.isArray(obj)) {
-    obj.forEach(el => {
-      if (typeof el === 'object') {
-        traverse(el, encountered, shouldThrow, allowDeepUnsaved, counter);
+  if (Array.isArray(obj) || typeof obj === 'object') {
+    for (const k in obj) {
+      if (typeof obj[k] === 'object') {
+        traverse(obj[k], encountered, shouldThrow, allowDeepUnsaved, counter);
       }
-    });
-  }
-  for (const k in obj) {
-    if (typeof obj[k] === 'object') {
-      traverse(obj[k], encountered, shouldThrow, allowDeepUnsaved, counter);
     }
   }
 }

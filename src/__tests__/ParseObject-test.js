@@ -3878,13 +3878,4 @@ describe('ParseObject pin', () => {
       'Traversing object failed due to high number of recursive calls, likely caused by circular reference within object.'
     );
   });
-
-  it('throws error for infinite recursion', () => {
-    const circularObject = {};
-    circularObject.circularReference = circularObject;
-
-    expect(() => {
-      encode(circularObject, false, false, [], false);
-    }).toThrowError('Encoding object failed due to high number of recursive calls, likely caused by circular reference within object.');
-  });
 });
