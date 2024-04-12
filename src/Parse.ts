@@ -32,6 +32,9 @@ import Storage from './Storage'
 import User from './ParseUser'
 import LiveQuery from './ParseLiveQuery'
 import LiveQueryClient from './LiveQueryClient'
+import LocalDatastoreController from './LocalDatastoreController';
+import StorageController from './StorageController';
+import WebSocketController from './WebSocketController';
 
 /**
  * Contains all Parse API classes and functions.
@@ -181,6 +184,10 @@ const Parse: ParseType = {
     CoreManager.set('MASTER_KEY', masterKey);
     CoreManager.set('USE_MASTER_KEY', false);
     CoreManager.setIfNeeded('EventEmitter', EventEmitter);
+    CoreManager.setIfNeeded('CryptoController', CryptoController);
+    CoreManager.setIfNeeded('LocalDatastoreController', LocalDatastoreController);
+    CoreManager.setIfNeeded('StorageController', StorageController);
+    CoreManager.setIfNeeded('WebSocketController', WebSocketController);
 
     Parse.LiveQuery = new LiveQuery();
     CoreManager.setIfNeeded('LiveQuery', Parse.LiveQuery);
@@ -433,7 +440,6 @@ const Parse: ParseType = {
   },
 };
 
-CoreManager.setCryptoController(CryptoController);
 CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);
 
