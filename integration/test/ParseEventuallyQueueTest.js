@@ -247,10 +247,10 @@ describe('Parse EventuallyQueue', () => {
     }
     assert.strictEqual(Parse.EventuallyQueue.isPolling(), false);
 
-    while (await Parse.EventuallyQueue.length()) {
-      await sleep(100);
-    }
     length = await Parse.EventuallyQueue.length();
+    while (length) {
+      length = await Parse.EventuallyQueue.length();
+    }
     assert.strictEqual(length, 0);
 
     const query = new Parse.Query('TestObject');
