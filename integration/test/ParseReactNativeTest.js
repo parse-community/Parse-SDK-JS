@@ -1,6 +1,7 @@
 'use strict';
 
 const Parse = require('../../react-native');
+const { resolvingPromise } = require('../../lib/react-native/promiseUtils');
 const CryptoController = require('../../lib/react-native/CryptoController');
 const LocalDatastoreController = require('../../lib/react-native/LocalDatastoreController.default');
 const StorageController = require('../../lib/react-native/StorageController.default');
@@ -79,5 +80,25 @@ describe('Parse React Native', () => {
     expect(Object.keys(localDatastore).length).toBe(2);
     expect(cachedObject.objectId).toBe(object.id);
     expect(cachedObject.field).toBe('test');
+  });
+
+  it('can subscribe to query', async () => {
+    // Handle WebSocket Controller
+    const object = new Parse.Object('TestObject');
+    await object.save();
+    const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+
+    const query = new Parse.Query('TestObject');
+    query.equalTo('objectId', object.id);
+    const subscription = await query.subscribe();
+    const promise = resolvingPromise();
+    subscription.on('update', (object, _, response) => {
+      expect(object.get('foo')).toBe('bar');
+      expect(response.installationId).toBe(installationId);
+      promise.resolve();
+    });
+    object.set({ foo: 'bar' });
+    await object.save();
+    await promise;
   });
 });

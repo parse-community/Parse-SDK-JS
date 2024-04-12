@@ -247,8 +247,7 @@ describe('Parse EventuallyQueue', () => {
     }
     assert.strictEqual(Parse.EventuallyQueue.isPolling(), false);
 
-    length = await Parse.EventuallyQueue.length();
-    while (length) {
+    while (await Parse.EventuallyQueue.length()) {
       await sleep(100);
     }
     length = await Parse.EventuallyQueue.length();
