@@ -546,10 +546,11 @@ class ParseUser extends ParseObject {
   /**
    * Verify whether a given password is the password of the current user.
    *
-   * @param {string} password A password to be verified
-   * @param {object} options
-   * @returns {Promise} A promise that is fulfilled with a user
-   *  when the password is correct.
+   * @param {string} password The password to be verified.
+   * @param {object} options The options.
+   * @param {boolean} [options.ignoreEmailVerification=false] Set to `true` to bypass email verification and verify
+   * the password regardless of whether the email has been verified. This requires the master key.
+   * @returns {Promise} A promise that is fulfilled with a user when the password is correct.
    */
   verifyPassword(password: string, options?: RequestOptions): Promise<ParseUser> {
     const username = this.getUsername() || '';
@@ -865,13 +866,14 @@ class ParseUser extends ParseObject {
 
   /**
    * Verify whether a given password is the password of the current user.
-   *
-   * @param {string} username  A username to be used for identificaiton
-   * @param {string} password A password to be verified
-   * @param {object} options
    * @static
-   * @returns {Promise} A promise that is fulfilled with a user
-   *  when the password is correct.
+   *
+   * @param {string} username  The username of the user whose password should be verified.
+   * @param {string} password The password to be verified.
+   * @param {object} options The options.
+   * @param {boolean} [options.ignoreEmailVerification=false] Set to `true` to bypass email verification and verify
+   * the password regardless of whether the email has been verified. This requires the master key.
+   * @returns {Promise} A promise that is fulfilled with a user when the password is correct.
    */
   static verifyPassword(username: string, password: string, options?: RequestOptions) {
     if (typeof username !== 'string') {
