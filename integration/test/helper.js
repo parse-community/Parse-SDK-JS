@@ -84,6 +84,7 @@ const defaultConfiguration = {
   revokeSessionOnPasswordReset: false,
   allowCustomObjectId: false,
   allowClientClassCreation: true,
+  encodeParseObjectInCloudFunction: true,
   emailAdapter: MockEmailAdapterWithOptions({
     fromAddress: 'parse@example.com',
     apiKey: 'k',

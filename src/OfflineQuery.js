@@ -315,11 +315,11 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
   for (const condition in constraints) {
     compareTo = constraints[condition];
 
-    if (compareTo.__type) {
+    if (compareTo?.__type) {
       compareTo = decode(compareTo);
     }
     // is it a $relativeTime? convert to date
-    if (compareTo['$relativeTime']) {
+    if (compareTo?.['$relativeTime']) {
       const parserResult = relativeTimeToDate(compareTo['$relativeTime']);
       if (parserResult.status !== 'success') {
         throw new ParseError(
