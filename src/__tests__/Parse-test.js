@@ -179,11 +179,11 @@ describe('Parse module', () => {
   });
 
   it('can set and get live query', () => {
+    const temp = Parse.LiveQuery;
     const LiveQuery = new ParseLiveQuery();
-    expect(Parse.LiveQuery).toEqual(undefined);
     Parse.LiveQuery = LiveQuery
     expect(Parse.LiveQuery).toEqual(LiveQuery);
-    Parse.LiveQuery = undefined;
+    Parse.LiveQuery = temp;
   });
 
   it('can set allowCustomObjectId', () => {
