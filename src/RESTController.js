@@ -249,15 +249,9 @@ const RESTController = {
         throw new Error('Cannot use the Master Key, it has not been provided.');
       }
     }
-
-    if (options.ignoreEmailVerification !== undefined) {
-      payload.ignoreEmailVerification = options.ignoreEmailVerification;
-    }
-
     if (CoreManager.get('FORCE_REVOCABLE_SESSION')) {
       payload._RevocableSession = '1';
     }
-
     const installationId = options.installationId;
     let installationIdPromise;
     if (installationId && typeof installationId === 'string') {
