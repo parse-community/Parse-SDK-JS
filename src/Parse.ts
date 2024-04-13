@@ -30,7 +30,7 @@ import Schema from './ParseSchema'
 import Session from './ParseSession'
 import Storage from './Storage'
 import User from './ParseUser'
-import LiveQuery from './ParseLiveQuery'
+import ParseLiveQuery from './ParseLiveQuery'
 import LiveQueryClient from './LiveQueryClient'
 import LocalDatastoreController from './LocalDatastoreController';
 import StorageController from './StorageController';
@@ -81,7 +81,7 @@ interface ParseType {
   Session: typeof Session,
   Storage: typeof Storage,
   User: typeof User,
-  LiveQuery?: typeof LiveQuery,
+  LiveQuery: ParseLiveQuery,
   LiveQueryClient: typeof LiveQueryClient,
 
   initialize(applicationId: string, javaScriptKey: string): void,
@@ -149,7 +149,6 @@ const Parse: ParseType = {
   Storage:  Storage,
   User:  User,
   LiveQueryClient:  LiveQueryClient,
-  LiveQuery:  undefined,
   IndexedDB: undefined,
   Hooks: undefined,
   Parse: undefined,
@@ -184,13 +183,11 @@ const Parse: ParseType = {
     CoreManager.set('MASTER_KEY', masterKey);
     CoreManager.set('USE_MASTER_KEY', false);
     CoreManager.setIfNeeded('EventEmitter', EventEmitter);
+    CoreManager.setIfNeeded('LiveQuery', new ParseLiveQuery());
     CoreManager.setIfNeeded('CryptoController', CryptoController);
     CoreManager.setIfNeeded('LocalDatastoreController', LocalDatastoreController);
     CoreManager.setIfNeeded('StorageController', StorageController);
     CoreManager.setIfNeeded('WebSocketController', WebSocketController);
-
-    Parse.LiveQuery = new LiveQuery();
-    CoreManager.setIfNeeded('LiveQuery', Parse.LiveQuery);
 
     if (process.env.PARSE_BUILD === 'browser') {
       Parse.IndexedDB = CoreManager.setIfNeeded('IndexedDBStorageController', IndexedDBStorageController);
@@ -294,6 +291,17 @@ const Parse: ParseType = {
   },
   get serverAuthType() {
     return CoreManager.get('SERVER_AUTH_TYPE');
+  },
+
+  /**
+   * @member {ParseLiveQuery} Parse.LiveQuery
+   * @static
+   */
+  set LiveQuery(liveQuery: ParseLiveQuery) {
+    CoreManager.setLiveQuery(liveQuery);
+  },
+  get LiveQuery() {
+    return CoreManager.getLiveQuery();
   },
 
   /**
