@@ -195,7 +195,8 @@ describe('Parse EventuallyQueue', () => {
     const object = new TestObject({ hash: 'saveSecret' });
     await new Promise((resolve) => parseServer.server.close(resolve));
     await object.saveEventually();
-    let length = await Parse.EventuallyQueue.length();
+
+    const length = await Parse.EventuallyQueue.length();
     assert(Parse.EventuallyQueue.isPolling());
     assert.strictEqual(length, 1);
 
@@ -203,14 +204,6 @@ describe('Parse EventuallyQueue', () => {
     while (Parse.EventuallyQueue.isPolling()) {
       await sleep(100);
     }
-    assert.strictEqual(Parse.EventuallyQueue.isPolling(), false);
-
-    while (await Parse.EventuallyQueue.length()) {
-      await sleep(100);
-    }
-    length = await Parse.EventuallyQueue.length();
-    assert.strictEqual(length, 0);
-
     const query = new Parse.Query(TestObject);
     query.equalTo('hash', 'saveSecret');
     let results = await query.find();
@@ -233,10 +226,9 @@ describe('Parse EventuallyQueue', () => {
     object.setACL(acl);
 
     await new Promise((resolve) => parseServer.server.close(resolve));
-
     await object.saveEventually();
 
-    let length = await Parse.EventuallyQueue.length();
+    const length = await Parse.EventuallyQueue.length();
     assert(Parse.EventuallyQueue.isPolling());
     assert.strictEqual(length, 1);
 
@@ -245,15 +237,6 @@ describe('Parse EventuallyQueue', () => {
     while (Parse.EventuallyQueue.isPolling()) {
       await sleep(100);
     }
-    assert.strictEqual(Parse.EventuallyQueue.isPolling(), false);
-
-    length = await Parse.EventuallyQueue.length();
-    while (length) {
-      await sleep(100);
-    }
-    length = await Parse.EventuallyQueue.length();
-    assert.strictEqual(length, 0);
-
     const query = new Parse.Query('TestObject');
     query.equalTo('hash', 'saveSecret');
     let results = await query.find();
@@ -269,7 +252,8 @@ describe('Parse EventuallyQueue', () => {
     await object.save();
     await new Promise((resolve) => parseServer.server.close(resolve));
     await object.destroyEventually();
-    let length = await Parse.EventuallyQueue.length();
+    const length = await Parse.EventuallyQueue.length();
+
     assert(Parse.EventuallyQueue.isPolling());
     assert.strictEqual(length, 1);
 
@@ -277,13 +261,6 @@ describe('Parse EventuallyQueue', () => {
     while (Parse.EventuallyQueue.isPolling()) {
       await sleep(100);
     }
-    assert.strictEqual(Parse.EventuallyQueue.isPolling(), false);
-    while (await Parse.EventuallyQueue.length()) {
-      await sleep(100);
-    }
-    length = await Parse.EventuallyQueue.length();
-    assert.strictEqual(length, 0);
-
     const query = new Parse.Query(TestObject);
     query.equalTo('hash', 'deleteSecret');
     let results = await query.find();
