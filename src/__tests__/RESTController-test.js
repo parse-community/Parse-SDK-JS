@@ -647,6 +647,39 @@ describe('RESTController', () => {
     });
   });
 
+  it('can handle ignoreEmailVerification option', async () => {
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn(),
+    };
+    RESTController._setXHR(function () {
+      return xhr;
+    });
+    RESTController.request(
+      'GET',
+      'verifyPassword',
+      { username: 'parseuser', password: 'parsepass' },
+      { ignoreEmailVerification: true }
+    );
+    await flushPromises();
+    expect(xhr.open.mock.calls[0]).toEqual([
+      'POST',
+      'https://api.parse.com/1/verifyPassword',
+      true,
+    ]);
+    expect(JSON.parse(xhr.send.mock.calls[0][0])).toEqual({
+      _method: 'GET',
+      _ApplicationId: 'A',
+      _JavaScriptKey: 'B',
+      _ClientVersion: 'V',
+      _InstallationId: 'iid',
+      ignoreEmailVerification: true,
+      username: 'parseuser',
+      password: 'parsepass',
+    });
+  });
+
   it('can handle wechat request', async () => {
     const XHR = require('../Xhr.weapp');
     const xhr = new XHR();
