@@ -185,6 +185,8 @@ const Parse: ParseType = {
     Parse.LiveQuery = new LiveQuery();
     CoreManager.setIfNeeded('LiveQuery', Parse.LiveQuery);
 
+    CoreManager.setIfNeeded('EventuallyQueue', EventuallyQueue);
+
     if (process.env.PARSE_BUILD === 'browser') {
       Parse.IndexedDB = CoreManager.setIfNeeded('IndexedDBStorageController', IndexedDBStorageController);
     }
@@ -380,7 +382,7 @@ const Parse: ParseType = {
     if (!this.LocalDatastore.isEnabled) {
       this.LocalDatastore.isEnabled = true;
       if (polling) {
-        EventuallyQueue.poll(ms);
+        CoreManager.getEventuallyQueue().poll(ms);
       }
     }
   },
