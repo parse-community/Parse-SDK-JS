@@ -110,9 +110,9 @@ const RESTController = {
           let response;
           try {
             response = JSON.parse(xhr.responseText);
-            const availableHeaders = xhr.getAllResponseHeaders() || "";
+            const availableHeaders = typeof xhr.getAllResponseHeaders === 'function' ? xhr.getAllResponseHeaders() : "";
             headers = {};
-            if (typeof xhr.getResponseHeader === 'function' && availableHeaders.indexOf('access-control-expose-headers') >= 0) {
+            if (typeof xhr.getResponseHeader === 'function' && availableHeaders && availableHeaders.indexOf('access-control-expose-headers') >= 0) {
               const responseHeaders = xhr.getResponseHeader('access-control-expose-headers').split(', ');
               responseHeaders.forEach(header => {
                 if (availableHeaders.indexOf(header.toLowerCase()) >= 0) {

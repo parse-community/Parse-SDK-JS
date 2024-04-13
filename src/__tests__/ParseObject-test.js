@@ -1684,7 +1684,6 @@ describe('ParseObject', () => {
   it('can make changes while in the process of a save', async () => {
     const xhr = {
       setRequestHeader: jest.fn(),
-      getAllResponseHeaders: jest.fn(),
       open: jest.fn(),
       send: jest.fn(),
     };
@@ -1718,7 +1717,6 @@ describe('ParseObject', () => {
         setRequestHeader: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
-        getAllResponseHeaders: jest.fn(),
       };
       xhrs.push(xhr);
       return xhr;
@@ -1829,7 +1827,6 @@ describe('ParseObject', () => {
     RESTController._setXHR(function () {
       const xhr = {
         setRequestHeader: jest.fn(),
-        getAllResponseHeaders: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
@@ -1960,7 +1957,6 @@ describe('ParseObject', () => {
     const xhrs = [];
     RESTController._setXHR(function () {
       const xhr = {
-        getAllResponseHeaders: jest.fn(),
         setRequestHeader: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
@@ -2160,7 +2156,6 @@ describe('ParseObject', () => {
         send: jest.fn(),
         status: 200,
         readyState: 4,
-        getAllResponseHeaders: jest.fn(),
       };
       xhrs.push(xhr);
       return xhr;
@@ -2299,7 +2294,6 @@ describe('ParseObject', () => {
   it('can destroy an object', async () => {
     const xhr = {
       setRequestHeader: jest.fn(),
-      getAllResponseHeaders: jest.fn(),
       open: jest.fn(),
       send: jest.fn(),
     };
@@ -2364,7 +2358,6 @@ describe('ParseObject', () => {
   it('can save an array of objects', (done) => {
     const xhr = {
       setRequestHeader: jest.fn(),
-      getAllResponseHeaders: jest.fn(),
       open: jest.fn(),
       send: jest.fn(),
     };
@@ -2405,7 +2398,6 @@ describe('ParseObject', () => {
     for (let i = 0; i < 2; i++) {
       xhrs[i] = {
         setRequestHeader: jest.fn(),
-        getAllResponseHeaders: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
@@ -2467,7 +2459,6 @@ describe('ParseObject', () => {
     for (let i = 0; i < 2; i++) {
       xhrs[i] = {
         setRequestHeader: jest.fn(),
-        getAllResponseHeaders: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
@@ -2529,7 +2520,6 @@ describe('ParseObject', () => {
     for (let i = 0; i < 2; i++) {
       xhrs[i] = {
         setRequestHeader: jest.fn(),
-        getAllResponseHeaders: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
@@ -2590,7 +2580,6 @@ describe('ObjectController', () => {
     const objectController = CoreManager.getObjectController();
     const xhr = {
       setRequestHeader: jest.fn(),
-      getAllResponseHeaders: jest.fn(),
       open: jest.fn(),
       send: jest.fn(),
     };
@@ -2662,7 +2651,6 @@ describe('ObjectController', () => {
     const objectController = CoreManager.getObjectController();
     const xhr = {
       setRequestHeader: jest.fn(),
-      getAllResponseHeaders: jest.fn(),
       open: jest.fn(),
       send: jest.fn(),
     };
@@ -2709,7 +2697,6 @@ describe('ObjectController', () => {
     const objectController = CoreManager.getObjectController();
     const xhr = {
       setRequestHeader: jest.fn(),
-      getAllResponseHeaders: jest.fn(),
       open: jest.fn(),
       send: jest.fn(),
     };
@@ -2764,7 +2751,6 @@ describe('ObjectController', () => {
     for (let i = 0; i < 3; i++) {
       xhrs[i] = {
         setRequestHeader: jest.fn(),
-        getAllResponseHeaders: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
       };
@@ -2847,7 +2833,6 @@ describe('ObjectController', () => {
     for (let i = 0; i < 3; i++) {
       xhrs[i] = {
         setRequestHeader: jest.fn(),
-        getAllResponseHeaders: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
       };
@@ -2955,7 +2940,6 @@ describe('ObjectController', () => {
     const objectController = CoreManager.getObjectController();
     const xhr = {
       setRequestHeader: jest.fn(),
-      getAllResponseHeaders: jest.fn(),
       open: jest.fn(),
       send: jest.fn(),
     };
@@ -2998,7 +2982,6 @@ describe('ObjectController', () => {
     for (let i = 0; i < 4; i++) {
       xhrs[i] = {
         setRequestHeader: jest.fn(),
-        getAllResponseHeaders: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
@@ -3040,7 +3023,6 @@ describe('ObjectController', () => {
     for (let i = 0; i < 3; i++) {
       xhrs[i] = {
         setRequestHeader: jest.fn(),
-        getAllResponseHeaders: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
@@ -3126,7 +3108,6 @@ describe('ObjectController', () => {
     for (let i = 0; i < 2; i++) {
       xhrs[i] = {
         setRequestHeader: jest.fn(),
-        getAllResponseHeaders: jest.fn(),
         open: jest.fn(),
         send: jest.fn(),
         status: 200,
@@ -3296,7 +3277,6 @@ describe('ParseObject (unique instance mode)', () => {
   it('can save an array of objects', async () => {
     const xhr = {
       setRequestHeader: jest.fn(),
-      getAllResponseHeaders: jest.fn(),
       open: jest.fn(),
       send: jest.fn(),
     };
