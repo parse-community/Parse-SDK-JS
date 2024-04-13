@@ -1262,7 +1262,12 @@ const DefaultController = {
 
   verifyPassword(username: string, password: string, options: RequestOptions) {
     const RESTController = CoreManager.getRESTController();
-    return RESTController.request('GET', 'verifyPassword', { username, password }, options);
+    const data = {
+      username,
+      password,
+      ...(options.ignoreEmailVerification !== undefined && { ignoreEmailVerification: options.ignoreEmailVerification }),
+    };
+    return RESTController.request('GET', 'verifyPassword', data, options);
   },
 
   requestEmailVerification(email: string, options: RequestOptions) {
