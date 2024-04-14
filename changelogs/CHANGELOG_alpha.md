@@ -1,3 +1,10 @@
+# [5.1.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.1...5.1.0-alpha.2) (2024-04-13)
+
+
+### Bug Fixes
+
+* Local datastore throws error when `Parse.Query.notEqualTo` is set to `null` ([#2102](https://github.com/parse-community/Parse-SDK-JS/issues/2102)) ([6afd32a](https://github.com/parse-community/Parse-SDK-JS/commit/6afd32af3517c88b570505d5cb25bd5ab449f039))
+
 # [5.1.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.0.0...5.1.0-alpha.1) (2024-03-31)
 
 

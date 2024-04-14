@@ -250,10 +250,6 @@ const RESTController = {
       }
     }
 
-    if (options.ignoreEmailVerification !== undefined) {
-      payload.ignoreEmailVerification = options.ignoreEmailVerification;
-    }
-
     if (CoreManager.get('FORCE_REVOCABLE_SESSION')) {
       payload._RevocableSession = '1';
     }
