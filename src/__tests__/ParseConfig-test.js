@@ -16,9 +16,11 @@ const CoreManager = require('../CoreManager');
 const ParseConfig = require('../ParseConfig').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
 const Storage = require('../Storage');
+const StorageController = require('../StorageController.default');
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
+CoreManager.set('StorageController', StorageController);
 
 describe('ParseConfig', () => {
   beforeEach(() => {

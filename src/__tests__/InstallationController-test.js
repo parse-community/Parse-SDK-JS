@@ -11,6 +11,8 @@ const CoreManager = require('../CoreManager');
 const InstallationController = require('../InstallationController');
 const Storage = require('../Storage');
 
+CoreManager.setStorageController(require('../StorageController.default'));
+
 describe('InstallationController', () => {
   beforeEach(() => {
     CoreManager.set('APPLICATION_ID', 'A');
