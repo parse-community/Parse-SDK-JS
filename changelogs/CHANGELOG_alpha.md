@@ -1,3 +1,10 @@
+# [5.1.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.2...5.1.0-alpha.3) (2024-04-14)
+
+
+### Features
+
+* Lazy load `Parse.CoreManager` controllers to add support for swappable `CryptoController`, `LocalDatastoreController`, `StorageController`, `WebSocketController`, `ParseLiveQuery` ([#2100](https://github.com/parse-community/Parse-SDK-JS/issues/2100)) ([fbd0ab1](https://github.com/parse-community/Parse-SDK-JS/commit/fbd0ab1402792e241c4d9d6496b451e4cc268b8b))
+
 # [5.1.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.1...5.1.0-alpha.2) (2024-04-13)
 
 
