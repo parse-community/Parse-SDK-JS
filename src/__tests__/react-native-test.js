@@ -8,7 +8,8 @@ jest.dontMock('../LiveQueryClient');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('../ParseObject');
 jest.dontMock('../Storage');
-
+jest.dontMock('../LocalDatastoreController');
+jest.dontMock('../WebSocketController');
 jest.mock(
   'react-native/Libraries/vendor/emitter/EventEmitter',
   () => {
@@ -54,14 +55,16 @@ describe('React Native', () => {
   });
 
   it('load LocalDatastoreController', () => {
-    const LocalDatastoreController = require('../LocalDatastoreController.react-native');
+    const LocalDatastoreController = require('../LocalDatastoreController');
     require('../LocalDatastore');
     const LDC = CoreManager.getLocalDatastoreController();
     expect(LocalDatastoreController).toEqual(LDC);
   });
 
   it('load StorageController', () => {
-    const StorageController = require('../StorageController.react-native');
+    const StorageController = require('../StorageController');
+    CoreManager.setStorageController(StorageController);
+
     jest.spyOn(StorageController, 'setItemAsync');
     const storage = require('../Storage');
     storage.setItemAsync('key', 'value');
@@ -69,6 +72,9 @@ describe('React Native', () => {
   });
 
   it('load WebSocketController', () => {
+    const WebSocketController = require('../WebSocketController');
+    CoreManager.setWebSocketController(WebSocketController);
+
     jest.mock('../EventEmitter', () => {
       return require('events').EventEmitter;
     });
