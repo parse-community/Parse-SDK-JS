@@ -120,7 +120,6 @@ const Parse: ParseType = {
   CoreManager:  CoreManager,
   Config:  Config,
   Error:  ParseError,
-  EventuallyQueue:  EventuallyQueue,
   FacebookUtils: FacebookUtils,
   File:  File,
   GeoPoint:  GeoPoint,
@@ -150,6 +149,18 @@ const Parse: ParseType = {
   IndexedDB: undefined,
   Hooks: undefined,
   Parse: undefined,
+
+  /**
+   * @member {EventuallyQueue} Parse.EventuallyQueue
+   * @static
+   */
+  set EventuallyQueue(queue: EventuallyQueue) {
+    CoreManager.setEventuallyQueue(queue);
+  },
+
+  get EventuallyQueue() {
+    return CoreManager.getEventuallyQueue();
+  },
 
   /**
    * Call this method first to set up your authentication tokens for Parse.
