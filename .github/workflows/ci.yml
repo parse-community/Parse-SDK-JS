@@ -34,6 +34,20 @@ jobs:
       - run: npm ci
       - name: Check Docs
         run: npm run docs
+  check-lint:
+    name: Lint
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -55,7 +69,6 @@ jobs:
         node-version: ${{ matrix.NODE_VERSION }}
         cache: npm
     - run: npm ci
-    - run: npm run lint
     - run: npm test -- --maxWorkers=4
     - run: npm run test:mongodb
       env:
