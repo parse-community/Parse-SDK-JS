@@ -18,6 +18,7 @@ export type RequestOptions = {
   progress?: any,
   context?: any,
   usePost?: boolean,
+  ignoreEmailVerification?: boolean,
 };
 
 export type FullOptions = {

@@ -3,14 +3,19 @@ jest.dontMock('../CryptoController');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../Parse');
+jest.dontMock('../ParseObject');
+jest.dontMock('../ParseLiveQuery');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('crypto-js/aes');
 jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
 global.indexedDB = require('./test_helpers/mockIndexedDB');
 const CoreManager = require('../CoreManager');
+const ParseLiveQuery = require('../ParseLiveQuery').default;
 const EventuallyQueue = require('../EventuallyQueue');
 const Parse = require('../Parse');
+
+CoreManager.setEventEmitter(require('events').EventEmitter);
 
 describe('Parse module', () => {
   it('can be initialized with keys', () => {
@@ -171,6 +176,14 @@ describe('Parse module', () => {
     CoreManager.set('REQUEST_BATCH_SIZE', 4);
     expect(CoreManager.get('REQUEST_BATCH_SIZE')).toBe(4);
     CoreManager.set('REQUEST_BATCH_SIZE', 20);
+  });
+
+  it('can set and get live query', () => {
+    const temp = Parse.LiveQuery;
+    const LiveQuery = new ParseLiveQuery();
+    Parse.LiveQuery = LiveQuery
+    expect(Parse.LiveQuery).toEqual(LiveQuery);
+    Parse.LiveQuery = temp;
   });
 
   it('can set allowCustomObjectId', () => {

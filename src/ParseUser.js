@@ -546,10 +546,11 @@ class ParseUser extends ParseObject {
   /**
    * Verify whether a given password is the password of the current user.
    *
-   * @param {string} password A password to be verified
-   * @param {object} options
-   * @returns {Promise} A promise that is fulfilled with a user
-   *  when the password is correct.
+   * @param {string} password The password to be verified.
+   * @param {object} options The options.
+   * @param {boolean} [options.ignoreEmailVerification=false] Set to `true` to bypass email verification and verify
+   * the password regardless of whether the email has been verified. This requires the master key.
+   * @returns {Promise} A promise that is fulfilled with a user when the password is correct.
    */
   verifyPassword(password: string, options?: RequestOptions): Promise<ParseUser> {
     const username = this.getUsername() || '';
@@ -865,13 +866,14 @@ class ParseUser extends ParseObject {
 
   /**
    * Verify whether a given password is the password of the current user.
-   *
-   * @param {string} username  A username to be used for identificaiton
-   * @param {string} password A password to be verified
-   * @param {object} options
    * @static
-   * @returns {Promise} A promise that is fulfilled with a user
-   *  when the password is correct.
+   *
+   * @param {string} username  The username of the user whose password should be verified.
+   * @param {string} password The password to be verified.
+   * @param {object} options The options.
+   * @param {boolean} [options.ignoreEmailVerification=false] Set to `true` to bypass email verification and verify
+   * the password regardless of whether the email has been verified. This requires the master key.
+   * @returns {Promise} A promise that is fulfilled with a user when the password is correct.
    */
   static verifyPassword(username: string, password: string, options?: RequestOptions) {
     if (typeof username !== 'string') {
@@ -882,15 +884,8 @@ class ParseUser extends ParseObject {
       return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Password must be a string.'));
     }
 
-    options = options || {};
-
-    const verificationOption = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      verificationOption.useMasterKey = options.useMasterKey;
-    }
-
     const controller = CoreManager.getUserController();
-    return controller.verifyPassword(username, password, verificationOption);
+    return controller.verifyPassword(username, password, options || {});
   }
 
   /**
@@ -1269,7 +1264,12 @@ const DefaultController = {
 
   verifyPassword(username: string, password: string, options: RequestOptions) {
     const RESTController = CoreManager.getRESTController();
-    return RESTController.request('GET', 'verifyPassword', { username, password }, options);
+    const data = {
+      username,
+      password,
+      ...(options.ignoreEmailVerification !== undefined && { ignoreEmailVerification: options.ignoreEmailVerification }),
+    };
+    return RESTController.request('GET', 'verifyPassword', data, options);
   },
 
   requestEmailVerification(email: string, options: RequestOptions) {

@@ -1376,6 +1376,16 @@ function runTest(controller) {
       assert.equal(results.length, 9);
     });
 
+    it(`${controller.name} can perform notEqualTo null queries`, async () => {
+      const nullObject = new Parse.Object({ className: 'BoxedNumber', number: null });
+      await nullObject.save();
+      const query = new Parse.Query('BoxedNumber');
+      query.notEqualTo('number', null);
+      query.fromLocalDatastore();
+      const results = await query.find();
+      assert.equal(results.length, 10);
+    });
+
     it(`${controller.name} can perform containedIn queries`, async () => {
       const query = new Parse.Query('BoxedNumber');
       query.containedIn('number', [3, 5, 7, 9, 11]);

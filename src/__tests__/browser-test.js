@@ -10,6 +10,7 @@ jest.dontMock('../Storage');
 jest.dontMock('crypto-js/aes');
 jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
+const CoreManager = require('../CoreManager');
 const ParseError = require('../ParseError').default;
 const EventuallyQueue = require('../EventuallyQueue');
 
@@ -61,7 +62,9 @@ describe('Browser', () => {
   });
 
   it('load StorageController', () => {
-    const StorageController = require('../StorageController.browser');
+    const StorageController = require('../StorageController');
+    CoreManager.setStorageController(StorageController);
+
     jest.spyOn(StorageController, 'setItem');
     const storage = require('../Storage');
     storage.setItem('key', 'value');

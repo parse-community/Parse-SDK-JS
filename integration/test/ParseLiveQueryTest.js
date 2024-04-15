@@ -4,6 +4,7 @@ const assert = require('assert');
 const Parse = require('../../node');
 const sleep = require('./sleep');
 const { resolvingPromise } = require('../../lib/node/promiseUtils');
+const { EventEmitter } = require('events');
 
 describe('Parse LiveQuery', () => {
   beforeEach(() => {
@@ -366,5 +367,42 @@ describe('Parse LiveQuery', () => {
     );
     client.state = 'closed';
     await client.close();
+  });
+
+  it('can subscribe to query with EventEmitter private fields', async () => {
+    class CustomEmitter {
+      #privateEmitter;
+
+      constructor() {
+        this.#privateEmitter = new EventEmitter();
+      }
+      on(event, listener) {
+        this.#privateEmitter.on(event, listener);
+      }
+      emit(event, ...args) {
+        this.#privateEmitter.emit(event, ...args);
+      }
+    }
+
+    const EV = Parse.CoreManager.getEventEmitter();
+
+    Parse.CoreManager.setEventEmitter(CustomEmitter);
+    const object = new TestObject();
+    await object.save();
+    const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+
+    const query = new Parse.Query(TestObject);
+    query.equalTo('objectId', object.id);
+    const subscription = await query.subscribe();
+    const promise = resolvingPromise();
+    subscription.on('update', (object, original, response) => {
+      assert.equal(object.get('foo'), 'bar');
+      assert.equal(response.installationId, installationId);
+      promise.resolve();
+    });
+    object.set({ foo: 'bar' });
+    await object.save();
+    await promise;
+    Parse.CoreManager.setEventEmitter(EV);
   });
 });

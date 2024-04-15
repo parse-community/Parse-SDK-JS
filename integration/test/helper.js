@@ -11,6 +11,7 @@ const Parse = require('../../node');
 const fs = require('fs');
 const path = require('path');
 const dns = require('dns');
+const MockEmailAdapterWithOptions = require('./support/MockEmailAdapterWithOptions');
 
 // Ensure localhost resolves to ipv4 address first on node v17+
 if (dns.setDefaultResultOrder) {
@@ -83,6 +84,12 @@ const defaultConfiguration = {
   revokeSessionOnPasswordReset: false,
   allowCustomObjectId: false,
   allowClientClassCreation: true,
+  encodeParseObjectInCloudFunction: true,
+  emailAdapter: MockEmailAdapterWithOptions({
+    fromAddress: 'parse@example.com',
+    apiKey: 'k',
+    domain: 'd',
+  }),
 };
 
 const openConnections = {};

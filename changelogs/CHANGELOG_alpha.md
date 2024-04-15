@@ -1,3 +1,39 @@
+# [5.1.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.3...5.1.0-alpha.4) (2024-04-15)
+
+
+### Bug Fixes
+
+* Live Query not working on Expo React Native ([#2109](https://github.com/parse-community/Parse-SDK-JS/issues/2109)) ([7a89665](https://github.com/parse-community/Parse-SDK-JS/commit/7a8966522f06efb3f0303b2a3c6fd08f41d8aff9))
+
+# [5.1.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.2...5.1.0-alpha.3) (2024-04-14)
+
+
+### Features
+
+* Lazy load `Parse.CoreManager` controllers to add support for swappable `CryptoController`, `LocalDatastoreController`, `StorageController`, `WebSocketController`, `ParseLiveQuery` ([#2100](https://github.com/parse-community/Parse-SDK-JS/issues/2100)) ([fbd0ab1](https://github.com/parse-community/Parse-SDK-JS/commit/fbd0ab1402792e241c4d9d6496b451e4cc268b8b))
+
+# [5.1.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.1...5.1.0-alpha.2) (2024-04-13)
+
+
+### Bug Fixes
+
+* Local datastore throws error when `Parse.Query.notEqualTo` is set to `null` ([#2102](https://github.com/parse-community/Parse-SDK-JS/issues/2102)) ([6afd32a](https://github.com/parse-community/Parse-SDK-JS/commit/6afd32af3517c88b570505d5cb25bd5ab449f039))
+
+# [5.1.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.0.0...5.1.0-alpha.1) (2024-03-31)
+
+
+### Features
+
+* Add password validation for user with unverified email via `Parse.User.verifyPassword` using master key and option `ignoreEmailVerification: true` ([#2076](https://github.com/parse-community/Parse-SDK-JS/issues/2076)) ([b0adf7e](https://github.com/parse-community/Parse-SDK-JS/commit/b0adf7e02ab0beea2cd9b759d0f788c69d291491))
+* Add support for setting `Parse.ACL` from json ([#2097](https://github.com/parse-community/Parse-SDK-JS/issues/2097)) ([72bc9ac](https://github.com/parse-community/Parse-SDK-JS/commit/72bc9ac3bfb23443a03742fe47a3b1b2713f8c96))
+
+# [5.0.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/5.0.0-alpha.3...5.0.0-alpha.4) (2024-03-23)
+
+
+### Features
+
+* Add password validation for user with unverified email via `Parse.User.verifyPassword` using master key and option `ignoreEmailVerification: true` ([#2076](https://github.com/parse-community/Parse-SDK-JS/issues/2076)) ([b0adf7e](https://github.com/parse-community/Parse-SDK-JS/commit/b0adf7e02ab0beea2cd9b759d0f788c69d291491))
+
 # [5.0.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/5.0.0-alpha.2...5.0.0-alpha.3) (2024-03-11)
 
 
