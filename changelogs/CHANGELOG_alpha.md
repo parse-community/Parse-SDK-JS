@@ -1,3 +1,10 @@
+# [5.1.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.3...5.1.0-alpha.4) (2024-04-15)
+
+
+### Bug Fixes
+
+* Live Query not working on Expo React Native ([#2109](https://github.com/parse-community/Parse-SDK-JS/issues/2109)) ([7a89665](https://github.com/parse-community/Parse-SDK-JS/commit/7a8966522f06efb3f0303b2a3c6fd08f41d8aff9))
+
 # [5.1.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.2...5.1.0-alpha.3) (2024-04-14)
 
 
