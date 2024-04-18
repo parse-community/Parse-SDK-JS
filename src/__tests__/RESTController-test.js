@@ -259,7 +259,7 @@ describe('RESTController', () => {
     expect(response._headers['X-Parse-Push-Status-Id']).toBe('5678');
   });
 
-  it('Dont call getRequestHeader with no headers or no getAllResponseHeaders', async () => {
+  it('does not call getRequestHeader with no headers or no getAllResponseHeaders', async () => {
     const XHR = function () {};
     XHR.prototype = {
       open: function () {},
