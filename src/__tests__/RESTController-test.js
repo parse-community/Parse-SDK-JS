@@ -282,7 +282,7 @@ describe('RESTController', () => {
     expect(XHR.prototype.getResponseHeader.mock.calls.length).toBe(0);
   });
 
-  it('mimic chromes console error on getResponseHeader', async () => {
+  it('mimics Chrome browser console error on getResponseHeader', async () => {
     const headers = {
       'access-control-expose-headers': 'a, b, c',
       'a' : 'value',
