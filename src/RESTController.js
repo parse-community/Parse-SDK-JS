@@ -29,6 +29,7 @@ export type FullOptions = {
   installationId?: string,
   progress?: any,
   usePost?: boolean,
+  authorizationHeader?: string,
 };
 
 let XHR = null;
@@ -155,6 +156,9 @@ const RESTController = {
       if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
         headers['Authorization'] =
           CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
+      }
+      if (options?.authorizationHeader) {
+        headers['Authorization'] = options.authorizationHeader;
       }
       const customHeaders = CoreManager.get('REQUEST_HEADERS');
       for (const key in customHeaders) {
