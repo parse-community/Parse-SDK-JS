@@ -294,13 +294,13 @@ describe('RESTController', () => {
       open: function () {},
       setRequestHeader: function () {},
       getResponseHeader: jest.fn(key => {
-          if (Object.keys(headers).includes(key)) {
-              return headers[key];
-          }
-          throw new Error("Chrome creates a console error here.");
+        if (Object.keys(headers).includes(key)) {
+          return headers[key];
+        }
+        throw new Error("Chrome creates a console error here.");
       }),
       getAllResponseHeaders: jest.fn(() => {
-          return Object.keys(headers).map(key => `${key}: ${headers[key]}`).join('\r\n');
+        return Object.keys(headers).map(key => `${key}: ${headers[key]}`).join('\r\n');
       }),
       send: function () {
         this.status = 200;
