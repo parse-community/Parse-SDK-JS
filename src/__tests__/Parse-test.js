@@ -109,7 +109,7 @@ describe('Parse module', () => {
     const controller = {
     };
     expect(() => Parse.EventuallyQueue = controller).toThrow(
-        'EventuallyQueue must implement poll()'
+      'EventuallyQueue must implement poll()'
     );
   });
 
