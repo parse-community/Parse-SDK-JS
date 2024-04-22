@@ -1,3 +1,10 @@
+# [5.1.0-alpha.5](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.4...5.1.0-alpha.5) (2024-04-22)
+
+
+### Bug Fixes
+
+* Chrome browser console warning about unsafe header `access-control-expose-headers` when calling Cloud Function ([#2095](https://github.com/parse-community/Parse-SDK-JS/issues/2095)) ([7b73c03](https://github.com/parse-community/Parse-SDK-JS/commit/7b73c033eef8977c3e6c7e4af7146ffa74deed0c))
+
 # [5.1.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.3...5.1.0-alpha.4) (2024-04-15)
 
 
