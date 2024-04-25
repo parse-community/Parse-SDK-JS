@@ -94,6 +94,14 @@ describe('Parse module', () => {
     expect(CoreManager.getLocalDatastoreController()).toBe(controller);
   });
 
+  it('cannot set EventuallyQueue controller with missing functions', () => {
+    const controller = {
+    };
+    expect(() => Parse.EventuallyQueue = controller).toThrow(
+      'EventuallyQueue must implement poll()'
+    );
+  });
+
   it('can set AsyncStorage', () => {
     const controller = {
       getItem: function () {},
@@ -257,5 +265,17 @@ describe('Parse module', () => {
       expect(currentStorage).toEqual(ParseInstance.IndexedDB);
       process.env.PARSE_BUILD = 'node';
     });
+  });
+
+  it('can set EventuallyQueue', () => {
+    const controller = {
+      poll: function () {},
+      save: function () {},
+      destroy: function () {},
+    };
+
+    Parse.EventuallyQueue = controller;
+    expect(CoreManager.getEventuallyQueue()).toBe(controller);
+    expect(Parse.EventuallyQueue).toBe(controller);
   });
 });

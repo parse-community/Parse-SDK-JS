@@ -123,7 +123,6 @@ const Parse: ParseType = {
   CoreManager:  CoreManager,
   Config:  Config,
   Error:  ParseError,
-  EventuallyQueue:  EventuallyQueue,
   FacebookUtils: FacebookUtils,
   File:  File,
   GeoPoint:  GeoPoint,
@@ -152,6 +151,18 @@ const Parse: ParseType = {
   IndexedDB: undefined,
   Hooks: undefined,
   Parse: undefined,
+
+  /**
+   * @member {EventuallyQueue} Parse.EventuallyQueue
+   * @static
+   */
+  set EventuallyQueue(queue: EventuallyQueue) {
+    CoreManager.setEventuallyQueue(queue);
+  },
+
+  get EventuallyQueue() {
+    return CoreManager.getEventuallyQueue();
+  },
 
   /**
    * Call this method first to set up your authentication tokens for Parse.
@@ -188,6 +199,8 @@ const Parse: ParseType = {
     CoreManager.setIfNeeded('LocalDatastoreController', LocalDatastoreController);
     CoreManager.setIfNeeded('StorageController', StorageController);
     CoreManager.setIfNeeded('WebSocketController', WebSocketController);
+
+    CoreManager.setIfNeeded('EventuallyQueue', EventuallyQueue);
 
     if (process.env.PARSE_BUILD === 'browser') {
       Parse.IndexedDB = CoreManager.setIfNeeded('IndexedDBStorageController', IndexedDBStorageController);
@@ -395,7 +408,7 @@ const Parse: ParseType = {
     if (!this.LocalDatastore.isEnabled) {
       this.LocalDatastore.isEnabled = true;
       if (polling) {
-        EventuallyQueue.poll(ms);
+        CoreManager.getEventuallyQueue().poll(ms);
       }
     }
   },
