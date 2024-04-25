@@ -1,3 +1,10 @@
+# [5.1.0-alpha.6](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.5...5.1.0-alpha.6) (2024-04-25)
+
+
+### Features
+
+* Allow setting custom queue for handling offline operations via `Parse.EventuallyQueue` ([#2106](https://github.com/parse-community/Parse-SDK-JS/issues/2106)) ([f92e4d4](https://github.com/parse-community/Parse-SDK-JS/commit/f92e4d42afdc1e55bcfff1ba9d0658d39943f3f0))
+
 # [5.1.0-alpha.5](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.4...5.1.0-alpha.5) (2024-04-22)
 
 
