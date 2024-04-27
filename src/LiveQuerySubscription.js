@@ -99,8 +99,8 @@ class Subscription {
     const EventEmitter = CoreManager.getEventEmitter();
     this.emitter = new EventEmitter();
 
-    this.on = this.emitter.on;
-    this.emit = this.emitter.emit;
+    this.on = (eventName, listener) => this.emitter.on(eventName, listener);
+    this.emit = (eventName, ...args) => this.emitter.emit(eventName, ...args);
     // adding listener so process does not crash
     // best practice is for developer to register their own listener
     this.on('error', () => {});

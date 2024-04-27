@@ -6,7 +6,7 @@ import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMuta
 import type ParseFile from './ParseFile';
 import type { FileSource } from './ParseFile';
 import type { Op } from './ParseOp';
-import type ParseObject from './ParseObject';
+import type ParseObject, {SaveOptions} from './ParseObject';
 import type { QueryJSON } from './ParseQuery';
 import type ParseUser from './ParseUser';
 import type { AuthData } from './ParseUser';
@@ -72,6 +72,11 @@ type PushController = {
 type QueryController = {
   find: (className: string, params: QueryJSON, options: RequestOptions) => Promise,
   aggregate: (className: string, params: any, options: RequestOptions) => Promise,
+};
+type EventuallyQueue = {
+  save: (object: ParseObject, serverOptions: SaveOptions) => Promise,
+  destroy: (object: ParseObject, serverOptions: RequestOptions) => Promise,
+  poll: (ms: number) => void
 };
 type RESTController = {
   request: (method: string, path: string, data: mixed, options: RequestOptions) => Promise,
@@ -361,6 +366,15 @@ const CoreManager = {
 
   getRESTController(): RESTController {
     return config['RESTController'];
+  },
+
+  setEventuallyQueue(controller: EventuallyQueue) {
+    requireMethods('EventuallyQueue', ['poll', 'save', 'destroy'], controller);
+    config['EventuallyQueue'] = controller;
+  },
+
+  getEventuallyQueue(): EventuallyQueue {
+    return config['EventuallyQueue'];
   },
 
   setSchemaController(controller: SchemaController) {

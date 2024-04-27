@@ -1,5 +1,3 @@
-/* global WebSocket */
-
 import CoreManager from './CoreManager';
 import ParseObject from './ParseObject';
 import LiveQuerySubscription from './LiveQuerySubscription';
@@ -159,8 +157,8 @@ class LiveQueryClient {
     const EventEmitter = CoreManager.getEventEmitter();
     this.emitter = new EventEmitter();
 
-    this.on = this.emitter.on;
-    this.emit = this.emitter.emit;
+    this.on = (eventName, listener) => this.emitter.on(eventName, listener);
+    this.emit = (eventName, ...args) => this.emitter.emit(eventName, ...args);
     // adding listener so process does not crash
     // best practice is for developer to register their own listener
     this.on('error', () => {});
@@ -500,18 +498,6 @@ class LiveQueryClient {
       time
     );
   }
-}
-
-if (process.env.PARSE_BUILD === 'node') {
-  CoreManager.setWebSocketController(require('ws'));
-} else if (process.env.PARSE_BUILD === 'browser') {
-  CoreManager.setWebSocketController(
-    typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null
-  );
-} else if (process.env.PARSE_BUILD === 'weapp') {
-  CoreManager.setWebSocketController(require('./Socket.weapp'));
-} else if (process.env.PARSE_BUILD === 'react-native') {
-  CoreManager.setWebSocketController(WebSocket);
 }
 
 export default LiveQueryClient;

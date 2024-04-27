@@ -7,7 +7,6 @@ import canBeSerialized from './canBeSerialized';
 import decode from './decode';
 import encode from './encode';
 import escape from './escape';
-import EventuallyQueue from './EventuallyQueue';
 import ParseACL from './ParseACL';
 import parseDate from './parseDate';
 import ParseError from './ParseError';
@@ -1220,8 +1219,8 @@ class ParseObject {
       await this.save(null, options);
     } catch (e) {
       if (e.code === ParseError.CONNECTION_FAILED) {
-        await EventuallyQueue.save(this, options);
-        EventuallyQueue.poll();
+        await CoreManager.getEventuallyQueue().save(this, options);
+        CoreManager.getEventuallyQueue().poll();
       }
     }
     return this;
@@ -1366,8 +1365,8 @@ class ParseObject {
       await this.destroy(options);
     } catch (e) {
       if (e.code === ParseError.CONNECTION_FAILED) {
-        await EventuallyQueue.destroy(this, options);
-        EventuallyQueue.poll();
+        await CoreManager.getEventuallyQueue().destroy(this, options);
+        CoreManager.getEventuallyQueue().poll();
       }
     }
     return this;

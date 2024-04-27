@@ -30,8 +30,11 @@ import Schema from './ParseSchema'
 import Session from './ParseSession'
 import Storage from './Storage'
 import User from './ParseUser'
-import LiveQuery from './ParseLiveQuery'
+import ParseLiveQuery from './ParseLiveQuery'
 import LiveQueryClient from './LiveQueryClient'
+import LocalDatastoreController from './LocalDatastoreController';
+import StorageController from './StorageController';
+import WebSocketController from './WebSocketController';
 
 /**
  * Contains all Parse API classes and functions.
@@ -78,7 +81,7 @@ interface ParseType {
   Session: typeof Session,
   Storage: typeof Storage,
   User: typeof User,
-  LiveQuery?: typeof LiveQuery,
+  LiveQuery: ParseLiveQuery,
   LiveQueryClient: typeof LiveQueryClient,
 
   initialize(applicationId: string, javaScriptKey: string): void,
@@ -120,7 +123,6 @@ const Parse: ParseType = {
   CoreManager:  CoreManager,
   Config:  Config,
   Error:  ParseError,
-  EventuallyQueue:  EventuallyQueue,
   FacebookUtils: FacebookUtils,
   File:  File,
   GeoPoint:  GeoPoint,
@@ -146,10 +148,21 @@ const Parse: ParseType = {
   Storage:  Storage,
   User:  User,
   LiveQueryClient:  LiveQueryClient,
-  LiveQuery:  undefined,
   IndexedDB: undefined,
   Hooks: undefined,
   Parse: undefined,
+
+  /**
+   * @member {EventuallyQueue} Parse.EventuallyQueue
+   * @static
+   */
+  set EventuallyQueue(queue: EventuallyQueue) {
+    CoreManager.setEventuallyQueue(queue);
+  },
+
+  get EventuallyQueue() {
+    return CoreManager.getEventuallyQueue();
+  },
 
   /**
    * Call this method first to set up your authentication tokens for Parse.
@@ -181,9 +194,13 @@ const Parse: ParseType = {
     CoreManager.set('MASTER_KEY', masterKey);
     CoreManager.set('USE_MASTER_KEY', false);
     CoreManager.setIfNeeded('EventEmitter', EventEmitter);
+    CoreManager.setIfNeeded('LiveQuery', new ParseLiveQuery());
+    CoreManager.setIfNeeded('CryptoController', CryptoController);
+    CoreManager.setIfNeeded('LocalDatastoreController', LocalDatastoreController);
+    CoreManager.setIfNeeded('StorageController', StorageController);
+    CoreManager.setIfNeeded('WebSocketController', WebSocketController);
 
-    Parse.LiveQuery = new LiveQuery();
-    CoreManager.setIfNeeded('LiveQuery', Parse.LiveQuery);
+    CoreManager.setIfNeeded('EventuallyQueue', EventuallyQueue);
 
     if (process.env.PARSE_BUILD === 'browser') {
       Parse.IndexedDB = CoreManager.setIfNeeded('IndexedDBStorageController', IndexedDBStorageController);
@@ -290,6 +307,17 @@ const Parse: ParseType = {
   },
 
   /**
+   * @member {ParseLiveQuery} Parse.LiveQuery
+   * @static
+   */
+  set LiveQuery(liveQuery: ParseLiveQuery) {
+    CoreManager.setLiveQuery(liveQuery);
+  },
+  get LiveQuery() {
+    return CoreManager.getLiveQuery();
+  },
+
+  /**
    * @member {string} Parse.liveQueryServerURL
    * @static
    */
@@ -380,7 +408,7 @@ const Parse: ParseType = {
     if (!this.LocalDatastore.isEnabled) {
       this.LocalDatastore.isEnabled = true;
       if (polling) {
-        EventuallyQueue.poll(ms);
+        CoreManager.getEventuallyQueue().poll(ms);
       }
     }
   },
@@ -433,7 +461,6 @@ const Parse: ParseType = {
   },
 };
 
-CoreManager.setCryptoController(CryptoController);
 CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);
 
