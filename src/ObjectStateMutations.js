@@ -122,7 +122,8 @@ export function estimateAttributes(
           const fields = attr.split('.');
           const first = fields[0];
           const last = fields[fields.length - 1];
-          data[first] = { ...serverData[first] };
+          // data could be locally set/updated and not saved yet, or multiple ops a.b and a.c can have been processed already
+          data[first] = { ...(data[first] || serverData[first]) };
           let object = { ...data };
           for (let i = 0; i < fields.length - 1; i++) {
             const key = fields[i];

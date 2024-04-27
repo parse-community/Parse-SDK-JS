@@ -499,6 +499,26 @@ describe('ParseObject', () => {
     expect(o.has('age')).toBe(true);
   });
 
+  it('setting multiple properties in an object', () => {
+    const o = new ParseObject('Person');
+    o._finishFetch({
+      objectId: 'p98',
+      age: 28,
+      data: { foo: 'bar' },
+    });
+    expect(o.dirty()).toBe(false);
+    expect(o.dirty()).toBe(false);
+    expect(o.has('data')).toBe(true);
+
+    o.set('data.score', 10);
+    expect(o.get('data')).toEqual({ foo: 'bar', score: 10 });
+    expect(o.dirty('data')).toBe(true);
+
+    o.set('data.score2', 12);
+    expect(o.get('data')).toEqual({ foo: 'bar', score: 10, score2: 12 });
+    expect(o.dirty('data')).toBe(true);
+  });
+
   it('can tell if a field is dirty', () => {
     const o = new ParseObject('Person');
     o._finishFetch({
