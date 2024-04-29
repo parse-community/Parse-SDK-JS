@@ -544,6 +544,84 @@ describe('ParseObject', () => {
     expect(o2.attributes).toEqual({});
   });
 
+  it('can set sub property of a local changed object without creating an op', () => {
+    const o = new ParseObject('Person');
+    o.set('data', { a: 2 });
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(1);
+
+    o.set('datab', {v: 2});
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(2);
+
+    o.set('data.b', 3);
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(2);
+    expect(o._getPendingOps()[0]['data']._value).toStrictEqual({ a: 2, b: 3});
+
+    o.set({"data.c" : 5, "data.d.a": 4});
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(2);
+    expect(o._getPendingOps()[0]['data']._value).toStrictEqual({ a: 2, b: 3, c: 5, d: { a: 4 }});
+  });
+
+  it('can unset sub property of a local changed object without creating an op', () => {
+    const o = new ParseObject('Person');
+    o.set('data', { a: 2, b: 4 });
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(1);
+
+    o.unset('data.b');
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(1);
+    expect(o._getPendingOps()[0]['data']._value).toStrictEqual({ a: 2});
+
+    o.unset('data.c');
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(1);
+    expect(o._getPendingOps()[0]['data']._value).toStrictEqual({ a: 2});
+
+    o.unset('data.c.d');
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(1);
+    expect(o._getPendingOps()[0]['data']._value).toStrictEqual({ a: 2});
+
+    o.set('data.b.c', 3);
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(1);
+    expect(o._getPendingOps()[0]['data']._value).toStrictEqual({ a: 2, b: { c: 3 }});
+
+    o.unset('data.b.c');
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(1);
+    expect(o._getPendingOps()[0]['data']._value).toStrictEqual({ a: 2, b: {}});
+
+    o.unset('data.b');
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(1);
+    expect(o._getPendingOps()[0]['data']._value).toStrictEqual({ a: 2});
+  });
+
+  it('can increment sub property of a local changed object without creating an op', () => {
+    const o = new ParseObject('Person');
+    o.set('data', {a: 2, b: 4});
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(1);
+
+    o.increment('data.a', 3);
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(1);
+    expect(o._getPendingOps()[0]['data']._value).toStrictEqual({ a: 5, b: 4});
+  });
+
+  it('collapse sub-property sets with parents as well', () => {
+    const o = new ParseObject('Person');
+    o._finishFetch({
+      objectId: 'o12312',
+      data: { a: 3 }
+    });
+    expect(o.dirty()).toBe(false);
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(0);
+
+    o.set('data.b', { c: 1 });
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(1);
+
+    o.set('data.boo', 4);
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(2);
+    expect(o._getPendingOps()[0]['data.boo']._value).toStrictEqual(4);
+
+    o.set('data.b.c', 2);
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(2);
+    expect(o._getPendingOps()[0]['data.b']._value).toStrictEqual({ c: 2 });
+  });
+
   it('can clear all fields', () => {
     const o = new ParseObject('Person');
     o._finishFetch({

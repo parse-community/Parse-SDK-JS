@@ -24,6 +24,8 @@ import {
   AddUniqueOp,
   RemoveOp,
   RelationOp,
+  validPendingParentOp,
+  applyOpToParent,
 } from './ParseOp';
 import ParseQuery from './ParseQuery';
 import ParseRelation from './ParseRelation';
@@ -771,8 +773,14 @@ class ParseObject {
     const last = pendingOps.length - 1;
     const stateController = CoreManager.getObjectStateController();
     for (const attr in newOps) {
-      const nextOp = newOps[attr].mergeWith(pendingOps[last][attr]);
-      stateController.setPendingOp(this._getStateIdentifier(), attr, nextOp);
+      const parentAttr = validPendingParentOp(attr, pendingOps[last]);
+      if (parentAttr) {
+        const parentOp = pendingOps[last][parentAttr];
+        applyOpToParent(parentAttr, parentOp, attr, newOps[attr]);
+      } else {
+        const nextOp = newOps[attr].mergeWith(pendingOps[last][attr]);
+        stateController.setPendingOp(this._getStateIdentifier(), attr, nextOp);
+      }
     }
 
     return this;

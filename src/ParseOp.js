@@ -54,6 +54,56 @@ export function opFromJSON(json: { [key: string]: any }): ?Op {
   return null;
 }
 
+export function validPendingParentOp(attr, pendingOps) {
+  if (!pendingOps || pendingOps[attr]) {
+    return null;
+  }
+
+  const lastDot = attr.lastIndexOf('.');
+  if (lastDot === -1) {
+    return null;
+  }
+
+  // This is an object with dot notation. So need to also match "parents"
+  const parentString = attr.substring(0, lastDot);
+  for (const pendingAttr in pendingOps) {
+    if (parentString.startsWith(pendingAttr)) {
+      return pendingAttr;
+    }
+  }
+}
+
+export function applyOpToParent(parentAttr: string, parent: Op, attr: string, op: Op) {
+  const subAttr = attr.substring(parentAttr.length + 1);
+
+  if (!(parent instanceof SetOp) || !subAttr) {
+    throw new TypeError(`Trying to set sub property on a invalid property (${parentAttr} -> ${subAttr})`);
+  }
+
+  let object = parent._value;
+  const fields = subAttr.split('.');
+  const last = fields[fields.length - 1];
+  for (let i = 0; i < fields.length - 1; i++) {
+    const key = fields[i];
+    if (!(key in object)) {
+      if (op instanceof UnsetOp) {
+        // property already doesn't exist, we don't have to do anytihng
+        return;
+      }
+      object[key] = {};
+    }
+    object = object[key];
+  }
+
+  if (op instanceof UnsetOp) {
+    delete object[last];
+  } else {
+    object[last] = op.applyTo(object[last]);
+  }
+
+  return parent;
+}
+
 export class Op {
   // Empty parent class
   applyTo(value: mixed): mixed {} /* eslint-disable-line no-unused-vars */
