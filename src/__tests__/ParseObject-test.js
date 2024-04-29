@@ -622,6 +622,20 @@ describe('ParseObject', () => {
     expect(o._getPendingOps()[0]['data.b']._value).toStrictEqual({ c: 2 });
   });
 
+  it('throw exception on non-sensical parent (not set)', async () => {
+    const o = new ParseObject('Person');
+    o.increment('data', 2);
+    expect(Object.keys(o._getPendingOps()[0]).length).toBe(1);
+
+    try {
+      o.set('data.a', 3);
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('Trying to set sub property on a invalid property (data -> a)');
+    }
+
+  });
+
   it('can clear all fields', () => {
     const o = new ParseObject('Person');
     o._finishFetch({
