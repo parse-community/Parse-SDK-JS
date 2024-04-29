@@ -161,6 +161,7 @@ const flushPromises = require('./test_helpers/flushPromises');
 
 CoreManager.setLocalDatastore(mockLocalDatastore);
 CoreManager.setRESTController(RESTController);
+CoreManager.setEventuallyQueue(EventuallyQueue);
 CoreManager.setInstallationController({
   currentInstallationId() {
     return Promise.resolve('iid');

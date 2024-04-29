@@ -28,6 +28,7 @@ A library that gives you access to the powerful Parse Server backend from your J
 
 - [Getting Started](#getting-started)
   - [Using Parse on Different Platforms](#using-parse-on-different-platforms)
+    - [Core Manager](#core-manager)
 - [Compatibility](#compatibility)
   - [Parse Server](#parse-server)
   - [Node.js](#nodejs)
@@ -88,6 +89,18 @@ $ npm install @types/parse
 ```
 
 Types are updated manually after every release. If a definition doesn't exist, please submit a pull request to [@types/parse][types-parse]
+
+#### Core Manager
+
+The SDK has a [Core Manager](src/CoreManager.js) that handles all configurations and controllers. These modules can be swapped out for customization before you initialize the SDK. For full list of all available modules take a look at the [Core Manager Documentation](src/CoreManager.js).
+
+```js
+// Configuration example
+Parse.CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1)
+
+// Controller example
+Parse.CoreManager.setRESTController(MyRESTController);
+```
 
 ## Compatibility
 

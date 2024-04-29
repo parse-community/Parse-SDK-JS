@@ -111,11 +111,14 @@ const RESTController = {
           let response;
           try {
             response = JSON.parse(xhr.responseText);
+            const availableHeaders = typeof xhr.getAllResponseHeaders === 'function' ? xhr.getAllResponseHeaders() : "";
             headers = {};
-            if (typeof xhr.getResponseHeader === 'function' && xhr.getResponseHeader('access-control-expose-headers')) {
+            if (typeof xhr.getResponseHeader === 'function' && availableHeaders?.indexOf('access-control-expose-headers') >= 0) {
               const responseHeaders = xhr.getResponseHeader('access-control-expose-headers').split(', ');
               responseHeaders.forEach(header => {
-                headers[header] = xhr.getResponseHeader(header.toLowerCase());
+                if (availableHeaders.indexOf(header.toLowerCase()) >= 0) {
+                  headers[header] = xhr.getResponseHeader(header.toLowerCase());
+                }
               });
             }
           } catch (e) {
@@ -248,10 +251,6 @@ const RESTController = {
       } else {
         throw new Error('Cannot use the Master Key, it has not been provided.');
       }
-    }
-
-    if (options.ignoreEmailVerification !== undefined) {
-      payload.ignoreEmailVerification = options.ignoreEmailVerification;
     }
 
     if (CoreManager.get('FORCE_REVOCABLE_SESSION')) {

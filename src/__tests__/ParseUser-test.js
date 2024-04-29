@@ -34,6 +34,7 @@ const flushPromises = require('./test_helpers/flushPromises');
 const mockAsyncStorage = require('./test_helpers/mockAsyncStorage');
 const CoreManager = require('../CoreManager');
 const CryptoController = require('../CryptoController');
+const StorageController = require('../StorageController.default');
 const LocalDatastore = require('../LocalDatastore');
 const ParseObject = require('../ParseObject').default;
 const ParseUser = require('../ParseUser').default;
@@ -44,6 +45,7 @@ const AnonymousUtils = require('../AnonymousUtils').default;
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 CoreManager.setCryptoController(CryptoController);
+CoreManager.setStorageController(StorageController);
 
 describe('ParseUser', () => {
   beforeEach(() => {
