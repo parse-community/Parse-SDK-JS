@@ -25,6 +25,7 @@ jest.dontMock('../ParseACL');
 jest.dontMock('../ParseQuery');
 jest.dontMock('../LiveQuerySubscription');
 jest.dontMock('../LocalDatastore');
+jest.dontMock('../WebSocketController');
 
 jest.useFakeTimers();
 
@@ -39,10 +40,12 @@ const EventEmitter = require('../EventEmitter');
 const LiveQueryClient = require('../LiveQueryClient').default;
 const ParseObject = require('../ParseObject').default;
 const ParseQuery = require('../ParseQuery').default;
+const WebSocketController = require('../WebSocketController');
 const { resolvingPromise } = require('../promiseUtils');
 const events = require('events');
 
 CoreManager.setLocalDatastore(mockLocalDatastore);
+CoreManager.setWebSocketController(WebSocketController);
 
 describe('LiveQueryClient', () => {
   beforeEach(() => {
