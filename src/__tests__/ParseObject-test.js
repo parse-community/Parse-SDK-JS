@@ -676,23 +676,55 @@ describe('ParseObject', () => {
       objectField: {
         number: 5,
         letter: 'a',
+        nested: {
+          number: 0,
+          letter: 'b',
+        },
       },
     });
 
     expect(o.attributes).toEqual({
-      objectField: { number: 5, letter: 'a' },
+      objectField: { number: 5, letter: 'a', nested: { number: 0, letter: 'b' } },
     });
     o.set('objectField.number', 20);
     o.set('objectField.letter', 'b');
+    o.set('objectField.nested.number', 1);
+    o.set('objectField.nested.letter', 'c');
 
     expect(o.attributes).toEqual({
-      objectField: { number: 20, letter: 'b' },
+      objectField: { number: 20, letter: 'b', nested: { number: 1, letter: 'c' } },
     });
     expect(o.op('objectField.number') instanceof SetOp).toBe(true);
-    expect(o.dirtyKeys()).toEqual(['objectField.number', 'objectField.letter', 'objectField']);
+    expect(o.dirtyKeys()).toEqual([
+      'objectField.number',
+      'objectField.letter',
+      'objectField.nested.number',
+      'objectField.nested.letter',
+      'objectField',
+    ]);
     expect(o._getSaveJSON()).toEqual({
       'objectField.number': 20,
       'objectField.letter': 'b',
+      'objectField.nested.number': 1,
+      'objectField.nested.letter': 'c',
+    });
+
+    o.revert('objectField.nested.number');
+    o.revert('objectField.nested.letter');
+    expect(o._getSaveJSON()).toEqual({
+      'objectField.number': 20,
+      'objectField.letter': 'b',
+    });
+    expect(o.attributes).toEqual({
+      objectField: { number: 20, letter: 'b', nested: { number: 0, letter: 'b' } },
+    });
+
+    // Also test setting new root fields using the dot notation
+    o.set('objectField2.number', 0);
+    expect(o._getSaveJSON()).toEqual({
+      'objectField.number': 20,
+      'objectField.letter': 'b',
+      'objectField2.number': 0,
     });
   });
 
