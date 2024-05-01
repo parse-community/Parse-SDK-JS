@@ -1,3 +1,10 @@
+# [5.1.0-alpha.7](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.6...5.1.0-alpha.7) (2024-05-01)
+
+
+### Bug Fixes
+
+* Multiple object updates of nested keys overwrite each other ([#1451](https://github.com/parse-community/Parse-SDK-JS/issues/1451)) ([fa4341a](https://github.com/parse-community/Parse-SDK-JS/commit/fa4341a8c0ce5a9c478435250b4af6ea020a45bd))
+
 # [5.1.0-alpha.6](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.5...5.1.0-alpha.6) (2024-04-25)
 
 
