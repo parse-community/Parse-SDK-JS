@@ -726,6 +726,10 @@ describe('ParseObject', () => {
       'objectField.letter': 'b',
       'objectField2.number': 0,
     });
+    expect(o.attributes).toEqual({
+      objectField: { number: 20, letter: 'b', nested: { number: 0, letter: 'b' } },
+      objectField2: { number: 0 },
+    });
   });
 
   it('can increment a nested field', () => {
