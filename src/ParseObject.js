@@ -470,10 +470,6 @@ class ParseObject {
         json[attr] = encode(attrs[attr], false, false, seen, offline);
       }
     }
-    const pending = this._getPendingOps();
-    for (const attr in pending[0]) {
-      json[attr] = pending[0][attr].toJSON(offline);
-    }
 
     if (this.id) {
       json.objectId = this.id;
