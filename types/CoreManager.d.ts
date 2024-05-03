@@ -14,6 +14,7 @@ import type { HookDeclaration, HookDeleteArg } from './ParseHooks';
 import type ParseConfig from './ParseConfig';
 import type LiveQueryClient from './LiveQueryClient';
 import type ParseSchema from './ParseSchema';
+import type ParseInstallation from './ParseInstallation';
 type AnalyticsController = {
     track: (name: string, dimensions: {
         [key: string]: string;
@@ -54,6 +55,8 @@ type FileController = {
 };
 type InstallationController = {
     currentInstallationId: () => Promise<string>;
+    currentInstallation: () => Promise<ParseInstallation | null>;
+    updateInstallationOnDisk: (installation: ParseInstallation) => Promise<void>;
 };
 type ObjectController = {
     fetch: (object: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions) => Promise<any>;

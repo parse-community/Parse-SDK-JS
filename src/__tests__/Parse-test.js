@@ -240,6 +240,8 @@ describe('Parse module', () => {
   it('_getInstallationId', () => {
     const controller = {
       currentInstallationId: () => '1234',
+      currentInstallation: () => {},
+      updateInstallationOnDisk: () => {},
     };
     CoreManager.setInstallationController(controller);
     expect(Parse._getInstallationId()).toBe('1234');

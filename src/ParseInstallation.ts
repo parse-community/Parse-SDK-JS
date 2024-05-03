@@ -1,13 +1,18 @@
-/**
- * @flow
- */
-
 import CoreManager from './CoreManager';
 import ParseObject from './ParseObject';
 
 import type { AttributeMap } from './ObjectStateMutations';
 
-const DEVICE_TYPES = {
+type DeviceInterface = {
+  IOS: string;
+  MACOS: string;
+  TVOS: string;
+  FCM: string;
+  ANDROID: string;
+  WEB: string;
+}
+
+const DEVICE_TYPES: DeviceInterface = {
   IOS: 'ios',
   MACOS: 'macos',
   TVOS: 'tvos',
@@ -31,7 +36,7 @@ class ParseInstallation extends ParseObject {
   /**
    * @param {object} attributes The initial set of data to store in the object.
    */
-  constructor(attributes: ?AttributeMap) {
+  constructor(attributes?: AttributeMap) {
     super('_Installation');
     if (attributes && typeof attributes === 'object') {
       if (!this.set(attributes)) {
@@ -41,72 +46,74 @@ class ParseInstallation extends ParseObject {
   }
 
   /**
-   * Gets the app identifier for this installation
+   * A unique identifier for this installation’s client application. In iOS, this is the Bundle Identifier.
    *
    * @property {string} appIdentifier
-   * @returns {string}
+   * @static
    */
-  get appIdentifier(): ?string {
+  get appIdentifier() {
     return this.get('appIdentifier');
   }
 
   /**
-   * Gets the app version for this installation
+   * The version string of the client application to which this installation belongs.
    *
    * @property {string} appVersion
-   * @returns {string}
+   * @static
    */
-  get appVersion(): ?string {
+  get appVersion() {
     return this.get('appVersion');
   }
 
   /**
-   * Gets the app name for this installation
+   * The display name of the client application to which this installation belongs.
    *
    * @property {string} appName
-   * @returns {string}
+   * @static
    */
-  get appName(): ?string {
+  get appName() {
     return this.get('appName');
   }
 
   /**
-   * Gets the badge number for this installation
+   * The current value of the icon badge for iOS apps.
+   * Changes to this value on the server will be used
+   * for future badge-increment push notifications.
    *
    * @property {number} badge
-   * @returns {number}
+   * @static
    */
-  get badge(): ?number {
+  get badge() {
     return this.get('badge');
   }
 
   /**
-   * Gets the array of channels for this installation
+   * An array of the channels to which a device is currently subscribed.
    *
-   * @property {Array} channels
-   * @returns {Array}
+   * @property {string[]} channels
+   * @static
    */
-  get channels(): ?Array<string> {
+  get channels() {
     return this.get('channels');
   }
 
   /**
-   * Gets the device token for this installation
+   * Token used to deliver push notifications to the device.
    *
    * @property {string} deviceToken
-   * @returns {string}
+   * @static
    */
-  get deviceToken(): ?string {
+  get deviceToken() {
     return this.get('deviceToken');
   }
 
   /**
-   * Gets the device type for this installation
+   * The type of device, “ios”, “android”, “web”, etc.
    *
    * @property {string} deviceType
-   * @returns {string}
+   * @static
    */
-  get deviceType(): ?string {
+  get deviceType() {
     return this.get('deviceType');
   }
 
@@ -114,19 +121,19 @@ class ParseInstallation extends ParseObject {
    * Gets the GCM sender identifier for this installation
    *
    * @property {string} GCMSenderId
-   * @returns {string}
+   * @static
    */
-  get GCMSenderId(): ?string {
+  get GCMSenderId() {
     return this.get('GCMSenderId');
   }
 
   /**
-   * Gets the installationId for this installation
+   * Universally Unique Identifier (UUID) for the device used by Parse. It must be unique across all of an app’s installations.
    *
    * @property {string} installationId
-   * @returns {string}
+   * @static
    */
-  get installationId(): ?string {
+  get installationId() {
     return this.get('installationId');
   }
 
@@ -134,9 +141,9 @@ class ParseInstallation extends ParseObject {
    * Gets the local identifier for this installation
    *
    * @property {string} localeIdentifier
-   * @returns {string}
+   * @static
    */
-  get localeIdentifier(): ?string {
+  get localeIdentifier() {
     return this.get('localeIdentifier');
   }
 
@@ -144,19 +151,19 @@ class ParseInstallation extends ParseObject {
    * Gets the parse server version for this installation
    *
    * @property {string} parseVersion
-   * @returns {string}
+   * @static
    */
-  get parseVersion(): ?string {
+  get parseVersion() {
     return this.get('parseVersion');
   }
 
   /**
-   * Gets the push type for this installation
+   * This field is reserved for directing Parse to the push delivery network to be used.
    *
    * @property {string} pushType
-   * @returns {string}
+   * @static
    */
-  get pushType(): ?string {
+  get pushType() {
     return this.get('pushType');
   }
 
@@ -164,9 +171,9 @@ class ParseInstallation extends ParseObject {
    * Gets the time zone for this installation
    *
    * @property {string} timeZone
-   * @returns {string}
+   * @static
    */
-  get timeZone(): ?string {
+  get timeZone() {
     return this.get('timeZone');
   }
 
@@ -182,10 +189,10 @@ class ParseInstallation extends ParseObject {
    * Parse.Installation.DEVICE_TYPES.WEB
    * </pre
    *
-   * @property {string} DEVICE_TYPES
-   * @returns {string}
+   * @property {Object} DEVICE_TYPES
+   * @static
    */
-  static get DEVICE_TYPES(): ?string {
+  static get DEVICE_TYPES(): DeviceInterface {
     return DEVICE_TYPES;
   }
 

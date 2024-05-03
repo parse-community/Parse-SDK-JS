@@ -1,7 +1,4 @@
-/**
- * @flow
- */
-
+import CoreManager from './CoreManager';
 import Storage from './Storage';
 import ParseInstallation from './ParseInstallation';
 import uuidv4 from './uuid';
@@ -9,12 +6,12 @@ import uuidv4 from './uuid';
 const CURRENT_INSTALLATION_KEY = 'currentInstallation';
 const CURRENT_INSTALLATION_ID_KEY = 'currentInstallationId';
 
-let iidCache = null;
+let iidCache: string | null = null;
 let currentInstallationCache = null;
 let currentInstallationCacheMatchesDisk = false;
 
 const InstallationController = {
-  async updateInstallationOnDisk(installation: ParseInstallation) {
+  async updateInstallationOnDisk(installation: ParseInstallation): Promise<void> {
     const path = Storage.generatePath(CURRENT_INSTALLATION_KEY);
     await Storage.setItemAsync(path, JSON.stringify(installation.toJSON()));
     this._setCurrentInstallationCache(installation);
@@ -37,7 +34,7 @@ const InstallationController = {
     return iid;
   },
 
-  async currentInstallation(): Promise<?ParseInstallation> {
+  async currentInstallation(): Promise<ParseInstallation | null> {
     if (currentInstallationCache) {
       return currentInstallationCache;
     }
@@ -58,6 +55,7 @@ const InstallationController = {
     const installation = new ParseInstallation();
     installation.set('deviceType', ParseInstallation.DEVICE_TYPES.WEB);
     installation.set('installationId', installationId);
+    installation.set('parseVersion', CoreManager.get('VERSION'));
     currentInstallationCache = installation;
     await Storage.setItemAsync(path, JSON.stringify(installation.toJSON()))
     return installation;
@@ -80,3 +78,4 @@ const InstallationController = {
 };
 
 module.exports = InstallationController;
+export default InstallationController;
