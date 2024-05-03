@@ -92,7 +92,7 @@ Types are updated manually after every release. If a definition doesn't exist, p
 
 #### Core Manager
 
-The SDK has a [Core Manager](src/CoreManager.js) that handles all configurations and controllers. These modules can be swapped out for customization before you initialize the SDK. For full list of all available modules take a look at the [Core Manager Documentation](src/CoreManager.js).
+The SDK has a [Core Manager](src/CoreManager.ts) that handles all configurations and controllers. These modules can be swapped out for customization before you initialize the SDK. For full list of all available modules take a look at the [Core Manager Documentation](src/CoreManager.ts).
 
 ```js
 // Configuration example

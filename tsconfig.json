@@ -8,8 +8,7 @@
     "noImplicitAny": false,
     "allowJs": false
   },
-  "files": [
-    "src/Parse.ts",
-    "src/ParseSession.ts"
+  "include": [
+    "src/*.ts"
   ]
 }
