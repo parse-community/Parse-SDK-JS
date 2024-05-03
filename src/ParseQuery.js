@@ -907,6 +907,10 @@ class ParseQuery {
       if (!objects[0]) {
         return undefined;
       }
+      // Return generic object when explain is used
+      if (this._explain) {
+        return objects[0];
+      }
       if (!objects[0].className) {
         objects[0].className = this.className;
       }
