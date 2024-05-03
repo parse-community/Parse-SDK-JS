@@ -1,10 +1,14 @@
 {
   "plugins": ["node_modules/jsdoc-babel", "plugins/markdown"],
   "babel": {
-      "plugins": ["@babel/plugin-transform-flow-comments"]
+    "babelrc": false,
+    "extensions": ["js", "ts", "jsx", "tsx"],
+    "plugins": ["@babel/plugin-transform-flow-comments"],
+    "presets": ["@babel/preset-typescript"]
   },
   "source": {
     "include":  ["./README.md"],
+    "includePattern": "\\.(jsx|js|ts|tsx)$",
     "excludePattern": "(^|\\/|\\\\)_"
   },
   "templates": {
