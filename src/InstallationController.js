@@ -3,35 +3,79 @@
  */
 
 import Storage from './Storage';
-const uuidv4 = require('./uuid');
+import ParseInstallation from './ParseInstallation';
+import uuidv4 from './uuid';
+
+const CURRENT_INSTALLATION_KEY = 'currentInstallation';
+const CURRENT_INSTALLATION_ID_KEY = 'currentInstallationId';
 
 let iidCache = null;
+let currentInstallationCache = null;
+let currentInstallationCacheMatchesDisk = false;
 
 const InstallationController = {
-  currentInstallationId(): Promise<string> {
+  async updateInstallationOnDisk(installation: ParseInstallation) {
+    const path = Storage.generatePath(CURRENT_INSTALLATION_KEY);
+    await Storage.setItemAsync(path, JSON.stringify(installation.toJSON()));
+    this._setCurrentInstallationCache(installation);
+  },
+
+  async currentInstallationId(): Promise<string> {
     if (typeof iidCache === 'string') {
-      return Promise.resolve(iidCache);
+      return iidCache;
     }
-    const path = Storage.generatePath('installationId');
-    return Storage.getItemAsync(path).then(iid => {
-      if (!iid) {
-        iid = uuidv4();
-        return Storage.setItemAsync(path, iid).then(() => {
-          iidCache = iid;
-          return iid;
-        });
-      }
-      iidCache = iid;
-      return iid;
-    });
+    const path = Storage.generatePath(CURRENT_INSTALLATION_ID_KEY);
+    let iid = await Storage.getItemAsync(path);
+    if (!iid) {
+      iid = uuidv4();
+      return Storage.setItemAsync(path, iid).then(() => {
+        iidCache = iid;
+        return iid;
+      });
+    }
+    iidCache = iid;
+    return iid;
+  },
+
+  async currentInstallation(): Promise<?ParseInstallation> {
+    if (currentInstallationCache) {
+      return currentInstallationCache;
+    }
+    if (currentInstallationCacheMatchesDisk) {
+      return null;
+    }
+    const path = Storage.generatePath(CURRENT_INSTALLATION_KEY);
+    let installationData = await Storage.getItemAsync(path);
+    currentInstallationCacheMatchesDisk = true;
+    if (installationData) {
+      installationData = JSON.parse(installationData);
+      installationData.className = '_Installation';
+      const current = ParseInstallation.fromJSON(installationData);
+      currentInstallationCache = current;
+      return current;
+    }
+    const installationId = await this.currentInstallationId();
+    const installation = new ParseInstallation();
+    installation.set('deviceType', ParseInstallation.DEVICE_TYPES.WEB);
+    installation.set('installationId', installationId);
+    currentInstallationCache = installation;
+    await Storage.setItemAsync(path, JSON.stringify(installation.toJSON()))
+    return installation;
   },
 
   _clearCache() {
     iidCache = null;
+    currentInstallationCache = null;
+    currentInstallationCacheMatchesDisk = false;
   },
 
   _setInstallationIdCache(iid: string) {
     iidCache = iid;
+  },
+
+  _setCurrentInstallationCache(installation: ParseInstallation, matchesDisk: boolean = true) {
+    currentInstallationCache = installation;
+    currentInstallationCacheMatchesDisk = matchesDisk;
   },
 };
 
