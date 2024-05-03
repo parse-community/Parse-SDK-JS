@@ -120,14 +120,14 @@ export function estimateAttributes(
         if (attr.includes('.')) {
           // convert a.b.c into { a: { b: { c: value } } }
           const fields = attr.split('.');
-          const first = fields[0];
           const last = fields[fields.length - 1];
-          data[first] = { ...serverData[first] };
-          let object = { ...data };
+          let object = data;
           for (let i = 0; i < fields.length - 1; i++) {
             const key = fields[i];
             if (!(key in object)) {
               object[key] = {};
+            } else {
+              object[key] = { ...object[key] };
             }
             object = object[key];
           }

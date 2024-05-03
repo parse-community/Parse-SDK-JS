@@ -292,6 +292,18 @@ describe('Parse Object', () => {
     assert.strictEqual(result.get('a').b.c.d, 2);
   });
 
+  it('can set nested fields without repeating pending operations on toJSON (regression test for #1452)', async () => {
+    const a = new Parse.Object('MyObject');
+    a.set('obj', {});
+    await a.save();
+    a.set('obj.a', 0);
+    const json = a.toJSON();
+    expect(json.obj).toEqual({ a: 0 });
+    expect(new Set(Object.keys(json))).toEqual(
+      new Set(['objectId', 'createdAt', 'updatedAt', 'obj'])
+    );
+  });
+
   it('can increment nested field and retain full object', async () => {
     const obj = new Parse.Object('TestIncrementObject');
     obj.set('objectField', { number: 5, letter: 'a' });

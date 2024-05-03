@@ -1,3 +1,17 @@
+# [5.1.0-alpha.8](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.7...5.1.0-alpha.8) (2024-05-02)
+
+
+### Bug Fixes
+
+* Pending updates to nested field causes `ParseObject.toJSON()` to return incorrect object ([#1453](https://github.com/parse-community/Parse-SDK-JS/issues/1453)) ([23cc573](https://github.com/parse-community/Parse-SDK-JS/commit/23cc573ccae9e11288aaeff61f478e59bf9bae0c))
+
+# [5.1.0-alpha.7](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.6...5.1.0-alpha.7) (2024-05-01)
+
+
+### Bug Fixes
+
+* Multiple object updates of nested keys overwrite each other ([#1451](https://github.com/parse-community/Parse-SDK-JS/issues/1451)) ([fa4341a](https://github.com/parse-community/Parse-SDK-JS/commit/fa4341a8c0ce5a9c478435250b4af6ea020a45bd))
+
 # [5.1.0-alpha.6](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.5...5.1.0-alpha.6) (2024-04-25)
 
 
