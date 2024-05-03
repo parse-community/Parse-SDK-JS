@@ -18,6 +18,10 @@ if (process.env.PARSE_BUILD === 'weapp') {
 type Base64 = { base64: string };
 type Uri = { uri: string };
 type FileData = Array<number> | Base64 | Blob | Uri;
+export type FileSaveOptions = FullOptions & {
+  metadata?: { [key: string]: any },
+  tags?: { [key: string]: any },
+};
 export type FileSource =
   | {
       format: 'file',
