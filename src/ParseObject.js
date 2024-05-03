@@ -339,9 +339,12 @@ class ParseObject {
     };
   }
 
-  _finishFetch(serverData: AttributeMap) {
+  _finishFetch(serverData: AttributeMap, override?: boolean) {
     if (!this.id && serverData.objectId) {
       this.id = serverData.objectId;
+    }
+    if (override) {
+      this._clearServerData();
     }
     const stateController = CoreManager.getObjectStateController();
     stateController.initializeState(this._getStateIdentifier());

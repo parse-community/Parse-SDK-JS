@@ -1041,6 +1041,61 @@ describe('ParseUser', () => {
       });
   });
 
+  it('user who logs out, deletes attribute, then logs back in has correct attributes', async () => {
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    CoreManager.setRESTController({
+      async request(method, path) {
+        expect(path).toBe('login');
+        return {
+          objectId: 'uid2',
+          username: 'username',
+          sessionToken: '123abc',
+          fieldToBeDeleted: 'This field is returned in the first login but not the second',
+        };
+      },
+      ajax() {},
+    });
+
+    const user1 = await ParseUser.logIn('username', 'password');
+    expect(user1.isCurrent()).toBe(true);
+    expect(user1.id).toBe('uid2');
+    expect(user1.get('username')).toBe('username');
+    expect(user1.get('fieldToBeDeleted')).toBe(
+      'This field is returned in the first login but not the second'
+    );
+
+    CoreManager.setRESTController({
+      async request() {
+        return {};
+      },
+      ajax() {},
+    });
+
+    await ParseUser.logOut();
+    expect(ParseUser.current()).toBe(null);
+
+    CoreManager.setRESTController({
+      async request(method, path) {
+        expect(path).toBe('login');
+
+        return {
+          objectId: 'uid2',
+          username: 'username',
+          sessionToken: '123abc',
+          // We assume fieldToBeDeleted was deleted while user was logged out
+        };
+      },
+      ajax() {},
+    });
+
+    const user2 = await ParseUser.logIn('username', 'password');
+    expect(user2.isCurrent()).toBe(true);
+    expect(user2.id).toBe('uid2');
+    expect(user2.get('username')).toBe('username');
+    expect(user2.get('fieldToBeDeleted')).toBe(undefined); // Failing test PR #1442
+  });
+
   it('can retreive a user with sessionToken (me)', async () => {
     ParseUser.disableUnsafeCurrentUser();
     ParseUser._clearCache();

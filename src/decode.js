@@ -27,7 +27,7 @@ export default function decode(value: any): any {
     return ParseObject.fromJSON(value);
   }
   if (value.__type === 'Object' && value.className) {
-    return ParseObject.fromJSON(value);
+    return ParseObject.fromJSON(value, true);
   }
   if (value.__type === 'Relation') {
     // The parent and key fields will be populated by the parent
