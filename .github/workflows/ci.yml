@@ -25,7 +25,6 @@ jobs:
       - run: npm ci
       - name: Check types
         run: npm run test:types
-        continue-on-error: true
   check-docs:
     name: Check Docs
     timeout-minutes: 5
