@@ -118,16 +118,25 @@ export function estimateAttributes(
         }
       } else {
         if (attr.includes('.')) {
-          // convert a.b.c into { a: { b: { c: value } } }
+          // similar to nestedSet function
           const fields = attr.split('.');
           const last = fields[fields.length - 1];
           let object = data;
           for (let i = 0; i < fields.length - 1; i++) {
             const key = fields[i];
             if (!(key in object)) {
-              object[key] = {};
+              const nextKey = fields[i + 1];
+              if (!isNaN(nextKey)) {
+                object[key] = [];
+              } else {
+                object[key] = {};
+              }
             } else {
-              object[key] = { ...object[key] };
+              if (Array.isArray(object[key])) {
+                object[key] = [ ...object[key] ];
+              } else {
+                object[key] = { ...object[key] };
+              }
             }
             object = object[key];
           }
@@ -141,18 +150,34 @@ export function estimateAttributes(
   return data;
 }
 
+/**
+ * Allows setting properties/variables deep in an object.
+ * Converts a.b into { a: { b: value } } for dot notation on Objects
+ * Converts a.0.b into { a: [{ b: value }] } for dot notation on Arrays
+ *
+ * @param obj The object to assign the value to
+ * @param key The key to assign. If it's in a deeper path, then use dot notation (`prop1.prop2.prop3`)
+ * Note that intermediate object(s) in the nested path are automatically created if they don't exist.
+ * @param value The value to assign. If it's an `undefined` then the key is deleted.
+ */
 function nestedSet(obj, key, value) {
-  const path = key.split('.');
-  for (let i = 0; i < path.length - 1; i++) {
-    if (!(path[i] in obj)) {
-      obj[path[i]] = {};
+  const paths = key.split('.');
+  for (let i = 0; i < paths.length - 1; i++) {
+    const path = paths[i];
+    if (!(path in obj)) {
+      const nextPath = paths[i + 1];
+      if (!isNaN(nextPath)) {
+        obj[path] = [];
+      } else {
+        obj[path] = {};
+      }
     }
-    obj = obj[path[i]];
+    obj = obj[path];
   }
   if (typeof value === 'undefined') {
-    delete obj[path[path.length - 1]];
+    delete obj[paths[paths.length - 1]];
   } else {
-    obj[path[path.length - 1]] = value;
+    obj[paths[paths.length - 1]] = value;
   }
 }
 
@@ -162,7 +187,17 @@ export function commitServerChanges(
   changes: AttributeMap
 ) {
   for (const attr in changes) {
-    const val = changes[attr];
+    let val = changes[attr];
+    // Check for JSON array { '0': { something }, '1': { something } }
+    if (
+      val &&
+      typeof val === 'object' &&
+      !Array.isArray(val) &&
+      Object.keys(val).length > 0 &&
+      Object.keys(val).some(k => !isNaN(parseInt(k)))
+    ) {
+      val = Object.values(val);
+    }
     nestedSet(serverData, attr, val);
     if (
       val &&
