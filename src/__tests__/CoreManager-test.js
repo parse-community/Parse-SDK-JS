@@ -136,9 +136,25 @@ describe('CoreManager', () => {
       'InstallationController must implement currentInstallationId()'
     );
 
+    expect(CoreManager.setInstallationController.bind(null, {
+      currentInstallationId: function () {},
+      currentInstallation: function () {},
+    })).toThrow(
+      'InstallationController must implement updateInstallationOnDisk()'
+    );
+
+    expect(CoreManager.setInstallationController.bind(null, {
+      currentInstallationId: function () {},
+      updateInstallationOnDisk: function () {},
+    })).toThrow(
+      'InstallationController must implement currentInstallation()'
+    );
+
     expect(
       CoreManager.setInstallationController.bind(null, {
         currentInstallationId: function () {},
+        currentInstallation: function () {},
+        updateInstallationOnDisk: function () {},
       })
     ).not.toThrow();
   });
@@ -146,6 +162,8 @@ describe('CoreManager', () => {
   it('can set and get InstallationController', () => {
     const controller = {
       currentInstallationId: function () {},
+      currentInstallation: function () {},
+      updateInstallationOnDisk: function () {},
     };
 
     CoreManager.setInstallationController(controller);
