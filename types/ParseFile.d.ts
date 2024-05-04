@@ -1,5 +1,5 @@
 // @ts-nocheck
-type FileSource = {
+export type FileSource = {
     format: "file";
     file: Blob;
     type: string;
@@ -178,4 +178,8 @@ type Base64 = {
 };
 type Uri = {
     uri: string;
+};
+export type FileSaveOptions = FullOptions & {
+    metadata?: { [key: string]: any },
+    tags?: { [key: string]: any },
 };

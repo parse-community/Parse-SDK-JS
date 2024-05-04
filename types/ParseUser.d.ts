@@ -1,5 +1,5 @@
 // @ts-nocheck
-type AuthData = {
+export type AuthData = {
     [key: string]: mixed;
 };
 export default ParseUser;

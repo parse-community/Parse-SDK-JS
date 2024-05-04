@@ -8,16 +8,16 @@ export function mergeFirstPendingState(pendingOps: Array<OpsMap>): void;
 export function estimateAttribute(serverData: AttributeMap, pendingOps: Array<OpsMap>, className: string, id: string | null, attr: string): mixed;
 export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<OpsMap>, className: string, id: string | null): AttributeMap;
 export function commitServerChanges(serverData: AttributeMap, objectCache: ObjectCache, changes: AttributeMap): void;
-type AttributeMap = {
+export type AttributeMap = {
     [attr: string]: any;
 };
-type OpsMap = {
+export type OpsMap = {
     [attr: string]: Op;
 };
-type ObjectCache = {
+export type ObjectCache = {
     [attr: string]: string;
 };
-type State = {
+export type State = {
     serverData: AttributeMap;
     pendingOps: OpsMap[];
     objectCache: ObjectCache;
