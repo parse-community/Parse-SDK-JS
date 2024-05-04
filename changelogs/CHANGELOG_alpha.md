@@ -1,3 +1,10 @@
+# [5.1.0-alpha.9](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.8...5.1.0-alpha.9) (2024-05-04)
+
+
+### Features
+
+* Improve installation object `Parse.Installation.currentInstallation` to support web push notifications ([#2119](https://github.com/parse-community/Parse-SDK-JS/issues/2119)) ([4fc62ce](https://github.com/parse-community/Parse-SDK-JS/commit/4fc62cec0c4ea704f48ec501a5f0182836de45d1))
+
 # [5.1.0-alpha.8](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.7...5.1.0-alpha.8) (2024-05-02)
 
 
