@@ -2,7 +2,7 @@
 type WhereClause = {
     [attr: string]: mixed;
 };
-export type QueryJSON = {
+type QueryJSON = {
     where: WhereClause;
     watch?: string;
     include?: string;
@@ -918,7 +918,7 @@ declare class ParseQuery {
     cancel(): ParseQuery;
     _setRequestTask(options: any): void;
     /**
-     * Sets a comment to the query so that the query
+     * Sets a comment to the query so that the query 
      * can be identified when using a the profiler for MongoDB.
      *
      * @param {string} value a comment can make your profile data easier to interpret and trace.

@@ -49,7 +49,7 @@ export function send(data: PushData, options?: FullOptions): Promise<any>;
  * @returns {Parse.Object} Status of Push.
  */
 export function getPushStatus(pushStatusId: string, options?: FullOptions): Promise<string>;
-export type PushData = {
+type PushData = {
     where?: WhereClause | ParseQuery;
     push_time?: string | Date;
     expiration_time?: string | Date;
