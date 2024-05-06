@@ -183,4 +183,13 @@ describe('encode', () => {
       str: 'abc',
     });
   });
+
+  it('handles circular references', () => {
+    const circularObject = {};
+    circularObject.circularReference = circularObject;
+
+    expect(() => {
+      encode(circularObject, false, false, [], false);
+    }).not.toThrow();
+  });
 });

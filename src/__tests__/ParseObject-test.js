@@ -153,6 +153,7 @@ const ParseObject = require('../ParseObject').default;
 const ParseOp = require('../ParseOp');
 const RESTController = require('../RESTController');
 const SingleInstanceStateController = require('../SingleInstanceStateController');
+const encode = require('../encode').default;
 const unsavedChildren = require('../unsavedChildren').default;
 
 const mockXHR = require('./test_helpers/mockXHR');
@@ -3935,5 +3936,20 @@ describe('ParseObject pin', () => {
       path: 'classes/Person/CUSTOM_ID',
     });
     CoreManager.set('ALLOW_CUSTOM_OBJECT_ID', false);
+  });
+
+  it('handles unsaved circular references', async () => {
+    const a = {};
+    const b = {};
+    a.b = b;
+    b.a = a;
+
+    const object = new ParseObject('Test');
+    object.set('a', a);
+    expect(() => {
+      object.save();
+    }).toThrowError(
+      'Traversing object failed due to high number of recursive calls, likely caused by circular reference within object.'
+    );
   });
 });
