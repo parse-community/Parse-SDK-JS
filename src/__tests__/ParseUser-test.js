@@ -1041,6 +1041,40 @@ describe('ParseUser', () => {
       });
   });
 
+  it('can logout user with clear session', async () => {
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    const RESTController = {
+      request() {
+        const error = new ParseError(ParseError.INVALID_SESSION_TOKEN, 'Invalid session token.');
+        return Promise.reject(error);
+      },
+      ajax() {},
+    };
+    jest.spyOn(RESTController, 'request');
+    CoreManager.setRESTController(RESTController);
+
+    await ParseUser.logOut({ clearSession: true });
+  });
+
+  it('can logout user with clear session and session token', async () => {
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    const RESTController = {
+      request() {
+        const error = new ParseError(ParseError.INVALID_SESSION_TOKEN, 'Invalid session token.');
+        return Promise.reject(error);
+      },
+      ajax() {},
+    };
+    jest.spyOn(RESTController, 'request');
+    CoreManager.setRESTController(RESTController);
+
+    await ParseUser.logOut({ sessionToken: '1234', clearSession: true });
+  });
+
   it('can retreive a user with sessionToken (me)', async () => {
     ParseUser.disableUnsafeCurrentUser();
     ParseUser._clearCache();

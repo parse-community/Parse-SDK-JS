@@ -1203,8 +1203,14 @@ const DefaultController = {
 
   logOut(options: RequestOptions): Promise<ParseUser> {
     const RESTController = CoreManager.getRESTController();
+    const promiseCatch = e => {
+      if (e.code === ParseError.INVALID_SESSION_TOKEN && options.clearSession) {
+        return;
+      }
+      throw e;
+    };
     if (options.sessionToken) {
-      return RESTController.request('POST', 'logout', {}, options);
+      return RESTController.request('POST', 'logout', {}, options).catch(promiseCatch);
     }
     return DefaultController.currentUserAsync().then(currentUser => {
       const path = Storage.generatePath(CURRENT_USER_KEY);
@@ -1212,9 +1218,11 @@ const DefaultController = {
       if (currentUser !== null) {
         const currentSession = currentUser.getSessionToken();
         if (currentSession && isRevocableSession(currentSession)) {
-          promise = promise.then(() => {
-            return RESTController.request('POST', 'logout', {}, { sessionToken: currentSession });
-          });
+          promise = promise
+            .then(() => {
+              return RESTController.request('POST', 'logout', {}, { sessionToken: currentSession });
+            })
+            .catch(promiseCatch);
         }
         currentUser._logOutWithAll();
         currentUser._finishFetch({ sessionToken: undefined });
