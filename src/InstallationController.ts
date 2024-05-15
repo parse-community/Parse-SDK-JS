@@ -49,7 +49,7 @@ const InstallationController = {
       installationData.className = '_Installation';
       const current = ParseInstallation.fromJSON(installationData);
       currentInstallationCache = current;
-      return current;
+      return current as ParseInstallation;
     }
     const installationId = await this.currentInstallationId();
     const installation = new ParseInstallation();

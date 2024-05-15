@@ -3,7 +3,6 @@ import isRevocableSession from './isRevocableSession';
 import ParseObject from './ParseObject';
 import ParseUser from './ParseUser';
 
-import type { AttributeMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
 
 /**
