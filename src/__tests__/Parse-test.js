@@ -4,6 +4,7 @@ jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../Parse');
 jest.dontMock('../ParseObject');
+jest.dontMock('../ParseOp');
 jest.dontMock('../ParseLiveQuery');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('crypto-js/aes');

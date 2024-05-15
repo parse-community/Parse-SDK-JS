@@ -2,6 +2,7 @@
  * @flow
  */
 
+import CoreManager from './CoreManager';
 import ParseACL from './ParseACL';
 import ParseError from './ParseError';
 import ParseObject from './ParseObject';
@@ -141,6 +142,7 @@ class ParseRole extends ParseObject {
   }
 }
 
+CoreManager.setParseRole(ParseRole);
 ParseObject.registerSubclass('_Role', ParseRole);
 
 export default ParseRole;

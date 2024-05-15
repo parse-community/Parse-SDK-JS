@@ -1,6 +1,6 @@
 jest.dontMock('../ParseFile');
 jest.dontMock('../unsavedChildren');
-
+jest.dontMock('../CoreManager');
 function mockObject({ className, localId, id, attributes, dirty }) {
   this.className = className;
   this.localId = localId;
@@ -18,6 +18,8 @@ mockObject.prototype = {
   },
 };
 jest.setMock('../ParseObject', mockObject);
+const CoreManager = require('../CoreManager');
+CoreManager.setParseObject(mockObject);
 
 const ParseFile = require('../ParseFile').default;
 const ParseObject = require('../ParseObject');

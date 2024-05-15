@@ -2,12 +2,11 @@
  * @flow
  */
 
+import CoreManager from './CoreManager';
 import ParseACL from './ParseACL';
 import ParseFile from './ParseFile';
 import ParseGeoPoint from './ParseGeoPoint';
 import ParsePolygon from './ParsePolygon';
-import ParseObject from './ParseObject';
-import { Op } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
 function encode(
@@ -17,6 +16,7 @@ function encode(
   seen: Array<mixed>,
   offline: boolean
 ): any {
+  const ParseObject = CoreManager.getParseObject();
   if (value instanceof ParseObject) {
     if (disallowObjects) {
       throw new Error('Parse Objects not allowed here');
@@ -37,6 +37,7 @@ function encode(
     seen = seen.concat(seenEntry);
     return value._toFullJSON(seen, offline);
   }
+  const { Op } = CoreManager.getParseOp();
   if (
     value instanceof Op ||
     value instanceof ParseACL ||

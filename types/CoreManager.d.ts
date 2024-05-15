@@ -284,5 +284,15 @@ declare const CoreManager: {
     getLiveQueryController(): LiveQueryControllerType;
     setHooksController(controller: HooksController): void;
     getHooksController(): HooksController;
+    setParseOp(op: ParseOp): void;
+    getParseOp(): any;
+    setParseObject(object: ParseObject): void;
+    getParseObject(): ParseObject;
+    setParseQuery(query: ParseQuery): void;
+    getParseQuery(): any;
+    setParseRole(role: ParseRole): void;
+    getParseRole(): ParseRole;
+    setParseUser(user: ParseUser): void;
+    getParseUser(): ParseUser;
 };
 export default CoreManager;

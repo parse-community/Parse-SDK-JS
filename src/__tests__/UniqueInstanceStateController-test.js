@@ -7,6 +7,8 @@ jest.dontMock('../ParseOp');
 jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../promiseUtils');
+jest.dontMock('../CoreManager');
+
 jest.useFakeTimers();
 
 const mockObject = function (className) {
@@ -22,6 +24,8 @@ const ParseOps = require('../ParseOp');
 const UniqueInstanceStateController = require('../UniqueInstanceStateController');
 const TaskQueue = require('../TaskQueue');
 const { resolvingPromise } = require('../promiseUtils');
+const CoreManager = require('../CoreManager');
+CoreManager.setParseObject(mockObject);
 
 describe('UniqueInstanceStateController', () => {
   it('returns null state for an unknown object', () => {

@@ -2,9 +2,10 @@
  * @flow
  */
 
-import { RelationOp } from './ParseOp';
-import ParseObject from './ParseObject';
-import ParseQuery from './ParseQuery';
+import type { RelationOp } from './ParseOp';
+import type ParseObject from './ParseObject';
+import type ParseQuery from './ParseQuery';
+import CoreManager from './CoreManager';
 
 /**
  * Creates a new Relation for the given parent object and key. This
@@ -68,7 +69,7 @@ class ParseRelation {
     if (!Array.isArray(objects)) {
       objects = [objects];
     }
-
+    const { RelationOp } = CoreManager.getParseOp();
     const change = new RelationOp(objects, []);
     const parent = this.parent;
     if (!parent) {
@@ -91,7 +92,7 @@ class ParseRelation {
     if (!Array.isArray(objects)) {
       objects = [objects];
     }
-
+    const { RelationOp } = CoreManager.getParseOp();
     const change = new RelationOp([], objects);
     if (!this.parent) {
       throw new Error('Cannot remove from a Relation without a parent');
@@ -127,6 +128,7 @@ class ParseRelation {
     if (!parent) {
       throw new Error('Cannot construct a query for a Relation without a parent');
     }
+    const ParseQuery = CoreManager.getParseQuery();
     if (!this.targetClassName) {
       query = new ParseQuery(parent.className);
       query._extraOptions.redirectClassNameForKey = this.key;

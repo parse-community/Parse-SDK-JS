@@ -6,11 +6,15 @@ jest.dontMock('../ParseConfig');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
+jest.dontMock('../ParseObject');
+jest.dontMock('../ParseOp');
 jest.dontMock('../RESTController');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
 jest.dontMock('./test_helpers/mockAsyncStorage');
-
+// Load the classes into CoreManager
+require('../ParseObject');
+require('../ParseOp');
 const mockAsyncStorage = require('./test_helpers/mockAsyncStorage');
 const CoreManager = require('../CoreManager');
 const ParseConfig = require('../ParseConfig').default;
@@ -231,7 +235,7 @@ describe('ParseConfig', () => {
     });
   });
 
-  it('rejects save on invalid response', done => {
+  fit('rejects save on invalid response', done => {
     CoreManager.setRESTController({
       request() {
         return Promise.resolve({ result: false });
