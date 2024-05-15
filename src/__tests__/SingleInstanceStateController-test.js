@@ -1,5 +1,6 @@
 jest.dontMock('../decode');
 jest.dontMock('../encode');
+jest.dontMock('../CoreManager');
 jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
@@ -20,6 +21,8 @@ const ParseOps = require('../ParseOp');
 const SingleInstanceStateController = require('../SingleInstanceStateController');
 const TaskQueue = require('../TaskQueue');
 const flushPromises = require('./test_helpers/flushPromises');
+const CoreManager = require('../CoreManager');
+CoreManager.setParseObject(mockObject);
 
 describe('SingleInstanceStateController', () => {
   it('returns null state for an unknown object', () => {

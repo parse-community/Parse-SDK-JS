@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "5.1.0-alpha.9",
+  "version": "5.1.0-alpha.10",
   "description": "Parse JavaScript SDK",
   "homepage": "https://parseplatform.org",
   "keywords": [
@@ -83,6 +83,7 @@
     "jsdoc": "4.0.2",
     "jsdoc-babel": "0.5.0",
     "lint-staged": "13.2.2",
+    "madge": "7.0.0",
     "metro-react-native-babel-preset": "0.76.4",
     "mongodb-runner": "5.4.3",
     "parse-server": "7.1.0-alpha.1",
@@ -112,6 +113,7 @@
     "watch:react-native": "cross-env PARSE_BUILD=react-native npm run watch",
     "integration": "cross-env TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
+    "madge:circular": "madge ./src --extensions js,ts --circular",
     "prepare": "npm run build",
     "release_docs": "./release_docs.sh",
     "gulp": "gulp",

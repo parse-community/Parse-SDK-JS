@@ -1,4 +1,6 @@
 jest.dontMock('../ParseACL');
+jest.dontMock('../ParseUser');
+jest.dontMock('../CoreManager');
 
 const mockRole = function (name) {
   this.name = name;
@@ -11,6 +13,8 @@ jest.setMock('../ParseRole', mockRole);
 const ParseACL = require('../ParseACL').default;
 const ParseUser = require('../ParseUser').default;
 const ParseRole = require('../ParseRole');
+const CoreManager = require('../CoreManager');
+CoreManager.setParseRole(require('../ParseRole'));
 
 describe('ParseACL', () => {
   it('can be constructed with no arguments', () => {
