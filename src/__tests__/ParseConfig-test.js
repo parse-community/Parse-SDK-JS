@@ -235,7 +235,7 @@ describe('ParseConfig', () => {
     });
   });
 
-  fit('rejects save on invalid response', done => {
+  it('rejects save on invalid response', done => {
     CoreManager.setRESTController({
       request() {
         return Promise.resolve({ result: false });

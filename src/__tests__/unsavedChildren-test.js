@@ -1,6 +1,7 @@
 jest.dontMock('../ParseFile');
 jest.dontMock('../unsavedChildren');
 jest.dontMock('../CoreManager');
+
 function mockObject({ className, localId, id, attributes, dirty }) {
   this.className = className;
   this.localId = localId;

@@ -2,7 +2,6 @@
  * @flow
  */
 
-import type { RelationOp } from './ParseOp';
 import type ParseObject from './ParseObject';
 import type ParseQuery from './ParseQuery';
 import CoreManager from './CoreManager';
