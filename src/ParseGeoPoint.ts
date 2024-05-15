@@ -186,7 +186,7 @@ class ParseGeoPoint {
    * @static
    * @returns {Promise<Parse.GeoPoint>} User's current location
    */
-  static current(options) {
+  static current(options): Promise<ParseGeoPoint> {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(location => {
         resolve(new ParseGeoPoint(location.coords.latitude, location.coords.longitude));

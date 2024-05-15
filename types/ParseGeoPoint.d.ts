@@ -93,6 +93,6 @@ declare class ParseGeoPoint {
      * @static
      * @returns {Promise<Parse.GeoPoint>} User's current location
      */
-    static current(options: any): Promise<unknown>;
+    static current(options: any): Promise<ParseGeoPoint>;
 }
 export default ParseGeoPoint;
