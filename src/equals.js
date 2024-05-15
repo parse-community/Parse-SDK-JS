@@ -1,7 +1,7 @@
+import CoreManager from './CoreManager';
 import ParseACL from './ParseACL';
 import ParseFile from './ParseFile';
 import ParseGeoPoint from './ParseGeoPoint';
-import ParseObject from './ParseObject';
 
 export default function equals(a, b) {
   const toString = Object.prototype.toString;
@@ -34,7 +34,7 @@ export default function equals(a, b) {
     }
     return true;
   }
-
+  const ParseObject = CoreManager.getParseObject();
   if (
     a instanceof ParseACL ||
     a instanceof ParseFile ||

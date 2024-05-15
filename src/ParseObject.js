@@ -25,7 +25,6 @@ import {
   RemoveOp,
   RelationOp,
 } from './ParseOp';
-import ParseQuery from './ParseQuery';
 import ParseRelation from './ParseRelation';
 import * as SingleInstanceStateController from './SingleInstanceStateController';
 import unique from './unique';
@@ -1007,6 +1006,7 @@ class ParseObject {
       return false;
     }
     try {
+      const ParseQuery = CoreManager.getParseQuery();
       const query = new ParseQuery(this.className);
       await query.get(this.id, options);
       return true;
@@ -2228,6 +2228,7 @@ const DefaultController = {
       if (error) {
         return Promise.reject(error);
       }
+      const ParseQuery = CoreManager.getParseQuery();
       const query = new ParseQuery(className);
       query.containedIn('objectId', ids);
       if (options && options.include) {
@@ -2549,6 +2550,7 @@ const DefaultController = {
   },
 };
 
+CoreManager.setParseObject(ParseObject);
 CoreManager.setObjectController(DefaultController);
 
 export default ParseObject;

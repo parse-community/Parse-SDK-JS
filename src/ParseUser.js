@@ -1278,6 +1278,7 @@ const DefaultController = {
   },
 };
 
+CoreManager.setParseUser(ParseUser);
 CoreManager.setUserController(DefaultController);
 
 export default ParseUser;
