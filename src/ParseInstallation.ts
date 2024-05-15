@@ -1,4 +1,5 @@
 import CoreManager from './CoreManager';
+import ParseError from './ParseError';
 import ParseObject from './ParseObject';
 
 import type { AttributeMap } from './ObjectStateMutations';
@@ -197,15 +198,59 @@ class ParseInstallation extends ParseObject {
   }
 
   /**
-   * Wrap the default save behavior with functionality to save to local storage.
+   * Wrap the default fetch behavior with functionality to update local storage.
+   * If the installation is deleted on the server, retry the fetch as a save operation.
+   *
+   * @param {...any} args
+   * @returns {Promise}
+   */
+  async fetch(...args: Array<any>): Promise<ParseInstallation> {
+    try {
+      await super.fetch.apply(this, args);
+    } catch (e) {
+      if (e.code !== ParseError.OBJECT_NOT_FOUND) {
+        throw e;
+      }
+      // The installation was deleted from the server.
+      // We always want fetch to succeed.
+      delete this.id;
+      this._getId(); // Generate localId
+      this._markAllFieldsDirty();
+      await super.save.apply(this, args);
+    }
+    await CoreManager.getInstallationController().updateInstallationOnDisk(this);
+    return this;
+  }
+
+  /**
+   * Wrap the default save behavior with functionality to update the local storage.
+   * If the installation is deleted on the server, retry saving a new installation.
    *
    * @param {...any} args
    * @returns {Promise}
    */
   async save(...args: Array<any>): Promise<ParseInstallation> {
-    await super.save.apply(this, args);
+    try {
+      await super.save.apply(this, args);
+    } catch (e) {      
+      if (e.code !== ParseError.OBJECT_NOT_FOUND) {
+        throw e;
+      }
+      // The installation was deleted from the server.
+      // We always want save to succeed.
+      delete this.id;
+      this._getId(); // Generate localId
+      this._markAllFieldsDirty();
+      await super.save.apply(this, args);
+    }
     await CoreManager.getInstallationController().updateInstallationOnDisk(this);
     return this;
+  }
+
+  _markAllFieldsDirty() {
+    for (const [key, value] of Object.entries(this.attributes)) {
+      this.set(key, value);
+    }
   }
 
   /**
