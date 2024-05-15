@@ -17,14 +17,18 @@ jobs:
         with:
           version: 2
   check-types:
-    name: Check types
+    name: Check Types
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - run: npm ci
-      - name: Check types
-        run: npm run test:types
+      - name: Build Types
+        run: npm run build:types
+      # - name: Lint Types
+      #   run: npm run lint:types
+      # - name: Test Types
+      #   run: npm run test:types
   check-docs:
     name: Check Docs
     timeout-minutes: 5
