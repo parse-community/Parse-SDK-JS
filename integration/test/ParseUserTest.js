@@ -189,6 +189,7 @@ describe('Parse User', () => {
     const objectId = installation.id;
     await installation.destroy({ useMasterKey: true });
     await installation.save();
+    expect(installation.id).toBeDefined();
     expect(installation.id).not.toBe(objectId);
     const currentInstallation = await Parse.Installation.currentInstallation();
     expect(currentInstallation.id).toBe(installation.id);
@@ -204,6 +205,7 @@ describe('Parse User', () => {
     const objectId = installation.id;
     await installation.destroy({ useMasterKey: true });
     await installation.fetch();
+    expect(installation.id).toBeDefined();
     expect(installation.id).not.toBe(objectId);
     const currentInstallation = await Parse.Installation.currentInstallation();
     expect(currentInstallation.id).toBe(installation.id);
