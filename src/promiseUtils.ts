@@ -1,17 +1,18 @@
 // Create Deferred Promise
-export function resolvingPromise() {
-  let res;
-  let rej;
-  const promise = new Promise((resolve, reject) => {
+export function resolvingPromise<T = any>() {
+  let res: (value: T) => void;
+  let rej: (error: T) => void;
+  const promise = new Promise<T>((resolve, reject) => {
     res = resolve;
     rej = reject;
   });
-  promise.resolve = res;
-  promise.reject = rej;
-  return promise;
+  const defer: typeof promise & { resolve: (res: T) => void, reject: (err: any) => void } = promise as any;
+  defer.resolve = res!;
+  defer.reject = rej!;
+  return defer;
 }
 
-export function when(promises) {
+export function when(promises: any) {
   let objects;
   const arrayArgument = Array.isArray(promises);
   if (arrayArgument) {
@@ -32,7 +33,7 @@ export function when(promises) {
     return Promise.resolve(returnValue);
   }
 
-  const promise = new resolvingPromise();
+  const promise = resolvingPromise();
 
   const resolveOne = function () {
     total--;
@@ -45,7 +46,7 @@ export function when(promises) {
     }
   };
 
-  const chain = function (object, index) {
+  const chain = function (object: Promise<any>, index: number) {
     if (object && typeof object.then === 'function') {
       object.then(
         function (result) {
@@ -70,7 +71,7 @@ export function when(promises) {
   return promise;
 }
 
-export function continueWhile(test, emitter) {
+export function continueWhile(test: () => any, emitter: () => Promise<any>) {
   if (test()) {
     return emitter().then(() => {
       return continueWhile(test, emitter);

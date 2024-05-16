@@ -1,7 +1,3 @@
-/**
- * @flow
- */
-
 import CoreManager from './CoreManager';
 import ParseACL from './ParseACL';
 import ParseFile from './ParseFile';
@@ -10,10 +6,10 @@ import ParsePolygon from './ParsePolygon';
 import ParseRelation from './ParseRelation';
 
 function encode(
-  value: mixed,
+  value: any,
   disallowObjects: boolean,
   forcePointers: boolean,
-  seen: Array<mixed>,
+  seen: Array<any>,
   offline: boolean
 ): any {
   const ParseObject = CoreManager.getParseObject();
@@ -57,7 +53,7 @@ function encode(
     if (isNaN(value)) {
       throw new Error('Tried to encode an invalid date.');
     }
-    return { __type: 'Date', iso: (value: any).toJSON() };
+    return { __type: 'Date', iso: (value as Date).toJSON() };
   }
   if (
     Object.prototype.toString.call(value) === '[object RegExp]' &&
@@ -84,10 +80,10 @@ function encode(
 }
 
 export default function (
-  value: mixed,
+  value: any,
   disallowObjects?: boolean,
   forcePointers?: boolean,
-  seen?: Array<mixed>,
+  seen?: Array<any>,
   offline?: boolean
 ): any {
   return encode(value, !!disallowObjects, !!forcePointers, seen || [], offline);

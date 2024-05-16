@@ -15,9 +15,6 @@ import type ParseConfig from './ParseConfig';
 import type LiveQueryClient from './LiveQueryClient';
 import type ParseSchema from './ParseSchema';
 import type ParseInstallation from './ParseInstallation';
-import type ParseQuery from './ParseQuery';
-import type * as ParseOp from './ParseOp';
-import type ParseRole from './ParseRole';
 
 type AnalyticsController = {
   track: (name: string, dimensions: { [key: string]: string }) => Promise<any>,
@@ -598,7 +595,7 @@ const CoreManager = {
     return config['HooksController']!;
   },
 
-  setParseOp(op: typeof ParseOp) {
+  setParseOp(op: any) {
     config['ParseOp'] = op;
   },
 
@@ -606,35 +603,35 @@ const CoreManager = {
     return config['ParseOp']!;
   },
 
-  setParseObject(object: typeof ParseObject) {
+  setParseObject(object: any) {
     config['ParseObject'] = object;
   },
 
-  getParseObject(): ParseObject {
+  getParseObject() {
     return config['ParseObject']!;
   },
 
-  setParseQuery(query: typeof ParseQuery) {
+  setParseQuery(query: any) {
     config['ParseQuery'] = query;
   },
 
-  getParseQuery(): ParseQuery {
+  getParseQuery() {
     return config['ParseQuery']!;
   },
 
-  setParseRole(role: typeof ParseRole) {
+  setParseRole(role: any) {
     config['ParseRole'] = role;
   },
 
-  getParseRole(): ParseRole {
+  getParseRole() {
     return config['ParseRole']!;
   },
 
-  setParseUser(user: typeof ParseUser) {
+  setParseUser(user: any) {
     config['ParseUser'] = user;
   },
 
-  getParseUser(): ParseUser {
+  getParseUser() {
     return config['ParseUser']!;
   },
 };

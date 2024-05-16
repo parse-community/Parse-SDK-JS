@@ -1,6 +1,6 @@
 import { v4 } from 'uuid';
 
-let uuid: () => string = null as any;
+let uuid: () => string;
 
 if (process.env.PARSE_BUILD === 'weapp') {
   uuid = function () {
