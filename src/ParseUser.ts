@@ -1246,7 +1246,7 @@ const DefaultController = {
 
     const RESTController = CoreManager.getRESTController();
     const result = await RESTController.request('POST', 'upgradeToRevocableSession', {}, options);
-    user._finishFetch({ sessionToken: result.sessionToken });
+    user._finishFetch({ sessionToken: result?.sessionToken || '' });
     const current = await user.isCurrentAsync();
     if (current) {
       return DefaultController.setCurrentUser(user);
