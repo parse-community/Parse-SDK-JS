@@ -1,6 +1,6 @@
 jest.autoMockOff();
 
-const escape = require('../escape.js').default;
+const escape = require('../escape').default;
 
 describe('escape', () => {
   it('escapes special HTML characters', () => {
