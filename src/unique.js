@@ -3,11 +3,12 @@
  */
 
 import arrayContainsObject from './arrayContainsObject';
-import ParseObject from './ParseObject';
+import CoreManager from './CoreManager';
 
 export default function unique<T>(arr: Array<T>): Array<T> {
   const uniques = [];
   arr.forEach(value => {
+    const ParseObject = CoreManager.getParseObject();
     if (value instanceof ParseObject) {
       if (!arrayContainsObject(uniques, value)) {
         uniques.push(value);

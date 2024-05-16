@@ -1,184 +1,298 @@
-// @ts-nocheck
-export default CoreManager;
-declare namespace CoreManager {
-    function get(key: string): any;
-    function set(key: string, value: any): void;
-    function setAnalyticsController(controller: AnalyticsController): void;
-    function getAnalyticsController(): AnalyticsController;
-    function setCloudController(controller: CloudController): void;
-    function getCloudController(): CloudController;
-    function setConfigController(controller: ConfigController): void;
-    function getConfigController(): ConfigController;
-    function setCryptoController(controller: CryptoController): void;
-    function getCryptoController(): CryptoController;
-    function setFileController(controller: FileController): void;
-    function getFileController(): FileController;
-    function setInstallationController(controller: InstallationController): void;
-    function getInstallationController(): InstallationController;
-    function setObjectController(controller: ObjectController): void;
-    function getObjectController(): ObjectController;
-    function setObjectStateController(controller: ObjectStateController): void;
-    function getObjectStateController(): ObjectStateController;
-    function setPushController(controller: PushController): void;
-    function getPushController(): PushController;
-    function setQueryController(controller: QueryController): void;
-    function getQueryController(): QueryController;
-    function setRESTController(controller: RESTController): void;
-    function getRESTController(): RESTController;
-    function setSchemaController(controller: SchemaController): void;
-    function getSchemaController(): SchemaController;
-    function setSessionController(controller: SessionController): void;
-    function getSessionController(): SessionController;
-    function setStorageController(controller: StorageController): void;
-    function setLocalDatastoreController(controller: LocalDatastoreController): void;
-    function getLocalDatastoreController(): LocalDatastoreController;
-    function setLocalDatastore(store: any): void;
-    function getLocalDatastore(): mixed;
-    function getStorageController(): StorageController;
-    function setAsyncStorage(storage: any): void;
-    function getAsyncStorage(): mixed;
-    function setWebSocketController(controller: WebSocketController): void;
-    function getWebSocketController(): WebSocketController;
-    function setUserController(controller: UserController): void;
-    function getUserController(): UserController;
-    function setLiveQueryController(controller: any): void;
-    function getLiveQueryController(): any;
-    function setHooksController(controller: HooksController): void;
-    function getHooksController(): HooksController;
-}
+import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
+import type ParseFile from './ParseFile';
+import type { FileSaveOptions, FileSource } from './ParseFile';
+import type { Op } from './ParseOp';
+import type ParseObject from './ParseObject';
+import type { SaveOptions } from './ParseObject';
+import type { QueryJSON } from './ParseQuery';
+import type ParseUser from './ParseUser';
+import type { AuthData } from './ParseUser';
+import type { PushData } from './Push';
+import type { RequestOptions, FullOptions } from './RESTController';
+import type ParseSession from './ParseSession';
+import type { HookDeclaration, HookDeleteArg } from './ParseHooks';
+import type ParseConfig from './ParseConfig';
+import type LiveQueryClient from './LiveQueryClient';
+import type ParseSchema from './ParseSchema';
+import type ParseInstallation from './ParseInstallation';
 type AnalyticsController = {
     track: (name: string, dimensions: {
         [key: string]: string;
     }) => Promise<any>;
 };
 type CloudController = {
-    run: (name: string, data: mixed, options: RequestOptions) => Promise<any>;
+    run: (name: string, data: any, options: RequestOptions) => Promise<any>;
     getJobsData: (options: RequestOptions) => Promise<any>;
-    startJob: (name: string, data: mixed, options: RequestOptions) => Promise<any>;
+    /** Returns promise which resolves with JobStatusId of the job */
+    startJob: (name: string, data: any, options: RequestOptions) => Promise<string>;
 };
 type ConfigController = {
-    current: () => Promise<any>;
-    get: () => Promise<any>;
+    current: () => Promise<ParseConfig> | ParseConfig;
+    get: (opts?: RequestOptions) => Promise<ParseConfig>;
     save: (attrs: {
         [key: string]: any;
-    }) => Promise<any>;
+    }, masterKeyOnlyFlags?: {
+        [key: string]: any;
+    }) => Promise<void>;
 };
 type CryptoController = {
     encrypt: (obj: any, secretKey: string) => string;
     decrypt: (encryptedText: string, secretKey: any) => string;
 };
 type FileController = {
-    saveFile: (name: string, source: FileSource, options: FullOptions) => Promise<any>;
-    saveBase64: (name: string, source: FileSource, options: FullOptions) => Promise<any>;
-    download: (uri: string) => Promise<any>;
+    saveFile: (name: string, source: FileSource, options?: FullOptions) => Promise<any>;
+    saveBase64: (name: string, source: FileSource, options?: FileSaveOptions) => Promise<{
+        name: string;
+        url: string;
+    }>;
+    download: (uri: string, options?: any) => Promise<{
+        base64?: string;
+        contentType?: string;
+    }>;
+    deleteFile: (name: string, options?: {
+        useMasterKey?: boolean;
+    }) => Promise<void>;
 };
 type InstallationController = {
-    currentInstallationId: () => Promise<any>;
+    currentInstallationId: () => Promise<string>;
+    currentInstallation: () => Promise<ParseInstallation | null>;
+    updateInstallationOnDisk: (installation: ParseInstallation) => Promise<void>;
 };
 type ObjectController = {
-    fetch: (object: ParseObject | ParseObject[], forceFetch: boolean, options: RequestOptions) => Promise<any>;
-    save: (object: ParseObject | (ParseFile | ParseObject)[], options: RequestOptions) => Promise<any>;
-    destroy: (object: ParseObject | ParseObject[], options: RequestOptions) => Promise<any>;
+    fetch: (object: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions) => Promise<Array<ParseObject | undefined> | ParseObject | undefined>;
+    save: (object: ParseObject | Array<ParseObject | ParseFile> | null, options: RequestOptions) => Promise<ParseObject | Array<ParseObject> | ParseFile>;
+    destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => Promise<ParseObject | Array<ParseObject>>;
 };
 type ObjectStateController = {
-    getState: (obj: any) => State;
+    getState: (obj: any) => State | null;
     initializeState: (obj: any, initial?: State) => State;
-    removeState: (obj: any) => State;
+    removeState: (obj: any) => State | null;
     getServerData: (obj: any) => AttributeMap;
     setServerData: (obj: any, attributes: AttributeMap) => void;
-    getPendingOps: (obj: any) => OpsMap[];
-    setPendingOp: (obj: any, attr: string, op: Op) => void;
+    getPendingOps: (obj: any) => Array<OpsMap>;
+    setPendingOp: (obj: any, attr: string, op?: Op) => void;
     pushPendingState: (obj: any) => void;
-    popPendingState: (obj: any) => OpsMap;
+    popPendingState: (obj: any) => OpsMap | undefined;
     mergeFirstPendingState: (obj: any) => void;
     getObjectCache: (obj: any) => ObjectCache;
-    estimateAttribute: (obj: any, attr: string) => mixed;
+    estimateAttribute: (obj: any, attr: string) => any;
     estimateAttributes: (obj: any) => AttributeMap;
     commitServerChanges: (obj: any, changes: AttributeMap) => void;
-    enqueueTask: (obj: any, task: () => Promise<any>) => Promise<any>;
+    enqueueTask: (obj: any, task: () => Promise<void>) => Promise<void>;
     clearAllState: () => void;
     duplicateState: (source: any, dest: any) => void;
 };
 type PushController = {
-    send: (data: PushData) => Promise<any>;
+    send: (data: PushData, options?: FullOptions) => Promise<any>;
 };
 type QueryController = {
-    find: (className: string, params: QueryJSON, options: RequestOptions) => Promise<any>;
-    aggregate: (className: string, params: any, options: RequestOptions) => Promise<any>;
+    find(className: string, params: QueryJSON, options: RequestOptions): Promise<{
+        results?: Array<ParseObject>;
+        className?: string;
+        count?: number;
+    }>;
+    aggregate(className: string, params: any, options: RequestOptions): Promise<{
+        results?: Array<any>;
+    }>;
+};
+type EventuallyQueue = {
+    save: (object: ParseObject, serverOptions: SaveOptions) => Promise<any>;
+    destroy: (object: ParseObject, serverOptions: RequestOptions) => Promise<any>;
+    poll: (ms?: number) => void;
 };
 type RESTController = {
-    request: (method: string, path: string, data: mixed, options: RequestOptions) => Promise<any>;
-    ajax: (method: string, url: string, data: any, headers?: any, options: FullOptions) => Promise<any>;
+    request: (method: string, path: string, data?: any, options?: RequestOptions) => Promise<any>;
+    ajax: (method: string, url: string, data: any, headers?: any, options?: FullOptions) => Promise<any>;
+    handleError: (err?: any) => void;
 };
 type SchemaController = {
     purge: (className: string) => Promise<any>;
-    get: (className: string, options: RequestOptions) => Promise<any>;
-    delete: (className: string, options: RequestOptions) => Promise<any>;
-    create: (className: string, params: any, options: RequestOptions) => Promise<any>;
-    update: (className: string, params: any, options: RequestOptions) => Promise<any>;
+    get: (className: string, options?: RequestOptions) => Promise<{
+        results: ParseSchema[];
+    }>;
+    delete: (className: string, options?: RequestOptions) => Promise<void>;
+    create: (className: string, params: any, options?: RequestOptions) => Promise<any>;
+    update: (className: string, params: any, options?: RequestOptions) => Promise<any>;
     send(className: string, method: string, params: any, options: RequestOptions): Promise<any>;
 };
 type SessionController = {
-    getSession: (token: RequestOptions) => Promise<any>;
+    getSession: (token: RequestOptions) => Promise<ParseSession>;
 };
 type StorageController = {
     async: 0;
-    getItem: (path: string) => string;
+    getItem: (path: string) => string | null;
     setItem: (path: string, value: string) => void;
     removeItem: (path: string) => void;
-    getItemAsync?: (path: string) => Promise<any>;
-    setItemAsync?: (path: string, value: string) => Promise<any>;
-    removeItemAsync?: (path: string) => Promise<any>;
+    getItemAsync?: (path: string) => Promise<string | null>;
+    setItemAsync?: (path: string, value: string) => Promise<void>;
+    removeItemAsync?: (path: string) => Promise<void>;
     clear: () => void;
+    getAllKeys?: () => Array<string>;
+    getAllKeysAsync?: () => Promise<Array<string>>;
 } | {
     async: 1;
-    getItem?: (path: string) => string;
+    getItem?: (path: string) => string | null;
     setItem?: (path: string, value: string) => void;
     removeItem?: (path: string) => void;
-    getItemAsync: (path: string) => Promise<any>;
-    setItemAsync: (path: string, value: string) => Promise<any>;
-    removeItemAsync: (path: string) => Promise<any>;
+    getItemAsync: (path: string) => Promise<string | null>;
+    setItemAsync: (path: string, value: string) => Promise<void>;
+    removeItemAsync: (path: string) => Promise<void>;
     clear: () => void;
+    getAllKeys?: () => Array<string>;
+    getAllKeysAsync?: () => Promise<Array<string>>;
 };
 type LocalDatastoreController = {
-    fromPinWithName: (name: string) => any;
+    fromPinWithName: (name: string) => any | undefined;
     pinWithName: (name: string, objects: any) => void;
     unPinWithName: (name: string) => void;
-    getAllContents: () => any;
+    getAllContents: () => any | undefined;
     clear: () => void;
 };
-type WebSocketController = {
+type UserController = {
+    setCurrentUser: (user: ParseUser) => Promise<void>;
+    currentUser: () => ParseUser | null;
+    currentUserAsync: () => Promise<ParseUser | null>;
+    signUp: (user: ParseUser, attrs: AttributeMap, options: RequestOptions) => Promise<ParseUser>;
+    logIn: (user: ParseUser, options: RequestOptions) => Promise<ParseUser>;
+    loginAs: (user: ParseUser, userId: string) => Promise<ParseUser>;
+    become: (user: ParseUser, options: RequestOptions) => Promise<ParseUser>;
+    hydrate: (user: ParseUser, userJSON: AttributeMap) => Promise<ParseUser>;
+    logOut: (options: RequestOptions) => Promise<void>;
+    me: (user: ParseUser, options: RequestOptions) => Promise<ParseUser>;
+    requestPasswordReset: (email: string, options: RequestOptions) => Promise<void>;
+    updateUserOnDisk: (user: ParseUser) => Promise<ParseUser>;
+    upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => Promise<void>;
+    linkWith: (user: ParseUser, authData: AuthData, options?: FullOptions) => Promise<ParseUser>;
+    removeUserFromDisk: () => Promise<ParseUser | void>;
+    verifyPassword: (username: string, password: string, options: RequestOptions) => Promise<ParseUser>;
+    requestEmailVerification: (email: string, options: RequestOptions) => Promise<void>;
+};
+type HooksController = {
+    get: (type: string, functionName?: string, triggerName?: string) => Promise<any>;
+    create: (hook: HookDeclaration) => Promise<any>;
+    remove: (hook: HookDeleteArg) => Promise<any>;
+    update: (hook: HookDeclaration) => Promise<any>;
+    sendRequest?: (method: string, path: string, body?: any) => Promise<any>;
+};
+type LiveQueryControllerType = {
+    setDefaultLiveQueryClient(liveQueryClient: LiveQueryClient): void;
+    getDefaultLiveQueryClient(): Promise<LiveQueryClient>;
+    _clearCachedDefaultClient(): void;
+};
+/** Based on https://github.com/react-native-async-storage/async-storage/blob/main/packages/default-storage-backend/src/types.ts */
+type AsyncStorageType = {
+    /** Fetches an item for a `key` and invokes a callback upon completion. */
+    getItem: (key: string, callback?: (error?: Error | null, result?: string | null) => void) => Promise<string | null>;
+    /** Sets the value for a `key` and invokes a callback upon completion. */
+    setItem: (key: string, value: string, callback?: (error?: Error | null) => void) => Promise<void>;
+    /** Removes an item for a `key` and invokes a callback upon completion. */
+    removeItem: (key: string, callback?: (error?: Error | null) => void) => Promise<void>;
+    /** Merges an existing `key` value with an input value, assuming both values are stringified JSON. */
+    mergeItem: (key: string, value: string, callback?: (error?: Error | null) => void) => Promise<void>;
+    /**
+     * Erases *all* `AsyncStorage` for all clients, libraries, etc. You probably
+     * don't want to call this; use `removeItem` or `multiRemove` to clear only
+     * your app's keys.
+     */
+    clear: (callback?: (error?: Error | null) => void) => Promise<void>;
+    /** Gets *all* keys known to your app; for all callers, libraries, etc. */
+    getAllKeys: (callback?: (error?: Error | null, result?: readonly string[] | null) => void) => Promise<readonly string[]>;
+    /**
+     * This allows you to batch the fetching of items given an array of `key`
+     * inputs. Your callback will be invoked with an array of corresponding
+     * key-value pairs found.
+     */
+    multiGet: (keys: readonly string[], callback?: (errors?: readonly (Error | null)[] | null, result?: readonly [string, string][]) => void) => Promise<readonly [string, string | null][]>;
+    /**
+     * Use this as a batch operation for storing multiple key-value pairs. When
+     * the operation completes you'll get a single callback with any errors.
+     *
+     * See https://react-native-async-storage.github.io/async-storage/docs/api#multiset
+     */
+    multiSet: (keyValuePairs: [string, string][], callback?: (errors?: readonly (Error | null)[] | null) => void) => Promise<readonly [string, string | null][]>;
+    /**
+     * Call this to batch the deletion of all keys in the `keys` array.
+     *
+     * See https://react-native-async-storage.github.io/async-storage/docs/api#multiremove
+     */
+    multiRemove: (keys: readonly string[], callback?: (errors?: readonly (Error | null)[] | null) => void) => Promise<void>;
+    /**
+     * Batch operation to merge in existing and new values for a given set of
+     * keys. This assumes that the values are stringified JSON.
+     *
+     * See https://react-native-async-storage.github.io/async-storage/docs/api#multimerge
+     */
+    multiMerge: (keyValuePairs: [string, string][], callback?: (errors?: readonly (Error | null)[] | null) => void) => Promise<void>;
+};
+export type WebSocketController = {
     onopen: () => void;
     onmessage: (message: any) => void;
-    onclose: () => void;
+    onclose: (arg?: any) => void;
     onerror: (error: any) => void;
     send: (data: any) => void;
     close: () => void;
 };
-type UserController = {
-    setCurrentUser: (user: ParseUser) => Promise<any>;
-    currentUser: () => ParseUser;
-    currentUserAsync: () => Promise<any>;
-    signUp: (user: ParseUser, attrs: AttributeMap, options: RequestOptions) => Promise<any>;
-    logIn: (user: ParseUser, options: RequestOptions) => Promise<any>;
-    become: (options: RequestOptions) => Promise<any>;
-    hydrate: (userJSON: AttributeMap) => Promise<any>;
-    logOut: (options: RequestOptions) => Promise<any>;
-    me: (options: RequestOptions) => Promise<any>;
-    requestPasswordReset: (email: string, options: RequestOptions) => Promise<any>;
-    updateUserOnDisk: (user: ParseUser) => Promise<any>;
-    upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => Promise<any>;
-    linkWith: (user: ParseUser, authData: {
-        [key: string]: mixed;
-    }) => Promise<any>;
-    removeUserFromDisk: () => Promise<any>;
-    verifyPassword: (username: string, password: string, options: RequestOptions) => Promise<any>;
-    requestEmailVerification: (email: string, options: RequestOptions) => Promise<any>;
+declare const CoreManager: {
+    get: (key: string) => any;
+    set: (key: string, value: any) => void;
+    setIfNeeded: (key: string, value: any) => any;
+    setAnalyticsController(controller: AnalyticsController): void;
+    getAnalyticsController(): AnalyticsController;
+    setCloudController(controller: CloudController): void;
+    getCloudController(): CloudController;
+    setConfigController(controller: ConfigController): void;
+    getConfigController(): ConfigController;
+    setCryptoController(controller: CryptoController): void;
+    getCryptoController(): CryptoController;
+    setEventEmitter(eventEmitter: any): void;
+    getEventEmitter(): any;
+    setFileController(controller: FileController): void;
+    setEventuallyQueue(controller: EventuallyQueue): void;
+    getEventuallyQueue(): EventuallyQueue;
+    getFileController(): FileController;
+    setInstallationController(controller: InstallationController): void;
+    getInstallationController(): InstallationController;
+    setLiveQuery(liveQuery: any): void;
+    getLiveQuery(): any;
+    setObjectController(controller: ObjectController): void;
+    getObjectController(): ObjectController;
+    setObjectStateController(controller: ObjectStateController): void;
+    getObjectStateController(): ObjectStateController;
+    setPushController(controller: PushController): void;
+    getPushController(): PushController;
+    setQueryController(controller: QueryController): void;
+    getQueryController(): QueryController;
+    setRESTController(controller: RESTController): void;
+    getRESTController(): RESTController;
+    setSchemaController(controller: SchemaController): void;
+    getSchemaController(): SchemaController;
+    setSessionController(controller: SessionController): void;
+    getSessionController(): SessionController;
+    setStorageController(controller: StorageController): void;
+    setLocalDatastoreController(controller: LocalDatastoreController): void;
+    getLocalDatastoreController(): LocalDatastoreController;
+    setLocalDatastore(store: any): void;
+    getLocalDatastore(): any;
+    getStorageController(): StorageController;
+    setAsyncStorage(storage: AsyncStorageType): void;
+    getAsyncStorage(): AsyncStorageType;
+    setWebSocketController(controller: new (url: string | URL, protocols?: string | string[] | undefined) => WebSocketController): void;
+    getWebSocketController(): new (url: string | URL, protocols?: string | string[] | undefined) => WebSocketController;
+    setUserController(controller: UserController): void;
+    getUserController(): UserController;
+    setLiveQueryController(controller: LiveQueryControllerType): void;
+    getLiveQueryController(): LiveQueryControllerType;
+    setHooksController(controller: HooksController): void;
+    getHooksController(): HooksController;
+    setParseOp(op: any): void;
+    getParseOp(): any;
+    setParseObject(object: typeof ParseObject): void;
+    getParseObject(): ParseObject;
+    setParseQuery(query: any): void;
+    getParseQuery(): ParseQuery;
+    setParseRole(role: any): void;
+    getParseRole(): ParseRole;
+    setParseUser(user: any): void;
+    getParseUser(): ParseUser;
 };
-type HooksController = {
-    get: (type: string, functionName?: string, triggerName?: string) => Promise<any>;
-    create: (hook: mixed) => Promise<any>;
-    delete: (hook: mixed) => Promise<any>;
-    update: (hook: mixed) => Promise<any>;
-    send: (method: string, path: string, body?: mixed) => Promise<any>;
-};
+export default CoreManager;

@@ -2,11 +2,13 @@
  * @flow
  */
 
+import CoreManager from './CoreManager';
 import ParseFile from './ParseFile';
-import ParseObject from './ParseObject';
+import type ParseObject from './ParseObject';
 import ParseRelation from './ParseRelation';
 
 export default function canBeSerialized(obj: ParseObject): boolean {
+  const ParseObject = CoreManager.getParseObject();
   if (!(obj instanceof ParseObject)) {
     return true;
   }
@@ -27,6 +29,7 @@ function canBeSerializedHelper(value: any): boolean {
   if (value instanceof ParseRelation) {
     return true;
   }
+  const ParseObject = CoreManager.getParseObject();
   if (value instanceof ParseObject) {
     return !!value.id;
   }

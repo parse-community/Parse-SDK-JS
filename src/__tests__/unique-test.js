@@ -16,6 +16,8 @@ jest.setMock('../ParseObject', mockObject);
 
 const unique = require('../unique').default;
 const ParseObject = require('../ParseObject');
+const CoreManager = require('../CoreManager');
+jest.spyOn(CoreManager, 'getParseObject').mockImplementation(() => require('../ParseObject'));
 
 describe('unique', () => {
   it('produces an array with unique elements', () => {
