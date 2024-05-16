@@ -43,8 +43,7 @@ import WebSocketController from './WebSocketController';
  * @global
  * @class
  * @hideconstructor
-*/
-
+ */
 interface ParseType {
   ACL: typeof ACL,
   Parse?: ParseType,

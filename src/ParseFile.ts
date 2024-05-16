@@ -1,11 +1,7 @@
-/**
- * @flow
- */
 /* global XMLHttpRequest, Blob */
 import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
-
-const ParseError = require('./ParseError').default;
+import ParseError from './ParseError';
 
 let XHR = null;
 if (typeof XMLHttpRequest !== 'undefined') {
@@ -66,13 +62,13 @@ function b64Digit(number: number): string {
  */
 class ParseFile {
   _name: string;
-  _url: ?string;
+  _url?: string;
   _source: FileSource;
-  _previousSave: ?Promise<ParseFile>;
-  _data: ?string;
-  _requestTask: ?any;
-  _metadata: ?Object;
-  _tags: ?Object;
+  _previousSave?: Promise<ParseFile>;
+  _data?: string;
+  _requestTask?: any;
+  _metadata?: Object;
+  _tags?: Object;
 
   /**
    * @param name {String} The file's name. This will be prefixed by a unique
@@ -125,17 +121,17 @@ class ParseFile {
           file: data,
           type: specifiedType,
         };
-      } else if (data && typeof data.uri === 'string' && data.uri !== undefined) {
+      } else if (data && typeof (data as Uri).uri === 'string' && (data as Uri).uri !== undefined) {
         this._source = {
           format: 'uri',
-          uri: data.uri,
+          uri: (data as Uri).uri,
           type: specifiedType,
         };
-      } else if (data && typeof data.base64 === 'string') {
-        const base64 = data.base64.split(',').slice(-1)[0];
+      } else if (data && typeof (data as Base64).base64 === 'string') {
+        const base64 = (data as Base64).base64.split(',').slice(-1)[0];
         const dataType =
           specifiedType ||
-          data.base64.split(';').slice(0, 1)[0].split(':').slice(1, 2)[0] ||
+          (data as Base64).base64.split(';').slice(0, 1)[0].split(':').slice(1, 2)[0] ||
           'text/plain';
         this._data = base64;
         this._source = {
@@ -156,7 +152,7 @@ class ParseFile {
    *
    * @returns {Promise} Promise that is resolve with base64 data
    */
-  async getData(): Promise<String> {
+  async getData(): Promise<string> {
     if (this._data) {
       return this._data;
     }
@@ -190,7 +186,7 @@ class ParseFile {
    * @param {object} options An object to specify url options
    * @returns {string | undefined}
    */
-  url(options?: { forceSecure?: boolean }): ?string {
+  url(options?: { forceSecure?: boolean }): string | undefined {
     options = options || {};
     if (!this._url) {
       return;
@@ -207,7 +203,7 @@ class ParseFile {
    *
    * @returns {object}
    */
-  metadata(): Object {
+  metadata() {
     return this._metadata;
   }
 
@@ -216,7 +212,7 @@ class ParseFile {
    *
    * @returns {object}
    */
-  tags(): Object {
+  tags() {
     return this._tags;
   }
 
@@ -243,7 +239,7 @@ class ParseFile {
    * </ul>
    * @returns {Promise | undefined} Promise that is resolved when the save finishes.
    */
-  save(options?: FullOptions): ?Promise {
+  save(options?: FileSaveOptions): Promise<ParseFile> | undefined {
     options = options || {};
     options.requestTask = task => (this._requestTask = task);
     options.metadata = this._metadata;
@@ -267,7 +263,7 @@ class ParseFile {
               return {};
             }
             const newSource = {
-              format: 'base64',
+              format: 'base64' as const,
               base64: result.base64,
               type: result.contentType,
             };
@@ -275,7 +271,7 @@ class ParseFile {
             this._requestTask = null;
             return controller.saveBase64(this._name, newSource, options);
           })
-          .then(res => {
+          .then((res: { name?: string, url?: string }) => {
             this._name = res.name;
             this._url = res.url;
             this._requestTask = null;
@@ -317,7 +313,7 @@ class ParseFile {
    * <pre>
    * @returns {Promise} Promise that is resolved when the delete finishes.
    */
-  destroy(options?: FullOptions = {}) {
+  destroy(options: FullOptions = {}) {
     if (!this._name) {
       throw new ParseError(ParseError.FILE_DELETE_UNNAMED_ERROR, 'Cannot delete an unnamed file.');
     }
@@ -333,7 +329,7 @@ class ParseFile {
     });
   }
 
-  toJSON(): { name: ?string, url: ?string } {
+  toJSON(): { __type: 'File', name?: string, url?: string } {
     return {
       __type: 'File',
       name: this._name,
@@ -341,7 +337,7 @@ class ParseFile {
     };
   }
 
-  equals(other: mixed): boolean {
+  equals(other: any): boolean {
     if (this === other) {
       return true;
     }
@@ -413,7 +409,7 @@ class ParseFile {
     return file;
   }
 
-  static encodeBase64(bytes: Array<number>): string {
+  static encodeBase64(bytes: Array<number> | Uint8Array): string {
     const chunks = [];
     chunks.length = Math.ceil(bytes.length / 3);
     for (let i = 0; i < chunks.length; i++) {
@@ -441,10 +437,10 @@ const DefaultController = {
     if (source.format !== 'file') {
       throw new Error('saveFile can only be used with File-type sources.');
     }
-    const base64Data = await new Promise((res, rej) => {
+    const base64Data = await new Promise<string>((res, rej) => {
       // eslint-disable-next-line no-undef
       const reader = new FileReader();
-      reader.onload = () => res(reader.result);
+      reader.onload = () => res(reader.result as string);
       reader.onerror = error => rej(error);
       reader.readAsDataURL(source.file);
     });
@@ -455,9 +451,9 @@ const DefaultController = {
     // use the entire string instead
     const data = second ? second : first;
     const newSource = {
-      format: 'base64',
+      format: 'base64' as const,
       base64: data,
-      type: source.type || (source.file ? source.file.type : null),
+      type: source.type || (source.file ? source.file.type : undefined),
     };
     return await DefaultController.saveBase64(name, newSource, options);
   },
@@ -510,7 +506,7 @@ const DefaultController = {
     }
   },
 
-  downloadAjax: function (uri, options) {
+  downloadAjax: function (uri: string, options: any) {
     return new Promise((resolve, reject) => {
       const xhr = new XHR();
       xhr.open('GET', uri, true);

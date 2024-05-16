@@ -1,5 +1,6 @@
 import ParseACL from './ParseACL';
 import ParseError from './ParseError';
+import ParseFile from './ParseFile';
 import { Op } from './ParseOp';
 import ParseRelation from './ParseRelation';
 import type { AttributeMap, OpsMap } from './ObjectStateMutations';
@@ -824,7 +825,7 @@ declare class ParseObject {
      * @static
      * @returns {Parse.Object[]}
      */
-    static saveAll(list: Array<ParseObject>, options?: SaveOptions): Promise<any>;
+    static saveAll(list: Array<ParseObject>, options?: SaveOptions): Promise<ParseFile | ParseObject | ParseObject[]>;
     /**
      * Creates a reference to a subclass of Parse.Object with the given id. This
      * does not exist on Parse.Object, only on subclasses.

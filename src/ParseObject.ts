@@ -1343,7 +1343,7 @@ class ParseObject {
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
     return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
-    });
+    }) as Promise<ParseObject> as Promise<this>;
   }
 
   /**
@@ -2210,11 +2210,11 @@ const DefaultController = {
       if (target.length < 1) {
         return Promise.resolve([]);
       }
-      const objs = [];
-      const ids = [];
-      let className = null;
-      const results = [];
-      let error = null;
+      const objs: ParseObject[] = [];
+      const ids: string[] = [];
+      let className: string | null = null;
+      const results: ParseObject[] = [];
+      let error: ParseError | null = null;
       target.forEach(el => {
         if (error) {
           return;
@@ -2232,7 +2232,7 @@ const DefaultController = {
           error = new ParseError(ParseError.MISSING_OBJECT_ID, 'All objects must have an ID');
         }
         if (forceFetch || !el.isDataAvailable()) {
-          ids.push(el.id);
+          ids.push(el.id!);
           objs.push(el);
         }
         results.push(el);
@@ -2385,7 +2385,7 @@ const DefaultController = {
     return Promise.resolve(target);
   },
 
-  save(target: ParseObject | null | Array<ParseObject | ParseFile>, options: RequestOptions): Promise<ParseObject | Array<ParseObject> | ParseFile> {
+  save(target: ParseObject | null | Array<ParseObject | ParseFile>, options: RequestOptions): Promise<ParseObject | Array<ParseObject> | ParseFile | undefined> {
     const batchSize =
       options && options.batchSize ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
@@ -2404,13 +2404,14 @@ const DefaultController = {
 
       let unsaved = target.concat();
       for (let i = 0; i < target.length; i++) {
-        if (target[i] instanceof ParseObject) {
-          unsaved = unsaved.concat(unsavedChildren(target[i], true));
+        const target_i = target[i];
+        if (target_i instanceof ParseObject) {
+          unsaved = unsaved.concat(unsavedChildren(target_i, true));
         }
       }
       unsaved = unique(unsaved);
 
-      const filesSaved: Array<ParseFile> = [];
+      const filesSaved: Array<Promise<ParseFile> | undefined> = [];
       let pending: Array<ParseObject> = [];
       unsaved.forEach(el => {
         if (el instanceof ParseFile) {
@@ -2558,7 +2559,7 @@ const DefaultController = {
         }
       );
     }
-    return Promise.resolve();
+    return Promise.resolve(undefined);
   },
 };
 

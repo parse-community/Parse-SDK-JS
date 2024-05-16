@@ -1,11 +1,8 @@
-/**
- * @flow
- */
 import { resolvingPromise } from './promiseUtils';
 
 type Task = {
-  task: () => Promise,
-  _completion: Promise,
+  task: () => Promise<void>,
+  _completion: any,
 };
 
 class TaskQueue {
@@ -15,8 +12,8 @@ class TaskQueue {
     this.queue = [];
   }
 
-  enqueue(task: () => Promise): Promise {
-    const taskComplete = new resolvingPromise();
+  enqueue(task: () => Promise<void>): Promise<void> {
+    const taskComplete = resolvingPromise<void>();
     this.queue.push({
       task: task,
       _completion: taskComplete,
@@ -55,3 +52,4 @@ class TaskQueue {
 }
 
 module.exports = TaskQueue;
+export default TaskQueue;

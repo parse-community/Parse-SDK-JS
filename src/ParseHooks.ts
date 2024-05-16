@@ -13,52 +13,52 @@ export function getTriggers() {
   return CoreManager.getHooksController().get('triggers');
 }
 
-export function getFunction(name) {
+export function getFunction(name: string) {
   return CoreManager.getHooksController().get('functions', name);
 }
 
-export function getTrigger(className, triggerName) {
+export function getTrigger(className: string, triggerName: string) {
   return CoreManager.getHooksController().get('triggers', className, triggerName);
 }
 
-export function createFunction(functionName, url) {
+export function createFunction(functionName: string, url: string) {
   return create({ functionName: functionName, url: url });
 }
 
-export function createTrigger(className, triggerName, url) {
+export function createTrigger(className: string, triggerName: string, url: string) {
   return create({ className: className, triggerName: triggerName, url: url });
 }
 
-export function create(hook) {
+export function create(hook: HookDeclaration) {
   return CoreManager.getHooksController().create(hook);
 }
 
-export function updateFunction(functionName, url) {
+export function updateFunction(functionName: string, url: string) {
   return update({ functionName: functionName, url: url });
 }
 
-export function updateTrigger(className, triggerName, url) {
+export function updateTrigger(className: string, triggerName: string, url: string) {
   return update({ className: className, triggerName: triggerName, url: url });
 }
 
-export function update(hook) {
+export function update(hook: HookDeclaration) {
   return CoreManager.getHooksController().update(hook);
 }
 
-export function removeFunction(functionName) {
+export function removeFunction(functionName: string) {
   return remove({ functionName: functionName });
 }
 
-export function removeTrigger(className, triggerName) {
+export function removeTrigger(className: string, triggerName: string) {
   return remove({ className: className, triggerName: triggerName });
 }
 
-export function remove(hook) {
+export function remove(hook: HookDeleteArg) {
   return CoreManager.getHooksController().remove(hook);
 }
 
 const DefaultController = {
-  get(type, functionName, triggerName) {
+  get(type: string, functionName?: string, triggerName?: string) {
     let url = '/hooks/' + type;
     if (functionName) {
       url += '/' + functionName;
@@ -111,7 +111,7 @@ const DefaultController = {
     return this.sendRequest('PUT', url, hook);
   },
 
-  sendRequest(method, url, body) {
+  sendRequest(method: string, url: string, body?: any) {
     return CoreManager.getRESTController()
       .request(method, url, body, { useMasterKey: true })
       .then(res => {
