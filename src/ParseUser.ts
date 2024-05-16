@@ -2,7 +2,6 @@ import CoreManager from './CoreManager';
 import isRevocableSession from './isRevocableSession';
 import ParseError from './ParseError';
 import ParseObject from './ParseObject';
-import ParseSession from './ParseSession';
 import Storage from './Storage';
 
 import type { AttributeMap } from './ObjectStateMutations';
@@ -1247,9 +1246,7 @@ const DefaultController = {
 
     const RESTController = CoreManager.getRESTController();
     const result = await RESTController.request('POST', 'upgradeToRevocableSession', {}, options);
-    const session = new ParseSession();
-    session._finishFetch(result);
-    user._finishFetch({ sessionToken: session.getSessionToken() });
+    user._finishFetch({ sessionToken: result.sessionToken });
     const current = await user.isCurrentAsync();
     if (current) {
       return DefaultController.setCurrentUser(user);

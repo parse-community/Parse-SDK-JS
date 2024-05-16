@@ -2171,6 +2171,7 @@ const DefaultController = {
   },
 };
 
+CoreManager.setParseQuery(ParseQuery);
 CoreManager.setQueryController(DefaultController);
 
 export default ParseQuery;
