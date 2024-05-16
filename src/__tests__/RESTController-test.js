@@ -17,6 +17,8 @@ CoreManager.setInstallationController({
   currentInstallationId() {
     return Promise.resolve('iid');
   },
+  currentInstallation() {},
+  updateInstallationOnDisk() {},
 });
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
@@ -221,6 +223,9 @@ describe('RESTController', () => {
       getResponseHeader: function (header) {
         return headers[header];
       },
+      getAllResponseHeaders: function() {
+        return Object.keys(headers).map(key => `${key}: ${headers[key]}`).join('\n');
+      },
       send: function () {
         this.status = 200;
         this.responseText = '{}';
@@ -241,6 +246,9 @@ describe('RESTController', () => {
       getResponseHeader: function (header) {
         return headers[header];
       },
+      getAllResponseHeaders: function() {
+        return Object.keys(headers).map(key => `${key}: ${headers[key]}`).join('\n');
+      },
       send: function () {
         this.status = 200;
         this.responseText = '{}';
@@ -252,6 +260,63 @@ describe('RESTController', () => {
     const response = await RESTController.request('POST', 'push', {}, { returnStatus: true });
     expect(response._headers['X-Parse-Push-Status-Id']).toBe('5678');
   });
+
+  it('does not call getRequestHeader with no headers or no getAllResponseHeaders', async () => {
+    const XHR = function () {};
+    XHR.prototype = {
+      open: function () {},
+      setRequestHeader: function () {},
+      getResponseHeader: jest.fn(),
+      send: function () {
+        this.status = 200;
+        this.responseText = '{"result":"hello"}';
+        this.readyState = 4;
+        this.onreadystatechange();
+      },
+    };
+    RESTController._setXHR(XHR);
+    await RESTController.request('GET', 'classes/MyObject', {}, {});
+    expect(XHR.prototype.getResponseHeader.mock.calls.length).toBe(0);
+
+    XHR.prototype.getAllResponseHeaders = jest.fn();
+    await RESTController.request('GET', 'classes/MyObject', {}, {});
+    expect(XHR.prototype.getAllResponseHeaders.mock.calls.length).toBe(1);
+    expect(XHR.prototype.getResponseHeader.mock.calls.length).toBe(0);
+  });
+
+  it('does not invoke Chrome browser console error on getResponseHeader', async () => {
+    const headers = {
+      'access-control-expose-headers': 'a, b, c',
+      'a' : 'value',
+      'b' : 'value',
+      'c' : 'value',
+    }
+    const XHR = function () {};
+    XHR.prototype = {
+      open: function () {},
+      setRequestHeader: function () {},
+      getResponseHeader: jest.fn(key => {
+        if (Object.keys(headers).includes(key)) {
+          return headers[key];
+        }
+        throw new Error("Chrome creates a console error here.");
+      }),
+      getAllResponseHeaders: jest.fn(() => {
+        return Object.keys(headers).map(key => `${key}: ${headers[key]}`).join('\r\n');
+      }),
+      send: function () {
+        this.status = 200;
+        this.responseText = '{"result":"hello"}';
+        this.readyState = 4;
+        this.onreadystatechange();
+      },
+    };
+    RESTController._setXHR(XHR);
+    await RESTController.request('GET', 'classes/MyObject', {}, {});
+    expect(XHR.prototype.getAllResponseHeaders.mock.calls.length).toBe(1);
+    expect(XHR.prototype.getResponseHeader.mock.calls.length).toBe(4);
+  });
+
 
   it('handles invalid header', async () => {
     const XHR = function () {};

@@ -1,6 +1,7 @@
 jest.dontMock('../arrayContainsObject');
 jest.dontMock('../encode');
 jest.dontMock('../decode');
+jest.dontMock('../CoreManager');
 jest.dontMock('../ParseOp');
 jest.dontMock('../unique');
 
@@ -30,6 +31,10 @@ jest.setMock('../ParseRelation', mockRelation);
 const ParseRelation = require('../ParseRelation');
 const ParseObject = require('../ParseObject');
 const ParseOp = require('../ParseOp');
+const CoreManager = require('../CoreManager');
+jest.spyOn(CoreManager, 'getParseObject').mockImplementation(() => require('../ParseObject'));
+jest.spyOn(CoreManager, 'getEventuallyQueue').mockImplementation(() => require('../EventuallyQueue'));
+
 const { Op, SetOp, UnsetOp, IncrementOp, AddOp, AddUniqueOp, RemoveOp, RelationOp, opFromJSON } =
   ParseOp;
 

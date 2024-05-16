@@ -3,14 +3,20 @@ jest.dontMock('../CryptoController');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../Parse');
+jest.dontMock('../ParseObject');
+jest.dontMock('../ParseOp');
+jest.dontMock('../ParseLiveQuery');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('crypto-js/aes');
 jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
 global.indexedDB = require('./test_helpers/mockIndexedDB');
 const CoreManager = require('../CoreManager');
+const ParseLiveQuery = require('../ParseLiveQuery').default;
 const EventuallyQueue = require('../EventuallyQueue');
 const Parse = require('../Parse');
+
+CoreManager.setEventEmitter(require('events').EventEmitter);
 
 describe('Parse module', () => {
   it('can be initialized with keys', () => {
@@ -87,6 +93,14 @@ describe('Parse module', () => {
     };
     Parse.setLocalDatastoreController(controller);
     expect(CoreManager.getLocalDatastoreController()).toBe(controller);
+  });
+
+  it('cannot set EventuallyQueue controller with missing functions', () => {
+    const controller = {
+    };
+    expect(() => Parse.EventuallyQueue = controller).toThrow(
+      'EventuallyQueue must implement poll()'
+    );
   });
 
   it('can set AsyncStorage', () => {
@@ -173,6 +187,14 @@ describe('Parse module', () => {
     CoreManager.set('REQUEST_BATCH_SIZE', 20);
   });
 
+  it('can set and get live query', () => {
+    const temp = Parse.LiveQuery;
+    const LiveQuery = new ParseLiveQuery();
+    Parse.LiveQuery = LiveQuery
+    expect(Parse.LiveQuery).toEqual(LiveQuery);
+    Parse.LiveQuery = temp;
+  });
+
   it('can set allowCustomObjectId', () => {
     expect(Parse.allowCustomObjectId).toBe(false);
     Parse.allowCustomObjectId = true;
@@ -219,6 +241,8 @@ describe('Parse module', () => {
   it('_getInstallationId', () => {
     const controller = {
       currentInstallationId: () => '1234',
+      currentInstallation: () => {},
+      updateInstallationOnDisk: () => {},
     };
     CoreManager.setInstallationController(controller);
     expect(Parse._getInstallationId()).toBe('1234');
@@ -244,5 +268,17 @@ describe('Parse module', () => {
       expect(currentStorage).toEqual(ParseInstance.IndexedDB);
       process.env.PARSE_BUILD = 'node';
     });
+  });
+
+  it('can set EventuallyQueue', () => {
+    const controller = {
+      poll: function () {},
+      save: function () {},
+      destroy: function () {},
+    };
+
+    Parse.EventuallyQueue = controller;
+    expect(CoreManager.getEventuallyQueue()).toBe(controller);
+    expect(Parse.EventuallyQueue).toBe(controller);
   });
 });

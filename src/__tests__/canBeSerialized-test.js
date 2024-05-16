@@ -1,4 +1,5 @@
 jest.dontMock('../canBeSerialized');
+jest.dontMock('../CoreManager');
 
 function mockObject(id, attributes) {
   this.id = id;
@@ -6,6 +7,8 @@ function mockObject(id, attributes) {
 }
 mockObject.registerSubclass = function () {};
 jest.setMock('../ParseObject', mockObject);
+const CoreManager = require('../CoreManager');
+CoreManager.setParseObject(mockObject);
 
 function mockFile(url) {
   this._url = url;

@@ -14,7 +14,7 @@ import GeoPoint from './ParseGeoPoint';
 import Polygon from './ParsePolygon';
 import Installation from './ParseInstallation';
 import LocalDatastore from './LocalDatastore';
-import Object from './ParseObject';
+import ParseObject from './ParseObject';
 import * as Push from './Push';
 import Query from './ParseQuery';
 import Relation from './ParseRelation';
@@ -23,7 +23,7 @@ import Schema from './ParseSchema';
 import Session from './ParseSession';
 import Storage from './Storage';
 import User from './ParseUser';
-import LiveQuery from './ParseLiveQuery';
+import ParseLiveQuery from './ParseLiveQuery';
 import LiveQueryClient from './LiveQueryClient';
 /**
  * Contains all Parse API classes and functions.
@@ -38,7 +38,10 @@ interface ParseType {
     Parse?: ParseType;
     Analytics: typeof Analytics;
     AnonymousUtils: typeof AnonymousUtils;
-    Cloud: typeof Cloud;
+    Cloud: typeof Cloud & {
+        /** only available in server environments */
+        useMasterKey?: () => void;
+    };
     CLP: typeof CLP;
     CoreManager: typeof CoreManager;
     Config: typeof Config;
@@ -51,7 +54,7 @@ interface ParseType {
     Polygon: typeof Polygon;
     Installation: typeof Installation;
     LocalDatastore: typeof LocalDatastore;
-    Object: typeof Object;
+    Object: typeof ParseObject;
     Op: {
         Set: typeof ParseOp.SetOp;
         Unset: typeof ParseOp.UnsetOp;
@@ -69,7 +72,7 @@ interface ParseType {
     Session: typeof Session;
     Storage: typeof Storage;
     User: typeof User;
-    LiveQuery: typeof LiveQuery;
+    LiveQuery: typeof ParseLiveQuery;
     LiveQueryClient: typeof LiveQueryClient;
     initialize(applicationId: string, javaScriptKey: string): void;
     _initialize(applicationId: string, javaScriptKey: string, masterKey?: string): void;
@@ -92,7 +95,7 @@ interface ParseType {
     _ajax(...args: any[]): void;
     _decode(...args: any[]): void;
     _encode(...args: any[]): void;
-    _getInstallationId?(): string;
+    _getInstallationId?(): Promise<string>;
     enableLocalDatastore(polling: boolean, ms: number): void;
     isLocalDatastoreEnabled(): boolean;
     dumpLocalDatastore(): void;

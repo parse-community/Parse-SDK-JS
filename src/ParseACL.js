@@ -2,8 +2,9 @@
  * @flow
  */
 
-import ParseRole from './ParseRole';
-import ParseUser from './ParseUser';
+import CoreManager from './CoreManager';
+import type ParseRole from './ParseRole';
+import type ParseUser from './ParseUser';
 
 type PermissionsMap = { [permission: string]: boolean };
 type ByIdMap = { [userId: string]: PermissionsMap };
@@ -33,6 +34,7 @@ class ParseACL {
   constructor(arg1: ParseUser | ByIdMap) {
     this.permissionsById = {};
     if (arg1 && typeof arg1 === 'object') {
+      const ParseUser = CoreManager.getParseUser();
       if (arg1 instanceof ParseUser) {
         this.setReadAccess(arg1, true);
         this.setWriteAccess(arg1, true);
@@ -100,6 +102,8 @@ class ParseACL {
   }
 
   _setAccess(accessType: string, userId: ParseUser | ParseRole | string, allowed: boolean) {
+    const ParseRole = CoreManager.getParseRole();
+    const ParseUser = CoreManager.getParseUser();
     if (userId instanceof ParseUser) {
       userId = userId.id;
     } else if (userId instanceof ParseRole) {
@@ -137,6 +141,8 @@ class ParseACL {
   }
 
   _getAccess(accessType: string, userId: ParseUser | ParseRole | string): boolean {
+    const ParseRole = CoreManager.getParseRole();
+    const ParseUser = CoreManager.getParseUser();
     if (userId instanceof ParseUser) {
       userId = userId.id;
       if (!userId) {
@@ -248,6 +254,7 @@ class ParseACL {
    * @throws {TypeError} If role is neither a Parse.Role nor a String.
    */
   getRoleReadAccess(role: ParseRole | string): boolean {
+    const ParseRole = CoreManager.getParseRole();
     if (role instanceof ParseRole) {
       // Normalize to the String name
       role = role.getName();
@@ -268,6 +275,7 @@ class ParseACL {
    * @throws {TypeError} If role is neither a Parse.Role nor a String.
    */
   getRoleWriteAccess(role: ParseRole | string): boolean {
+    const ParseRole = CoreManager.getParseRole();
     if (role instanceof ParseRole) {
       // Normalize to the String name
       role = role.getName();
@@ -287,6 +295,7 @@ class ParseACL {
    * @throws {TypeError} If role is neither a Parse.Role nor a String.
    */
   setRoleReadAccess(role: ParseRole | string, allowed: boolean) {
+    const ParseRole = CoreManager.getParseRole();
     if (role instanceof ParseRole) {
       // Normalize to the String name
       role = role.getName();
@@ -306,6 +315,7 @@ class ParseACL {
    * @throws {TypeError} If role is neither a Parse.Role nor a String.
    */
   setRoleWriteAccess(role: ParseRole | string, allowed: boolean) {
+    const ParseRole = CoreManager.getParseRole();
     if (role instanceof ParseRole) {
       // Normalize to the String name
       role = role.getName();

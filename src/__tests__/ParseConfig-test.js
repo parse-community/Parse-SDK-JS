@@ -6,19 +6,25 @@ jest.dontMock('../ParseConfig');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
+jest.dontMock('../ParseObject');
+jest.dontMock('../ParseOp');
 jest.dontMock('../RESTController');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
 jest.dontMock('./test_helpers/mockAsyncStorage');
-
+// Load the classes into CoreManager
+require('../ParseObject');
+require('../ParseOp');
 const mockAsyncStorage = require('./test_helpers/mockAsyncStorage');
 const CoreManager = require('../CoreManager');
 const ParseConfig = require('../ParseConfig').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
 const Storage = require('../Storage');
+const StorageController = require('../StorageController.default');
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
+CoreManager.set('StorageController', StorageController);
 
 describe('ParseConfig', () => {
   beforeEach(() => {

@@ -3,7 +3,6 @@ import isRevocableSession from './isRevocableSession';
 import ParseObject from './ParseObject';
 import ParseUser from './ParseUser';
 
-import type { AttributeMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
 
 /**
@@ -57,7 +56,7 @@ class ParseSession extends ParseObject {
     options = options || {};
     const controller = CoreManager.getSessionController();
 
-    const sessionOptions = {};
+    const sessionOptions: FullOptions = {};
     if (options.hasOwnProperty('useMasterKey')) {
       sessionOptions.useMasterKey = options.useMasterKey;
     }

@@ -21,7 +21,7 @@ import GeoPoint from './ParseGeoPoint'
 import Polygon from './ParsePolygon'
 import Installation from './ParseInstallation'
 import LocalDatastore from './LocalDatastore'
-import Object from './ParseObject'
+import ParseObject from './ParseObject';
 import * as Push from './Push'
 import Query from './ParseQuery'
 import Relation from './ParseRelation'
@@ -30,8 +30,11 @@ import Schema from './ParseSchema'
 import Session from './ParseSession'
 import Storage from './Storage'
 import User from './ParseUser'
-import LiveQuery from './ParseLiveQuery'
+import ParseLiveQuery from './ParseLiveQuery'
 import LiveQueryClient from './LiveQueryClient'
+import LocalDatastoreController from './LocalDatastoreController';
+import StorageController from './StorageController';
+import WebSocketController from './WebSocketController';
 
 /**
  * Contains all Parse API classes and functions.
@@ -47,7 +50,10 @@ interface ParseType {
   Parse?: ParseType,
   Analytics: typeof Analytics,
   AnonymousUtils: typeof AnonymousUtils,
-  Cloud: typeof Cloud,
+  Cloud: typeof Cloud & {
+    /** only available in server environments */
+    useMasterKey?: () => void
+  },
   CLP: typeof CLP,
   CoreManager: typeof CoreManager,
   Config: typeof Config,
@@ -60,7 +66,7 @@ interface ParseType {
   Polygon: typeof Polygon,
   Installation: typeof Installation,
   LocalDatastore: typeof LocalDatastore,
-  Object: typeof Object,
+  Object: typeof ParseObject,
   Op: {
     Set: typeof ParseOp.SetOp,
     Unset: typeof ParseOp.UnsetOp,
@@ -78,14 +84,14 @@ interface ParseType {
   Session: typeof Session,
   Storage: typeof Storage,
   User: typeof User,
-  LiveQuery?: typeof LiveQuery,
+  LiveQuery: typeof ParseLiveQuery,
   LiveQueryClient: typeof LiveQueryClient,
 
   initialize(applicationId: string, javaScriptKey: string): void,
   _initialize(applicationId: string, javaScriptKey: string, masterKey?: string): void,
   setAsyncStorage(storage: any): void,
   setLocalDatastoreController(controller: any): void,
-  getServerHealth(): Promise<any>
+  getServerHealth(): Promise<any>,
 
   applicationId: string,
   javaScriptKey: string,
@@ -103,7 +109,7 @@ interface ParseType {
   _ajax(...args: any[]): void,
   _decode(...args: any[]): void,
   _encode(...args: any[]): void,
-  _getInstallationId?(): string,
+  _getInstallationId?(): Promise<string>,
   enableLocalDatastore(polling: boolean, ms: number): void,
   isLocalDatastoreEnabled(): boolean,
   dumpLocalDatastore(): void,
@@ -114,42 +120,52 @@ interface ParseType {
 const Parse: ParseType = {
   ACL: ACL,
   Analytics: Analytics,
-  AnonymousUtils:  AnonymousUtils,
+  AnonymousUtils: AnonymousUtils,
   Cloud: Cloud,
   CLP: CLP,
-  CoreManager:  CoreManager,
-  Config:  Config,
-  Error:  ParseError,
-  EventuallyQueue:  EventuallyQueue,
+  CoreManager: CoreManager,
+  Config: Config,
+  Error: ParseError,
   FacebookUtils: FacebookUtils,
-  File:  File,
-  GeoPoint:  GeoPoint,
-  Polygon:  Polygon,
-  Installation:  Installation,
-  LocalDatastore:  LocalDatastore,
-  Object:  Object,
+  File: File,
+  GeoPoint: GeoPoint,
+  Polygon: Polygon,
+  Installation: Installation,
+  LocalDatastore: LocalDatastore,
+  Object: ParseObject,
   Op: {
-    Set:  ParseOp.SetOp,
-    Unset:  ParseOp.UnsetOp,
-    Increment:  ParseOp.IncrementOp,
-    Add:  ParseOp.AddOp,
-    Remove:  ParseOp.RemoveOp,
-    AddUnique:  ParseOp.AddUniqueOp,
-    Relation:  ParseOp.RelationOp,
+    Set: ParseOp.SetOp,
+    Unset: ParseOp.UnsetOp,
+    Increment: ParseOp.IncrementOp,
+    Add: ParseOp.AddOp,
+    Remove: ParseOp.RemoveOp,
+    AddUnique: ParseOp.AddUniqueOp,
+    Relation: ParseOp.RelationOp,
   },
-  Push:  Push,
-  Query:  Query,
-  Relation:  Relation,
-  Role:  Role,
-  Schema:  Schema,
-  Session:  Session,
-  Storage:  Storage,
-  User:  User,
-  LiveQueryClient:  LiveQueryClient,
-  LiveQuery:  undefined,
+  Push: Push,
+  Query: Query,
+  Relation: Relation,
+  Role: Role,
+  Schema: Schema,
+  Session: Session,
+  Storage: Storage,
+  User: User,
+  LiveQueryClient: LiveQueryClient,
   IndexedDB: undefined,
   Hooks: undefined,
   Parse: undefined,
+
+  /**
+   * @member {EventuallyQueue} Parse.EventuallyQueue
+   * @static
+   */
+  set EventuallyQueue(queue: EventuallyQueue) {
+    CoreManager.setEventuallyQueue(queue);
+  },
+
+  get EventuallyQueue() {
+    return CoreManager.getEventuallyQueue();
+  },
 
   /**
    * Call this method first to set up your authentication tokens for Parse.
@@ -168,7 +184,7 @@ const Parse: ParseType = {
       /* eslint-disable no-console */
       console.log(
         "It looks like you're using the browser version of the SDK in a " +
-          "node.js environment. You should require('parse/node') instead."
+        "node.js environment. You should require('parse/node') instead."
       );
       /* eslint-enable no-console */
     }
@@ -181,9 +197,13 @@ const Parse: ParseType = {
     CoreManager.set('MASTER_KEY', masterKey);
     CoreManager.set('USE_MASTER_KEY', false);
     CoreManager.setIfNeeded('EventEmitter', EventEmitter);
-
-    Parse.LiveQuery = new LiveQuery();
-    CoreManager.setIfNeeded('LiveQuery', Parse.LiveQuery);
+    CoreManager.setIfNeeded('LiveQuery', new ParseLiveQuery());
+    CoreManager.setIfNeeded('CryptoController', CryptoController);
+    CoreManager.setIfNeeded('EventuallyQueue', EventuallyQueue);
+    CoreManager.setIfNeeded('InstallationController', InstallationController);
+    CoreManager.setIfNeeded('LocalDatastoreController', LocalDatastoreController);
+    CoreManager.setIfNeeded('StorageController', StorageController);
+    CoreManager.setIfNeeded('WebSocketController', WebSocketController);
 
     if (process.env.PARSE_BUILD === 'browser') {
       Parse.IndexedDB = CoreManager.setIfNeeded('IndexedDBStorageController', IndexedDBStorageController);
@@ -290,6 +310,17 @@ const Parse: ParseType = {
   },
 
   /**
+   * @member {ParseLiveQuery} Parse.LiveQuery
+   * @static
+   */
+  set LiveQuery(liveQuery: ParseLiveQuery) {
+    CoreManager.setLiveQuery(liveQuery);
+  },
+  get LiveQuery() {
+    return CoreManager.getLiveQuery();
+  },
+
+  /**
    * @member {string} Parse.liveQueryServerURL
    * @static
    */
@@ -361,7 +392,7 @@ const Parse: ParseType = {
     return encode(value, disallowObjects);
   },
 
-  _getInstallationId () {
+  _getInstallationId() {
     return CoreManager.getInstallationController().currentInstallationId();
   },
   /**
@@ -380,7 +411,7 @@ const Parse: ParseType = {
     if (!this.LocalDatastore.isEnabled) {
       this.LocalDatastore.isEnabled = true;
       if (polling) {
-        EventuallyQueue.poll(ms);
+        CoreManager.getEventuallyQueue().poll(ms);
       }
     }
   },
@@ -390,7 +421,7 @@ const Parse: ParseType = {
    * @static
    * @returns {boolean}
    */
-  isLocalDatastoreEnabled () {
+  isLocalDatastoreEnabled() {
     return this.LocalDatastore.isEnabled;
   },
   /**
@@ -418,7 +449,7 @@ const Parse: ParseType = {
    *
    * @static
    */
-  enableEncryptedUser () {
+  enableEncryptedUser() {
     this.encryptedUser = true;
   },
 
@@ -428,18 +459,16 @@ const Parse: ParseType = {
    * @static
    * @returns {boolean}
    */
-  isEncryptedUserEnabled () {
+  isEncryptedUserEnabled() {
     return this.encryptedUser;
   },
 };
 
-CoreManager.setCryptoController(CryptoController);
-CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);
 
 if (process.env.PARSE_BUILD === 'node') {
   Parse.initialize = Parse._initialize;
-  Parse.Cloud = Parse.Cloud || {};
+  Parse.Cloud = Parse.Cloud || {} as any;
   Parse.Cloud.useMasterKey = function () {
     CoreManager.set('USE_MASTER_KEY', true);
   };
