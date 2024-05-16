@@ -60,7 +60,7 @@ type InstallationController = {
 };
 type ObjectController = {
     fetch: (object: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions) => Promise<Array<ParseObject | undefined> | ParseObject | undefined>;
-    save: (object: ParseObject | Array<ParseObject | ParseFile> | null, options: RequestOptions) => Promise<ParseObject | Array<ParseObject> | ParseFile>;
+    save: (object: ParseObject | Array<ParseObject | ParseFile> | null, options: RequestOptions) => Promise<ParseObject | Array<ParseObject> | ParseFile | undefined>;
     destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => Promise<ParseObject | Array<ParseObject>>;
 };
 type ObjectStateController = {

@@ -1,10 +1,7 @@
-/**
- * @flow
- */
-
 import CoreManager from './CoreManager';
 import ParseQuery from './ParseQuery';
 
+import type ParseObject from './ParseObject';
 import type { WhereClause } from './ParseQuery';
 import type { FullOptions } from './RESTController';
 
@@ -49,9 +46,9 @@ export type PushData = {
  *     be used for this request.
  * </ul>
  * @returns {Promise} A promise that is fulfilled when the push request
- *     completes.
+ *     completes and returns `pushStatusId`.
  */
-export function send(data: PushData, options?: FullOptions = {}): Promise {
+export function send(data: PushData, options: FullOptions = {}): Promise<string> {
   if (data.where && data.where instanceof ParseQuery) {
     data.where = data.where.toJSON().where;
   }
@@ -89,7 +86,7 @@ export function send(data: PushData, options?: FullOptions = {}): Promise {
  * </ul>
  * @returns {Parse.Object} Status of Push.
  */
-export function getPushStatus(pushStatusId: string, options?: FullOptions = {}): Promise<string> {
+export function getPushStatus(pushStatusId: string, options: FullOptions = {}): Promise<ParseObject> {
   const pushOptions = { useMasterKey: true };
   if (options.hasOwnProperty('useMasterKey')) {
     pushOptions.useMasterKey = options.useMasterKey;
