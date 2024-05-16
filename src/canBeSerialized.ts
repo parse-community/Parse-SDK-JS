@@ -1,7 +1,3 @@
-/**
- * @flow
- */
-
 import CoreManager from './CoreManager';
 import ParseFile from './ParseFile';
 import type ParseObject from './ParseObject';

@@ -2385,7 +2385,7 @@ const DefaultController = {
     return Promise.resolve(target);
   },
 
-  save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions): Promise<ParseObject | Array<ParseObject> | ParseFile> {
+  save(target: ParseObject | null | Array<ParseObject | ParseFile>, options: RequestOptions): Promise<ParseObject | Array<ParseObject> | ParseFile> {
     const batchSize =
       options && options.batchSize ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
@@ -2452,11 +2452,11 @@ const DefaultController = {
 
             // Queue up tasks for each object in the batch.
             // When every task is ready, the API request will execute
-            const batchReturned = new resolvingPromise();
-            const batchReady = [];
-            const batchTasks = [];
+            const batchReturned = resolvingPromise();
+            const batchReady: ReturnType<typeof resolvingPromise<void>>[] = [];
+            const batchTasks: Promise<void>[] = [];
             batch.forEach((obj, index) => {
-              const ready = new resolvingPromise();
+              const ready = resolvingPromise<void>();
               batchReady.push(ready);
               const task = function () {
                 ready.resolve();

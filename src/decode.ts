@@ -1,8 +1,4 @@
-/**
- * @flow
- */
 import CoreManager from './CoreManager';
-import ParseACL from './ParseACL'; // eslint-disable-line no-unused-vars
 import ParseFile from './ParseFile';
 import ParseGeoPoint from './ParseGeoPoint';
 import ParsePolygon from './ParsePolygon';
