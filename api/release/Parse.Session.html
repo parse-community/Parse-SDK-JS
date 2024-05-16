@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Object - Documentation</title>
+    <title>Session - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,7 +29,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">Object</h1>
+    <h1 class="page-title">Session</h1>
     
 
     
@@ -44,21 +44,12 @@
         <h2>
             <span class="ancestors"><a href="Parse.html">Parse</a>.</span>
         
-        Object
+        Session
         </h2>
         
-            <div class="class-description"><p>Creates a new model with defined attributes.</p>
-<p>You won't normally call this method directly.  It is recommended that
-you use a subclass of <code>Parse.Object</code> instead, created by calling
-<code>extend</code>.</p>
-<p>However, if you don't want to use a subclass, or aren't sure which
-subclass is appropriate, you can use this form:<pre>
-    var object = new Parse.Object("ClassName");
-</pre>
-That is basically equivalent to:<pre>
-    var MyClass = Parse.Object.extend("ClassName");
-    var object = new MyClass();
-</pre></p></div>
+            <div class="class-description"><p>A Parse.Session object is a local representation of a revocable session.
+This class is a subclass of a Parse.Object, and retains the same
+functionality of a Parse.Object.</p></div>
         
     
 </header>
@@ -73,7 +64,7 @@ That is basically equivalent to:<pre>
     <h2>Constructor</h2>
     
 
-    <h4 class="name" id="Object"><span class="type-signature"></span>new Object<span class="signature">(className, attributes, options)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Session"><span class="type-signature"></span>new Session<span class="signature">(attributes)</span><span class="type-signature"></span></h4>
 
     
 
@@ -151,32 +142,6 @@ That is basically equivalent to:<pre>
 
         <tr>
             
-                <td class="name"><code>className</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>string</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>The class name for the object</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>attributes</code></td>
             
 
@@ -194,33 +159,7 @@ That is basically equivalent to:<pre>
             
 
             <td class="description last">
-                <p>The initial set of data to store in the object.</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>object</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>The options for this object instance.</p>
+                <p>The initial set of data to store in the user.</p>
                 
             </td>
         </tr>
@@ -247,6 +186,17 @@ That is basically equivalent to:<pre>
 </div>
     
     </div>
+
+    
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="Parse.Object.html">Parse.Object</a></li>
+    </ul>
+
 
     
 
@@ -339,6 +289,11 @@ That is basically equivalent to:<pre>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#createdAt">Parse.Object#createdAt</a>
+    </li></ul></dd>
     
 
     
@@ -453,6 +408,11 @@ That is basically equivalent to:<pre>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#updatedAt">Parse.Object#updatedAt</a>
+    </li></ul></dd>
+    
 
     
 
@@ -517,6 +477,11 @@ That is basically equivalent to:<pre>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#_clearPendingOps">Parse.Object#_clearPendingOps</a>
+    </li></ul></dd>
     
 
     
@@ -661,6 +626,11 @@ these fields will be cleared</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#_getId">Parse.Object#_getId</a>
+    </li></ul></dd>
+    
 
     
 
@@ -759,6 +729,11 @@ these fields will be cleared</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#_getStateIdentifier">Parse.Object#_getStateIdentifier</a>
+    </li></ul></dd>
     
 
     
@@ -862,6 +837,11 @@ key.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#add">Parse.Object#add</a>
+    </li></ul></dd>
     
 
     
@@ -1038,6 +1018,11 @@ key.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#addAll">Parse.Object#addAll</a>
+    </li></ul></dd>
     
 
     
@@ -1221,6 +1206,11 @@ not guaranteed.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#addAllUnique">Parse.Object#addAllUnique</a>
+    </li></ul></dd>
+    
 
     
 
@@ -1403,6 +1393,11 @@ not guaranteed.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#addUnique">Parse.Object#addUnique</a>
+    </li></ul></dd>
+    
 
     
 
@@ -1578,6 +1573,11 @@ not guaranteed.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#clear">Parse.Object#clear</a>
+    </li></ul></dd>
+    
 
     
 
@@ -1680,6 +1680,11 @@ not guaranteed.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#clone">Parse.Object#clone</a>
+    </li></ul></dd>
+    
 
     
 
@@ -1779,6 +1784,11 @@ object is saved. If no amount is specified, 1 is used by default.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#decrement">Parse.Object#decrement</a>
+    </li></ul></dd>
     
 
     
@@ -1960,6 +1970,11 @@ object is saved. If no amount is specified, 1 is used by default.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#destroy">Parse.Object#destroy</a>
+    </li></ul></dd>
+    
 
     
 
@@ -2129,6 +2144,11 @@ next time the app is opened.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#destroyEventually">Parse.Object#destroyEventually</a>
+    </li></ul></dd>
     
 
     
@@ -2304,6 +2324,11 @@ particular attribute has been modified since the last save/refresh.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#dirty">Parse.Object#dirty</a>
+    </li></ul></dd>
+    
 
     
 
@@ -2455,6 +2480,11 @@ particular attribute has been modified since the last save/refresh.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#dirtyKeys">Parse.Object#dirtyKeys</a>
+    </li></ul></dd>
+    
 
     
 
@@ -2553,6 +2583,11 @@ particular attribute has been modified since the last save/refresh.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#equals">Parse.Object#equals</a>
+    </li></ul></dd>
     
 
     
@@ -2704,6 +2739,11 @@ particular attribute has been modified since the last save/refresh.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#escape">Parse.Object#escape</a>
+    </li></ul></dd>
     
 
     
@@ -2858,6 +2898,11 @@ login)</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#existed">Parse.Object#existed</a>
+    </li></ul></dd>
+    
 
     
 
@@ -2956,6 +3001,11 @@ login)</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#exists">Parse.Object#exists</a>
+    </li></ul></dd>
     
 
     
@@ -3117,6 +3167,11 @@ model differs from its current attributes, they will be overriden.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#fetch">Parse.Object#fetch</a>
+    </li></ul></dd>
     
 
     
@@ -3287,6 +3342,11 @@ and then call <code>fetchFromLocalDatastore()</code> on it.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#fetchFromLocalDatastore">Parse.Object#fetchFromLocalDatastore</a>
+    </li></ul></dd>
+    
 
     
 
@@ -3392,6 +3452,11 @@ notation to specify which fields in the included object are also fetched.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#fetchWithInclude">Parse.Object#fetchWithInclude</a>
+    </li></ul></dd>
     
 
     
@@ -3583,6 +3648,11 @@ completes.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#get">Parse.Object#get</a>
+    </li></ul></dd>
+    
 
     
 
@@ -3734,6 +3804,11 @@ completes.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#getACL">Parse.Object#getACL</a>
+    </li></ul></dd>
+    
 
     
 
@@ -3824,6 +3899,105 @@ completes.</p>
 
     
 
+    <h4 class="name" id="getSessionToken"><span class="type-signature"></span>getSessionToken<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Returns the session token string.</p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="section-returns">
+<h5>Returns:</h5>
+
+        
+
+<dl class="param-type">
+    <dt>
+        Type:
+    </dt>
+    <dd>
+        
+<span class="param-type"><code>string</code></span>
+
+
+    </dd>
+</dl>
+
+
+    
+</div>
+
+
+
+</div>
+        
+            
+<div class="section-method">
+
+    
+
     <h4 class="name" id="has"><span class="type-signature"></span>has<span class="signature">(attr)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
 
     
@@ -3847,6 +4021,11 @@ null or undefined.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#has">Parse.Object#has</a>
+    </li></ul></dd>
     
 
     
@@ -3999,6 +4178,11 @@ object is saved. If no amount is specified, 1 is used by default.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#increment">Parse.Object#increment</a>
+    </li></ul></dd>
     
 
     
@@ -4180,6 +4364,11 @@ object is saved. If no amount is specified, 1 is used by default.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#isDataAvailable">Parse.Object#isDataAvailable</a>
+    </li></ul></dd>
+    
 
     
 
@@ -4278,6 +4467,11 @@ object is saved. If no amount is specified, 1 is used by default.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#isNew">Parse.Object#isNew</a>
+    </li></ul></dd>
     
 
     
@@ -4380,6 +4574,11 @@ const isPinned = await object.isPinned();
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#isPinned">Parse.Object#isPinned</a>
+    </li></ul></dd>
     
 
     
@@ -4484,6 +4683,11 @@ const isPinned = await object.isPinned();
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#isValid">Parse.Object#isValid</a>
+    </li></ul></dd>
+    
 
     
 
@@ -4582,6 +4786,11 @@ const isPinned = await object.isPinned();
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#newInstance">Parse.Object#newInstance</a>
+    </li></ul></dd>
     
 
     
@@ -4684,6 +4893,11 @@ object.op(&quot;x&quot;) would return an instance of Parse.Op.Increment.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#op">Parse.Object#op</a>
+    </li></ul></dd>
     
 
     
@@ -4851,6 +5065,11 @@ await object.pin();
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#pin">Parse.Object#pin</a>
+    </li></ul></dd>
+    
 
     
 
@@ -4960,6 +5179,11 @@ await object.pinWithName(name);
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#pinWithName">Parse.Object#pinWithName</a>
+    </li></ul></dd>
     
 
     
@@ -5116,6 +5340,11 @@ await object.pinWithName(name);
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#relation">Parse.Object#relation</a>
+    </li></ul></dd>
+    
 
     
 
@@ -5267,6 +5496,11 @@ with a given key.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#remove">Parse.Object#remove</a>
+    </li></ul></dd>
     
 
     
@@ -5443,6 +5677,11 @@ with a given key.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#removeAll">Parse.Object#removeAll</a>
+    </li></ul></dd>
     
 
     
@@ -5624,6 +5863,11 @@ with a given key.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#revert">Parse.Object#revert</a>
+    </li></ul></dd>
+    
 
     
 
@@ -5791,6 +6035,11 @@ gameTurn.save(&quot;player&quot;, &quot;Jake Cutter&quot;);</pre></p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#save">Parse.Object#save</a>
+    </li></ul></dd>
     
 
     
@@ -6073,6 +6322,11 @@ next time the app is opened.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#saveEventually">Parse.Object#saveEventually</a>
+    </li></ul></dd>
+    
 
     
 
@@ -6264,6 +6518,11 @@ error: function(gameTurnAgain, error) {
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#set">Parse.Object#set</a>
+    </li></ul></dd>
     
 
     
@@ -6482,6 +6741,11 @@ The only supported option is <code>error</code>.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#setACL">Parse.Object#setACL</a>
+    </li></ul></dd>
+    
 
     
 
@@ -6673,6 +6937,11 @@ The only supported option is <code>error</code>.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#toJSON">Parse.Object#toJSON</a>
+    </li></ul></dd>
+    
 
     
 
@@ -6840,6 +7109,11 @@ The only supported option is <code>error</code>.</p>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#toOfflinePointer">Parse.Object#toOfflinePointer</a>
+    </li></ul></dd>
+    
 
     
 
@@ -6938,6 +7212,11 @@ The only supported option is <code>error</code>.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#toPointer">Parse.Object#toPointer</a>
+    </li></ul></dd>
     
 
     
@@ -7041,6 +7320,11 @@ await object.unPin();
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#unPin">Parse.Object#unPin</a>
+    </li></ul></dd>
     
 
     
@@ -7147,6 +7431,11 @@ await object.unPinWithName(name);
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#unPinWithName">Parse.Object#unPinWithName</a>
+    </li></ul></dd>
     
 
     
@@ -7303,6 +7592,11 @@ exist.</p>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#unset">Parse.Object#unset</a>
+    </li></ul></dd>
     
 
     
@@ -7482,6 +7776,11 @@ to provide additional validation on <code>set</code> and
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Parse.Object.html#validate">Parse.Object#validate</a>
+    </li></ul></dd>
+    
 
     
 
@@ -7624,20 +7923,14 @@ to provide additional validation on <code>set</code> and
 
     
 
-    <h4 class="name" id=".createWithoutData"><span class="type-signature">(static) </span>createWithoutData<span class="signature">(id)</span><span class="type-signature"> &rarr; {<a href="Parse.Object.html">Parse.Object</a>}</span></h4>
+    <h4 class="name" id=".current"><span class="type-signature">(static) </span>current<span class="signature">(options)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Creates a reference to a subclass of Parse.Object with the given id. This
-does not exist on Parse.Object, only on subclasses.</p>
-<p>A shortcut for: <pre>
- var Foo = Parse.Object.extend("Foo");
- var pointerToFoo = new Foo();
- pointerToFoo.id = "myObjectId";
-</pre>
+    <p>Retrieves the Session object for the currently logged in session.</p>
 </div>
 
 
@@ -7708,220 +8001,6 @@ does not exist on Parse.Object, only on subclasses.</p>
     </thead>
 
     <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>string</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>The ID of the object to create a reference to.</p>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-returns">
-<h5>Returns:</h5>
-
-        
-
-<dl class="param-type">
-    <dt>
-        Type:
-    </dt>
-    <dd>
-        
-<span class="param-type"><code><a href="Parse.Object.html">Parse.Object</a></code></span>
-
-
-    </dd>
-</dl>
-
-
-<div class="param-desc">
-    <p>A Parse.Object reference.</p>
-</div>
-
-    
-</div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".destroyAll"><span class="type-signature">(static) </span>destroyAll<span class="signature">(list, options)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Destroy the given list of models on the server if it was already persisted.</p>
-<p>Unlike saveAll, if an error occurs while deleting an individual model,
-this method will continue trying to delete the rest of the models if
-possible, except in the case of a fatal error like a connection error.
-<p>In particular, the Parse.Error object returned in the case of error may
-be one of two types:
-<ul>
-<li>A Parse.Error.AGGREGATE_ERROR. This object's "errors" property is an
-array of other Parse.Error objects. Each error object in this array
-has an "object" property that references the object that could not be
-deleted (for instance, because that object could not be found).</li>
-<li>A non-aggregate Parse.Error. This indicates a serious error that
-caused the delete operation to be aborted partway through (for
-instance, a connection failure in the middle of the delete).</li>
-</ul>
-<pre>
-Parse.Object.destroyAll([object1, object2, ...])
-.then((list) => {
-// All the objects were deleted.
-}, (error) => {
-// An error occurred while deleting one or more of the objects.
-// If this is an aggregate error, then we can inspect each error
-// object individually to determine the reason why a particular
-// object was not deleted.
-if (error.code === Parse.Error.AGGREGATE_ERROR) {
-for (var i = 0; i < error.errors.length; i++) {
-console.log("Couldn't delete " + error.errors[i].object.id +
-"due to " + error.errors[i].message);
-}
-} else {
-console.log("Delete aborted because of " + error.message);
-}
-});
-</pre>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>list</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>Array</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>A list of <code>Parse.Object</code>.</p>
-                
-            </td>
-        </tr>
-
     
 
         <tr>
@@ -7943,7 +8022,7 @@ console.log("Delete aborted because of " + error.message);
             
 
             <td class="description last">
-                
+                <p>useMasterKey</p>
                 
             </td>
         </tr>
@@ -7984,8 +8063,9 @@ console.log("Delete aborted because of " + error.message);
 
 
 <div class="param-desc">
-    <p>A promise that is fulfilled when the destroyAll
-completes.</p>
+    <p>A promise that is resolved with the Parse.Session
+object after it has been fetched. If there is no current user, the
+promise will be rejected.</p>
 </div>
 
     
@@ -8000,17 +8080,18 @@ completes.</p>
 
     
 
-    <h4 class="name" id=".disableSingleInstance"><span class="type-signature">(static) </span>disableSingleInstance<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".isCurrentSessionRevocable"><span class="type-signature">(static) </span>isCurrentSessionRevocable<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Disable single instance objects, where any local objects with the same Id
-share the same attributes, and stay synchronized with each other.
-When disabled, you can have two instances of the same object in memory
-without them sharing attributes.</p>
+    <p>Determines whether the current session token is revocable.
+This method is useful for migrating Express.js or Node.js web apps to
+use revocable sessions. If you are migrating an app that uses the Parse
+SDK in the browser only, please use Parse.User.enableRevocableSession()
+instead, so that sessions can be automatically upgraded.</p>
 </div>
 
 
@@ -8058,296 +8139,6 @@ without them sharing attributes.</p>
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".enableSingleInstance"><span class="type-signature">(static) </span>enableSingleInstance<span class="signature">()</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Enable single instance objects, where any local objects with the same Id
-share the same attributes, and stay synchronized with each other.
-This is disabled by default in server environments, since it can lead to
-security issues.</p>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".extend"><span class="type-signature">(static) </span>extend<span class="signature">(className, protoProps, classProps)</span><span class="type-signature"> &rarr; {<a href="Parse.Object.html">Parse.Object</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Creates a new subclass of Parse.Object for the given Parse class name.</p>
-<p>Every extension of a Parse class will inherit from the most recent
-previous extension of that class. When a Parse.Object is automatically
-created by parsing JSON, it will use the most recent extension of that
-class.</p>
-<p>You should call either:<pre>
-    var MyClass = Parse.Object.extend("MyClass", {
-        <i>Instance methods</i>,
-        initialize: function(attrs, options) {
-            this.someInstanceProperty = [],
-            <i>Other instance properties</i>
-        }
-    }, {
-        <i>Class properties</i>
-    });</pre>
-or, for Backbone compatibility:<pre>
-    var MyClass = Parse.Object.extend({
-        className: "MyClass",
-        <i>Instance methods</i>,
-        initialize: function(attrs, options) {
-            this.someInstanceProperty = [],
-            <i>Other instance properties</i>
-        }
-    }, {
-        <i>Class properties</i>
-    });</pre></p>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>className</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>string</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>The name of the Parse class backing this model.</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>protoProps</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>object</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>Instance properties to add to instances of the
-class returned from this method.</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>classProps</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>object</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>Class properties to add the class returned from
-this method.</p>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -8373,2485 +8164,15 @@ this method.</p>
     </dt>
     <dd>
         
-<span class="param-type"><code><a href="Parse.Object.html">Parse.Object</a></code></span>
-
-
-    </dd>
-</dl>
-
-
-<div class="param-desc">
-    <p>A new subclass of Parse.Object.</p>
-</div>
-
-    
-</div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".fetchAll"><span class="type-signature">(static) </span>fetchAll<span class="signature">(list, options)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Parse.Object.html">Parse.Object</a>>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Fetches the given list of Parse.Object.
-If any error is encountered, stops and calls the error handler.</p>
-<pre>
-  Parse.Object.fetchAll([object1, object2, ...])
-   .then((list) => {
-     // All the objects were fetched.
-   }, (error) => {
-     // An error occurred while fetching one of the objects.
-   });
-</pre>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>list</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>Array</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>A list of <code>Parse.Object</code>.</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>object</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>Valid options are:<ul></p>
-  <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-    be used for this request.
-  <li>sessionToken: A valid session token, used for making a request on
-      behalf of a specific user.
-  <li>include: The name(s) of the key(s) to include. Can be a string, an array of strings,
-      or an array of array of strings.
-</ul>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-returns">
-<h5>Returns:</h5>
-
-        
-
-<dl class="param-type">
-    <dt>
-        Type:
-    </dt>
-    <dd>
-        
-<span class="param-type"><code>Array.&lt;<a href="Parse.Object.html">Parse.Object</a>></code></span>
-
-
-    </dd>
-</dl>
-
-
-    
-</div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".fetchAllIfNeeded"><span class="type-signature">(static) </span>fetchAllIfNeeded<span class="signature">(list, options)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Parse.Object.html">Parse.Object</a>>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Fetches the given list of Parse.Object if needed.
-If any error is encountered, stops and calls the error handler.</p>
-<pre>
-  Parse.Object.fetchAllIfNeeded([object1, ...])
-   .then((list) => {
-     // Objects were fetched and updated.
-   }, (error) => {
-     // An error occurred while fetching one of the objects.
-   });
-</pre>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>list</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>Array</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>A list of <code>Parse.Object</code>.</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>object</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-returns">
-<h5>Returns:</h5>
-
-        
-
-<dl class="param-type">
-    <dt>
-        Type:
-    </dt>
-    <dd>
-        
-<span class="param-type"><code>Array.&lt;<a href="Parse.Object.html">Parse.Object</a>></code></span>
-
-
-    </dd>
-</dl>
-
-
-    
-</div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".fetchAllIfNeededWithInclude"><span class="type-signature">(static) </span>fetchAllIfNeededWithInclude<span class="signature">(list, keys, options)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Parse.Object.html">Parse.Object</a>>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Fetches the given list of Parse.Object if needed.
-If any error is encountered, stops and calls the error handler.</p>
-<p>Includes nested Parse.Objects for the provided key. You can use dot
-notation to specify which fields in the included object are also fetched.</p>
-<p>If any error is encountered, stops and calls the error handler.</p>
-<pre>
-  Parse.Object.fetchAllIfNeededWithInclude([object1, object2, ...], [pointer1, pointer2, ...])
-   .then((list) => {
-     // All the objects were fetched.
-   }, (error) => {
-     // An error occurred while fetching one of the objects.
-   });
-</pre>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>list</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>Array</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>A list of <code>Parse.Object</code>.</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>keys</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>string</code></span>
-|
-
-<span class="param-type"><code>Array.&lt;(string|Array.&lt;string>)></code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>The name(s) of the key(s) to include.</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>object</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>Valid options are:<ul></p>
-  <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-    be used for this request.
-  <li>sessionToken: A valid session token, used for making a request on
-      behalf of a specific user.
-</ul>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-returns">
-<h5>Returns:</h5>
-
-        
-
-<dl class="param-type">
-    <dt>
-        Type:
-    </dt>
-    <dd>
-        
-<span class="param-type"><code>Array.&lt;<a href="Parse.Object.html">Parse.Object</a>></code></span>
-
-
-    </dd>
-</dl>
-
-
-    
-</div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".fetchAllWithInclude"><span class="type-signature">(static) </span>fetchAllWithInclude<span class="signature">(list, keys, options)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Parse.Object.html">Parse.Object</a>>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Fetches the given list of Parse.Object.</p>
-<p>Includes nested Parse.Objects for the provided key. You can use dot
-notation to specify which fields in the included object are also fetched.</p>
-<p>If any error is encountered, stops and calls the error handler.</p>
-<pre>
-  Parse.Object.fetchAllWithInclude([object1, object2, ...], [pointer1, pointer2, ...])
-   .then((list) => {
-     // All the objects were fetched.
-   }, (error) => {
-     // An error occurred while fetching one of the objects.
-   });
-</pre>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>list</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>Array</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>A list of <code>Parse.Object</code>.</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>keys</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>string</code></span>
-|
-
-<span class="param-type"><code>Array.&lt;(string|Array.&lt;string>)></code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>The name(s) of the key(s) to include.</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>object</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>Valid options are:<ul></p>
-  <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
-    be used for this request.
-  <li>sessionToken: A valid session token, used for making a request on
-      behalf of a specific user.
-</ul>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-returns">
-<h5>Returns:</h5>
-
-        
-
-<dl class="param-type">
-    <dt>
-        Type:
-    </dt>
-    <dd>
-        
-<span class="param-type"><code>Array.&lt;<a href="Parse.Object.html">Parse.Object</a>></code></span>
-
-
-    </dd>
-</dl>
-
-
-    
-</div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".fromJSON"><span class="type-signature">(static) </span>fromJSON<span class="signature">(json, override, dirty)</span><span class="type-signature"> &rarr; {<a href="Parse.Object.html">Parse.Object</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Creates a new instance of a Parse Object from a JSON representation.</p>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>json</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>object</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>The JSON map of the Object's data</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>override</code></td>
-            
-
-            <td class="type">
-            
-                
 <span class="param-type"><code>boolean</code></span>
 
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>In single instance mode, all old server data
-is overwritten if this is set to true</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>dirty</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>boolean</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>Whether the Parse.Object should set JSON keys to dirty</p>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-returns">
-<h5>Returns:</h5>
-
-        
-
-<dl class="param-type">
-    <dt>
-        Type:
-    </dt>
-    <dd>
-        
-<span class="param-type"><code><a href="Parse.Object.html">Parse.Object</a></code></span>
-
-
-    </dd>
-</dl>
-
-
-<div class="param-desc">
-    <p>A Parse.Object reference</p>
-</div>
-
-    
-</div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".pinAll"><span class="type-signature">(static) </span>pinAll<span class="signature">(objects)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Asynchronously stores the objects and every object they point to in the local datastore,
-recursively, using a default pin name: _default.</p>
-<p>If those other objects have not been fetched from Parse, they will not be stored.
-However, if they have changed data, all the changes will be retained.</p>
-<pre>
-await Parse.Object.pinAll([...]);
-</pre>
-<p>To retrieve object:
-<code>query.fromLocalDatastore()</code> or <code>query.fromPin()</code></p>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>objects</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>Array</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>A list of <code>Parse.Object</code>.</p>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-returns">
-<h5>Returns:</h5>
-
-        
-
-<dl class="param-type">
-    <dt>
-        Type:
-    </dt>
-    <dd>
-        
-<span class="param-type"><code>Promise</code></span>
-
-
-    </dd>
-</dl>
-
-
-<div class="param-desc">
-    <p>A promise that is fulfilled when the pin completes.</p>
-</div>
-
-    
-</div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".pinAllWithName"><span class="type-signature">(static) </span>pinAllWithName<span class="signature">(name, objects)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Asynchronously stores the objects and every object they point to in the local datastore, recursively.</p>
-<p>If those other objects have not been fetched from Parse, they will not be stored.
-However, if they have changed data, all the changes will be retained.</p>
-<pre>
-await Parse.Object.pinAllWithName(name, [obj1, obj2, ...]);
-</pre>
-<p>To retrieve object:
-<code>query.fromLocalDatastore()</code> or <code>query.fromPinWithName(name)</code></p>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>string</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>Name of Pin.</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>objects</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>Array</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>A list of <code>Parse.Object</code>.</p>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-returns">
-<h5>Returns:</h5>
-
-        
-
-<dl class="param-type">
-    <dt>
-        Type:
-    </dt>
-    <dd>
-        
-<span class="param-type"><code>Promise</code></span>
-
-
-    </dd>
-</dl>
-
-
-<div class="param-desc">
-    <p>A promise that is fulfilled when the pin completes.</p>
-</div>
-
-    
-</div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".registerSubclass"><span class="type-signature">(static) </span>registerSubclass<span class="signature">(className, constructor)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Registers a subclass of Parse.Object with a specific class name.
-When objects of that class are retrieved from a query, they will be
-instantiated with this subclass.
-This is only necessary when using ES6 subclassing.</p>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>className</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>string</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>The class name of the subclass</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>constructor</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>function</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>The subclass</p>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".saveAll"><span class="type-signature">(static) </span>saveAll<span class="signature">(list, options)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Parse.Object.html">Parse.Object</a>>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Saves the given list of Parse.Object.
-If any error is encountered, stops and calls the error handler.</p>
-<pre>
-Parse.Object.saveAll([object1, object2, ...])
-.then((list) => {
-// All the objects were saved.
-}, (error) => {
-// An error occurred while saving one of the objects.
-});
-</pre>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>list</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>Array</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>A list of <code>Parse.Object</code>.</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>object</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-returns">
-<h5>Returns:</h5>
-
-        
-
-<dl class="param-type">
-    <dt>
-        Type:
-    </dt>
-    <dd>
-        
-<span class="param-type"><code>Array.&lt;<a href="Parse.Object.html">Parse.Object</a>></code></span>
-
-
     </dd>
 </dl>
 
 
     
 </div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".unPinAll"><span class="type-signature">(static) </span>unPinAll<span class="signature">(objects)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Asynchronously removes the objects and every object they point to in the local datastore,
-recursively, using a default pin name: _default.</p>
-<pre>
-await Parse.Object.unPinAll([...]);
-</pre>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>objects</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>Array</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>A list of <code>Parse.Object</code>.</p>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-returns">
-<h5>Returns:</h5>
-
-        
-
-<dl class="param-type">
-    <dt>
-        Type:
-    </dt>
-    <dd>
-        
-<span class="param-type"><code>Promise</code></span>
-
-
-    </dd>
-</dl>
-
-
-<div class="param-desc">
-    <p>A promise that is fulfilled when the unPin completes.</p>
-</div>
-
-    
-</div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".unPinAllObjects"><span class="type-signature">(static) </span>unPinAllObjects<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Asynchronously removes all objects in the local datastore using a default pin name: _default.</p>
-<pre>
-await Parse.Object.unPinAllObjects();
-</pre>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-returns">
-<h5>Returns:</h5>
-
-        
-
-<dl class="param-type">
-    <dt>
-        Type:
-    </dt>
-    <dd>
-        
-<span class="param-type"><code>Promise</code></span>
-
-
-    </dd>
-</dl>
-
-
-<div class="param-desc">
-    <p>A promise that is fulfilled when the unPin completes.</p>
-</div>
-
-    
-</div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".unPinAllObjectsWithName"><span class="type-signature">(static) </span>unPinAllObjectsWithName<span class="signature">(name)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Asynchronously removes all objects with the specified pin name.
-Deletes the pin name also.</p>
-<pre>
-await Parse.Object.unPinAllObjectsWithName(name);
-</pre>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>string</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>Name of Pin.</p>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-returns">
-<h5>Returns:</h5>
-
-        
-
-<dl class="param-type">
-    <dt>
-        Type:
-    </dt>
-    <dd>
-        
-<span class="param-type"><code>Promise</code></span>
-
-
-    </dd>
-</dl>
-
-
-<div class="param-desc">
-    <p>A promise that is fulfilled when the unPin completes.</p>
-</div>
-
-    
-</div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".unPinAllWithName"><span class="type-signature">(static) </span>unPinAllWithName<span class="signature">(name, objects)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Asynchronously removes the objects and every object they point to in the local datastore, recursively.</p>
-<pre>
-await Parse.Object.unPinAllWithName(name, [obj1, obj2, ...]);
-</pre>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>string</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>Name of Pin.</p>
-                
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>objects</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>Array</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>A list of <code>Parse.Object</code>.</p>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="section-returns">
-<h5>Returns:</h5>
-
-        
-
-<dl class="param-type">
-    <dt>
-        Type:
-    </dt>
-    <dd>
-        
-<span class="param-type"><code>Promise</code></span>
-
-
-    </dd>
-</dl>
-
-
-<div class="param-desc">
-    <p>A promise that is fulfilled when the unPin completes.</p>
-</div>
-
-    
-</div>
-
-
-
-</div>
-        
-            
-<div class="section-method">
-
-    
-
-    <h4 class="name" id=".unregisterSubclass"><span class="type-signature">(static) </span>unregisterSubclass<span class="signature">(className)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Unegisters a subclass of Parse.Object with a specific class name.</p>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>className</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><code>string</code></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <p>The class name of the subclass</p>
-                
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -10874,7 +8195,7 @@ await Parse.Object.unPinAllWithName(name, [obj1, obj2, ...]);
 <br class="clear">
 
 <footer>
-    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on 2024-05-16T13:27:17.928Z.
+    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on 2024-05-16T13:27:17.995Z.
 </footer>
 
 <script>prettyPrint();</script>

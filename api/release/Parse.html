@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Subscription - Documentation</title>
+    <title>Parse - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,7 +29,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">Subscription</h1>
+    <h1 class="page-title">Parse</h1>
     
 
     
@@ -42,69 +42,8 @@
 <header>
     
         <h2>
-        Subscription
+        Parse
         </h2>
-        
-            <div class="class-description"><p>Creates a new LiveQuery Subscription.
-<a href="https://nodejs.org/api/events.html#events_class_eventemitter">cloud functions</a>.</p>
-<p>Response Object - Contains data from the client that made the request
-<ul>
-<li>clientId</li>
-<li>installationId - requires Parse Server 4.0.0+</li>
-</ul>
-</p>
-<p>Open Event - When you call query.subscribe(), we send a subscribe request to
-the LiveQuery server, when we get the confirmation from the LiveQuery server,
-this event will be emitted. When the client loses WebSocket connection to the
-LiveQuery server, we will try to auto reconnect the LiveQuery server. If we
-reconnect the LiveQuery server and successfully resubscribe the ParseQuery,
-you'll also get this event.
-<pre>
-subscription.on('open', (response) => {
-
-});</pre></p>
-<p>Create Event - When a new ParseObject is created and it fulfills the ParseQuery you subscribe,
-you'll get this event. The object is the ParseObject which is created.
-<pre>
-subscription.on('create', (object, response) => {
-
-});</pre></p>
-<p>Update Event - When an existing ParseObject (original) which fulfills the ParseQuery you subscribe
-is updated (The ParseObject fulfills the ParseQuery before and after changes),
-you'll get this event. The object is the ParseObject which is updated.
-Its content is the latest value of the ParseObject.
-<p>Parse-Server 3.1.3+ Required for original object parameter</p>
-<pre>
-subscription.on('update', (object, original, response) => {
-
-});</pre></p>
-<p>Enter Event - When an existing ParseObject's (original) old value doesn't fulfill the ParseQuery
-but its new value fulfills the ParseQuery, you'll get this event. The object is the
-ParseObject which enters the ParseQuery. Its content is the latest value of the ParseObject.
-<p>Parse-Server 3.1.3+ Required for original object parameter</p>
-<pre>
-subscription.on('enter', (object, original, response) => {
-
-});</pre></p>
-<p>Update Event - When an existing ParseObject's old value fulfills the ParseQuery but its new value
-doesn't fulfill the ParseQuery, you'll get this event. The object is the ParseObject
-which leaves the ParseQuery. Its content is the latest value of the ParseObject.
-<pre>
-subscription.on('leave', (object, response) => {
-
-});</pre></p>
-<p>Delete Event - When an existing ParseObject which fulfills the ParseQuery is deleted, you'll
-get this event. The object is the ParseObject which is deleted.
-<pre>
-subscription.on('delete', (object, response) => {
-
-});</pre></p>
-<p>Close Event - When the client loses the WebSocket connection to the LiveQuery
-server and we stop receiving events, you'll get this event.
-<pre>
-subscription.on('close', () => {
-
-});</pre></p></div>
         
     
 </header>
@@ -116,14 +55,16 @@ subscription.on('close', () => {
 <div class="section-method">
 
     
-    <h2>Constructor</h2>
-    
 
-    <h4 class="name" id="Subscription"><span class="type-signature"></span>new Subscription<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Parse"><span class="type-signature"></span>new Parse<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
+
+<div class="description">
+    <p>Contains all Parse API classes and functions.</p>
+</div>
 
 
 
@@ -195,11 +136,933 @@ subscription.on('close', () => {
     
 
     
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="Parse.ACL.html">ACL</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.Analytics.html">Analytics</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.AnonymousUtils.html">AnonymousUtils</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.CLP.html">CLP</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.Cloud.html">Cloud</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.Config.html">Config</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.Error.html">Error</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.html#.EventuallyQueue">EventuallyQueue</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.FacebookUtils.html">FacebookUtils</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.File.html">File</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.Installation.html">Installation</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.html#.LiveQuery">LiveQuery</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.LiveQueryClient.html">LiveQueryClient</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.LocalDatastore.html">LocalDatastore</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.Object.html">Object</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.Polygon.html">Polygon</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.Push.html">Push</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.Query.html">Query</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.Relation.html">Relation</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.Role.html">Role</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.Schema.html">Schema</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.Session.html">Session</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Parse.User.html">User</a></dt>
+            <dd></dd>
+        </dl>
+    
 
      
 
     
 
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<div class="section-members">
+<h4 class="name" id=".EventuallyQueue"><span class="type-signature">(static) </span>EventuallyQueue<span class="type-signature"> :EventuallyQueue</span></h4>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><code>EventuallyQueue</code></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="section-members">
+<h4 class="name" id=".LiveQuery"><span class="type-signature">(static) </span>LiveQuery<span class="type-signature"> :ParseLiveQuery</span></h4>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><code>ParseLiveQuery</code></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="section-members">
+<h4 class="name" id=".allowCustomObjectId"><span class="type-signature">(static) </span>allowCustomObjectId<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><code>boolean</code></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="section-members">
+<h4 class="name" id=".applicationId"><span class="type-signature">(static) </span>applicationId<span class="type-signature"> :string</span></h4>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><code>string</code></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="section-members">
+<h4 class="name" id=".encryptedUser"><span class="type-signature">(static) </span>encryptedUser<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><code>boolean</code></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="section-members">
+<h4 class="name" id=".idempotency"><span class="type-signature">(static) </span>idempotency<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><code>boolean</code></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="section-members">
+<h4 class="name" id=".javaScriptKey"><span class="type-signature">(static) </span>javaScriptKey<span class="type-signature"> :string</span></h4>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><code>string</code></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="section-members">
+<h4 class="name" id=".liveQueryServerURL"><span class="type-signature">(static) </span>liveQueryServerURL<span class="type-signature"> :string</span></h4>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><code>string</code></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="section-members">
+<h4 class="name" id=".masterKey"><span class="type-signature">(static) </span>masterKey<span class="type-signature"> :string</span></h4>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><code>string</code></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="section-members">
+<h4 class="name" id=".secret"><span class="type-signature">(static) </span>secret<span class="type-signature"> :string</span></h4>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><code>string</code></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="section-members">
+<h4 class="name" id=".serverAuthToken"><span class="type-signature">(static) </span>serverAuthToken<span class="type-signature"> :string</span></h4>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><code>string</code></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="section-members">
+<h4 class="name" id=".serverAuthType"><span class="type-signature">(static) </span>serverAuthType<span class="type-signature"> :string</span></h4>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><code>string</code></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="section-members">
+<h4 class="name" id=".serverURL"><span class="type-signature">(static) </span>serverURL<span class="type-signature"> :string</span></h4>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><code>string</code></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</div>
+
+        
     
 
     
@@ -211,14 +1074,364 @@ subscription.on('close', () => {
 
     
 
-    <h4 class="name" id="unsubscribe"><span class="type-signature"></span>unsubscribe<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id=".dumpLocalDatastore"><span class="type-signature">(static) </span>dumpLocalDatastore<span class="signature">()</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Close the subscription</p>
+    <p>Gets all contents from Local Datastore</p>
+<pre>
+await Parse.dumpLocalDatastore();
+</pre>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="section-returns">
+<h5>Returns:</h5>
+
+        
+
+<dl class="param-type">
+    <dt>
+        Type:
+    </dt>
+    <dd>
+        
+<span class="param-type"><code>object</code></span>
+
+
+    </dd>
+</dl>
+
+
+    
+</div>
+
+
+
+</div>
+        
+            
+<div class="section-method">
+
+    
+
+    <h4 class="name" id=".enableEncryptedUser"><span class="type-signature">(static) </span>enableEncryptedUser<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Enable the current user encryption.
+This must be called before login any user.</p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+        
+            
+<div class="section-method">
+
+    
+
+    <h4 class="name" id=".enableLocalDatastore"><span class="type-signature">(static) </span>enableLocalDatastore<span class="signature">(polling<span class="signature-attributes">opt</span>, ms<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Enable pinning in your application.
+This must be called after <code>Parse.initialize</code> in your application.</p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>polling</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">
+                <p>Allow pinging the server /health endpoint. Default true</p>
+                
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ms</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">
+                <p>Milliseconds to ping the server. Default 2000ms</p>
+                
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+        
+            
+<div class="section-method">
+
+    
+
+    <h4 class="name" id=".getServerHealth"><span class="type-signature">(static) </span>getServerHealth<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Returns information regarding the current server's health</p>
 </div>
 
 
@@ -305,6 +1518,679 @@ subscription.on('close', () => {
 
 </div>
         
+            
+<div class="section-method">
+
+    
+
+    <h4 class="name" id=".initialize"><span class="type-signature">(static) </span>initialize<span class="signature">(applicationId, javaScriptKey<span class="signature-attributes">opt</span>, masterKey<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Call this method first to set up your authentication tokens for Parse.</p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>applicationId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><code>string</code></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">
+                <p>Your Parse Application ID.</p>
+                
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>javaScriptKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><code>string</code></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">
+                <p>Your Parse JavaScript Key (Not needed for parse-server)</p>
+                
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>masterKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><code>string</code></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">
+                <p>Your Parse Master Key. (Node.js only!)</p>
+                
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+        
+            
+<div class="section-method">
+
+    
+
+    <h4 class="name" id=".isEncryptedUserEnabled"><span class="type-signature">(static) </span>isEncryptedUserEnabled<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Flag that indicates whether Encrypted User is enabled.</p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="section-returns">
+<h5>Returns:</h5>
+
+        
+
+<dl class="param-type">
+    <dt>
+        Type:
+    </dt>
+    <dd>
+        
+<span class="param-type"><code>boolean</code></span>
+
+
+    </dd>
+</dl>
+
+
+    
+</div>
+
+
+
+</div>
+        
+            
+<div class="section-method">
+
+    
+
+    <h4 class="name" id=".isLocalDatastoreEnabled"><span class="type-signature">(static) </span>isLocalDatastoreEnabled<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Flag that indicates whether Local Datastore is enabled.</p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="section-returns">
+<h5>Returns:</h5>
+
+        
+
+<dl class="param-type">
+    <dt>
+        Type:
+    </dt>
+    <dd>
+        
+<span class="param-type"><code>boolean</code></span>
+
+
+    </dd>
+</dl>
+
+
+    
+</div>
+
+
+
+</div>
+        
+            
+<div class="section-method">
+
+    
+
+    <h4 class="name" id=".setAsyncStorage"><span class="type-signature">(static) </span>setAsyncStorage<span class="signature">(storage)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Call this method to set your AsyncStorage engine
+Starting Parse@1.11, the ParseSDK do not provide a React AsyncStorage as the ReactNative module
+is not provided at a stable path and changes over versions.</p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>storage</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><code>AsyncStorage</code></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <p>a react native async storage.</p>
+                
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+        
+            
+<div class="section-method">
+
+    
+
+    <h4 class="name" id=".setLocalDatastoreController"><span class="type-signature">(static) </span>setLocalDatastoreController<span class="signature">(controller)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Call this method to set your LocalDatastoreStorage engine
+If using React-Native use <a href="Parse.html#.setAsyncStorage">Parse.setAsyncStorage()</a></p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>controller</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><code>LocalDatastoreController</code></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <p>a data storage.</p>
+                
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+        
     
 
     
@@ -322,7 +2208,7 @@ subscription.on('close', () => {
 <br class="clear">
 
 <footer>
-    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on 2024-05-16T13:27:18.045Z.
+    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on 2024-05-16T13:27:17.849Z.
 </footer>
 
 <script>prettyPrint();</script>
