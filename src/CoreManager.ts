@@ -53,7 +53,7 @@ type ObjectController = {
     object: ParseObject | Array<ParseObject>,
     forceFetch: boolean,
     options: RequestOptions
-  ) => Promise<any>,
+  ) => Promise<Array<ParseObject | undefined> | ParseObject | undefined>,
   save: (object: ParseObject | Array<ParseObject | ParseFile> | null, options: RequestOptions) => Promise<ParseObject | Array<ParseObject> | ParseFile>,
   destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => Promise<ParseObject | Array<ParseObject>>,
 };
@@ -86,7 +86,7 @@ type QueryController = {
 type EventuallyQueue = {
   save: (object: ParseObject, serverOptions: SaveOptions) => Promise<any>,
   destroy: (object: ParseObject, serverOptions: RequestOptions) => Promise<any>,
-  poll: (ms: number) => void
+  poll: (ms?: number) => void
 };
 type RESTController = {
   request: (method: string, path: string, data?: any, options?: RequestOptions) => Promise<any>,
@@ -598,7 +598,7 @@ const CoreManager = {
     return config['HooksController']!;
   },
 
-  setParseOp(op: ParseOp) {
+  setParseOp(op: typeof ParseOp) {
     config['ParseOp'] = op;
   },
 
@@ -606,7 +606,7 @@ const CoreManager = {
     return config['ParseOp']!;
   },
 
-  setParseObject(object: ParseObject) {
+  setParseObject(object: typeof ParseObject) {
     config['ParseObject'] = object;
   },
 
@@ -614,15 +614,15 @@ const CoreManager = {
     return config['ParseObject']!;
   },
 
-  setParseQuery(query: ParseQuery) {
+  setParseQuery(query: typeof ParseQuery) {
     config['ParseQuery'] = query;
   },
 
-  getParseQuery() {
-    return config['ParseQuery']!
+  getParseQuery(): ParseQuery {
+    return config['ParseQuery']!;
   },
 
-  setParseRole(role: ParseRole) {
+  setParseRole(role: typeof ParseRole) {
     config['ParseRole'] = role;
   },
 
@@ -630,7 +630,7 @@ const CoreManager = {
     return config['ParseRole']!;
   },
 
-  setParseUser(user: ParseUser) {
+  setParseUser(user: typeof ParseUser) {
     config['ParseUser'] = user;
   },
 
