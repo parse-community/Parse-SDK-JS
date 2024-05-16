@@ -179,6 +179,38 @@ describe('Parse User', () => {
     });
   });
 
+  it('can save new installation when deleted', async () => {
+    const currentInstallationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installation = await Parse.Installation.currentInstallation();
+    expect(installation.installationId).toBe(currentInstallationId);
+    expect(installation.deviceType).toBe(Parse.Installation.DEVICE_TYPES.WEB);
+    await installation.save();
+    expect(installation.id).toBeDefined();
+    const objectId = installation.id;
+    await installation.destroy({ useMasterKey: true });
+    await installation.save();
+    expect(installation.id).toBeDefined();
+    expect(installation.id).not.toBe(objectId);
+    const currentInstallation = await Parse.Installation.currentInstallation();
+    expect(currentInstallation.id).toBe(installation.id);
+  });
+
+  it('can fetch installation when deleted', async () => {
+    const currentInstallationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installation = await Parse.Installation.currentInstallation();
+    expect(installation.installationId).toBe(currentInstallationId);
+    expect(installation.deviceType).toBe(Parse.Installation.DEVICE_TYPES.WEB);
+    await installation.save();
+    expect(installation.id).toBeDefined();
+    const objectId = installation.id;
+    await installation.destroy({ useMasterKey: true });
+    await installation.fetch();
+    expect(installation.id).toBeDefined();
+    expect(installation.id).not.toBe(objectId);
+    const currentInstallation = await Parse.Installation.currentInstallation();
+    expect(currentInstallation.id).toBe(installation.id);
+  });
+
   it('can login with userId', async () => {
     Parse.User.enableUnsafeCurrentUser();
 
