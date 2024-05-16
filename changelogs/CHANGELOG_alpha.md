@@ -1,3 +1,10 @@
+# [5.1.0-alpha.11](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.10...5.1.0-alpha.11) (2024-05-16)
+
+
+### Bug Fixes
+
+* `Parse.GeoPoint.current` returns `undefined` ([#2127](https://github.com/parse-community/Parse-SDK-JS/issues/2127)) ([3860535](https://github.com/parse-community/Parse-SDK-JS/commit/3860535f5257b7b5edbf7ebfd286e2a4a7fd2769))
+
 # [5.1.0-alpha.10](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.9...5.1.0-alpha.10) (2024-05-15)
 
 
