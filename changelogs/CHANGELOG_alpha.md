@@ -1,3 +1,10 @@
+## [5.1.1-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0...5.1.1-alpha.1) (2024-05-16)
+
+
+### Bug Fixes
+
+* `Parse.Installation` not working when installation is deleted on server ([#2126](https://github.com/parse-community/Parse-SDK-JS/issues/2126)) ([22360b4](https://github.com/parse-community/Parse-SDK-JS/commit/22360b4dc96ca7ebfcc2441855456b241bf450ac))
+
 # [5.1.0-alpha.11](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.10...5.1.0-alpha.11) (2024-05-16)
 
 
