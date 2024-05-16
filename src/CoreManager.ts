@@ -15,6 +15,9 @@ import type ParseConfig from './ParseConfig';
 import type LiveQueryClient from './LiveQueryClient';
 import type ParseSchema from './ParseSchema';
 import type ParseInstallation from './ParseInstallation';
+import type ParseQuery from './ParseQuery';
+import type * as ParseOp from './ParseOp';
+import type ParseRole from './ParseRole';
 
 type AnalyticsController = {
   track: (name: string, dimensions: { [key: string]: string }) => Promise<any>,
@@ -50,7 +53,7 @@ type ObjectController = {
     object: ParseObject | Array<ParseObject>,
     forceFetch: boolean,
     options: RequestOptions
-  ) => Promise<any>,
+  ) => Promise<Array<ParseObject | undefined> | ParseObject | undefined>,
   save: (object: ParseObject | Array<ParseObject | ParseFile> | null, options: RequestOptions) => Promise<ParseObject | Array<ParseObject> | ParseFile>,
   destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => Promise<ParseObject | Array<ParseObject>>,
 };
@@ -83,7 +86,7 @@ type QueryController = {
 type EventuallyQueue = {
   save: (object: ParseObject, serverOptions: SaveOptions) => Promise<any>,
   destroy: (object: ParseObject, serverOptions: RequestOptions) => Promise<any>,
-  poll: (ms: number) => void
+  poll: (ms?: number) => void
 };
 type RESTController = {
   request: (method: string, path: string, data?: any, options?: RequestOptions) => Promise<any>,
@@ -593,6 +596,46 @@ const CoreManager = {
 
   getHooksController(): HooksController {
     return config['HooksController']!;
+  },
+
+  setParseOp(op: typeof ParseOp) {
+    config['ParseOp'] = op;
+  },
+
+  getParseOp() {
+    return config['ParseOp']!;
+  },
+
+  setParseObject(object: typeof ParseObject) {
+    config['ParseObject'] = object;
+  },
+
+  getParseObject(): ParseObject {
+    return config['ParseObject']!;
+  },
+
+  setParseQuery(query: typeof ParseQuery) {
+    config['ParseQuery'] = query;
+  },
+
+  getParseQuery(): ParseQuery {
+    return config['ParseQuery']!;
+  },
+
+  setParseRole(role: typeof ParseRole) {
+    config['ParseRole'] = role;
+  },
+
+  getParseRole(): ParseRole {
+    return config['ParseRole']!;
+  },
+
+  setParseUser(user: typeof ParseUser) {
+    config['ParseUser'] = user;
+  },
+
+  getParseUser(): ParseUser {
+    return config['ParseUser']!;
   },
 };
 

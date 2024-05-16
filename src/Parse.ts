@@ -91,7 +91,7 @@ interface ParseType {
   _initialize(applicationId: string, javaScriptKey: string, masterKey?: string): void,
   setAsyncStorage(storage: any): void,
   setLocalDatastoreController(controller: any): void,
-  getServerHealth(): Promise<any>
+  getServerHealth(): Promise<any>,
 
   applicationId: string,
   javaScriptKey: string,

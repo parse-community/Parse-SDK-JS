@@ -1,12 +1,11 @@
 /**
  * @flow
  */
+import CoreManager from './CoreManager';
 import ParseACL from './ParseACL'; // eslint-disable-line no-unused-vars
 import ParseFile from './ParseFile';
 import ParseGeoPoint from './ParseGeoPoint';
 import ParsePolygon from './ParsePolygon';
-import ParseObject from './ParseObject';
-import { opFromJSON } from './ParseOp';
 import ParseRelation from './ParseRelation';
 
 export default function decode(value: any): any {
@@ -21,8 +20,10 @@ export default function decode(value: any): any {
     return dup;
   }
   if (typeof value.__op === 'string') {
+    const { opFromJSON } = CoreManager.getParseOp();
     return opFromJSON(value);
   }
+  const ParseObject = CoreManager.getParseObject();
   if (value.__type === 'Pointer' && value.className) {
     return ParseObject.fromJSON(value);
   }

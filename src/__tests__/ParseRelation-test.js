@@ -1,4 +1,5 @@
 jest.dontMock('../encode');
+jest.dontMock('../CoreManager');
 jest.dontMock('../ParseRelation');
 jest.dontMock('../ParseOp');
 jest.dontMock('../unique');
@@ -56,6 +57,10 @@ jest.setMock('../ParseQuery', mockQuery);
 
 const ParseObject = require('../ParseObject');
 const ParseRelation = require('../ParseRelation').default;
+const CoreManager = require('../CoreManager');
+CoreManager.setParseObject(mockObject);
+CoreManager.setParseQuery(mockQuery);
+CoreManager.setParseOp(require('../ParseOp'));
 
 describe('ParseRelation', () => {
   it('can be constructed with a reference parent and key', () => {

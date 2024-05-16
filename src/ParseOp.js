@@ -5,7 +5,8 @@
 import arrayContainsObject from './arrayContainsObject';
 import decode from './decode';
 import encode from './encode';
-import ParseObject from './ParseObject';
+import CoreManager from './CoreManager';
+import type ParseObject from './ParseObject';
 import ParseRelation from './ParseRelation';
 import unique from './unique';
 
@@ -190,6 +191,7 @@ export class AddUniqueOp extends Op {
       return this._value || [];
     }
     if (Array.isArray(value)) {
+      const ParseObject = CoreManager.getParseObject();
       const toAdd = [];
       this._value.forEach(v => {
         if (v instanceof ParseObject) {
@@ -241,6 +243,7 @@ export class RemoveOp extends Op {
       return [];
     }
     if (Array.isArray(value)) {
+      const ParseObject = CoreManager.getParseObject();
       // var i = value.indexOf(this._value);
       const removed = value.concat([]);
       for (let i = 0; i < this._value.length; i++) {
@@ -274,6 +277,7 @@ export class RemoveOp extends Op {
       return new UnsetOp();
     }
     if (previous instanceof RemoveOp) {
+      const ParseObject = CoreManager.getParseObject();
       const uniques = previous._value.concat([]);
       for (let i = 0; i < this._value.length; i++) {
         if (this._value[i] instanceof ParseObject) {
@@ -450,3 +454,14 @@ export class RelationOp extends Op {
     return adds || removes || {};
   }
 }
+CoreManager.setParseOp({
+  Op,
+  opFromJSON,
+  SetOp,
+  UnsetOp,
+  IncrementOp,
+  AddOp,
+  RelationOp,
+  RemoveOp,
+  AddUniqueOp
+});

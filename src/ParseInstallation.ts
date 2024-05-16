@@ -190,7 +190,7 @@ class ParseInstallation extends ParseObject {
    * Parse.Installation.DEVICE_TYPES.WEB
    * </pre
    *
-   * @property {Object} DEVICE_TYPES
+   * @property {object} DEVICE_TYPES
    * @static
    */
   static get DEVICE_TYPES(): DeviceInterface {
@@ -229,7 +229,7 @@ class ParseInstallation extends ParseObject {
    * @param {...any} args
    * @returns {Promise}
    */
-  async save(...args: Array<any>): Promise<ParseInstallation> {
+  async save(...args: Array<any>): Promise<this> {
     try {
       await super.save.apply(this, args);
     } catch (e) {      

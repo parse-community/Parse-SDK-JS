@@ -59,7 +59,7 @@ type InstallationController = {
     updateInstallationOnDisk: (installation: ParseInstallation) => Promise<void>;
 };
 type ObjectController = {
-    fetch: (object: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions) => Promise<any>;
+    fetch: (object: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions) => Promise<Array<ParseObject | undefined> | ParseObject | undefined>;
     save: (object: ParseObject | Array<ParseObject | ParseFile> | null, options: RequestOptions) => Promise<ParseObject | Array<ParseObject> | ParseFile>;
     destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => Promise<ParseObject | Array<ParseObject>>;
 };
@@ -98,7 +98,7 @@ type QueryController = {
 type EventuallyQueue = {
     save: (object: ParseObject, serverOptions: SaveOptions) => Promise<any>;
     destroy: (object: ParseObject, serverOptions: RequestOptions) => Promise<any>;
-    poll: (ms: number) => void;
+    poll: (ms?: number) => void;
 };
 type RESTController = {
     request: (method: string, path: string, data?: any, options?: RequestOptions) => Promise<any>;
@@ -284,5 +284,15 @@ declare const CoreManager: {
     getLiveQueryController(): LiveQueryControllerType;
     setHooksController(controller: HooksController): void;
     getHooksController(): HooksController;
+    setParseOp(op: any): void;
+    getParseOp(): any;
+    setParseObject(object: typeof ParseObject): void;
+    getParseObject(): ParseObject;
+    setParseQuery(query: any): void;
+    getParseQuery(): ParseQuery;
+    setParseRole(role: any): void;
+    getParseRole(): ParseRole;
+    setParseUser(user: any): void;
+    getParseUser(): ParseUser;
 };
 export default CoreManager;
