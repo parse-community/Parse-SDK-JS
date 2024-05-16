@@ -1,13 +1,11 @@
 jest.autoMockOff();
 
 const mockRNStorageInterface = require('./test_helpers/mockRNStorage');
-const mockStorageInterface = require('./test_helpers/mockStorageInteface');
 const mockIndexedDB = require('./test_helpers/mockIndexedDB');
 const mockWeChat = require('./test_helpers/mockWeChat');
 const CoreManager = require('../CoreManager');
 
 global.wx = mockWeChat;
-global.localStorage = mockStorageInterface;
 global.indexedDB = mockIndexedDB;
 jest.mock('idb-keyval', () => {
   return mockIndexedDB;

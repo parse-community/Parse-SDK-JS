@@ -29,7 +29,7 @@ declare class ParseSession extends ParseObject {
      * object after it has been fetched. If there is no current user, the
      * promise will be rejected.
      */
-    static current(options: FullOptions): any;
+    static current(options: FullOptions): Promise<ParseSession>;
     /**
      * Determines whether the current session token is revocable.
      * This method is useful for migrating Express.js or Node.js web apps to

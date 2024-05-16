@@ -1,3 +1,31 @@
+## [5.1.1-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0...5.1.1-alpha.1) (2024-05-16)
+
+
+### Bug Fixes
+
+* `Parse.Installation` not working when installation is deleted on server ([#2126](https://github.com/parse-community/Parse-SDK-JS/issues/2126)) ([22360b4](https://github.com/parse-community/Parse-SDK-JS/commit/22360b4dc96ca7ebfcc2441855456b241bf450ac))
+
+# [5.1.0-alpha.11](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.10...5.1.0-alpha.11) (2024-05-16)
+
+
+### Bug Fixes
+
+* `Parse.GeoPoint.current` returns `undefined` ([#2127](https://github.com/parse-community/Parse-SDK-JS/issues/2127)) ([3860535](https://github.com/parse-community/Parse-SDK-JS/commit/3860535f5257b7b5edbf7ebfd286e2a4a7fd2769))
+
+# [5.1.0-alpha.10](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.9...5.1.0-alpha.10) (2024-05-15)
+
+
+### Bug Fixes
+
+* Remove circular dependencies ([#2125](https://github.com/parse-community/Parse-SDK-JS/issues/2125)) ([b415165](https://github.com/parse-community/Parse-SDK-JS/commit/b415165486f0328e0f9fb2d949d7b11abf363435))
+
+# [5.1.0-alpha.9](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.8...5.1.0-alpha.9) (2024-05-04)
+
+
+### Features
+
+* Improve installation object `Parse.Installation.currentInstallation` to support web push notifications ([#2119](https://github.com/parse-community/Parse-SDK-JS/issues/2119)) ([4fc62ce](https://github.com/parse-community/Parse-SDK-JS/commit/4fc62cec0c4ea704f48ec501a5f0182836de45d1))
+
 # [5.1.0-alpha.8](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.7...5.1.0-alpha.8) (2024-05-02)
 
 

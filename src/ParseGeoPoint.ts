@@ -1,8 +1,4 @@
 /**
- * @flow
- */
-
-/**
  * Creates a new GeoPoint with any of the following forms:<br>
  *   <pre>
  *   new GeoPoint(otherGeoPoint)
@@ -102,7 +98,7 @@ class ParseGeoPoint {
     };
   }
 
-  equals(other: mixed): boolean {
+  equals(other: any): boolean {
     return (
       other instanceof ParseGeoPoint &&
       this.latitude === other.latitude &&
@@ -183,12 +179,24 @@ class ParseGeoPoint {
   /**
    * Creates a GeoPoint with the user's current location, if available.
    *
+   * @param {object} options The options.
+   * @param {boolean} [options.enableHighAccuracy=false] A boolean value that indicates the application would like to receive the best possible results.
+   *  If true and if the device is able to provide a more accurate position, it will do so.
+   *  Note that this can result in slower response times or increased power consumption (with a GPS chip on a mobile device for example).
+   *  On the other hand, if false, the device can take the liberty to save resources by responding more quickly and/or using less power. Default: false.
+   * @param {number} [options.timeout=Infinity] A positive long value representing the maximum length of time (in milliseconds) the device is allowed to take in order to return a position.
+   *  The default value is Infinity, meaning that getCurrentPosition() won't return until the position is available.
+   * @param {number} [options.maximumAge=0] A positive long value indicating the maximum age in milliseconds of a possible cached position that is acceptable to return.
+   *  If set to 0, it means that the device cannot use a cached position and must attempt to retrieve the real current position.
+   *  If set to Infinity the device must return a cached position regardless of its age. Default: 0.
    * @static
-   * @returns {Parse.GeoPoint} User's current location
+   * @returns {Promise<Parse.GeoPoint>} User's current location
    */
-  static current() {
-    return navigator.geolocation.getCurrentPosition(location => {
-      return new ParseGeoPoint(location.coords.latitude, location.coords.longitude);
+  static current(options): Promise<ParseGeoPoint> {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(location => {
+        resolve(new ParseGeoPoint(location.coords.latitude, location.coords.longitude));
+      }, reject, options);
     });
   }
 }

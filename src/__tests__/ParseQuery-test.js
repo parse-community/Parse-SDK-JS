@@ -5,6 +5,8 @@ jest.dontMock('../EventEmitter');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseQuery');
+jest.dontMock('../ParseObject');
+jest.dontMock('../ParseOp');
 jest.dontMock('../promiseUtils');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../UniqueInstanceStateController');
@@ -17,22 +19,6 @@ jest.mock('../uuid', () => {
   let value = 0;
   return () => value++;
 });
-const mockObject = function (className) {
-  this.className = className;
-  this.attributes = {};
-};
-mockObject.registerSubclass = function () {};
-mockObject.fromJSON = function (json) {
-  const o = new mockObject(json.className);
-  o.id = json.objectId;
-  for (const attr in json) {
-    if (attr !== 'className' && attr !== '__type' && attr !== 'objectId') {
-      o.attributes[attr] = json[attr];
-    }
-  }
-  return o;
-};
-jest.setMock('../ParseObject', mockObject);
 
 const mockLocalDatastore = {
   _serializeObjectsFromPinName: jest.fn(),
@@ -44,7 +30,7 @@ let CoreManager = require('../CoreManager');
 const EventEmitter = require('../EventEmitter');
 const ParseError = require('../ParseError').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
-let ParseObject = require('../ParseObject');
+let ParseObject = require('../ParseObject').default;
 let ParseQuery = require('../ParseQuery').default;
 const LiveQuerySubscription = require('../LiveQuerySubscription').default;
 
@@ -2156,7 +2142,7 @@ describe('ParseQuery', () => {
       let callCount = 0;
       const callback = (accumulator, object) => {
         callCount += 1;
-        accumulator.attributes.number += object.attributes.number;
+        accumulator.set('number', accumulator.attributes.number + object.attributes.number);
         return accumulator;
       };
       const q = new ParseQuery('Item');

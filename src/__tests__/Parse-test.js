@@ -4,6 +4,7 @@ jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../Parse');
 jest.dontMock('../ParseObject');
+jest.dontMock('../ParseOp');
 jest.dontMock('../ParseLiveQuery');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('crypto-js/aes');
@@ -240,6 +241,8 @@ describe('Parse module', () => {
   it('_getInstallationId', () => {
     const controller = {
       currentInstallationId: () => '1234',
+      currentInstallation: () => {},
+      updateInstallationOnDisk: () => {},
     };
     CoreManager.setInstallationController(controller);
     expect(Parse._getInstallationId()).toBe('1234');

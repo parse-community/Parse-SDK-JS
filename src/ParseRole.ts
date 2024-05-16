@@ -1,7 +1,4 @@
-/**
- * @flow
- */
-
+import CoreManager from './CoreManager';
 import ParseACL from './ParseACL';
 import ParseError from './ParseError';
 import ParseObject from './ParseObject';
@@ -42,7 +39,7 @@ class ParseRole extends ParseObject {
    *
    * @returns {string} the name of the role.
    */
-  getName(): ?string {
+  getName(): string | null {
     const name = this.get('name');
     if (name == null || typeof name === 'string') {
       return name;
@@ -67,7 +64,7 @@ class ParseRole extends ParseObject {
    *     callbacks.
    * @returns {(ParseObject|boolean)} true if the set succeeded.
    */
-  setName(name: string, options?: mixed): ParseObject | boolean {
+  setName(name: string, options?: any): ParseObject | boolean {
     this._validateName(name);
     return this.set('name', name, options);
   }
@@ -114,8 +111,8 @@ class ParseRole extends ParseObject {
     }
   }
 
-  validate(attrs: AttributeMap, options?: mixed): ParseError | boolean {
-    const isInvalid = super.validate(attrs, options);
+  validate(attrs: AttributeMap, options?: any): ParseError | boolean {
+    const isInvalid = (super.validate as typeof this['validate'])(attrs, options);
     if (isInvalid) {
       return isInvalid;
     }
@@ -141,6 +138,7 @@ class ParseRole extends ParseObject {
   }
 }
 
+CoreManager.setParseRole(ParseRole);
 ParseObject.registerSubclass('_Role', ParseRole);
 
 export default ParseRole;

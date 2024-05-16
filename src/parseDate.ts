@@ -1,8 +1,4 @@
-/**
- * @flow
- */
-
-export default function parseDate(iso8601: string): ?Date {
+export default function parseDate(iso8601: string): Date | null {
   const regexp = new RegExp(
     '^([0-9]{1,4})-([0-9]{1,2})-([0-9]{1,2})' +
       'T' +

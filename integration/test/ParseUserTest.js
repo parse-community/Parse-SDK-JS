@@ -113,7 +113,7 @@ describe('Parse User', () => {
 
   it('can login users with installationId', async () => {
     Parse.User.enableUnsafeCurrentUser();
-    const currentInstallation = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const currentInstallationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
     const installationId = '12345678';
     const user = new Parse.User();
     user.set('username', 'parse');
@@ -132,7 +132,7 @@ describe('Parse User', () => {
     let sessions = await sessionQuery.find({ useMasterKey: true });
     expect(sessions.length).toBe(2);
     expect(sessions[0].get('installationId')).toBe(installationId);
-    expect(sessions[1].get('installationId')).toBe(currentInstallation);
+    expect(sessions[1].get('installationId')).toBe(currentInstallationId);
     expect(sessions[0].get('sessionToken')).toBe(user.getSessionToken());
     expect(sessions[1].get('sessionToken')).toBe(loggedUser.getSessionToken());
 
@@ -142,10 +142,73 @@ describe('Parse User', () => {
     });
     sessions = await sessionQuery.find({ useMasterKey: true });
     expect(sessions.length).toBe(2);
-    expect(sessions[0].get('installationId')).toBe(currentInstallation);
+    expect(sessions[0].get('installationId')).toBe(currentInstallationId);
     expect(sessions[1].get('installationId')).toBe(installationId);
     expect(sessions[0].get('sessionToken')).toBe(loggedUser.getSessionToken());
     expect(sessions[1].get('sessionToken')).toBe(installationUser.getSessionToken());
+  });
+
+  it('can get current installation', async () => {
+    const currentInstallationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installation = await Parse.Installation.currentInstallation();
+    expect(installation.installationId).toBe(currentInstallationId);
+    expect(installation.deviceType).toBe(Parse.Installation.DEVICE_TYPES.WEB);
+    await installation.save();
+    expect(installation.id).toBeDefined();
+    expect(installation.createdAt).toBeDefined();
+    expect(installation.updatedAt).toBeDefined();
+    const data = {
+      deviceToken: '1234',
+      badge: 1,
+      appIdentifier: 'com.parse.server',
+      appName: 'Parse JS SDK',
+      appVersion: '1.0.0',
+      parseVersion: '1.0.0',
+      localeIdentifier: 'en-US',
+      timeZone: 'GMT',
+      channels: ['test'],
+      GCMSenderId: '1234',
+      pushType: 'test',
+    };
+    installation.set(data);
+    await installation.save();
+    const query = new Parse.Query(Parse.Installation);
+    const result = await query.get(installation.id, { useMasterKey: true });
+    Object.keys(data).forEach(key => {
+      expect(result[key]).toEqual(data[key]);
+    });
+  });
+
+  it('can save new installation when deleted', async () => {
+    const currentInstallationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installation = await Parse.Installation.currentInstallation();
+    expect(installation.installationId).toBe(currentInstallationId);
+    expect(installation.deviceType).toBe(Parse.Installation.DEVICE_TYPES.WEB);
+    await installation.save();
+    expect(installation.id).toBeDefined();
+    const objectId = installation.id;
+    await installation.destroy({ useMasterKey: true });
+    await installation.save();
+    expect(installation.id).toBeDefined();
+    expect(installation.id).not.toBe(objectId);
+    const currentInstallation = await Parse.Installation.currentInstallation();
+    expect(currentInstallation.id).toBe(installation.id);
+  });
+
+  it('can fetch installation when deleted', async () => {
+    const currentInstallationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installation = await Parse.Installation.currentInstallation();
+    expect(installation.installationId).toBe(currentInstallationId);
+    expect(installation.deviceType).toBe(Parse.Installation.DEVICE_TYPES.WEB);
+    await installation.save();
+    expect(installation.id).toBeDefined();
+    const objectId = installation.id;
+    await installation.destroy({ useMasterKey: true });
+    await installation.fetch();
+    expect(installation.id).toBeDefined();
+    expect(installation.id).not.toBe(objectId);
+    const currentInstallation = await Parse.Installation.currentInstallation();
+    expect(currentInstallation.id).toBe(installation.id);
   });
 
   it('can login with userId', async () => {

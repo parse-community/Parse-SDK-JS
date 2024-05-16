@@ -17,14 +17,18 @@ jobs:
         with:
           version: 2
   check-types:
-    name: Check types
+    name: Check Types
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - run: npm ci
-      - name: Check types
+      - name: Build Types
+        run: npm run build:types
+      - name: Test Types
         run: npm run test:types
+      - name: Lint Types
+        run: npm run lint:types
   check-docs:
     name: Check Docs
     timeout-minutes: 5
@@ -34,6 +38,15 @@ jobs:
       - run: npm ci
       - name: Check Docs
         run: npm run docs
+  check-circular:
+    name: Check Circular Dependencies
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm ci
+      - name: Circular Dependencies
+        run: npm run madge:circular
   check-lint:
     name: Lint
     timeout-minutes: 15

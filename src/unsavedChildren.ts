@@ -1,9 +1,6 @@
-/**
- * @flow
- */
-
+import CoreManager from './CoreManager';
 import ParseFile from './ParseFile';
-import ParseObject from './ParseObject';
+import type ParseObject from './ParseObject';
 import ParseRelation from './ParseRelation';
 
 type EncounterMap = {
@@ -50,6 +47,7 @@ function traverse(
   shouldThrow: boolean,
   allowDeepUnsaved: boolean
 ) {
+  const ParseObject = CoreManager.getParseObject();
   if (obj instanceof ParseObject) {
     if (!obj.id && shouldThrow) {
       throw new Error('Cannot create a pointer to an unsaved Object.');
@@ -67,7 +65,7 @@ function traverse(
     return;
   }
   if (obj instanceof ParseFile) {
-    if (!obj.url() && encountered.files.indexOf(obj) < 0) {
+    if (!(obj as ParseFile).url() && encountered.files.indexOf(obj) < 0) {
       encountered.files.push(obj);
     }
     return;

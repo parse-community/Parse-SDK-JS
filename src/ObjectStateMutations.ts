@@ -1,15 +1,11 @@
-/**
- * @flow
- */
-
 import encode from './encode';
+import CoreManager from './CoreManager';
 import ParseFile from './ParseFile';
-import ParseObject from './ParseObject';
 import ParseRelation from './ParseRelation';
 import TaskQueue from './TaskQueue';
 import { RelationOp } from './ParseOp';
-
 import type { Op } from './ParseOp';
+import type ParseObject from './ParseObject';
 
 export type AttributeMap = { [attr: string]: any };
 export type OpsMap = { [attr: string]: Op };
@@ -43,7 +39,7 @@ export function setServerData(serverData: AttributeMap, attributes: AttributeMap
   }
 }
 
-export function setPendingOp(pendingOps: Array<OpsMap>, attr: string, op: ?Op) {
+export function setPendingOp(pendingOps: Array<OpsMap>, attr: string, op?: Op) {
   const last = pendingOps.length - 1;
   if (op) {
     pendingOps[last][attr] = op;
@@ -84,7 +80,7 @@ export function estimateAttribute(
   pendingOps: Array<OpsMap>,
   object: ParseObject,
   attr: string
-): mixed {
+): any {
   let value = serverData[attr];
   for (let i = 0; i < pendingOps.length; i++) {
     if (pendingOps[i][attr]) {
@@ -186,6 +182,7 @@ export function commitServerChanges(
   objectCache: ObjectCache,
   changes: AttributeMap
 ) {
+  const ParseObject = CoreManager.getParseObject();
   for (const attr in changes) {
     let val = changes[attr];
     // Check for JSON array { '0': { something }, '1': { something } }
