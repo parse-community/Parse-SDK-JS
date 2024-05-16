@@ -1,7 +1,3 @@
-/**
- * @flow
- */
-
 import CoreManager from './CoreManager';
 import ParseFile from './ParseFile';
 import type ParseObject from './ParseObject';
@@ -69,7 +65,7 @@ function traverse(
     return;
   }
   if (obj instanceof ParseFile) {
-    if (!obj.url() && encountered.files.indexOf(obj) < 0) {
+    if (!(obj as ParseFile).url() && encountered.files.indexOf(obj) < 0) {
       encountered.files.push(obj);
     }
     return;

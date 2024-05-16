@@ -1,7 +1,3 @@
-/*
- * @flow
- */
-
 const encoded = {
   '&': '&amp;',
   '<': '&lt;',

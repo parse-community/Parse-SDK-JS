@@ -286,13 +286,13 @@ declare const CoreManager: {
     getHooksController(): HooksController;
     setParseOp(op: any): void;
     getParseOp(): any;
-    setParseObject(object: typeof ParseObject): void;
-    getParseObject(): ParseObject;
+    setParseObject(object: any): void;
+    getParseObject(): any;
     setParseQuery(query: any): void;
-    getParseQuery(): ParseQuery;
+    getParseQuery(): any;
     setParseRole(role: any): void;
-    getParseRole(): ParseRole;
+    getParseRole(): any;
     setParseUser(user: any): void;
-    getParseUser(): ParseUser;
+    getParseUser(): any;
 };
 export default CoreManager;
