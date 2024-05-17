@@ -50,6 +50,7 @@ declare class ParseObject {
      * @param {string} className The class name for the object
      * @param {object} attributes The initial set of data to store in the object.
      * @param {object} options The options for this object instance.
+     * @param {boolean} [options.ignoreValidation=false] Set to `true` ignore any attribute validation errors.
      */
     constructor(className?: string | {
         className: string;
@@ -440,7 +441,7 @@ declare class ParseObject {
      * @returns {Promise} A promise that is fulfilled when the fetch
      *     completes.
      */
-    fetchWithInclude(keys: String | Array<string | Array<string>>, options: RequestOptions): Promise<any>;
+    fetchWithInclude(keys: string | Array<string | Array<string>>, options: RequestOptions): Promise<any>;
     /**
      * Saves this object to the server at some unspecified time in the future,
      * even if Parse is currently inaccessible.
@@ -706,7 +707,7 @@ declare class ParseObject {
      * @static
      * @returns {Parse.Object[]}
      */
-    static fetchAllWithInclude(list: Array<ParseObject>, keys: String | Array<string | Array<string>>, options: RequestOptions): Promise<ParseObject | ParseObject[]>;
+    static fetchAllWithInclude(list: Array<ParseObject>, keys: string | Array<string | Array<string>>, options: RequestOptions): Promise<ParseObject | ParseObject[]>;
     /**
      * Fetches the given list of Parse.Object if needed.
      * If any error is encountered, stops and calls the error handler.
@@ -737,7 +738,7 @@ declare class ParseObject {
      * @static
      * @returns {Parse.Object[]}
      */
-    static fetchAllIfNeededWithInclude(list: Array<ParseObject>, keys: String | Array<string | Array<string>>, options: RequestOptions): Promise<ParseObject | ParseObject[]>;
+    static fetchAllIfNeededWithInclude(list: Array<ParseObject>, keys: string | Array<string | Array<string>>, options: RequestOptions): Promise<ParseObject | ParseObject[]>;
     /**
      * Fetches the given list of Parse.Object if needed.
      * If any error is encountered, stops and calls the error handler.

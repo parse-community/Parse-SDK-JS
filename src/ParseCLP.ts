@@ -1,13 +1,9 @@
-/**
- * @flow
- */
-
 import ParseRole from './ParseRole';
 import ParseUser from './ParseUser';
 
-type Entity = Entity;
+type Entity = ParseUser | ParseRole | string;
 type UsersMap = { [userId: string]: boolean | any };
-export type PermissionsMap = { [permission: string]: UsersMap };
+export type PermissionsMap = { writeUserFields?: string[], readUserFields?: string[] } & { [permission: string]: UsersMap };
 
 const PUBLIC_KEY = '*';
 
@@ -323,7 +319,7 @@ class ParseCLP {
     return permissions;
   }
 
-  _setArrayAccess(permission: string, userId: Entity, fields: string) {
+  _setArrayAccess(permission: string, userId: Entity, fields: string[]) {
     userId = this._parseEntity(userId);
 
     const permissions = this.permissionsMap[permission][userId];
@@ -356,8 +352,8 @@ class ParseCLP {
     }
   }
 
-  _getGroupPointerPermissions(operation: string): string[] {
-    return this.permissionsMap[operation];
+  _getGroupPointerPermissions(operation: 'readUserFields' | 'writeUserFields'): string[] {
+    return this.permissionsMap[operation] || [];
   }
 
   /**
@@ -373,7 +369,7 @@ class ParseCLP {
    * @returns {string[]} User pointer fields
    */
   getReadUserFields(): string[] {
-    return this._getGroupPointerPermissions('readUserFields');
+    return this._getGroupPointerPermissions('readUserFields') || [];
   }
 
   /**
@@ -389,7 +385,7 @@ class ParseCLP {
    * @returns {string[]} User pointer fields
    */
   getWriteUserFields(): string[] {
-    return this._getGroupPointerPermissions('writeUserFields');
+    return this._getGroupPointerPermissions('writeUserFields') || [];
   }
 
   /**
@@ -409,7 +405,7 @@ class ParseCLP {
    * @returns {string[]}
    */
   getProtectedFields(userId: Entity): string[] {
-    return this._getAccess('protectedFields', userId, false);
+    return this._getAccess('protectedFields', userId, false) as string[];
   }
 
   /**
@@ -435,9 +431,9 @@ class ParseCLP {
    */
   getReadAccess(userId: Entity): boolean {
     return (
-      this._getAccess('find', userId) &&
-      this._getAccess('get', userId) &&
-      this._getAccess('count', userId)
+      this._getAccess('find', userId) as boolean &&
+      this._getAccess('get', userId) as boolean &&
+      this._getAccess('count', userId) as boolean
     );
   }
 
@@ -465,10 +461,10 @@ class ParseCLP {
    */
   getWriteAccess(userId: Entity): boolean {
     return (
-      this._getAccess('create', userId) &&
-      this._getAccess('update', userId) &&
-      this._getAccess('delete', userId) &&
-      this._getAccess('addField', userId)
+      this._getAccess('create', userId) as boolean &&
+      this._getAccess('update', userId) as boolean &&
+      this._getAccess('delete', userId) as boolean &&
+      this._getAccess('addField', userId) as boolean
     );
   }
 

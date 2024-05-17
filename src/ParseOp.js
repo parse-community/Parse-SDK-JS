@@ -57,20 +57,20 @@ export function opFromJSON(json: { [key: string]: any }): ?Op {
 
 export class Op {
   // Empty parent class
-  applyTo(value: mixed): mixed {} /* eslint-disable-line no-unused-vars */
-  mergeWith(previous: Op): ?Op {} /* eslint-disable-line no-unused-vars */
-  toJSON(): mixed {}
+  applyTo(value: any): any {} /* eslint-disable-line @typescript-eslint/no-unused-vars */
+  mergeWith(previous: Op): ?Op {} /* eslint-disable-line @typescript-eslint/no-unused-vars */
+  toJSON(): any {}
 }
 
 export class SetOp extends Op {
-  _value: ?mixed;
+  _value: ?any;
 
-  constructor(value: mixed) {
+  constructor(value: any) {
     super();
     this._value = value;
   }
 
-  applyTo(): mixed {
+  applyTo(): any {
     return this._value;
   }
 
@@ -108,7 +108,7 @@ export class IncrementOp extends Op {
     this._amount = amount;
   }
 
-  applyTo(value: ?mixed): number {
+  applyTo(value: ?any): number {
     if (typeof value === 'undefined') {
       return this._amount;
     }
@@ -140,14 +140,14 @@ export class IncrementOp extends Op {
 }
 
 export class AddOp extends Op {
-  _value: Array<mixed>;
+  _value: Array<any>;
 
-  constructor(value: mixed | Array<mixed>) {
+  constructor(value: any | Array<any>) {
     super();
     this._value = Array.isArray(value) ? value : [value];
   }
 
-  applyTo(value: mixed): Array<mixed> {
+  applyTo(value: any): Array<any> {
     if (value == null) {
       return this._value;
     }
@@ -173,20 +173,20 @@ export class AddOp extends Op {
     throw new Error('Cannot merge Add Op with the previous Op');
   }
 
-  toJSON(): { __op: string, objects: mixed } {
+  toJSON(): { __op: string, objects: any } {
     return { __op: 'Add', objects: encode(this._value, false, true) };
   }
 }
 
 export class AddUniqueOp extends Op {
-  _value: Array<mixed>;
+  _value: Array<any>;
 
-  constructor(value: mixed | Array<mixed>) {
+  constructor(value: any | Array<any>) {
     super();
     this._value = unique(Array.isArray(value) ? value : [value]);
   }
 
-  applyTo(value: mixed | Array<mixed>): Array<mixed> {
+  applyTo(value: any | Array<any>): Array<any> {
     if (value == null) {
       return this._value || [];
     }
@@ -225,20 +225,20 @@ export class AddUniqueOp extends Op {
     throw new Error('Cannot merge AddUnique Op with the previous Op');
   }
 
-  toJSON(): { __op: string, objects: mixed } {
+  toJSON(): { __op: string, objects: any } {
     return { __op: 'AddUnique', objects: encode(this._value, false, true) };
   }
 }
 
 export class RemoveOp extends Op {
-  _value: Array<mixed>;
+  _value: Array<any>;
 
-  constructor(value: mixed | Array<mixed>) {
+  constructor(value: any | Array<any>) {
     super();
     this._value = unique(Array.isArray(value) ? value : [value]);
   }
 
-  applyTo(value: mixed | Array<mixed>): Array<mixed> {
+  applyTo(value: any | Array<any>): Array<any> {
     if (value == null) {
       return [];
     }
@@ -295,7 +295,7 @@ export class RemoveOp extends Op {
     throw new Error('Cannot merge Remove Op with the previous Op');
   }
 
-  toJSON(): { __op: string, objects: mixed } {
+  toJSON(): { __op: string, objects: any } {
     return { __op: 'Remove', objects: encode(this._value, false, true) };
   }
 }
@@ -340,7 +340,7 @@ export class RelationOp extends Op {
     return obj.id;
   }
 
-  applyTo(value: mixed, parent: ParseObject, key?: string): ?ParseRelation {
+  applyTo(value: any, parent: ParseObject, key?: string): ?ParseRelation {
     if (!value) {
       if (!parent || !key) {
         throw new Error(
@@ -425,7 +425,7 @@ export class RelationOp extends Op {
     throw new Error('Cannot merge Relation Op with the previous Op');
   }
 
-  toJSON(): { __op?: string, objects?: mixed, ops?: mixed } {
+  toJSON(): { __op?: string, objects?: any, ops?: any } {
     const idToPointer = id => {
       return {
         __type: 'Pointer',

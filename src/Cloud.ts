@@ -1,7 +1,3 @@
-/**
- * @flow
- */
-
 import CoreManager from './CoreManager';
 import decode from './decode';
 import encode from './encode';
@@ -33,14 +29,14 @@ import type { RequestOptions } from './RESTController';
  * @returns {Promise} A promise that will be resolved with the result
  * of the function.
  */
-export function run(name: string, data: mixed, options: RequestOptions): Promise<mixed> {
+export function run(name: string, data: any, options: RequestOptions): Promise<any> {
   options = options || {};
 
   if (typeof name !== 'string' || name.length === 0) {
     throw new TypeError('Cloud function name must be a string.');
   }
 
-  const requestOptions = {};
+  const requestOptions: RequestOptions = {};
   if (options.useMasterKey) {
     requestOptions.useMasterKey = options.useMasterKey;
   }
@@ -65,7 +61,7 @@ export function run(name: string, data: mixed, options: RequestOptions): Promise
  * @returns {Promise} A promise that will be resolved with the result
  * of the function.
  */
-export function getJobsData(): Promise<Object> {
+export function getJobsData(): Promise<any> {
   const requestOptions = {
     useMasterKey: true,
   };
@@ -82,7 +78,7 @@ export function getJobsData(): Promise<Object> {
  * @returns {Promise} A promise that will be resolved with the jobStatusId
  * of the job.
  */
-export function startJob(name: string, data: mixed): Promise<string> {
+export function startJob(name: string, data: any): Promise<string> {
   if (typeof name !== 'string' || name.length === 0) {
     throw new TypeError('Cloud job name must be a string.');
   }
@@ -106,7 +102,7 @@ export function getJobStatus(jobStatusId: string): Promise<ParseObject> {
 }
 
 const DefaultController = {
-  run(name, data, options: RequestOptions) {
+  run(name: string, data: any, options: RequestOptions) {
     const RESTController = CoreManager.getRESTController();
 
     const payload = encode(data, true);
@@ -131,7 +127,7 @@ const DefaultController = {
     return RESTController.request('GET', 'cloud_code/jobs/data', null, options);
   },
 
-  async startJob(name, data, options: RequestOptions) {
+  async startJob(name: string, data: any, options: RequestOptions) {
     const RESTController = CoreManager.getRESTController();
 
     const payload = encode(data, true);

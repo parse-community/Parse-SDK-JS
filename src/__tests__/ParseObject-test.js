@@ -121,7 +121,7 @@ const mockLocalDatastore = {
     if (!mockLocalDatastore.isEnabled) {
       return;
     }
-    /* eslint-disable no-unused-vars */
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
     const objectKey = mockLocalDatastore.getKeyForObject(object);
   }),

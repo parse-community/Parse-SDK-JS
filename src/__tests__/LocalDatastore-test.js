@@ -723,7 +723,7 @@ describe('LocalDatastore', () => {
     expect(LocalDatastore.isSyncing).toBe(false);
   });
 
-  it('updateFromServer on mixed object', async () => {
+  it('updateFromServer on any object', async () => {
     LocalDatastore.isEnabled = true;
     LocalDatastore.isSyncing = false;
     const testObject = new ParseObject('TestObject');
