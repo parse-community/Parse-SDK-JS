@@ -20,7 +20,8 @@ describe('Parse LiveQuery', () => {
   it('can subscribe to query', async () => {
     const object = new TestObject();
     await object.save();
-    const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
 
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
@@ -39,7 +40,8 @@ describe('Parse LiveQuery', () => {
   it('can subscribe to query with client', async () => {
     const object = new TestObject();
     await object.save();
-    const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
 
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
@@ -389,7 +391,8 @@ describe('Parse LiveQuery', () => {
     Parse.CoreManager.setEventEmitter(CustomEmitter);
     const object = new TestObject();
     await object.save();
-    const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
 
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);

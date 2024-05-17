@@ -101,7 +101,7 @@ function equalObjectsGeneric(obj, compareTo, eqlFn) {
  * relative to now.
  *
  * @param {string} text The text to convert.
- * @param {Date} [now=new Date()] The date from which add or subtract. Default is now.
+ * @param {Date} [now] The date from which add or subtract. Default is now.
  * @returns {RelativeTimeToDateResult}
  */
 function relativeTimeToDate(text, now = new Date()) {

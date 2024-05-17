@@ -99,10 +99,7 @@ describe('ParseInstallation', () => {
           return Promise.resolve({}, 200);
         }
         once = false;
-        const parseError = new ParseError(
-          ParseError.OBJECT_NOT_FOUND,
-          'Object not found.'
-        );
+        const parseError = new ParseError(ParseError.OBJECT_NOT_FOUND, 'Object not found.');
         return Promise.reject(parseError);
       },
       ajax() {},
@@ -200,10 +197,7 @@ describe('ParseInstallation', () => {
         }
         once = false;
         // fetch() results
-        const parseError = new ParseError(
-          ParseError.OBJECT_NOT_FOUND,
-          'Object not found.'
-        );
+        const parseError = new ParseError(ParseError.OBJECT_NOT_FOUND, 'Object not found.');
         return Promise.reject(parseError);
       },
       ajax() {},

@@ -15,24 +15,24 @@ type Base64 = { base64: string };
 type Uri = { uri: string };
 type FileData = Array<number> | Base64 | Blob | Uri;
 export type FileSaveOptions = FullOptions & {
-  metadata?: { [key: string]: any },
-  tags?: { [key: string]: any },
+  metadata?: { [key: string]: any };
+  tags?: { [key: string]: any };
 };
 export type FileSource =
   | {
-      format: 'file',
-      file: Blob,
-      type: string | undefined,
+      format: 'file';
+      file: Blob;
+      type: string | undefined;
     }
   | {
-      format: 'base64',
-      base64: string,
-      type: string | undefined,
+      format: 'base64';
+      base64: string;
+      type: string | undefined;
     }
   | {
-      format: 'uri',
-      uri: string,
-      type: string | undefined,
+      format: 'uri';
+      uri: string;
+      type: string | undefined;
     };
 
 function b64Digit(number: number): string {
@@ -272,7 +272,7 @@ class ParseFile {
             this._requestTask = null;
             return controller.saveBase64(this._name, newSource, options);
           })
-          .then((res: { name?: string, url?: string }) => {
+          .then((res: { name?: string; url?: string }) => {
             this._name = res.name;
             this._url = res.url;
             this._requestTask = null;
@@ -330,7 +330,7 @@ class ParseFile {
     });
   }
 
-  toJSON(): { __type: 'File', name?: string, url?: string } {
+  toJSON(): { __type: 'File'; name?: string; url?: string } {
     return {
       __type: 'File',
       name: this._name,
@@ -463,7 +463,7 @@ const DefaultController = {
     if (source.format !== 'base64') {
       throw new Error('saveBase64 can only be used with Base64-type sources.');
     }
-    const data: { base64: any, _ContentType?: any, fileData: any } = {
+    const data: { base64: any; _ContentType?: any; fileData: any } = {
       base64: source.base64,
       fileData: {
         metadata: { ...options.metadata },

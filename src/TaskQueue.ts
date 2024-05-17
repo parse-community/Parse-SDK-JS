@@ -1,8 +1,8 @@
 import { resolvingPromise } from './promiseUtils';
 
 type Task = {
-  task: () => Promise<void>,
-  _completion: any,
+  task: () => Promise<void>;
+  _completion: any;
 };
 
 class TaskQueue {

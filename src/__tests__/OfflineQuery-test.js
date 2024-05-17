@@ -285,7 +285,10 @@ describe('OfflineQuery', () => {
 
   it('matches on inequalities', () => {
     const player = new ParseObject('Person');
-    player.set('score', 12).set('name', 'Bill').set('birthday', new Date(1980, 2, 4));
+    player
+      .set('score', 12)
+      .set('name', 'Bill')
+      .set('birthday', new Date(1980, 2, 4));
 
     let q = new ParseQuery('Person');
     q.lessThan('score', 15);

@@ -2,8 +2,10 @@ import CoreManager from './CoreManager';
 import decode from './decode';
 import ParseError from './ParseError';
 
-export type HookDeclaration = { functionName: string, url: string } | { className: string, triggerName: string, url: string };
-export type HookDeleteArg = { functionName: string } | { className: string, triggerName: string };
+export type HookDeclaration =
+  | { functionName: string; url: string }
+  | { className: string; triggerName: string; url: string };
+export type HookDeleteArg = { functionName: string } | { className: string; triggerName: string };
 
 export function getFunctions() {
   return CoreManager.getHooksController().get('functions');

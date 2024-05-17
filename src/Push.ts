@@ -6,10 +6,10 @@ import type { WhereClause } from './ParseQuery';
 import type { FullOptions } from './RESTController';
 
 export type PushData = {
-  where?: WhereClause | ParseQuery,
-  push_time?: Date | string,
-  expiration_time?: Date | string,
-  expiration_interval?: number,
+  where?: WhereClause | ParseQuery;
+  push_time?: Date | string;
+  expiration_time?: Date | string;
+  expiration_interval?: number;
 };
 
 /**
@@ -86,7 +86,10 @@ export function send(data: PushData, options: FullOptions = {}): Promise<string>
  * </ul>
  * @returns {Parse.Object} Status of Push.
  */
-export function getPushStatus(pushStatusId: string, options: FullOptions = {}): Promise<ParseObject> {
+export function getPushStatus(
+  pushStatusId: string,
+  options: FullOptions = {}
+): Promise<ParseObject> {
   const pushOptions = { useMasterKey: true };
   if (options.hasOwnProperty('useMasterKey')) {
     pushOptions.useMasterKey = options.useMasterKey;

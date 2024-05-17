@@ -108,7 +108,7 @@ class ParseRelation {
    *
    * @returns {object} JSON representation of Relation
    */
-  toJSON(): { __type: 'Relation', className: ?string } {
+  toJSON(): { __type: 'Relation'; className: ?string } {
     return {
       __type: 'Relation',
       className: this.targetClassName,

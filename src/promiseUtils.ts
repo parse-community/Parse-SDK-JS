@@ -6,7 +6,8 @@ export function resolvingPromise<T = any>() {
     res = resolve;
     rej = reject;
   });
-  const defer: typeof promise & { resolve: (res: T) => void, reject: (err: any) => void } = promise as any;
+  const defer: typeof promise & { resolve: (res: T) => void; reject: (err: any) => void } =
+    promise as any;
   defer.resolve = res!;
   defer.reject = rej!;
   return defer;

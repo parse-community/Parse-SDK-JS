@@ -134,7 +134,7 @@ export class IncrementOp extends Op {
     throw new Error('Cannot merge Increment Op with the previous Op');
   }
 
-  toJSON(): { __op: string, amount: number } {
+  toJSON(): { __op: string; amount: number } {
     return { __op: 'Increment', amount: this._amount };
   }
 }
@@ -173,7 +173,7 @@ export class AddOp extends Op {
     throw new Error('Cannot merge Add Op with the previous Op');
   }
 
-  toJSON(): { __op: string, objects: any } {
+  toJSON(): { __op: string; objects: any } {
     return { __op: 'Add', objects: encode(this._value, false, true) };
   }
 }
@@ -225,7 +225,7 @@ export class AddUniqueOp extends Op {
     throw new Error('Cannot merge AddUnique Op with the previous Op');
   }
 
-  toJSON(): { __op: string, objects: any } {
+  toJSON(): { __op: string; objects: any } {
     return { __op: 'AddUnique', objects: encode(this._value, false, true) };
   }
 }
@@ -295,7 +295,7 @@ export class RemoveOp extends Op {
     throw new Error('Cannot merge Remove Op with the previous Op');
   }
 
-  toJSON(): { __op: string, objects: any } {
+  toJSON(): { __op: string; objects: any } {
     return { __op: 'Remove', objects: encode(this._value, false, true) };
   }
 }
@@ -425,7 +425,7 @@ export class RelationOp extends Op {
     throw new Error('Cannot merge Relation Op with the previous Op');
   }
 
-  toJSON(): { __op?: string, objects?: any, ops?: any } {
+  toJSON(): { __op?: string; objects?: any; ops?: any } {
     const idToPointer = id => {
       return {
         __type: 'Pointer',
@@ -463,5 +463,5 @@ CoreManager.setParseOp({
   AddOp,
   RelationOp,
   RemoveOp,
-  AddUniqueOp
+  AddUniqueOp,
 });

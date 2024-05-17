@@ -53,7 +53,7 @@ class ParsePolygon {
    *
    * @returns {object}
    */
-  toJSON(): { __type: string, coordinates: Array<Array<number>> } {
+  toJSON(): { __type: string; coordinates: Array<Array<number>> } {
     ParsePolygon._validate(this._coordinates);
     return {
       __type: 'Polygon',

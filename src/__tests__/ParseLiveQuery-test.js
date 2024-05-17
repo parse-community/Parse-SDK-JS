@@ -19,7 +19,7 @@ const mockLiveQueryClient = {
   close: jest.fn(),
 };
 CoreManager.setEventEmitter(EventEmitter);
-const LiveQuery = new ParseLiveQuery()
+const LiveQuery = new ParseLiveQuery();
 
 describe('ParseLiveQuery', () => {
   beforeEach(() => {

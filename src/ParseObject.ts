@@ -31,30 +31,30 @@ import type { AttributeMap, OpsMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
 
 export type Pointer = {
-  __type: string,
-  className: string,
-  objectId?: string,
-  _localId?: string,
+  __type: string;
+  className: string;
+  objectId?: string;
+  _localId?: string;
 };
 
 type SaveParams = {
-  method: string,
-  path: string,
-  body: AttributeMap,
+  method: string;
+  path: string;
+  body: AttributeMap;
 };
 
 export type SaveOptions = FullOptions & {
-  cascadeSave?: boolean,
-  context?: AttributeMap,
-  batchSize?: number,
+  cascadeSave?: boolean;
+  context?: AttributeMap;
+  batchSize?: number;
 };
 
 type FetchOptions = {
-  useMasterKey?: boolean,
-  sessionToken?: string,
-  include?: string | string[],
-  context?: AttributeMap,
-}
+  useMasterKey?: boolean;
+  sessionToken?: string;
+  include?: string | string[];
+  context?: AttributeMap;
+};
 
 // Mapping of class names to constructors, so we can populate objects from the
 // server with appropriate subclasses of ParseObject
@@ -104,10 +104,10 @@ class ParseObject {
    * @param {string} className The class name for the object
    * @param {object} attributes The initial set of data to store in the object.
    * @param {object} options The options for this object instance.
-   * @param {boolean} [options.ignoreValidation=false] Set to `true` ignore any attribute validation errors.
+   * @param {boolean} [options.ignoreValidation] Set to `true` ignore any attribute validation errors.
    */
   constructor(
-    className?: string | { className: string, [attr: string]: any },
+    className?: string | { className: string; [attr: string]: any },
     attributes?: { [attr: string]: any },
     options?: { ignoreValidation: boolean }
   ) {
@@ -201,7 +201,7 @@ class ParseObject {
    *
    * @returns {Parse.Object|object}
    */
-  _getStateIdentifier(): ParseObject | { id: string, className: string } {
+  _getStateIdentifier(): ParseObject | { id: string; className: string } {
     if (singleInstance) {
       let id = this.id;
       if (!id) {
@@ -349,10 +349,10 @@ class ParseObject {
     const stateController = CoreManager.getObjectStateController();
     stateController.initializeState(this._getStateIdentifier());
     const decoded: Partial<{
-      createdAt?: Date,
-      updatedAt?: Date,
-      ACL?: any,
-      [key: string]: any,
+      createdAt?: Date;
+      updatedAt?: Date;
+      ACL?: any;
+      [key: string]: any;
     }> = {};
     for (const attr in serverData) {
       if (attr === 'ACL') {
@@ -403,9 +403,9 @@ class ParseObject {
 
   _handleSaveResponse(response: AttributeMap, status: number) {
     const changes: Partial<{
-      createdAt: string,
-      updatedAt: string,
-      [key: string]: any
+      createdAt: string;
+      updatedAt: string;
+      [key: string]: any;
     }> = {};
     let attr;
     const stateController = CoreManager.getObjectStateController();
@@ -934,7 +934,9 @@ class ParseObject {
    * @returns {Parse.Object}
    */
   clone(): any {
-    const clone = new (this.constructor as new (...args: ConstructorParameters<typeof ParseObject>) => this)(this.className);
+    const clone = new (this.constructor as new (
+      ...args: ConstructorParameters<typeof ParseObject>
+    ) => this)(this.className);
     let attributes = this.attributes;
     if (typeof (this.constructor as any).readOnlyAttributes === 'function') {
       const readonly = (this.constructor as any).readOnlyAttributes() || [];
@@ -960,7 +962,9 @@ class ParseObject {
    * @returns {Parse.Object}
    */
   newInstance(): any {
-    const clone = new (this.constructor as new (...args: ConstructorParameters<typeof ParseObject>) => this)(this.className);
+    const clone = new (this.constructor as new (
+      ...args: ConstructorParameters<typeof ParseObject>
+    ) => this)(this.className);
     clone.id = this.id;
     if (singleInstance) {
       // Just return an object with the right id
@@ -1193,7 +1197,10 @@ class ParseObject {
    * @returns {Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetchWithInclude(keys: string | Array<string | Array<string>>, options: RequestOptions): Promise<any> {
+  fetchWithInclude(
+    keys: string | Array<string | Array<string>>,
+    options: RequestOptions
+  ): Promise<any> {
     options = options || {};
     options.include = keys;
     return this.fetch(options);
@@ -2309,7 +2316,7 @@ const DefaultController = {
   async destroy(
     target: ParseObject | Array<ParseObject>,
     options: RequestOptions
-  ): Promise<ParseObject | Array<ParseObject>>{
+  ): Promise<ParseObject | Array<ParseObject>> {
     const batchSize =
       options && options.batchSize ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
@@ -2386,7 +2393,10 @@ const DefaultController = {
     return Promise.resolve(target);
   },
 
-  save(target: ParseObject | null | Array<ParseObject | ParseFile>, options: RequestOptions): Promise<ParseObject | Array<ParseObject> | ParseFile | undefined> {
+  save(
+    target: ParseObject | null | Array<ParseObject | ParseFile>,
+    options: RequestOptions
+  ): Promise<ParseObject | Array<ParseObject> | ParseFile | undefined> {
     const batchSize =
       options && options.batchSize ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();

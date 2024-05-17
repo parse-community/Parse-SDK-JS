@@ -240,11 +240,13 @@ class LiveQueryClient {
       op: OP_TYPES.UNSUBSCRIBE,
       requestId: subscription.id,
     };
-    return this.connectPromise.then(() => {
-      return this.socket.send(JSON.stringify(unsubscribeRequest));
-    }).then(() => {
-      return subscription.unsubscribePromise;
-    });
+    return this.connectPromise
+      .then(() => {
+        return this.socket.send(JSON.stringify(unsubscribeRequest));
+      })
+      .then(() => {
+        return subscription.unsubscribePromise;
+      });
   }
 
   /**
@@ -275,7 +277,7 @@ class LiveQueryClient {
       this._handleWebSocketMessage(event);
     };
 
-    this.socket.onclose = (event) => {
+    this.socket.onclose = event => {
       this.socket.closingPromise?.resolve(event);
       this._handleWebSocketClose();
     };
@@ -353,7 +355,7 @@ class LiveQueryClient {
       javascriptKey: this.javascriptKey,
       masterKey: this.masterKey,
       sessionToken: this.sessionToken,
-      installationId: undefined as string | undefined
+      installationId: undefined as string | undefined,
     };
     if (this.additionalProperties) {
       connectRequest.installationId = this.installationId;

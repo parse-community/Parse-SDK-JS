@@ -14,14 +14,14 @@ import type { SaveOptions } from './ParseObject';
 import type { RequestOptions } from './RESTController';
 
 type QueueObject = {
-  queueId: string,
-  action: string,
-  object: ParseObject,
-  serverOptions: SaveOptions | RequestOptions,
-  id: string,
-  className: string,
-  hash: string,
-  createdAt: Date,
+  queueId: string;
+  action: string;
+  object: ParseObject;
+  serverOptions: SaveOptions | RequestOptions;
+  id: string;
+  className: string;
+  hash: string;
+  createdAt: Date;
 };
 
 type Queue = Array<QueueObject>;

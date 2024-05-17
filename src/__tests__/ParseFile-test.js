@@ -24,7 +24,7 @@ const mockLocalDatastore = {
     const objectKey = mockLocalDatastore.getKeyForObject(object);
   }),
   _updateObjectIfPinned: jest.fn(),
-  getKeyForObject: jest.fn((object) => {
+  getKeyForObject: jest.fn(object => {
     // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
     const OBJECT_PREFIX = 'Parse_LDS_';
     const objectId = object.objectId || object._getId();

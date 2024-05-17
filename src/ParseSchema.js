@@ -24,8 +24,8 @@ const FIELD_TYPES = [
 ];
 
 type FieldOptions = {
-  required: boolean,
-  defaultValue: any,
+  required: boolean;
+  defaultValue: any;
 };
 
 /**

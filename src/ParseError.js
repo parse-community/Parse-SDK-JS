@@ -16,7 +16,7 @@ class ParseError extends Error {
     super(message);
     this.code = code;
     let customMessage = message;
-    CoreManager.get('PARSE_ERRORS').forEach((error) => {
+    CoreManager.get('PARSE_ERRORS').forEach(error => {
       if (error.code === code && error.code) {
         customMessage = error.message;
       }

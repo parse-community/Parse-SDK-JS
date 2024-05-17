@@ -33,7 +33,9 @@ const ParseObject = require('../ParseObject');
 const ParseOp = require('../ParseOp');
 const CoreManager = require('../CoreManager');
 jest.spyOn(CoreManager, 'getParseObject').mockImplementation(() => require('../ParseObject'));
-jest.spyOn(CoreManager, 'getEventuallyQueue').mockImplementation(() => require('../EventuallyQueue'));
+jest
+  .spyOn(CoreManager, 'getEventuallyQueue')
+  .mockImplementation(() => require('../EventuallyQueue'));
 
 const { Op, SetOp, UnsetOp, IncrementOp, AddOp, AddUniqueOp, RemoveOp, RelationOp, opFromJSON } =
   ParseOp;

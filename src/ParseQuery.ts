@@ -11,47 +11,47 @@ import type LiveQuerySubscription from './LiveQuerySubscription';
 import type { RequestOptions, FullOptions } from './RESTController';
 
 type BatchOptions = FullOptions & {
-  batchSize?: number
-  useMasterKey?: boolean,
-  sessionToken?: string,
-  context?: { [key: string]: any },
-  json?: boolean
+  batchSize?: number;
+  useMasterKey?: boolean;
+  sessionToken?: string;
+  context?: { [key: string]: any };
+  json?: boolean;
 };
 
 export type WhereClause = {
-  [attr: string]: any,
+  [attr: string]: any;
 };
 
 type QueryOptions = {
-  useMasterKey?: boolean,
-  sessionToken?: string,
-  context?: { [key: string]: any },
-  json?: boolean,
+  useMasterKey?: boolean;
+  sessionToken?: string;
+  context?: { [key: string]: any };
+  json?: boolean;
 };
 
 type FullTextQueryOptions = {
-  language?: string,
-  caseSensitive?: boolean,
-  diacriticSensitive?: boolean,
+  language?: string;
+  caseSensitive?: boolean;
+  diacriticSensitive?: boolean;
 };
 
 export type QueryJSON = {
-  where: WhereClause,
-  watch?: string,
-  include?: string,
-  excludeKeys?: string,
-  keys?: string,
-  limit?: number,
-  skip?: number,
-  order?: string,
-  className?: string,
-  count?: number,
-  hint?: any,
-  explain?: boolean,
-  readPreference?: string,
-  includeReadPreference?: string,
-  subqueryReadPreference?: string,
-  comment?: string,
+  where: WhereClause;
+  watch?: string;
+  include?: string;
+  excludeKeys?: string;
+  keys?: string;
+  limit?: number;
+  skip?: number;
+  order?: string;
+  className?: string;
+  count?: number;
+  hint?: any;
+  explain?: boolean;
+  readPreference?: string;
+  includeReadPreference?: string;
+  subqueryReadPreference?: string;
+  comment?: string;
 };
 
 /**
@@ -487,7 +487,7 @@ class ParseQuery {
     if (this._explain) {
       params.explain = true;
     }
-    if(this._comment) {
+    if (this._comment) {
       params.comment = this._comment;
     }
     for (const key in this._extraOptions) {
@@ -575,7 +575,7 @@ class ParseQuery {
       this._explain = !!json.explain;
     }
 
-    if(json.comment) {
+    if (json.comment) {
       this._comment = json.comment;
     }
 
@@ -773,10 +773,10 @@ class ParseQuery {
    * @returns {Promise} A promise that is resolved with the count when
    * the query completes.
    */
-  count(options?: { useMasterKey?: boolean, sessionToken?: string }): Promise<number> {
+  count(options?: { useMasterKey?: boolean; sessionToken?: string }): Promise<number> {
     options = options || {};
 
-    const findOptions: { useMasterKey?: boolean, sessionToken?: string } = {};
+    const findOptions: { useMasterKey?: boolean; sessionToken?: string } = {};
     if (options.hasOwnProperty('useMasterKey')) {
       findOptions.useMasterKey = options.useMasterKey;
     }
@@ -807,7 +807,9 @@ class ParseQuery {
   distinct(key: string, options?: { sessionToken?: string }): Promise<Array<any>> {
     options = options || {};
 
-    const distinctOptions: { sessionToken?: string, useMasterKey: boolean } = { useMasterKey: true};
+    const distinctOptions: { sessionToken?: string; useMasterKey: boolean } = {
+      useMasterKey: true,
+    };
 
     if (options.hasOwnProperty('sessionToken')) {
       distinctOptions.sessionToken = options.sessionToken;
@@ -835,7 +837,9 @@ class ParseQuery {
    */
   aggregate(pipeline: any, options?: { sessionToken?: string }): Promise<Array<any>> {
     options = options || {};
-    const aggregateOptions: { sessionToken?: string, useMasterKey: boolean } = { useMasterKey: true };
+    const aggregateOptions: { sessionToken?: string; useMasterKey: boolean } = {
+      useMasterKey: true,
+    };
 
     if (options.hasOwnProperty('sessionToken')) {
       aggregateOptions.sessionToken = options.sessionToken;
@@ -955,10 +959,7 @@ class ParseQuery {
    * @returns {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
-  eachBatch(
-    callback: (objs: Array<ParseObject>) => void,
-    options?: BatchOptions
-  ): Promise<void> {
+  eachBatch(callback: (objs: Array<ParseObject>) => void, options?: BatchOptions): Promise<void> {
     options = options || {};
 
     if (this._order || this._skip || this._limit >= 0) {
@@ -1550,7 +1551,12 @@ class ParseQuery {
       throw new Error('The value being searched for must be a string.');
     }
 
-    const fullOptions: { $term?: string, $language?: string, $caseSensitive?: boolean, $diacriticSensitive?: boolean } = {};
+    const fullOptions: {
+      $term?: string;
+      $language?: string;
+      $caseSensitive?: boolean;
+      $diacriticSensitive?: boolean;
+    } = {};
     fullOptions.$term = value;
 
     for (const option in options) {
@@ -2155,12 +2161,20 @@ class ParseQuery {
 }
 
 const DefaultController = {
-  find(className: string, params: QueryJSON, options: RequestOptions): Promise<{ results: Array<ParseObject> }> {
+  find(
+    className: string,
+    params: QueryJSON,
+    options: RequestOptions
+  ): Promise<{ results: Array<ParseObject> }> {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request('GET', 'classes/' + className, params, options);
   },
 
-  aggregate(className: string, params: any, options: RequestOptions): Promise<{ results: Array<any> }> {
+  aggregate(
+    className: string,
+    params: any,
+    options: RequestOptions
+  ): Promise<{ results: Array<any> }> {
     const RESTController = CoreManager.getRESTController();
 
     return RESTController.request('GET', 'aggregate/' + className, params, options);

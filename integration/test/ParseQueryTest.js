@@ -2415,5 +2415,4 @@ describe('Parse Query', () => {
     const explain = await query.find();
     assert.equal(explain.command.comment, comment);
   });
-
 });
