@@ -25,7 +25,7 @@ const FIELD_TYPES = [
 
 type FieldOptions = {
   required: boolean,
-  defaultValue: mixed,
+  defaultValue: any,
 };
 
 /**
@@ -47,9 +47,9 @@ type FieldOptions = {
  */
 class ParseSchema {
   className: string;
-  _fields: { [key: string]: mixed };
-  _indexes: { [key: string]: mixed };
-  _clp: { [key: string]: mixed };
+  _fields: { [key: string]: any };
+  _indexes: { [key: string]: any };
+  _clp: { [key: string]: any };
 
   /**
    * @param {string} className Parse Class string.

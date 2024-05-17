@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable */
 declare module xmlhttprequest {
   declare var XMLHttpRequest: () => XMLHttpRequest;
 }

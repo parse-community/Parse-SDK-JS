@@ -1,4 +1,4 @@
-/* eslint no-unused-vars: "off" */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @flow
  */

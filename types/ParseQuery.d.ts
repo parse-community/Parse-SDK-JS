@@ -246,6 +246,8 @@ declare class ParseQuery {
      * Counts the number of objects that match this query.
      *
      * @param {object} options
+     * @param {boolean} [options.useMasterKey]
+     * @param {string} [options.sessionToken]
      * Valid options are:<ul>
      *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
      *     be used for this request.
@@ -264,10 +266,7 @@ declare class ParseQuery {
      *
      * @param {string} key A field to find distinct values
      * @param {object} options
-     * Valid options are:<ul>
-     *   <li>sessionToken: A valid session token, used for making a request on
-     *       behalf of a specific user.
-     * </ul>
+     * @param {string} [options.sessionToken] A valid session token, used for making a request on behalf of a specific user.
      * @returns {Promise} A promise that is resolved with the query completes.
      */
     distinct(key: string, options?: {
@@ -277,10 +276,8 @@ declare class ParseQuery {
      * Executes an aggregate query and returns aggregate results
      *
      * @param {(Array|object)} pipeline Array or Object of stages to process query
-     * @param {object} options Valid options are:<ul>
-     *   <li>sessionToken: A valid session token, used for making a request on
-     *       behalf of a specific user.
-     * </ul>
+     * @param {object} options
+     * @param {string} [options.sessionToken] A valid session token, used for making a request on behalf of a specific user.
      * @returns {Promise} A promise that is resolved with the query completes.
      */
     aggregate(pipeline: any, options?: {

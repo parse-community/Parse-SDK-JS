@@ -207,7 +207,7 @@ const RESTController = {
     return promise;
   },
 
-  request(method: string, path: string, data: mixed, options?: RequestOptions) {
+  request(method: string, path: string, data: any, options?: RequestOptions) {
     options = options || {};
     let url = CoreManager.get('SERVER_URL');
     if (url[url.length - 1] !== '/') {

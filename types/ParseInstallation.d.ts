@@ -29,6 +29,7 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {string} appIdentifier
      * @static
+     * @returns {string}
      */
     get appIdentifier(): any;
     /**
@@ -36,6 +37,7 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {string} appVersion
      * @static
+     * @returns {string}
      */
     get appVersion(): any;
     /**
@@ -43,6 +45,7 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {string} appName
      * @static
+     * @returns {string}
      */
     get appName(): any;
     /**
@@ -52,6 +55,7 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {number} badge
      * @static
+     * @returns {number}
      */
     get badge(): any;
     /**
@@ -59,6 +63,7 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {string[]} channels
      * @static
+     * @returns {string[]}
      */
     get channels(): any;
     /**
@@ -66,6 +71,7 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {string} deviceToken
      * @static
+     * @returns {string}
      */
     get deviceToken(): any;
     /**
@@ -73,6 +79,7 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {string} deviceType
      * @static
+     * @returns {string}
      */
     get deviceType(): any;
     /**
@@ -80,6 +87,7 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {string} GCMSenderId
      * @static
+     * @returns {string}
      */
     get GCMSenderId(): any;
     /**
@@ -87,6 +95,7 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {string} installationId
      * @static
+     * @returns {string}
      */
     get installationId(): any;
     /**
@@ -94,6 +103,7 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {string} localeIdentifier
      * @static
+     * @returns {string}
      */
     get localeIdentifier(): any;
     /**
@@ -101,6 +111,7 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {string} parseVersion
      * @static
+     * @returns {string}
      */
     get parseVersion(): any;
     /**
@@ -108,6 +119,7 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {string} pushType
      * @static
+     * @returns {string}
      */
     get pushType(): any;
     /**
@@ -115,6 +127,7 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {string} timeZone
      * @static
+     * @returns {string}
      */
     get timeZone(): any;
     /**
@@ -131,15 +144,26 @@ declare class ParseInstallation extends ParseObject {
      *
      * @property {object} DEVICE_TYPES
      * @static
+     * @returns {object}
      */
     static get DEVICE_TYPES(): DeviceInterface;
     /**
-     * Wrap the default save behavior with functionality to save to local storage.
+     * Wrap the default fetch behavior with functionality to update local storage.
+     * If the installation is deleted on the server, retry the fetch as a save operation.
+     *
+     * @param {...any} args
+     * @returns {Promise}
+     */
+    fetch(...args: Array<any>): Promise<ParseInstallation>;
+    /**
+     * Wrap the default save behavior with functionality to update the local storage.
+     * If the installation is deleted on the server, retry saving a new installation.
      *
      * @param {...any} args
      * @returns {Promise}
      */
     save(...args: Array<any>): Promise<this>;
+    _markAllFieldsDirty(): void;
     /**
      * Get the current Parse.Installation from disk. If doesn't exists, create an new installation.
      *

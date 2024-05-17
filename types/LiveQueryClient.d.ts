@@ -1,8 +1,8 @@
-// @ts-nocheck
-export default LiveQueryClient;
+import { WebSocketController } from './CoreManager';
+import LiveQuerySubscription from './LiveQuerySubscription';
+import type ParseQuery from './ParseQuery';
 /**
  * Creates a new LiveQueryClient.
- * Extends events.EventEmitter
  * <a href="https://nodejs.org/api/events.html#events_class_eventemitter">cloud functions</a>.
  *
  * A wrapper of a standard WebSocket client. We add several useful methods to
@@ -45,6 +45,26 @@ export default LiveQueryClient;
  * @alias Parse.LiveQueryClient
  */
 declare class LiveQueryClient {
+    attempts: number;
+    id: number;
+    requestId: number;
+    applicationId: string;
+    serverURL: string;
+    javascriptKey?: string;
+    masterKey?: string;
+    sessionToken?: string;
+    installationId?: string;
+    additionalProperties: boolean;
+    connectPromise: any;
+    subscriptions: Map<number, LiveQuerySubscription>;
+    socket: WebSocketController & {
+        closingPromise?: any;
+    };
+    state: string;
+    reconnectHandle: any;
+    emitter: any;
+    on: any;
+    emit: any;
     /**
      * @param {object} options
      * @param {string} options.applicationId - applicationId of your Parse app
@@ -55,28 +75,13 @@ declare class LiveQueryClient {
      * @param {string} options.installationId (optional)
      */
     constructor({ applicationId, serverURL, javascriptKey, masterKey, sessionToken, installationId, }: {
-        applicationId: string;
-        serverURL: string;
-        javascriptKey: string;
-        masterKey: string;
-        sessionToken: string;
-        installationId: string;
+        applicationId: any;
+        serverURL: any;
+        javascriptKey: any;
+        masterKey: any;
+        sessionToken: any;
+        installationId: any;
     });
-    attempts: number;
-    id: number;
-    requestId: number;
-    applicationId: string;
-    serverURL: string;
-    javascriptKey: string | null;
-    masterKey: string | null;
-    sessionToken: string | null;
-    installationId: string | null;
-    additionalProperties: boolean;
-    connectPromise: Promise<any>;
-    subscriptions: Map<any, any>;
-    socket: any;
-    state: string;
-    reconnectHandle: NodeJS.Timeout;
     shouldOpen(): any;
     /**
      * Subscribes to a ParseQuery
@@ -88,18 +93,18 @@ declare class LiveQueryClient {
      * <a href="https://github.com/parse-community/parse-server/wiki/Parse-LiveQuery-Protocol-Specification">here</a> for more details. The subscription you get is the same subscription you get
      * from our Standard API.
      *
-     * @param {object} query - the ParseQuery you want to subscribe to
+     * @param {ParseQuery} query - the ParseQuery you want to subscribe to
      * @param {string} sessionToken (optional)
      * @returns {LiveQuerySubscription | undefined}
      */
-    subscribe(query: Object, sessionToken: string | null): LiveQuerySubscription;
+    subscribe(query: ParseQuery, sessionToken?: string): LiveQuerySubscription | undefined;
     /**
      * After calling unsubscribe you'll stop receiving events from the subscription object.
      *
      * @param {object} subscription - subscription you would like to unsubscribe from.
      * @returns {Promise | undefined}
      */
-    unsubscribe(subscription: Object): Promise | null;
+    unsubscribe(subscription: LiveQuerySubscription): Promise<void>;
     /**
      * After open is called, the LiveQueryClient will try to send a connect request
      * to the LiveQuery server.
@@ -113,7 +118,7 @@ declare class LiveQueryClient {
      *
      * @returns {Promise | undefined} CloseEvent {@link https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close_event}
      */
-    close(): Promise | null;
+    close(): Promise<void>;
     _handleReset(): void;
     _handleWebSocketOpen(): void;
     _handleWebSocketMessage(event: any): void;
@@ -121,4 +126,4 @@ declare class LiveQueryClient {
     _handleWebSocketError(error: any): void;
     _handleReconnect(): void;
 }
-import LiveQuerySubscription from './LiveQuerySubscription';
+export default LiveQueryClient;

@@ -99,7 +99,7 @@ export function getObjectCache(obj: ObjectIdentifier): ObjectCache {
   return {};
 }
 
-export function estimateAttribute(obj: ObjectIdentifier, attr: string): mixed {
+export function estimateAttribute(obj: ObjectIdentifier, attr: string): any {
   const serverData = getServerData(obj);
   const pendingOps = getPendingOps(obj);
   return ObjectStateMutations.estimateAttribute(serverData, pendingOps, obj, attr);

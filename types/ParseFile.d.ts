@@ -17,15 +17,15 @@ export type FileSaveOptions = FullOptions & {
 export type FileSource = {
     format: 'file';
     file: Blob;
-    type: string;
+    type: string | undefined;
 } | {
     format: 'base64';
     base64: string;
-    type: string;
+    type: string | undefined;
 } | {
     format: 'uri';
     uri: string;
-    type: string;
+    type: string | undefined;
 };
 /**
  * A Parse.File is a local representation of a file that is saved to the Parse
@@ -40,8 +40,8 @@ declare class ParseFile {
     _previousSave?: Promise<ParseFile>;
     _data?: string;
     _requestTask?: any;
-    _metadata?: Object;
-    _tags?: Object;
+    _metadata?: object;
+    _tags?: object;
     /**
      * @param name {String} The file's name. This will be prefixed by a unique
      *     value once the file has finished saving. The file name must begin with
@@ -69,10 +69,10 @@ declare class ParseFile {
      * @param type {String} Optional Content-Type header to use for the file. If
      *     this is omitted, the content type will be inferred from the name's
      *     extension.
-     * @param metadata {Object} Optional key value pairs to be stored with file object
-     * @param tags {Object} Optional key value pairs to be stored with file object
+     * @param metadata {object} Optional key value pairs to be stored with file object
+     * @param tags {object} Optional key value pairs to be stored with file object
      */
-    constructor(name: string, data?: FileData, type?: string, metadata?: Object, tags?: Object);
+    constructor(name: string, data?: FileData, type?: string, metadata?: object, tags?: object);
     /**
      * Return the data for the file, downloading it if not already present.
      * Data is present if initialized with Byte Array, Base64 or Saved with Uri.
@@ -94,6 +94,7 @@ declare class ParseFile {
      * after you get the file from a Parse.Object.
      *
      * @param {object} options An object to specify url options
+     * @param {boolean} [options.forceSecure] force the url to be secure
      * @returns {string | undefined}
      */
     url(options?: {
@@ -104,13 +105,13 @@ declare class ParseFile {
      *
      * @returns {object}
      */
-    metadata(): Object;
+    metadata(): object;
     /**
      * Gets the tags of the file.
      *
      * @returns {object}
      */
-    tags(): Object;
+    tags(): object;
     /**
      * Saves the file to the Parse cloud.
      *

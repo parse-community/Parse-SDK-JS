@@ -1,7 +1,3 @@
-/**
- * @flow
- */
-
 import CoreManager from './CoreManager';
 
 import type ParseObject from './ParseObject';
@@ -32,33 +28,33 @@ const LocalDatastore = {
   isEnabled: false,
   isSyncing: false,
 
-  fromPinWithName(name: string): Promise<Array<Object>> {
+  fromPinWithName(name: string): Promise<Array<any>> {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.fromPinWithName(name);
   },
 
-  pinWithName(name: string, value: any): Promise<void> {
+  async pinWithName(name: string, value: any): Promise<void> {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.pinWithName(name, value);
   },
 
-  unPinWithName(name: string): Promise<void> {
+  async unPinWithName(name: string): Promise<void> {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.unPinWithName(name);
   },
 
-  _getAllContents(): Promise<Object> {
+  _getAllContents(): Promise<any> {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.getAllContents();
   },
 
   // Use for testing
-  _getRawStorage(): Promise<Object> {
+  async _getRawStorage(): Promise<any> {
     const controller = CoreManager.getLocalDatastoreController();
-    return controller.getRawStorage();
+    return (controller as any).getRawStorage();
   },
 
-  _clear(): Promise<void> {
+  async _clear(): Promise<void> {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.clear();
   },
@@ -376,7 +372,7 @@ const LocalDatastore = {
     return `${OBJECT_PREFIX}${object.className}_${objectId}`;
   },
 
-  getPinName(pinName: ?string) {
+  getPinName(pinName?: string) {
     if (!pinName || pinName === DEFAULT_PIN) {
       return DEFAULT_PIN;
     }
