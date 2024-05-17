@@ -1,3 +1,10 @@
+# [5.2.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.1-alpha.1...5.2.0-alpha.1) (2024-05-17)
+
+
+### Features
+
+* Support dot notation on array fields ([#2120](https://github.com/parse-community/Parse-SDK-JS/issues/2120)) ([25ec684](https://github.com/parse-community/Parse-SDK-JS/commit/25ec684bf01cf9cd616ceff6f5d30e2e7fb83a5a))
+
 ## [5.1.1-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0...5.1.1-alpha.1) (2024-05-16)
 
 
