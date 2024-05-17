@@ -1,28 +1,28 @@
-// @ts-nocheck
-export function defaultState(): State;
-export function setServerData(serverData: AttributeMap, attributes: AttributeMap): void;
-export function setPendingOp(pendingOps: Array<OpsMap>, attr: string, op: Op | null): void;
-export function pushPendingState(pendingOps: Array<OpsMap>): void;
-export function popPendingState(pendingOps: Array<OpsMap>): OpsMap;
-export function mergeFirstPendingState(pendingOps: Array<OpsMap>): void;
-export function estimateAttribute(serverData: AttributeMap, pendingOps: Array<OpsMap>, className: string, id: string | null, attr: string): mixed;
-export function estimateAttributes(serverData: AttributeMap, pendingOps: Array<OpsMap>, className: string, id: string | null): AttributeMap;
-export function commitServerChanges(serverData: AttributeMap, objectCache: ObjectCache, changes: AttributeMap): void;
-type AttributeMap = {
+import TaskQueue from './TaskQueue';
+import type { Op } from './ParseOp';
+import type ParseObject from './ParseObject';
+export type AttributeMap = {
     [attr: string]: any;
 };
-type OpsMap = {
+export type OpsMap = {
     [attr: string]: Op;
 };
-type ObjectCache = {
+export type ObjectCache = {
     [attr: string]: string;
 };
-type State = {
+export type State = {
     serverData: AttributeMap;
-    pendingOps: OpsMap[];
+    pendingOps: Array<OpsMap>;
     objectCache: ObjectCache;
     tasks: TaskQueue;
     existed: boolean;
 };
-import { Op } from './ParseOp';
-export {};
+export declare function defaultState(): State;
+export declare function setServerData(serverData: AttributeMap, attributes: AttributeMap): void;
+export declare function setPendingOp(pendingOps: Array<OpsMap>, attr: string, op?: Op): void;
+export declare function pushPendingState(pendingOps: Array<OpsMap>): void;
+export declare function popPendingState(pendingOps: Array<OpsMap>): OpsMap;
+export declare function mergeFirstPendingState(pendingOps: Array<OpsMap>): void;
+export declare function estimateAttribute(serverData: AttributeMap, pendingOps: Array<OpsMap>, object: ParseObject, attr: string): any;
+export declare function estimateAttributes(serverData: AttributeMap, pendingOps: Array<OpsMap>, object: ParseObject): AttributeMap;
+export declare function commitServerChanges(serverData: AttributeMap, objectCache: ObjectCache, changes: AttributeMap): void;

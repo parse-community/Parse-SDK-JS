@@ -32,7 +32,7 @@ import LiveQueryClient from './LiveQueryClient';
  * @global
  * @class
  * @hideconstructor
-*/
+ */
 interface ParseType {
     ACL: typeof ACL;
     Parse?: ParseType;

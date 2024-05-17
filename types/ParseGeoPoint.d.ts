@@ -1,8 +1,3 @@
-// @ts-nocheck
-export default ParseGeoPoint;
-/**
- * @flow
- */
 /**
  * Creates a new GeoPoint with any of the following forms:<br>
  *   <pre>
@@ -27,14 +22,8 @@ export default ParseGeoPoint;
  * @alias Parse.GeoPoint
  */
 declare class ParseGeoPoint {
-    static _validate(latitude: number, longitude: number): void;
-    /**
-     * Creates a GeoPoint with the user's current location, if available.
-     *
-     * @static
-     * @returns {Parse.GeoPoint} User's current location
-     */
-    static current(): Parse.GeoPoint;
+    _latitude: number;
+    _longitude: number;
     /**
      * @param {(number[] | object | number)} arg1 Either a list of coordinate pairs, an object with `latitude`, `longitude`, or the latitude or the point.
      * @param {number} arg2 The longitude of the GeoPoint
@@ -43,9 +32,6 @@ declare class ParseGeoPoint {
         latitude: number;
         longitude: number;
     } | number, arg2?: number);
-    _latitude: number;
-    _longitude: number;
-    set latitude(arg: number);
     /**
      * North-south portion of the coordinate, in range [-90, 90].
      * Throws an exception if set out of range in a modern browser.
@@ -54,7 +40,7 @@ declare class ParseGeoPoint {
      * @returns {number}
      */
     get latitude(): number;
-    set longitude(arg: number);
+    set latitude(val: number);
     /**
      * East-west portion of the coordinate, in range [-180, 180].
      * Throws if set out of range in a modern browser.
@@ -63,6 +49,7 @@ declare class ParseGeoPoint {
      * @returns {number}
      */
     get longitude(): number;
+    set longitude(val: number);
     /**
      * Returns a JSON representation of the GeoPoint, suitable for Parse.
      *
@@ -73,7 +60,7 @@ declare class ParseGeoPoint {
         latitude: number;
         longitude: number;
     };
-    equals(other: mixed): boolean;
+    equals(other: any): boolean;
     /**
      * Returns the distance from this GeoPoint to another in radians.
      *
@@ -95,4 +82,23 @@ declare class ParseGeoPoint {
      * @returns {number}
      */
     milesTo(point: ParseGeoPoint): number;
+    static _validate(latitude: number, longitude: number): void;
+    /**
+     * Creates a GeoPoint with the user's current location, if available.
+     *
+     * @param {object} options The options.
+     * @param {boolean} [options.enableHighAccuracy=false] A boolean value that indicates the application would like to receive the best possible results.
+     *  If true and if the device is able to provide a more accurate position, it will do so.
+     *  Note that this can result in slower response times or increased power consumption (with a GPS chip on a mobile device for example).
+     *  On the other hand, if false, the device can take the liberty to save resources by responding more quickly and/or using less power. Default: false.
+     * @param {number} [options.timeout=Infinity] A positive long value representing the maximum length of time (in milliseconds) the device is allowed to take in order to return a position.
+     *  The default value is Infinity, meaning that getCurrentPosition() won't return until the position is available.
+     * @param {number} [options.maximumAge=0] A positive long value indicating the maximum age in milliseconds of a possible cached position that is acceptable to return.
+     *  If set to 0, it means that the device cannot use a cached position and must attempt to retrieve the real current position.
+     *  If set to Infinity the device must return a cached position regardless of its age. Default: 0.
+     * @static
+     * @returns {Promise<Parse.GeoPoint>} User's current location
+     */
+    static current(options: any): Promise<ParseGeoPoint>;
 }
+export default ParseGeoPoint;

@@ -57,6 +57,8 @@ CoreManager.setInstallationController({
   currentInstallationId() {
     return Promise.resolve('iid');
   },
+  currentInstallation() {},
+  updateInstallationOnDisk() {},
 });
 
 describe('EventuallyQueue', () => {

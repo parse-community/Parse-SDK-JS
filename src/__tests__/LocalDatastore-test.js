@@ -2,7 +2,8 @@
 
 jest.autoMockOff();
 jest.unmock('../LocalDatastoreUtils');
-
+jest.dontMock('../ParseOp');
+require('../ParseOp');
 const encode = require('../encode').default;
 
 let objectCount = 0;
@@ -65,6 +66,8 @@ class MockObject {
   set(key, value) {
     this.attributes[key] = value;
   }
+
+  static registerSubclass() {}
 }
 
 const mockAsyncStorage = require('./test_helpers/mockRNStorage');
@@ -96,6 +99,9 @@ const LocalDatastoreController = require('../LocalDatastoreController');
 const RNDatastoreController = require('../LocalDatastoreController.react-native');
 const BrowserStorageController = require('../StorageController.browser');
 const DefaultStorageController = require('../StorageController.default');
+// Register our mocks
+jest.spyOn(CoreManager, 'getParseObject').mockImplementation(() => require('../ParseObject'));
+jest.spyOn(CoreManager, 'getParseQuery').mockImplementation(() => require('../ParseQuery'));
 
 const item1 = new ParseObject('Item');
 const item2 = new ParseObject('Item');
@@ -717,7 +723,7 @@ describe('LocalDatastore', () => {
     expect(LocalDatastore.isSyncing).toBe(false);
   });
 
-  it('updateFromServer on mixed object', async () => {
+  it('updateFromServer on any object', async () => {
     LocalDatastore.isEnabled = true;
     LocalDatastore.isSyncing = false;
     const testObject = new ParseObject('TestObject');

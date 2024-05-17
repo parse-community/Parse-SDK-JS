@@ -14,6 +14,7 @@ import type { HookDeclaration, HookDeleteArg } from './ParseHooks';
 import type ParseConfig from './ParseConfig';
 import type LiveQueryClient from './LiveQueryClient';
 import type ParseSchema from './ParseSchema';
+import type ParseInstallation from './ParseInstallation';
 
 type AnalyticsController = {
   track: (name: string, dimensions: { [key: string]: string }) => Promise<any>,
@@ -41,14 +42,16 @@ type FileController = {
 };
 type InstallationController = {
   currentInstallationId: () => Promise<string>,
+  currentInstallation: () => Promise<ParseInstallation | null>,
+  updateInstallationOnDisk: (installation: ParseInstallation) => Promise<void>,
 };
 type ObjectController = {
   fetch: (
     object: ParseObject | Array<ParseObject>,
     forceFetch: boolean,
     options: RequestOptions
-  ) => Promise<any>,
-  save: (object: ParseObject | Array<ParseObject | ParseFile> | null, options: RequestOptions) => Promise<ParseObject | Array<ParseObject> | ParseFile>,
+  ) => Promise<Array<ParseObject | undefined> | ParseObject | undefined>,
+  save: (object: ParseObject | Array<ParseObject | ParseFile> | null, options: RequestOptions) => Promise<ParseObject | Array<ParseObject> | ParseFile | undefined>,
   destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => Promise<ParseObject | Array<ParseObject>>,
 };
 type ObjectStateController = {
@@ -80,7 +83,7 @@ type QueryController = {
 type EventuallyQueue = {
   save: (object: ParseObject, serverOptions: SaveOptions) => Promise<any>,
   destroy: (object: ParseObject, serverOptions: RequestOptions) => Promise<any>,
-  poll: (ms: number) => void
+  poll: (ms?: number) => void
 };
 type RESTController = {
   request: (method: string, path: string, data?: any, options?: RequestOptions) => Promise<any>,
@@ -376,7 +379,11 @@ const CoreManager = {
   },
 
   setInstallationController(controller: InstallationController) {
-    requireMethods('InstallationController', ['currentInstallationId'], controller);
+    requireMethods(
+      'InstallationController',
+      ['currentInstallationId', 'currentInstallation', 'updateInstallationOnDisk'],
+      controller
+    );
     config['InstallationController'] = controller;
   },
 
@@ -586,6 +593,46 @@ const CoreManager = {
 
   getHooksController(): HooksController {
     return config['HooksController']!;
+  },
+
+  setParseOp(op: any) {
+    config['ParseOp'] = op;
+  },
+
+  getParseOp() {
+    return config['ParseOp']!;
+  },
+
+  setParseObject(object: any) {
+    config['ParseObject'] = object;
+  },
+
+  getParseObject() {
+    return config['ParseObject']!;
+  },
+
+  setParseQuery(query: any) {
+    config['ParseQuery'] = query;
+  },
+
+  getParseQuery() {
+    return config['ParseQuery']!;
+  },
+
+  setParseRole(role: any) {
+    config['ParseRole'] = role;
+  },
+
+  getParseRole() {
+    return config['ParseRole']!;
+  },
+
+  setParseUser(user: any) {
+    config['ParseUser'] = user;
+  },
+
+  getParseUser() {
+    return config['ParseUser']!;
   },
 };
 

@@ -1,1 +1,1 @@
-export default function _default(value: mixed, disallowObjects?: boolean, forcePointers?: boolean, seen?: Array<mixed>, offline?: boolean): any;
+export default function (value: any, disallowObjects?: boolean, forcePointers?: boolean, seen?: Array<any>, offline?: boolean): any;

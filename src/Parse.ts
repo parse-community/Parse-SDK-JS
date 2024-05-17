@@ -43,8 +43,7 @@ import WebSocketController from './WebSocketController';
  * @global
  * @class
  * @hideconstructor
-*/
-
+ */
 interface ParseType {
   ACL: typeof ACL,
   Parse?: ParseType,
@@ -91,7 +90,7 @@ interface ParseType {
   _initialize(applicationId: string, javaScriptKey: string, masterKey?: string): void,
   setAsyncStorage(storage: any): void,
   setLocalDatastoreController(controller: any): void,
-  getServerHealth(): Promise<any>
+  getServerHealth(): Promise<any>,
 
   applicationId: string,
   javaScriptKey: string,
@@ -199,11 +198,11 @@ const Parse: ParseType = {
     CoreManager.setIfNeeded('EventEmitter', EventEmitter);
     CoreManager.setIfNeeded('LiveQuery', new ParseLiveQuery());
     CoreManager.setIfNeeded('CryptoController', CryptoController);
+    CoreManager.setIfNeeded('EventuallyQueue', EventuallyQueue);
+    CoreManager.setIfNeeded('InstallationController', InstallationController);
     CoreManager.setIfNeeded('LocalDatastoreController', LocalDatastoreController);
     CoreManager.setIfNeeded('StorageController', StorageController);
     CoreManager.setIfNeeded('WebSocketController', WebSocketController);
-
-    CoreManager.setIfNeeded('EventuallyQueue', EventuallyQueue);
 
     if (process.env.PARSE_BUILD === 'browser') {
       Parse.IndexedDB = CoreManager.setIfNeeded('IndexedDBStorageController', IndexedDBStorageController);
@@ -403,7 +402,7 @@ const Parse: ParseType = {
    * @param [ms] Milliseconds to ping the server. Default 2000ms
    * @static
    */
-  enableLocalDatastore(polling = true, ms: number = 2000) {
+  enableLocalDatastore(polling = true, ms = 2000) {
     if (!this.applicationId) {
       console.log("'enableLocalDataStore' must be called after 'initialize'");
       return;
@@ -464,7 +463,6 @@ const Parse: ParseType = {
   },
 };
 
-CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);
 
 if (process.env.PARSE_BUILD === 'node') {

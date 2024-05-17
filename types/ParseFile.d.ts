@@ -1,18 +1,32 @@
-// @ts-nocheck
-type FileSource = {
-    format: "file";
-    file: Blob;
-    type: string;
-} | {
-    format: "base64";
+import type { FullOptions } from './RESTController';
+type Base64 = {
     base64: string;
-    type: string;
-} | {
-    format: "uri";
-    uri: string;
-    type: string;
 };
-export default ParseFile;
+type Uri = {
+    uri: string;
+};
+type FileData = Array<number> | Base64 | Blob | Uri;
+export type FileSaveOptions = FullOptions & {
+    metadata?: {
+        [key: string]: any;
+    };
+    tags?: {
+        [key: string]: any;
+    };
+};
+export type FileSource = {
+    format: 'file';
+    file: Blob;
+    type: string | undefined;
+} | {
+    format: 'base64';
+    base64: string;
+    type: string | undefined;
+} | {
+    format: 'uri';
+    uri: string;
+    type: string | undefined;
+};
 /**
  * A Parse.File is a local representation of a file that is saved to the Parse
  * cloud.
@@ -20,8 +34,14 @@ export default ParseFile;
  * @alias Parse.File
  */
 declare class ParseFile {
-    static fromJSON(obj: any): ParseFile;
-    static encodeBase64(bytes: Array<number>): string;
+    _name: string;
+    _url?: string;
+    _source: FileSource;
+    _previousSave?: Promise<ParseFile>;
+    _data?: string;
+    _requestTask?: any;
+    _metadata?: object;
+    _tags?: object;
     /**
      * @param name {String} The file's name. This will be prefixed by a unique
      *     value once the file has finished saving. The file name must begin with
@@ -49,18 +69,10 @@ declare class ParseFile {
      * @param type {String} Optional Content-Type header to use for the file. If
      *     this is omitted, the content type will be inferred from the name's
      *     extension.
-     * @param metadata {Object} Optional key value pairs to be stored with file object
-     * @param tags {Object} Optional key value pairs to be stored with file object
+     * @param metadata {object} Optional key value pairs to be stored with file object
+     * @param tags {object} Optional key value pairs to be stored with file object
      */
-    constructor(name: string, data?: FileData, type?: string, metadata?: Object, tags?: Object);
-    _name: string;
-    _url: string | null;
-    _source: FileSource;
-    _previousSave: Promise<ParseFile> | null;
-    _data: string | null;
-    _requestTask: any | null;
-    _metadata: Object | null;
-    _tags: Object | null;
+    constructor(name: string, data?: FileData, type?: string, metadata?: object, tags?: object);
     /**
      * Return the data for the file, downloading it if not already present.
      * Data is present if initialized with Byte Array, Base64 or Saved with Uri.
@@ -68,7 +80,7 @@ declare class ParseFile {
      *
      * @returns {Promise} Promise that is resolve with base64 data
      */
-    getData(): Promise<String>;
+    getData(): Promise<string>;
     /**
      * Gets the name of the file. Before save is called, this is the filename
      * given by the user. After save is called, that name gets prefixed with a
@@ -82,23 +94,24 @@ declare class ParseFile {
      * after you get the file from a Parse.Object.
      *
      * @param {object} options An object to specify url options
+     * @param {boolean} [options.forceSecure] force the url to be secure
      * @returns {string | undefined}
      */
     url(options?: {
         forceSecure?: boolean;
-    }): string | null;
+    }): string | undefined;
     /**
      * Gets the metadata of the file.
      *
      * @returns {object}
      */
-    metadata(): Object;
+    metadata(): object;
     /**
      * Gets the tags of the file.
      *
      * @returns {object}
      */
-    tags(): Object;
+    tags(): object;
     /**
      * Saves the file to the Parse cloud.
      *
@@ -122,7 +135,7 @@ declare class ParseFile {
      * </ul>
      * @returns {Promise | undefined} Promise that is resolved when the save finishes.
      */
-    save(options?: FullOptions): Promise | null;
+    save(options?: FileSaveOptions): Promise<ParseFile> | undefined;
     /**
      * Aborts the request if it has already been sent.
      */
@@ -138,12 +151,13 @@ declare class ParseFile {
      * <pre>
      * @returns {Promise} Promise that is resolved when the delete finishes.
      */
-    destroy(options?: FullOptions): Promise<any>;
+    destroy(options?: FullOptions): Promise<this>;
     toJSON(): {
-        name: string | null;
-        url: string | null;
+        __type: 'File';
+        name?: string;
+        url?: string;
     };
-    equals(other: mixed): boolean;
+    equals(other: any): boolean;
     /**
      * Sets metadata to be saved with file object. Overwrites existing metadata
      *
@@ -170,12 +184,7 @@ declare class ParseFile {
      * @param {*} value tag
      */
     addTag(key: string, value: string): void;
+    static fromJSON(obj: any): ParseFile;
+    static encodeBase64(bytes: Array<number> | Uint8Array): string;
 }
-import { FullOptions } from './RESTController';
-type FileData = number[] | Blob | Base64 | Uri;
-type Base64 = {
-    base64: string;
-};
-type Uri = {
-    uri: string;
-};
+export default ParseFile;

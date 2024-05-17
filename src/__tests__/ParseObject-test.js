@@ -121,7 +121,7 @@ const mockLocalDatastore = {
     if (!mockLocalDatastore.isEnabled) {
       return;
     }
-    /* eslint-disable no-unused-vars */
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
     const objectKey = mockLocalDatastore.getKeyForObject(object);
   }),
@@ -165,11 +165,17 @@ CoreManager.setInstallationController({
   currentInstallationId() {
     return Promise.resolve('iid');
   },
+  currentInstallation() {},
+  updateInstallationOnDisk() {},
 });
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 CoreManager.set('MASTER_KEY', 'C');
 CoreManager.set('VERSION', 'V');
+// Register our mocks
+jest.spyOn(CoreManager, 'getParseQuery').mockImplementation(() => mockQuery);
+jest.spyOn(CoreManager, 'getEventuallyQueue').mockImplementation(() => EventuallyQueue);
+jest.spyOn(CoreManager, 'getParseUser').mockImplementation(() => require('../ParseUser').default);
 
 const { SetOp, UnsetOp, IncrementOp } = require('../ParseOp');
 

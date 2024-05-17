@@ -1,11 +1,15 @@
-type PermissionsMap = {
+import ParseRole from './ParseRole';
+import ParseUser from './ParseUser';
+type Entity = ParseUser | ParseRole | string;
+type UsersMap = {
+    [userId: string]: boolean | any;
+};
+export type PermissionsMap = {
+    writeUserFields?: string[];
+    readUserFields?: string[];
+} & {
     [permission: string]: UsersMap;
 };
-export default ParseCLP;
-type UsersMap = {
-    [userId: string]: any;
-};
-declare const UsersMap: any;
 /**
  * Creates a new CLP.
  * If no argument is given, the CLP has no permissions for anyone.
@@ -99,11 +103,11 @@ declare const UsersMap: any;
  * @alias Parse.CLP
  */
 declare class ParseCLP {
+    permissionsMap: PermissionsMap;
     /**
      * @param {(Parse.User | Parse.Role | object)} userId The user to initialize the CLP for
      */
     constructor(userId: ParseUser | ParseRole | PermissionsMap);
-    permissionsMap: PermissionsMap;
     /**
      * Returns a JSON-encoded version of the CLP.
      *
@@ -118,12 +122,12 @@ declare class ParseCLP {
      */
     equals(other: ParseCLP): boolean;
     _getRoleName(role: ParseRole | string): string;
-    _parseEntity(entity: any): string;
-    _setAccess(permission: string, userId: any, allowed: boolean): void;
-    _getAccess(permission: string, userId: any, returnBoolean?: boolean): boolean | string[];
-    _setArrayAccess(permission: string, userId: any, fields: string): void;
+    _parseEntity(entity: Entity): string;
+    _setAccess(permission: string, userId: Entity, allowed: boolean): void;
+    _getAccess(permission: string, userId: Entity, returnBoolean?: boolean): boolean | string[];
+    _setArrayAccess(permission: string, userId: Entity, fields: string[]): void;
     _setGroupPointerPermission(operation: string, pointerFields: string[]): void;
-    _getGroupPointerPermissions(operation: string): string[];
+    _getGroupPointerPermissions(operation: 'readUserFields' | 'writeUserFields'): string[];
     /**
      * Sets user pointer fields to allow permission for get/count/find operations.
      *
@@ -150,21 +154,21 @@ declare class ParseCLP {
      * @param userId An instance of Parse.User or its objectId.
      * @param {string[]} fields fields to be protected
      */
-    setProtectedFields(userId: any, fields: string[]): void;
+    setProtectedFields(userId: Entity, fields: string[]): void;
     /**
      * Returns array of fields are accessable to this user.
      *
      * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
      * @returns {string[]}
      */
-    getProtectedFields(userId: any): string[];
+    getProtectedFields(userId: Entity): string[];
     /**
      * Sets whether the given user is allowed to read from this class.
      *
      * @param userId An instance of Parse.User or its objectId.
      * @param {boolean} allowed whether that user should have read access.
      */
-    setReadAccess(userId: any, allowed: boolean): void;
+    setReadAccess(userId: Entity, allowed: boolean): void;
     /**
      * Get whether the given user id is *explicitly* allowed to read from this class.
      * Even if this returns false, the user may still be able to access it if
@@ -174,14 +178,14 @@ declare class ParseCLP {
      * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
      * @returns {boolean}
      */
-    getReadAccess(userId: any): boolean;
+    getReadAccess(userId: Entity): boolean;
     /**
      * Sets whether the given user id is allowed to write to this class.
      *
      * @param userId An instance of Parse.User or its objectId, or a Parse.Role..
      * @param {boolean} allowed Whether that user should have write access.
      */
-    setWriteAccess(userId: any, allowed: boolean): void;
+    setWriteAccess(userId: Entity, allowed: boolean): void;
     /**
      * Gets whether the given user id is *explicitly* allowed to write to this class.
      * Even if this returns false, the user may still be able to write it if
@@ -191,7 +195,7 @@ declare class ParseCLP {
      * @param userId An instance of Parse.User or its objectId, or a Parse.Role.
      * @returns {boolean}
      */
-    getWriteAccess(userId: any): boolean;
+    getWriteAccess(userId: Entity): boolean;
     /**
      * Sets whether the public is allowed to read from this class.
      *
@@ -286,5 +290,4 @@ declare class ParseCLP {
      */
     setRoleProtectedFields(role: ParseRole | string, fields: string[]): void;
 }
-import ParseRole from './ParseRole';
-import ParseUser from './ParseUser';
+export default ParseCLP;

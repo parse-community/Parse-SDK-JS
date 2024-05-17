@@ -14,6 +14,7 @@ import type { HookDeclaration, HookDeleteArg } from './ParseHooks';
 import type ParseConfig from './ParseConfig';
 import type LiveQueryClient from './LiveQueryClient';
 import type ParseSchema from './ParseSchema';
+import type ParseInstallation from './ParseInstallation';
 type AnalyticsController = {
     track: (name: string, dimensions: {
         [key: string]: string;
@@ -54,10 +55,12 @@ type FileController = {
 };
 type InstallationController = {
     currentInstallationId: () => Promise<string>;
+    currentInstallation: () => Promise<ParseInstallation | null>;
+    updateInstallationOnDisk: (installation: ParseInstallation) => Promise<void>;
 };
 type ObjectController = {
-    fetch: (object: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions) => Promise<any>;
-    save: (object: ParseObject | Array<ParseObject | ParseFile> | null, options: RequestOptions) => Promise<ParseObject | Array<ParseObject> | ParseFile>;
+    fetch: (object: ParseObject | Array<ParseObject>, forceFetch: boolean, options: RequestOptions) => Promise<Array<ParseObject | undefined> | ParseObject | undefined>;
+    save: (object: ParseObject | Array<ParseObject | ParseFile> | null, options: RequestOptions) => Promise<ParseObject | Array<ParseObject> | ParseFile | undefined>;
     destroy: (object: ParseObject | Array<ParseObject>, options: RequestOptions) => Promise<ParseObject | Array<ParseObject>>;
 };
 type ObjectStateController = {
@@ -95,7 +98,7 @@ type QueryController = {
 type EventuallyQueue = {
     save: (object: ParseObject, serverOptions: SaveOptions) => Promise<any>;
     destroy: (object: ParseObject, serverOptions: RequestOptions) => Promise<any>;
-    poll: (ms: number) => void;
+    poll: (ms?: number) => void;
 };
 type RESTController = {
     request: (method: string, path: string, data?: any, options?: RequestOptions) => Promise<any>;
@@ -281,5 +284,15 @@ declare const CoreManager: {
     getLiveQueryController(): LiveQueryControllerType;
     setHooksController(controller: HooksController): void;
     getHooksController(): HooksController;
+    setParseOp(op: any): void;
+    getParseOp(): any;
+    setParseObject(object: any): void;
+    getParseObject(): any;
+    setParseQuery(query: any): void;
+    getParseQuery(): any;
+    setParseRole(role: any): void;
+    getParseRole(): any;
+    setParseUser(user: any): void;
+    getParseUser(): any;
 };
 export default CoreManager;

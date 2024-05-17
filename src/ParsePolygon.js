@@ -67,7 +67,7 @@ class ParsePolygon {
    * @param {(Parse.Polygon | object)} other
    * @returns {boolean}
    */
-  equals(other: mixed): boolean {
+  equals(other: any): boolean {
     if (!(other instanceof ParsePolygon) || this.coordinates.length !== other.coordinates.length) {
       return false;
     }
