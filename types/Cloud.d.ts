@@ -1,4 +1,5 @@
-// @ts-nocheck
+import ParseObject from './ParseObject';
+import type { RequestOptions } from './RESTController';
 /**
  * Contains functions for calling and declaring
  * <a href="/docs/cloud_code_guide#functions">cloud functions</a>.
@@ -21,7 +22,7 @@
  * @returns {Promise} A promise that will be resolved with the result
  * of the function.
  */
-export function run(name: string, data: mixed, options: RequestOptions): Promise<mixed>;
+export declare function run(name: string, data: any, options: RequestOptions): Promise<any>;
 /**
  * Gets data for the current set of cloud jobs.
  *
@@ -30,7 +31,7 @@ export function run(name: string, data: mixed, options: RequestOptions): Promise
  * @returns {Promise} A promise that will be resolved with the result
  * of the function.
  */
-export function getJobsData(): Promise<Object>;
+export declare function getJobsData(): Promise<any>;
 /**
  * Starts a given cloud job, which will process asynchronously.
  *
@@ -41,7 +42,7 @@ export function getJobsData(): Promise<Object>;
  * @returns {Promise} A promise that will be resolved with the jobStatusId
  * of the job.
  */
-export function startJob(name: string, data: mixed): Promise<string>;
+export declare function startJob(name: string, data: any): Promise<string>;
 /**
  * Gets job status by Id
  *
@@ -50,6 +51,4 @@ export function startJob(name: string, data: mixed): Promise<string>;
  * @param {string} jobStatusId The Id of Job Status.
  * @returns {Parse.Object} Status of Job.
  */
-export function getJobStatus(jobStatusId: string): Promise<ParseObject>;
-import { RequestOptions } from './RESTController';
-import ParseObject from './ParseObject';
+export declare function getJobStatus(jobStatusId: string): Promise<ParseObject>;

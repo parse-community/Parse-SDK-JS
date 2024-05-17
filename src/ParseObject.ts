@@ -104,6 +104,7 @@ class ParseObject {
    * @param {string} className The class name for the object
    * @param {object} attributes The initial set of data to store in the object.
    * @param {object} options The options for this object instance.
+   * @param {boolean} [options.ignoreValidation=false] Set to `true` ignore any attribute validation errors.
    */
   constructor(
     className?: string | { className: string, [attr: string]: any },
@@ -1192,7 +1193,7 @@ class ParseObject {
    * @returns {Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetchWithInclude(keys: String | Array<string | Array<string>>, options: RequestOptions): Promise<any> {
+  fetchWithInclude(keys: string | Array<string | Array<string>>, options: RequestOptions): Promise<any> {
     options = options || {};
     options.include = keys;
     return this.fetch(options);
@@ -1605,7 +1606,7 @@ class ParseObject {
    */
   static fetchAllWithInclude(
     list: Array<ParseObject>,
-    keys: String | Array<string | Array<string>>,
+    keys: string | Array<string | Array<string>>,
     options: RequestOptions
   ) {
     options = options || {};
@@ -1645,7 +1646,7 @@ class ParseObject {
    */
   static fetchAllIfNeededWithInclude(
     list: Array<ParseObject>,
-    keys: String | Array<string | Array<string>>,
+    keys: string | Array<string | Array<string>>,
     options: RequestOptions
   ) {
     options = options || {};

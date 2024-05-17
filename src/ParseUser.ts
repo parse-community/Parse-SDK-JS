@@ -74,6 +74,7 @@ class ParseUser extends ParseObject {
    * @see {@link https://docs.parseplatform.org/js/guide/#linking-users Linking Users}
    * @param {string | AuthProvider} provider Name of auth provider or {@link https://parseplatform.org/Parse-SDK-JS/api/master/AuthProvider.html AuthProvider}
    * @param {object} options
+   * @param {object} [options.authData] AuthData to link with
    * <ul>
    *   <li>If provider is string, options is {@link http://docs.parseplatform.org/parse-server/guide/#supported-3rd-party-authentications authData}
    *   <li>If provider is AuthProvider, options is saveOpts
@@ -148,6 +149,7 @@ class ParseUser extends ParseObject {
   /**
    * @param provider
    * @param options
+   * @param {object} [options.authData]
    * @param saveOpts
    * @deprecated since 2.9.0 see {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#linkWith linkWith}
    * @returns {Promise}
@@ -795,6 +797,7 @@ class ParseUser extends ParseObject {
    *
    * @param provider
    * @param options
+   * @param {object} [options.authData]
    * @param saveOpts
    * @static
    * @returns {Promise}
@@ -977,6 +980,7 @@ class ParseUser extends ParseObject {
   /**
    * @param provider
    * @param options
+   * @param {object} [options.authData]
    * @param saveOpts
    * @deprecated since 2.9.0 see {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.User.html#logInWith logInWith}
    * @static

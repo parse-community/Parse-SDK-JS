@@ -22,17 +22,17 @@ export type FileSource =
   | {
       format: 'file',
       file: Blob,
-      type: string,
+      type: string | undefined,
     }
   | {
       format: 'base64',
       base64: string,
-      type: string,
+      type: string | undefined,
     }
   | {
       format: 'uri',
       uri: string,
-      type: string,
+      type: string | undefined,
     };
 
 function b64Digit(number: number): string {
@@ -67,8 +67,8 @@ class ParseFile {
   _previousSave?: Promise<ParseFile>;
   _data?: string;
   _requestTask?: any;
-  _metadata?: Object;
-  _tags?: Object;
+  _metadata?: object;
+  _tags?: object;
 
   /**
    * @param name {String} The file's name. This will be prefixed by a unique
@@ -97,10 +97,10 @@ class ParseFile {
    * @param type {String} Optional Content-Type header to use for the file. If
    *     this is omitted, the content type will be inferred from the name's
    *     extension.
-   * @param metadata {Object} Optional key value pairs to be stored with file object
-   * @param tags {Object} Optional key value pairs to be stored with file object
+   * @param metadata {object} Optional key value pairs to be stored with file object
+   * @param tags {object} Optional key value pairs to be stored with file object
    */
-  constructor(name: string, data?: FileData, type?: string, metadata?: Object, tags?: Object) {
+  constructor(name: string, data?: FileData, type?: string, metadata?: object, tags?: object) {
     const specifiedType = type || '';
 
     this._name = name;
@@ -184,6 +184,7 @@ class ParseFile {
    * after you get the file from a Parse.Object.
    *
    * @param {object} options An object to specify url options
+   * @param {boolean} [options.forceSecure] force the url to be secure
    * @returns {string | undefined}
    */
   url(options?: { forceSecure?: boolean }): string | undefined {
@@ -319,11 +320,11 @@ class ParseFile {
     }
     const destroyOptions = { useMasterKey: true };
     if (options.hasOwnProperty('useMasterKey')) {
-      destroyOptions.useMasterKey = options.useMasterKey;
+      destroyOptions.useMasterKey = !!options.useMasterKey;
     }
     const controller = CoreManager.getFileController();
     return controller.deleteFile(this._name, destroyOptions).then(() => {
-      this._data = null;
+      this._data = undefined;
       this._requestTask = null;
       return this;
     });
@@ -433,7 +434,7 @@ class ParseFile {
 }
 
 const DefaultController = {
-  saveFile: async function (name: string, source: FileSource, options?: FullOptions) {
+  saveFile: async function (name: string, source: FileSource, options?: FileSaveOptions) {
     if (source.format !== 'file') {
       throw new Error('saveFile can only be used with File-type sources.');
     }
@@ -452,17 +453,17 @@ const DefaultController = {
     const data = second ? second : first;
     const newSource = {
       format: 'base64' as const,
-      base64: data,
+      base64: data as string,
       type: source.type || (source.file ? source.file.type : undefined),
     };
     return await DefaultController.saveBase64(name, newSource, options);
   },
 
-  saveBase64: function (name: string, source: FileSource, options?: FullOptions) {
+  saveBase64: function (name: string, source: FileSource, options: FileSaveOptions = {}) {
     if (source.format !== 'base64') {
       throw new Error('saveBase64 can only be used with Base64-type sources.');
     }
-    const data: { base64: any, _ContentType?: any, fileData: Object } = {
+    const data: { base64: any, _ContentType?: any, fileData: any } = {
       base64: source.base64,
       fileData: {
         metadata: { ...options.metadata },

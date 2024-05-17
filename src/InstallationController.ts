@@ -7,7 +7,7 @@ const CURRENT_INSTALLATION_KEY = 'currentInstallation';
 const CURRENT_INSTALLATION_ID_KEY = 'currentInstallationId';
 
 let iidCache: string | null = null;
-let currentInstallationCache = null;
+let currentInstallationCache: ParseInstallation | null = null;
 let currentInstallationCacheMatchesDisk = false;
 
 const InstallationController = {
@@ -42,12 +42,12 @@ const InstallationController = {
       return null;
     }
     const path = Storage.generatePath(CURRENT_INSTALLATION_KEY);
-    let installationData = await Storage.getItemAsync(path);
+    let installationData: any = await Storage.getItemAsync(path);
     currentInstallationCacheMatchesDisk = true;
     if (installationData) {
       installationData = JSON.parse(installationData);
       installationData.className = '_Installation';
-      const current = ParseInstallation.fromJSON(installationData);
+      const current = ParseInstallation.fromJSON(installationData) as ParseInstallation;
       currentInstallationCache = current;
       return current as ParseInstallation;
     }
@@ -71,7 +71,7 @@ const InstallationController = {
     iidCache = iid;
   },
 
-  _setCurrentInstallationCache(installation: ParseInstallation, matchesDisk: boolean = true) {
+  _setCurrentInstallationCache(installation: ParseInstallation, matchesDisk = true) {
     currentInstallationCache = installation;
     currentInstallationCacheMatchesDisk = matchesDisk;
   },

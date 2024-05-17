@@ -402,7 +402,7 @@ const Parse: ParseType = {
    * @param [ms] Milliseconds to ping the server. Default 2000ms
    * @static
    */
-  enableLocalDatastore(polling = true, ms: number = 2000) {
+  enableLocalDatastore(polling = true, ms = 2000) {
     if (!this.applicationId) {
       console.log("'enableLocalDataStore' must be called after 'initialize'");
       return;

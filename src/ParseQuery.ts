@@ -762,6 +762,8 @@ class ParseQuery {
    * Counts the number of objects that match this query.
    *
    * @param {object} options
+   * @param {boolean} [options.useMasterKey]
+   * @param {string} [options.sessionToken]
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
    *     be used for this request.
@@ -799,10 +801,7 @@ class ParseQuery {
    *
    * @param {string} key A field to find distinct values
    * @param {object} options
-   * Valid options are:<ul>
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
+   * @param {string} [options.sessionToken] A valid session token, used for making a request on behalf of a specific user.
    * @returns {Promise} A promise that is resolved with the query completes.
    */
   distinct(key: string, options?: { sessionToken?: string }): Promise<Array<any>> {
@@ -830,10 +829,8 @@ class ParseQuery {
    * Executes an aggregate query and returns aggregate results
    *
    * @param {(Array|object)} pipeline Array or Object of stages to process query
-   * @param {object} options Valid options are:<ul>
-   *   <li>sessionToken: A valid session token, used for making a request on
-   *       behalf of a specific user.
-   * </ul>
+   * @param {object} options
+   * @param {string} [options.sessionToken] A valid session token, used for making a request on behalf of a specific user.
    * @returns {Promise} A promise that is resolved with the query completes.
    */
   aggregate(pipeline: any, options?: { sessionToken?: string }): Promise<Array<any>> {
@@ -1087,7 +1084,7 @@ class ParseQuery {
    * @param {boolean} explain Used to toggle the information on the query plan.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  explain(explain: boolean = true): ParseQuery {
+  explain(explain = true): ParseQuery {
     if (typeof explain !== 'boolean') {
       throw new Error('You can only set explain to a boolean value');
     }
@@ -1366,13 +1363,12 @@ class ParseQuery {
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   containsAllStartingWith(key: string, values: Array<string>): ParseQuery {
-    const _this = this;
     if (!Array.isArray(values)) {
       values = [values];
     }
 
     const regexObject = values.map(value => {
-      return { $regex: _this._regexStartWith(value) };
+      return { $regex: this._regexStartWith(value) };
     });
 
     return this.containsAll(key, regexObject);
@@ -1871,7 +1867,7 @@ class ParseQuery {
    * @param {boolean} includeCount false - disable, true - enable.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  withCount(includeCount: boolean = true): ParseQuery {
+  withCount(includeCount = true): ParseQuery {
     if (typeof includeCount !== 'boolean') {
       throw new Error('You can only set withCount to a boolean value');
     }

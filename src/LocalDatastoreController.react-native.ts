@@ -1,13 +1,8 @@
-/**
- * @flow
- * @private
- */
-
 import { isLocalDatastoreKey } from './LocalDatastoreUtils';
 const RNStorage = require('./StorageController.react-native');
 
 const LocalDatastoreController = {
-  async fromPinWithName(name: string): Promise<Array<Object>> {
+  async fromPinWithName(name: string): Promise<Array<any>> {
     const values = await RNStorage.getItemAsync(name);
     if (!values) {
       return [];
@@ -30,9 +25,9 @@ const LocalDatastoreController = {
     return RNStorage.removeItemAsync(name);
   },
 
-  async getAllContents(): Promise<Object> {
+  async getAllContents(): Promise<any> {
     const keys = await RNStorage.getAllKeysAsync();
-    const batch = [];
+    const batch: string[] = [];
     for (let i = 0; i < keys.length; i += 1) {
       const key = keys[i];
       if (isLocalDatastoreKey(key)) {
@@ -40,7 +35,7 @@ const LocalDatastoreController = {
       }
     }
     const LDS = {};
-    let results = [];
+    let results: any[] = [];
     try {
       results = await RNStorage.multiGet(batch);
     } catch (error) {
@@ -59,7 +54,7 @@ const LocalDatastoreController = {
   },
 
   // Used for testing
-  async getRawStorage(): Promise<Object> {
+  async getRawStorage(): Promise<any> {
     const keys = await RNStorage.getAllKeysAsync();
     const storage = {};
     const results = await RNStorage.multiGet(keys);
@@ -72,7 +67,7 @@ const LocalDatastoreController = {
 
   async clear(): Promise<void> {
     const keys = await RNStorage.getAllKeysAsync();
-    const batch = [];
+    const batch: string[] = [];
     for (let i = 0; i < keys.length; i += 1) {
       const key = keys[i];
       if (isLocalDatastoreKey(key)) {
@@ -86,3 +81,4 @@ const LocalDatastoreController = {
 };
 
 module.exports = LocalDatastoreController;
+export default LocalDatastoreController;

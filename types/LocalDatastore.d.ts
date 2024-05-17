@@ -1,22 +1,42 @@
-export default LocalDatastore;
-declare namespace LocalDatastore {
-    let isEnabled: boolean;
-    let isSyncing: boolean;
-    function fromPinWithName(name: string): Promise<Object[]>;
-    function pinWithName(name: string, value: any): Promise<void>;
-    function unPinWithName(name: string): Promise<void>;
-    function _getAllContents(): Promise<Object>;
-    function _getRawStorage(): Promise<Object>;
-    function _clear(): Promise<void>;
-    function _handlePinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
-    function _handleUnPinAllWithName(name: string, objects: ParseObject[]): Promise<void[]>;
-    function _getChildren(object: ParseObject): {};
-    function _traverse(object: any, encountered: any): void;
-    function _serializeObjectsFromPinName(name: string): Promise<any[]>;
-    function _serializeObject(objectKey: string, localDatastore: any): Promise<any>;
-    function _updateObjectIfPinned(object: ParseObject): Promise<void>;
-    function _destroyObjectIfPinned(object: ParseObject): Promise<void[]>;
-    function _updateLocalIdForObject(localId: string, object: ParseObject): Promise<void[]>;
+import type ParseObject from './ParseObject';
+/**
+ * Provides a local datastore which can be used to store and retrieve <code>Parse.Object</code>. <br />
+ * To enable this functionality, call <code>Parse.enableLocalDatastore()</code>.
+ *
+ * Pin object to add to local datastore
+ *
+ * <pre>await object.pin();</pre>
+ * <pre>await object.pinWithName('pinName');</pre>
+ *
+ * Query pinned objects
+ *
+ * <pre>query.fromLocalDatastore();</pre>
+ * <pre>query.fromPin();</pre>
+ * <pre>query.fromPinWithName();</pre>
+ *
+ * <pre>const localObjects = await query.find();</pre>
+ *
+ * @class Parse.LocalDatastore
+ * @static
+ */
+declare const LocalDatastore: {
+    isEnabled: boolean;
+    isSyncing: boolean;
+    fromPinWithName(name: string): Promise<Array<any>>;
+    pinWithName(name: string, value: any): Promise<void>;
+    unPinWithName(name: string): Promise<void>;
+    _getAllContents(): Promise<any>;
+    _getRawStorage(): Promise<any>;
+    _clear(): Promise<void>;
+    _handlePinAllWithName(name: string, objects: Array<ParseObject>): Promise<void>;
+    _handleUnPinAllWithName(name: string, objects: Array<ParseObject>): Promise<any[]>;
+    _getChildren(object: ParseObject): {};
+    _traverse(object: any, encountered: any): void;
+    _serializeObjectsFromPinName(name: string): Promise<any[]>;
+    _serializeObject(objectKey: string, localDatastore: any): Promise<any>;
+    _updateObjectIfPinned(object: ParseObject): Promise<void>;
+    _destroyObjectIfPinned(object: ParseObject): Promise<any[]>;
+    _updateLocalIdForObject(localId: string, object: ParseObject): Promise<any[]>;
     /**
      * Updates Local Datastore from Server
      *
@@ -28,9 +48,9 @@ declare namespace LocalDatastore {
      * @name Parse.LocalDatastore.updateFromServer
      * @static
      */
-    function updateFromServer(): Promise<void>;
-    function getKeyForObject(object: any): string;
-    function getPinName(pinName: string): string;
-    function checkIfEnabled(): boolean;
-}
-import ParseObject from './ParseObject';
+    updateFromServer(): Promise<void>;
+    getKeyForObject(object: any): string;
+    getPinName(pinName?: string): string;
+    checkIfEnabled(): any;
+};
+export default LocalDatastore;

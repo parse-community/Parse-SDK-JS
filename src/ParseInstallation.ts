@@ -51,6 +51,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {string} appIdentifier
    * @static
+   * @returns {string}
    */
   get appIdentifier() {
     return this.get('appIdentifier');
@@ -61,6 +62,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {string} appVersion
    * @static
+   * @returns {string}
    */
   get appVersion() {
     return this.get('appVersion');
@@ -71,6 +73,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {string} appName
    * @static
+   * @returns {string}
    */
   get appName() {
     return this.get('appName');
@@ -83,6 +86,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {number} badge
    * @static
+   * @returns {number}
    */
   get badge() {
     return this.get('badge');
@@ -93,6 +97,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {string[]} channels
    * @static
+   * @returns {string[]}
    */
   get channels() {
     return this.get('channels');
@@ -103,6 +108,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {string} deviceToken
    * @static
+   * @returns {string}
    */
   get deviceToken() {
     return this.get('deviceToken');
@@ -113,6 +119,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {string} deviceType
    * @static
+   * @returns {string}
    */
   get deviceType() {
     return this.get('deviceType');
@@ -123,6 +130,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {string} GCMSenderId
    * @static
+   * @returns {string}
    */
   get GCMSenderId() {
     return this.get('GCMSenderId');
@@ -133,6 +141,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {string} installationId
    * @static
+   * @returns {string}
    */
   get installationId() {
     return this.get('installationId');
@@ -143,6 +152,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {string} localeIdentifier
    * @static
+   * @returns {string}
    */
   get localeIdentifier() {
     return this.get('localeIdentifier');
@@ -153,6 +163,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {string} parseVersion
    * @static
+   * @returns {string}
    */
   get parseVersion() {
     return this.get('parseVersion');
@@ -163,6 +174,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {string} pushType
    * @static
+   * @returns {string}
    */
   get pushType() {
     return this.get('pushType');
@@ -173,6 +185,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {string} timeZone
    * @static
+   * @returns {string}
    */
   get timeZone() {
     return this.get('timeZone');
@@ -192,6 +205,7 @@ class ParseInstallation extends ParseObject {
    *
    * @property {object} DEVICE_TYPES
    * @static
+   * @returns {object}
    */
   static get DEVICE_TYPES(): DeviceInterface {
     return DEVICE_TYPES;
@@ -232,7 +246,7 @@ class ParseInstallation extends ParseObject {
   async save(...args: Array<any>): Promise<this> {
     try {
       await super.save.apply(this, args);
-    } catch (e) {      
+    } catch (e) {
       if (e.code !== ParseError.OBJECT_NOT_FOUND) {
         throw e;
       }

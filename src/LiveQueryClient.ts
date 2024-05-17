@@ -1,8 +1,9 @@
-import CoreManager from './CoreManager';
+import CoreManager, { WebSocketController } from './CoreManager';
 import ParseObject from './ParseObject';
 import LiveQuerySubscription from './LiveQuerySubscription';
 import { resolvingPromise } from './promiseUtils';
 import ParseError from './ParseError';
+import type ParseQuery from './ParseQuery';
 
 // The LiveQuery client inner state
 const CLIENT_STATE = {
@@ -107,15 +108,19 @@ class LiveQueryClient {
   requestId: number;
   applicationId: string;
   serverURL: string;
-  javascriptKey: ?string;
-  masterKey: ?string;
-  sessionToken: ?string;
-  installationId: ?string;
+  javascriptKey?: string;
+  masterKey?: string;
+  sessionToken?: string;
+  installationId?: string;
   additionalProperties: boolean;
-  connectPromise: Promise;
-  subscriptions: Map;
-  socket: any;
+  connectPromise: any;
+  subscriptions: Map<number, LiveQuerySubscription>;
+  socket: WebSocketController & { closingPromise?: any };
   state: string;
+  reconnectHandle: any;
+  emitter: any;
+  on: any;
+  emit: any;
 
   /**
    * @param {object} options
@@ -178,11 +183,11 @@ class LiveQueryClient {
    * <a href="https://github.com/parse-community/parse-server/wiki/Parse-LiveQuery-Protocol-Specification">here</a> for more details. The subscription you get is the same subscription you get
    * from our Standard API.
    *
-   * @param {object} query - the ParseQuery you want to subscribe to
+   * @param {ParseQuery} query - the ParseQuery you want to subscribe to
    * @param {string} sessionToken (optional)
    * @returns {LiveQuerySubscription | undefined}
    */
-  subscribe(query: Object, sessionToken: ?string): LiveQuerySubscription {
+  subscribe(query: ParseQuery, sessionToken?: string): LiveQuerySubscription | undefined {
     if (!query) {
       return;
     }
@@ -200,6 +205,7 @@ class LiveQueryClient {
         keys,
         watch,
       },
+      sessionToken: undefined as string | undefined,
     };
 
     if (sessionToken) {
@@ -226,7 +232,7 @@ class LiveQueryClient {
    * @param {object} subscription - subscription you would like to unsubscribe from.
    * @returns {Promise | undefined}
    */
-  unsubscribe(subscription: Object): ?Promise {
+  async unsubscribe(subscription: LiveQuerySubscription): Promise<void> {
     if (!subscription) {
       return;
     }
@@ -270,7 +276,7 @@ class LiveQueryClient {
     };
 
     this.socket.onclose = (event) => {
-      this.socket.closingPromise.resolve(event);
+      this.socket.closingPromise?.resolve(event);
       this._handleWebSocketClose();
     };
 
@@ -295,6 +301,7 @@ class LiveQueryClient {
           where,
           fields,
         },
+        sessionToken: undefined as string | undefined,
       };
 
       if (sessionToken) {
@@ -313,7 +320,7 @@ class LiveQueryClient {
    *
    * @returns {Promise | undefined} CloseEvent {@link https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close_event}
    */
-  close(): ?Promise {
+  async close(): Promise<void> {
     if (this.state === CLIENT_STATE.INITIALIZED || this.state === CLIENT_STATE.DISCONNECTED) {
       return;
     }
@@ -346,6 +353,7 @@ class LiveQueryClient {
       javascriptKey: this.javascriptKey,
       masterKey: this.masterKey,
       sessionToken: this.sessionToken,
+      installationId: undefined as string | undefined
     };
     if (this.additionalProperties) {
       connectRequest.installationId = this.installationId;
@@ -358,9 +366,9 @@ class LiveQueryClient {
     if (typeof data === 'string') {
       data = JSON.parse(data);
     }
-    let subscription = null;
+    let subscription: null | LiveQuerySubscription = null;
     if (data.requestId) {
-      subscription = this.subscriptions.get(data.requestId);
+      subscription = this.subscriptions.get(data.requestId) || null;
     }
     const response = {
       clientId: data.clientId,

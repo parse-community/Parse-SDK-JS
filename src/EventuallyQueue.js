@@ -303,7 +303,7 @@ const EventuallyQueue = {
    * @param [ms] Milliseconds to ping the server. Default 2000ms
    * @static
    */
-  poll(ms?: number = 2000) {
+  poll(ms = 2000) {
     if (polling) {
       return;
     }
