@@ -113,7 +113,7 @@
     "integration": "cross-env TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
     "madge:circular": "madge ./src --extensions js,ts --circular",
-    "prepare": "npm run build",
+    "prepare": "husky && npm run build",
     "release_docs": "./release_docs.sh",
     "gulp": "gulp",
     "prettier": "prettier --write '{src,integration}/{**/*,*}.{js,ts}' && npm run lint:fix",
