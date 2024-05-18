@@ -1,16 +1,13 @@
-/**
- * @flow
- */
-
 import arrayContainsObject from './arrayContainsObject';
 import decode from './decode';
 import encode from './encode';
 import CoreManager from './CoreManager';
 import type ParseObject from './ParseObject';
+import type Pointer from './ParseObject';
 import ParseRelation from './ParseRelation';
 import unique from './unique';
 
-export function opFromJSON(json: { [key: string]: any }): ?Op {
+export function opFromJSON(json: { [key: string]: any }): Op | null {
   if (!json || !json.__op) {
     return null;
   }
@@ -58,12 +55,12 @@ export function opFromJSON(json: { [key: string]: any }): ?Op {
 export class Op {
   // Empty parent class
   applyTo(value: any): any {} /* eslint-disable-line @typescript-eslint/no-unused-vars */
-  mergeWith(previous: Op): ?Op {} /* eslint-disable-line @typescript-eslint/no-unused-vars */
-  toJSON(): any {}
+  mergeWith(previous: Op): Op | void {} /* eslint-disable-line @typescript-eslint/no-unused-vars */
+  toJSON(offline?: boolean): any {} /* eslint-disable-line @typescript-eslint/no-unused-vars */
 }
 
 export class SetOp extends Op {
-  _value: ?any;
+  _value: any;
 
   constructor(value: any) {
     super();
@@ -78,7 +75,7 @@ export class SetOp extends Op {
     return new SetOp(this._value);
   }
 
-  toJSON(offline?: boolean) {
+  toJSON(offline?: boolean): any {
     return encode(this._value, false, true, undefined, offline);
   }
 }
@@ -108,7 +105,7 @@ export class IncrementOp extends Op {
     this._amount = amount;
   }
 
-  applyTo(value: ?any): number {
+  applyTo(value: any): number {
     if (typeof value === 'undefined') {
       return this._amount;
     }
@@ -192,7 +189,7 @@ export class AddUniqueOp extends Op {
     }
     if (Array.isArray(value)) {
       const ParseObject = CoreManager.getParseObject();
-      const toAdd = [];
+      const toAdd: any[] = [];
       this._value.forEach(v => {
         if (v instanceof ParseObject) {
           if (!arrayContainsObject(value, v)) {
@@ -301,7 +298,7 @@ export class RemoveOp extends Op {
 }
 
 export class RelationOp extends Op {
-  _targetClassName: ?string;
+  _targetClassName: string | null;
   relationsToAdd: Array<string>;
   relationsToRemove: Array<string>;
 
@@ -340,7 +337,7 @@ export class RelationOp extends Op {
     return obj.id;
   }
 
-  applyTo(value: any, parent: ParseObject, key?: string): ?ParseRelation {
+  applyTo(value: any, parent?: ParseObject, key?: string): ParseRelation {
     if (!value) {
       if (!parent || !key) {
         throw new Error(
@@ -426,7 +423,7 @@ export class RelationOp extends Op {
   }
 
   toJSON(): { __op?: string; objects?: any; ops?: any } {
-    const idToPointer = id => {
+    const idToPointer = (id: string) => {
       return {
         __type: 'Pointer',
         className: this._targetClassName,
@@ -434,9 +431,9 @@ export class RelationOp extends Op {
       };
     };
 
-    let adds = null;
-    let removes = null;
-    let pointers = null;
+    let pointers: any = null;
+    let adds: null | { __op: string; objects: null | Pointer[] } = null;
+    let removes: null | { __op: string; objects: null | Pointer[] } = null;
 
     if (this.relationsToAdd.length > 0) {
       pointers = this.relationsToAdd.map(idToPointer);

@@ -1,4 +1,4 @@
-import Parse from './Parse';
+import Parse from 'parse';
 // Parse is a global type, but it can also be imported
 
 // class GameScore extends Parse.Object {
@@ -2053,21 +2053,17 @@ import Parse from './Parse';
 //   }
 // }
 
-function testSession() {
-  function testConstructor() {
-      // $ExpectType ParseSession
-      new Parse.Session();
+// $ExpectType ParseSession
+new Parse.Session();
 
-      // $ExpectType ParseSession
-      new Parse.Session({ example: 100 });
+// $ExpectType ParseSession
+new Parse.Session({ example: 100 });
 
-      // @ts-expect-error
-      new Parse.Session<{ example: number }>();
+// @ts-expect-error: invalid type
+new Parse.Session<{ example: number }>();
 
-      // @ts-expect-error
-      new Parse.Session<{ example: number }>({ example: 'hello' });
-  }
-}
+// @ts-expect-error: invalid type
+new Parse.Session<{ example: number }>({ example: 'hello' });
 
 // function testUser() {
 //   function testConstructor() {

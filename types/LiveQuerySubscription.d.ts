@@ -85,17 +85,17 @@ export default Subscription;
  * @alias Parse.LiveQuerySubscription
  */
 declare class Subscription {
-    constructor(id: any, query: any, sessionToken: any);
-    id: any;
-    query: any;
-    sessionToken: any;
-    subscribePromise: Promise<any>;
-    unsubscribePromise: Promise<any>;
-    subscribed: boolean;
-    /**
-     * Close the subscription
-     *
-     * @returns {Promise}
-     */
-    unsubscribe(): Promise<any>;
+  constructor(id: any, query: any, sessionToken: any);
+  id: any;
+  query: any;
+  sessionToken: any;
+  subscribePromise: Promise<any>;
+  unsubscribePromise: Promise<any>;
+  subscribed: boolean;
+  /**
+   * Close the subscription
+   *
+   * @returns {Promise}
+   */
+  unsubscribe(): Promise<any>;
 }

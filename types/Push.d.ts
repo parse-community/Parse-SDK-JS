@@ -3,10 +3,10 @@ import type ParseObject from './ParseObject';
 import type { WhereClause } from './ParseQuery';
 import type { FullOptions } from './RESTController';
 export type PushData = {
-    where?: WhereClause | ParseQuery;
-    push_time?: Date | string;
-    expiration_time?: Date | string;
-    expiration_interval?: number;
+  where?: WhereClause | ParseQuery;
+  push_time?: Date | string;
+  expiration_time?: Date | string;
+  expiration_interval?: number;
 };
 /**
  * Contains functions to deal with Push in Parse.
@@ -57,4 +57,7 @@ export declare function send(data: PushData, options?: FullOptions): Promise<str
  * </ul>
  * @returns {Parse.Object} Status of Push.
  */
-export declare function getPushStatus(pushStatusId: string, options?: FullOptions): Promise<ParseObject>;
+export declare function getPushStatus(
+  pushStatusId: string,
+  options?: FullOptions
+): Promise<ParseObject>;

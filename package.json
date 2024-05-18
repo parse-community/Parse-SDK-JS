@@ -54,6 +54,7 @@
     "@semantic-release/github": "8.0.7",
     "@semantic-release/npm": "9.0.2",
     "@semantic-release/release-notes-generator": "10.0.3",
+    "@types/facebook-js-sdk": "3.3.11",
     "babel-jest": "29.5.0",
     "babel-plugin-inline-package-json": "2.0.0",
     "babel-plugin-minify-dead-code-elimination": "0.5.2",
@@ -97,7 +98,7 @@
   },
   "scripts": {
     "build": "node build_releases.js",
-    "build:types": "tsc",
+    "build:types": "tsc && prettier --write 'types/{**/*,*}.ts' && npm run lint:fix",
     "release": "node build_releases.js && npm publish",
     "test": "cross-env PARSE_BUILD=node jest",
     "test:mongodb": "npm run test:mongodb:runnerstart && npm run integration",
@@ -118,7 +119,7 @@
     "pre-commit": "lint-staged",
     "release_docs": "./release_docs.sh",
     "gulp": "gulp",
-    "prettier": "prettier --write '{src,integration}/{**/*,*}.{js,ts}' && npm run lint:fix",
+    "prettier": "prettier --write '{src,integration,types}/{**/*,*}.{js,ts}' && npm run lint:fix",
     "cross-env": "cross-env"
   },
   "lint-staged": {

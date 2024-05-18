@@ -1,13 +1,11 @@
-/**
- * @flow-weak
- */
 /* global FB */
 import ParseUser from './ParseUser';
+import type { AuthProviderType } from './ParseUser';
 
 let initialized = false;
 let requestedPermissions;
 let initOptions;
-const provider = {
+const provider: AuthProviderType = {
   authenticate(options) {
     if (typeof FB === 'undefined') {
       options.error(this, 'Facebook SDK not found.');
@@ -38,7 +36,7 @@ const provider = {
 
   restoreAuthentication(authData) {
     if (authData) {
-      const newOptions = {};
+      const newOptions: typeof initOptions = {};
       if (initOptions) {
         for (const key in initOptions) {
           newOptions[key] = initOptions[key];
