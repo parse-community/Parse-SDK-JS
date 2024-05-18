@@ -232,6 +232,8 @@ describe('GeoPoint', () => {
         expect(options).toEqual({ timeout: 5000 });
       },
     };
-    await expect(ParseGeoPoint.current({ timeout: 5000 })).rejects.toEqual({ message: 'PERMISSION_DENIED' });
+    await expect(ParseGeoPoint.current({ timeout: 5000 })).rejects.toEqual({
+      message: 'PERMISSION_DENIED',
+    });
   });
 });

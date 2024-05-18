@@ -9,26 +9,26 @@ import ParseError from './ParseError';
 import { resolvingPromise } from './promiseUtils';
 
 export type RequestOptions = {
-  useMasterKey?: boolean,
-  sessionToken?: string,
-  installationId?: string,
-  returnStatus?: boolean,
-  batchSize?: number,
-  include?: any,
-  progress?: any,
-  context?: any,
-  usePost?: boolean,
-  ignoreEmailVerification?: boolean,
+  useMasterKey?: boolean;
+  sessionToken?: string;
+  installationId?: string;
+  returnStatus?: boolean;
+  batchSize?: number;
+  include?: any;
+  progress?: any;
+  context?: any;
+  usePost?: boolean;
+  ignoreEmailVerification?: boolean;
 };
 
 export type FullOptions = {
-  success?: any,
-  error?: any,
-  useMasterKey?: boolean,
-  sessionToken?: string,
-  installationId?: string,
-  progress?: any,
-  usePost?: boolean,
+  success?: any;
+  error?: any;
+  useMasterKey?: boolean;
+  sessionToken?: string;
+  installationId?: string;
+  progress?: any;
+  usePost?: boolean;
 };
 
 let XHR = null;
@@ -111,10 +111,16 @@ const RESTController = {
           let response;
           try {
             response = JSON.parse(xhr.responseText);
-            const availableHeaders = typeof xhr.getAllResponseHeaders === 'function' ? xhr.getAllResponseHeaders() : "";
+            const availableHeaders =
+              typeof xhr.getAllResponseHeaders === 'function' ? xhr.getAllResponseHeaders() : '';
             headers = {};
-            if (typeof xhr.getResponseHeader === 'function' && availableHeaders?.indexOf('access-control-expose-headers') >= 0) {
-              const responseHeaders = xhr.getResponseHeader('access-control-expose-headers').split(', ');
+            if (
+              typeof xhr.getResponseHeader === 'function' &&
+              availableHeaders?.indexOf('access-control-expose-headers') >= 0
+            ) {
+              const responseHeaders = xhr
+                .getResponseHeader('access-control-expose-headers')
+                .split(', ');
               responseHeaders.forEach(header => {
                 if (availableHeaders.indexOf(header.toLowerCase()) >= 0) {
                   headers[header] = xhr.getResponseHeader(header.toLowerCase());

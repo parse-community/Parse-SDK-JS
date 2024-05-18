@@ -57,7 +57,7 @@ const InstallationController = {
     installation.set('installationId', installationId);
     installation.set('parseVersion', CoreManager.get('VERSION'));
     currentInstallationCache = installation;
-    await Storage.setItemAsync(path, JSON.stringify(installation.toJSON()))
+    await Storage.setItemAsync(path, JSON.stringify(installation.toJSON()));
     return installation;
   },
 

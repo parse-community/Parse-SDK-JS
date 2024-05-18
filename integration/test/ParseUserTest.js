@@ -113,7 +113,8 @@ describe('Parse User', () => {
 
   it('can login users with installationId', async () => {
     Parse.User.enableUnsafeCurrentUser();
-    const currentInstallationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const currentInstallationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
     const installationId = '12345678';
     const user = new Parse.User();
     user.set('username', 'parse');
@@ -149,7 +150,8 @@ describe('Parse User', () => {
   });
 
   it('can get current installation', async () => {
-    const currentInstallationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const currentInstallationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
     const installation = await Parse.Installation.currentInstallation();
     expect(installation.installationId).toBe(currentInstallationId);
     expect(installation.deviceType).toBe(Parse.Installation.DEVICE_TYPES.WEB);
@@ -180,7 +182,8 @@ describe('Parse User', () => {
   });
 
   it('can save new installation when deleted', async () => {
-    const currentInstallationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const currentInstallationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
     const installation = await Parse.Installation.currentInstallation();
     expect(installation.installationId).toBe(currentInstallationId);
     expect(installation.deviceType).toBe(Parse.Installation.DEVICE_TYPES.WEB);
@@ -196,7 +199,8 @@ describe('Parse User', () => {
   });
 
   it('can fetch installation when deleted', async () => {
-    const currentInstallationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const currentInstallationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
     const installation = await Parse.Installation.currentInstallation();
     expect(installation.installationId).toBe(currentInstallationId);
     expect(installation.deviceType).toBe(Parse.Installation.DEVICE_TYPES.WEB);
@@ -227,9 +231,7 @@ describe('Parse User', () => {
 
     await Parse.User.logOut();
     assert(!Parse.User.current());
-    await expectAsync(Parse.User.loginAs('garbage')).toBeRejectedWithError(
-      'user not found'
-    );
+    await expectAsync(Parse.User.loginAs('garbage')).toBeRejectedWithError('user not found');
   });
 
   it('can become a user', done => {
@@ -1128,7 +1130,10 @@ describe('Parse User', () => {
       preventLoginWithUnverifiedEmail: true,
     });
     await Parse.User.signUp('asd123', 'xyz123');
-    const res = await Parse.User.verifyPassword('asd123', 'xyz123', { useMasterKey: true, ignoreEmailVerification: true });
+    const res = await Parse.User.verifyPassword('asd123', 'xyz123', {
+      useMasterKey: true,
+      ignoreEmailVerification: true,
+    });
     expect(typeof res).toBe('object');
     expect(res.username).toBe('asd123');
   });

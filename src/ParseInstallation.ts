@@ -11,7 +11,7 @@ type DeviceInterface = {
   FCM: string;
   ANDROID: string;
   WEB: string;
-}
+};
 
 const DEVICE_TYPES: DeviceInterface = {
   IOS: 'ios',

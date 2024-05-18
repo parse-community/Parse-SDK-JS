@@ -96,9 +96,8 @@ describe('Parse module', () => {
   });
 
   it('cannot set EventuallyQueue controller with missing functions', () => {
-    const controller = {
-    };
-    expect(() => Parse.EventuallyQueue = controller).toThrow(
+    const controller = {};
+    expect(() => (Parse.EventuallyQueue = controller)).toThrow(
       'EventuallyQueue must implement poll()'
     );
   });
@@ -190,7 +189,7 @@ describe('Parse module', () => {
   it('can set and get live query', () => {
     const temp = Parse.LiveQuery;
     const LiveQuery = new ParseLiveQuery();
-    Parse.LiveQuery = LiveQuery
+    Parse.LiveQuery = LiveQuery;
     expect(Parse.LiveQuery).toEqual(LiveQuery);
     Parse.LiveQuery = temp;
   });

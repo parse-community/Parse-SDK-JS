@@ -8,14 +8,14 @@ import type { Op } from './ParseOp';
 import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
 
 type ObjectIdentifier = {
-  className: string,
-  id: string,
+  className: string;
+  id: string;
 };
 
 let objectState: {
   [className: string]: {
-    [id: string]: State,
-  },
+    [id: string]: State;
+  };
 } = {};
 
 export function getState(obj: ObjectIdentifier): ?State {

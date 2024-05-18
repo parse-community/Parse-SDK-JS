@@ -207,8 +207,9 @@ describe('IndexDB StorageController', () => {
   it('handle indexedDB is not accessible', async () => {
     jest.isolateModules(() => {
       global.indexedDB = mockIndexedDB;
-      jest.spyOn(idbKeyVal, 'createStore')
-        .mockImplementationOnce(() => { throw new Error('Protected'); });
+      jest.spyOn(idbKeyVal, 'createStore').mockImplementationOnce(() => {
+        throw new Error('Protected');
+      });
       const dbController = require('../IndexedDBStorageController');
       expect(dbController).toBeUndefined();
       expect(idbKeyVal.createStore).toHaveBeenCalled();

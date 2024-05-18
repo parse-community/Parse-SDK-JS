@@ -10,9 +10,9 @@ import type { RequestOptions, FullOptions } from './RESTController';
 export type AuthData = { [key: string]: any };
 export type AuthProviderType = {
   authenticate?(options: {
-    error?: (provider: AuthProviderType, error: string | any) => void,
-    success?: (provider: AuthProviderType, result: AuthData) => void,
-  }): void,
+    error?: (provider: AuthProviderType, error: string | any) => void;
+    success?: (provider: AuthProviderType, result: AuthData) => void;
+  }): void;
   restoreAuthentication(authData: any): boolean;
   getAuthType(): string;
   deauthenticate?(): void;
@@ -118,7 +118,7 @@ class ParseUser extends ParseObject {
       this.stripAnonymity();
 
       const controller = CoreManager.getUserController();
-      return controller.linkWith(this, authData, saveOpts).catch((e) => {
+      return controller.linkWith(this, authData, saveOpts).catch(e => {
         delete authData[authType];
         this.restoreAnonimity(oldAnonymousData);
         throw e;
@@ -398,7 +398,7 @@ class ParseUser extends ParseObject {
    *
    * @returns {string} the session token, or undefined
    */
-  getSessionToken(): string | null{
+  getSessionToken(): string | null {
     const token = this.get('sessionToken');
     if (token == null || typeof token === 'string') {
       return token;
@@ -429,7 +429,10 @@ class ParseUser extends ParseObject {
    * @returns {Promise} A promise that is fulfilled when the signup
    *     finishes.
    */
-  signUp(attrs: AttributeMap, options?: FullOptions & { context?: AttributeMap }): Promise<ParseUser> {
+  signUp(
+    attrs: AttributeMap,
+    options?: FullOptions & { context?: AttributeMap }
+  ): Promise<ParseUser> {
     options = options || {};
 
     const signupOptions: FullOptions & { context?: AttributeMap } = {};
@@ -553,7 +556,7 @@ class ParseUser extends ParseObject {
    *
    * @param {string} password The password to be verified.
    * @param {object} options The options.
-   * @param {boolean} [options.ignoreEmailVerification=false] Set to `true` to bypass email verification and verify
+   * @param {boolean} [options.ignoreEmailVerification] Set to `true` to bypass email verification and verify
    * the password regardless of whether the email has been verified. This requires the master key.
    * @returns {Promise} A promise that is fulfilled with a user when the password is correct.
    */
@@ -693,7 +696,12 @@ class ParseUser extends ParseObject {
    * @returns {Promise} A promise that is fulfilled with the user when
    *     the login completes.
    */
-  static logInWithAdditionalAuth(username: string, password: string, authData: AuthData, options?: FullOptions) {
+  static logInWithAdditionalAuth(
+    username: string,
+    password: string,
+    authData: AuthData,
+    options?: FullOptions
+  ) {
     if (typeof username !== 'string') {
       return Promise.reject(new ParseError(ParseError.OTHER_CAUSE, 'Username must be a string.'));
     }
@@ -720,7 +728,10 @@ class ParseUser extends ParseObject {
    */
   static loginAs(userId: string) {
     if (!userId) {
-      throw new ParseError(ParseError.USERNAME_MISSING, 'Cannot log in as user with an empty user id');
+      throw new ParseError(
+        ParseError.USERNAME_MISSING,
+        'Cannot log in as user with an empty user id'
+      );
     }
     const controller = CoreManager.getUserController();
     const user = new this();
@@ -877,7 +888,7 @@ class ParseUser extends ParseObject {
    * @param {string} username  The username of the user whose password should be verified.
    * @param {string} password The password to be verified.
    * @param {object} options The options.
-   * @param {boolean} [options.ignoreEmailVerification=false] Set to `true` to bypass email verification and verify
+   * @param {boolean} [options.ignoreEmailVerification] Set to `true` to bypass email verification and verify
    * the password regardless of whether the email has been verified. This requires the master key.
    * @returns {Promise} A promise that is fulfilled with a user when the password is correct.
    */
@@ -1034,7 +1045,7 @@ const DefaultController = {
     return DefaultController.updateUserOnDisk(user);
   },
 
-  currentUser(): ParseUser | null{
+  currentUser(): ParseUser | null {
     if (currentUserCache) {
       return currentUserCache;
     }
@@ -1170,14 +1181,16 @@ const DefaultController = {
 
   loginAs(user: ParseUser, userId: string): Promise<ParseUser> {
     const RESTController = CoreManager.getRESTController();
-    return RESTController.request('POST', 'loginAs', { userId }, { useMasterKey: true }).then(response => {
-      user._finishFetch(response);
-      user._setExisted(true);
-      if (!canUseCurrentUser) {
-        return Promise.resolve(user);
+    return RESTController.request('POST', 'loginAs', { userId }, { useMasterKey: true }).then(
+      response => {
+        user._finishFetch(response);
+        user._setExisted(true);
+        if (!canUseCurrentUser) {
+          return Promise.resolve(user);
+        }
+        return DefaultController.setCurrentUser(user);
       }
-      return DefaultController.setCurrentUser(user);
-    });
+    );
   },
 
   become(user: ParseUser, options: RequestOptions): Promise<ParseUser> {
@@ -1272,7 +1285,9 @@ const DefaultController = {
     const data = {
       username,
       password,
-      ...(options.ignoreEmailVerification !== undefined && { ignoreEmailVerification: options.ignoreEmailVerification }),
+      ...(options.ignoreEmailVerification !== undefined && {
+        ignoreEmailVerification: options.ignoreEmailVerification,
+      }),
     };
     return RESTController.request('GET', 'verifyPassword', data, options);
   },

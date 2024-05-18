@@ -3,7 +3,9 @@ import ParseUser from './ParseUser';
 
 type Entity = ParseUser | ParseRole | string;
 type UsersMap = { [userId: string]: boolean | any };
-export type PermissionsMap = { writeUserFields?: string[], readUserFields?: string[] } & { [permission: string]: UsersMap };
+export type PermissionsMap = { writeUserFields?: string[]; readUserFields?: string[] } & {
+  [permission: string]: UsersMap;
+};
 
 const PUBLIC_KEY = '*';
 
@@ -431,9 +433,9 @@ class ParseCLP {
    */
   getReadAccess(userId: Entity): boolean {
     return (
-      this._getAccess('find', userId) as boolean &&
-      this._getAccess('get', userId) as boolean &&
-      this._getAccess('count', userId) as boolean
+      (this._getAccess('find', userId) as boolean) &&
+      (this._getAccess('get', userId) as boolean) &&
+      (this._getAccess('count', userId) as boolean)
     );
   }
 
@@ -461,10 +463,10 @@ class ParseCLP {
    */
   getWriteAccess(userId: Entity): boolean {
     return (
-      this._getAccess('create', userId) as boolean &&
-      this._getAccess('update', userId) as boolean &&
-      this._getAccess('delete', userId) as boolean &&
-      this._getAccess('addField', userId) as boolean
+      (this._getAccess('create', userId) as boolean) &&
+      (this._getAccess('update', userId) as boolean) &&
+      (this._getAccess('delete', userId) as boolean) &&
+      (this._getAccess('addField', userId) as boolean)
     );
   }
 

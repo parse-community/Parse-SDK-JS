@@ -52,18 +52,21 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
         request.continue();
       });
       page.on('requestfailed', request => {
-        if (request.failure().errorText  === 'net::ERR_ABORTED' && !request.url().includes('favicon.ico')) {
+        if (
+          request.failure().errorText === 'net::ERR_ABORTED' &&
+          !request.url().includes('favicon.ico')
+        ) {
           abortedCount += 1;
           promise.resolve();
         }
       });
       await page.evaluate(async () => {
         const parseLogo =
-        'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
+          'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
         const file = new Parse.File('parse-server-logo', { uri: parseLogo });
         file.save().then(() => {});
 
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
           const intervalId = setInterval(() => {
             if (file._requestTask && typeof file._requestTask.abort === 'function') {
               file.cancel();

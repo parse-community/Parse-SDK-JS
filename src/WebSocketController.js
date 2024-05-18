@@ -4,7 +4,8 @@ let WebSocketController;
 
 try {
   if (process.env.PARSE_BUILD === 'browser') {
-    WebSocketController = (typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null);
+    WebSocketController =
+      typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null;
   } else if (process.env.PARSE_BUILD === 'node') {
     WebSocketController = require('ws');
   } else if (process.env.PARSE_BUILD === 'weapp') {

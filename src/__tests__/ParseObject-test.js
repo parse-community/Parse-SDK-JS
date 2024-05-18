@@ -126,12 +126,13 @@ const mockLocalDatastore = {
     const objectKey = mockLocalDatastore.getKeyForObject(object);
   }),
   _updateObjectIfPinned: jest.fn(),
-  getKeyForObject: jest.fn((object) => {
+  getKeyForObject: jest.fn(object => {
     // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
     const objectId = object.objectId || object._getId();
     const OBJECT_PREFIX = 'Parse_LDS_';
     return `${OBJECT_PREFIX}${object.className}_${objectId}`;
-  }), updateFromServer: jest.fn(),
+  }),
+  updateFromServer: jest.fn(),
   _clear: jest.fn(),
   checkIfEnabled: jest.fn(() => {
     if (!mockLocalDatastore.isEnabled) {
@@ -2440,7 +2441,7 @@ describe('ParseObject', () => {
     expect(controller.ajax).toHaveBeenCalledTimes(0);
   });
 
-  it('can save an array of objects', (done) => {
+  it('can save an array of objects', done => {
     const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
@@ -2478,7 +2479,7 @@ describe('ParseObject', () => {
     });
   });
 
-  it('can saveAll with batchSize', (done) => {
+  it('can saveAll with batchSize', done => {
     const xhrs = [];
     for (let i = 0; i < 2; i++) {
       xhrs[i] = {
@@ -2539,7 +2540,7 @@ describe('ParseObject', () => {
     });
   });
 
-  it('can saveAll with global batchSize', (done) => {
+  it('can saveAll with global batchSize', done => {
     const xhrs = [];
     for (let i = 0; i < 2; i++) {
       xhrs[i] = {
@@ -2600,7 +2601,7 @@ describe('ParseObject', () => {
     });
   });
 
-  it('returns the first error when saving an array of objects', (done) => {
+  it('returns the first error when saving an array of objects', done => {
     const xhrs = [];
     for (let i = 0; i < 2; i++) {
       xhrs[i] = {
@@ -2661,7 +2662,7 @@ describe('ObjectController', () => {
     jest.clearAllMocks();
   });
 
-  it('can fetch a single object', (done) => {
+  it('can fetch a single object', done => {
     const objectController = CoreManager.getObjectController();
     const xhr = {
       setRequestHeader: jest.fn(),

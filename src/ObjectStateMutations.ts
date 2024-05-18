@@ -12,11 +12,11 @@ export type OpsMap = { [attr: string]: Op };
 export type ObjectCache = { [attr: string]: string };
 
 export type State = {
-  serverData: AttributeMap,
-  pendingOps: Array<OpsMap>,
-  objectCache: ObjectCache,
-  tasks: TaskQueue,
-  existed: boolean,
+  serverData: AttributeMap;
+  pendingOps: Array<OpsMap>;
+  objectCache: ObjectCache;
+  tasks: TaskQueue;
+  existed: boolean;
 };
 
 export function defaultState(): State {

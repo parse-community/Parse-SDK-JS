@@ -73,7 +73,7 @@
     "gulp-rename": "2.0.0",
     "gulp-uglify": "3.0.2",
     "gulp-watch": "5.0.1",
-    "husky": "8.0.3",
+    "husky": "9.0.11",
     "jasmine": "5.1.0",
     "jasmine-reporters": "2.5.2",
     "jasmine-spec-reporter": "7.0.0",
@@ -81,12 +81,12 @@
     "jest-environment-jsdom": "29.5.0",
     "jsdoc": "4.0.2",
     "jsdoc-babel": "0.5.0",
-    "lint-staged": "13.2.2",
+    "lint-staged": "15.2.2",
     "madge": "7.0.0",
     "metro-react-native-babel-preset": "0.76.4",
     "mongodb-runner": "5.4.3",
     "parse-server": "7.1.0-alpha.1",
-    "prettier": "3.0.2",
+    "prettier": "3.2.5",
     "puppeteer": "20.4.0",
     "regenerator-runtime": "0.13.11",
     "semantic-release": "19.0.5",
@@ -114,19 +114,15 @@
     "integration": "cross-env TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
     "madge:circular": "madge ./src --extensions js,ts --circular",
-    "prepare": "npm run build",
+    "prepare": "husky && npm run build",
+    "pre-commit": "lint-staged",
     "release_docs": "./release_docs.sh",
     "gulp": "gulp",
-    "prettier": "prettier --write '{src,integration}/{**/*,*}.js' && npm run lint:fix",
+    "prettier": "prettier --write '{src,integration}/{**/*,*}.{js,ts}' && npm run lint:fix",
     "cross-env": "cross-env"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
-    "{src,integration}/{**/*,*}.js": [
+    "{src,integration}/{**/*,*}.{js,ts}": [
       "prettier --write",
       "eslint --fix --cache",
       "git add"

@@ -1803,7 +1803,7 @@ describe('ParseQuery', () => {
       q.select('size', 'name');
       q.includeAll();
       q.hint('_id_');
-      q.exclude('foo')
+      q.exclude('foo');
 
       await q.findAll();
       expect(findMock).toHaveBeenCalledTimes(1);
@@ -3857,5 +3857,4 @@ describe('ParseQuery LocalDatastore', () => {
     query.comment();
     expect(query._comment).toBeUndefined();
   });
-
 });

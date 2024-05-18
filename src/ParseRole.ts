@@ -112,7 +112,7 @@ class ParseRole extends ParseObject {
   }
 
   validate(attrs: AttributeMap, options?: any): ParseError | boolean {
-    const isInvalid = (super.validate as typeof this['validate'])(attrs, options);
+    const isInvalid = (super.validate as (typeof this)['validate'])(attrs, options);
     if (isInvalid) {
       return isInvalid;
     }

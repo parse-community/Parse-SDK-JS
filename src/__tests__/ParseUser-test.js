@@ -354,9 +354,11 @@ describe('ParseUser', () => {
         },
         ajax() {},
       });
-      const response = await ParseUser.logInWithAdditionalAuth('username', 'password', {mfa: {key:'1234'}});
+      const response = await ParseUser.logInWithAdditionalAuth('username', 'password', {
+        mfa: { key: '1234' },
+      });
       expect(response instanceof ParseUser).toBe(true);
-      expect(response.get('authDataResponse')).toEqual({mfa: { enabled: true }});
+      expect(response.get('authDataResponse')).toEqual({ mfa: { enabled: true } });
     });
 
     it('loginWithAdditonal fails with invalid payload', async () => {
@@ -368,12 +370,11 @@ describe('ParseUser', () => {
       await expect(ParseUser.logInWithAdditionalAuth('username', {}, {})).rejects.toThrowError(
         new ParseError(ParseError.OTHER_CAUSE, 'Password must be a string.')
       );
-      await expect(ParseUser.logInWithAdditionalAuth('username', 'password', '')).rejects.toThrowError(
-        new ParseError(ParseError.OTHER_CAUSE, 'Auth must be an object.')
-      );
+      await expect(
+        ParseUser.logInWithAdditionalAuth('username', 'password', '')
+      ).rejects.toThrowError(new ParseError(ParseError.OTHER_CAUSE, 'Auth must be an object.'));
     });
   });
-
 
   it('preserves changes when logging in', done => {
     ParseUser.enableUnsafeCurrentUser();
@@ -409,11 +410,11 @@ describe('ParseUser', () => {
     });
   });
 
-  it('does not allow loginAs without id', (done) => {
+  it('does not allow loginAs without id', done => {
     try {
       ParseUser.loginAs(null, null);
     } catch (e) {
-      expect(e.message).toBe('Cannot log in as user with an empty user id')
+      expect(e.message).toBe('Cannot log in as user with an empty user id');
       done();
     }
   });

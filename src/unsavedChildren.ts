@@ -4,8 +4,8 @@ import type ParseObject from './ParseObject';
 import ParseRelation from './ParseRelation';
 
 type EncounterMap = {
-  objects: { [identifier: string]: ParseObject | boolean },
-  files: Array<ParseFile>,
+  objects: { [identifier: string]: ParseObject | boolean };
+  files: Array<ParseFile>;
 };
 
 /**
