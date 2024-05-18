@@ -475,6 +475,44 @@ describe('Parse Object', () => {
     assert.equal(result.get('objectField').string, 'hello');
   });
 
+  it('can set and unset without save', async () => {
+    const obj = new TestObject({
+      objectField: {
+        number: 5,
+        string: 'hello',
+      },
+    });
+    obj.unset('objectField.number');
+    assert.equal(obj.get('objectField').number, undefined);
+    assert.equal(obj.get('objectField').string, 'hello');
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, undefined);
+    assert.equal(result.get('objectField').string, 'hello');
+  });
+
+  it('can set and set sub-property without save', async () => {
+    const obj = new TestObject({
+      objectField: {
+        number: 5,
+        string: 'hello',
+      },
+    });
+    obj.set('objectField.numberb', 4);
+    assert.equal(obj.get('objectField').number, 5);
+    assert.equal(obj.get('objectField').numberb, 4);
+    assert.equal(obj.get('objectField').string, 'hello');
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').number, 5);
+    assert.equal(result.get('objectField').numberb, 4);
+    assert.equal(result.get('objectField').string, 'hello');
+  });
+
   it('can unset nested fields two levels', async () => {
     const obj = new TestObject({
       objectField: {
@@ -485,6 +523,27 @@ describe('Parse Object', () => {
       },
     });
     await obj.save();
+
+    obj.unset('objectField.foo.bar');
+    assert.equal(obj.get('objectField').foo.bar, undefined);
+    assert.equal(obj.get('objectField').string, 'hello');
+    await obj.save();
+
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(obj.id);
+    assert.equal(result.get('objectField').foo.bar, undefined);
+    assert.equal(result.get('objectField').string, 'hello');
+  });
+
+  it('can unset nested fields two levels - without save between', async () => {
+    const obj = new TestObject({
+      objectField: {
+        foo: {
+          bar: 5,
+        },
+        string: 'hello',
+      },
+    });
 
     obj.unset('objectField.foo.bar');
     assert.equal(obj.get('objectField').foo.bar, undefined);
