@@ -211,35 +211,47 @@ describe('ObjectStateMutations', () => {
     // Test one level nested
     serverData = {
       _id: 'someId',
-      items: [{ value: 'a', count: 5 }, { value: 'b', count: 1 } ],
+      items: [
+        { value: 'a', count: 5 },
+        { value: 'b', count: 1 },
+      ],
       className: 'bug',
-      number: 2
-    }
+      number: 2,
+    };
     pendingOps = [{ 'items.0.count': new ParseOps.IncrementOp(1) }];
     expect(
       ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId')
     ).toEqual({
       _id: 'someId',
-      items: [{ value: 'a', count: 6 }, { value: 'b', count: 1 }],
+      items: [
+        { value: 'a', count: 6 },
+        { value: 'b', count: 1 },
+      ],
       className: 'bug',
-      number: 2
+      number: 2,
     });
 
     // Test multiple level nested fields
     serverData = {
       _id: 'someId',
-      items: [{ value: { count: 54 }, count: 5 }, { value: 'b', count: 1 }],
+      items: [
+        { value: { count: 54 }, count: 5 },
+        { value: 'b', count: 1 },
+      ],
       className: 'bug',
-      number: 2
-    }
+      number: 2,
+    };
     pendingOps = [{ 'items.0.value.count': new ParseOps.IncrementOp(6) }];
     expect(
       ObjectStateMutations.estimateAttributes(serverData, pendingOps, 'someClass', 'someId')
     ).toEqual({
       _id: 'someId',
-      items: [{ value: { count: 60 }, count: 5 }, { value: 'b', count: 1 }],
+      items: [
+        { value: { count: 60 }, count: 5 },
+        { value: 'b', count: 1 },
+      ],
       className: 'bug',
-      number: 2
+      number: 2,
     });
   });
 
@@ -266,20 +278,38 @@ describe('ObjectStateMutations', () => {
   });
 
   it('can commit dot notation array changes from the server', () => {
-    const serverData = { items: [{ value: 'a', count: 5 }, { value: 'b', count: 1 }] };
-    ObjectStateMutations.commitServerChanges(serverData, {}, {
-      'items.0.count': 15,
-      'items.1.count': 4,
+    const serverData = {
+      items: [
+        { value: 'a', count: 5 },
+        { value: 'b', count: 1 },
+      ],
+    };
+    ObjectStateMutations.commitServerChanges(
+      serverData,
+      {},
+      {
+        'items.0.count': 15,
+        'items.1.count': 4,
+      }
+    );
+    expect(serverData).toEqual({
+      items: [
+        { value: 'a', count: 15 },
+        { value: 'b', count: 4 },
+      ],
     });
-    expect(serverData).toEqual({ items: [{ value: 'a', count: 15 }, { value: 'b', count: 4 }] });
   });
 
   it('can commit dot notation array changes from the server to empty serverData', () => {
     const serverData = {};
-    ObjectStateMutations.commitServerChanges(serverData, {}, {
-      'items.0.count': 15,
-      'items.1.count': 4,
-    });
+    ObjectStateMutations.commitServerChanges(
+      serverData,
+      {},
+      {
+        'items.0.count': 15,
+        'items.1.count': 4,
+      }
+    );
     expect(serverData).toEqual({ items: [{ count: 15 }, { count: 4 }] });
   });
 
@@ -287,9 +317,9 @@ describe('ObjectStateMutations', () => {
     const serverData = {};
     const objectCache = {};
     ObjectStateMutations.commitServerChanges(serverData, objectCache, {
-      items: { '0': { count: 20 }, '1': { count: 5 } }
+      items: { '0': { count: 20 }, '1': { count: 5 } },
     });
-    expect(serverData).toEqual({ items: [ { count: 20 }, { count: 5 } ] });
+    expect(serverData).toEqual({ items: [{ count: 20 }, { count: 5 }] });
     expect(objectCache).toEqual({ items: '[{"count":20},{"count":5}]' });
   });
 

@@ -126,7 +126,7 @@ const LocalDatastore = {
   },
 
   // Retrieve all pointer fields from object recursively
-  _getChildren(object: ParseObject) {
+  _getChildren(object: ParseObject): any {
     const encountered = {};
     const json = object._toFullJSON(undefined, true);
     for (const key in json) {

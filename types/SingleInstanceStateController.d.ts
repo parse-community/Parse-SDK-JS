@@ -14,14 +14,17 @@ export function estimateAttributes(obj: ObjectIdentifier): AttributeMap;
 export function commitServerChanges(obj: ObjectIdentifier, changes: AttributeMap): void;
 export function enqueueTask(obj: ObjectIdentifier, task: () => Promise): Promise<any>;
 export function clearAllState(): void;
-export function duplicateState(source: {
+export function duplicateState(
+  source: {
     id: string;
-}, dest: {
+  },
+  dest: {
     id: string;
-}): void;
+  }
+): void;
 type ObjectIdentifier = {
-    className: string;
-    id: string;
+  className: string;
+  id: string;
 };
 import { State } from './ObjectStateMutations';
 import { AttributeMap } from './ObjectStateMutations';

@@ -1,7 +1,3 @@
-/**
- * @flow
- */
-
 import CoreManager from './CoreManager';
 import ParseObject from './ParseObject';
 import ParseCLP from './ParseCLP';
@@ -24,8 +20,9 @@ const FIELD_TYPES = [
 ];
 
 type FieldOptions = {
-  required: boolean;
-  defaultValue: any;
+  required?: boolean;
+  defaultValue?: any;
+  targetClass?: string;
 };
 
 /**
@@ -222,12 +219,14 @@ class ParseSchema {
       throw new Error(`${type} is not a valid type.`);
     }
     if (type === 'Pointer') {
-      return this.addPointer(name, options.targetClass, options);
+      return this.addPointer(name, options.targetClass!, options);
     }
     if (type === 'Relation') {
-      return this.addRelation(name, options.targetClass, options);
+      return this.addRelation(name, options.targetClass!);
     }
-    const fieldOptions = { type };
+    const fieldOptions: Partial<FieldOptions> & {
+      type: string;
+    } = { type };
 
     if (typeof options.required === 'boolean') {
       fieldOptions.required = options.required;
@@ -404,7 +403,9 @@ class ParseSchema {
     if (!targetClass) {
       throw new Error('You need to set the targetClass of the Pointer.');
     }
-    const fieldOptions = { type: 'Pointer', targetClass };
+    const fieldOptions: Partial<FieldOptions> & {
+      type: string;
+    } = { type: 'Pointer', targetClass };
 
     if (typeof options.required === 'boolean') {
       fieldOptions.required = options.required;
@@ -466,30 +467,30 @@ class ParseSchema {
 }
 
 const DefaultController = {
-  send(className: string, method: string, params: any = {}): Promise {
+  send(className: string, method: string, params: any = {}): Promise<any> {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request(method, `schemas/${className}`, params, {
       useMasterKey: true,
     });
   },
 
-  get(className: string): Promise {
+  get(className: string): Promise<any> {
     return this.send(className, 'GET');
   },
 
-  create(className: string, params: any): Promise {
+  create(className: string, params: any): Promise<any> {
     return this.send(className, 'POST', params);
   },
 
-  update(className: string, params: any): Promise {
+  update(className: string, params: any): Promise<any> {
     return this.send(className, 'PUT', params);
   },
 
-  delete(className: string): Promise {
+  delete(className: string): Promise<any> {
     return this.send(className, 'DELETE');
   },
 
-  purge(className: string): Promise {
+  purge(className: string): Promise<any> {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request('DELETE', `purge/${className}`, {}, { useMasterKey: true });
   },

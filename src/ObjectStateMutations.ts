@@ -86,7 +86,7 @@ export function estimateAttribute(
     if (pendingOps[i][attr]) {
       if (pendingOps[i][attr] instanceof RelationOp) {
         if (object.id) {
-          value = pendingOps[i][attr].applyTo(value, object, attr);
+          value = (pendingOps[i][attr] as RelationOp).applyTo(value, object, attr);
         }
       } else {
         value = pendingOps[i][attr].applyTo(value);
@@ -110,7 +110,7 @@ export function estimateAttributes(
     for (attr in pendingOps[i]) {
       if (pendingOps[i][attr] instanceof RelationOp) {
         if (object.id) {
-          data[attr] = pendingOps[i][attr].applyTo(data[attr], object, attr);
+          data[attr] = (pendingOps[i][attr] as RelationOp).applyTo(data[attr], object, attr);
         }
       } else {
         if (attr.includes('.')) {
@@ -129,7 +129,7 @@ export function estimateAttributes(
               }
             } else {
               if (Array.isArray(object[key])) {
-                object[key] = [ ...object[key] ];
+                object[key] = [...object[key]];
               } else {
                 object[key] = { ...object[key] };
               }

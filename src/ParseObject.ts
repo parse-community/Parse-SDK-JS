@@ -58,7 +58,7 @@ type FetchOptions = {
 
 // Mapping of class names to constructors, so we can populate objects from the
 // server with appropriate subclasses of ParseObject
-const classMap = {};
+const classMap: AttributeMap = {};
 
 // Global counter for generating unique Ids for non-single-instance objects
 let objectCount = 0;
@@ -412,7 +412,7 @@ class ParseObject {
     const pending = stateController.popPendingState(this._getStateIdentifier());
     for (attr in pending) {
       if (pending[attr] instanceof RelationOp) {
-        changes[attr] = pending[attr].applyTo(undefined, this, attr);
+        changes[attr] = (pending[attr] as RelationOp).applyTo(undefined, this, attr);
       } else if (!(attr in response)) {
         // Only SetOps and UnsetOps should not come back with results
         changes[attr] = pending[attr].applyTo(undefined);

@@ -1,8 +1,6 @@
-/**
- * @flow
- */
-
 import ParseGeoPoint from './ParseGeoPoint';
+type Coordinate = [number, number];
+type Coordinates = Coordinate[];
 
 /**
  * Creates a new Polygon with any of the following forms:<br>
@@ -24,12 +22,12 @@ import ParseGeoPoint from './ParseGeoPoint';
  * @alias Parse.Polygon
  */
 class ParsePolygon {
-  _coordinates: Array<Array<number>>;
+  _coordinates: Coordinates;
 
   /**
-   * @param {(number[][] | Parse.GeoPoint[])} coordinates An Array of coordinate pairs
+   * @param {(Coordinates | Parse.GeoPoint[])} coordinates An Array of coordinate pairs
    */
-  constructor(coordinates: Array<Array<number>> | Array<ParseGeoPoint>) {
+  constructor(coordinates: Coordinates | Array<ParseGeoPoint>) {
     this._coordinates = ParsePolygon._validate(coordinates);
   }
 
@@ -37,14 +35,14 @@ class ParsePolygon {
    * Coordinates value for this Polygon.
    * Throws an exception if not valid type.
    *
-   * @property {(number[][] | Parse.GeoPoint[])} coordinates list of coordinates
-   * @returns {number[][]}
+   * @property {(Coordinates | Parse.GeoPoint[])} coordinates list of coordinates
+   * @returns {Coordinates}
    */
-  get coordinates(): Array<Array<number>> {
+  get coordinates(): Coordinates {
     return this._coordinates;
   }
 
-  set coordinates(coords: Array<Array<number>> | Array<ParseGeoPoint>) {
+  set coordinates(coords: Coordinates | Array<ParseGeoPoint>) {
     this._coordinates = ParsePolygon._validate(coords);
   }
 
@@ -53,7 +51,7 @@ class ParsePolygon {
    *
    * @returns {object}
    */
-  toJSON(): { __type: string; coordinates: Array<Array<number>> } {
+  toJSON(): { __type: string; coordinates: Coordinates } {
     ParsePolygon._validate(this._coordinates);
     return {
       __type: 'Polygon',
@@ -67,7 +65,7 @@ class ParsePolygon {
    * @param {(Parse.Polygon | object)} other
    * @returns {boolean}
    */
-  equals(other: any): boolean {
+  equals(other: ParsePolygon | any): boolean {
     if (!(other instanceof ParsePolygon) || this.coordinates.length !== other.coordinates.length) {
       return false;
     }
@@ -138,14 +136,14 @@ class ParsePolygon {
    * @throws {TypeError}
    * @returns {number[][]} Array of coordinates if validated.
    */
-  static _validate(coords: Array<Array<number>> | Array<ParseGeoPoint>): Array<Array<number>> {
+  static _validate(coords: Coordinates | Array<ParseGeoPoint>): Coordinates {
     if (!Array.isArray(coords)) {
       throw new TypeError('Coordinates must be an Array');
     }
     if (coords.length < 3) {
       throw new TypeError('Polygon must have at least 3 GeoPoints or Points');
     }
-    const points = [];
+    const points: Coordinates = [];
     for (let i = 0; i < coords.length; i += 1) {
       const coord = coords[i];
       let geoPoint;

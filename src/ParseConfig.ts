@@ -1,7 +1,3 @@
-/**
- * @flow
- */
-
 import CoreManager from './CoreManager';
 import decode from './decode';
 import encode from './encode';
@@ -17,7 +13,6 @@ import type { RequestOptions } from './RESTController';
  *
  * @alias Parse.Config
  */
-
 class ParseConfig {
   attributes: { [key: string]: any };
   _escapedAttributes: { [key: string]: any };
@@ -123,7 +118,7 @@ class ParseConfig {
   }
 }
 
-let currentConfig = null;
+let currentConfig: ParseConfig | null = null;
 
 const CURRENT_CONFIG_KEY = 'currentConfig';
 
@@ -195,7 +190,7 @@ const DefaultController = {
     });
   },
 
-  save(attrs: { [key: string]: any }, masterKeyOnlyFlags: { [key: string]: any }) {
+  save(attrs?: { [key: string]: any }, masterKeyOnlyFlags?: { [key: string]: any }) {
     const RESTController = CoreManager.getRESTController();
     const encodedAttrs = {};
     for (const key in attrs) {
