@@ -866,7 +866,7 @@ declare class ParseObject {
   static saveAll(
     list: Array<ParseObject>,
     options?: SaveOptions
-  ): Promise<ParseFile | ParseObject | ParseObject[]>;
+  ): Promise<ParseObject | ParseFile | ParseObject[]>;
   /**
    * Creates a reference to a subclass of Parse.Object with the given id. This
    * does not exist on Parse.Object, only on subclasses.

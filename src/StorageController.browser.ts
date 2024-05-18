@@ -1,13 +1,9 @@
-/**
- * @flow
- * @private
- */
 /* global localStorage */
 
 const StorageController = {
   async: 0,
 
-  getItem(path: string): ?string {
+  getItem(path: string): string | null {
     return localStorage.getItem(path);
   },
 
@@ -25,9 +21,9 @@ const StorageController = {
   },
 
   getAllKeys() {
-    const keys = [];
+    const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i += 1) {
-      keys.push(localStorage.key(i));
+      keys.push(localStorage.key(i) as string);
     }
     return keys;
   },
@@ -38,3 +34,4 @@ const StorageController = {
 };
 
 module.exports = StorageController;
+export default StorageController;

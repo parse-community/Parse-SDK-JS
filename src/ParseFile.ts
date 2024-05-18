@@ -2,13 +2,16 @@
 import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
 import ParseError from './ParseError';
+import XhrWeapp from './Xhr.weapp';
+import http from 'http';
+import https from 'https';
 
-let XHR = null;
+let XHR: any = null;
 if (typeof XMLHttpRequest !== 'undefined') {
   XHR = XMLHttpRequest;
 }
 if (process.env.PARSE_BUILD === 'weapp') {
-  XHR = require('./Xhr.weapp');
+  XHR = XhrWeapp;
 }
 
 type Base64 = { base64: string };
@@ -240,7 +243,7 @@ class ParseFile {
    * </ul>
    * @returns {Promise | undefined} Promise that is resolved when the save finishes.
    */
-  save(options?: FileSaveOptions): Promise<ParseFile> | undefined {
+  save(options?: FileSaveOptions & { requestTask?: any }): Promise<ParseFile> | undefined {
     options = options || {};
     options.requestTask = task => (this._requestTask = task);
     options.metadata = this._metadata;
@@ -484,7 +487,7 @@ const DefaultController = {
       return this.downloadAjax(uri, options);
     } else if (process.env.PARSE_BUILD === 'node') {
       return new Promise((resolve, reject) => {
-        const client = uri.indexOf('https') === 0 ? require('https') : require('http');
+        const client = uri.indexOf('https') === 0 ? https : http;
         const req = client.get(uri, resp => {
           resp.setEncoding('base64');
           let base64 = '';

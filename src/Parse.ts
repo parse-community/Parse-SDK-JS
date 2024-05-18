@@ -17,6 +17,7 @@ import Config from './ParseConfig';
 import ParseError from './ParseError';
 import FacebookUtils from './FacebookUtils';
 import File from './ParseFile';
+import * as Hooks from './ParseHooks';
 import GeoPoint from './ParseGeoPoint';
 import Polygon from './ParsePolygon';
 import Installation from './ParseInstallation';
@@ -474,7 +475,7 @@ if (process.env.PARSE_BUILD === 'node') {
   Parse.Cloud.useMasterKey = function () {
     CoreManager.set('USE_MASTER_KEY', true);
   };
-  Parse.Hooks = require('./ParseHooks');
+  Parse.Hooks = Hooks;
 }
 
 // For legacy requires, of the form `var Parse = require('parse').Parse`

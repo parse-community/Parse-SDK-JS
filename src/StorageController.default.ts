@@ -1,14 +1,9 @@
-/**
- * @flow
- * @private
- */
-
 // When there is no native storage interface, we default to an in-memory map
 const memMap = {};
 const StorageController = {
   async: 0,
 
-  getItem(path: string): ?string {
+  getItem(path: string): string | null {
     if (memMap.hasOwnProperty(path)) {
       return memMap[path];
     }
@@ -37,3 +32,4 @@ const StorageController = {
 };
 
 module.exports = StorageController;
+export default StorageController;

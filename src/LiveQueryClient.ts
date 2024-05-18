@@ -72,9 +72,8 @@ const generateInterval = k => {
  * We expose three events to help you monitor the status of the LiveQueryClient.
  *
  * <pre>
- * let Parse = require('parse/node');
- * let LiveQueryClient = Parse.LiveQueryClient;
- * let client = new LiveQueryClient({
+ * const LiveQueryClient = Parse.LiveQueryClient;
+ * const client = new LiveQueryClient({
  *   applicationId: '',
  *   serverURL: '',
  *   javascriptKey: '',

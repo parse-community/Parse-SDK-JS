@@ -1,12 +1,10 @@
-/**
- * @flow
- */
 /* global XMLHttpRequest, XDomainRequest */
-const uuidv4 = require('./uuid');
-
+import uuidv4 from './uuid';
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
 import { resolvingPromise } from './promiseUtils';
+import xmlhttprequest from 'xmlhttprequest';
+import XhrWeapp from './Xhr.weapp';
 
 export type RequestOptions = {
   useMasterKey?: boolean;
@@ -31,24 +29,38 @@ export type FullOptions = {
   usePost?: boolean;
 };
 
-let XHR = null;
+type PayloadType = {
+  _context?: any;
+  _method?: string;
+  _ApplicationId: string;
+  _JavaScriptKey?: string;
+  _ClientVersion: string;
+  _MasterKey?: string;
+  _RevocableSession?: string;
+  _InstallationId?: string;
+  _SessionToken?: string;
+};
+
+let XHR: any = null;
 if (typeof XMLHttpRequest !== 'undefined') {
   XHR = XMLHttpRequest;
 }
 if (process.env.PARSE_BUILD === 'node') {
-  XHR = require('xmlhttprequest').XMLHttpRequest;
+  XHR = xmlhttprequest.XMLHttpRequest;
 }
 if (process.env.PARSE_BUILD === 'weapp') {
-  XHR = require('./Xhr.weapp');
+  XHR = XhrWeapp;
 }
 
 let useXDomainRequest = false;
+// @ts-ignore
 if (typeof XDomainRequest !== 'undefined' && !('withCredentials' in new XMLHttpRequest())) {
   useXDomainRequest = true;
 }
 
 function ajaxIE9(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
   return new Promise((resolve, reject) => {
+    // @ts-ignore
     const xdr = new XDomainRequest();
     xdr.onload = function () {
       let response;
@@ -78,7 +90,9 @@ function ajaxIE9(method: string, url: string, data: any, headers?: any, options?
     };
     xdr.open(method, url);
     xdr.send(data);
+    // @ts-ignore
     if (options && typeof options.requestTask === 'function') {
+      // @ts-ignore
       options.requestTask(xdr);
     }
   });
@@ -203,8 +217,9 @@ const RESTController = {
         });
       };
       xhr.send(data);
-
+      // @ts-ignore
       if (options && typeof options.requestTask === 'function') {
+        // @ts-ignore
         options.requestTask(xhr);
       }
     };
@@ -221,7 +236,7 @@ const RESTController = {
     }
     url += path;
 
-    const payload = {};
+    const payload: Partial<PayloadType> = {};
     if (data && typeof data === 'object') {
       for (const k in data) {
         payload[k] = data[k];
@@ -264,7 +279,7 @@ const RESTController = {
     }
 
     const installationId = options.installationId;
-    let installationIdPromise;
+    let installationIdPromise: Promise<string>;
     if (installationId && typeof installationId === 'string') {
       installationIdPromise = Promise.resolve(installationId);
     } else {
@@ -307,7 +322,7 @@ const RESTController = {
       .catch(RESTController.handleError);
   },
 
-  handleError(response) {
+  handleError(response: any) {
     // Transform the error into an instance of ParseError by trying to parse
     // the error string as JSON
     let error;
@@ -342,3 +357,4 @@ const RESTController = {
 };
 
 module.exports = RESTController;
+export default RESTController;
