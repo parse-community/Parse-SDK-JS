@@ -1,10 +1,10 @@
-export = SocketWeapp;
 declare class SocketWeapp {
-  constructor(serverURL: any);
   onopen: () => void;
   onmessage: () => void;
   onclose: () => void;
   onerror: () => void;
+  constructor(serverURL: any);
   send(data: any): void;
   close(): void;
 }
+export default SocketWeapp;

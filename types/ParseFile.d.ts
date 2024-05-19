@@ -136,7 +136,11 @@ declare class ParseFile {
    * </ul>
    * @returns {Promise | undefined} Promise that is resolved when the save finishes.
    */
-  save(options?: FileSaveOptions): Promise<ParseFile> | undefined;
+  save(
+    options?: FileSaveOptions & {
+      requestTask?: any;
+    }
+  ): Promise<ParseFile> | undefined;
   /**
    * Aborts the request if it has already been sent.
    */

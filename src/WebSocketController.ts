@@ -1,4 +1,6 @@
 /* global WebSocket */
+import ws from 'ws';
+import SocketWeapp from './Socket.weapp';
 
 let WebSocketController;
 
@@ -7,9 +9,9 @@ try {
     WebSocketController =
       typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null;
   } else if (process.env.PARSE_BUILD === 'node') {
-    WebSocketController = require('ws');
+    WebSocketController = ws;
   } else if (process.env.PARSE_BUILD === 'weapp') {
-    WebSocketController = require('./Socket.weapp');
+    WebSocketController = SocketWeapp;
   } else if (process.env.PARSE_BUILD === 'react-native') {
     WebSocketController = WebSocket;
   }
@@ -17,3 +19,4 @@ try {
   // WebSocket unavailable
 }
 module.exports = WebSocketController;
+export default WebSocketController;

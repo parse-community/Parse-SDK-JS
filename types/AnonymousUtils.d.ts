@@ -1,5 +1,34 @@
-export default AnonymousUtils;
-declare namespace AnonymousUtils {
+import ParseUser from './ParseUser';
+import type { RequestOptions } from './RESTController';
+/**
+ * Provides utility functions for working with Anonymously logged-in users. <br />
+ * Anonymous users have some unique characteristics:
+ * <ul>
+ *  <li>Anonymous users don't need a user name or password.</li>
+ *  <ul>
+ *    <li>Once logged out, an anonymous user cannot be recovered.</li>
+ *  </ul>
+ *  <li>signUp converts an anonymous user to a standard user with the given username and password.</li>
+ *  <ul>
+ *    <li>Data associated with the anonymous user is retained.</li>
+ *  </ul>
+ *  <li>logIn switches users without converting the anonymous user.</li>
+ *  <ul>
+ *    <li>Data associated with the anonymous user will be lost.</li>
+ *  </ul>
+ *  <li>Service logIn (e.g. Facebook, Twitter) will attempt to convert
+ *  the anonymous user into a standard user by linking it to the service.</li>
+ *  <ul>
+ *    <li>If a user already exists that is linked to the service, it will instead switch to the existing user.</li>
+ *  </ul>
+ *  <li>Service linking (e.g. Facebook, Twitter) will convert the anonymous user
+ *  into a standard user by linking it to the service.</li>
+ * </ul>
+ *
+ * @class Parse.AnonymousUtils
+ * @static
+ */
+declare const AnonymousUtils: {
   /**
    * Gets whether the user has their account linked to anonymous user.
    *
@@ -11,7 +40,7 @@ declare namespace AnonymousUtils {
    *     linked to an anonymous user.
    * @static
    */
-  function isLinked(user: ParseUser): boolean;
+  isLinked(user: ParseUser): boolean;
   /**
    * Logs in a user Anonymously.
    *
@@ -21,7 +50,7 @@ declare namespace AnonymousUtils {
    * @returns {Promise} Logged in user
    * @static
    */
-  function logIn(options?: RequestOptions): Promise<ParseUser>;
+  logIn(options?: RequestOptions): Promise<ParseUser>;
   /**
    * Links Anonymous User to an existing PFUser.
    *
@@ -32,7 +61,7 @@ declare namespace AnonymousUtils {
    * @returns {Promise} Linked with User
    * @static
    */
-  function link(user: ParseUser, options?: RequestOptions): Promise<ParseUser>;
+  link(user: ParseUser, options?: RequestOptions): Promise<ParseUser>;
   /**
    * Returns true if Authentication Provider has been registered for use.
    *
@@ -41,16 +70,15 @@ declare namespace AnonymousUtils {
    * @returns {boolean}
    * @static
    */
-  function isRegistered(): boolean;
-  function _getAuthProvider(): {
+  isRegistered(): boolean;
+  _getAuthProvider(): {
     restoreAuthentication(): boolean;
     getAuthType(): string;
     getAuthData(): {
       authData: {
-        id: any;
+        id: string;
       };
     };
   };
-}
-import ParseUser from './ParseUser';
-import { RequestOptions } from './RESTController';
+};
+export default AnonymousUtils;

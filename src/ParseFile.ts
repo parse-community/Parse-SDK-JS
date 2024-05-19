@@ -2,13 +2,14 @@
 import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
 import ParseError from './ParseError';
+import XhrWeapp from './Xhr.weapp';
 
-let XHR = null;
+let XHR: any = null;
 if (typeof XMLHttpRequest !== 'undefined') {
   XHR = XMLHttpRequest;
 }
 if (process.env.PARSE_BUILD === 'weapp') {
-  XHR = require('./Xhr.weapp');
+  XHR = XhrWeapp;
 }
 
 type Base64 = { base64: string };
@@ -240,7 +241,7 @@ class ParseFile {
    * </ul>
    * @returns {Promise | undefined} Promise that is resolved when the save finishes.
    */
-  save(options?: FileSaveOptions): Promise<ParseFile> | undefined {
+  save(options?: FileSaveOptions & { requestTask?: any }): Promise<ParseFile> | undefined {
     options = options || {};
     options.requestTask = task => (this._requestTask = task);
     options.metadata = this._metadata;

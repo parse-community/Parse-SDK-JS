@@ -65,7 +65,7 @@ export function send(data: PushData, options: FullOptions = {}): Promise<string>
     throw new Error('expiration_time and expiration_interval cannot both be set.');
   }
 
-  const pushOptions = { useMasterKey: true };
+  const pushOptions: FullOptions = { useMasterKey: true };
   if (options.hasOwnProperty('useMasterKey')) {
     pushOptions.useMasterKey = options.useMasterKey;
   }
@@ -90,7 +90,7 @@ export function getPushStatus(
   pushStatusId: string,
   options: FullOptions = {}
 ): Promise<ParseObject> {
-  const pushOptions = { useMasterKey: true };
+  const pushOptions: FullOptions = { useMasterKey: true };
   if (options.hasOwnProperty('useMasterKey')) {
     pushOptions.useMasterKey = options.useMasterKey;
   }
@@ -99,8 +99,8 @@ export function getPushStatus(
 }
 
 const DefaultController = {
-  async send(data: PushData, options?: FullOptions) {
-    options.returnStatus = true;
+  async send(data: PushData, options?: FullOptions & { returnStatus?: boolean }) {
+    options!.returnStatus = true;
     const response = await CoreManager.getRESTController().request('POST', 'push', data, options);
     return response._headers?.['X-Parse-Push-Status-Id'];
   },

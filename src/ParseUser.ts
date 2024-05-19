@@ -1059,7 +1059,7 @@ const DefaultController = {
       );
     }
     const path = Storage.generatePath(CURRENT_USER_KEY);
-    let userData = Storage.getItem(path);
+    let userData: any = Storage.getItem(path);
     currentUserCacheMatchesDisk = true;
     if (!userData) {
       currentUserCache = null;
@@ -1097,7 +1097,7 @@ const DefaultController = {
       return Promise.resolve(null);
     }
     const path = Storage.generatePath(CURRENT_USER_KEY);
-    return Storage.getItemAsync(path).then(userData => {
+    return Storage.getItemAsync(path).then((userData: any) => {
       currentUserCacheMatchesDisk = true;
       if (!userData) {
         currentUserCache = null;

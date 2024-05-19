@@ -1,8 +1,8 @@
-const equalObjects = require('./equals').default;
-const decode = require('./decode').default;
-const ParseError = require('./ParseError').default;
-const ParsePolygon = require('./ParsePolygon').default;
-const ParseGeoPoint = require('./ParseGeoPoint').default;
+import equalObjects from './equals';
+import decode from './decode';
+import ParseError from './ParseError';
+import ParsePolygon from './ParsePolygon';
+import ParseGeoPoint from './ParseGeoPoint';
 /**
  * contains -- Determines if an object is contained in a list with special handling for Parse pointers.
  *
@@ -333,7 +333,9 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
     if (
       toString.call(compareTo) === '[object Date]' ||
       (typeof compareTo === 'string' &&
+        // @ts-ignore
         new Date(compareTo) !== 'Invalid Date' &&
+        // @ts-ignore
         !isNaN(new Date(compareTo)))
     ) {
       object[key] = new Date(object[key].iso ? object[key].iso : object[key]);
@@ -594,3 +596,4 @@ const OfflineQuery = {
 };
 
 module.exports = OfflineQuery;
+export default OfflineQuery;

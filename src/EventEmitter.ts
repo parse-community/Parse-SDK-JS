@@ -2,7 +2,7 @@
  * This is a simple wrapper to unify EventEmitter implementations across platforms.
  */
 
-let EventEmitter;
+let EventEmitter: any;
 
 try {
   if (process.env.PARSE_BUILD === 'react-native') {
@@ -18,3 +18,4 @@ try {
   // EventEmitter unavailable
 }
 module.exports = EventEmitter;
+export default EventEmitter;

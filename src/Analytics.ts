@@ -1,7 +1,3 @@
-/**
- * @flow
- */
-
 import CoreManager from './CoreManager';
 
 /**
@@ -44,7 +40,7 @@ import CoreManager from './CoreManager';
  * @returns {Promise} A promise that is resolved when the round-trip
  * to the server completes.
  */
-export function track(name: string, dimensions: { [key: string]: string }): Promise {
+export function track(name: string, dimensions: { [key: string]: string }): Promise<void> {
   name = name || '';
   name = name.replace(/^\s*/, '');
   name = name.replace(/\s*$/, '');
@@ -62,10 +58,10 @@ export function track(name: string, dimensions: { [key: string]: string }): Prom
 }
 
 const DefaultController = {
-  track(name, dimensions) {
+  track(name: string, dimensions: { [key: string]: string }) {
     const path = 'events/' + name;
     const RESTController = CoreManager.getRESTController();
-    return RESTController.request('POST', path, { dimensions: dimensions });
+    return RESTController.request('POST', path, { dimensions });
   },
 };
 

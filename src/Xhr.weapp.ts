@@ -1,4 +1,24 @@
-module.exports = class XhrWeapp {
+class XhrWeapp {
+  UNSENT: number;
+  OPENED: number;
+  HEADERS_RECEIVED: number;
+  LOADING: number;
+  DONE: number;
+  header: any;
+  readyState: any;
+  status: number;
+  response: string | undefined;
+  responseType: string;
+  responseText: string;
+  responseHeader: any;
+  method: string;
+  url: string;
+  onabort: () => void;
+  onprogress: () => void;
+  onerror: () => void;
+  onreadystatechange: () => void;
+  requestTask: any;
+
   constructor() {
     this.UNSENT = 0;
     this.OPENED = 1;
@@ -55,6 +75,7 @@ module.exports = class XhrWeapp {
   }
 
   send(data) {
+    // @ts-ignore
     this.requestTask = wx.request({
       url: this.url,
       method: this.method,
@@ -71,6 +92,7 @@ module.exports = class XhrWeapp {
       },
       fail: err => {
         this.requestTask = null;
+        // @ts-ignore
         this.onerror(err);
       },
     });
@@ -80,7 +102,10 @@ module.exports = class XhrWeapp {
         loaded: res.totalBytesWritten,
         total: res.totalBytesExpectedToWrite,
       };
+      // @ts-ignore
       this.onprogress(event);
     });
   }
-};
+}
+module.exports = XhrWeapp;
+export default XhrWeapp;
