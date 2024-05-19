@@ -3,8 +3,6 @@ import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
 import ParseError from './ParseError';
 import XhrWeapp from './Xhr.weapp';
-import http from 'http';
-import https from 'https';
 
 let XHR: any = null;
 if (typeof XMLHttpRequest !== 'undefined') {
@@ -487,7 +485,7 @@ const DefaultController = {
       return this.downloadAjax(uri, options);
     } else if (process.env.PARSE_BUILD === 'node') {
       return new Promise((resolve, reject) => {
-        const client = uri.indexOf('https') === 0 ? https : http;
+        const client = uri.indexOf('https') === 0 ? require('https') : require('http');
         const req = client.get(uri, resp => {
           resp.setEncoding('base64');
           let base64 = '';

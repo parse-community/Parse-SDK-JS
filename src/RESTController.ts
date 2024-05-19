@@ -3,7 +3,6 @@ import uuidv4 from './uuid';
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
 import { resolvingPromise } from './promiseUtils';
-import xmlhttprequest from 'xmlhttprequest';
 import XhrWeapp from './Xhr.weapp';
 
 export type RequestOptions = {
@@ -46,7 +45,7 @@ if (typeof XMLHttpRequest !== 'undefined') {
   XHR = XMLHttpRequest;
 }
 if (process.env.PARSE_BUILD === 'node') {
-  XHR = xmlhttprequest.XMLHttpRequest;
+  XHR = require('xmlhttprequest').XMLHttpRequest;
 }
 if (process.env.PARSE_BUILD === 'weapp') {
   XHR = XhrWeapp;
