@@ -333,8 +333,10 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
     if (
       toString.call(compareTo) === '[object Date]' ||
       (typeof compareTo === 'string' &&
-        new Date(compareTo).toString() !== 'Invalid Date' &&
-        !isNaN(new Date(compareTo).getTime()))
+        // @ts-ignore
+        new Date(compareTo) !== 'Invalid Date' &&
+        // @ts-ignore
+        !isNaN(new Date(compareTo)))
     ) {
       object[key] = new Date(object[key].iso ? object[key].iso : object[key]);
     }
