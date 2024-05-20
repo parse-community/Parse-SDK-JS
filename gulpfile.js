@@ -32,12 +32,12 @@ const PRESETS = {
   'react-native': ["@babel/preset-typescript", 'module:metro-react-native-babel-preset'],
 };
 const PLUGINS = {
-  'browser': [transformRuntime, '@babel/plugin-transform-flow-comments', '@babel/plugin-proposal-class-properties', 'inline-package-json',
+  'browser': [transformRuntime, '@babel/plugin-proposal-class-properties', 'inline-package-json',
     ['transform-inline-environment-variables', {'exclude': ['SERVER_RENDERING']}]],
-  'weapp': [transformRuntime, '@babel/plugin-transform-flow-comments', '@babel/plugin-proposal-class-properties', 'inline-package-json',
+  'weapp': [transformRuntime, '@babel/plugin-proposal-class-properties', 'inline-package-json',
     ['transform-inline-environment-variables', {'exclude': ['SERVER_RENDERING']}]],
-  'node': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables'],
-  'react-native': ['@babel/plugin-transform-flow-comments', 'inline-package-json', 'transform-inline-environment-variables']
+  'node': ['inline-package-json', 'transform-inline-environment-variables'],
+  'react-native': ['inline-package-json', 'transform-inline-environment-variables']
 };
 
 const DEV_HEADER = (

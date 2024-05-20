@@ -3,7 +3,6 @@
   "babel": {
     "babelrc": false,
     "extensions": ["js", "ts", "jsx", "tsx"],
-    "plugins": ["@babel/plugin-transform-flow-comments"],
     "presets": ["@babel/preset-typescript"]
   },
   "source": {

@@ -1,15 +1,14 @@
-/**
- * @flow
- */
 /* global window */
 
 import { createStore, del, set, get, clear, keys } from 'idb-keyval';
+
+let IndexedDBStorageController: any;
 
 if (typeof window !== 'undefined' && window.indexedDB) {
   try {
     const ParseStore = createStore('parseDB', 'parseStore');
 
-    const IndexedDBStorageController = {
+    IndexedDBStorageController = {
       async: 1,
       getItemAsync(path: string) {
         return get(path, ParseStore);
@@ -27,13 +26,13 @@ if (typeof window !== 'undefined' && window.indexedDB) {
         return clear(ParseStore);
       },
     };
-
-    module.exports = IndexedDBStorageController;
   } catch (_) {
     // IndexedDB not accessible
-    module.exports = undefined;
+    IndexedDBStorageController = undefined;
   }
 } else {
   // IndexedDB not supported
-  module.exports = undefined;
+  IndexedDBStorageController = undefined;
 }
+module.exports = IndexedDBStorageController;
+export default IndexedDBStorageController;

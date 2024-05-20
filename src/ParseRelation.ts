@@ -1,7 +1,3 @@
-/**
- * @flow
- */
-
 import type ParseObject from './ParseObject';
 import type ParseQuery from './ParseQuery';
 import CoreManager from './CoreManager';
@@ -20,15 +16,15 @@ import CoreManager from './CoreManager';
  * @alias Parse.Relation
  */
 class ParseRelation {
-  parent: ?ParseObject;
-  key: ?string;
-  targetClassName: ?string;
+  parent?: ParseObject;
+  key?: string;
+  targetClassName?: string | null;
 
   /**
    * @param {Parse.Object} parent The parent of this relation.
    * @param {string} key The key for this relation on the parent.
    */
-  constructor(parent: ?ParseObject, key: ?string) {
+  constructor(parent?: ParseObject, key?: string) {
     this.parent = parent;
     this.key = key;
     this.targetClassName = null;
@@ -108,7 +104,7 @@ class ParseRelation {
    *
    * @returns {object} JSON representation of Relation
    */
-  toJSON(): { __type: 'Relation'; className: ?string } {
+  toJSON(): { __type: 'Relation'; className: string | null } {
     return {
       __type: 'Relation',
       className: this.targetClassName,

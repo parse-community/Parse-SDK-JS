@@ -1,19 +1,21 @@
-/**
- * @flow
- */
-
 import * as ObjectStateMutations from './ObjectStateMutations';
-import TaskQueue from './TaskQueue';
 
 import type { Op } from './ParseOp';
 import type ParseObject from './ParseObject';
 import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
 
-let objectState = new WeakMap();
+let objectState: {
+  [className: string]: {
+    [id: string]: State;
+  };
+} = {};
 
-export function getState(obj: ParseObject): ?State {
-  const classData = objectState.get(obj);
-  return classData || null;
+export function getState(obj: ParseObject): State | null {
+  const classData = objectState[obj.className];
+  if (classData) {
+    return classData[obj.id!] || null;
+  }
+  return null;
 }
 
 export function initializeState(obj: ParseObject, initial?: State): State {
@@ -21,26 +23,22 @@ export function initializeState(obj: ParseObject, initial?: State): State {
   if (state) {
     return state;
   }
-  if (!initial) {
-    initial = {
-      serverData: {},
-      pendingOps: [{}],
-      objectCache: {},
-      tasks: new TaskQueue(),
-      existed: false,
-    };
+  if (!objectState[obj.className]) {
+    objectState[obj.className] = {};
   }
-  state = initial;
-  objectState.set(obj, state);
+  if (!initial) {
+    initial = ObjectStateMutations.defaultState();
+  }
+  state = objectState[obj.className][obj.id!] = initial;
   return state;
 }
 
-export function removeState(obj: ParseObject): ?State {
+export function removeState(obj: ParseObject): State | null {
   const state = getState(obj);
   if (state === null) {
     return null;
   }
-  objectState.delete(obj);
+  delete objectState[obj.className][obj.id!];
   return state;
 }
 
@@ -65,7 +63,7 @@ export function getPendingOps(obj: ParseObject): Array<OpsMap> {
   return [{}];
 }
 
-export function setPendingOp(obj: ParseObject, attr: string, op: ?Op) {
+export function setPendingOp(obj: ParseObject, attr: string, op?: Op) {
   const pendingOps = initializeState(obj).pendingOps;
   ObjectStateMutations.setPendingOp(pendingOps, attr, op);
 }
@@ -110,28 +108,15 @@ export function commitServerChanges(obj: ParseObject, changes: AttributeMap) {
   ObjectStateMutations.commitServerChanges(state.serverData, state.objectCache, changes);
 }
 
-export function enqueueTask(obj: ParseObject, task: () => Promise): Promise {
+export function enqueueTask(obj: ParseObject, task: () => Promise<any>): Promise<void> {
   const state = initializeState(obj);
   return state.tasks.enqueue(task);
 }
 
-export function duplicateState(source: ParseObject, dest: ParseObject): void {
-  const oldState = initializeState(source);
-  const newState = initializeState(dest);
-  for (const key in oldState.serverData) {
-    newState.serverData[key] = oldState.serverData[key];
-  }
-  for (let index = 0; index < oldState.pendingOps.length; index++) {
-    for (const key in oldState.pendingOps[index]) {
-      newState.pendingOps[index][key] = oldState.pendingOps[index][key];
-    }
-  }
-  for (const key in oldState.objectCache) {
-    newState.objectCache[key] = oldState.objectCache[key];
-  }
-  newState.existed = oldState.existed;
+export function clearAllState() {
+  objectState = {};
 }
 
-export function clearAllState() {
-  objectState = new WeakMap();
+export function duplicateState(source: { id: string }, dest: { id: string }) {
+  dest.id = source.id;
 }

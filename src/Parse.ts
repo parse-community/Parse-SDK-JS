@@ -159,11 +159,11 @@ const Parse: ParseType = {
    * @member {EventuallyQueue} Parse.EventuallyQueue
    * @static
    */
-  set EventuallyQueue(queue: EventuallyQueue) {
+  set EventuallyQueue(queue: typeof EventuallyQueue) {
     CoreManager.setEventuallyQueue(queue);
   },
 
-  get EventuallyQueue() {
+  get EventuallyQueue(): any {
     return CoreManager.getEventuallyQueue();
   },
 
@@ -316,7 +316,7 @@ const Parse: ParseType = {
    * @member {ParseLiveQuery} Parse.LiveQuery
    * @static
    */
-  set LiveQuery(liveQuery: ParseLiveQuery) {
+  set LiveQuery(liveQuery: typeof ParseLiveQuery) {
     CoreManager.setLiveQuery(liveQuery);
   },
   get LiveQuery() {

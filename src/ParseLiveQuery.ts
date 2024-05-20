@@ -1,6 +1,3 @@
-/**
- * @flow
- */
 import LiveQueryClient from './LiveQueryClient';
 import CoreManager from './CoreManager';
 
@@ -36,11 +33,15 @@ function getLiveQueryClient(): Promise<LiveQueryClient> {
  * @static
  */
 class LiveQuery {
+  emitter: any;
+  on: any;
+  emit: any;
+
   constructor() {
     const EventEmitter = CoreManager.getEventEmitter();
     this.emitter = new EventEmitter();
-    this.on = (eventName, listener) => this.emitter.on(eventName, listener);
-    this.emit = (eventName, ...args) => this.emitter.emit(eventName, ...args);
+    this.on = (eventName: string, listener: any) => this.emitter.on(eventName, listener);
+    this.emit = (eventName: string, ...args: any) => this.emitter.emit(eventName, ...args);
     // adding listener so process does not crash
     // best practice is for developer to register their own listener
     this.on('error', () => {});
@@ -50,7 +51,7 @@ class LiveQuery {
    * After open is called, the LiveQuery will try to send a connect request
    * to the LiveQuery server.
    */
-  async open(): void {
+  async open(): Promise<void> {
     const liveQueryClient = await getLiveQueryClient();
     liveQueryClient.open();
   }
@@ -62,7 +63,7 @@ class LiveQuery {
    * If you call query.subscribe() after this, we'll create a new WebSocket
    * connection to the LiveQuery server.
    */
-  async close(): void {
+  async close(): Promise<void> {
     const liveQueryClient = await getLiveQueryClient();
     liveQueryClient.close();
   }

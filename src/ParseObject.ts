@@ -1946,13 +1946,13 @@ class ParseObject {
    *     });</pre></p>
    *
    * @param {string} className The name of the Parse class backing this model.
-   * @param {object} protoProps Instance properties to add to instances of the
+   * @param {object} [protoProps] Instance properties to add to instances of the
    *     class returned from this method.
-   * @param {object} classProps Class properties to add the class returned from
+   * @param {object} [classProps] Class properties to add the class returned from
    *     this method.
    * @returns {Parse.Object} A new subclass of Parse.Object.
    */
-  static extend(className: any, protoProps: any, classProps: any) {
+  static extend(className: any, protoProps?: any, classProps?: any) {
     if (typeof className !== 'string') {
       if (className && typeof className.className === 'string') {
         return ParseObject.extend(className.className, className, protoProps);
@@ -2539,7 +2539,7 @@ const DefaultController = {
       // generate _localId in case if cascadeSave=false
       target._getId();
       const localId = target._localId;
-      // copying target lets Flow guarantee the pointer isn't modified elsewhere
+      // copying target lets guarantee the pointer isn't modified elsewhere
       const targetCopy = target;
       const task = function () {
         const params = targetCopy._getSaveParams();
