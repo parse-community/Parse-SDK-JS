@@ -1,9 +1,3 @@
-/**
- * https://github.com/francimedia/parse-js-local-storage
- *
- * @flow
- */
-
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
 import ParseObject from './ParseObject';
@@ -27,9 +21,9 @@ type QueueObject = {
 type Queue = Array<QueueObject>;
 
 const QUEUE_KEY = 'Parse/Eventually/Queue';
-let queueCache = [];
+let queueCache: QueueObject[] = [];
 let dirtyCache = true;
-let polling = undefined;
+let polling: ReturnType<typeof setInterval> | undefined = undefined;
 
 /**
  * Provides utility functions to queue objects that will be
@@ -50,7 +44,7 @@ const EventuallyQueue = {
    * @static
    * @see Parse.Object#saveEventually
    */
-  save(object: ParseObject, serverOptions: SaveOptions = {}): Promise {
+  save(object: ParseObject, serverOptions: SaveOptions = {}): Promise<void> {
     return this.enqueue('save', object, serverOptions);
   },
 
@@ -65,7 +59,7 @@ const EventuallyQueue = {
    * @static
    * @see Parse.Object#destroyEventually
    */
-  destroy(object: ParseObject, serverOptions: RequestOptions = {}): Promise {
+  destroy(object: ParseObject, serverOptions: RequestOptions = {}): Promise<void> {
     return this.enqueue('destroy', object, serverOptions);
   },
 
@@ -99,7 +93,7 @@ const EventuallyQueue = {
     action: string,
     object: ParseObject,
     serverOptions: SaveOptions | RequestOptions
-  ): Promise {
+  ): Promise<void> {
     const queueData = await this.getQueue();
     const queueId = this.generateQueueId(action, object);
 
@@ -127,7 +121,7 @@ const EventuallyQueue = {
     return this.setQueue(queueData);
   },
 
-  store(data) {
+  store(data: QueueObject[]) {
     return Storage.setItemAsync(QUEUE_KEY, JSON.stringify(data));
   },
 
@@ -140,10 +134,10 @@ const EventuallyQueue = {
    *
    * @function getQueue
    * @name Parse.EventuallyQueue.getQueue
-   * @returns {Promise<Array>}
+   * @returns {Promise<QueueObject[]>}
    * @static
    */
-  async getQueue(): Promise<Array> {
+  async getQueue(): Promise<QueueObject[]> {
     if (dirtyCache) {
       queueCache = JSON.parse((await this.load()) || '[]');
       dirtyCache = false;
@@ -189,7 +183,7 @@ const EventuallyQueue = {
    * @returns {Promise} A promise that is fulfilled when queue is cleared.
    * @static
    */
-  clear(): Promise {
+  clear(): Promise<void> {
     queueCache = [];
     return this.store([]);
   },
@@ -212,10 +206,10 @@ const EventuallyQueue = {
    *
    * @function length
    * @name Parse.EventuallyQueue.length
-   * @returns {number}
+   * @returns {Promise<number>}
    * @static
    */
-  async length(): number {
+  async length(): Promise<number> {
     const queueData = await this.getQueue();
     return queueData.length;
   },
@@ -268,7 +262,7 @@ const EventuallyQueue = {
       // Queued update was overwritten by other request. Do not save
       if (
         typeof object.updatedAt !== 'undefined' &&
-          object.updatedAt > new Date(queueObject.object.createdAt)
+          object.updatedAt > new Date(queueObject.object.createdAt as Date)
       ) {
         return this.remove(queueObject.queueId);
       }
@@ -345,7 +339,7 @@ const EventuallyQueue = {
   },
 
   _setPolling(flag: boolean) {
-    polling = flag;
+    polling = flag as any;
   },
 
   process: {

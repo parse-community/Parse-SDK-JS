@@ -1,5 +1,6 @@
 import CoreManager from './CoreManager';
 import { resolvingPromise } from './promiseUtils';
+import type ParseQuery from './ParseQuery';
 
 /**
  * Creates a new LiveQuery Subscription.
@@ -84,12 +85,21 @@ import { resolvingPromise } from './promiseUtils';
  * });</pre></p>
  */
 class Subscription {
+  id: string | number;
+  query: ParseQuery;
+  sessionToken?: string;
+  subscribePromise: any;
+  unsubscribePromise: any;
+  subscribed: boolean;
+  emitter: any;
+  on: any;
+  emit: any;
   /*
-   * @param {string} id - subscription id
+   * @param {string | number} id - subscription id
    * @param {string} query - query to subscribe to
    * @param {string} sessionToken - optional session token
    */
-  constructor(id, query, sessionToken) {
+  constructor(id: string | number, query: ParseQuery, sessionToken?: string) {
     this.id = id;
     this.query = query;
     this.sessionToken = sessionToken;
@@ -111,7 +121,7 @@ class Subscription {
    *
    * @returns {Promise}
    */
-  unsubscribe(): Promise {
+  unsubscribe(): Promise<void> {
     return CoreManager.getLiveQueryController()
       .getDefaultLiveQueryClient()
       .then(liveQueryClient => {

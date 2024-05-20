@@ -940,13 +940,13 @@ declare class ParseObject {
    *     });</pre></p>
    *
    * @param {string} className The name of the Parse class backing this model.
-   * @param {object} protoProps Instance properties to add to instances of the
+   * @param {object} [protoProps] Instance properties to add to instances of the
    *     class returned from this method.
-   * @param {object} classProps Class properties to add the class returned from
+   * @param {object} [classProps] Class properties to add the class returned from
    *     this method.
    * @returns {Parse.Object} A new subclass of Parse.Object.
    */
-  static extend(className: any, protoProps: any, classProps: any): any;
+  static extend(className: any, protoProps?: any, classProps?: any): any;
   /**
    * Enable single instance objects, where any local objects with the same Id
    * share the same attributes, and stay synchronized with each other.

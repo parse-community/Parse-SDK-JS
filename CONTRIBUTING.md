@@ -98,7 +98,6 @@ Parse Community has a [responsible Vulnerability Disclosure Program](https://git
 ## Coding Style
 
 * Most importantly, match the existing code style as much as possible.
-* We use [Flow](http://flowtype.org/) and ES6 for this codebase. Use modern syntax whenever possible.
 * Keep lines within 80 characters.
 * Always end lines with semicolons.
 

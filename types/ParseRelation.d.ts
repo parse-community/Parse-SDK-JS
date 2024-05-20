@@ -1,4 +1,5 @@
-export default ParseRelation;
+import type ParseObject from './ParseObject';
+import type ParseQuery from './ParseQuery';
 /**
  * Creates a new Relation for the given parent object and key. This
  * constructor should rarely be used directly, but rather created by
@@ -13,14 +14,14 @@ export default ParseRelation;
  * @alias Parse.Relation
  */
 declare class ParseRelation {
+  parent?: ParseObject;
+  key?: string;
+  targetClassName?: string | null;
   /**
    * @param {Parse.Object} parent The parent of this relation.
    * @param {string} key The key for this relation on the parent.
    */
-  constructor(parent: ParseObject | null, key: string | null);
-  parent: ParseObject | null;
-  key: string | null;
-  targetClassName: string | null;
+  constructor(parent?: ParseObject, key?: string);
   _ensureParentAndKey(parent: ParseObject, key: string): void;
   /**
    * Adds a Parse.Object or an array of Parse.Objects to the relation.
@@ -52,5 +53,4 @@ declare class ParseRelation {
    */
   query(): ParseQuery;
 }
-import ParseObject from './ParseObject';
-import ParseQuery from './ParseQuery';
+export default ParseRelation;

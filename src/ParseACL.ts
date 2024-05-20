@@ -1,7 +1,3 @@
-/**
- * @flow
- */
-
 import CoreManager from './CoreManager';
 import type ParseRole from './ParseRole';
 import type ParseUser from './ParseUser';
@@ -36,8 +32,8 @@ class ParseACL {
     if (arg1 && typeof arg1 === 'object') {
       const ParseUser = CoreManager.getParseUser();
       if (arg1 instanceof ParseUser) {
-        this.setReadAccess(arg1, true);
-        this.setWriteAccess(arg1, true);
+        this.setReadAccess(arg1 as ParseUser, true);
+        this.setWriteAccess(arg1 as ParseUser, true);
       } else {
         for (const userId in arg1) {
           const accessList = arg1[userId];
@@ -105,9 +101,9 @@ class ParseACL {
     const ParseRole = CoreManager.getParseRole();
     const ParseUser = CoreManager.getParseUser();
     if (userId instanceof ParseUser) {
-      userId = userId.id;
+      userId = (userId as ParseUser).id!;
     } else if (userId instanceof ParseRole) {
-      const name = userId.getName();
+      const name = (userId as ParseRole).getName();
       if (!name) {
         throw new TypeError('Role must have a name');
       }
@@ -144,18 +140,18 @@ class ParseACL {
     const ParseRole = CoreManager.getParseRole();
     const ParseUser = CoreManager.getParseUser();
     if (userId instanceof ParseUser) {
-      userId = userId.id;
+      userId = (userId as ParseUser).id!;
       if (!userId) {
         throw new Error('Cannot get access for a ParseUser without an ID');
       }
     } else if (userId instanceof ParseRole) {
-      const name = userId.getName();
+      const name = (userId as ParseRole).getName();
       if (!name) {
         throw new TypeError('Role must have a name');
       }
       userId = 'role:' + name;
     }
-    const permissions = this.permissionsById[userId];
+    const permissions = this.permissionsById[userId as string];
     if (!permissions) {
       return false;
     }
@@ -257,7 +253,7 @@ class ParseACL {
     const ParseRole = CoreManager.getParseRole();
     if (role instanceof ParseRole) {
       // Normalize to the String name
-      role = role.getName();
+      role = (role as ParseRole).getName()!;
     }
     if (typeof role !== 'string') {
       throw new TypeError('role must be a ParseRole or a String');
@@ -278,7 +274,7 @@ class ParseACL {
     const ParseRole = CoreManager.getParseRole();
     if (role instanceof ParseRole) {
       // Normalize to the String name
-      role = role.getName();
+      role = (role as ParseRole).getName()!;
     }
     if (typeof role !== 'string') {
       throw new TypeError('role must be a ParseRole or a String');
@@ -298,7 +294,7 @@ class ParseACL {
     const ParseRole = CoreManager.getParseRole();
     if (role instanceof ParseRole) {
       // Normalize to the String name
-      role = role.getName();
+      role = (role as ParseRole).getName()!;
     }
     if (typeof role !== 'string') {
       throw new TypeError('role must be a ParseRole or a String');
@@ -318,7 +314,7 @@ class ParseACL {
     const ParseRole = CoreManager.getParseRole();
     if (role instanceof ParseRole) {
       // Normalize to the String name
-      role = role.getName();
+      role = (role as ParseRole).getName()!;
     }
     if (typeof role !== 'string') {
       throw new TypeError('role must be a ParseRole or a String');

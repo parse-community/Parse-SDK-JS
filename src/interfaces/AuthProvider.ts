@@ -1,9 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /**
- * @flow
- */
-
-/**
  * Interface declaration for Authentication Providers
  *
  * @interface AuthProvider

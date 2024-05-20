@@ -3,7 +3,6 @@
   "extends": [
     "eslint:recommended",
     "plugin:jsdoc/recommended",
-    "plugin:flowtype/recommended",
     "plugin:@typescript-eslint/recommended"
   ],
   "env": {
@@ -15,7 +14,6 @@
     "wx": true 
   },
   "plugins": [
-    "flowtype",
     "jsdoc",
     "@typescript-eslint"
   ],
@@ -46,7 +44,6 @@
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
-    "flowtype/no-types-missing-file-annotation": 0,
     "jsdoc/require-jsdoc": 0,
     "jsdoc/require-returns-description": 0,
     "jsdoc/require-param-description": 0,
@@ -57,15 +54,6 @@
       "error",
       {
         "allowExtraTrailingParamDocs": true
-      }
-    ],
-    "jsdoc/check-tag-names": [
-      "error",
-      {
-        "definedTags": [
-          "flow",
-          "flow-weak"
-        ]
       }
     ],
     "jsdoc/no-undefined-types": [
