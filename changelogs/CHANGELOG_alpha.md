@@ -1,3 +1,10 @@
+# [5.2.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/5.2.0-alpha.1...5.2.0-alpha.2) (2024-06-07)
+
+
+### Bug Fixes
+
+* Duplicate pending operations on nested fields ([#2162](https://github.com/parse-community/Parse-SDK-JS/issues/2162)) ([df6df7c](https://github.com/parse-community/Parse-SDK-JS/commit/df6df7c68b9871f0b744958a489a54f1623943a9))
+
 # [5.2.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.1-alpha.1...5.2.0-alpha.1) (2024-05-17)
 
 
