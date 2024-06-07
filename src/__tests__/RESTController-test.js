@@ -352,7 +352,6 @@ describe('RESTController', () => {
   });
 
   it('idempotency - sends requestId header', async () => {
-    CoreManager.set('IDEMPOTENCY', true);
     const requestIdHeader = header => 'X-Parse-Request-Id' === header[0];
     const xhr = {
       setRequestHeader: jest.fn(),
@@ -364,21 +363,19 @@ describe('RESTController', () => {
     });
     RESTController.request('POST', 'classes/MyObject', {}, {});
     await flushPromises();
-    expect(xhr.setRequestHeader.mock.calls.filter(requestIdHeader)).toEqual([
-      ['X-Parse-Request-Id', '1000'],
-    ]);
+    const [header, requestId] = xhr.setRequestHeader.mock.calls.filter(requestIdHeader)[0];
+    expect(header).toBe('X-Parse-Request-Id');
+    expect(requestId).toBeDefined();
     xhr.setRequestHeader.mockClear();
 
     RESTController.request('PUT', 'classes/MyObject', {}, {});
     await flushPromises();
-    expect(xhr.setRequestHeader.mock.calls.filter(requestIdHeader)).toEqual([
-      ['X-Parse-Request-Id', '1001'],
-    ]);
-    CoreManager.set('IDEMPOTENCY', false);
+    const [nextHeader, nextRequestId] = xhr.setRequestHeader.mock.calls.filter(requestIdHeader)[0];
+    expect(nextHeader).toBe('X-Parse-Request-Id');
+    expect(nextRequestId).toBe((Number(requestId) + 1).toString());
   });
 
   it('idempotency - handle requestId on network retries', done => {
-    CoreManager.set('IDEMPOTENCY', true);
     RESTController._setXHR(
       mockXHR([{ status: 500 }, { status: 500 }, { status: 200, response: { success: true } }])
     );
@@ -394,11 +391,9 @@ describe('RESTController', () => {
       done();
     });
     jest.runAllTimers();
-    CoreManager.set('IDEMPOTENCY', false);
   });
 
   it('idempotency - should properly handle url method not POST / PUT', () => {
-    CoreManager.set('IDEMPOTENCY', true);
     const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
@@ -412,7 +407,6 @@ describe('RESTController', () => {
       header => 'X-Parse-Request-Id' === header[0]
     );
     expect(requestIdHeaders.length).toBe(0);
-    CoreManager.set('IDEMPOTENCY', false);
   });
 
   it('handles aborted requests', done => {

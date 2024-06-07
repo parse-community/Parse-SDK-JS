@@ -75,12 +75,12 @@ describe('Parse module', () => {
   });
 
   it('can set idempotency', () => {
-    expect(Parse.idempotency).toBe(false);
-    Parse.idempotency = true;
-    expect(CoreManager.get('IDEMPOTENCY')).toBe(true);
     expect(Parse.idempotency).toBe(true);
     Parse.idempotency = false;
+    expect(CoreManager.get('IDEMPOTENCY')).toBe(false);
     expect(Parse.idempotency).toBe(false);
+    Parse.idempotency = true;
+    expect(Parse.idempotency).toBe(true);
   });
 
   it('can set LocalDatastoreController', () => {

@@ -22,7 +22,12 @@ function DuplicateXHR(requestId) {
 
 describe('Idempotency', () => {
   beforeEach(() => {
+    Parse.idempotency = false;
     RESTController._setXHR(XHR);
+  });
+
+  afterEach(() => {
+    Parse.idempotency = true;
   });
 
   it('handle duplicate cloud code function request', async () => {
