@@ -291,7 +291,7 @@ class LiveQueryClient {
       const query = subscription.query;
       const queryJSON = query.toJSON();
       const where = queryJSON.where;
-      const fields = queryJSON.keys ? queryJSON.keys.split(',') : undefined;
+      const keys = queryJSON.keys ? queryJSON.keys.split(',') : undefined;
       const className = query.className;
       const sessionToken = subscription.sessionToken;
       const subscribeRequest = {
@@ -300,7 +300,7 @@ class LiveQueryClient {
         query: {
           className,
           where,
-          fields,
+          keys,
         },
         sessionToken: undefined as string | undefined,
       };
