@@ -90,6 +90,42 @@ describe('Parse LiveQuery', () => {
     await promise;
   });
 
+  it('can resubscribe', async () => {
+    const client = new Parse.LiveQueryClient({
+      applicationId: 'integration',
+      serverURL: 'ws://localhost:1337',
+      javascriptKey: null,
+      masterKey: null,
+      sessionToken: null,
+    });
+    client.open();
+    const resubscribeSpy = spyOn(client, 'resubscribe').and.callThrough();
+    const consoleSpy = spyOn(console, 'error').and.callFake(() => {});
+    const subscribeRequest = {
+      op: 'subscribe',
+      requestId: 1,
+      query: {
+        className: 'TestObject',
+        where: { objectId: 'HEXkuHFm0D' },
+        keys: ['foo', 'objectId'],
+        watch: undefined,
+        unknownField: 'throws Additional properties not allowed error',
+      },
+      sessionToken: undefined,
+    };
+    await client.connectPromise;
+    client.socket.send(JSON.stringify(subscribeRequest));
+    await sleep(1000);
+    expect(resubscribeSpy).toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'LiveQuery reconnecting with error:',
+      'Additional properties not allowed',
+      'code:',
+      1
+    );
+    await client.close();
+  });
+
   it('can subscribe to multiple queries', async () => {
     const objectA = new TestObject();
     const objectB = new TestObject();

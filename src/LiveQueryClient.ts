@@ -55,6 +55,7 @@ const SUBSCRIPTION_EMMITER_TYPES = {
   DELETE: 'delete',
 };
 
+// Exponentially-growing random delay
 const generateInterval = k => {
   return Math.random() * Math.min(30, Math.pow(2, k) - 1) * 1000;
 };
@@ -291,7 +292,8 @@ class LiveQueryClient {
       const query = subscription.query;
       const queryJSON = query.toJSON();
       const where = queryJSON.where;
-      const fields = queryJSON.keys ? queryJSON.keys.split(',') : undefined;
+      const keys = queryJSON.keys?.split(',');
+      const watch = queryJSON.watch?.split(',');
       const className = query.className;
       const sessionToken = subscription.sessionToken;
       const subscribeRequest = {
@@ -300,7 +302,8 @@ class LiveQueryClient {
         query: {
           className,
           where,
-          fields,
+          keys,
+          watch,
         },
         sessionToken: undefined as string | undefined,
       };
@@ -347,7 +350,6 @@ class LiveQueryClient {
   }
 
   _handleWebSocketOpen() {
-    this.attempts = 1;
     const connectRequest = {
       op: OP_TYPES.CONNECT,
       applicationId: this.applicationId,
@@ -387,6 +389,7 @@ class LiveQueryClient {
       break;
     case OP_EVENTS.SUBSCRIBED:
       if (subscription) {
+        this.attempts = 1;
         subscription.subscribed = true;
         subscription.subscribePromise.resolve();
         setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN, response), 200);
@@ -410,6 +413,7 @@ class LiveQueryClient {
         this.additionalProperties = false;
       }
       if (data.reconnect) {
+        console.error('LiveQuery reconnecting with error:', data.error, 'code:', data.code);
         this._handleReconnect();
       }
       break;
@@ -485,7 +489,6 @@ class LiveQueryClient {
     if (this.state === CLIENT_STATE.DISCONNECTED) {
       return;
     }
-
     this.state = CLIENT_STATE.RECONNECTING;
     const time = generateInterval(this.attempts);
 
@@ -493,11 +496,9 @@ class LiveQueryClient {
     // we're unable to distinguish different between close/error when we're unable to reconnect therefore
     // we try to reconnect in both cases
     // server side ws and browser WebSocket behave differently in when close/error get triggered
-
     if (this.reconnectHandle) {
       clearTimeout(this.reconnectHandle);
     }
-
     this.reconnectHandle = setTimeout(
       (() => {
         this.attempts++;
