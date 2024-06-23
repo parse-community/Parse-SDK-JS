@@ -104,14 +104,12 @@ const destroyAliveConnections = function () {
   }
 };
 let parseServer;
-let server;
 
 const reconfigureServer = async (changedConfiguration = {}) => {
-  if (server) {
+  if (parseServer) {
     await parseServer.handleShutdown();
-    await new Promise(resolve => server.close(resolve));
+    await new Promise(resolve => parseServer.server.close(resolve));
     parseServer = undefined;
-    server = undefined;
     return reconfigureServer(changedConfiguration);
   }
 
@@ -121,6 +119,10 @@ const reconfigureServer = async (changedConfiguration = {}) => {
     port,
   });
   parseServer = await ParseServer.startApp(newConfiguration);
+  if (parseServer.config.state === 'initialized') {
+    console.error('Failed to initialize Parse Server');
+    await reconfigureServer(newConfiguration);
+  }
   const app = parseServer.expressApp;
   for (const fileName of ['parse.js', 'parse.min.js']) {
     const file = fs.readFileSync(path.resolve(__dirname, `./../../dist/${fileName}`)).toString();
@@ -147,8 +149,7 @@ const reconfigureServer = async (changedConfiguration = {}) => {
       res.send('{}');
     });
   });
-  server = parseServer.server;
-  server.on('connection', connection => {
+  parseServer.server.on('connection', connection => {
     const key = `${connection.remoteAddress}:${connection.remotePort}`;
     openConnections[key] = connection;
     connection.on('close', () => {
