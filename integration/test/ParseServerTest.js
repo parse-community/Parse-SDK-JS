@@ -6,6 +6,7 @@ describe('ParseServer', () => {
   it('can reconfigure server', async () => {
     const parseServer = await reconfigureServer({ serverURL: 'www.google.com' });
     assert.strictEqual(parseServer.config.serverURL, 'www.google.com');
+    await parseServer.handleShutdown();
     await new Promise(resolve => parseServer.server.close(resolve));
     await reconfigureServer();
   });
