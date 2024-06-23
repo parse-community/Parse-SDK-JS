@@ -413,7 +413,6 @@ class LiveQueryClient {
         this.additionalProperties = false;
       }
       if (data.reconnect) {
-        console.error('LiveQuery reconnecting with error:', data.error, 'code:', data.code);
         this._handleReconnect();
       }
       break;

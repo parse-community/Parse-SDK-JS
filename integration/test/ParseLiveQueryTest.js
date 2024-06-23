@@ -100,7 +100,6 @@ describe('Parse LiveQuery', () => {
     });
     client.open();
     const resubscribeSpy = spyOn(client, 'resubscribe').and.callThrough();
-    const consoleSpy = spyOn(console, 'error').and.callFake(() => {});
     const subscribeRequest = {
       op: 'subscribe',
       requestId: 1,
@@ -117,12 +116,6 @@ describe('Parse LiveQuery', () => {
     client.socket.send(JSON.stringify(subscribeRequest));
     await sleep(1000);
     expect(resubscribeSpy).toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'LiveQuery reconnecting with error:',
-      'Additional properties not allowed',
-      'code:',
-      1
-    );
     await client.close();
   });
 

@@ -748,7 +748,6 @@ describe('LiveQueryClient', () => {
       expect(error).toEqual(data.error);
     });
     const spy = jest.spyOn(liveQueryClient, '_handleReconnect');
-    jest.spyOn(console, 'error').mockImplementationOnce(() => {});
     try {
       liveQueryClient._handleWebSocketMessage(event);
       await liveQueryClient.connectPromise;
