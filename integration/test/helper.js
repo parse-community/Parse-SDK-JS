@@ -93,16 +93,6 @@ const defaultConfiguration = {
 };
 
 const openConnections = {};
-const destroyAliveConnections = function () {
-  for (const socketId in openConnections) {
-    try {
-      openConnections[socketId].destroy();
-      delete openConnections[socketId];
-    } catch (e) {
-      /* */
-    }
-  }
-};
 let parseServer;
 
 const reconfigureServer = async (changedConfiguration = {}) => {
@@ -176,16 +166,17 @@ beforeAll(async () => {
 
 afterEach(async () => {
   await Parse.User.logOut();
-  // Connection close events are not immediate on node 10+... wait a bit
-  await sleep(0);
-  if (Object.keys(openConnections).length > 0) {
-    console.warn('There were open connections to the server left after the test finished');
-  }
   Parse.Storage._clear();
   await TestUtils.destroyAllDataPermanently(true);
-  destroyAliveConnections();
   if (didChangeConfiguration) {
     await reconfigureServer();
+  }
+});
+
+afterAll(() => {
+  // Jasmine process counts as one open connection
+  if (Object.keys(openConnections).length > 1) {
+    console.warn('There were open connections to the server left after the test finished');
   }
 });
 
