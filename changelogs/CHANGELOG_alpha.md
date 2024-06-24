@@ -1,3 +1,10 @@
+# [5.2.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/5.2.0-alpha.2...5.2.0-alpha.3) (2024-06-24)
+
+
+### Bug Fixes
+
+* `LiveQueryClient.resubscribe` with Parse Server 7 causes many open connections ([#2184](https://github.com/parse-community/Parse-SDK-JS/issues/2184)) ([71b4d17](https://github.com/parse-community/Parse-SDK-JS/commit/71b4d17efa197f6f0bb94105809f32a9adc86ea6))
+
 # [5.2.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/5.2.0-alpha.1...5.2.0-alpha.2) (2024-06-07)
 
 
