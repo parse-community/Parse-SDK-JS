@@ -121,7 +121,7 @@ const reconfigureServer = async (changedConfiguration = {}) => {
   parseServer = await ParseServer.startApp(newConfiguration);
   if (parseServer.config.state === 'initialized') {
     console.error('Failed to initialize Parse Server');
-    await reconfigureServer(newConfiguration);
+    return reconfigureServer(newConfiguration);
   }
   const app = parseServer.expressApp;
   for (const fileName of ['parse.js', 'parse.min.js']) {
