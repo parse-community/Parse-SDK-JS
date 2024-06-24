@@ -3,5 +3,5 @@
 /// <reference path="node.d.ts" />
 /// <reference path="react-native.d.ts" />
 
-import parse from "./Parse";
+import parse from './Parse';
 export default parse;

@@ -944,6 +944,8 @@ describe('LiveQueryClient', () => {
     };
     const query = new ParseQuery('Test');
     query.equalTo('key', 'value');
+    query.select(['key']);
+    query.watch(['key']);
     liveQueryClient.subscribe(query);
     liveQueryClient.connectPromise.resolve();
 
@@ -961,6 +963,8 @@ describe('LiveQueryClient', () => {
         where: {
           key: 'value',
         },
+        keys: ['key'],
+        watch: ['key'],
       },
     });
   });
@@ -978,6 +982,8 @@ describe('LiveQueryClient', () => {
     };
     const query = new ParseQuery('Test');
     query.equalTo('key', 'value');
+    query.select(['key']);
+    query.watch(['key']);
     liveQueryClient.subscribe(query, 'mySessionToken');
     liveQueryClient.connectPromise.resolve();
 
@@ -996,6 +1002,8 @@ describe('LiveQueryClient', () => {
         where: {
           key: 'value',
         },
+        keys: ['key'],
+        watch: ['key'],
       },
     });
   });

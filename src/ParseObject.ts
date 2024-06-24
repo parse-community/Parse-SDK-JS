@@ -31,34 +31,34 @@ import type { AttributeMap, OpsMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
 
 export type Pointer = {
-  __type: string,
-  className: string,
-  objectId?: string,
-  _localId?: string,
+  __type: string;
+  className: string;
+  objectId?: string;
+  _localId?: string;
 };
 
 type SaveParams = {
-  method: string,
-  path: string,
-  body: AttributeMap,
+  method: string;
+  path: string;
+  body: AttributeMap;
 };
 
 export type SaveOptions = FullOptions & {
-  cascadeSave?: boolean,
-  context?: AttributeMap,
-  batchSize?: number,
+  cascadeSave?: boolean;
+  context?: AttributeMap;
+  batchSize?: number;
 };
 
 type FetchOptions = {
-  useMasterKey?: boolean,
-  sessionToken?: string,
-  include?: string | string[],
-  context?: AttributeMap,
-}
+  useMasterKey?: boolean;
+  sessionToken?: string;
+  include?: string | string[];
+  context?: AttributeMap;
+};
 
 // Mapping of class names to constructors, so we can populate objects from the
 // server with appropriate subclasses of ParseObject
-const classMap = {};
+const classMap: AttributeMap = {};
 
 // Global counter for generating unique Ids for non-single-instance objects
 let objectCount = 0;
@@ -104,9 +104,10 @@ class ParseObject {
    * @param {string} className The class name for the object
    * @param {object} attributes The initial set of data to store in the object.
    * @param {object} options The options for this object instance.
+   * @param {boolean} [options.ignoreValidation] Set to `true` ignore any attribute validation errors.
    */
   constructor(
-    className?: string | { className: string, [attr: string]: any },
+    className?: string | { className: string; [attr: string]: any },
     attributes?: { [attr: string]: any },
     options?: { ignoreValidation: boolean }
   ) {
@@ -200,7 +201,7 @@ class ParseObject {
    *
    * @returns {Parse.Object|object}
    */
-  _getStateIdentifier(): ParseObject | { id: string, className: string } {
+  _getStateIdentifier(): ParseObject | { id: string; className: string } {
     if (singleInstance) {
       let id = this.id;
       if (!id) {
@@ -348,10 +349,10 @@ class ParseObject {
     const stateController = CoreManager.getObjectStateController();
     stateController.initializeState(this._getStateIdentifier());
     const decoded: Partial<{
-      createdAt?: Date,
-      updatedAt?: Date,
-      ACL?: any,
-      [key: string]: any,
+      createdAt?: Date;
+      updatedAt?: Date;
+      ACL?: any;
+      [key: string]: any;
     }> = {};
     for (const attr in serverData) {
       if (attr === 'ACL') {
@@ -402,16 +403,16 @@ class ParseObject {
 
   _handleSaveResponse(response: AttributeMap, status: number) {
     const changes: Partial<{
-      createdAt: string,
-      updatedAt: string,
-      [key: string]: any
+      createdAt: string;
+      updatedAt: string;
+      [key: string]: any;
     }> = {};
     let attr;
     const stateController = CoreManager.getObjectStateController();
     const pending = stateController.popPendingState(this._getStateIdentifier());
     for (attr in pending) {
       if (pending[attr] instanceof RelationOp) {
-        changes[attr] = pending[attr].applyTo(undefined, this, attr);
+        changes[attr] = (pending[attr] as RelationOp).applyTo(undefined, this, attr);
       } else if (!(attr in response)) {
         // Only SetOps and UnsetOps should not come back with results
         changes[attr] = pending[attr].applyTo(undefined);
@@ -481,7 +482,12 @@ class ParseObject {
         json[attr] = encode(attrs[attr], false, false, seen, offline);
       }
     }
-
+    const pending = this._getPendingOps();
+    for (const attr in pending[0]) {
+      if (attr.indexOf('.') < 0) {
+        json[attr] = pending[0][attr].toJSON(offline);
+      }
+    }
     if (this.id) {
       json.objectId = this.id;
     }
@@ -933,7 +939,9 @@ class ParseObject {
    * @returns {Parse.Object}
    */
   clone(): any {
-    const clone = new (this.constructor as new (...args: ConstructorParameters<typeof ParseObject>) => this)(this.className);
+    const clone = new (this.constructor as new (
+      ...args: ConstructorParameters<typeof ParseObject>
+    ) => this)(this.className);
     let attributes = this.attributes;
     if (typeof (this.constructor as any).readOnlyAttributes === 'function') {
       const readonly = (this.constructor as any).readOnlyAttributes() || [];
@@ -959,7 +967,9 @@ class ParseObject {
    * @returns {Parse.Object}
    */
   newInstance(): any {
-    const clone = new (this.constructor as new (...args: ConstructorParameters<typeof ParseObject>) => this)(this.className);
+    const clone = new (this.constructor as new (
+      ...args: ConstructorParameters<typeof ParseObject>
+    ) => this)(this.className);
     clone.id = this.id;
     if (singleInstance) {
       // Just return an object with the right id
@@ -1192,7 +1202,10 @@ class ParseObject {
    * @returns {Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetchWithInclude(keys: String | Array<string | Array<string>>, options: RequestOptions): Promise<any> {
+  fetchWithInclude(
+    keys: string | Array<string | Array<string>>,
+    options: RequestOptions
+  ): Promise<any> {
     options = options || {};
     options.include = keys;
     return this.fetch(options);
@@ -1343,7 +1356,7 @@ class ParseObject {
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
     return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
-    });
+    }) as Promise<ParseObject> as Promise<this>;
   }
 
   /**
@@ -1605,7 +1618,7 @@ class ParseObject {
    */
   static fetchAllWithInclude(
     list: Array<ParseObject>,
-    keys: String | Array<string | Array<string>>,
+    keys: string | Array<string | Array<string>>,
     options: RequestOptions
   ) {
     options = options || {};
@@ -1645,7 +1658,7 @@ class ParseObject {
    */
   static fetchAllIfNeededWithInclude(
     list: Array<ParseObject>,
-    keys: String | Array<string | Array<string>>,
+    keys: string | Array<string | Array<string>>,
     options: RequestOptions
   ) {
     options = options || {};
@@ -1938,13 +1951,13 @@ class ParseObject {
    *     });</pre></p>
    *
    * @param {string} className The name of the Parse class backing this model.
-   * @param {object} protoProps Instance properties to add to instances of the
+   * @param {object} [protoProps] Instance properties to add to instances of the
    *     class returned from this method.
-   * @param {object} classProps Class properties to add the class returned from
+   * @param {object} [classProps] Class properties to add the class returned from
    *     this method.
    * @returns {Parse.Object} A new subclass of Parse.Object.
    */
-  static extend(className: any, protoProps: any, classProps: any) {
+  static extend(className: any, protoProps?: any, classProps?: any) {
     if (typeof className !== 'string') {
       if (className && typeof className.className === 'string') {
         return ParseObject.extend(className.className, className, protoProps);
@@ -2210,11 +2223,11 @@ const DefaultController = {
       if (target.length < 1) {
         return Promise.resolve([]);
       }
-      const objs = [];
-      const ids = [];
-      let className = null;
-      const results = [];
-      let error = null;
+      const objs: ParseObject[] = [];
+      const ids: string[] = [];
+      let className: string | null = null;
+      const results: ParseObject[] = [];
+      let error: ParseError | null = null;
       target.forEach(el => {
         if (error) {
           return;
@@ -2232,7 +2245,7 @@ const DefaultController = {
           error = new ParseError(ParseError.MISSING_OBJECT_ID, 'All objects must have an ID');
         }
         if (forceFetch || !el.isDataAvailable()) {
-          ids.push(el.id);
+          ids.push(el.id!);
           objs.push(el);
         }
         results.push(el);
@@ -2308,7 +2321,7 @@ const DefaultController = {
   async destroy(
     target: ParseObject | Array<ParseObject>,
     options: RequestOptions
-  ): Promise<ParseObject | Array<ParseObject>>{
+  ): Promise<ParseObject | Array<ParseObject>> {
     const batchSize =
       options && options.batchSize ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
@@ -2385,7 +2398,10 @@ const DefaultController = {
     return Promise.resolve(target);
   },
 
-  save(target: ParseObject | Array<ParseObject | ParseFile>, options: RequestOptions): Promise<ParseObject | Array<ParseObject> | ParseFile> {
+  save(
+    target: ParseObject | null | Array<ParseObject | ParseFile>,
+    options: RequestOptions
+  ): Promise<ParseObject | Array<ParseObject> | ParseFile | undefined> {
     const batchSize =
       options && options.batchSize ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
@@ -2404,13 +2420,14 @@ const DefaultController = {
 
       let unsaved = target.concat();
       for (let i = 0; i < target.length; i++) {
-        if (target[i] instanceof ParseObject) {
-          unsaved = unsaved.concat(unsavedChildren(target[i], true));
+        const target_i = target[i];
+        if (target_i instanceof ParseObject) {
+          unsaved = unsaved.concat(unsavedChildren(target_i, true));
         }
       }
       unsaved = unique(unsaved);
 
-      const filesSaved: Array<ParseFile> = [];
+      const filesSaved: Array<Promise<ParseFile> | undefined> = [];
       let pending: Array<ParseObject> = [];
       unsaved.forEach(el => {
         if (el instanceof ParseFile) {
@@ -2452,11 +2469,11 @@ const DefaultController = {
 
             // Queue up tasks for each object in the batch.
             // When every task is ready, the API request will execute
-            const batchReturned = new resolvingPromise();
-            const batchReady = [];
-            const batchTasks = [];
+            const batchReturned = resolvingPromise();
+            const batchReady: ReturnType<typeof resolvingPromise<void>>[] = [];
+            const batchTasks: Promise<void>[] = [];
             batch.forEach((obj, index) => {
-              const ready = new resolvingPromise();
+              const ready = resolvingPromise<void>();
               batchReady.push(ready);
               const task = function () {
                 ready.resolve();
@@ -2527,7 +2544,7 @@ const DefaultController = {
       // generate _localId in case if cascadeSave=false
       target._getId();
       const localId = target._localId;
-      // copying target lets Flow guarantee the pointer isn't modified elsewhere
+      // copying target lets guarantee the pointer isn't modified elsewhere
       const targetCopy = target;
       const task = function () {
         const params = targetCopy._getSaveParams();
@@ -2558,7 +2575,7 @@ const DefaultController = {
         }
       );
     }
-    return Promise.resolve();
+    return Promise.resolve(undefined);
   },
 };
 

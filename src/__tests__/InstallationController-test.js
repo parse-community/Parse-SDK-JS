@@ -44,7 +44,7 @@ describe('InstallationController', () => {
   });
 
   it('permanently stores the installation id', async () => {
-    const iid =  await InstallationController.currentInstallationId();
+    const iid = await InstallationController.currentInstallationId();
     InstallationController._clearCache();
     const i = await InstallationController.currentInstallationId();
     expect(i).toBe(iid);
@@ -76,7 +76,7 @@ describe('InstallationController', () => {
   it('permanently stores the current installation', async () => {
     const iid = 'stored-installation-id';
     InstallationController._setInstallationIdCache(iid);
-    const installation =  await InstallationController.currentInstallation();
+    const installation = await InstallationController.currentInstallation();
     InstallationController._clearCache();
     const i = await InstallationController.currentInstallation();
     expect(i.installationId).toEqual(installation.installationId);

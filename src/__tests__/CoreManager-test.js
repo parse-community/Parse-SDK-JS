@@ -136,19 +136,19 @@ describe('CoreManager', () => {
       'InstallationController must implement currentInstallationId()'
     );
 
-    expect(CoreManager.setInstallationController.bind(null, {
-      currentInstallationId: function () {},
-      currentInstallation: function () {},
-    })).toThrow(
-      'InstallationController must implement updateInstallationOnDisk()'
-    );
+    expect(
+      CoreManager.setInstallationController.bind(null, {
+        currentInstallationId: function () {},
+        currentInstallation: function () {},
+      })
+    ).toThrow('InstallationController must implement updateInstallationOnDisk()');
 
-    expect(CoreManager.setInstallationController.bind(null, {
-      currentInstallationId: function () {},
-      updateInstallationOnDisk: function () {},
-    })).toThrow(
-      'InstallationController must implement currentInstallation()'
-    );
+    expect(
+      CoreManager.setInstallationController.bind(null, {
+        currentInstallationId: function () {},
+        updateInstallationOnDisk: function () {},
+      })
+    ).toThrow('InstallationController must implement currentInstallation()');
 
     expect(
       CoreManager.setInstallationController.bind(null, {

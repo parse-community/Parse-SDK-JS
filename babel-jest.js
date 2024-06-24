@@ -8,5 +8,4 @@ module.exports = babelJest.createTransformer({
     useBuiltIns: 'entry',
     corejs: 3,
   }]],
-  plugins: ['@babel/plugin-transform-flow-comments'],
 });

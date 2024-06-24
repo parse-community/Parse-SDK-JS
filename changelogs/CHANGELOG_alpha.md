@@ -1,3 +1,31 @@
+# [5.2.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/5.2.0-alpha.2...5.2.0-alpha.3) (2024-06-24)
+
+
+### Bug Fixes
+
+* `LiveQueryClient.resubscribe` with Parse Server 7 causes many open connections ([#2184](https://github.com/parse-community/Parse-SDK-JS/issues/2184)) ([71b4d17](https://github.com/parse-community/Parse-SDK-JS/commit/71b4d17efa197f6f0bb94105809f32a9adc86ea6))
+
+# [5.2.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/5.2.0-alpha.1...5.2.0-alpha.2) (2024-06-07)
+
+
+### Bug Fixes
+
+* Duplicate pending operations on nested fields ([#2162](https://github.com/parse-community/Parse-SDK-JS/issues/2162)) ([df6df7c](https://github.com/parse-community/Parse-SDK-JS/commit/df6df7c68b9871f0b744958a489a54f1623943a9))
+
+# [5.2.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.1-alpha.1...5.2.0-alpha.1) (2024-05-17)
+
+
+### Features
+
+* Support dot notation on array fields ([#2120](https://github.com/parse-community/Parse-SDK-JS/issues/2120)) ([25ec684](https://github.com/parse-community/Parse-SDK-JS/commit/25ec684bf01cf9cd616ceff6f5d30e2e7fb83a5a))
+
+## [5.1.1-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0...5.1.1-alpha.1) (2024-05-16)
+
+
+### Bug Fixes
+
+* `Parse.Installation` not working when installation is deleted on server ([#2126](https://github.com/parse-community/Parse-SDK-JS/issues/2126)) ([22360b4](https://github.com/parse-community/Parse-SDK-JS/commit/22360b4dc96ca7ebfcc2441855456b241bf450ac))
+
 # [5.1.0-alpha.11](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0-alpha.10...5.1.0-alpha.11) (2024-05-16)
 
 

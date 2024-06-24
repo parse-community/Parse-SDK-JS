@@ -32,7 +32,7 @@ describe('Parse React Native', () => {
 
   it('can log in a user', async () => {
     // Handle Storage Controller
-    await Parse.User.signUp('asdf', 'zxcv')
+    await Parse.User.signUp('asdf', 'zxcv');
     const user = await Parse.User.logIn('asdf', 'zxcv');
     expect(user.get('username')).toBe('asdf');
     expect(user.existed()).toBe(true);
@@ -86,7 +86,8 @@ describe('Parse React Native', () => {
     // Handle WebSocket Controller
     const object = new Parse.Object('TestObject');
     await object.save();
-    const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
 
     const query = new Parse.Query('TestObject');
     query.equalTo('objectId', object.id);
