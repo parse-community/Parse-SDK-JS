@@ -5,7 +5,6 @@ jasmine.getEnv().addReporter(new SpecReporter());
 
 const ParseServer = require('parse-server').default;
 const CustomAuth = require('./CustomAuth');
-const sleep = require('./sleep');
 const { TestUtils } = require('parse-server');
 const Parse = require('../../node');
 const fs = require('fs');
