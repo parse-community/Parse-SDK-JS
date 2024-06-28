@@ -323,6 +323,17 @@ describe('ObjectStateMutations', () => {
     expect(objectCache).toEqual({ items: '[{"count":20},{"count":5}]' });
   });
 
+  it('can commit json array with missing indexes', () => {
+    const serverData = {};
+    const objectCache = {};
+    ObjectStateMutations.commitServerChanges(serverData, objectCache, {
+      sentPerUTCOffset: { '1': { count: 20 } },
+    });
+    // Should not transform to an array
+    expect(serverData).toEqual({ sentPerUTCOffset: { '1': { count: 20 } } });
+    expect(objectCache).toEqual({ sentPerUTCOffset: '{"1":{"count":20}}' });
+  });
+
   it('can generate a default state for implementations', () => {
     expect(ObjectStateMutations.defaultState()).toEqual({
       serverData: {},
