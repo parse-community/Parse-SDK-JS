@@ -191,7 +191,8 @@ export function commitServerChanges(
       typeof val === 'object' &&
       !Array.isArray(val) &&
       Object.keys(val).length > 0 &&
-      Object.keys(val).some(k => !isNaN(parseInt(k)))
+      Object.keys(val).some(k => !isNaN(parseInt(k))) &&
+      !['sentPerUTCOffset', 'failedPerUTCOffset'].includes(attr)
     ) {
       val = Object.values(val);
     }
