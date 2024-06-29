@@ -1,3 +1,10 @@
+# [5.2.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/5.2.0-alpha.3...5.2.0-alpha.4) (2024-06-28)
+
+
+### Bug Fixes
+
+* Dot notation on JSON arrays doesn't work on `PushStatus` offset fields ([#2194](https://github.com/parse-community/Parse-SDK-JS/issues/2194)) ([e0eb6f0](https://github.com/parse-community/Parse-SDK-JS/commit/e0eb6f04e086da4628a9706b17909d11e5f06210))
+
 # [5.2.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/5.2.0-alpha.2...5.2.0-alpha.3) (2024-06-24)
 
 
