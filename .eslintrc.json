@@ -3,19 +3,19 @@
   "extends": [
     "eslint:recommended",
     "plugin:jsdoc/recommended",
-    "plugin:flowtype/recommended"
+    "plugin:@typescript-eslint/recommended"
   ],
   "env": {
     "node": true,
     "es6": true
   },
-  "parser": "@babel/eslint-parser",
+  "parser": "@typescript-eslint/parser",
   "globals": { 
     "wx": true 
   },
   "plugins": [
-    "flowtype",
-    "jsdoc"
+    "jsdoc",
+    "@typescript-eslint"
   ],
   "parserOptions": {
     "ecmaVersion": 6,
@@ -36,7 +36,14 @@
     "no-console": 0,
     "no-prototype-builtins": "off",
     "require-atomic-updates": "off",
-    "flowtype/no-types-missing-file-annotation": 0,
+    "prefer-spread": "off",
+    "prefer-rest-params": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/triple-slash-reference": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-var-requires": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
     "jsdoc/require-jsdoc": 0,
     "jsdoc/require-returns-description": 0,
     "jsdoc/require-param-description": 0,
@@ -47,15 +54,6 @@
       "error",
       {
         "allowExtraTrailingParamDocs": true
-      }
-    ],
-    "jsdoc/check-tag-names": [
-      "error",
-      {
-        "definedTags": [
-          "flow",
-          "flow-weak"
-        ]
       }
     ],
     "jsdoc/no-undefined-types": [

@@ -1,4 +1,3 @@
-/* global File */
 jest.autoMockOff();
 jest.mock('http');
 jest.mock('https');
@@ -20,12 +19,12 @@ const mockLocalDatastore = {
     if (!mockLocalDatastore.isEnabled) {
       return;
     }
-    /* eslint-disable no-unused-vars */
     // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     const objectKey = mockLocalDatastore.getKeyForObject(object);
   }),
   _updateObjectIfPinned: jest.fn(),
-  getKeyForObject: jest.fn((object) => {
+  getKeyForObject: jest.fn(object => {
     // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
     const OBJECT_PREFIX = 'Parse_LDS_';
     const objectId = object.objectId || object._getId();

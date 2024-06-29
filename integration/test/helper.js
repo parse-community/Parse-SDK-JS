@@ -5,7 +5,6 @@ jasmine.getEnv().addReporter(new SpecReporter());
 
 const ParseServer = require('parse-server').default;
 const CustomAuth = require('./CustomAuth');
-const sleep = require('./sleep');
 const { TestUtils } = require('parse-server');
 const Parse = require('../../node');
 const fs = require('fs');
@@ -93,25 +92,13 @@ const defaultConfiguration = {
 };
 
 const openConnections = {};
-const destroyAliveConnections = function () {
-  for (const socketId in openConnections) {
-    try {
-      openConnections[socketId].destroy();
-      delete openConnections[socketId];
-    } catch (e) {
-      /* */
-    }
-  }
-};
 let parseServer;
-let server;
 
 const reconfigureServer = async (changedConfiguration = {}) => {
-  if (server) {
+  if (parseServer) {
     await parseServer.handleShutdown();
-    await new Promise(resolve => server.close(resolve));
+    await new Promise(resolve => parseServer.server.close(resolve));
     parseServer = undefined;
-    server = undefined;
     return reconfigureServer(changedConfiguration);
   }
 
@@ -121,6 +108,10 @@ const reconfigureServer = async (changedConfiguration = {}) => {
     port,
   });
   parseServer = await ParseServer.startApp(newConfiguration);
+  if (parseServer.config.state === 'initialized') {
+    console.error('Failed to initialize Parse Server');
+    return reconfigureServer(newConfiguration);
+  }
   const app = parseServer.expressApp;
   for (const fileName of ['parse.js', 'parse.min.js']) {
     const file = fs.readFileSync(path.resolve(__dirname, `./../../dist/${fileName}`)).toString();
@@ -147,8 +138,7 @@ const reconfigureServer = async (changedConfiguration = {}) => {
       res.send('{}');
     });
   });
-  server = parseServer.server;
-  server.on('connection', connection => {
+  parseServer.server.on('connection', connection => {
     const key = `${connection.remoteAddress}:${connection.remotePort}`;
     openConnections[key] = connection;
     connection.on('close', () => {
@@ -175,16 +165,17 @@ beforeAll(async () => {
 
 afterEach(async () => {
   await Parse.User.logOut();
-  // Connection close events are not immediate on node 10+... wait a bit
-  await sleep(0);
-  if (Object.keys(openConnections).length > 0) {
-    console.warn('There were open connections to the server left after the test finished');
-  }
   Parse.Storage._clear();
   await TestUtils.destroyAllDataPermanently(true);
-  destroyAliveConnections();
   if (didChangeConfiguration) {
     await reconfigureServer();
+  }
+});
+
+afterAll(() => {
+  // Jasmine process counts as one open connection
+  if (Object.keys(openConnections).length > 1) {
+    console.warn('There were open connections to the server left after the test finished');
   }
 });
 

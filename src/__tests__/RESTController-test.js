@@ -223,8 +223,10 @@ describe('RESTController', () => {
       getResponseHeader: function (header) {
         return headers[header];
       },
-      getAllResponseHeaders: function() {
-        return Object.keys(headers).map(key => `${key}: ${headers[key]}`).join('\n');
+      getAllResponseHeaders: function () {
+        return Object.keys(headers)
+          .map(key => `${key}: ${headers[key]}`)
+          .join('\n');
       },
       send: function () {
         this.status = 200;
@@ -234,7 +236,12 @@ describe('RESTController', () => {
       },
     };
     RESTController._setXHR(XHR);
-    const response = await RESTController.request('GET', 'classes/MyObject', {}, { returnStatus: true });
+    const response = await RESTController.request(
+      'GET',
+      'classes/MyObject',
+      {},
+      { returnStatus: true }
+    );
     expect(response._headers['X-Parse-Job-Status-Id']).toBe('1234');
   });
 
@@ -246,8 +253,10 @@ describe('RESTController', () => {
       getResponseHeader: function (header) {
         return headers[header];
       },
-      getAllResponseHeaders: function() {
-        return Object.keys(headers).map(key => `${key}: ${headers[key]}`).join('\n');
+      getAllResponseHeaders: function () {
+        return Object.keys(headers)
+          .map(key => `${key}: ${headers[key]}`)
+          .join('\n');
       },
       send: function () {
         this.status = 200;
@@ -287,10 +296,10 @@ describe('RESTController', () => {
   it('does not invoke Chrome browser console error on getResponseHeader', async () => {
     const headers = {
       'access-control-expose-headers': 'a, b, c',
-      'a' : 'value',
-      'b' : 'value',
-      'c' : 'value',
-    }
+      a: 'value',
+      b: 'value',
+      c: 'value',
+    };
     const XHR = function () {};
     XHR.prototype = {
       open: function () {},
@@ -299,10 +308,12 @@ describe('RESTController', () => {
         if (Object.keys(headers).includes(key)) {
           return headers[key];
         }
-        throw new Error("Chrome creates a console error here.");
+        throw new Error('Chrome creates a console error here.');
       }),
       getAllResponseHeaders: jest.fn(() => {
-        return Object.keys(headers).map(key => `${key}: ${headers[key]}`).join('\r\n');
+        return Object.keys(headers)
+          .map(key => `${key}: ${headers[key]}`)
+          .join('\r\n');
       }),
       send: function () {
         this.status = 200;
@@ -316,7 +327,6 @@ describe('RESTController', () => {
     expect(XHR.prototype.getAllResponseHeaders.mock.calls.length).toBe(1);
     expect(XHR.prototype.getResponseHeader.mock.calls.length).toBe(4);
   });
-
 
   it('handles invalid header', async () => {
     const XHR = function () {};

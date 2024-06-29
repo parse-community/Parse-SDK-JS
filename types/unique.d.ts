@@ -1,1 +1,1 @@
-export default function unique<T>(arr: T[]): T[];
+export default function unique<T>(arr: Array<T>): Array<T>;

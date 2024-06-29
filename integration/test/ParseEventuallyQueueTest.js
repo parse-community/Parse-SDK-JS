@@ -193,7 +193,8 @@ describe('Parse EventuallyQueue', () => {
   it('can saveEventually', async () => {
     const parseServer = await reconfigureServer();
     const object = new TestObject({ hash: 'saveSecret' });
-    await new Promise((resolve) => parseServer.server.close(resolve));
+    await parseServer.handleShutdown();
+    await new Promise(resolve => parseServer.server.close(resolve));
     await object.saveEventually();
 
     const length = await Parse.EventuallyQueue.length();
@@ -224,15 +225,15 @@ describe('Parse EventuallyQueue', () => {
     const acl = new Parse.ACL(user);
     const object = new TestObject({ hash: 'saveSecret' });
     object.setACL(acl);
-
-    await new Promise((resolve) => parseServer.server.close(resolve));
+    await parseServer.handleShutdown();
+    await new Promise(resolve => parseServer.server.close(resolve));
     await object.saveEventually();
 
     const length = await Parse.EventuallyQueue.length();
     assert(Parse.EventuallyQueue.isPolling());
     assert.strictEqual(length, 1);
 
-    await reconfigureServer({});
+    await reconfigureServer();
 
     while (Parse.EventuallyQueue.isPolling()) {
       await sleep(100);
@@ -250,14 +251,15 @@ describe('Parse EventuallyQueue', () => {
     const parseServer = await reconfigureServer();
     const object = new TestObject({ hash: 'deleteSecret' });
     await object.save();
-    await new Promise((resolve) => parseServer.server.close(resolve));
+    await parseServer.handleShutdown();
+    await new Promise(resolve => parseServer.server.close(resolve));
     await object.destroyEventually();
     const length = await Parse.EventuallyQueue.length();
 
     assert(Parse.EventuallyQueue.isPolling());
     assert.strictEqual(length, 1);
 
-    await reconfigureServer({});
+    await reconfigureServer();
     while (Parse.EventuallyQueue.isPolling()) {
       await sleep(100);
     }
