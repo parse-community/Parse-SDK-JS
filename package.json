@@ -85,7 +85,7 @@
     "mongodb-runner": "5.6.2",
     "parse-server": "7.1.0-alpha.10",
     "prettier": "3.3.2",
-    "puppeteer": "20.4.0",
+    "puppeteer": "22.12.1",
     "regenerator-runtime": "0.14.1",
     "semantic-release": "19.0.5",
     "vinyl-source-stream": "2.0.0"
