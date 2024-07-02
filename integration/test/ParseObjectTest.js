@@ -2056,6 +2056,35 @@ describe('Parse Object', () => {
     expect(obj.get('string')).toBeInstanceOf(String);
   });
 
+  fit('returns correct field values', async () => {
+    const values = [
+      { field: 'string', value: 'string' },
+      { field: 'number', value: 1 },
+      { field: 'boolean', value: true },
+      { field: 'array', value: [1, 2, 3] },
+      { field: 'object1', value: { key: 'value' } },
+      { field: 'object2', value: { key1: 'value1', key2: 'value2' } },
+      { field: 'object3', value: { key1: 1, key2: 2 } },
+      { field: 'object4', value: { '1': 1 } },
+      { field: 'date', value: new Date() },
+      { field: 'file', value: Parse.File.fromJSON({
+        __type: 'File',
+        name: 'name',
+        url: 'http://localhost:8378/1/files/test/name',
+      }) },
+      { field: 'geoPoint', value: new Parse.GeoPoint(40, -30) },
+      { field: 'bytes', value: { __type: 'Bytes', base64: 'ZnJveW8=' } },
+    ];
+    for (const value of values) {
+      const object = new TestObject();
+      object.set(value.field, value.value);
+      await object.save();
+      const query = new Parse.Query(TestObject);
+      const objectAgain = await query.get(object.id);
+      expect(objectAgain.get(value.field)).toEqual(value.value);
+    }
+  });
+
   describe('allowCustomObjectId', () => {
     it('can save without setting an objectId', async () => {
       await reconfigureServer({ allowCustomObjectId: true });
