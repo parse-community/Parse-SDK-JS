@@ -2067,11 +2067,14 @@ describe('Parse Object', () => {
       { field: 'object3', value: { key1: 1, key2: 2 } },
       { field: 'object4', value: { '1': 1 } },
       { field: 'date', value: new Date() },
-      { field: 'file', value: Parse.File.fromJSON({
-        __type: 'File',
-        name: 'name',
-        url: 'http://localhost:8378/1/files/test/name',
-      }) },
+      {
+        field: 'file',
+        value: Parse.File.fromJSON({
+          __type: 'File',
+          name: 'name',
+          url: 'http://localhost:1337/parse/files/integration/name',
+        }),
+      },
       { field: 'geoPoint', value: new Parse.GeoPoint(40, -30) },
       { field: 'bytes', value: { __type: 'Bytes', base64: 'ZnJveW8=' } },
     ];
