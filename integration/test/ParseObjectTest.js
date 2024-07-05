@@ -2188,7 +2188,7 @@ describe('Parse Object', () => {
     });
   });
 
-  it.only('returns correct field values', async () => {
+  fit('returns correct field values', async () => {
     const values = [
       // { field: 'string', value: 'string' },
       // { field: 'number', value: 1 },
@@ -2197,7 +2197,7 @@ describe('Parse Object', () => {
       // { field: 'object', value: { key: 'value' } },
       // { field: 'object', value: { key1: 'value1', key2: 'value2' } },
       // { field: 'object', value: { key1: 1, key2: 2 } },
-      { field: 'object', value: { '1x1': 1, '2': 1, '1': 2 } },
+      { field: 'object', value: { '1x1': 1, '2': 2, '3': 3 } },
       { field: 'object', value: { '1': 1 } },
       // { field: 'date', value: new Date() },
       // {
@@ -2217,7 +2217,6 @@ describe('Parse Object', () => {
       await object.save();
       const query = new Parse.Query(TestObject);
       const objectAgain = await query.get(object.id);
-      console.log('>>>>>>>', objectAgain.get(value.field), value.value)
       expect(objectAgain.get(value.field)).toEqual(value.value);
     }
   });

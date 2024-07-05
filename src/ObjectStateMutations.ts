@@ -177,6 +177,12 @@ function nestedSet(obj, key, value) {
   }
 }
 
+function isJSONArray(val) {
+  const keys = Object.keys(val);
+  const indexes = keys.map((k, i) => `${i}`);
+  return keys.every(k => indexes.includes(k));
+}
+
 export function commitServerChanges(
   serverData: AttributeMap,
   objectCache: ObjectCache,
@@ -191,7 +197,7 @@ export function commitServerChanges(
       typeof val === 'object' &&
       !Array.isArray(val) &&
       Object.keys(val).length > 0 &&
-        Object.keys(val).some(k => k === String(Number(k)) && Number.isInteger(Number(k))) &&
+      isJSONArray(val) &&
       !['sentPerUTCOffset', 'failedPerUTCOffset'].includes(attr)
     ) {
       val = Object.values(val);
