@@ -2187,4 +2187,38 @@ describe('Parse Object', () => {
       Parse.allowCustomObjectId = false;
     });
   });
+
+  it.only('returns correct field values', async () => {
+    const values = [
+      // { field: 'string', value: 'string' },
+      // { field: 'number', value: 1 },
+      // { field: 'boolean', value: true },
+      // { field: 'array', value: [1, 2, 3] },
+      // { field: 'object', value: { key: 'value' } },
+      // { field: 'object', value: { key1: 'value1', key2: 'value2' } },
+      // { field: 'object', value: { key1: 1, key2: 2 } },
+      { field: 'object', value: { '1x1': 1, '2': 1, '1': 2 } },
+      { field: 'object', value: { '1': 1 } },
+      // { field: 'date', value: new Date() },
+      // {
+      //   field: 'file',
+      //   value: Parse.File.fromJSON({
+      //     __type: 'File',
+      //     name: 'name',
+      //     url: 'http://localhost:1337/parse/files/integration/name',
+      //   }),
+      // },
+      // { field: 'geoPoint', value: new Parse.GeoPoint(40, -30) },
+      // { field: 'bytes', value: { __type: 'Bytes', base64: 'ZnJveW8=' } },
+    ];
+    for (const value of values) {
+      const object = new TestObject();
+      object.set(value.field, value.value);
+      await object.save();
+      const query = new Parse.Query(TestObject);
+      const objectAgain = await query.get(object.id);
+      console.log('>>>>>>>', objectAgain.get(value.field), value.value)
+      expect(objectAgain.get(value.field)).toEqual(value.value);
+    }
+  });
 });
