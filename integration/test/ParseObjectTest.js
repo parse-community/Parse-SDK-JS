@@ -2066,6 +2066,7 @@ describe('Parse Object', () => {
       // { field: 'object', value: { key1: 'value1', key2: 'value2' } },
       // { field: 'object', value: { key1: 1, key2: 2 } },
       { field: 'object', value: { '1x1': 1 } },
+      { field: 'object', value: { '1x1': 1, '2': 2 } },
       { field: 'object', value: { '1': 1 } },
       // { field: 'date', value: new Date() },
       // {
