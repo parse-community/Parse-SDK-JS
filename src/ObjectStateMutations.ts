@@ -178,6 +178,7 @@ function nestedSet(obj, key, value) {
 }
 
 function isJSONArray(val) {
+  // Check for JSON array { '0': { something }, '1': { something } }
   const keys = Object.keys(val);
   const indexes = keys.map((k, i) => `${i}`);
   return keys.every(k => indexes.includes(k));
@@ -191,7 +192,6 @@ export function commitServerChanges(
   const ParseObject = CoreManager.getParseObject();
   for (const attr in changes) {
     let val = changes[attr];
-    // Check for JSON array { '0': { something }, '1': { something } }
     if (
       val &&
       typeof val === 'object' &&
