@@ -42,10 +42,10 @@ A library that gives you access to the powerful Parse Server backend from your J
 
 Parse JS SDK is compatible with the following versions of Parse Server.
 
-| Parse JS SDK     | Parse Server |
-|------------------|--------------|
-| >= 4.0.0 < 5.0.0 | <= 6.0.0     |
-| >= 5.0.0         | >= 7.0.0     |
+| Parse JS SDK     | Parse Server     |
+|------------------|------------------|
+| >= 4.0.0 < 5.0.0 | >= 6.0.0 < 7.0.0 |
+| >= 5.0.0         | >= 7.0.0         |
 
 ### Node.js
 
