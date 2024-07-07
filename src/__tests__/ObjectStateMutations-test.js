@@ -319,8 +319,9 @@ describe('ObjectStateMutations', () => {
     ObjectStateMutations.commitServerChanges(serverData, objectCache, {
       items: { '0': { count: 20 }, '1': { count: 5 } },
     });
-    expect(serverData).toEqual({ items: [{ count: 20 }, { count: 5 }] });
-    expect(objectCache).toEqual({ items: '[{"count":20},{"count":5}]' });
+    // Should not transform
+    expect(serverData).toEqual({ items: { '0': { count: 20 }, '1': { count: 5 } } });
+    expect(objectCache).toEqual({ items: '{"0":{"count":20},"1":{"count":5}}' });
   });
 
   it('can commit json array with PushStatus offset fields', () => {
