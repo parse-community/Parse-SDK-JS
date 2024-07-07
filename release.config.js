@@ -6,7 +6,7 @@ const fs = require('fs').promises;
 const path = require('path');
 
 // Get env vars
-const ref = process.env.GITHUB_REF;
+const ref = process.env.GITHUB_REF || '(local)';
 const serverUrl = process.env.GITHUB_SERVER_URL;
 const repository = process.env.GITHUB_REPOSITORY;
 const repositoryUrl = serverUrl + '/' + repository;
@@ -91,7 +91,7 @@ async function config() {
       [
         '@saithodev/semantic-release-backmerge',
         {
-          'branches': [
+          'backmergeBranches': [
             { from: 'beta', to: 'alpha' },
             { from: 'release', to: 'beta' },
           ]
