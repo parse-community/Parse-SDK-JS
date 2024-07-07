@@ -8,7 +8,7 @@
 [![Snyk Badge](https://snyk.io/test/github/parse-community/Parse-SDK-JS/badge.svg)](https://snyk.io/test/github/parse-community/Parse-SDK-JS)
 [![Coverage](http://codecov.io/github/parse-community/Parse-SDK-JS/coverage.svg?branch=alpha)](http://codecov.io/github/parse-community/Parse-SDK-JS?branch=alpha)
 
-[![Node Version](https://img.shields.io/badge/nodejs-18,_20-green.svg?logo=node.js&style=flat)](https://nodejs.org/)
+[![Node Version](https://img.shields.io/badge/nodejs-18,_20,_22-green.svg?logo=node.js&style=flat)](https://nodejs.org/)
 [![auto-release](https://img.shields.io/badge/%F0%9F%9A%80-auto--release-9e34eb.svg)](https://github.com/parse-community/parse-dashboard/releases)
 
 [![npm latest version](https://img.shields.io/npm/v/parse/latest.svg)](https://www.npmjs.com/package/parse)
@@ -53,8 +53,9 @@ Parse JS SDK is continuously tested with the most recent releases of Node.js to 
 
 | Version    | Latest Version | End-of-Life | Compatible |
 |------------|----------------|-------------|------------|
-| Node.js 18 | 18.19.0        | April 2025  | ✅ Yes      |
-| Node.js 20 | 20.10.0        | April 2026  | ✅ Yes      |
+| Node.js 18 | 18.20.3        | April 2025  | ✅ Yes      |
+| Node.js 20 | 20.15.0        | April 2026  | ✅ Yes      |
+| Node.js 22 | 22.4.0         | April 2027  | ✅ Yes      |
 
 ## Getting Started
 
