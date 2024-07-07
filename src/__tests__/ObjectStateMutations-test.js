@@ -313,6 +313,17 @@ describe('ObjectStateMutations', () => {
     expect(serverData).toEqual({ items: [{ count: 15 }, { count: 4 }] });
   });
 
+  it('can commit nested json array changes from the server to empty serverData', () => {
+    const serverData = {};
+    const objectCache = {};
+    ObjectStateMutations.commitServerChanges(serverData, objectCache, {
+      items: { '0': { count: 20 }, '1': { count: 5 } },
+    });
+    // Should not transform
+    expect(serverData).toEqual({ items: { '0': { count: 20 }, '1': { count: 5 } } });
+    expect(objectCache).toEqual({ items: '{"0":{"count":20},"1":{"count":5}}' });
+  });
+
   it('can commit json array with PushStatus offset fields', () => {
     const serverData = {};
     const objectCache = {};
