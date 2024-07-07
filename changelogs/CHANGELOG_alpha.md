@@ -1,3 +1,10 @@
+# [5.3.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.2.0...5.3.0-alpha.1) (2024-07-07)
+
+
+### Features
+
+* Add support for Node 22 ([#2209](https://github.com/parse-community/Parse-SDK-JS/issues/2209)) ([c74fd4c](https://github.com/parse-community/Parse-SDK-JS/commit/c74fd4ce2aa7b0618c3027e1936103d24f2987a7))
+
 # [5.2.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/5.2.0-alpha.3...5.2.0-alpha.4) (2024-06-28)
 
 
