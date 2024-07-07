@@ -2056,11 +2056,11 @@ describe('Parse Object', () => {
     expect(obj.get('string')).toBeInstanceOf(String);
   });
 
-  fit('returns correct field values', async () => {
+  it('returns correct field values', async () => {
     const values = [
-      // { field: 'string', value: 'string' },
-      // { field: 'number', value: 1 },
-      // { field: 'boolean', value: true },
+      { field: 'string', value: 'string' },
+      { field: 'number', value: 1 },
+      { field: 'boolean', value: true },
       { field: 'array', value: [0, 1, 2] },
       { field: 'array', value: [1, 2, 3] },
       { field: 'array', value: [{ '0': 'a' }, 2, 3] },
@@ -2072,17 +2072,17 @@ describe('Parse Object', () => {
       { field: 'object', value: { '0': 0 } },
       { field: 'object', value: { '1': 1 } },
       { field: 'object', value: { '0': { '0': 'a', '1': 'b' } } },
-      // { field: 'date', value: new Date() },
-      // {
-      //   field: 'file',
-      //   value: Parse.File.fromJSON({
-      //     __type: 'File',
-      //     name: 'name',
-      //     url: 'http://localhost:1337/parse/files/integration/name',
-      //   }),
-      // },
-      // { field: 'geoPoint', value: new Parse.GeoPoint(40, -30) },
-      // { field: 'bytes', value: { __type: 'Bytes', base64: 'ZnJveW8=' } },
+      { field: 'date', value: new Date() },
+      {
+        field: 'file',
+        value: Parse.File.fromJSON({
+          __type: 'File',
+          name: 'name',
+          url: 'http://localhost:1337/parse/files/integration/name',
+        }),
+      },
+      { field: 'geoPoint', value: new Parse.GeoPoint(40, -30) },
+      { field: 'bytes', value: { __type: 'Bytes', base64: 'ZnJveW8=' } },
     ];
     for (const value of values) {
       const object = new TestObject();
