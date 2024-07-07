@@ -1,3 +1,14 @@
+# [5.3.0](https://github.com/parse-community/Parse-SDK-JS/compare/5.2.0...5.3.0) (2024-07-07)
+
+
+### Bug Fixes
+
+* `Parse.Object.get` returns array instead of object if key name is number-like ([#2201](https://github.com/parse-community/Parse-SDK-JS/issues/2201)) ([5921ba2](https://github.com/parse-community/Parse-SDK-JS/commit/5921ba248431b197ee1592eae39376132be454a3))
+
+### Features
+
+* Add support for Node 22 ([#2209](https://github.com/parse-community/Parse-SDK-JS/issues/2209)) ([c74fd4c](https://github.com/parse-community/Parse-SDK-JS/commit/c74fd4ce2aa7b0618c3027e1936103d24f2987a7))
+
 # [5.2.0](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0...5.2.0) (2024-06-29)
 
 
