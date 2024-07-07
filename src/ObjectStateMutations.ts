@@ -191,8 +191,7 @@ export function commitServerChanges(
       typeof val === 'object' &&
       !Array.isArray(val) &&
       Object.keys(val).length > 0 &&
-      Object.keys(val).every(k => k === String(Number(k)) && Number.isInteger(Number(k))) &&
-      !['sentPerUTCOffset', 'failedPerUTCOffset'].includes(attr)
+      Object.keys(val).every(k => k === String(Number(k)) && Number.isInteger(Number(k)))
     ) {
       val = Object.values(val);
     }
