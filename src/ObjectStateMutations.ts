@@ -184,18 +184,7 @@ export function commitServerChanges(
 ) {
   const ParseObject = CoreManager.getParseObject();
   for (const attr in changes) {
-    let val = changes[attr];
-    // Check for JSON array { '0': { something }, '1': { something } }
-    if (
-      val &&
-      typeof val === 'object' &&
-      !Array.isArray(val) &&
-      Object.keys(val).length > 0 &&
-      Object.keys(val).some(k => !isNaN(parseInt(k))) &&
-      !['sentPerUTCOffset', 'failedPerUTCOffset'].includes(attr)
-    ) {
-      val = Object.values(val);
-    }
+    const val = changes[attr];
     nestedSet(serverData, attr, val);
     if (
       val &&
