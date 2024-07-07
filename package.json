@@ -127,7 +127,7 @@
     ]
   },
   "engines": {
-    "node": ">=18 <23"
+    "node": "^18 || ^19 || ^20 || ^22"
   },
   "jest": {
     "automock": true,
