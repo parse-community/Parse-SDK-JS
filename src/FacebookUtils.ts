@@ -105,7 +105,7 @@ const FacebookUtils = {
       }
     }
     if (initOptions.status && typeof console !== 'undefined') {
-      const warn = console.warn || console.log || function () {}; // eslint-disable-line no-console
+      const warn = console.warn || console.log || function () {};
       warn.call(
         console,
         'The "status" flag passed into' +

@@ -75,7 +75,7 @@ jest.setMock('../ParseRelation', mockRelation);
 const mockQuery = function (className) {
   this.className = className;
 };
-mockQuery.prototype.containedIn = function (field, ids) {
+mockQuery.prototype.containedIn = function (_field, ids) {
   this.results = [];
   ids.forEach(id => {
     this.results.push(
@@ -117,7 +117,7 @@ const mockLocalDatastore = {
   _serializeObject: jest.fn(),
   _transverseSerializeObject: jest.fn(),
   _destroyObjectIfPinned: jest.fn(),
-  _updateLocalIdForObject: jest.fn((localId, /** @type {ParseObject}*/ object) => {
+  _updateLocalIdForObject: jest.fn((_localId, /** @type {ParseObject}*/ object) => {
     if (!mockLocalDatastore.isEnabled) {
       return;
     }
@@ -3606,16 +3606,14 @@ describe('ParseObject extensions', () => {
   it('can extend object', () => {
     const startExtend = Date.now();
     for (let i = 0; i < 100000; i++) {
-      // eslint-disable-next-line
       const Parent = ParseObject.extend('Parent');
-      // eslint-disable-next-line
+
       const parent = new Parent();
     }
     expect(Date.now() - startExtend).toBeLessThan(200);
 
     const startNew = Date.now();
     for (let i = 0; i < 100000; i++) {
-      // eslint-disable-next-line
       const parent = new ParseObject('Parent');
     }
     expect(Date.now() - startNew).toBeLessThan(200);

@@ -517,84 +517,66 @@ describe('Schema', () => {
       });
   });
 
-  it('invalid field name', done => {
+  it('invalid field name', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addField(null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid field type', done => {
+  it('invalid field type', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addField('name', 'UnknownType');
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid index name', done => {
+  it('invalid index name', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addIndex(null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid index', done => {
+  it('invalid index', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addIndex('name', null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid pointer name', done => {
+  it('invalid pointer name', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addPointer(null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid pointer class', done => {
+  it('invalid pointer class', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addPointer('name', null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid relation name', done => {
+  it('invalid relation name', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addRelation(null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid relation class', done => {
+  it('invalid relation class', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addRelation('name', null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('assert class name', done => {
+  it('assert class name', () => {
     const testSchema = new Parse.Schema();
-    try {
+    expect(function () {
       testSchema.assertClassName();
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 });

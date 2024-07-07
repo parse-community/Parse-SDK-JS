@@ -889,7 +889,7 @@ describe('OfflineQuery', () => {
       validateQuery(query);
 
       expect(true).toBe(true);
-    } catch (e) {
+    } catch (_) {
       // Should not reach here
       expect(false).toEqual(true);
     }

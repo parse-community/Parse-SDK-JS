@@ -105,7 +105,7 @@ describe('React Native StorageController', () => {
 
   it('can handle set error', done => {
     const mockRNError = {
-      setItem(path, value, cb) {
+      setItem(_path, _value, cb) {
         cb('Error Thrown', undefined);
       },
     };
@@ -118,7 +118,7 @@ describe('React Native StorageController', () => {
 
   it('can handle get error', done => {
     const mockRNError = {
-      getItem(path, cb) {
+      getItem(_path, cb) {
         cb('Error Thrown', undefined);
       },
     };
@@ -131,7 +131,7 @@ describe('React Native StorageController', () => {
 
   it('can handle remove error', done => {
     const mockRNError = {
-      removeItem(path, cb) {
+      removeItem(_path, cb) {
         cb('Error Thrown', undefined);
       },
     };

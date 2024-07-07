@@ -2754,7 +2754,7 @@ describe('ParseQuery', () => {
     try {
       const q = new ParseQuery('Item');
       q.aggregate(pipeline).then(() => {});
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -2837,7 +2837,7 @@ describe('ParseQuery', () => {
     };
 
     CoreManager.setQueryController({
-      find: function (name, params, options) {
+      find: function (_name, _params, options) {
         options.requestTask(mockRequestTask);
         return Promise.resolve({
           results: [],

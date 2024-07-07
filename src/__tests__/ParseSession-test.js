@@ -103,7 +103,7 @@ describe('ParseSession', () => {
 
   it('can fetch the full session for the current token', done => {
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('GET');
         expect(path).toBe('sessions/me');
         expect(options).toEqual({

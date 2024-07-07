@@ -181,12 +181,10 @@ const Parse: ParseType = {
       CoreManager.get('IS_NODE') &&
       !process.env.SERVER_RENDERING
     ) {
-      /* eslint-disable no-console */
       console.log(
         "It looks like you're using the browser version of the SDK in a " +
           "node.js environment. You should require('parse/node') instead."
       );
-      /* eslint-enable no-console */
     }
     Parse._initialize(applicationId, javaScriptKey);
   },
@@ -439,7 +437,7 @@ const Parse: ParseType = {
    */
   dumpLocalDatastore() {
     if (!this.LocalDatastore.isEnabled) {
-      console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
+      console.log('Parse.enableLocalDatastore() must be called first');
       return Promise.resolve({});
     } else {
       return Parse.LocalDatastore._getAllContents();
