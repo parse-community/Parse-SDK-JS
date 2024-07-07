@@ -1,3 +1,10 @@
+# [5.3.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0-alpha.1...5.3.0-alpha.2) (2024-07-07)
+
+
+### Bug Fixes
+
+* `Parse.Object.get` returns array instead of object if key name is number-like ([#2201](https://github.com/parse-community/Parse-SDK-JS/issues/2201)) ([5921ba2](https://github.com/parse-community/Parse-SDK-JS/commit/5921ba248431b197ee1592eae39376132be454a3))
+
 # [5.3.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.2.0...5.3.0-alpha.1) (2024-07-07)
 
 
