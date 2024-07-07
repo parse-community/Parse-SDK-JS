@@ -69,8 +69,6 @@ jobs:
         include:
           - name: Node 18
             NODE_VERSION: 18.20.3
-          - name: Node 19
-            NODE_VERSION: 19.9.0
           - name: Node 20
             NODE_VERSION: 20.15.0
           - name: Node 22
