@@ -10,7 +10,7 @@ const StorageController = {
     try {
       // @ts-ignore
       wx.setStorageSync(path, value);
-    } catch (e) {
+    } catch (_) {
       // Quota exceeded
     }
   },

@@ -909,7 +909,7 @@ describe('LocalDatastore (RNDatastoreController)', () => {
 
   it('can handle clear error', async () => {
     const mockStorageError = {
-      multiRemove(keys, cb) {
+      multiRemove(_keys, cb) {
         cb('error thrown');
       },
       getAllKeys(cb) {
@@ -923,7 +923,7 @@ describe('LocalDatastore (RNDatastoreController)', () => {
 
   it('can handle multiget error', async () => {
     const mockStorageError = {
-      multiGet(keys, cb) {
+      multiGet(_keys, cb) {
         cb('error thrown');
       },
       getAllKeys(cb) {

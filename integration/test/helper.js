@@ -115,7 +115,7 @@ const reconfigureServer = async (changedConfiguration = {}) => {
   const app = parseServer.expressApp;
   for (const fileName of ['parse.js', 'parse.min.js']) {
     const file = fs.readFileSync(path.resolve(__dirname, `./../../dist/${fileName}`)).toString();
-    app.get(`/${fileName}`, (req, res) => {
+    app.get(`/${fileName}`, (_req, res) => {
       res.send(`<html><head>
           <meta charset="utf-8">
           <meta http-equiv="X-UA-Compatible" content="IE=edge">

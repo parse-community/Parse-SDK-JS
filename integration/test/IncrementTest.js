@@ -178,7 +178,7 @@ describe('Increment', () => {
     object.save().then(() => {
       try {
         object.increment('not_score');
-      } catch (e) {
+      } catch (_) {
         done();
       }
     });

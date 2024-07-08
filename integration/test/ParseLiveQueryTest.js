@@ -27,7 +27,7 @@ describe('Parse LiveQuery', () => {
     query.equalTo('objectId', object.id);
     const subscription = await query.subscribe();
     const promise = resolvingPromise();
-    subscription.on('update', (object, original, response) => {
+    subscription.on('update', (object, _original, response) => {
       assert.equal(object.get('foo'), 'bar');
       assert.equal(response.installationId, installationId);
       promise.resolve();
@@ -51,7 +51,7 @@ describe('Parse LiveQuery', () => {
     }
     const subscription = client.subscribe(query);
     const promise = resolvingPromise();
-    subscription.on('update', (object, original, response) => {
+    subscription.on('update', (object, _original, response) => {
       assert.equal(object.get('foo'), 'bar');
       assert.equal(response.installationId, installationId);
       promise.resolve();
@@ -427,7 +427,7 @@ describe('Parse LiveQuery', () => {
     query.equalTo('objectId', object.id);
     const subscription = await query.subscribe();
     const promise = resolvingPromise();
-    subscription.on('update', (object, original, response) => {
+    subscription.on('update', (object, _original, response) => {
       assert.equal(object.get('foo'), 'bar');
       assert.equal(response.installationId, installationId);
       promise.resolve();

@@ -269,7 +269,7 @@ describe('ParseLiveQuery', () => {
     try {
       LiveQuery.emit('error');
       expect(true).toBe(true);
-    } catch (error) {
+    } catch (_) {
       // Should not throw error
       expect(false).toBe(true);
     }

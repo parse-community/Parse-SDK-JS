@@ -45,7 +45,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema();
       schema.assertClassName();
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -185,7 +185,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addField(null, 'string');
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -194,7 +194,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addField('testField', 'unknown');
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -212,7 +212,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addIndex(null, { name: 1 });
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -221,7 +221,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addIndex('testIndex', null);
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -230,7 +230,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addPointer(null, 'targetClass');
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -239,7 +239,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addPointer('pointerField', null);
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -248,7 +248,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addRelation(null, 'targetClass');
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -257,7 +257,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addRelation('relationField', null);
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });

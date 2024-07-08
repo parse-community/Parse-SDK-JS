@@ -1947,7 +1947,7 @@ describe('Parse Object', () => {
     const lo = new LimitedObject();
     try {
       lo.set('immutable', 'mutable');
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -1961,7 +1961,7 @@ describe('Parse Object', () => {
     const lo = new LimitedObject();
     try {
       lo.unset('immutable');
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });

@@ -2481,7 +2481,7 @@ function runTest(controller) {
       assert.equal(objAgain.get('owner').get('age'), 21);
       try {
         await Parse.User.logOut();
-      } catch (e) {
+      } catch (_) {
         /* */
       }
     });

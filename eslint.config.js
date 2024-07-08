@@ -1,26 +1,16 @@
-{
-  "root": true,
-  "extends": [
-    "eslint:recommended",
-    "plugin:jsdoc/recommended",
-    "plugin:@typescript-eslint/recommended"
+const eslint = require('@eslint/js');
+const tseslint = require('typescript-eslint');
+const jsdoc = require('eslint-plugin-jsdoc');
+
+module.exports = tseslint.config({
+  files: ['**/*.js', '**/*.ts'],
+  extends: [
+    eslint.configs.recommended,
+    ...tseslint.configs.recommended,
   ],
-  "env": {
-    "node": true,
-    "es6": true
-  },
-  "parser": "@typescript-eslint/parser",
-  "globals": { 
-    "wx": true 
-  },
-  "plugins": [
-    "jsdoc",
-    "@typescript-eslint"
-  ],
-  "parserOptions": {
-    "ecmaVersion": 6,
-    "sourceType": "module",
-    "requireConfigFile": false
+  plugins: {
+    '@typescript-eslint': tseslint.plugin,
+    jsdoc,
   },
   "rules": {
     "indent": ["error", 2],
@@ -44,6 +34,18 @@
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "args": "all",
+        "argsIgnorePattern": "^_",
+        "caughtErrors": "all",
+        "caughtErrorsIgnorePattern": "^_",
+        "destructuredArrayIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "ignoreRestSiblings": true
+      }
+    ],
     "jsdoc/require-jsdoc": 0,
     "jsdoc/require-returns-description": 0,
     "jsdoc/require-param-description": 0,
@@ -67,5 +69,23 @@
         ]
       }
     ]
-  }
-}
+  },
+  languageOptions: {
+    parser: tseslint.parser,
+    globals: {
+      __dirname: true,
+      beforeEach: true,
+      Buffer: true,
+      console: true,
+      describe: true,
+      fail: true,
+      expect: true,
+      global: true,
+      it: true,
+      jasmine: true,
+      process: true,
+      spyOn: true,
+    },
+  },
+});
+
