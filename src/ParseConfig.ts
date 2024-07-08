@@ -128,7 +128,7 @@ function decodePayload(data) {
     if (json && typeof json === 'object') {
       return decode(json);
     }
-  } catch (e) {
+  } catch (_) {
     return null;
   }
 }

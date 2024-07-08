@@ -332,11 +332,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
     // Compare Date Object or Date String
     if (
       toString.call(compareTo) === '[object Date]' ||
-      (typeof compareTo === 'string' &&
-        // @ts-ignore
-        new Date(compareTo) !== 'Invalid Date' &&
-        // @ts-ignore
-        !isNaN(new Date(compareTo)))
+      (typeof compareTo === 'string' && new Date(compareTo).toString() !== 'Invalid Date')
     ) {
       object[key] = new Date(object[key].iso ? object[key].iso : object[key]);
     }
@@ -462,7 +458,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
       // avoid the default
       break;
     case '$select': {
-      const subQueryObjects = objects.filter((obj, index, arr) => {
+      const subQueryObjects = objects.filter((obj, _index, arr) => {
         return matchesQuery(compareTo.query.className, obj, arr, compareTo.query.where);
       });
       for (let i = 0; i < subQueryObjects.length; i += 1) {
@@ -472,7 +468,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
       return false;
     }
     case '$dontSelect': {
-      const subQueryObjects = objects.filter((obj, index, arr) => {
+      const subQueryObjects = objects.filter((obj, _index, arr) => {
         return matchesQuery(compareTo.query.className, obj, arr, compareTo.query.where);
       });
       for (let i = 0; i < subQueryObjects.length; i += 1) {
@@ -482,7 +478,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
       return false;
     }
     case '$inQuery': {
-      const subQueryObjects = objects.filter((obj, index, arr) => {
+      const subQueryObjects = objects.filter((obj, _index, arr) => {
         return matchesQuery(compareTo.className, obj, arr, compareTo.where);
       });
 
@@ -498,7 +494,7 @@ function matchesKeyConstraints(className, object, objects, key, constraints) {
       return false;
     }
     case '$notInQuery': {
-      const subQueryObjects = objects.filter((obj, index, arr) => {
+      const subQueryObjects = objects.filter((obj, _index, arr) => {
         return matchesQuery(compareTo.className, obj, arr, compareTo.where);
       });
 

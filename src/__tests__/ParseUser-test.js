@@ -481,7 +481,7 @@ describe('ParseUser', () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('GET');
         expect(path).toBe('users/me');
         expect(options.sessionToken).toBe('123abc');
@@ -512,7 +512,7 @@ describe('ParseUser', () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('GET');
         expect(path).toBe('users/me');
         expect(options.sessionToken).toBe('123abc');
@@ -672,7 +672,7 @@ describe('ParseUser', () => {
       .then(u => {
         expect(ParseUser.current()).toBe(u);
         CoreManager.setRESTController({
-          request(method, path, body, options) {
+          request(method, path, _body, options) {
             expect(method).toBe('POST');
             expect(path).toBe('logout');
             expect(options).toEqual({
@@ -1046,7 +1046,7 @@ describe('ParseUser', () => {
     ParseUser.disableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('GET');
         expect(path).toBe('users/me');
         expect(options.sessionToken).toBe('123abc');
@@ -1072,7 +1072,7 @@ describe('ParseUser', () => {
     ParseUser.disableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('GET');
         expect(path).toBe('users/me');
         expect(options.sessionToken).toBe('123abc');
@@ -1479,7 +1479,7 @@ describe('ParseUser', () => {
   it('can linkWith options', async () => {
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(_method, _path, _body, options) {
         expect(options).toEqual(expect.objectContaining({ useMasterKey: true }));
         return Promise.resolve(
           {
@@ -1831,7 +1831,7 @@ describe('ParseUser', () => {
       ajax() {},
     });
     const CustomCrypto = {
-      encrypt(obj, secretKey) {
+      encrypt(_obj, secretKey) {
         expect(secretKey).toBe('hello');
         return ENCRYPTED_DATA;
       },
@@ -1865,7 +1865,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     const installationId = '12345678';
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('POST');
         expect(path).toBe('users');
         expect(options.installationId).toBe(installationId);
@@ -1896,7 +1896,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     const installationId = '12345678';
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('POST');
         expect(path).toBe('users');
         expect(options.installationId).toBe(installationId);

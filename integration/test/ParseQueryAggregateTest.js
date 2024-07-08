@@ -37,7 +37,7 @@ describe('Parse Aggregate Query', () => {
     const query = new Parse.Query(TestObject);
     try {
       query.aggregate(pipeline).then(() => {});
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });

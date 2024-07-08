@@ -138,7 +138,7 @@ class ParseUser extends ParseObject {
               }
             );
           },
-          error: (provider, error) => {
+          error: (_provider, error) => {
             reject(error);
           },
         });

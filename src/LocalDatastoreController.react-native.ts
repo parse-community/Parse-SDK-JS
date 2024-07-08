@@ -46,7 +46,7 @@ const LocalDatastoreController = {
       const [key, value] = pair;
       try {
         LDS[key] = JSON.parse(value);
-      } catch (error) {
+      } catch (_) {
         LDS[key] = null;
       }
     });

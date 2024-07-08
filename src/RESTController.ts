@@ -57,7 +57,7 @@ if (typeof XDomainRequest !== 'undefined' && !('withCredentials' in new XMLHttpR
   useXDomainRequest = true;
 }
 
-function ajaxIE9(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
+function ajaxIE9(method: string, url: string, data: any, _headers?: any, options?: FullOptions) {
   return new Promise((resolve, reject) => {
     // @ts-ignore
     const xdr = new XDomainRequest();
@@ -329,7 +329,7 @@ const RESTController = {
       try {
         const errorJSON = JSON.parse(response.responseText);
         error = new ParseError(errorJSON.code, errorJSON.error);
-      } catch (e) {
+      } catch (_) {
         // If we fail to parse the error text, that's okay.
         error = new ParseError(
           ParseError.INVALID_JSON,
