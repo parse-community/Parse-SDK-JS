@@ -89,7 +89,7 @@
     "puppeteer": "20.4.0",
     "regenerator-runtime": "0.14.1",
     "semantic-release": "24.0.0",
-    "typescript-eslint": "8.0.0-alpha.10",
+    "typescript-eslint": "8.0.0-alpha.44",
     "vinyl-source-stream": "2.0.0"
   },
   "optionalDependencies": {
