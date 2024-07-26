@@ -22,6 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
       - run: npm ci
       - name: Build Types
         run: npm run build:types
@@ -35,6 +39,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
       - run: npm ci
       - name: Check Docs
         run: npm run docs
@@ -44,6 +52,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
       - run: npm ci
       - name: Circular Dependencies
         run: npm run madge:circular
