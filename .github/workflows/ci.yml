@@ -18,10 +18,14 @@ jobs:
           version: 2
   check-types:
     name: Check Types
-    timeout-minutes: 5
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
       - run: npm ci
       - name: Build Types
         run: npm run build:types
@@ -31,19 +35,27 @@ jobs:
         run: npm run lint:types
   check-docs:
     name: Check Docs
-    timeout-minutes: 5
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
       - run: npm ci
       - name: Check Docs
         run: npm run docs
   check-circular:
     name: Check Circular Dependencies
-    timeout-minutes: 5
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
       - run: npm ci
       - name: Circular Dependencies
         run: npm run madge:circular
