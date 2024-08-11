@@ -47,6 +47,7 @@ export type SaveOptions = FullOptions & {
   cascadeSave?: boolean;
   context?: AttributeMap;
   batchSize?: number;
+  transaction?: boolean;
 };
 
 type FetchOptions = {
@@ -1354,6 +1355,14 @@ class ParseObject {
     }
     const controller = CoreManager.getObjectController();
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
+    if (
+      unsaved &&
+      unsaved.length > 1 &&
+      options.hasOwnProperty('transaction') &&
+      typeof options.transaction === 'boolean'
+    ) {
+      saveOptions.transaction = options.transaction;
+    }
     return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
     }) as Promise<ParseObject> as Promise<this>;
@@ -1770,6 +1779,14 @@ class ParseObject {
     if (options.hasOwnProperty('sessionToken')) {
       destroyOptions.sessionToken = options.sessionToken;
     }
+    if (options.hasOwnProperty('transaction') && typeof options.transaction === 'boolean') {
+      if (options.hasOwnProperty('batchSize'))
+        throw new ParseError(
+          ParseError.OTHER_CAUSE,
+          'You cannot use both transaction and batchSize options simultaneously.'
+        );
+      destroyOptions.transaction = options.transaction;
+    }
     if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
       destroyOptions.batchSize = options.batchSize;
     }
@@ -1804,6 +1821,14 @@ class ParseObject {
     }
     if (options.hasOwnProperty('sessionToken')) {
       saveOptions.sessionToken = options.sessionToken;
+    }
+    if (options.hasOwnProperty('transaction') && typeof options.transaction === 'boolean') {
+      if (options.hasOwnProperty('batchSize'))
+        throw new ParseError(
+          ParseError.OTHER_CAUSE,
+          'You cannot use both transaction and batchSize options simultaneously.'
+        );
+      saveOptions.transaction = options.transaction;
     }
     if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
       saveOptions.batchSize = options.batchSize;
@@ -2322,12 +2347,20 @@ const DefaultController = {
     target: ParseObject | Array<ParseObject>,
     options: RequestOptions
   ): Promise<ParseObject | Array<ParseObject>> {
-    const batchSize =
+    if (options && options.batchSize && options.transaction)
+      throw new ParseError(
+        ParseError.OTHER_CAUSE,
+        'You cannot use both transaction and batchSize options simultaneously.'
+      );
+
+    let batchSize =
       options && options.batchSize ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
     const localDatastore = CoreManager.getLocalDatastore();
 
     const RESTController = CoreManager.getRESTController();
     if (Array.isArray(target)) {
+      if (options && options.transaction && target.length > 1) batchSize = target.length;
+
       if (target.length < 1) {
         return Promise.resolve([]);
       }
@@ -2348,21 +2381,20 @@ const DefaultController = {
       let deleteCompleted = Promise.resolve();
       const errors = [];
       batches.forEach(batch => {
+        const requests = batch.map(obj => {
+          return {
+            method: 'DELETE',
+            path: getServerUrlPath() + 'classes/' + obj.className + '/' + obj._getId(),
+            body: {},
+          };
+        });
+        const body =
+          options && options.transaction && requests.length > 1
+            ? { requests, transaction: true }
+            : { requests };
+
         deleteCompleted = deleteCompleted.then(() => {
-          return RESTController.request(
-            'POST',
-            'batch',
-            {
-              requests: batch.map(obj => {
-                return {
-                  method: 'DELETE',
-                  path: getServerUrlPath() + 'classes/' + obj.className + '/' + obj._getId(),
-                  body: {},
-                };
-              }),
-            },
-            options
-          ).then(results => {
+          return RESTController.request('POST', 'batch', body, options).then(results => {
             for (let i = 0; i < results.length; i++) {
               if (results[i] && results[i].hasOwnProperty('error')) {
                 const err = new ParseError(results[i].error.code, results[i].error.error);
@@ -2402,8 +2434,15 @@ const DefaultController = {
     target: ParseObject | null | Array<ParseObject | ParseFile>,
     options: RequestOptions
   ): Promise<ParseObject | Array<ParseObject> | ParseFile | undefined> {
-    const batchSize =
+    if (options && options.batchSize && options.transaction)
+      throw new ParseError(
+        ParseError.OTHER_CAUSE,
+        'You cannot use both transaction and batchSize options simultaneously.'
+      );
+
+    let batchSize =
       options && options.batchSize ? options.batchSize : CoreManager.get('REQUEST_BATCH_SIZE');
+
     const localDatastore = CoreManager.getLocalDatastore();
     const mapIdForPin = {};
 
@@ -2436,6 +2475,15 @@ const DefaultController = {
           pending.push(el);
         }
       });
+
+      if (options && options.transaction && pending.length > 1) {
+        if (pending.some(el => !canBeSerialized(el)))
+          throw new ParseError(
+            ParseError.OTHER_CAUSE,
+            'Tried to save a transactional batch containing an object with unserializable attributes.'
+          );
+        batchSize = pending.length;
+      }
 
       return Promise.all(filesSaved).then(() => {
         let objectError = null;
@@ -2504,18 +2552,16 @@ const DefaultController = {
             when(batchReady)
               .then(() => {
                 // Kick off the batch request
-                return RESTController.request(
-                  'POST',
-                  'batch',
-                  {
-                    requests: batch.map(obj => {
-                      const params = obj._getSaveParams();
-                      params.path = getServerUrlPath() + params.path;
-                      return params;
-                    }),
-                  },
-                  options
-                );
+                const requests = batch.map(obj => {
+                  const params = obj._getSaveParams();
+                  params.path = getServerUrlPath() + params.path;
+                  return params;
+                });
+                const body =
+                  options && options.transaction && requests.length > 1
+                    ? { requests, transaction: true }
+                    : { requests };
+                return RESTController.request('POST', 'batch', body, options);
               })
               .then(batchReturned.resolve, error => {
                 batchReturned.reject(new ParseError(ParseError.INCORRECT_TYPE, error.message));
