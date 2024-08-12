@@ -2067,6 +2067,34 @@ describe('ParseObject', () => {
     }
   });
 
+  it('should fail to save object when its children lack IDs using transaction option', async () => {
+    const xhrs = [];
+    RESTController._setXHR(function () {
+      const xhr = {
+        setRequestHeader: jest.fn(),
+        open: jest.fn(),
+        send: jest.fn(),
+        status: 200,
+        readyState: 4,
+      };
+      xhrs.push(xhr);
+      return xhr;
+    });
+
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj1.set('relatedObject', obj2);
+
+    try {
+      await obj1.save(null, { transaction: true });
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe(
+        'Tried to save a transactional batch containing an object with unserializable attributes.'
+      );
+    }
+  });
+
   it('should save batch with serializable attribute and transaction option', async () => {
     const xhrs = [];
     RESTController._setXHR(function () {
@@ -2117,6 +2145,119 @@ describe('ParseObject', () => {
     jest.runAllTicks();
     await flushPromises();
     await promise;
+  });
+
+  it('should save object along with its children using transaction option', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{ success: { objectId: 'id2' } }, { success: { objectId: 'parent' } }],
+        },
+      ])
+    );
+
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj2.id = 'id2';
+    obj2.set('attribute', true);
+
+    obj1.set('relatedObject', obj2);
+
+    const saved1 = await obj1.save(null, { transaction: true });
+
+    const saved2 = saved1.get('relatedObject');
+    expect(saved1.dirty()).toBe(false);
+    expect(saved2.dirty()).toBe(false);
+    expect(saved1.id).toBe('parent');
+    expect(saved2.id).toBe('id2');
+
+    expect(controller.request).toHaveBeenCalledWith(
+      'POST',
+      'batch',
+      {
+        requests: [
+          {
+            method: 'PUT',
+            body: { attribute: true },
+            path: '/1/classes/TestObject/id2',
+          },
+          {
+            method: 'POST',
+            body: {
+              relatedObject: { __type: 'Pointer', className: 'TestObject', objectId: 'id2' },
+            },
+            path: '/1/classes/TestObject',
+          },
+        ],
+        transaction: true,
+      },
+      expect.anything()
+    );
+  });
+
+  it('should save file & object along with its children using transaction option', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: { name: 'mock-name', url: 'mock-url' },
+        },
+        {
+          status: 200,
+          response: [{ success: { objectId: 'id2' } }, { success: { objectId: 'parent' } }],
+        },
+      ])
+    );
+
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+
+    const file1 = new ParseFile('parse-server-logo', [0, 1, 2, 3]);
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj2.id = 'id2';
+    obj2.set('file', file1);
+
+    obj1.set('relatedObject', obj2);
+
+    const saved1 = await obj1.save(null, { transaction: true });
+
+    const saved2 = saved1.get('relatedObject');
+    expect(saved1.dirty()).toBe(false);
+    expect(saved2.dirty()).toBe(false);
+    expect(saved1.id).toBe('parent');
+    expect(saved2.id).toBe('id2');
+
+    const file = saved2.get('file');
+    expect(file.name()).toBe('mock-name');
+    expect(file.url()).toBe('mock-url');
+
+    expect(controller.request).toHaveBeenCalledWith(
+      'POST',
+      'batch',
+      {
+        requests: [
+          {
+            method: 'PUT',
+            body: { file: { __type: 'File', name: 'mock-name', url: 'mock-url' } },
+            path: '/1/classes/TestObject/id2',
+          },
+          {
+            method: 'POST',
+            body: {
+              relatedObject: { __type: 'Pointer', className: 'TestObject', objectId: 'id2' },
+            },
+            path: '/1/classes/TestObject',
+          },
+        ],
+        transaction: true,
+      },
+      expect.anything()
+    );
   });
 
   it('should destroy batch with transaction option', async () => {

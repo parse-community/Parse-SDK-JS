@@ -1357,11 +1357,26 @@ class ParseObject {
     const unsaved = options.cascadeSave !== false ? unsavedChildren(this) : null;
     if (
       unsaved &&
-      unsaved.length > 1 &&
-      options.hasOwnProperty('transaction') &&
-      typeof options.transaction === 'boolean'
+      unsaved.length &&
+      options.transaction === true &&
+      unsaved.some(el => el instanceof ParseObject)
     ) {
       saveOptions.transaction = options.transaction;
+      const unsavedFiles: ParseFile[] = [];
+      const unsavedObjects: ParseObject[] = [];
+      unsaved.forEach(el => {
+        if (el instanceof ParseFile) unsavedFiles.push(el);
+        else unsavedObjects.push(el);
+      });
+      unsavedObjects.push(this);
+
+      const filePromise = unsavedFiles.length
+        ? controller.save(unsavedFiles, saveOptions)
+        : Promise.resolve();
+
+      return filePromise
+        .then(() => controller.save(unsavedObjects, saveOptions))
+        .then((savedOjbects: this[]) => savedOjbects.pop());
     }
     return controller.save(unsaved, saveOptions).then(() => {
       return controller.save(this, saveOptions);
@@ -1780,11 +1795,6 @@ class ParseObject {
       destroyOptions.sessionToken = options.sessionToken;
     }
     if (options.hasOwnProperty('transaction') && typeof options.transaction === 'boolean') {
-      if (options.hasOwnProperty('batchSize'))
-        throw new ParseError(
-          ParseError.OTHER_CAUSE,
-          'You cannot use both transaction and batchSize options simultaneously.'
-        );
       destroyOptions.transaction = options.transaction;
     }
     if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
@@ -1823,11 +1833,6 @@ class ParseObject {
       saveOptions.sessionToken = options.sessionToken;
     }
     if (options.hasOwnProperty('transaction') && typeof options.transaction === 'boolean') {
-      if (options.hasOwnProperty('batchSize'))
-        throw new ParseError(
-          ParseError.OTHER_CAUSE,
-          'You cannot use both transaction and batchSize options simultaneously.'
-        );
       saveOptions.transaction = options.transaction;
     }
     if (options.hasOwnProperty('batchSize') && typeof options.batchSize === 'number') {
