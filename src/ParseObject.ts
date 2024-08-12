@@ -2440,9 +2440,11 @@ const DefaultController = {
     options: RequestOptions
   ): Promise<ParseObject | Array<ParseObject> | ParseFile | undefined> {
     if (options && options.batchSize && options.transaction)
-      throw new ParseError(
-        ParseError.OTHER_CAUSE,
-        'You cannot use both transaction and batchSize options simultaneously.'
+      return Promise.reject(
+        new ParseError(
+          ParseError.OTHER_CAUSE,
+          'You cannot use both transaction and batchSize options simultaneously.'
+        )
       );
 
     let batchSize =
@@ -2483,9 +2485,11 @@ const DefaultController = {
 
       if (options && options.transaction && pending.length > 1) {
         if (pending.some(el => !canBeSerialized(el)))
-          throw new ParseError(
-            ParseError.OTHER_CAUSE,
-            'Tried to save a transactional batch containing an object with unserializable attributes.'
+          return Promise.reject(
+            new ParseError(
+              ParseError.OTHER_CAUSE,
+              'Tried to save a transactional batch containing an object with unserializable attributes.'
+            )
           );
         batchSize = pending.length;
       }

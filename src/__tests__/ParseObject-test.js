@@ -2016,40 +2016,38 @@ describe('ParseObject', () => {
   it('should fail saveAll batch cycle', async () => {
     const obj = new ParseObject('Item');
     obj.set('child', obj);
-    try {
-      await ParseObject.saveAll([obj]);
-      expect(true).toBe(false);
-    } catch (e) {
-      expect(e.message).toBe('Tried to save a batch with a cycle.');
-    }
+
+    await expect(ParseObject.saveAll([obj])).rejects.toEqual(
+      expect.objectContaining({
+        message: 'Tried to save a batch with a cycle.',
+      })
+    );
   });
 
   it('should fail save with transaction and batchSize option', async () => {
     const obj1 = new ParseObject('TestObject');
     const obj2 = new ParseObject('TestObject');
 
-    try {
-      await ParseObject.saveAll([obj1, obj2], { transaction: true, batchSize: 20 });
-      expect(true).toBe(false);
-    } catch (e) {
-      expect(e.message).toBe(
-        'You cannot use both transaction and batchSize options simultaneously.'
-      );
-    }
+    await expect(
+      ParseObject.saveAll([obj1, obj2], { transaction: true, batchSize: 20 })
+    ).rejects.toEqual(
+      expect.objectContaining({
+        message: 'You cannot use both transaction and batchSize options simultaneously.',
+      })
+    );
   });
 
   it('should fail destroy with transaction and batchSize option', async () => {
     const obj1 = new ParseObject('TestObject');
     const obj2 = new ParseObject('TestObject');
 
-    try {
-      await ParseObject.destroyAll([obj1, obj2], { transaction: true, batchSize: 20 });
-      expect(true).toBe(false);
-    } catch (e) {
-      expect(e.message).toBe(
-        'You cannot use both transaction and batchSize options simultaneously.'
-      );
-    }
+    await expect(
+      ParseObject.destroyAll([obj1, obj2], { transaction: true, batchSize: 20 })
+    ).rejects.toEqual(
+      expect.objectContaining({
+        message: 'You cannot use both transaction and batchSize options simultaneously.',
+      })
+    );
   });
 
   it('should fail save batch with unserializable attribute and transaction option', async () => {
@@ -2057,46 +2055,41 @@ describe('ParseObject', () => {
     const obj2 = new ParseObject('TestObject');
     obj1.set('relatedObject', obj2);
 
-    try {
-      await ParseObject.saveAll([obj1, obj2], { transaction: true });
-      expect(true).toBe(false);
-    } catch (e) {
-      expect(e.message).toBe(
-        'Tried to save a transactional batch containing an object with unserializable attributes.'
-      );
-    }
+    await expect(ParseObject.saveAll([obj1, obj2], { transaction: true })).rejects.toEqual(
+      expect.objectContaining({
+        message:
+          'Tried to save a transactional batch containing an object with unserializable attributes.',
+      })
+    );
   });
 
   it('should fail to save object when its children lack IDs using transaction option', async () => {
-    const xhrs = [];
-    RESTController._setXHR(function () {
-      const xhr = {
-        setRequestHeader: jest.fn(),
-        open: jest.fn(),
-        send: jest.fn(),
-        status: 200,
-        readyState: 4,
-      };
-      xhrs.push(xhr);
-      return xhr;
-    });
+    RESTController._setXHR(mockXHR([{ status: 200, response: [] }]));
 
     const obj1 = new ParseObject('TestObject');
     const obj2 = new ParseObject('TestObject');
     obj1.set('relatedObject', obj2);
 
-    try {
-      await obj1.save(null, { transaction: true });
-      expect(true).toBe(false);
-    } catch (e) {
-      expect(e.message).toBe(
-        'Tried to save a transactional batch containing an object with unserializable attributes.'
-      );
-    }
+    await expect(obj1.save(null, { transaction: true })).rejects.toEqual(
+      expect.objectContaining({
+        message:
+          'Tried to save a transactional batch containing an object with unserializable attributes.',
+      })
+    );
   });
 
   it('should save batch with serializable attribute and transaction option', async () => {
     const xhrs = [];
+
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{ success: { objectId: 'parent' } }, { success: { objectId: 'id2' } }],
+        },
+      ])
+    );
+
     RESTController._setXHR(function () {
       const xhr = {
         setRequestHeader: jest.fn(),
