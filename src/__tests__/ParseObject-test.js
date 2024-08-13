@@ -2079,8 +2079,6 @@ describe('ParseObject', () => {
   });
 
   it('should save batch with serializable attribute and transaction option', async () => {
-    const xhrs = [];
-
     CoreManager.getRESTController()._setXHR(
       mockXHR([
         {
@@ -2090,54 +2088,39 @@ describe('ParseObject', () => {
       ])
     );
 
-    RESTController._setXHR(function () {
-      const xhr = {
-        setRequestHeader: jest.fn(),
-        open: jest.fn(),
-        send: jest.fn(),
-        status: 200,
-        readyState: 4,
-      };
-      xhrs.push(xhr);
-      return xhr;
-    });
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
 
     const obj1 = new ParseObject('TestObject');
     const obj2 = new ParseObject('TestObject');
     obj2.id = 'id2';
     obj1.set('relatedObject', obj2);
 
-    const promise = ParseObject.saveAll([obj1, obj2], { transaction: true }).then(
-      ([saved1, saved2]) => {
-        expect(saved1.dirty()).toBe(false);
-        expect(saved2.dirty()).toBe(false);
-        expect(saved1.id).toBe('parent');
-        expect(saved2.id).toBe('id2');
-      }
-    );
-    jest.runAllTicks();
-    await flushPromises();
+    const [saved1, saved2] = await ParseObject.saveAll([obj1, obj2], { transaction: true });
 
-    expect(xhrs.length).toBe(1);
-    expect(xhrs[0].open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
-    const call = JSON.parse(xhrs[0].send.mock.calls[0]);
-    expect(call.transaction).toBe(true);
-    expect(call.requests).toEqual([
+    expect(saved1.dirty()).toBe(false);
+    expect(saved2.dirty()).toBe(false);
+    expect(saved1.id).toBe('parent');
+    expect(saved2.id).toBe('id2');
+
+    expect(controller.request).toHaveBeenCalledWith(
+      'POST',
+      'batch',
       {
-        method: 'POST',
-        body: { relatedObject: { __type: 'Pointer', className: 'TestObject', objectId: 'id2' } },
-        path: '/1/classes/TestObject',
+        requests: [
+          {
+            method: 'POST',
+            body: {
+              relatedObject: { __type: 'Pointer', className: 'TestObject', objectId: 'id2' },
+            },
+            path: '/1/classes/TestObject',
+          },
+          { method: 'PUT', body: {}, path: '/1/classes/TestObject/id2' },
+        ],
+        transaction: true,
       },
-      { method: 'PUT', body: {}, path: '/1/classes/TestObject/id2' },
-    ]);
-    xhrs[0].responseText = JSON.stringify([
-      { success: { objectId: 'parent' } },
-      { success: { objectId: 'id2' } },
-    ]);
-    xhrs[0].onreadystatechange();
-    jest.runAllTicks();
-    await flushPromises();
-    await promise;
+      expect.anything()
+    );
   });
 
   it('should save object along with its children using transaction option', async () => {
@@ -2254,44 +2237,37 @@ describe('ParseObject', () => {
   });
 
   it('should destroy batch with transaction option', async () => {
-    const xhrs = [];
-    RESTController._setXHR(function () {
-      const xhr = {
-        setRequestHeader: jest.fn(),
-        open: jest.fn(),
-        send: jest.fn(),
-        status: 200,
-        readyState: 4,
-      };
-      xhrs.push(xhr);
-      return xhr;
-    });
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{ success: { objectId: 'parent' } }, { success: { objectId: 'id2' } }],
+        },
+      ])
+    );
+
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
 
     const obj1 = new ParseObject('TestObject');
     const obj2 = new ParseObject('TestObject');
     obj1.id = 'parent';
     obj2.id = 'id2';
 
-    const promise = ParseObject.saveAll([obj1, obj2], { transaction: true });
-    jest.runAllTicks();
-    await flushPromises();
+    await ParseObject.destroyAll([obj1, obj2], { transaction: true });
 
-    expect(xhrs.length).toBe(1);
-    expect(xhrs[0].open.mock.calls[0]).toEqual(['POST', 'https://api.parse.com/1/batch', true]);
-    const call = JSON.parse(xhrs[0].send.mock.calls[0]);
-    expect(call.transaction).toBe(true);
-    expect(call.requests).toEqual([
-      { method: 'PUT', body: {}, path: '/1/classes/TestObject/parent' },
-      { method: 'PUT', body: {}, path: '/1/classes/TestObject/id2' },
-    ]);
-    xhrs[0].responseText = JSON.stringify([
-      { success: { objectId: 'parent' } },
-      { success: { objectId: 'id2' } },
-    ]);
-    xhrs[0].onreadystatechange();
-    jest.runAllTicks();
-    await flushPromises();
-    await promise;
+    expect(controller.request).toHaveBeenCalledWith(
+      'POST',
+      'batch',
+      {
+        requests: [
+          { method: 'DELETE', body: {}, path: '/1/classes/TestObject/parent' },
+          { method: 'DELETE', body: {}, path: '/1/classes/TestObject/id2' },
+        ],
+        transaction: true,
+      },
+      expect.anything()
+    );
   });
 
   it('should fail on invalid date', done => {
