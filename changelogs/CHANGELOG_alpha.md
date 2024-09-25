@@ -1,3 +1,10 @@
+# [5.3.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0-alpha.2...5.3.0-alpha.3) (2024-09-25)
+
+
+### Bug Fixes
+
+* Security upgrade dset from 3.1.3 to 3.1.4 ([#2277](https://github.com/parse-community/Parse-SDK-JS/issues/2277)) ([058f8e4](https://github.com/parse-community/Parse-SDK-JS/commit/058f8e4d3f8113cd8e81f6e58d2d6bba579b1000))
+
 # [5.3.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0-alpha.1...5.3.0-alpha.2) (2024-07-07)
 
 
