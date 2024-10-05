@@ -48,7 +48,7 @@ jobs:
         run: npm run docs
   check-circular:
     name: Check Circular Dependencies
-    timeout-minutes: 10
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
