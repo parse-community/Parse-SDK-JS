@@ -13,16 +13,16 @@ Parse.Cloud.define('TestFetchFromLocalDatastore', function (request) {
   return object.save();
 });
 
-Parse.Cloud.define('UpdateUser', function (request) {
+Parse.Cloud.define('UpdateUser', async function (request) {
   const user = new Parse.User();
   user.id = request.params.id;
   user.set('foo', 'changed');
-  return user.save(null, { useMasterKey: true });
+  return await user.save(null, { useMasterKey: true });
 });
 
-Parse.Cloud.define('CloudFunctionIdempotency', function () {
+Parse.Cloud.define('CloudFunctionIdempotency', async function () {
   const object = new Parse.Object('IdempotencyItem');
-  return object.save(null, { useMasterKey: true });
+  return await object.save(null, { useMasterKey: true });
 });
 
 Parse.Cloud.define('CloudFunctionUndefined', function () {
