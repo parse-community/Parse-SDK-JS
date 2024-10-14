@@ -2016,12 +2016,258 @@ describe('ParseObject', () => {
   it('should fail saveAll batch cycle', async () => {
     const obj = new ParseObject('Item');
     obj.set('child', obj);
-    try {
-      await ParseObject.saveAll([obj]);
-      expect(true).toBe(false);
-    } catch (e) {
-      expect(e.message).toBe('Tried to save a batch with a cycle.');
-    }
+
+    await expect(ParseObject.saveAll([obj])).rejects.toEqual(
+      expect.objectContaining({
+        message: 'Tried to save a batch with a cycle.',
+      })
+    );
+  });
+
+  it('should fail save with transaction and batchSize option', async () => {
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+
+    await expect(
+      ParseObject.saveAll([obj1, obj2], { transaction: true, batchSize: 20 })
+    ).rejects.toEqual(
+      expect.objectContaining({
+        message: 'You cannot use both transaction and batchSize options simultaneously.',
+      })
+    );
+  });
+
+  it('should fail destroy with transaction and batchSize option', async () => {
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+
+    await expect(
+      ParseObject.destroyAll([obj1, obj2], { transaction: true, batchSize: 20 })
+    ).rejects.toEqual(
+      expect.objectContaining({
+        message: 'You cannot use both transaction and batchSize options simultaneously.',
+      })
+    );
+  });
+
+  it('should fail save batch with unserializable attribute and transaction option', async () => {
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj1.set('relatedObject', obj2);
+
+    await expect(ParseObject.saveAll([obj1, obj2], { transaction: true })).rejects.toEqual(
+      expect.objectContaining({
+        message:
+          'Tried to save a transactional batch containing an object with unserializable attributes.',
+      })
+    );
+  });
+
+  it('should fail to save object when its children lack IDs using transaction option', async () => {
+    RESTController._setXHR(mockXHR([{ status: 200, response: [] }]));
+
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj1.set('relatedObject', obj2);
+
+    await expect(obj1.save(null, { transaction: true })).rejects.toEqual(
+      expect.objectContaining({
+        message:
+          'Tried to save a transactional batch containing an object with unserializable attributes.',
+      })
+    );
+  });
+
+  it('should save batch with serializable attribute and transaction option', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{ success: { objectId: 'parent' } }, { success: { objectId: 'id2' } }],
+        },
+      ])
+    );
+
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj2.id = 'id2';
+    obj1.set('relatedObject', obj2);
+
+    const [saved1, saved2] = await ParseObject.saveAll([obj1, obj2], { transaction: true });
+
+    expect(saved1.dirty()).toBe(false);
+    expect(saved2.dirty()).toBe(false);
+    expect(saved1.id).toBe('parent');
+    expect(saved2.id).toBe('id2');
+
+    expect(controller.request).toHaveBeenCalledWith(
+      'POST',
+      'batch',
+      {
+        requests: [
+          {
+            method: 'POST',
+            body: {
+              relatedObject: { __type: 'Pointer', className: 'TestObject', objectId: 'id2' },
+            },
+            path: '/1/classes/TestObject',
+          },
+          { method: 'PUT', body: {}, path: '/1/classes/TestObject/id2' },
+        ],
+        transaction: true,
+      },
+      expect.anything()
+    );
+  });
+
+  it('should save object along with its children using transaction option', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{ success: { objectId: 'id2' } }, { success: { objectId: 'parent' } }],
+        },
+      ])
+    );
+
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj2.id = 'id2';
+    obj2.set('attribute', true);
+
+    obj1.set('relatedObject', obj2);
+
+    const saved1 = await obj1.save(null, { transaction: true });
+
+    const saved2 = saved1.get('relatedObject');
+    expect(saved1.dirty()).toBe(false);
+    expect(saved2.dirty()).toBe(false);
+    expect(saved1.id).toBe('parent');
+    expect(saved2.id).toBe('id2');
+
+    expect(controller.request).toHaveBeenCalledWith(
+      'POST',
+      'batch',
+      {
+        requests: [
+          {
+            method: 'PUT',
+            body: { attribute: true },
+            path: '/1/classes/TestObject/id2',
+          },
+          {
+            method: 'POST',
+            body: {
+              relatedObject: { __type: 'Pointer', className: 'TestObject', objectId: 'id2' },
+            },
+            path: '/1/classes/TestObject',
+          },
+        ],
+        transaction: true,
+      },
+      expect.anything()
+    );
+  });
+
+  it('should save file & object along with its children using transaction option', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: { name: 'mock-name', url: 'mock-url' },
+        },
+        {
+          status: 200,
+          response: [{ success: { objectId: 'id2' } }, { success: { objectId: 'parent' } }],
+        },
+      ])
+    );
+
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+
+    const file1 = new ParseFile('parse-server-logo', [0, 1, 2, 3]);
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj2.id = 'id2';
+    obj2.set('file', file1);
+
+    obj1.set('relatedObject', obj2);
+
+    const saved1 = await obj1.save(null, { transaction: true });
+
+    const saved2 = saved1.get('relatedObject');
+    expect(saved1.dirty()).toBe(false);
+    expect(saved2.dirty()).toBe(false);
+    expect(saved1.id).toBe('parent');
+    expect(saved2.id).toBe('id2');
+
+    const file = saved2.get('file');
+    expect(file.name()).toBe('mock-name');
+    expect(file.url()).toBe('mock-url');
+
+    expect(controller.request).toHaveBeenCalledWith(
+      'POST',
+      'batch',
+      {
+        requests: [
+          {
+            method: 'PUT',
+            body: { file: { __type: 'File', name: 'mock-name', url: 'mock-url' } },
+            path: '/1/classes/TestObject/id2',
+          },
+          {
+            method: 'POST',
+            body: {
+              relatedObject: { __type: 'Pointer', className: 'TestObject', objectId: 'id2' },
+            },
+            path: '/1/classes/TestObject',
+          },
+        ],
+        transaction: true,
+      },
+      expect.anything()
+    );
+  });
+
+  it('should destroy batch with transaction option', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{ success: { objectId: 'parent' } }, { success: { objectId: 'id2' } }],
+        },
+      ])
+    );
+
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj1.id = 'parent';
+    obj2.id = 'id2';
+
+    await ParseObject.destroyAll([obj1, obj2], { transaction: true });
+
+    expect(controller.request).toHaveBeenCalledWith(
+      'POST',
+      'batch',
+      {
+        requests: [
+          { method: 'DELETE', body: {}, path: '/1/classes/TestObject/parent' },
+          { method: 'DELETE', body: {}, path: '/1/classes/TestObject/id2' },
+        ],
+        transaction: true,
+      },
+      expect.anything()
+    );
   });
 
   it('should fail on invalid date', done => {
