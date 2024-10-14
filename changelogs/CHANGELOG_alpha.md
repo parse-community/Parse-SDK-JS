@@ -1,3 +1,10 @@
+# [5.3.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0-alpha.3...5.3.0-alpha.4) (2024-10-14)
+
+
+### Features
+
+* Add transaction to save and destroy on `Parse.Object` ([#2265](https://github.com/parse-community/Parse-SDK-JS/issues/2265)) ([2b55bdf](https://github.com/parse-community/Parse-SDK-JS/commit/2b55bdf74d8338688765f27b14826e527d0aeb53))
+
 # [5.3.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0-alpha.2...5.3.0-alpha.3) (2024-09-25)
 
 
