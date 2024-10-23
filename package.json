@@ -43,7 +43,7 @@
     "@babel/preset-env": "7.25.8",
     "@babel/preset-react": "7.25.7",
     "@babel/preset-typescript": "7.25.7",
-    "@definitelytyped/dtslint": "0.0.163",
+    "@definitelytyped/dtslint": "0.2.25",
     "@eslint/js": "9.13.0",
     "@parse/minami": "git+https://github.com/parse-community/minami#main",
     "@saithodev/semantic-release-backmerge": "4.0.1",
