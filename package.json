@@ -83,7 +83,7 @@
     "lint-staged": "15.2.10",
     "madge": "8.0.0",
     "metro-react-native-babel-preset": "0.77.0",
-    "mongodb-runner": "5.7.0",
+    "mongodb-runner": "5.7.1",
     "parse-server": "7.3.0",
     "prettier": "3.3.3",
     "puppeteer": "23.6.0",
