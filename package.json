@@ -86,7 +86,7 @@
     "mongodb-runner": "5.7.1",
     "parse-server": "7.3.0",
     "prettier": "3.3.3",
-    "puppeteer": "23.7.1",
+    "puppeteer": "23.8.0",
     "regenerator-runtime": "0.14.1",
     "semantic-release": "24.2.0",
     "typescript-eslint": "8.0.0-alpha.10",
