@@ -7,7 +7,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/Parse.ts'),
       formats: ['cjs'],
-      fileName: () => 'parse.js',
+      fileName: () => 'Parse.js',
     },
     outDir: 'lib/react-native',
     rollupOptions: {
