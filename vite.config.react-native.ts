@@ -1,13 +1,14 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { glob } from "glob"
 import babel from '@rollup/plugin-babel';
 
 export default defineConfig({
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/Parse.ts'),
+      entry: glob.sync(resolve(__dirname, 'src/*.ts')),
       formats: ['cjs'],
-      fileName: () => 'Parse.js',
+      fileName: (_, name) => `${name}.js`,
     },
     outDir: 'lib/react-native',
     rollupOptions: {
