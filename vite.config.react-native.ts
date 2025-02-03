@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import { glob } from "glob"
 import babel from '@rollup/plugin-babel';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 export default defineConfig({
   build: {
@@ -13,6 +14,9 @@ export default defineConfig({
     outDir: 'lib/react-native',
     rollupOptions: {
       plugins: [
+        nodeResolve({
+          preferBuiltins: true,
+        }),
         babel({
           babelHelpers: 'runtime',
           extensions: ['.ts', '.js'],
@@ -29,7 +33,6 @@ export default defineConfig({
         }) as any,
       ],
     },
-    // For react-native you may not want to minify the output.
     minify: false,
     sourcemap: true,
   }
