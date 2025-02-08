@@ -113,7 +113,7 @@ Types are updated manually after every release. If a definition doesn't exist, p
 
 #### Core Manager
 
-The SDK has a [Core Manager](src/CoreManager.ts) that handles all configurations and controllers. These modules can be swapped out for customization before you initialize the SDK. For full list of all available modules take a look at the [Core Manager Documentation](src/CoreManager.ts).
+The SDK has a [Core Manager][core-manager] that handles all configurations and controllers. These modules can be swapped out for customization before you initialize the SDK. For full list of all available modules take a look at the [Core Manager Documentation][core-manager].
 
 ```js
 // Configuration example
@@ -144,6 +144,7 @@ We really want Parse to be yours, to see it grow and thrive in the open source c
 
 [3rd-party-auth]: http://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication
 [contributing]: https://github.com/parse-community/Parse-SDK-JS/blob/master/CONTRIBUTING.md
+[core-manager]: https://github.com/parse-community/Parse-SDK-JS/blob/alpha/src/CoreManager.ts
 [custom-auth-module]: https://docs.parseplatform.org/js/guide/#custom-authentication-module
 [link-with]: https://docs.parseplatform.org/js/guide/#linking-users
 [open-collective-link]: https://opencollective.com/parse-server
