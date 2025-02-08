@@ -37,8 +37,8 @@ export function run(name: string, data: any, options: RequestOptions): Promise<a
   }
 
   const requestOptions: RequestOptions = {};
-  if (options.useMasterKey) {
-    requestOptions.useMasterKey = options.useMasterKey;
+  if (options.hasOwnProperty('useMasterKey')) {
+    requestOptions.useMasterKey = !!options.useMasterKey;
   }
   if (options.sessionToken) {
     requestOptions.sessionToken = options.sessionToken;
