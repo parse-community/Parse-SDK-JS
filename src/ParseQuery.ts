@@ -721,6 +721,7 @@ class ParseQuery {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>json: Return raw json without converting to Parse.Object
    * </ul>
    * @returns {Promise} A promise that is resolved with the results when
    * the query completes.
@@ -924,33 +925,9 @@ class ParseQuery {
       return Promise.reject(error);
     }
 
-    const query = new ParseQuery(this.className);
-    query._limit = options.batchSize || 100;
-    query._include = [...this._include];
-    query._exclude = [...this._exclude];
-    if (this._select) {
-      query._select = [...this._select];
-    }
-    query._hint = this._hint;
-    query._where = {};
-    for (const attr in this._where) {
-      const val = this._where[attr];
-      if (Array.isArray(val)) {
-        query._where[attr] = val.map(v => {
-          return v;
-        });
-      } else if (val && typeof val === 'object') {
-        const conditionMap = {};
-        query._where[attr] = conditionMap;
-        for (const cond in val) {
-          conditionMap[cond] = val[cond];
-        }
-      } else {
-        query._where[attr] = val;
-      }
-    }
-
+    const query = ParseQuery.fromJSON(this.className, this.toJSON());
     query.ascending('objectId');
+    query._limit = options.batchSize || 100;
 
     const findOptions = ParseObject._getRequestOptions(options);
     let finished = false;
@@ -965,7 +942,11 @@ class ParseQuery {
           Promise.resolve(previousResults.length > 0 && callback(previousResults)),
         ]);
         if (results.length >= query._limit) {
-          query.greaterThan('objectId', results[results.length - 1].id);
+          if (findOptions.json) {
+            query.greaterThan('objectId', (results[results.length - 1] as any).objectId);
+          } else {
+            query.greaterThan('objectId', results[results.length - 1].id);
+          }
           previousResults = results;
         } else if (results.length > 0) {
           await Promise.resolve(callback(results));
