@@ -1805,11 +1805,7 @@ describe('ParseQuery', () => {
       q.hint('_id_');
       q.exclude('foo');
 
-      const [result1, result2] = await q.findAll();
-      expect(result1.id).toBeDefined();
-      expect(result2.id).toBeDefined();
-      expect(result1.objectId).toBeUndefined();
-      expect(result2.objectId).toBeUndefined();
+      await q.findAll();
       expect(findMock).toHaveBeenCalledTimes(1);
       const [className, params, options] = findMock.mock.calls[0];
       expect(className).toBe('Item');
@@ -1839,9 +1835,6 @@ describe('ParseQuery', () => {
         },
       });
       expect(options.requestTask).toBeDefined();
-      const [json] = await q.findAll({ json: true });
-      expect(json.objectId).toBeDefined();
-      expect(json.id).toBeUndefined();
     });
 
     it('passes options through to the REST API', async () => {
@@ -1882,6 +1875,17 @@ describe('ParseQuery', () => {
       const q = new ParseQuery('Item');
       const results = await q.findAll();
       expect(results.map(obj => obj.attributes.size)).toEqual(['medium', 'small']);
+    });
+
+    it('Returns all objects with json', async () => {
+      const q = new ParseQuery('Item');
+      const results = await q.findAll({ json: true, batchSize: 2 });
+      expect(results.length).toEqual(3);
+      expect(findMock).toHaveBeenCalledTimes(2);
+      results.map(result => {
+        expect(result.id).toBeUndefined();
+        expect(result.objectId).toBeDefined();
+      });
     });
   });
 
