@@ -721,7 +721,7 @@ class ParseQuery {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
-   *   <li>json: Return raw json without converting to Parse.Object
+   *   <li>json: Return raw JSON without converting to Parse.Object.
    * </ul>
    * @returns {Promise} A promise that is resolved with the results when
    * the query completes.
