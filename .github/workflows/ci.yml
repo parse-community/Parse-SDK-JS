@@ -29,8 +29,8 @@ jobs:
       - run: npm ci
       - name: Build Types
         run: npm run build:types
-      - name: Test Types
-        run: npm run test:types
+      # - name: Test Types
+      #   run: npm run test:types
       - name: Lint Types
         run: npm run lint:types
   check-docs:

@@ -37,101 +37,21 @@ import LocalDatastoreController from './LocalDatastoreController';
 import StorageController from './StorageController';
 import WebSocketController from './WebSocketController';
 
-/**
- * Contains all Parse API classes and functions.
- *
- * @static
- * @global
- * @class
- * @hideconstructor
- */
-interface ParseType {
-  ACL: typeof ACL;
-  Parse?: ParseType;
-  Analytics: typeof Analytics;
-  AnonymousUtils: typeof AnonymousUtils;
-  Cloud: typeof Cloud & {
-    /** only available in server environments */
-    useMasterKey?: () => void;
-  };
-  CLP: typeof CLP;
-  CoreManager: typeof CoreManager;
-  Config: typeof Config;
-  Error: typeof ParseError;
-  EventuallyQueue: typeof EventuallyQueue;
-  FacebookUtils: typeof FacebookUtils;
-  File: typeof File;
-  GeoPoint: typeof GeoPoint;
-  Hooks?: any;
-  Polygon: typeof Polygon;
-  Installation: typeof Installation;
-  LocalDatastore: typeof LocalDatastore;
-  Object: typeof ParseObject;
-  Op: {
-    Set: typeof ParseOp.SetOp;
-    Unset: typeof ParseOp.UnsetOp;
-    Increment: typeof ParseOp.IncrementOp;
-    Add: typeof ParseOp.AddOp;
-    Remove: typeof ParseOp.RemoveOp;
-    AddUnique: typeof ParseOp.AddUniqueOp;
-    Relation: typeof ParseOp.RelationOp;
-  };
-  Push: typeof Push;
-  Query: typeof Query;
-  Relation: typeof Relation;
-  Role: typeof Role;
-  Schema: typeof Schema;
-  Session: typeof Session;
-  Storage: typeof Storage;
-  User: typeof User;
-  LiveQuery: typeof ParseLiveQuery;
-  LiveQueryClient: typeof LiveQueryClient;
-
-  initialize(applicationId: string, javaScriptKey: string): void;
-  _initialize(applicationId: string, javaScriptKey: string, masterKey?: string): void;
-  setAsyncStorage(storage: any): void;
-  setLocalDatastoreController(controller: any): void;
-  getServerHealth(): Promise<any>;
-
-  applicationId: string;
-  javaScriptKey: string;
-  masterKey: string;
-  serverURL: string;
-  serverAuthToken: string;
-  serverAuthType: string;
-  liveQueryServerURL: string;
-  encryptedUser: boolean;
-  secret: string;
-  idempotency: boolean;
-  allowCustomObjectId: boolean;
-  IndexedDB?: any;
-  _request(...args: any[]): void;
-  _ajax(...args: any[]): void;
-  _decode(...args: any[]): void;
-  _encode(...args: any[]): void;
-  _getInstallationId?(): Promise<string>;
-  enableLocalDatastore(polling: boolean, ms: number): void;
-  isLocalDatastoreEnabled(): boolean;
-  dumpLocalDatastore(): void;
-  enableEncryptedUser(): void;
-  isEncryptedUserEnabled(): void;
-}
-
-const Parse: ParseType = {
-  ACL: ACL,
-  Analytics: Analytics,
-  AnonymousUtils: AnonymousUtils,
-  Cloud: Cloud,
-  CLP: CLP,
-  CoreManager: CoreManager,
-  Config: Config,
+const Parse = {
+  ACL,
+  Analytics,
+  AnonymousUtils,
+  Cloud,
+  CLP,
+  CoreManager,
+  Config,
   Error: ParseError,
-  FacebookUtils: FacebookUtils,
-  File: File,
-  GeoPoint: GeoPoint,
-  Polygon: Polygon,
-  Installation: Installation,
-  LocalDatastore: LocalDatastore,
+  FacebookUtils,
+  File,
+  GeoPoint,
+  Polygon,
+  Installation,
+  LocalDatastore,
   Object: ParseObject,
   Op: {
     Set: ParseOp.SetOp,
@@ -142,15 +62,15 @@ const Parse: ParseType = {
     AddUnique: ParseOp.AddUniqueOp,
     Relation: ParseOp.RelationOp,
   },
-  Push: Push,
-  Query: Query,
-  Relation: Relation,
-  Role: Role,
-  Schema: Schema,
-  Session: Session,
-  Storage: Storage,
-  User: User,
-  LiveQueryClient: LiveQueryClient,
+  Push,
+  Query,
+  Relation,
+  Role,
+  Schema,
+  Session,
+  Storage,
+  User,
+  LiveQueryClient,
   IndexedDB: undefined,
   Hooks: undefined,
   Parse: undefined,
@@ -314,10 +234,10 @@ const Parse: ParseType = {
    * @member {ParseLiveQuery} Parse.LiveQuery
    * @static
    */
-  set LiveQuery(liveQuery: typeof ParseLiveQuery) {
+  set LiveQuery(liveQuery: ParseLiveQuery) {
     CoreManager.setLiveQuery(liveQuery);
   },
-  get LiveQuery() {
+  get LiveQuery(): ParseLiveQuery {
     return CoreManager.getLiveQuery();
   },
 
@@ -404,15 +324,15 @@ const Parse: ParseType = {
    * @param [ms] Milliseconds to ping the server. Default 2000ms
    * @static
    */
-  enableLocalDatastore(polling = true, ms = 2000) {
+  enableLocalDatastore(polling?: boolean, ms?: number) {
     if (!this.applicationId) {
       console.log("'enableLocalDataStore' must be called after 'initialize'");
       return;
     }
     if (!this.LocalDatastore.isEnabled) {
       this.LocalDatastore.isEnabled = true;
-      if (polling) {
-        CoreManager.getEventuallyQueue().poll(ms);
+      if (polling || typeof polling === 'undefined') {
+        CoreManager.getEventuallyQueue().poll(ms || 2000);
       }
     }
   },
@@ -470,7 +390,7 @@ CoreManager.setRESTController(RESTController);
 if (process.env.PARSE_BUILD === 'node') {
   Parse.initialize = Parse._initialize;
   Parse.Cloud = Parse.Cloud || ({} as any);
-  Parse.Cloud.useMasterKey = function () {
+  (Parse.Cloud as any).useMasterKey = function () {
     CoreManager.set('USE_MASTER_KEY', true);
   };
   Parse.Hooks = Hooks;
