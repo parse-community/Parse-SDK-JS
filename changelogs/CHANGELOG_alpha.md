@@ -1,3 +1,15 @@
+# [6.0.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0-alpha.6...6.0.0-alpha.1) (2025-02-16)
+
+
+### Bug Fixes
+
+* Remove validation error handler option `error` from various methods of `Parse.Object` ([#2445](https://github.com/parse-community/Parse-SDK-JS/issues/2445)) ([52ddaee](https://github.com/parse-community/Parse-SDK-JS/commit/52ddaee5213a0d5e5797f4130781987665fef843))
+
+
+### BREAKING CHANGES
+
+* Removes the error handler option `error` from `Parse.Object.set`, `Parse.Object.setACL`, `Parse.Object.unset`, `Parse.Role.setName` and instead throws on validation error. Previously, if the `error` option was set, the handler was invoked if a validation error occurred on `Parse.Object.set`, and if no handler was set, an error was thrown on `Parse.Object.save`. The new behavior is that an error is thrown at `Parse.Object.set`. For example, instead of using `Parse.Object.set(key, value, { error: ... })` wrap `Parse.Object.set(key, value)` into a `try/catch` block. ([52ddaee](52ddaee))
+
 # [5.3.0-alpha.6](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0-alpha.5...5.3.0-alpha.6) (2025-02-14)
 
 

@@ -965,7 +965,7 @@ describe('ParseObject', () => {
       o.validate({
         'invalid!key': 12,
       })
-    ).toEqual(new ParseError(ParseError.INVALID_KEY_NAME));
+    ).toEqual(new ParseError(ParseError.INVALID_KEY_NAME, `Invalid key name: "invalid!key"`));
 
     expect(
       o.validate({
@@ -982,16 +982,13 @@ describe('ParseObject', () => {
 
   it('validates attributes on set()', () => {
     const o = new ParseObject('Listing');
-    expect(o.set('ACL', 'not an acl')).toBe(false);
+    expect(() => {
+      o.set('ACL', 'not an acl');
+    }).toThrow(new ParseError(ParseError.OTHER_CAUSE, 'ACL must be a Parse ACL.'));
     expect(o.set('ACL', { '*': { read: true, write: false } })).toBe(o);
-    expect(o.set('$$$', 'o_O')).toBe(false);
-
-    o.set('$$$', 'o_O', {
-      error: function (obj, err) {
-        expect(obj).toBe(o);
-        expect(err.code).toBe(105);
-      },
-    });
+    expect(() => {
+      o.set('$$$', 'o_O');
+    }).toThrow(new ParseError(ParseError.INVALID_KEY_NAME, `Invalid key name: "$$$"`));
   });
 
   it('ignores validation if ignoreValidation option is passed to set()', () => {
@@ -1947,22 +1944,25 @@ describe('ParseObject', () => {
     await result;
   });
 
-  it('will fail for a circular dependency of non-existing objects', () => {
+  it('will fail for a circular dependency of non-existing objects', async () => {
     const parent = new ParseObject('Item');
     const child = new ParseObject('Item');
     parent.set('child', child);
     child.set('parent', parent);
-    expect(parent.save.bind(parent)).toThrow('Cannot create a pointer to an unsaved Object.');
+    await expect(parent.save()).rejects.toThrowError(
+      'Cannot create a pointer to an unsaved Object.'
+    );
   });
 
-  it('will fail for deeper unsaved objects', () => {
+  it('will fail for deeper unsaved objects', async () => {
     const parent = new ParseObject('Item');
     const child = new ParseObject('Item');
     const grandchild = new ParseObject('Item');
     parent.set('child', child);
     child.set('child', grandchild);
-
-    expect(parent.save.bind(parent)).toThrow('Cannot create a pointer to an unsaved Object.');
+    await expect(parent.save()).rejects.toThrowError(
+      'Cannot create a pointer to an unsaved Object.'
+    );
   });
 
   it('does not mark shallow objects as dirty', () => {

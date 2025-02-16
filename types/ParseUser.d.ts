@@ -171,7 +171,7 @@ declare class ParseUser extends ParseObject {
    * @param {string} email
    * @returns {boolean}
    */
-  setEmail(email: string): boolean | ParseObject;
+  setEmail(email: string): this;
   /**
    * Returns the session token for this user, if the user has been logged in,
    * or if it is the result of a query with the master key. Otherwise, returns

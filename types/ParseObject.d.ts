@@ -241,59 +241,59 @@ declare class ParseObject {
    * @param {(string|object)} value The value to give it.
    * @param {object} options A set of options for the set.
    *     The only supported option is <code>error</code>.
-   * @returns {(ParseObject|boolean)} true if the set succeeded.
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  set(key: any, value?: any, options?: any): ParseObject | boolean;
+  set(key: any, value?: any, options?: any): this;
   /**
    * Remove an attribute from the model. This is a noop if the attribute doesn't
    * exist.
    *
    * @param {string} attr The string name of an attribute.
    * @param options
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
   unset(
     attr: string,
     options?: {
       [opt: string]: any;
     }
-  ): ParseObject | boolean;
+  ): this;
   /**
    * Atomically increments the value of the given attribute the next time the
    * object is saved. If no amount is specified, 1 is used by default.
    *
    * @param attr {String} The key.
    * @param amount {Number} The amount to increment by (optional).
-   * @returns {(ParseObject|boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  increment(attr: string, amount?: number): ParseObject | boolean;
+  increment(attr: string, amount?: number): this;
   /**
    * Atomically decrements the value of the given attribute the next time the
    * object is saved. If no amount is specified, 1 is used by default.
    *
    * @param attr {String} The key.
    * @param amount {Number} The amount to decrement by (optional).
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  decrement(attr: string, amount?: number): ParseObject | boolean;
+  decrement(attr: string, amount?: number): this;
   /**
    * Atomically add an object to the end of the array associated with a given
    * key.
    *
    * @param attr {String} The key.
    * @param item {} The item to add.
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  add(attr: string, item: any): ParseObject | boolean;
+  add(attr: string, item: any): this;
   /**
    * Atomically add the objects to the end of the array associated with a given
    * key.
    *
    * @param attr {String} The key.
    * @param items {Object[]} The items to add.
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  addAll(attr: string, items: Array<any>): ParseObject | boolean;
+  addAll(attr: string, items: Array<any>): this;
   /**
    * Atomically add an object to the array associated with a given key, only
    * if it is not already present in the array. The position of the insert is
@@ -301,9 +301,9 @@ declare class ParseObject {
    *
    * @param attr {String} The key.
    * @param item {} The object to add.
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  addUnique(attr: string, item: any): ParseObject | boolean;
+  addUnique(attr: string, item: any): this;
   /**
    * Atomically add the objects to the array associated with a given key, only
    * if it is not already present in the array. The position of the insert is
@@ -311,27 +311,27 @@ declare class ParseObject {
    *
    * @param attr {String} The key.
    * @param items {Object[]} The objects to add.
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  addAllUnique(attr: string, items: Array<any>): ParseObject | boolean;
+  addAllUnique(attr: string, items: Array<any>): this;
   /**
    * Atomically remove all instances of an object from the array associated
    * with a given key.
    *
    * @param attr {String} The key.
    * @param item {} The object to remove.
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  remove(attr: string, item: any): ParseObject | boolean;
+  remove(attr: string, item: any): this;
   /**
    * Atomically remove all instances of the objects from the array associated
    * with a given key.
    *
    * @param attr {String} The key.
    * @param items {Object[]} The object to remove.
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  removeAll(attr: string, items: Array<any>): ParseObject | boolean;
+  removeAll(attr: string, items: Array<any>): this;
   /**
    * Returns an instance of a subclass of Parse.Op describing what kind of
    * modification has been performed on this field since the last time it was
@@ -410,10 +410,10 @@ declare class ParseObject {
    *
    * @param {Parse.ACL} acl An instance of Parse.ACL.
    * @param {object} options
-   * @returns {(ParseObject | boolean)} Whether the set passed validation.
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    * @see Parse.Object#set
    */
-  setACL(acl: ParseACL, options?: any): ParseObject | boolean;
+  setACL(acl: ParseACL, options?: any): this;
   /**
    * Clears any (or specific) changes to this object made since the last call to save()
    *
@@ -423,9 +423,9 @@ declare class ParseObject {
   /**
    * Clears all attributes on a model
    *
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  clear(): ParseObject | boolean;
+  clear(): this;
   /**
    * Fetch the model from the server. If the server's representation of the
    * model differs from its current attributes, they will be overriden.

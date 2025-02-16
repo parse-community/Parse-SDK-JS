@@ -10,7 +10,9 @@ describe('Parse.ACL', () => {
 
   it('acl must be valid', () => {
     const user = new Parse.User();
-    assert.equal(user.setACL(`Ceci n'est pas un ACL.`), false);
+    expect(() => user.setACL(`Ceci n'est pas un ACL.`)).toThrow(
+      new Parse.Error(Parse.Error.OTHER_CAUSE, 'ACL must be a Parse ACL.')
+    );
   });
 
   it('can refresh object with acl', async () => {

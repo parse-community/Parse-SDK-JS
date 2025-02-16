@@ -41,7 +41,9 @@ class ParseUser extends ParseObject {
   constructor(attributes?: AttributeMap) {
     super('_User');
     if (attributes && typeof attributes === 'object') {
-      if (!this.set(attributes || {})) {
+      try {
+        this.set(attributes || {});
+      } catch (_) {
         throw new Error("Can't create an invalid Parse User");
       }
     }

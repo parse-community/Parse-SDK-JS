@@ -136,8 +136,12 @@ class ParseObject {
         options = attributes as any;
       }
     }
-    if (toSet && !this.set(toSet, options)) {
-      throw new Error("Can't create an invalid Parse Object");
+    if (toSet) {
+      try {
+        this.set(toSet, options);
+      } catch (_) {
+        throw new Error("Can't create an invalid Parse Object");
+      }
     }
   }
 
@@ -733,9 +737,9 @@ class ParseObject {
    * @param {(string|object)} value The value to give it.
    * @param {object} options A set of options for the set.
    *     The only supported option is <code>error</code>.
-   * @returns {(ParseObject|boolean)} true if the set succeeded.
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  set(key: any, value?: any, options?: any): ParseObject | boolean {
+  set(key: any, value?: any, options?: any): this {
     let changes = {};
     const newOps = {};
     if (key && typeof key === 'object') {
@@ -804,12 +808,9 @@ class ParseObject {
 
     // Validate changes
     if (!options.ignoreValidation) {
-      const validation = this.validate(newValues);
-      if (validation) {
-        if (typeof options.error === 'function') {
-          options.error(this, validation);
-        }
-        return false;
+      const validationError = this.validate(newValues);
+      if (validationError) {
+        throw validationError;
       }
     }
 
@@ -831,9 +832,9 @@ class ParseObject {
    *
    * @param {string} attr The string name of an attribute.
    * @param options
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  unset(attr: string, options?: { [opt: string]: any }): ParseObject | boolean {
+  unset(attr: string, options?: { [opt: string]: any }): this {
     options = options || {};
     options.unset = true;
     return this.set(attr, null, options);
@@ -845,9 +846,9 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param amount {Number} The amount to increment by (optional).
-   * @returns {(ParseObject|boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  increment(attr: string, amount?: number): ParseObject | boolean {
+  increment(attr: string, amount?: number): this {
     if (typeof amount === 'undefined') {
       amount = 1;
     }
@@ -863,9 +864,9 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param amount {Number} The amount to decrement by (optional).
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  decrement(attr: string, amount?: number): ParseObject | boolean {
+  decrement(attr: string, amount?: number): this {
     if (typeof amount === 'undefined') {
       amount = 1;
     }
@@ -881,9 +882,9 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param item {} The item to add.
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  add(attr: string, item: any): ParseObject | boolean {
+  add(attr: string, item: any): this {
     return this.set(attr, new AddOp([item]));
   }
 
@@ -893,9 +894,9 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param items {Object[]} The items to add.
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  addAll(attr: string, items: Array<any>): ParseObject | boolean {
+  addAll(attr: string, items: Array<any>): this {
     return this.set(attr, new AddOp(items));
   }
 
@@ -906,9 +907,9 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param item {} The object to add.
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  addUnique(attr: string, item: any): ParseObject | boolean {
+  addUnique(attr: string, item: any): this {
     return this.set(attr, new AddUniqueOp([item]));
   }
 
@@ -919,9 +920,9 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param items {Object[]} The objects to add.
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  addAllUnique(attr: string, items: Array<any>): ParseObject | boolean {
+  addAllUnique(attr: string, items: Array<any>): this {
     return this.set(attr, new AddUniqueOp(items));
   }
 
@@ -931,9 +932,9 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param item {} The object to remove.
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  remove(attr: string, item: any): ParseObject | boolean {
+  remove(attr: string, item: any): this {
     return this.set(attr, new RemoveOp([item]));
   }
 
@@ -943,9 +944,9 @@ class ParseObject {
    *
    * @param attr {String} The key.
    * @param items {Object[]} The object to remove.
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  removeAll(attr: string, items: Array<any>): ParseObject | boolean {
+  removeAll(attr: string, items: Array<any>): this {
     return this.set(attr, new RemoveOp(items));
   }
 
@@ -1099,7 +1100,7 @@ class ParseObject {
     }
     for (const key in attrs) {
       if (!/^[A-Za-z][0-9A-Za-z_.]*$/.test(key)) {
-        return new ParseError(ParseError.INVALID_KEY_NAME);
+        return new ParseError(ParseError.INVALID_KEY_NAME, `Invalid key name: "${key}"`);
       }
     }
     return false;
@@ -1124,10 +1125,10 @@ class ParseObject {
    *
    * @param {Parse.ACL} acl An instance of Parse.ACL.
    * @param {object} options
-   * @returns {(ParseObject | boolean)} Whether the set passed validation.
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    * @see Parse.Object#set
    */
-  setACL(acl: ParseACL, options?: any): ParseObject | boolean {
+  setACL(acl: ParseACL, options?: any): this {
     return this.set('ACL', acl, options);
   }
 
@@ -1154,9 +1155,9 @@ class ParseObject {
   /**
    * Clears all attributes on a model
    *
-   * @returns {(ParseObject | boolean)}
+   * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  clear(): ParseObject | boolean {
+  clear(): this {
     const attributes = this.attributes;
     const erasable = {};
     let readonly = ['createdAt', 'updatedAt'];
@@ -1320,7 +1321,7 @@ class ParseObject {
    * @returns {Promise} A promise that is fulfilled when the save
    * completes.
    */
-  save(
+  async save(
     arg1: undefined | string | { [attr: string]: any } | null,
     arg2: SaveOptions | any,
     arg3?: SaveOptions
@@ -1337,17 +1338,9 @@ class ParseObject {
       attrs[arg1] = arg2;
       options = arg3;
     }
-
     options = options || {};
     if (attrs) {
-      let validationError;
-      options.error = (_, validation) => {
-        validationError = validation;
-      };
-      const success = this.set(attrs, options);
-      if (!success) {
-        return Promise.reject(validationError);
-      }
+      this.set(attrs, options);
     }
     const saveOptions = ParseObject._getRequestOptions(options);
     const controller = CoreManager.getObjectController();
@@ -1985,7 +1978,9 @@ class ParseObject {
       }
 
       if (attributes && typeof attributes === 'object') {
-        if (!this.set(attributes || {}, options)) {
+        try {
+          this.set(attributes || {}, options);
+        } catch (_) {
           throw new Error("Can't create an invalid Parse Object");
         }
       }
