@@ -1,15 +1,12 @@
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import jsdoc from 'eslint-plugin-jsdoc';
-import expectType from "eslint-plugin-expect-type/configs/recommended";
+const eslint = require('@eslint/js');
+const tseslint = require('typescript-eslint');
+const jsdoc = require('eslint-plugin-jsdoc');
 
-export default tseslint.config({
+module.exports = tseslint.config({
   files: ['**/*.js', '**/*.ts'],
   extends: [
-    expectType,
     eslint.configs.recommended,
     ...tseslint.configs.recommended,
-    ...tseslint.configs.recommendedTypeChecked,
   ],
   plugins: {
     '@typescript-eslint': tseslint.plugin,
@@ -37,10 +34,6 @@ export default tseslint.config({
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-require-imports": "off",
-    "@typescript-eslint/no-unsafe-call": "off",
-    "@typescript-eslint/no-unsafe-member-access": "off",
-    "@typescript-eslint/no-unsafe-argument": "off",
-    "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
@@ -79,10 +72,6 @@ export default tseslint.config({
   },
   languageOptions: {
     parser: tseslint.parser,
-    parserOptions: {
-      projectService: true,
-      tsconfigRootDir: import.meta.dirname,
-    },
     globals: {
       __dirname: true,
       beforeEach: true,

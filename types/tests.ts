@@ -1,8 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-unused-expressions, @typescript-eslint/no-empty-object-type, no-empty */
-
-// Run the following command to get number of failed tests
-// $ npm run test:types 2>&1 | tee temp.txt; grep 'ERROR:' temp.txt -c; rm temp.txt;
-
 import Parse from 'parse';
 import ParseNode from 'parse/node';
 import ParseRN from 'parse/react-native';
