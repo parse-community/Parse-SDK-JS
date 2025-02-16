@@ -61,7 +61,7 @@ export function remove(hook: HookDeleteArg) {
 
 const DefaultController = {
   get(type: string, functionName?: string, triggerName?: string) {
-    let url = '/hooks/' + type;
+    let url = 'hooks/' + type;
     if (functionName) {
       url += '/' + functionName;
       if (triggerName) {
@@ -74,9 +74,9 @@ const DefaultController = {
   create(hook) {
     let url;
     if (hook.functionName && hook.url) {
-      url = '/hooks/functions';
+      url = 'hooks/functions';
     } else if (hook.className && hook.triggerName && hook.url) {
-      url = '/hooks/triggers';
+      url = 'hooks/triggers';
     } else {
       return Promise.reject({ error: 'invalid hook declaration', code: 143 });
     }
@@ -86,10 +86,10 @@ const DefaultController = {
   remove(hook) {
     let url;
     if (hook.functionName) {
-      url = '/hooks/functions/' + hook.functionName;
+      url = 'hooks/functions/' + hook.functionName;
       delete hook.functionName;
     } else if (hook.className && hook.triggerName) {
-      url = '/hooks/triggers/' + hook.className + '/' + hook.triggerName;
+      url = 'hooks/triggers/' + hook.className + '/' + hook.triggerName;
       delete hook.className;
       delete hook.triggerName;
     } else {
@@ -101,10 +101,10 @@ const DefaultController = {
   update(hook) {
     let url;
     if (hook.functionName && hook.url) {
-      url = '/hooks/functions/' + hook.functionName;
+      url = 'hooks/functions/' + hook.functionName;
       delete hook.functionName;
     } else if (hook.className && hook.triggerName && hook.url) {
-      url = '/hooks/triggers/' + hook.className + '/' + hook.triggerName;
+      url = 'hooks/triggers/' + hook.className + '/' + hook.triggerName;
       delete hook.className;
       delete hook.triggerName;
     } else {

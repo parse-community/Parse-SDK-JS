@@ -1,3 +1,15 @@
+# [6.0.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/6.0.0-alpha.1...6.0.0-alpha.2) (2025-02-16)
+
+
+### Bug Fixes
+
+* `Parse.Hooks` requests have double forward slash in URL ([#2441](https://github.com/parse-community/Parse-SDK-JS/issues/2441)) ([1fc520c](https://github.com/parse-community/Parse-SDK-JS/commit/1fc520ccdc3742c467dfaa9f58d249389b4d5c5a))
+
+
+### BREAKING CHANGES
+
+* Internal REST requests for `Parse.Hooks` use a URL that contains a double forward slash, for example `http://localhost/parse//hooks/functions`. This release changes the double forward slash to a single forward slash. ([1fc520c](1fc520c))
+
 # [6.0.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0-alpha.6...6.0.0-alpha.1) (2025-02-16)
 
 
