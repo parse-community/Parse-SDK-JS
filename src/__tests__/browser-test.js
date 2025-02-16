@@ -84,7 +84,6 @@ describe('Browser', () => {
       }
     }
     global.XDomainRequest = XDomainRequest;
-    console.log('hererer');
     const RESTController = require('../RESTController');
     const options = {
       progress: () => {},

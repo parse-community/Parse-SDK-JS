@@ -320,7 +320,7 @@ class ParseFile {
       throw new ParseError(ParseError.FILE_DELETE_UNNAMED_ERROR, 'Cannot delete an unnamed file.');
     }
     const destroyOptions = { useMasterKey: true };
-    if (options.hasOwnProperty('useMasterKey')) {
+    if (Object.hasOwn(options, 'useMasterKey')) {
       destroyOptions.useMasterKey = !!options.useMasterKey;
     }
     const controller = CoreManager.getFileController();

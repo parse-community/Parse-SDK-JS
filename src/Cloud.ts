@@ -26,30 +26,22 @@ import type { RequestOptions } from './RESTController';
  * @param {string} name The function name.
  * @param {object} data The parameters to send to the cloud function.
  * @param {object} options
+ * Valid options are:<ul>
+ *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+ *     be used for this request.
+ *   <li>sessionToken: A valid session token, used for making a request on
+ *        behalf of a specific user.
+ *   <li>installationId: the installationId which made the request
+ *   <li>context: A dictionary that is accessible in Cloud Code triggers.
+ * </ul>
  * @returns {Promise} A promise that will be resolved with the result
  * of the function.
  */
 export function run(name: string, data: any, options: RequestOptions): Promise<any> {
-  options = options || {};
-
   if (typeof name !== 'string' || name.length === 0) {
     throw new TypeError('Cloud function name must be a string.');
   }
-
-  const requestOptions: RequestOptions = {};
-  if (options.useMasterKey) {
-    requestOptions.useMasterKey = options.useMasterKey;
-  }
-  if (options.sessionToken) {
-    requestOptions.sessionToken = options.sessionToken;
-  }
-  if (options.installationId) {
-    requestOptions.installationId = options.installationId;
-  }
-  if (options.context && typeof options.context === 'object') {
-    requestOptions.context = options.context;
-  }
-
+  const requestOptions = ParseObject._getRequestOptions(options);
   return CoreManager.getCloudController().run(name, data, requestOptions);
 }
 
@@ -62,10 +54,7 @@ export function run(name: string, data: any, options: RequestOptions): Promise<a
  * of the function.
  */
 export function getJobsData(): Promise<any> {
-  const requestOptions = {
-    useMasterKey: true,
-  };
-  return CoreManager.getCloudController().getJobsData(requestOptions);
+  return CoreManager.getCloudController().getJobsData({ useMasterKey: true });
 }
 
 /**
@@ -82,10 +71,7 @@ export function startJob(name: string, data: any): Promise<string> {
   if (typeof name !== 'string' || name.length === 0) {
     throw new TypeError('Cloud job name must be a string.');
   }
-  const requestOptions = {
-    useMasterKey: true,
-  };
-  return CoreManager.getCloudController().startJob(name, data, requestOptions);
+  return CoreManager.getCloudController().startJob(name, data, { useMasterKey: true });
 }
 
 /**
@@ -104,17 +90,15 @@ export function getJobStatus(jobStatusId: string): Promise<ParseObject> {
 const DefaultController = {
   run(name: string, data: any, options: RequestOptions) {
     const RESTController = CoreManager.getRESTController();
-
     const payload = encode(data, true);
 
     const request = RESTController.request('POST', 'functions/' + name, payload, options);
-
     return request.then(res => {
-      if (typeof res === 'object' && Object.keys(res).length > 0 && !res.hasOwnProperty('result')) {
+      if (typeof res === 'object' && Object.keys(res).length > 0 && !Object.hasOwn(res, 'result')) {
         throw new ParseError(ParseError.INVALID_JSON, 'The server returned an invalid response.');
       }
       const decoded = decode(res);
-      if (decoded && decoded.hasOwnProperty('result')) {
+      if (decoded && Object.hasOwn(decoded, 'result')) {
         return Promise.resolve(decoded.result);
       }
       return Promise.resolve(undefined);
@@ -123,7 +107,6 @@ const DefaultController = {
 
   getJobsData(options: RequestOptions) {
     const RESTController = CoreManager.getRESTController();
-
     return RESTController.request('GET', 'cloud_code/jobs/data', null, options);
   },
 

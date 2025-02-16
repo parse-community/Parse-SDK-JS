@@ -20,6 +20,7 @@ export type SaveOptions = FullOptions & {
   cascadeSave?: boolean;
   context?: AttributeMap;
   batchSize?: number;
+  transaction?: boolean;
 };
 type FetchOptions = {
   useMasterKey?: boolean;
@@ -125,6 +126,15 @@ declare class ParseObject {
   _handleSaveResponse(response: AttributeMap, status: number): void;
   _handleSaveError(): void;
   static _getClassMap(): AttributeMap;
+  static _getRequestOptions(
+    options?: RequestOptions &
+      FullOptions & {
+        json?: boolean;
+      }
+  ): RequestOptions &
+    FullOptions & {
+      json?: boolean;
+    };
   initialize(): void;
   /**
    * Returns a JSON version of the object suitable for saving to Parse.
@@ -787,6 +797,15 @@ declare class ParseObject {
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   *   <li>include: The name(s) of the key(s) to include. Can be a string, an array of strings,
+   *       or an array of array of strings.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeFind` trigger.
+   * </ul>
    * @static
    * @returns {Parse.Object[]}
    */
@@ -837,6 +856,15 @@ declare class ParseObject {
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers.
+   *   <li>transaction: Set to true to enable transactions
+   *   <li>batchSize: How many objects to yield in each batch (default: 20)
+   * </ul>
    * @static
    * @returns {Promise} A promise that is fulfilled when the destroyAll
    * completes.
@@ -860,6 +888,17 @@ declare class ParseObject {
    *
    * @param {Array} list A list of <code>Parse.Object</code>.
    * @param {object} options
+   * Valid options are:
+   * <ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *        be used for this request.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   *   <li>cascadeSave: If `false`, nested objects will not be saved (default is `true`).
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeSave` and `afterSave` triggers.
+   *   <li>transaction: Set to true to enable transactions
+   *   <li>batchSize: How many objects to yield in each batch (default: 20)
+   * </ul>
    * @static
    * @returns {Parse.Object[]}
    */

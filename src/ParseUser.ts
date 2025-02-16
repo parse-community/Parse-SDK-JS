@@ -51,17 +51,15 @@ class ParseUser extends ParseObject {
    * Request a revocable session token to replace the older style of token.
    *
    * @param {object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   * </ul>
    * @returns {Promise} A promise that is resolved when the replacement
    *   token has been fetched.
    */
   _upgradeToRevocableSession(options: RequestOptions): Promise<void> {
-    options = options || {};
-
-    const upgradeOptions: RequestOptions = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      upgradeOptions.useMasterKey = options.useMasterKey;
-    }
-
+    const upgradeOptions = ParseObject._getRequestOptions(options);
     const controller = CoreManager.getUserController();
     return controller.upgradeToRevocableSession(this, upgradeOptions);
   }
@@ -108,7 +106,7 @@ class ParseUser extends ParseObject {
     } else {
       authType = provider.getAuthType();
     }
-    if (options && options.hasOwnProperty('authData')) {
+    if (options && Object.hasOwn(options, 'authData')) {
       const authData = this.get('authData') || {};
       if (typeof authData !== 'object') {
         throw new Error('Invalid type: authData field should be an object');
@@ -323,7 +321,7 @@ class ParseUser extends ParseObject {
 
   stripAnonymity() {
     const authData = this.get('authData');
-    if (authData && typeof authData === 'object' && authData.hasOwnProperty('anonymous')) {
+    if (authData && typeof authData === 'object' && Object.hasOwn(authData, 'anonymous')) {
       // We need to set anonymous to null instead of deleting it in order to remove it from Parse.
       authData.anonymous = null;
     }
@@ -426,6 +424,12 @@ class ParseUser extends ParseObject {
    *
    * @param {object} attrs Extra fields to set on the new user, or null.
    * @param {object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>installationId: the installationId which made the request
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeLogin` and `afterLogin` triggers.
+   * </ul>
    * @returns {Promise} A promise that is fulfilled when the signup
    *     finishes.
    */
@@ -433,22 +437,7 @@ class ParseUser extends ParseObject {
     attrs: AttributeMap,
     options?: FullOptions & { context?: AttributeMap }
   ): Promise<ParseUser> {
-    options = options || {};
-
-    const signupOptions: FullOptions & { context?: AttributeMap } = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      signupOptions.useMasterKey = options.useMasterKey;
-    }
-    if (options.hasOwnProperty('installationId')) {
-      signupOptions.installationId = options.installationId;
-    }
-    if (
-      options.hasOwnProperty('context') &&
-      Object.prototype.toString.call(options.context) === '[object Object]'
-    ) {
-      signupOptions.context = options.context;
-    }
-
+    const signupOptions = ParseObject._getRequestOptions(options);
     const controller = CoreManager.getUserController();
     return controller.signUp(this, attrs, signupOptions);
   }
@@ -461,27 +450,20 @@ class ParseUser extends ParseObject {
    * <p>A username and password must be set before calling logIn.</p>
    *
    * @param {object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>usePost: Use POST method to make the request (default: true)
+   *   <li>installationId: the installationId which made the request
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeLogin` and `afterLogin` triggers.
+   * </ul>
    * @returns {Promise} A promise that is fulfilled with the user when
    *     the login is complete.
    */
   logIn(options: FullOptions & { context?: AttributeMap } = {}): Promise<ParseUser> {
-    options = options || {};
-
-    const loginOptions: FullOptions & { context?: AttributeMap } = { usePost: true };
-    if (options.hasOwnProperty('useMasterKey')) {
-      loginOptions.useMasterKey = options.useMasterKey;
-    }
-    if (options.hasOwnProperty('installationId')) {
-      loginOptions.installationId = options.installationId;
-    }
-    if (options.hasOwnProperty('usePost')) {
-      loginOptions.usePost = options.usePost;
-    }
-    if (
-      options.hasOwnProperty('context') &&
-      Object.prototype.toString.call(options.context) === '[object Object]'
-    ) {
-      loginOptions.context = options.context;
+    const loginOptions = ParseObject._getRequestOptions(options);
+    if (!Object.hasOwn(loginOptions, 'usePost')) {
+      loginOptions.usePost = true;
     }
     const controller = CoreManager.getUserController();
     return controller.logIn(this, loginOptions);
@@ -745,6 +727,7 @@ class ParseUser extends ParseObject {
    *
    * @param {string} sessionToken The sessionToken to log in with.
    * @param {object} options
+   * @param {boolean} [options.useMasterKey]
    * @static
    * @returns {Promise} A promise that is fulfilled with the user when
    *     the login completes.
@@ -753,15 +736,8 @@ class ParseUser extends ParseObject {
     if (!canUseCurrentUser) {
       throw new Error('It is not memory-safe to become a user in a server environment');
     }
-    options = options || {};
-
-    const becomeOptions: RequestOptions = {
-      sessionToken: sessionToken,
-    };
-    if (options.hasOwnProperty('useMasterKey')) {
-      becomeOptions.useMasterKey = options.useMasterKey;
-    }
-
+    const becomeOptions = ParseObject._getRequestOptions(options);
+    becomeOptions.sessionToken = sessionToken;
     const controller = CoreManager.getUserController();
     const user = new this();
     return controller.become(user, becomeOptions);
@@ -772,17 +748,14 @@ class ParseUser extends ParseObject {
    *
    * @param {string} sessionToken The sessionToken to get user with.
    * @param {object} options
+   * @param {boolean} [options.useMasterKey]
    * @static
    * @returns {Promise} A promise that is fulfilled with the user is fetched.
    */
   static me(sessionToken: string, options: RequestOptions = {}) {
     const controller = CoreManager.getUserController();
-    const meOptions: RequestOptions = {
-      sessionToken: sessionToken,
-    };
-    if (options.useMasterKey) {
-      meOptions.useMasterKey = options.useMasterKey;
-    }
+    const meOptions = ParseObject._getRequestOptions(options);
+    meOptions.sessionToken = sessionToken;
     const user = new this();
     return controller.me(user, meOptions);
   }
@@ -845,17 +818,15 @@ class ParseUser extends ParseObject {
    * @param {string} email The email address associated with the user that
    *     forgot their password.
    * @param {object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   * </ul>
    * @static
    * @returns {Promise}
    */
   static requestPasswordReset(email: string, options?: RequestOptions) {
-    options = options || {};
-
-    const requestOptions: RequestOptions = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      requestOptions.useMasterKey = options.useMasterKey;
-    }
-
+    const requestOptions = ParseObject._getRequestOptions(options);
     const controller = CoreManager.getUserController();
     return controller.requestPasswordReset(email, requestOptions);
   }
@@ -866,17 +837,15 @@ class ParseUser extends ParseObject {
    * @param {string} email The email address associated with the user that
    *     needs to verify their email.
    * @param {object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   * </ul>
    * @static
    * @returns {Promise}
    */
   static requestEmailVerification(email: string, options?: RequestOptions) {
-    options = options || {};
-
-    const requestOptions: RequestOptions = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      requestOptions.useMasterKey = options.useMasterKey;
-    }
-
+    const requestOptions = ParseObject._getRequestOptions(options);
     const controller = CoreManager.getUserController();
     return controller.requestEmailVerification(email, requestOptions);
   }

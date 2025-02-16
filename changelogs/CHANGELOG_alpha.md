@@ -1,3 +1,17 @@
+# [5.3.0-alpha.6](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0-alpha.5...5.3.0-alpha.6) (2025-02-14)
+
+
+### Bug Fixes
+
+* `Parse.Query.findAll` not returning all objects with option `json: true` ([#2449](https://github.com/parse-community/Parse-SDK-JS/issues/2449)) ([f160b8c](https://github.com/parse-community/Parse-SDK-JS/commit/f160b8c9a14ef26b850bebd0a65e84a1e96ef327))
+
+# [5.3.0-alpha.5](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0-alpha.4...5.3.0-alpha.5) (2025-02-11)
+
+
+### Bug Fixes
+
+* Cannot pass `useMasterKey: false` to `Parse.Cloud.run` ([#2431](https://github.com/parse-community/Parse-SDK-JS/issues/2431)) ([abadac9](https://github.com/parse-community/Parse-SDK-JS/commit/abadac947d8453afdf86f4a008aee189b4a6bfd2))
+
 # [5.3.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0-alpha.3...5.3.0-alpha.4) (2024-10-14)
 
 

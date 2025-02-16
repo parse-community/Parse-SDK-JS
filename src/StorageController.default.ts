@@ -4,7 +4,7 @@ const StorageController = {
   async: 0,
 
   getItem(path: string): string | null {
-    if (memMap.hasOwnProperty(path)) {
+    if (Object.hasOwn(memMap, path)) {
       return memMap[path];
     }
     return null;
@@ -24,7 +24,7 @@ const StorageController = {
 
   clear() {
     for (const key in memMap) {
-      if (memMap.hasOwnProperty(key)) {
+      if (Object.hasOwn(memMap, key)) {
         delete memMap[key];
       }
     }

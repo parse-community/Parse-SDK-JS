@@ -99,7 +99,7 @@ function handleSelectResult(data: any, select: Array<string>) {
 
   select.forEach(field => {
     const hasSubObjectSelect = field.indexOf('.') !== -1;
-    if (!hasSubObjectSelect && !data.hasOwnProperty(field)) {
+    if (!hasSubObjectSelect && !Object.hasOwn(data, field)) {
       // this field was selected, but is missing from the retrieved data
       data[field] = undefined;
     } else if (hasSubObjectSelect) {
@@ -111,7 +111,7 @@ function handleSelectResult(data: any, select: Array<string>) {
 
       pathComponents.forEach((component, index, arr) => {
         // add keys if the expected data is missing
-        if (obj && !obj.hasOwnProperty(component)) {
+        if (obj && !Object.hasOwn(obj, component)) {
           obj[component] = undefined;
         }
         if (obj && typeof obj === 'object') {
@@ -148,7 +148,7 @@ function copyMissingDataWithMask(src, dest, mask, copyThisLevel) {
   //copy missing elements at this level
   if (copyThisLevel) {
     for (const key in src) {
-      if (src.hasOwnProperty(key) && !dest.hasOwnProperty(key)) {
+      if (Object.hasOwn(src, key) && !Object.hasOwn(dest, key)) {
         dest[key] = src[key];
       }
     }
@@ -580,7 +580,7 @@ class ParseQuery {
     }
 
     for (const key in json) {
-      if (json.hasOwnProperty(key)) {
+      if (Object.hasOwn(json, key)) {
         if (
           [
             'where',
@@ -639,20 +639,7 @@ class ParseQuery {
   get(objectId: string, options?: QueryOptions): Promise<ParseObject> {
     this.equalTo('objectId', objectId);
 
-    const firstOptions: QueryOptions = {};
-    if (options && options.hasOwnProperty('useMasterKey')) {
-      firstOptions.useMasterKey = options.useMasterKey;
-    }
-    if (options && options.hasOwnProperty('sessionToken')) {
-      firstOptions.sessionToken = options.sessionToken;
-    }
-    if (options && options.hasOwnProperty('context') && typeof options.context === 'object') {
-      firstOptions.context = options.context;
-    }
-    if (options && options.hasOwnProperty('json')) {
-      firstOptions.json = options.json;
-    }
-
+    const firstOptions = ParseObject._getRequestOptions(options);
     return this.first(firstOptions).then(response => {
       if (response) {
         return response;
@@ -679,22 +666,10 @@ class ParseQuery {
    * the query completes.
    */
   find(options?: QueryOptions): Promise<Array<ParseObject>> {
-    options = options || {};
-
-    const findOptions: QueryOptions = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      findOptions.useMasterKey = options.useMasterKey;
-    }
-    if (options.hasOwnProperty('sessionToken')) {
-      findOptions.sessionToken = options.sessionToken;
-    }
-    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
-      findOptions.context = options.context;
-    }
+    const findOptions = ParseObject._getRequestOptions(options);
     this._setRequestTask(findOptions);
 
     const controller = CoreManager.getQueryController();
-
     const select = this._select;
 
     if (this._queriesLocalDatastore) {
@@ -719,7 +694,7 @@ class ParseQuery {
         if (select) {
           handleSelectResult(data, select);
         }
-        if (options.json) {
+        if (findOptions.json) {
           return data;
         } else {
           return ParseObject.fromJSON(data, !select);
@@ -746,6 +721,7 @@ class ParseQuery {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
+   *   <li>json: Return raw JSON without converting to Parse.Object.
    * </ul>
    * @returns {Promise} A promise that is resolved with the results when
    * the query completes.
@@ -776,13 +752,7 @@ class ParseQuery {
   count(options?: { useMasterKey?: boolean; sessionToken?: string }): Promise<number> {
     options = options || {};
 
-    const findOptions: { useMasterKey?: boolean; sessionToken?: string } = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      findOptions.useMasterKey = options.useMasterKey;
-    }
-    if (options.hasOwnProperty('sessionToken')) {
-      findOptions.sessionToken = options.sessionToken;
-    }
+    const findOptions = ParseObject._getRequestOptions(options);
     this._setRequestTask(findOptions);
 
     const controller = CoreManager.getQueryController();
@@ -806,12 +776,10 @@ class ParseQuery {
    */
   distinct(key: string, options?: { sessionToken?: string }): Promise<Array<any>> {
     options = options || {};
-
     const distinctOptions: { sessionToken?: string; useMasterKey: boolean } = {
       useMasterKey: true,
     };
-
-    if (options.hasOwnProperty('sessionToken')) {
+    if (Object.hasOwn(options, 'sessionToken')) {
       distinctOptions.sessionToken = options.sessionToken;
     }
     this._setRequestTask(distinctOptions);
@@ -840,8 +808,7 @@ class ParseQuery {
     const aggregateOptions: { sessionToken?: string; useMasterKey: boolean } = {
       useMasterKey: true,
     };
-
-    if (options.hasOwnProperty('sessionToken')) {
+    if (Object.hasOwn(options, 'sessionToken')) {
       aggregateOptions.sessionToken = options.sessionToken;
     }
     this._setRequestTask(aggregateOptions);
@@ -887,16 +854,7 @@ class ParseQuery {
    * the query completes.
    */
   first(options: QueryOptions = {}): Promise<ParseObject | void> {
-    const findOptions: QueryOptions = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      findOptions.useMasterKey = options.useMasterKey;
-    }
-    if (options.hasOwnProperty('sessionToken')) {
-      findOptions.sessionToken = options.sessionToken;
-    }
-    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
-      findOptions.context = options.context;
-    }
+    const findOptions = ParseObject._getRequestOptions(options);
     this._setRequestTask(findOptions);
 
     const controller = CoreManager.getQueryController();
@@ -930,7 +888,7 @@ class ParseQuery {
       if (select) {
         handleSelectResult(objects[0], select);
       }
-      if (options.json) {
+      if (findOptions.json) {
         return objects[0];
       } else {
         return ParseObject.fromJSON(objects[0], !select);
@@ -967,48 +925,11 @@ class ParseQuery {
       return Promise.reject(error);
     }
 
-    const query = new ParseQuery(this.className);
-    query._limit = options.batchSize || 100;
-    query._include = [...this._include];
-    query._exclude = [...this._exclude];
-    if (this._select) {
-      query._select = [...this._select];
-    }
-    query._hint = this._hint;
-    query._where = {};
-    for (const attr in this._where) {
-      const val = this._where[attr];
-      if (Array.isArray(val)) {
-        query._where[attr] = val.map(v => {
-          return v;
-        });
-      } else if (val && typeof val === 'object') {
-        const conditionMap = {};
-        query._where[attr] = conditionMap;
-        for (const cond in val) {
-          conditionMap[cond] = val[cond];
-        }
-      } else {
-        query._where[attr] = val;
-      }
-    }
-
+    const query = ParseQuery.fromJSON(this.className, this.toJSON());
     query.ascending('objectId');
+    query._limit = options.batchSize || 100;
 
-    const findOptions: BatchOptions = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      findOptions.useMasterKey = options.useMasterKey;
-    }
-    if (options.hasOwnProperty('sessionToken')) {
-      findOptions.sessionToken = options.sessionToken;
-    }
-    if (options.hasOwnProperty('context') && typeof options.context === 'object') {
-      findOptions.context = options.context;
-    }
-    if (options.hasOwnProperty('json')) {
-      findOptions.json = options.json;
-    }
-
+    const findOptions = ParseObject._getRequestOptions(options);
     let finished = false;
     let previousResults: ParseObject[] = [];
     return continueWhile(
@@ -1021,7 +942,11 @@ class ParseQuery {
           Promise.resolve(previousResults.length > 0 && callback(previousResults)),
         ]);
         if (results.length >= query._limit) {
-          query.greaterThan('objectId', results[results.length - 1].id);
+          if (findOptions.json) {
+            query.greaterThan('objectId', (results[results.length - 1] as any).objectId);
+          } else {
+            query.greaterThan('objectId', results[results.length - 1].id);
+          }
           previousResults = results;
         } else if (results.length > 0) {
           await Promise.resolve(callback(results));

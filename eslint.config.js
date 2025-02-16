@@ -24,7 +24,6 @@ module.exports = tseslint.config({
     "no-useless-escape": "off",
     "no-var": "error",
     "no-console": 0,
-    "no-prototype-builtins": "off",
     "require-atomic-updates": "off",
     "prefer-spread": "off",
     "prefer-rest-params": "off",

@@ -244,7 +244,7 @@ describe('ParseObject', () => {
   it('can ignore validation if ignoreValidation option is provided', () => {
     class ValidatedObject extends ParseObject {
       validate(attrs) {
-        if (attrs.hasOwnProperty('badAttr')) {
+        if (Object.hasOwn(attrs, 'badAttr')) {
           return 'you have the bad attr';
         }
       }

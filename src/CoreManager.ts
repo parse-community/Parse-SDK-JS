@@ -340,7 +340,7 @@ function requireMethods(name: string, methods: Array<string>, controller: any) {
 
 const CoreManager = {
   get: function (key: string): any {
-    if (config.hasOwnProperty(key)) {
+    if (Object.hasOwn(config, key)) {
       return config[key];
     }
     throw new Error('Configuration key not found: ' + key);
@@ -351,7 +351,7 @@ const CoreManager = {
   },
 
   setIfNeeded: function (key: string, value: any): any {
-    if (!config.hasOwnProperty(key)) {
+    if (!Object.hasOwn(config, key)) {
       config[key] = value;
     }
     return config[key];

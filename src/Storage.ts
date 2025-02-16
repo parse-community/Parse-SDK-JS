@@ -85,7 +85,7 @@ const Storage = {
 
   _clear() {
     const controller = CoreManager.getStorageController();
-    if (controller.hasOwnProperty('clear')) {
+    if (Object.hasOwn(controller, 'clear')) {
       controller.clear();
     }
   },

@@ -55,7 +55,11 @@ describe('Cloud', () => {
   it('run passes options', () => {
     Cloud.run('myfunction', {}, { useMasterKey: false });
 
-    expect(CoreManager.getCloudController().run.mock.calls[0]).toEqual(['myfunction', {}, {}]);
+    expect(CoreManager.getCloudController().run.mock.calls[0]).toEqual([
+      'myfunction',
+      {},
+      { useMasterKey: false },
+    ]);
 
     Cloud.run('myfunction', {}, { useMasterKey: true });
 

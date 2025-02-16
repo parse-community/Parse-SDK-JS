@@ -94,7 +94,9 @@ jobs:
         node-version: ${{ matrix.NODE_VERSION }}
         cache: npm
     - run: npm ci
-    - run: npm test -- --maxWorkers=4
+    # Run unit tests
+    - run: npm test -- --maxWorkers=4 
+    # Run integration tests
     - run: npm run test:mongodb
       env:
         CI: true

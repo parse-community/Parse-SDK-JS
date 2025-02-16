@@ -598,8 +598,8 @@ describe('Parse User', () => {
       })
       .then(() => {
         assert.equal(Object.keys(user.attributes).length, 5);
-        assert(user.attributes.hasOwnProperty('username'));
-        assert(user.attributes.hasOwnProperty('email'));
+        assert(Object.hasOwn(user.attributes, 'username'));
+        assert(Object.hasOwn(user.attributes, 'email'));
         return user.destroy();
       })
       .then(() => {
