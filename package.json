@@ -102,7 +102,7 @@
     "test": "cross-env PARSE_BUILD=node jest",
     "test:mongodb": "npm run test:mongodb:runnerstart && npm run integration",
     "test:mongodb:runnerstart": "mongodb-runner start -- --port 27017",
-    "test:types": "dtslint --expectOnly types",
+    "test:types": "dtslint --expectOnly types 2>&1 | tee temp.txt; echo \"Type tests failed: $(grep 'ERROR:' temp.txt -c)\"; rm temp.txt;",
     "posttest:mongodb": "mongodb-runner stop --all",
     "lint": "eslint --cache src/ integration/",
     "lint:fix": "eslint --fix --cache src/ integration/",
