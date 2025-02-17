@@ -30,7 +30,7 @@ jobs:
       - name: Build Types
         run: npm run build:types
       - name: Test Types
-        run: npm run test:types 2>&1
+        run: npm run test:types 2>1
   check-docs:
     name: Check Docs
     timeout-minutes: 10
