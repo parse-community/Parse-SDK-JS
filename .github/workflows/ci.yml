@@ -27,8 +27,6 @@ jobs:
         with:
           cache: npm
       - run: npm ci
-      - name: Build Types
-        run: npm run build:types
       - name: Test Types
         run: npm run test:types 2>&1 | tee silent.txt;
   check-docs:
