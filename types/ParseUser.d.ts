@@ -32,6 +32,10 @@ declare class ParseUser extends ParseObject {
    * Request a revocable session token to replace the older style of token.
    *
    * @param {object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   * </ul>
    * @returns {Promise} A promise that is resolved when the replacement
    *   token has been fetched.
    */
@@ -167,7 +171,7 @@ declare class ParseUser extends ParseObject {
    * @param {string} email
    * @returns {boolean}
    */
-  setEmail(email: string): boolean | ParseObject;
+  setEmail(email: string): this;
   /**
    * Returns the session token for this user, if the user has been logged in,
    * or if it is the result of a query with the master key. Otherwise, returns
@@ -192,6 +196,12 @@ declare class ParseUser extends ParseObject {
    *
    * @param {object} attrs Extra fields to set on the new user, or null.
    * @param {object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>installationId: the installationId which made the request
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeLogin` and `afterLogin` triggers.
+   * </ul>
    * @returns {Promise} A promise that is fulfilled when the signup
    *     finishes.
    */
@@ -209,6 +219,13 @@ declare class ParseUser extends ParseObject {
    * <p>A username and password must be set before calling logIn.</p>
    *
    * @param {object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   *   <li>usePost: Use POST method to make the request (default: true)
+   *   <li>installationId: the installationId which made the request
+   *   <li>context: A dictionary that is accessible in Cloud Code `beforeLogin` and `afterLogin` triggers.
+   * </ul>
    * @returns {Promise} A promise that is fulfilled with the user when
    *     the login is complete.
    */
@@ -362,6 +379,7 @@ declare class ParseUser extends ParseObject {
    *
    * @param {string} sessionToken The sessionToken to log in with.
    * @param {object} options
+   * @param {boolean} [options.useMasterKey]
    * @static
    * @returns {Promise} A promise that is fulfilled with the user when
    *     the login completes.
@@ -372,6 +390,7 @@ declare class ParseUser extends ParseObject {
    *
    * @param {string} sessionToken The sessionToken to get user with.
    * @param {object} options
+   * @param {boolean} [options.useMasterKey]
    * @static
    * @returns {Promise} A promise that is fulfilled with the user is fetched.
    */
@@ -423,6 +442,10 @@ declare class ParseUser extends ParseObject {
    * @param {string} email The email address associated with the user that
    *     forgot their password.
    * @param {object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   * </ul>
    * @static
    * @returns {Promise}
    */
@@ -433,6 +456,10 @@ declare class ParseUser extends ParseObject {
    * @param {string} email The email address associated with the user that
    *     needs to verify their email.
    * @param {object} options
+   * Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *     be used for this request.
+   * </ul>
    * @static
    * @returns {Promise}
    */

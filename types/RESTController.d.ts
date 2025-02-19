@@ -9,6 +9,7 @@ export type RequestOptions = {
   context?: any;
   usePost?: boolean;
   ignoreEmailVerification?: boolean;
+  transaction?: boolean;
 };
 export type FullOptions = {
   success?: any;

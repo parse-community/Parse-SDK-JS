@@ -20,7 +20,9 @@ class ParseSession extends ParseObject {
   constructor(attributes?: any) {
     super('_Session');
     if (attributes && typeof attributes === 'object') {
-      if (!this.set(attributes || {})) {
+      try {
+        this.set(attributes || {});
+      } catch (_) {
         throw new Error("Can't create an invalid Session");
       }
     }
@@ -53,13 +55,9 @@ class ParseSession extends ParseObject {
    * promise will be rejected.
    */
   static current(options: FullOptions) {
-    options = options || {};
     const controller = CoreManager.getSessionController();
+    const sessionOptions = ParseObject._getRequestOptions(options);
 
-    const sessionOptions: FullOptions = {};
-    if (options.hasOwnProperty('useMasterKey')) {
-      sessionOptions.useMasterKey = options.useMasterKey;
-    }
     return ParseUser.currentAsync().then(user => {
       if (!user) {
         return Promise.reject('There is no current user.');

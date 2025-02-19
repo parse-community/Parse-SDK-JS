@@ -19,6 +19,14 @@ import type { RequestOptions } from './RESTController';
  * @param {string} name The function name.
  * @param {object} data The parameters to send to the cloud function.
  * @param {object} options
+ * Valid options are:<ul>
+ *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+ *     be used for this request.
+ *   <li>sessionToken: A valid session token, used for making a request on
+ *        behalf of a specific user.
+ *   <li>installationId: the installationId which made the request
+ *   <li>context: A dictionary that is accessible in Cloud Code triggers.
+ * </ul>
  * @returns {Promise} A promise that will be resolved with the result
  * of the function.
  */

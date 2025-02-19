@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2015",
-    "lib": ["dom"],
+    "lib": ["es2022", "dom"],
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "types",

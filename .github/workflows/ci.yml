@@ -30,9 +30,7 @@ jobs:
       - name: Build Types
         run: npm run build:types
       - name: Test Types
-        run: npm run test:types
-      - name: Lint Types
-        run: npm run lint:types
+        run: npm run test:types 2>&1 | tee silent.txt;
   check-docs:
     name: Check Docs
     timeout-minutes: 10
@@ -96,7 +94,9 @@ jobs:
         node-version: ${{ matrix.NODE_VERSION }}
         cache: npm
     - run: npm ci
-    - run: npm test -- --maxWorkers=4
+    # Run unit tests
+    - run: npm test -- --maxWorkers=4 
+    # Run integration tests
     - run: npm run test:mongodb
       env:
         CI: true

@@ -1493,13 +1493,17 @@ describe('Parse Query', () => {
 
   it('can return all objects with findAll', async () => {
     const objs = [...Array(101)].map(() => new Parse.Object('Container'));
-
     await Parse.Object.saveAll(objs);
-
     const query = new Parse.Query('Container');
-
     const result = await query.findAll();
+    assert.equal(result.length, 101);
+  });
 
+  it('can return all objects with findAll json option', async () => {
+    const objs = [...Array(101)].map(() => new Parse.Object('Container'));
+    await Parse.Object.saveAll(objs);
+    const query = new Parse.Query('Container');
+    const result = await query.findAll({ json: true, batchSize: 100 });
     assert.equal(result.length, 101);
   });
 

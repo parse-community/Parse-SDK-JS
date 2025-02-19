@@ -40,7 +40,9 @@ class ParseInstallation extends ParseObject {
   constructor(attributes?: AttributeMap) {
     super('_Installation');
     if (attributes && typeof attributes === 'object') {
-      if (!this.set(attributes)) {
+      try {
+        this.set(attributes || {});
+      } catch (_) {
         throw new Error("Can't create an invalid Installation");
       }
     }

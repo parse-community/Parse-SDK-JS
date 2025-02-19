@@ -66,7 +66,7 @@ export function send(data: PushData, options: FullOptions = {}): Promise<string>
   }
 
   const pushOptions: FullOptions = { useMasterKey: true };
-  if (options.hasOwnProperty('useMasterKey')) {
+  if (Object.hasOwn(options, 'useMasterKey')) {
     pushOptions.useMasterKey = options.useMasterKey;
   }
 
@@ -91,7 +91,7 @@ export function getPushStatus(
   options: FullOptions = {}
 ): Promise<ParseObject> {
   const pushOptions: FullOptions = { useMasterKey: true };
-  if (options.hasOwnProperty('useMasterKey')) {
+  if (Object.hasOwn(options, 'useMasterKey')) {
     pushOptions.useMasterKey = options.useMasterKey;
   }
   const query = new ParseQuery('_PushStatus');
