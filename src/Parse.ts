@@ -389,7 +389,7 @@ CoreManager.setRESTController(RESTController);
 
 if (process.env.PARSE_BUILD === 'node') {
   Parse.initialize = Parse._initialize;
-  Parse.Cloud = Parse.Cloud || ({} as any);
+  Parse.Cloud = { ...(Parse.Cloud || ({} as any)) };
   (Parse.Cloud as any).useMasterKey = function () {
     CoreManager.set('USE_MASTER_KEY', true);
   };
