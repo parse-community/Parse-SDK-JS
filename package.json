@@ -97,7 +97,7 @@
   },
   "scripts": {
     "build": "node build_releases.js",
-    "build:types": "tsc && prettier --write 'types/{**/*,*}.ts' && npm run lint:fix",
+    "build:types": "tsc",
     "release": "node build_releases.js && npm publish",
     "test": "cross-env PARSE_BUILD=node jest",
     "test:mongodb": "npm run test:mongodb:runnerstart && npm run integration",
@@ -114,7 +114,7 @@
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
     "madge:circular": "madge ./src --extensions js,ts --circular",
     "prepare": "husky && npm run build",
-    "pre-commit": "lint-staged",
+    "pre-commit": "lint-staged && npm run build:types",
     "release_docs": "./release_docs.sh",
     "gulp": "gulp",
     "prettier": "prettier --write '{src,integration,types}/{**/*,*}.{js,ts}' && npm run lint:fix",

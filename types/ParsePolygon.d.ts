@@ -21,49 +21,49 @@ type Coordinates = Coordinate[];
  * @alias Parse.Polygon
  */
 declare class ParsePolygon {
-  _coordinates: Coordinates;
-  /**
-   * @param {(Coordinates | Parse.GeoPoint[])} coordinates An Array of coordinate pairs
-   */
-  constructor(coordinates: Coordinates | Array<ParseGeoPoint>);
-  /**
-   * Coordinates value for this Polygon.
-   * Throws an exception if not valid type.
-   *
-   * @property {(Coordinates | Parse.GeoPoint[])} coordinates list of coordinates
-   * @returns {Coordinates}
-   */
-  get coordinates(): Coordinates;
-  set coordinates(coords: Coordinates | Array<ParseGeoPoint>);
-  /**
-   * Returns a JSON representation of the Polygon, suitable for Parse.
-   *
-   * @returns {object}
-   */
-  toJSON(): {
-    __type: string;
-    coordinates: Coordinates;
-  };
-  /**
-   * Checks if two polygons are equal
-   *
-   * @param {(Parse.Polygon | object)} other
-   * @returns {boolean}
-   */
-  equals(other: ParsePolygon | any): boolean;
-  /**
-   *
-   * @param {Parse.GeoPoint} point
-   * @returns {boolean} Returns if the point is contained in the polygon
-   */
-  containsPoint(point: ParseGeoPoint): boolean;
-  /**
-   * Validates that the list of coordinates can form a valid polygon
-   *
-   * @param {Array} coords the list of coordinates to validate as a polygon
-   * @throws {TypeError}
-   * @returns {number[][]} Array of coordinates if validated.
-   */
-  static _validate(coords: Coordinates | Array<ParseGeoPoint>): Coordinates;
+    _coordinates: Coordinates;
+    /**
+     * @param {(Coordinates | Parse.GeoPoint[])} coordinates An Array of coordinate pairs
+     */
+    constructor(coordinates: Coordinates | Array<ParseGeoPoint>);
+    /**
+     * Coordinates value for this Polygon.
+     * Throws an exception if not valid type.
+     *
+     * @property {(Coordinates | Parse.GeoPoint[])} coordinates list of coordinates
+     * @returns {Coordinates}
+     */
+    get coordinates(): Coordinates;
+    set coordinates(coords: Coordinates | Array<ParseGeoPoint>);
+    /**
+     * Returns a JSON representation of the Polygon, suitable for Parse.
+     *
+     * @returns {object}
+     */
+    toJSON(): {
+        __type: string;
+        coordinates: Coordinates;
+    };
+    /**
+     * Checks if two polygons are equal
+     *
+     * @param {(Parse.Polygon | object)} other
+     * @returns {boolean}
+     */
+    equals(other: ParsePolygon | any): boolean;
+    /**
+     *
+     * @param {Parse.GeoPoint} point
+     * @returns {boolean} Returns if the point is contained in the polygon
+     */
+    containsPoint(point: ParseGeoPoint): boolean;
+    /**
+     * Validates that the list of coordinates can form a valid polygon
+     *
+     * @param {Array} coords the list of coordinates to validate as a polygon
+     * @throws {TypeError}
+     * @returns {number[][]} Array of coordinates if validated.
+     */
+    static _validate(coords: Coordinates | Array<ParseGeoPoint>): Coordinates;
 }
 export default ParsePolygon;

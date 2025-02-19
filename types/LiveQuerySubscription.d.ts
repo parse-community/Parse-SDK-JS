@@ -82,21 +82,21 @@ import type ParseQuery from './ParseQuery';
  * });</pre></p>
  */
 declare class Subscription {
-  id: string | number;
-  query: ParseQuery;
-  sessionToken?: string;
-  subscribePromise: any;
-  unsubscribePromise: any;
-  subscribed: boolean;
-  emitter: any;
-  on: any;
-  emit: any;
-  constructor(id: string | number, query: ParseQuery, sessionToken?: string);
-  /**
-   * Close the subscription
-   *
-   * @returns {Promise}
-   */
-  unsubscribe(): Promise<void>;
+    id: string | number;
+    query: ParseQuery;
+    sessionToken?: string;
+    subscribePromise: any;
+    unsubscribePromise: any;
+    subscribed: boolean;
+    emitter: any;
+    on: any;
+    emit: any;
+    constructor(id: string | number, query: ParseQuery, sessionToken?: string);
+    /**
+     * Close the subscription
+     *
+     * @returns {Promise}
+     */
+    unsubscribe(): Promise<void>;
 }
 export default Subscription;

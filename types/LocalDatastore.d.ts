@@ -20,37 +20,37 @@ import type ParseObject from './ParseObject';
  * @static
  */
 declare const LocalDatastore: {
-  isEnabled: boolean;
-  isSyncing: boolean;
-  fromPinWithName(name: string): Promise<Array<any>>;
-  pinWithName(name: string, value: any): Promise<void>;
-  unPinWithName(name: string): Promise<void>;
-  _getAllContents(): Promise<any>;
-  _getRawStorage(): Promise<any>;
-  _clear(): Promise<void>;
-  _handlePinAllWithName(name: string, objects: Array<ParseObject>): Promise<void>;
-  _handleUnPinAllWithName(name: string, objects: Array<ParseObject>): Promise<any[]>;
-  _getChildren(object: ParseObject): any;
-  _traverse(object: any, encountered: any): void;
-  _serializeObjectsFromPinName(name: string): Promise<any[]>;
-  _serializeObject(objectKey: string, localDatastore: any): Promise<any>;
-  _updateObjectIfPinned(object: ParseObject): Promise<void>;
-  _destroyObjectIfPinned(object: ParseObject): Promise<any[]>;
-  _updateLocalIdForObject(localId: string, object: ParseObject): Promise<any[]>;
-  /**
-   * Updates Local Datastore from Server
-   *
-   * <pre>
-   * await Parse.LocalDatastore.updateFromServer();
-   * </pre>
-   *
-   * @function updateFromServer
-   * @name Parse.LocalDatastore.updateFromServer
-   * @static
-   */
-  updateFromServer(): Promise<void>;
-  getKeyForObject(object: any): string;
-  getPinName(pinName?: string): string;
-  checkIfEnabled(): any;
+    isEnabled: boolean;
+    isSyncing: boolean;
+    fromPinWithName(name: string): Promise<Array<any>>;
+    pinWithName(name: string, value: any): Promise<void>;
+    unPinWithName(name: string): Promise<void>;
+    _getAllContents(): Promise<any>;
+    _getRawStorage(): Promise<any>;
+    _clear(): Promise<void>;
+    _handlePinAllWithName(name: string, objects: Array<ParseObject>): Promise<void>;
+    _handleUnPinAllWithName(name: string, objects: Array<ParseObject>): Promise<any[]>;
+    _getChildren(object: ParseObject): any;
+    _traverse(object: any, encountered: any): void;
+    _serializeObjectsFromPinName(name: string): Promise<any[]>;
+    _serializeObject(objectKey: string, localDatastore: any): Promise<any>;
+    _updateObjectIfPinned(object: ParseObject): Promise<void>;
+    _destroyObjectIfPinned(object: ParseObject): Promise<any[]>;
+    _updateLocalIdForObject(localId: string, object: ParseObject): Promise<any[]>;
+    /**
+     * Updates Local Datastore from Server
+     *
+     * <pre>
+     * await Parse.LocalDatastore.updateFromServer();
+     * </pre>
+     *
+     * @function updateFromServer
+     * @name Parse.LocalDatastore.updateFromServer
+     * @static
+     */
+    updateFromServer(): Promise<void>;
+    getKeyForObject(object: any): string;
+    getPinName(pinName?: string): string;
+    checkIfEnabled(): any;
 };
 export default LocalDatastore;
