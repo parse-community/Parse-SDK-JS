@@ -10,7 +10,7 @@ jest.dontMock('../Storage');
 jest.dontMock('crypto-js/aes');
 jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 const ParseError = require('../ParseError').default;
 const EventuallyQueue = require('../EventuallyQueue');
 
@@ -33,7 +33,7 @@ describe('Browser', () => {
   });
 
   it('warning initializing parse/node in browser', () => {
-    const Parse = require('../Parse');
+    const Parse = require('../Parse').default;
     jest.spyOn(console, 'log').mockImplementationOnce(() => {});
     jest.spyOn(Parse, '_initialize').mockImplementationOnce(() => {});
     Parse.initialize('A', 'B');
@@ -45,7 +45,7 @@ describe('Browser', () => {
 
   it('initializing parse/node in browser with server rendering', () => {
     process.env.SERVER_RENDERING = true;
-    const Parse = require('../Parse');
+    const Parse = require('../Parse').default;
     jest.spyOn(console, 'log').mockImplementationOnce(() => {});
     jest.spyOn(Parse, '_initialize').mockImplementationOnce(() => {});
     Parse.initialize('A', 'B');
@@ -54,7 +54,7 @@ describe('Browser', () => {
   });
 
   it('should start eventually queue poll on initialize', () => {
-    const Parse = require('../Parse');
+    const Parse = require('../Parse').default;
     jest.spyOn(console, 'log').mockImplementationOnce(() => {});
     jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
     Parse.initialize('A', 'B');
@@ -62,11 +62,11 @@ describe('Browser', () => {
   });
 
   it('load StorageController', () => {
-    const StorageController = require('../StorageController');
+    const StorageController = require('../StorageController').default;
     CoreManager.setStorageController(StorageController);
 
     jest.spyOn(StorageController, 'setItem');
-    const storage = require('../Storage');
+    const storage = require('../Storage').default;
     storage.setItem('key', 'value');
     expect(StorageController.setItem).toHaveBeenCalledTimes(1);
   });
@@ -84,7 +84,7 @@ describe('Browser', () => {
       }
     }
     global.XDomainRequest = XDomainRequest;
-    const RESTController = require('../RESTController');
+    const RESTController = require('../RESTController').default;
     const options = {
       progress: () => {},
       requestTask: () => {},
@@ -114,7 +114,7 @@ describe('Browser', () => {
     class XMLHttpRequest {}
     global.XDomainRequest = XDomainRequest;
     global.XMLHttpRequest = XMLHttpRequest;
-    const RESTController = require('../RESTController');
+    const RESTController = require('../RESTController').default;
     try {
       await RESTController.ajax('POST', 'classes/TestObject');
       expect(true).toBe(false);
@@ -142,7 +142,7 @@ describe('Browser', () => {
     class XMLHttpRequest {}
     global.XDomainRequest = XDomainRequest;
     global.XMLHttpRequest = XMLHttpRequest;
-    const RESTController = require('../RESTController');
+    const RESTController = require('../RESTController').default;
     try {
       await RESTController.ajax('POST', 'classes/TestObject');
       expect(true).toBe(false);

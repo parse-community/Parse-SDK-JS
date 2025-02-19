@@ -57,7 +57,7 @@ jest.setMock('../ParseQuery', mockQuery);
 
 const ParseObject = require('../ParseObject');
 const ParseRelation = require('../ParseRelation').default;
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 CoreManager.setParseObject(mockObject);
 CoreManager.setParseQuery(mockQuery);
 CoreManager.setParseOp(require('../ParseOp'));

@@ -90,15 +90,15 @@ jest.mock('../ParseQuery', () => {
   });
 });
 
-const CoreManager = require('../CoreManager');
-const LocalDatastore = require('../LocalDatastore');
+const CoreManager = require('../CoreManager').default;
+const LocalDatastore = require('../LocalDatastore').default;
 const ParseObject = require('../ParseObject');
 const ParseQuery = require('../ParseQuery');
 const ParseUser = require('../ParseUser').default;
-const LocalDatastoreController = require('../LocalDatastoreController');
-const RNDatastoreController = require('../LocalDatastoreController.react-native');
-const BrowserStorageController = require('../StorageController.browser');
-const DefaultStorageController = require('../StorageController.default');
+const LocalDatastoreController = require('../LocalDatastoreController').default;
+const RNDatastoreController = require('../LocalDatastoreController.react-native').default;
+const BrowserStorageController = require('../StorageController.browser').default;
+const DefaultStorageController = require('../StorageController.default').default;
 // Register our mocks
 jest.spyOn(CoreManager, 'getParseObject').mockImplementation(() => require('../ParseObject'));
 jest.spyOn(CoreManager, 'getParseQuery').mockImplementation(() => require('../ParseQuery'));

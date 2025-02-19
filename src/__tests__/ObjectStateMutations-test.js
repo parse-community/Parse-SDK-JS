@@ -13,12 +13,12 @@ const mockObject = function (className) {
 };
 mockObject.registerSubclass = function () {};
 jest.setMock('../ParseObject', mockObject);
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 CoreManager.setParseObject(mockObject);
 
 const ObjectStateMutations = require('../ObjectStateMutations');
 const ParseOps = require('../ParseOp');
-const TaskQueue = require('../TaskQueue');
+const TaskQueue = require('../TaskQueue').default;
 
 describe('ObjectStateMutations', () => {
   it('can apply server data', () => {

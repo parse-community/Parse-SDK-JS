@@ -7,7 +7,7 @@ function mockObject(id, attributes) {
 }
 mockObject.registerSubclass = function () {};
 jest.setMock('../ParseObject', mockObject);
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 CoreManager.setParseObject(mockObject);
 
 function mockFile(url) {

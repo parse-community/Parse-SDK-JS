@@ -31,7 +31,7 @@ jest.setMock('../ParseRelation', mockRelation);
 const ParseRelation = require('../ParseRelation');
 const ParseObject = require('../ParseObject');
 const ParseOp = require('../ParseOp');
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 jest.spyOn(CoreManager, 'getParseObject').mockImplementation(() => require('../ParseObject'));
 jest
   .spyOn(CoreManager, 'getEventuallyQueue')

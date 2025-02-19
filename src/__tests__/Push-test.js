@@ -14,7 +14,7 @@ mockQuery.prototype = {
 };
 jest.setMock('../ParseQuery', mockQuery);
 
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 const ParseQuery = require('../ParseQuery');
 const Push = require('../Push');
 

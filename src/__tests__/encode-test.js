@@ -46,7 +46,7 @@ const ParseFile = require('../ParseFile').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
 const ParseObject = require('../ParseObject');
 const ParseRelation = require('../ParseRelation').default;
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 CoreManager.setParseObject(mockObject);
 CoreManager.setParseOp(require('../ParseOp'));
 CoreManager.setParseUser(require('../ParseUser').default);

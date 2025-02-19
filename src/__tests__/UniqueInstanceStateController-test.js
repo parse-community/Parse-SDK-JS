@@ -22,9 +22,9 @@ const ParseGeoPoint = require('../ParseGeoPoint').default;
 const ParseObject = require('../ParseObject');
 const ParseOps = require('../ParseOp');
 const UniqueInstanceStateController = require('../UniqueInstanceStateController');
-const TaskQueue = require('../TaskQueue');
+const TaskQueue = require('../TaskQueue').default;
 const { resolvingPromise } = require('../promiseUtils');
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 CoreManager.setParseObject(mockObject);
 
 describe('UniqueInstanceStateController', () => {

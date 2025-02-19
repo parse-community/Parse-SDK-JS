@@ -19,7 +19,7 @@ mockObject.prototype = {
   },
 };
 jest.setMock('../ParseObject', mockObject);
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 CoreManager.setParseObject(mockObject);
 
 const ParseFile = require('../ParseFile').default;

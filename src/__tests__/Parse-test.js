@@ -11,10 +11,10 @@ jest.dontMock('crypto-js/aes');
 jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
 global.indexedDB = require('./test_helpers/mockIndexedDB');
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 const ParseLiveQuery = require('../ParseLiveQuery').default;
 const EventuallyQueue = require('../EventuallyQueue');
-const Parse = require('../Parse');
+const Parse = require('../Parse').default;
 
 CoreManager.setEventEmitter(require('events').EventEmitter);
 
@@ -259,7 +259,7 @@ describe('Parse module', () => {
     jest.isolateModules(() => {
       expect(Parse.IndexedDB).toBeUndefined();
       process.env.PARSE_BUILD = 'browser';
-      const ParseInstance = require('../Parse');
+      const ParseInstance = require('../Parse').default;
       ParseInstance.initialize('test', 'test');
       expect(ParseInstance.IndexedDB).toBeDefined();
       CoreManager.setStorageController(ParseInstance.IndexedDB);

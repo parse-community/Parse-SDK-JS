@@ -15,12 +15,12 @@ jest.mock('../uuid', () => {
   return () => value++ + '';
 });
 
-const CoreManager = require('../CoreManager');
-const ParseInstallation = require('../ParseInstallation');
-const InstallationController = require('../InstallationController');
-const Storage = require('../Storage');
+const CoreManager = require('../CoreManager').default;
+const ParseInstallation = require('../ParseInstallation').default;
+const InstallationController = require('../InstallationController').default;
+const Storage = require('../Storage').default;
 
-CoreManager.setStorageController(require('../StorageController.default'));
+CoreManager.setStorageController(require('../StorageController.default').default);
 
 describe('InstallationController', () => {
   beforeEach(() => {

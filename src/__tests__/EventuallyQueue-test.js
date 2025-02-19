@@ -44,12 +44,12 @@ jest.mock('../ParseQuery', () => {
   });
 });
 const mockRNStorageInterface = require('./test_helpers/mockRNStorage');
-const CoreManager = require('../CoreManager');
-const EventuallyQueue = require('../EventuallyQueue');
+const CoreManager = require('../CoreManager').default;
+const EventuallyQueue = require('../EventuallyQueue').default;
 const ParseError = require('../ParseError').default;
 const ParseObject = require('../ParseObject');
-const RESTController = require('../RESTController');
-const Storage = require('../Storage');
+const RESTController = require('../RESTController').default;
+const Storage = require('../Storage').default;
 const mockXHR = require('./test_helpers/mockXHR');
 const flushPromises = require('./test_helpers/flushPromises');
 
@@ -65,7 +65,7 @@ describe('EventuallyQueue', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     CoreManager.setAsyncStorage(mockRNStorageInterface);
-    CoreManager.setStorageController(require('../StorageController.react-native'));
+    CoreManager.setStorageController(require('../StorageController.react-native').default);
     CoreManager.setRESTController(RESTController);
     EventuallyQueue.stopPoll();
     await EventuallyQueue.clear();
