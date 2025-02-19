@@ -107,5 +107,4 @@ class XhrWeapp {
     });
   }
 }
-module.exports = XhrWeapp;
 export default XhrWeapp;

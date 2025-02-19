@@ -476,8 +476,11 @@ if (process.env.PARSE_BUILD === 'node') {
   Parse.Hooks = Hooks;
 }
 
+if (process.env.PARSE_BUILD === 'browser') {
+  (globalThis as any).Parse = Parse;
+}
+
 // For legacy requires, of the form `var Parse = require('parse').Parse`
 Parse.Parse = Parse;
 
-module.exports = Parse;
 export default Parse;

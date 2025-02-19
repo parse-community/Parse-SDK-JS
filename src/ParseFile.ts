@@ -36,7 +36,7 @@ export type FileSource =
       type: string | undefined;
     };
 
-function b64Digit(number: number): string {
+export function b64Digit(number: number): string {
   if (number < 26) {
     return String.fromCharCode(65 + number);
   }
@@ -569,4 +569,3 @@ const DefaultController = {
 CoreManager.setFileController(DefaultController);
 
 export default ParseFile;
-exports.b64Digit = b64Digit;

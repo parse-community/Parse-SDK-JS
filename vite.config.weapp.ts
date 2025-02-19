@@ -1,10 +1,10 @@
 import { defineConfig } from 'vite';
 import { terser } from 'rollup-plugin-terser';
 import { resolve } from 'path';
-import babel from '@rollup/plugin-babel';
 import pkg from './package.json';
+import commonjs from 'vite-plugin-commonjs'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
-// You can define a DEV header if needed (here we reuse FULL_HEADER for the minified file)
 const DEV_HEADER = `/**
  * Parse JavaScript SDK v${pkg.version}
  *
@@ -29,14 +29,16 @@ const FULL_HEADER = `/**
 `;
 
 export default defineConfig({
+  plugins: [nodePolyfills(), commonjs()],
+  define: {
+    'process.env.PARSE_BUILD': '"weapp"',
+  },
   build: {
     outDir: 'dist',
-    minify: false,
-    sourcemap: false,
     emptyOutDir: false,
     rollupOptions: {
       input: resolve(__dirname, 'src/Parse.ts'),
-      external: ['xmlhttprequest', '_process', 'events'],
+      external: ['xmlhttprequest', '_process'],
       output: [
         {
           entryFileNames: 'parse.weapp.js',
@@ -45,7 +47,6 @@ export default defineConfig({
           globals: {
             xmlhttprequest: 'XMLHttpRequest',
             _process: 'process',
-            events: 'EventEmitter',
           },
           banner: DEV_HEADER,
         },
@@ -56,7 +57,6 @@ export default defineConfig({
           globals: {
             xmlhttprequest: 'XMLHttpRequest',
             _process: 'process',
-            events: 'EventEmitter',
           },
           banner: FULL_HEADER,
           plugins: [
@@ -66,29 +66,16 @@ export default defineConfig({
               },
             }) as any,
           ],
-        },
-      ],
-      plugins: [
-        babel({
-          babelHelpers: 'runtime',
-          extensions: ['.ts', '.js'],
-          presets: [
-            '@babel/preset-typescript',
-            ['@babel/preset-env', { targets: "> 0.25%, not dead" }],
-            '@babel/react'
-          ],
-          plugins: [
-            [
-              '@babel/plugin-transform-runtime',
-              { corejs: 3, helpers: true, regenerator: true, useESModules: false }
-            ],
-            '@babel/plugin-proposal-class-properties',
-            'inline-package-json',
-            ['transform-inline-environment-variables', { exclude: ['SERVER_RENDERING'] }]
-          ],
-          exclude: /node_modules/,
-        }) as any,
-      ],
+        }
+      ]
+    },
+    minify: false,
+    sourcemap: false,
+  },
+  resolve: {
+    alias: {
+      'react-native/Libraries/vendor/emitter/EventEmitter': 'events',
+      'EventEmitter': 'events',
     },
   },
 });

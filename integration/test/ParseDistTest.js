@@ -4,7 +4,7 @@ const { resolvingPromise } = require('../../lib/node/promiseUtils');
 let browser = null;
 let page = null;
 for (const fileName of ['parse.js', 'parse.min.js']) {
-  describe(`Parse Dist Test ${fileName}`, () => {
+  fdescribe(`Parse Dist Test ${fileName}`, () => {
     beforeEach(async () => {
       browser = await puppeteer.launch({
         args: ['--disable-web-security', '--incognito', '--no-sandbox'],

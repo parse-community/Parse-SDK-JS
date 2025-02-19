@@ -5,6 +5,9 @@ import babel from '@rollup/plugin-babel';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 export default defineConfig({
+  define: {
+    'process.env.PARSE_BUILD': '"node"',
+  },
   build: {
     lib: {
       entry: glob.sync(resolve(__dirname, 'src/*.ts')),

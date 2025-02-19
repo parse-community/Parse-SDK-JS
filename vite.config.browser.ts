@@ -2,6 +2,8 @@ import { defineConfig } from 'vite';
 import { terser } from 'rollup-plugin-terser';
 import { resolve } from 'path';
 import pkg from './package.json';
+import commonjs from 'vite-plugin-commonjs'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 const DEV_HEADER = `/**
  * Parse JavaScript SDK v${pkg.version}
@@ -27,12 +29,16 @@ const FULL_HEADER = `/**
 `;
 
 export default defineConfig({
+  plugins: [nodePolyfills(), commonjs()],
+  define: {
+    'process.env.PARSE_BUILD': '"browser"',
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: false,
     rollupOptions: {
       input: resolve(__dirname, 'src/Parse.ts'),
-      external: ['xmlhttprequest', '_process', 'events'],
+      external: ['xmlhttprequest', '_process'],
       output: [
         {
           entryFileNames: 'parse.js',
@@ -41,7 +47,6 @@ export default defineConfig({
           globals: {
             xmlhttprequest: 'XMLHttpRequest',
             _process: 'process',
-            events: 'EventEmitter'
           },
           banner: DEV_HEADER,
         },
@@ -52,7 +57,6 @@ export default defineConfig({
           globals: {
             xmlhttprequest: 'XMLHttpRequest',
             _process: 'process',
-            events: 'EventEmitter'
           },
           banner: FULL_HEADER,
           plugins: [
@@ -67,5 +71,11 @@ export default defineConfig({
     },
     minify: false,
     sourcemap: false,
+  },
+  resolve: {
+    alias: {
+      'react-native/Libraries/vendor/emitter/EventEmitter': 'events',
+      'EventEmitter': 'events',
+    },
   },
 });
