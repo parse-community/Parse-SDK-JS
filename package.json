@@ -97,7 +97,7 @@
   },
   "scripts": {
     "build": "node build_releases.js",
-    "build:types": "tsc && prettier --write 'types/{**/*,*}.ts' && npm run lint:fix",
+    "build:types": "tsc && prettier --write 'types/{**/*,*}.ts'",
     "release": "node build_releases.js && npm publish",
     "test": "cross-env PARSE_BUILD=node jest",
     "test:mongodb": "npm run test:mongodb:runnerstart && npm run integration",
