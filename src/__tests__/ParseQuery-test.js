@@ -2541,6 +2541,7 @@ describe('ParseQuery', () => {
     q.ascending(['a', 'b', 'c']);
     q.skip(4);
     q.equalTo('size', 'medium');
+    q.readPreference('PRIMARY', 'SECONDARY', 'SECONDARY_PREFERRED');
 
     const json = q.toJSON();
 
@@ -2558,6 +2559,9 @@ describe('ParseQuery', () => {
       where: {
         size: 'medium',
       },
+      readPreference: 'PRIMARY',
+      includeReadPreference: 'SECONDARY',
+      subqueryReadPreference: 'SECONDARY_PREFERRED',
     });
   });
 
