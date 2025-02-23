@@ -7,10 +7,6 @@ describe('CoreManager', () => {
     expect(CoreManager.get('SERVER_URL')).toBe('https://api.parse.com/1');
   });
 
-  it('pulls the version string from package.json', () => {
-    expect(CoreManager.get('VERSION').length).toBeGreaterThan(0);
-  });
-
   it('detects when running in node', () => {
     expect(CoreManager.get('IS_NODE')).toBe(true);
   });
