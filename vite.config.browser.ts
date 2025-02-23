@@ -4,6 +4,7 @@ import { resolve } from 'path';
 import pkg from './package.json';
 import commonjs from 'vite-plugin-commonjs'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+const version = require('./package.json').version;
 
 const DEV_HEADER = `/**
  * Parse JavaScript SDK v${pkg.version}
@@ -32,6 +33,7 @@ export default defineConfig({
   plugins: [nodePolyfills(), commonjs()],
   define: {
     'process.env.PARSE_BUILD': '"browser"',
+    'process.env.PARSE_VERSION': `"js${version}"`,
   },
   build: {
     outDir: 'dist',

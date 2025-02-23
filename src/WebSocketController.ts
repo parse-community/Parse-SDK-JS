@@ -3,7 +3,6 @@ import ws from 'ws';
 import SocketWeapp from './Socket.weapp';
 
 let WebSocketController;
-
 try {
   if (process.env.PARSE_BUILD === 'browser') {
     WebSocketController =
