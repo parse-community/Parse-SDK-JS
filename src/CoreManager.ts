@@ -317,7 +317,7 @@ const config: Config & { [key: string]: any } = {
   SERVER_AUTH_TOKEN: null,
   LIVEQUERY_SERVER_URL: null,
   ENCRYPTED_KEY: null,
-  VERSION: 'js' + require('../package.json').version,
+  VERSION: process.env.PARSE_VERSION,
   APPLICATION_ID: null,
   JAVASCRIPT_KEY: null,
   MASTER_KEY: null,
