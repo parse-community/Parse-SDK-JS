@@ -18,6 +18,6 @@ export default defineConfig({
     rollupOptions: {
     },
     minify: false,
-    sourcemap: true,
+    sourcemap: false,
   }
 });

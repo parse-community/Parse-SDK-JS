@@ -20,7 +20,7 @@ export default defineConfig({
     },
     outDir: 'lib/node',
     rollupOptions: {
-      external: ['ws'],
+      external: ['ws', 'uuid'],
       plugins: [
         nodeResolve({
           preferBuiltins: true,
@@ -30,7 +30,7 @@ export default defineConfig({
           extensions: ['.ts', '.js'],
           presets: [
             '@babel/preset-typescript',
-            ['@babel/preset-env', { targets: { node: "14" } }]
+            ['@babel/preset-env', { targets: { node: "18" } }]
           ],
           plugins: [
             'inline-package-json',
@@ -41,6 +41,6 @@ export default defineConfig({
       ],
     },
     minify: false,
-    sourcemap: true,
+    sourcemap: false,
   },
 });
