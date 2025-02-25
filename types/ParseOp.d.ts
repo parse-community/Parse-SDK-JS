@@ -17,7 +17,7 @@ export declare class UnsetOp extends Op {
   applyTo(): any;
   mergeWith(): UnsetOp;
   toJSON(): {
-    __op: any;
+    __op: string;
   };
 }
 export declare class IncrementOp extends Op {
