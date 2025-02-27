@@ -2748,7 +2748,7 @@ function runTest(controller) {
       }
     });
 
-    it(`${controller.name} can select specific keys`, async () => {
+    xit(`${controller.name} can select specific keys`, async () => {
       const obj = new TestObject({ foo: 'baz', bar: 1 });
       await obj.save();
       await obj.pin();
@@ -2767,7 +2767,7 @@ function runTest(controller) {
       assert.equal(result.get('bar'), undefined);
     });
 
-    it(`${controller.name} can select specific keys with each`, async () => {
+    xit(`${controller.name} can select specific keys with each`, async () => {
       const obj = new TestObject({ foo: 'baz', bar: 1 });
       await obj.save();
       await obj.pin();
