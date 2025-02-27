@@ -40,7 +40,7 @@ export default defineConfig({
     emptyOutDir: false,
     rollupOptions: {
       input: resolve(__dirname, 'src/Parse.ts'),
-      external: ['xmlhttprequest', '_process'],
+      external: ['xmlhttprequest', '_process', 'react-native-get-random-values'],
       output: [
         {
           entryFileNames: 'parse.js',
