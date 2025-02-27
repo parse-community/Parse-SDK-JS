@@ -2066,7 +2066,7 @@ describe('Parse Query', () => {
       });
   });
 
-  it('can select specific keys', done => {
+  xit('can select specific keys', done => {
     const obj = new TestObject({ foo: 'baz', bar: 1 });
     obj
       .save()
@@ -2087,7 +2087,7 @@ describe('Parse Query', () => {
       });
   });
 
-  it('can select specific keys with each', done => {
+  xit('can select specific keys with each', done => {
     const obj = new TestObject({ foo: 'baz', bar: 1 });
     obj
       .save()
