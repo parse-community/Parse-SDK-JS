@@ -21,15 +21,12 @@ export default defineConfig({
     },
     outDir: 'lib/react-native',
     rollupOptions: {
-      external: ['react-native-crypto-js', 'react-native-get-random-values', 'react-native', 'uuid'],
-      plugins: [
-        
-      ]
+      external: ['uuid'],
     },
     minify: false,
     sourcemap: false,
   },
   optimizeDeps: {
-    exclude: ['react-native-crypto-js', 'react-native-get-random-values', 'react-native', 'uuid']
+    exclude: ['uuid']
   }  
 });
