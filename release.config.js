@@ -38,7 +38,7 @@ async function config() {
     branches: [
       'release',
       { name: 'alpha', prerelease: true },
-      { name: 'beta', prerelease: true },
+      // { name: 'beta', prerelease: true },
       'next-major',
       // Long-Term-Support branches
       // { name: 'release-1', range: '1.x.x', channel: '1.x' },
@@ -92,8 +92,9 @@ async function config() {
         '@saithodev/semantic-release-backmerge',
         {
           'backmergeBranches': [
-            { from: 'beta', to: 'alpha' },
-            { from: 'release', to: 'beta' },
+            // { from: 'beta', to: 'alpha' },
+            // { from: 'release', to: 'beta' },
+            { from: 'release', to: 'alpha' },
           ]
         }
       ],

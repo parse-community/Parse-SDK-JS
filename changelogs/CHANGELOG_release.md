@@ -1,3 +1,35 @@
+# [6.0.0](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0...6.0.0) (2025-03-02)
+
+
+### Bug Fixes
+
+* `Parse.Hooks` requests have double forward slash in URL ([#2441](https://github.com/parse-community/Parse-SDK-JS/issues/2441)) ([1fc520c](https://github.com/parse-community/Parse-SDK-JS/commit/1fc520ccdc3742c467dfaa9f58d249389b4d5c5a))
+* `Parse.Query.findAll` not returning all objects with option `json: true` ([#2449](https://github.com/parse-community/Parse-SDK-JS/issues/2449)) ([f160b8c](https://github.com/parse-community/Parse-SDK-JS/commit/f160b8c9a14ef26b850bebd0a65e84a1e96ef327))
+* Cannot pass `useMasterKey: false` to `Parse.Cloud.run` ([#2431](https://github.com/parse-community/Parse-SDK-JS/issues/2431)) ([abadac9](https://github.com/parse-community/Parse-SDK-JS/commit/abadac947d8453afdf86f4a008aee189b4a6bfd2))
+* Remove validation error handler option `error` from various methods of `Parse.Object` ([#2445](https://github.com/parse-community/Parse-SDK-JS/issues/2445)) ([52ddaee](https://github.com/parse-community/Parse-SDK-JS/commit/52ddaee5213a0d5e5797f4130781987665fef843))
+* Security upgrade dset from 3.1.3 to 3.1.4 ([#2277](https://github.com/parse-community/Parse-SDK-JS/issues/2277)) ([058f8e4](https://github.com/parse-community/Parse-SDK-JS/commit/058f8e4d3f8113cd8e81f6e58d2d6bba579b1000))
+
+### Features
+
+* Add transaction to save and destroy on `Parse.Object` ([#2265](https://github.com/parse-community/Parse-SDK-JS/issues/2265)) ([2b55bdf](https://github.com/parse-community/Parse-SDK-JS/commit/2b55bdf74d8338688765f27b14826e527d0aeb53))
+
+
+### BREAKING CHANGES
+
+* Internal REST requests for `Parse.Hooks` use a URL that contains a double forward slash, for example `http://localhost/parse//hooks/functions`. This release changes the double forward slash to a single forward slash. ([1fc520c](1fc520c))
+* Removes the error handler option `error` from `Parse.Object.set`, `Parse.Object.setACL`, `Parse.Object.unset`, `Parse.Role.setName` and instead throws on validation error. Previously, if the `error` option was set, the handler was invoked if a validation error occurred on `Parse.Object.set`, and if no handler was set, an error was thrown on `Parse.Object.save`. The new behavior is that an error is thrown at `Parse.Object.set`. For example, instead of using `Parse.Object.set(key, value, { error: ... })` wrap `Parse.Object.set(key, value)` into a `try/catch` block. ([52ddaee](52ddaee))
+
+# [5.3.0](https://github.com/parse-community/Parse-SDK-JS/compare/5.2.0...5.3.0) (2024-07-07)
+
+
+### Bug Fixes
+
+* `Parse.Object.get` returns array instead of object if key name is number-like ([#2201](https://github.com/parse-community/Parse-SDK-JS/issues/2201)) ([5921ba2](https://github.com/parse-community/Parse-SDK-JS/commit/5921ba248431b197ee1592eae39376132be454a3))
+
+### Features
+
+* Add support for Node 22 ([#2209](https://github.com/parse-community/Parse-SDK-JS/issues/2209)) ([c74fd4c](https://github.com/parse-community/Parse-SDK-JS/commit/c74fd4ce2aa7b0618c3027e1936103d24f2987a7))
+
 # [5.2.0](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0...5.2.0) (2024-06-29)
 
 
