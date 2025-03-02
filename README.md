@@ -3,7 +3,6 @@
 ---
 
 [![Build Status CI alpha](https://github.com/parse-community/Parse-SDK-JS/actions/workflows/ci.yml/badge.svg?branch=alpha&subject=alpha)](https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Aalpha)
-[![Build Status CI beta](https://github.com/parse-community/Parse-SDK-JS/actions/workflows/ci.yml/badge.svg?branch=beta)](https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Abeta)
 [![Build Status CI release](https://github.com/parse-community/Parse-SDK-JS/actions/workflows/ci.yml/badge.svg?branch=release)](https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Arelease)
 [![Snyk Badge](https://snyk.io/test/github/parse-community/Parse-SDK-JS/badge.svg)](https://snyk.io/test/github/parse-community/Parse-SDK-JS)
 [![Coverage](https://codecov.io/gh/parse-community/Parse-SDK-JS/branch/alpha/graph/badge.svg)](https://codecov.io/gh/parse-community/Parse-SDK-JS)
