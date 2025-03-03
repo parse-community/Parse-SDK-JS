@@ -547,7 +547,7 @@ describe('Parse Object', () => {
   });
 
   it('cannot create invalid key names', async () => {
-    const error = new Parse.Error(Parse.Error.INVALID_KEY_NAME, `Invalid key name: "foo^bar"`);
+    const error = new Parse.Error(Parse.Error.INVALID_KEY_NAME, 'Invalid field name: foo^bar');
     const item = new Parse.Object('Item');
     expect(() => {
       item.set({ 'foo^bar': 'baz' });
@@ -559,7 +559,7 @@ describe('Parse Object', () => {
     const item = new Parse.Object('Item');
     expect(() => {
       item.set({ foobar: 'baz', 'foo^bar': 'baz' });
-    }).toThrow(new Parse.Error(Parse.Error.INVALID_KEY_NAME, `Invalid key name: "foo^bar"`));
+    }).toThrow(new Parse.Error(Parse.Error.INVALID_KEY_NAME, 'Invalid field name: foo^bar'));
   });
 
   it('can unset fields', done => {

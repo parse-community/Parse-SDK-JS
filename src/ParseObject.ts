@@ -1099,8 +1099,8 @@ class ParseObject {
       return new ParseError(ParseError.OTHER_CAUSE, 'ACL must be a Parse ACL.');
     }
     for (const key in attrs) {
-      if (!/^[A-Za-z][0-9A-Za-z_.]*$/.test(key)) {
-        return new ParseError(ParseError.INVALID_KEY_NAME, `Invalid key name: "${key}"`);
+      if (!/^[A-Za-z_][0-9A-Za-z_.]*$/.test(key)) {
+        return new ParseError(ParseError.INVALID_KEY_NAME, `Invalid field name: ${key}`);
       }
     }
     return false;
