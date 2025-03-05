@@ -59,7 +59,7 @@
     "babel-plugin-transform-inline-environment-variables": "0.4.4",
     "browserify": "17.0.0",
     "codecov": "3.8.3",
-    "core-js": "3.40.0",
+    "core-js": "3.41.0",
     "cross-env": "7.0.2",
     "eslint": "9.21.0",
     "eslint-plugin-expect-type": "0.6.2",
