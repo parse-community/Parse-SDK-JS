@@ -965,7 +965,7 @@ describe('ParseObject', () => {
       o.validate({
         'invalid!key': 12,
       })
-    ).toEqual(new ParseError(ParseError.INVALID_KEY_NAME, 'Invalid field name: invalid!key'));
+    ).toEqual(new ParseError(ParseError.INVALID_KEY_NAME, 'Invalid key name: invalid!key'));
 
     expect(
       o.validate({
@@ -988,7 +988,7 @@ describe('ParseObject', () => {
     expect(o.set('ACL', { '*': { read: true, write: false } })).toBe(o);
     expect(() => {
       o.set('$$$', 'o_O');
-    }).toThrow(new ParseError(ParseError.INVALID_KEY_NAME, 'Invalid field name: $$$'));
+    }).toThrow(new ParseError(ParseError.INVALID_KEY_NAME, 'Invalid key name: $$$'));
   });
 
   it('ignores validation if ignoreValidation option is passed to set()', () => {

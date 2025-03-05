@@ -1100,7 +1100,7 @@ class ParseObject {
     }
     for (const key in attrs) {
       if (!/^[A-Za-z_][0-9A-Za-z_.]*$/.test(key)) {
-        return new ParseError(ParseError.INVALID_KEY_NAME, `Invalid field name: ${key}`);
+        return new ParseError(ParseError.INVALID_KEY_NAME, `Invalid key name: ${key}`);
       }
     }
     return false;
