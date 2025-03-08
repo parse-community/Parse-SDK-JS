@@ -160,6 +160,7 @@ beforeAll(async () => {
   Parse.initialize('integration');
   Parse.CoreManager.set('SERVER_URL', serverURL);
   Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
+  Parse.CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1);
 });
 
 afterEach(async () => {
