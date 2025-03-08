@@ -164,11 +164,15 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-  await Parse.User.logOut();
-  Parse.Storage._clear();
-  await TestUtils.destroyAllDataPermanently(true);
-  if (didChangeConfiguration) {
-    await reconfigureServer();
+  try {
+    await Parse.User.logOut();
+    Parse.Storage._clear();
+    await TestUtils.destroyAllDataPermanently(true);
+    if (didChangeConfiguration) {
+      await reconfigureServer();
+    }
+  } catch (e) {
+    console.error('Failed to tear down the server', e);
   }
 });
 
