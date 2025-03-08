@@ -31,8 +31,10 @@ type FetchOptions = {
   context?: AttributeMap;
 };
 export type SetOptions = {
-  ignoreValidation: boolean;
+  ignoreValidation?: boolean;
+  unset?: boolean;
 };
+export type AttributeKey<T> = Extract<keyof T, string>;
 export interface Attributes {
   [key: string]: any;
 }
@@ -41,6 +43,12 @@ interface JSONBaseAttributes {
   createdAt: string;
   updatedAt: string;
 }
+interface CommonAttributes {
+  ACL: ParseACL;
+}
+type AtomicKey<T> = {
+  [K in keyof T]: NonNullable<T[K]> extends any[] ? K : never;
+};
 type Encode<T> = T extends ParseObject
   ? ReturnType<T['toJSON']> | Pointer
   : T extends ParseACL | ParseGeoPoint | ParsePolygon | ParseRelation | ParseFile
@@ -92,7 +100,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
           className: string;
           [attr: string]: any;
         },
-    attributes?: T | Attributes,
+    attributes?: T,
     options?: SetOptions
   );
   /**
@@ -178,7 +186,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param {object} other - An other object ot compare
    * @returns {boolean}
    */
-  equals(other: any): boolean;
+  equals<T extends ParseObject>(other: T): boolean;
   /**
    * Returns true if this object has been modified since its last
    * save/refresh.  If an attribute is specified, it returns true only if that
@@ -187,13 +195,13 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param {string} attr An attribute name (optional).
    * @returns {boolean}
    */
-  dirty(attr?: string): boolean;
+  dirty<K extends AttributeKey<T>>(attr?: K): boolean;
   /**
    * Returns an array of keys that have been modified since last save/refresh
    *
    * @returns {string[]}
    */
-  dirtyKeys(): Array<string>;
+  dirtyKeys(): string[];
   /**
    * Returns true if the object has been fetched.
    *
@@ -218,14 +226,14 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param {string} attr The string name of an attribute.
    * @returns {*}
    */
-  get(attr: string): any;
+  get<K extends AttributeKey<T>>(attr: K): T[K];
   /**
    * Gets a relation on the given class for the attribute.
    *
    * @param {string} attr The attribute to get the relation for.
    * @returns {Parse.Relation}
    */
-  relation<R extends ParseObject, K extends Extract<keyof T, string> = Extract<keyof T, string>>(
+  relation<R extends ParseObject, K extends AttributeKey<T> = AttributeKey<T>>(
     attr: T[K] extends ParseRelation ? K : never
   ): ParseRelation<this, R>;
   /**
@@ -234,7 +242,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param {string} attr The string name of an attribute.
    * @returns {string}
    */
-  escape(attr: string): string;
+  escape<K extends AttributeKey<T>>(attr: K): string;
   /**
    * Returns <code>true</code> if the attribute contains a value that is not
    * null or undefined.
@@ -242,7 +250,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param {string} attr The string name of the attribute.
    * @returns {boolean}
    */
-  has(attr: string): boolean;
+  has<K extends AttributeKey<T>>(attr: K): boolean;
   /**
    * Sets a hash of model attributes on the object.
    *
@@ -273,7 +281,11 @@ declare class ParseObject<T extends Attributes = Attributes> {
    *     The only supported option is <code>error</code>.
    * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  set(key: any, value?: any, options?: any): this;
+  set<K extends AttributeKey<T>>(
+    key: K | (Pick<T, K> | T),
+    value?: SetOptions | (T[K] extends undefined ? never : T[K]),
+    options?: SetOptions
+  ): this;
   /**
    * Remove an attribute from the model. This is a noop if the attribute doesn't
    * exist.
@@ -282,12 +294,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param options
    * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  unset(
-    attr: string,
-    options?: {
-      [opt: string]: any;
-    }
-  ): this;
+  unset<K extends AttributeKey<T>>(attr: K, options?: SetOptions): this;
   /**
    * Atomically increments the value of the given attribute the next time the
    * object is saved. If no amount is specified, 1 is used by default.
@@ -296,7 +303,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param amount {Number} The amount to increment by (optional).
    * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  increment(attr: string, amount?: number): this;
+  increment<K extends AttributeKey<T>>(attr: K, amount?: number): this;
   /**
    * Atomically decrements the value of the given attribute the next time the
    * object is saved. If no amount is specified, 1 is used by default.
@@ -305,7 +312,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param amount {Number} The amount to decrement by (optional).
    * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  decrement(attr: string, amount?: number): this;
+  decrement<K extends AttributeKey<T>>(attr: K, amount?: number): this;
   /**
    * Atomically add an object to the end of the array associated with a given
    * key.
@@ -314,7 +321,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param item {} The item to add.
    * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  add(attr: string, item: any): this;
+  add<K extends AtomicKey<T>[keyof T]>(attr: K, item: NonNullable<T[K]>[number]): this;
   /**
    * Atomically add the objects to the end of the array associated with a given
    * key.
@@ -323,7 +330,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param items {Object[]} The items to add.
    * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  addAll(attr: string, items: Array<any>): this;
+  addAll<K extends AtomicKey<T>[keyof T]>(attr: K, items: NonNullable<T[K]>): this;
   /**
    * Atomically add an object to the array associated with a given key, only
    * if it is not already present in the array. The position of the insert is
@@ -333,7 +340,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param item {} The object to add.
    * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  addUnique(attr: string, item: any): this;
+  addUnique<K extends AtomicKey<T>[keyof T]>(attr: K, item: NonNullable<T[K]>[number]): this;
   /**
    * Atomically add the objects to the array associated with a given key, only
    * if it is not already present in the array. The position of the insert is
@@ -343,7 +350,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param items {Object[]} The objects to add.
    * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  addAllUnique(attr: string, items: Array<any>): this;
+  addAllUnique<K extends AtomicKey<T>[keyof T]>(attr: K, items: NonNullable<T[K]>): this;
   /**
    * Atomically remove all instances of an object from the array associated
    * with a given key.
@@ -352,7 +359,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param item {} The object to remove.
    * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  remove(attr: string, item: any): this;
+  remove<K extends AtomicKey<T>[keyof T]>(attr: K, item: NonNullable<T[K]>[number]): this;
   /**
    * Atomically remove all instances of the objects from the array associated
    * with a given key.
@@ -361,7 +368,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param items {Object[]} The object to remove.
    * @returns {Parse.Object} Returns the object, so you can chain this call.
    */
-  removeAll(attr: string, items: Array<any>): this;
+  removeAll<K extends AtomicKey<T>[keyof T]>(attr: K, items: NonNullable<T[K]>): this;
   /**
    * Returns an instance of a subclass of Parse.Op describing what kind of
    * modification has been performed on this field since the last time it was
@@ -371,7 +378,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @param attr {String} The key.
    * @returns {Parse.Op | undefined} The operation, or undefined if none.
    */
-  op(attr: string): Op | undefined;
+  op<K extends AttributeKey<T>>(attr: K): Op | undefined;
   /**
    * Creates a new model with identical attributes to this one.
    *
@@ -449,7 +456,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    *
    * @param {string} [keys] - specify which fields to revert
    */
-  revert(...keys: Array<string>): void;
+  revert(...keys: Array<Extract<keyof (T & CommonAttributes), string>>): void;
   /**
    * Clears all attributes on a model
    *
@@ -520,7 +527,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the save
    * completes.
    */
-  saveEventually(options: SaveOptions): Promise<this>;
+  saveEventually(options?: SaveOptions): Promise<this>;
   /**
    * Set a hash of model attributes, and save the model to the server.
    * updatedAt will be updated when the request returns.
@@ -584,17 +591,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the save
    * completes.
    */
-  save(
-    arg1?:
-      | undefined
-      | string
-      | {
-          [attr: string]: any;
-        }
-      | null,
-    arg2?: SaveOptions | any,
-    arg3?: SaveOptions
-  ): Promise<this>;
+  save<K extends AttributeKey<T>>(arg1?: Pick<T, K> | T | null, arg2?: SaveOptions): Promise<this>;
   /**
    * Deletes this object from the server at some unspecified time in the future,
    * even if Parse is currently inaccessible.
@@ -617,7 +614,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the destroy
    *     completes.
    */
-  destroyEventually(options: RequestOptions): Promise<this>;
+  destroyEventually(options?: RequestOptions): Promise<this>;
   /**
    * Destroy this model on the server if it was already persisted.
    *
@@ -632,7 +629,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the destroy
    *     completes.
    */
-  destroy(options: RequestOptions): Promise<void | ParseObject>;
+  destroy(options?: RequestOptions): Promise<void | ParseObject>;
   /**
    * Asynchronously stores the object and every object it points to in the local datastore,
    * recursively, using a default pin name: _default.
@@ -771,7 +768,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    */
   static fetchAllWithInclude<T extends ParseObject>(
     list: T[],
-    keys: string | Array<string | Array<string>>,
+    keys: keyof T['attributes'] | Array<keyof T['attributes']>,
     options?: RequestOptions
   ): Promise<T[]>;
   /**
@@ -806,7 +803,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    */
   static fetchAllIfNeededWithInclude<T extends ParseObject>(
     list: T[],
-    keys: string | Array<string | Array<string>>,
+    keys: keyof T['attributes'] | Array<keyof T['attributes']>,
     options?: RequestOptions
   ): Promise<T[]>;
   /**
@@ -952,7 +949,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
    * @static
    * @returns {Parse.Object} A Parse.Object reference
    */
-  static fromJSON(json: any, override?: boolean, dirty?: boolean): ParseObject;
+  static fromJSON<T extends ParseObject>(json: any, override?: boolean, dirty?: boolean): T;
   /**
    * Registers a subclass of Parse.Object with a specific class name.
    * When objects of that class are retrieved from a query, they will be

@@ -31,7 +31,7 @@ class ParseGeoPoint {
    * @param {number} arg2 The longitude of the GeoPoint
    */
   constructor(
-    arg1?: Array<number> | { latitude: number; longitude: number } | number,
+    arg1?: [number, number] | { latitude: number; longitude: number } | number,
     arg2?: number
   ) {
     if (Array.isArray(arg1)) {

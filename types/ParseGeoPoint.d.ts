@@ -30,7 +30,7 @@ declare class ParseGeoPoint {
    */
   constructor(
     arg1?:
-      | Array<number>
+      | [number, number]
       | {
           latitude: number;
           longitude: number;

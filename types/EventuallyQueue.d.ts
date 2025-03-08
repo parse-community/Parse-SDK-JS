@@ -1,17 +1,7 @@
 import ParseObject from './ParseObject';
+import type { Queue, QueueObject } from './CoreManager';
 import type { SaveOptions } from './ParseObject';
 import type { RequestOptions } from './RESTController';
-type QueueObject = {
-  queueId: string;
-  action: string;
-  object: ParseObject;
-  serverOptions: SaveOptions | RequestOptions;
-  id: string;
-  className: string;
-  hash: string;
-  createdAt: Date;
-};
-type Queue = Array<QueueObject>;
 /**
  * Provides utility functions to queue objects that will be
  * saved to the server at a later date.
@@ -67,19 +57,19 @@ declare const EventuallyQueue: {
   enqueue(
     action: string,
     object: ParseObject,
-    serverOptions: SaveOptions | RequestOptions
+    serverOptions?: SaveOptions | RequestOptions
   ): Promise<void>;
-  store(data: QueueObject[]): Promise<void>;
-  load(): Promise<string>;
+  store(data: Queue): Promise<void>;
+  load(): Promise<string | null>;
   /**
    * Sets the in-memory queue from local storage and returns.
    *
    * @function getQueue
    * @name Parse.EventuallyQueue.getQueue
-   * @returns {Promise<QueueObject[]>}
+   * @returns {Promise<Queue>}
    * @static
    */
-  getQueue(): Promise<QueueObject[]>;
+  getQueue(): Promise<Queue>;
   /**
    * Saves the queue to local storage
    *

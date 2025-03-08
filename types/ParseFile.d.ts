@@ -43,8 +43,8 @@ declare class ParseFile {
   _previousSave?: Promise<ParseFile>;
   _data?: string;
   _requestTask?: any;
-  _metadata?: object;
-  _tags?: object;
+  _metadata?: Record<string, any>;
+  _tags?: Record<string, any>;
   /**
    * @param name {String} The file's name. This will be prefixed by a unique
    *     value once the file has finished saving. The file name must begin with
@@ -106,13 +106,13 @@ declare class ParseFile {
    *
    * @returns {object}
    */
-  metadata(): object;
+  metadata(): Record<string, any>;
   /**
    * Gets the tags of the file.
    *
    * @returns {object}
    */
-  tags(): object;
+  tags(): Record<string, any>;
   /**
    * Saves the file to the Parse cloud.
    *
@@ -168,7 +168,7 @@ declare class ParseFile {
    *
    * @param {object} metadata Key value pairs to be stored with file object
    */
-  setMetadata(metadata: any): void;
+  setMetadata(metadata: Record<string, any>): void;
   /**
    * Sets metadata to be saved with file object. Adds to existing metadata.
    *
@@ -181,7 +181,7 @@ declare class ParseFile {
    *
    * @param {object} tags Key value pairs to be stored with file object
    */
-  setTags(tags: any): void;
+  setTags(tags: Record<string, any>): void;
   /**
    * Sets tags to be saved with file object. Adds to existing tags.
    *

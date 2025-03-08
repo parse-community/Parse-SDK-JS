@@ -30,7 +30,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
    * @static
    * @returns {string}
    */
-  get appIdentifier(): any;
+  get appIdentifier(): T[Extract<keyof T, string>];
   /**
    * The version string of the client application to which this installation belongs.
    *
@@ -38,7 +38,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
    * @static
    * @returns {string}
    */
-  get appVersion(): any;
+  get appVersion(): T[Extract<keyof T, string>];
   /**
    * The display name of the client application to which this installation belongs.
    *
@@ -46,7 +46,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
    * @static
    * @returns {string}
    */
-  get appName(): any;
+  get appName(): T[Extract<keyof T, string>];
   /**
    * The current value of the icon badge for iOS apps.
    * Changes to this value on the server will be used
@@ -56,7 +56,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
    * @static
    * @returns {number}
    */
-  get badge(): any;
+  get badge(): T[Extract<keyof T, string>];
   /**
    * An array of the channels to which a device is currently subscribed.
    *
@@ -64,7 +64,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
    * @static
    * @returns {string[]}
    */
-  get channels(): any;
+  get channels(): T[Extract<keyof T, string>];
   /**
    * Token used to deliver push notifications to the device.
    *
@@ -72,7 +72,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
    * @static
    * @returns {string}
    */
-  get deviceToken(): any;
+  get deviceToken(): T[Extract<keyof T, string>];
   /**
    * The type of device, “ios”, “android”, “web”, etc.
    *
@@ -80,7 +80,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
    * @static
    * @returns {string}
    */
-  get deviceType(): any;
+  get deviceType(): T[Extract<keyof T, string>];
   /**
    * Gets the GCM sender identifier for this installation
    *
@@ -88,7 +88,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
    * @static
    * @returns {string}
    */
-  get GCMSenderId(): any;
+  get GCMSenderId(): T[Extract<keyof T, string>];
   /**
    * Universally Unique Identifier (UUID) for the device used by Parse. It must be unique across all of an app’s installations.
    *
@@ -96,7 +96,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
    * @static
    * @returns {string}
    */
-  get installationId(): any;
+  get installationId(): T[Extract<keyof T, string>];
   /**
    * Gets the local identifier for this installation
    *
@@ -104,7 +104,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
    * @static
    * @returns {string}
    */
-  get localeIdentifier(): any;
+  get localeIdentifier(): T[Extract<keyof T, string>];
   /**
    * Gets the parse server version for this installation
    *
@@ -112,7 +112,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
    * @static
    * @returns {string}
    */
-  get parseVersion(): any;
+  get parseVersion(): T[Extract<keyof T, string>];
   /**
    * This field is reserved for directing Parse to the push delivery network to be used.
    *
@@ -120,7 +120,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
    * @static
    * @returns {string}
    */
-  get pushType(): any;
+  get pushType(): T[Extract<keyof T, string>];
   /**
    * Gets the time zone for this installation
    *
@@ -128,7 +128,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
    * @static
    * @returns {string}
    */
-  get timeZone(): any;
+  get timeZone(): T[Extract<keyof T, string>];
   /**
    * Returns the device types for used for Push Notifications.
    *

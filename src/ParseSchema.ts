@@ -1,8 +1,59 @@
 import CoreManager from './CoreManager';
 import ParseObject from './ParseObject';
 import ParseCLP from './ParseCLP';
-
+import type ParseGeoPoint from './ParseGeoPoint';
+import type ParseFile from './ParseFile';
+import type ParsePolygon from './ParsePolygon';
+import type ParseRelation from './ParseRelation';
 import type { PermissionsMap } from './ParseCLP';
+import type { Pointer } from './ParseObject';
+
+type Bytes = string;
+
+type TYPE =
+  | 'String'
+  | 'Number'
+  | 'Bytes'
+  | 'Boolean'
+  | 'Date'
+  | 'File'
+  | 'GeoPoint'
+  | 'Polygon'
+  | 'Array'
+  | 'Object'
+  | 'Pointer'
+  | 'Relation';
+
+type AttrType<T extends ParseObject, V> = Extract<
+  {
+    [K in keyof T['attributes']]: T['attributes'][K] extends V ? K : never;
+  }[keyof T['attributes']],
+  string
+>;
+
+interface FieldOptions<
+  T extends
+    | string
+    | number
+    | boolean
+    | Bytes
+    | Date
+    | ParseFile
+    | ParseGeoPoint
+    | ParsePolygon
+    | any[]
+    | object
+    | Pointer
+    | ParseRelation = any,
+> {
+  required?: boolean | undefined;
+  defaultValue?: T | undefined;
+  targetClass?: string | undefined;
+}
+
+interface Index {
+  [fieldName: string]: number | string;
+}
 
 interface CLPField {
   '*'?: boolean | undefined;
@@ -58,12 +109,6 @@ const FIELD_TYPES = [
   'Relation',
 ];
 
-type FieldOptions = {
-  required?: boolean;
-  defaultValue?: any;
-  targetClass?: string;
-};
-
 /**
  * A Parse.Schema object is for handling schema data from Parse.
  * <p>All the schemas methods require MasterKey.
@@ -81,7 +126,7 @@ type FieldOptions = {
  *
  * @alias Parse.Schema
  */
-class ParseSchema {
+class ParseSchema<T extends ParseObject = any> {
   className: string;
   _fields: { [key: string]: any };
   _indexes: { [key: string]: any };
@@ -143,7 +188,7 @@ class ParseSchema {
    * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  save() {
+  save(): Promise<ParseSchema> {
     this.assertClassName();
 
     const controller = CoreManager.getSchemaController();
@@ -154,7 +199,7 @@ class ParseSchema {
       classLevelPermissions: this._clp,
     };
 
-    return controller.create(this.className, params);
+    return controller.create(this.className, params) as Promise<ParseSchema>;
   }
 
   /**
@@ -163,7 +208,7 @@ class ParseSchema {
    * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  update() {
+  update(): Promise<ParseSchema> {
     this.assertClassName();
 
     const controller = CoreManager.getSchemaController();
@@ -177,7 +222,7 @@ class ParseSchema {
     this._fields = {};
     this._indexes = {};
 
-    return controller.update(this.className, params);
+    return controller.update(this.className, params) as Promise<ParseSchema>;
   }
 
   /**
@@ -187,7 +232,7 @@ class ParseSchema {
    * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  delete() {
+  delete(): Promise<void> {
     this.assertClassName();
 
     const controller = CoreManager.getSchemaController();
@@ -201,7 +246,7 @@ class ParseSchema {
    * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  purge() {
+  purge(): Promise<any> {
     this.assertClassName();
 
     const controller = CoreManager.getSchemaController();
@@ -226,7 +271,7 @@ class ParseSchema {
    * @param {object | Parse.CLP} clp Class Level Permissions
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  setCLP(clp: PermissionsMap | ParseCLP) {
+  setCLP(clp: PermissionsMap | ParseCLP): this {
     if (clp instanceof ParseCLP) {
       this._clp = clp.toJSON();
     } else {
@@ -248,9 +293,9 @@ class ParseSchema {
    * </ul>
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addField(name: string, type: string, options: FieldOptions = {}) {
-    type = type || 'String';
-
+  addField<T extends TYPE = any>(name: string, type?: T, options?: FieldOptions): this {
+    type = (type || 'String') as T;
+    options = options || {};
     if (!name) {
       throw new Error('field name may not be null.');
     }
@@ -258,10 +303,10 @@ class ParseSchema {
       throw new Error(`${type} is not a valid type.`);
     }
     if (type === 'Pointer') {
-      return this.addPointer(name, options.targetClass!, options);
+      return this.addPointer(name as any, options.targetClass!, options);
     }
     if (type === 'Relation') {
-      return this.addRelation(name, options.targetClass!);
+      return this.addRelation(name as any, options.targetClass!);
     }
     const fieldOptions: Partial<FieldOptions> & {
       type: string;
@@ -281,7 +326,7 @@ class ParseSchema {
         };
       }
     }
-    if (type === 'Bytes') {
+    if (type === ('Bytes' as T)) {
       if (options && options.defaultValue) {
         fieldOptions.defaultValue = {
           __type: 'Bytes',
@@ -304,16 +349,14 @@ class ParseSchema {
    * schema.addIndex('index_name', { 'field': 1 });
    * </pre>
    */
-  addIndex(name: string, index: any) {
+  addIndex(name: string, index: Index): this {
     if (!name) {
       throw new Error('index name may not be null.');
     }
     if (!index) {
       throw new Error('index may not be null.');
     }
-
     this._indexes[name] = index;
-
     return this;
   }
 
@@ -324,7 +367,7 @@ class ParseSchema {
    * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addString(name: string, options: FieldOptions) {
+  addString(name: AttrType<T, string>, options?: FieldOptions<string>): this {
     return this.addField(name, 'String', options);
   }
 
@@ -335,7 +378,7 @@ class ParseSchema {
    * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addNumber(name: string, options: FieldOptions) {
+  addNumber(name: AttrType<T, number>, options?: FieldOptions<number>): this {
     return this.addField(name, 'Number', options);
   }
 
@@ -346,7 +389,7 @@ class ParseSchema {
    * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addBoolean(name: string, options: FieldOptions) {
+  addBoolean(name: AttrType<T, boolean>, options?: FieldOptions<boolean>): this {
     return this.addField(name, 'Boolean', options);
   }
 
@@ -357,7 +400,7 @@ class ParseSchema {
    * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addBytes(name: string, options: FieldOptions) {
+  addBytes(name: AttrType<T, Bytes>, options?: FieldOptions<Bytes>): this {
     return this.addField(name, 'Bytes', options);
   }
 
@@ -368,7 +411,7 @@ class ParseSchema {
    * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addDate(name: string, options: FieldOptions) {
+  addDate(name: AttrType<T, Date>, options?: FieldOptions<Date>): this {
     return this.addField(name, 'Date', options);
   }
 
@@ -379,7 +422,7 @@ class ParseSchema {
    * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addFile(name: string, options: FieldOptions) {
+  addFile(name: AttrType<T, ParseFile>, options?: FieldOptions<ParseFile>) {
     return this.addField(name, 'File', options);
   }
 
@@ -390,7 +433,7 @@ class ParseSchema {
    * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addGeoPoint(name: string, options: FieldOptions) {
+  addGeoPoint(name: AttrType<T, ParseGeoPoint>, options?: FieldOptions<ParseGeoPoint>): this {
     return this.addField(name, 'GeoPoint', options);
   }
 
@@ -401,7 +444,7 @@ class ParseSchema {
    * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addPolygon(name: string, options: FieldOptions) {
+  addPolygon(name: AttrType<T, ParsePolygon>, options?: FieldOptions<ParsePolygon>): this {
     return this.addField(name, 'Polygon', options);
   }
 
@@ -412,7 +455,7 @@ class ParseSchema {
    * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addArray(name: string, options: FieldOptions) {
+  addArray(name: AttrType<T, any[]>, options?: FieldOptions<any[]>): this {
     return this.addField(name, 'Array', options);
   }
 
@@ -423,7 +466,7 @@ class ParseSchema {
    * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addObject(name: string, options: FieldOptions) {
+  addObject(name: AttrType<T, object>, options?: FieldOptions<object>): this {
     return this.addField(name, 'Object', options);
   }
 
@@ -435,7 +478,11 @@ class ParseSchema {
    * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addPointer(name: string, targetClass: string, options: FieldOptions = {}) {
+  addPointer(
+    name: AttrType<T, ParseObject | Pointer>,
+    targetClass: string,
+    options?: FieldOptions<Pointer>
+  ): this {
     if (!name) {
       throw new Error('field name may not be null.');
     }
@@ -446,10 +493,10 @@ class ParseSchema {
       type: string;
     } = { type: 'Pointer', targetClass };
 
-    if (typeof options.required === 'boolean') {
+    if (typeof options?.required === 'boolean') {
       fieldOptions.required = options.required;
     }
-    if (options.defaultValue !== undefined) {
+    if (options?.defaultValue !== undefined) {
       fieldOptions.defaultValue = options.defaultValue;
       if (options.defaultValue instanceof ParseObject) {
         fieldOptions.defaultValue = options.defaultValue.toPointer();
@@ -466,19 +513,17 @@ class ParseSchema {
    * @param {string} targetClass Name of the target Pointer Class
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  addRelation(name: string, targetClass: string) {
+  addRelation(name: AttrType<T, ParseRelation>, targetClass: string) {
     if (!name) {
       throw new Error('field name may not be null.');
     }
     if (!targetClass) {
       throw new Error('You need to set the targetClass of the Relation.');
     }
-
     this._fields[name] = {
       type: 'Relation',
       targetClass,
     };
-
     return this;
   }
 
@@ -488,7 +533,7 @@ class ParseSchema {
    * @param {string} name Name of the field
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  deleteField(name: string) {
+  deleteField(name: string): this {
     this._fields[name] = { __op: 'Delete' };
     return this;
   }
@@ -499,7 +544,7 @@ class ParseSchema {
    * @param {string} name Name of the field
    * @returns {Parse.Schema} Returns the schema, so you can chain this call.
    */
-  deleteIndex(name: string) {
+  deleteIndex(name: string): this {
     this._indexes[name] = { __op: 'Delete' };
     return this;
   }

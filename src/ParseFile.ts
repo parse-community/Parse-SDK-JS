@@ -68,8 +68,8 @@ class ParseFile {
   _previousSave?: Promise<ParseFile>;
   _data?: string;
   _requestTask?: any;
-  _metadata?: object;
-  _tags?: object;
+  _metadata?: Record<string, any>;
+  _tags?: Record<string, any>;
 
   /**
    * @param name {String} The file's name. This will be prefixed by a unique
@@ -205,7 +205,7 @@ class ParseFile {
    *
    * @returns {object}
    */
-  metadata() {
+  metadata(): Record<string, any> {
     return this._metadata;
   }
 
@@ -214,7 +214,7 @@ class ParseFile {
    *
    * @returns {object}
    */
-  tags() {
+  tags(): Record<string, any> {
     return this._tags;
   }
 
@@ -357,7 +357,7 @@ class ParseFile {
    *
    * @param {object} metadata Key value pairs to be stored with file object
    */
-  setMetadata(metadata: any) {
+  setMetadata(metadata: Record<string, any>) {
     if (metadata && typeof metadata === 'object') {
       Object.keys(metadata).forEach(key => {
         this.addMetadata(key, metadata[key]);
@@ -382,7 +382,7 @@ class ParseFile {
    *
    * @param {object} tags Key value pairs to be stored with file object
    */
-  setTags(tags: any) {
+  setTags(tags: Record<string, any>) {
     if (tags && typeof tags === 'object') {
       Object.keys(tags).forEach(key => {
         this.addTag(key, tags[key]);

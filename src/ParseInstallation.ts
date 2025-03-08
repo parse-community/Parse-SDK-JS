@@ -1,6 +1,7 @@
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
 import ParseObject, { Attributes } from './ParseObject';
+import type { AttributeKey } from './ParseObject';
 
 type DeviceInterface = {
   IOS: string;
@@ -39,7 +40,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
     super('_Installation');
     if (attributes && typeof attributes === 'object') {
       try {
-        this.set(attributes || {});
+        this.set((attributes || {}) as any);
       } catch (_) {
         throw new Error("Can't create an invalid Installation");
       }
@@ -54,7 +55,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @returns {string}
    */
   get appIdentifier() {
-    return this.get('appIdentifier');
+    return this.get('appIdentifier' as AttributeKey<T>);
   }
 
   /**
@@ -65,7 +66,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @returns {string}
    */
   get appVersion() {
-    return this.get('appVersion');
+    return this.get('appVersion' as AttributeKey<T>);
   }
 
   /**
@@ -76,7 +77,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @returns {string}
    */
   get appName() {
-    return this.get('appName');
+    return this.get('appName' as AttributeKey<T>);
   }
 
   /**
@@ -89,7 +90,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @returns {number}
    */
   get badge() {
-    return this.get('badge');
+    return this.get('badge' as AttributeKey<T>);
   }
 
   /**
@@ -100,7 +101,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @returns {string[]}
    */
   get channels() {
-    return this.get('channels');
+    return this.get('channels' as AttributeKey<T>);
   }
 
   /**
@@ -111,7 +112,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @returns {string}
    */
   get deviceToken() {
-    return this.get('deviceToken');
+    return this.get('deviceToken' as AttributeKey<T>);
   }
 
   /**
@@ -122,7 +123,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @returns {string}
    */
   get deviceType() {
-    return this.get('deviceType');
+    return this.get('deviceType' as AttributeKey<T>);
   }
 
   /**
@@ -133,7 +134,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @returns {string}
    */
   get GCMSenderId() {
-    return this.get('GCMSenderId');
+    return this.get('GCMSenderId' as AttributeKey<T>);
   }
 
   /**
@@ -144,7 +145,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @returns {string}
    */
   get installationId() {
-    return this.get('installationId');
+    return this.get('installationId' as AttributeKey<T>);
   }
 
   /**
@@ -155,7 +156,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @returns {string}
    */
   get localeIdentifier() {
-    return this.get('localeIdentifier');
+    return this.get('localeIdentifier' as AttributeKey<T>);
   }
 
   /**
@@ -166,7 +167,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @returns {string}
    */
   get parseVersion() {
-    return this.get('parseVersion');
+    return this.get('parseVersion' as AttributeKey<T>);
   }
 
   /**
@@ -177,7 +178,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @returns {string}
    */
   get pushType() {
-    return this.get('pushType');
+    return this.get('pushType' as AttributeKey<T>);
   }
 
   /**
@@ -188,7 +189,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @returns {string}
    */
   get timeZone() {
-    return this.get('timeZone');
+    return this.get('timeZone' as AttributeKey<T>);
   }
 
   /**
@@ -232,7 +233,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
       this._markAllFieldsDirty();
       await super.save.apply(this, args);
     }
-    await CoreManager.getInstallationController().updateInstallationOnDisk(this);
+    await CoreManager.getInstallationController().updateInstallationOnDisk(this as any);
     return this;
   }
 
@@ -263,7 +264,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
 
   _markAllFieldsDirty() {
     for (const [key, value] of Object.entries(this.attributes)) {
-      this.set(key, value);
+      this.set(key as AttributeKey<T>, value);
     }
   }
 

@@ -1,4 +1,5 @@
 import type ParseQuery from './ParseQuery';
+import type { EventEmitter } from 'events';
 /**
  * Creates a new LiveQuery Subscription.
  * <a href="https://nodejs.org/api/events.html#events_class_eventemitter">cloud functions</a>.
@@ -88,9 +89,9 @@ declare class LiveQuerySubscription {
   subscribePromise: any;
   unsubscribePromise: any;
   subscribed: boolean;
-  emitter: any;
-  on: any;
-  emit: any;
+  emitter: EventEmitter;
+  on: EventEmitter['on'];
+  emit: EventEmitter['emit'];
   constructor(id: string | number, query: ParseQuery, sessionToken?: string);
   /**
    * Close the subscription
