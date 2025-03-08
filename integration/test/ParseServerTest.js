@@ -1,24 +1,28 @@
 'use strict';
 
-const assert = require('assert');
-
 describe('ParseServer', () => {
   it('can reconfigure server', async () => {
-    const parseServer = await reconfigureServer({ serverURL: 'www.google.com' });
-    assert.strictEqual(parseServer.config.serverURL, 'www.google.com');
+    let parseServer = await reconfigureServer({ serverURL: 'www.google.com' });
+    expect(parseServer.config.serverURL).toBe('www.google.com');
     await parseServer.handleShutdown();
-    await reconfigureServer();
+    parseServer = await reconfigureServer();
+    expect(parseServer.config.serverURL).toBe('http://localhost:1337/parse');
   });
 
   it('can shutdown', async () => {
+    let close = 0;
     const parseServer = await reconfigureServer();
+    parseServer.server.on('close', () => {
+      close += 1;
+    });
     const object = new TestObject({ foo: 'bar' });
     await parseServer.handleShutdown();
+    expect(close).toBe(1);
     await expectAsync(object.save()).toBeRejectedWithError(
       'XMLHttpRequest failed: "Unable to connect to the Parse API"'
     );
     await reconfigureServer({});
     await object.save();
-    assert(object.id);
+    expect(object.id).toBeDefined();
   });
 });
