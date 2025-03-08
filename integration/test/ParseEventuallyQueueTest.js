@@ -194,7 +194,7 @@ describe('Parse EventuallyQueue', () => {
     const parseServer = await reconfigureServer();
     const object = new TestObject({ hash: 'saveSecret' });
     await parseServer.handleShutdown();
-    await new Promise(resolve => parseServer.server.close(resolve));
+    // await new Promise(resolve => parseServer.server.close(resolve));
     await object.saveEventually();
 
     const length = await Parse.EventuallyQueue.length();
@@ -226,7 +226,7 @@ describe('Parse EventuallyQueue', () => {
     const object = new TestObject({ hash: 'saveSecret' });
     object.setACL(acl);
     await parseServer.handleShutdown();
-    await new Promise(resolve => parseServer.server.close(resolve));
+    // await new Promise(resolve => parseServer.server.close(resolve));
     await object.saveEventually();
 
     const length = await Parse.EventuallyQueue.length();
@@ -252,7 +252,7 @@ describe('Parse EventuallyQueue', () => {
     const object = new TestObject({ hash: 'deleteSecret' });
     await object.save();
     await parseServer.handleShutdown();
-    await new Promise(resolve => parseServer.server.close(resolve));
+    // await new Promise(resolve => parseServer.server.close(resolve));
     await object.destroyEventually();
     const length = await Parse.EventuallyQueue.length();
 
