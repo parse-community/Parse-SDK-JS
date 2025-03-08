@@ -7,7 +7,6 @@ describe('ParseServer', () => {
     const parseServer = await reconfigureServer({ serverURL: 'www.google.com' });
     assert.strictEqual(parseServer.config.serverURL, 'www.google.com');
     await parseServer.handleShutdown();
-    // await new Promise(resolve => parseServer.server.close(resolve));
     await reconfigureServer();
   });
 
@@ -15,7 +14,6 @@ describe('ParseServer', () => {
     const parseServer = await reconfigureServer();
     const object = new TestObject({ foo: 'bar' });
     await parseServer.handleShutdown();
-    // await new Promise(resolve => parseServer.server.close(resolve));
     await expectAsync(object.save()).toBeRejectedWithError(
       'XMLHttpRequest failed: "Unable to connect to the Parse API"'
     );

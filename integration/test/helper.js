@@ -98,7 +98,6 @@ let parseServer;
 const reconfigureServer = async (changedConfiguration = {}) => {
   if (parseServer) {
     await parseServer.handleShutdown();
-    // await new Promise(resolve => parseServer.server.close(resolve));
     parseServer = undefined;
     return reconfigureServer(changedConfiguration);
   }
@@ -164,15 +163,11 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-  try {
-    await Parse.User.logOut();
-    Parse.Storage._clear();
-    await TestUtils.destroyAllDataPermanently(true);
-    if (didChangeConfiguration) {
-      await reconfigureServer();
-    }
-  } catch (error) {
-    console.error('Error in afterEach', error);
+  await Parse.User.logOut();
+  Parse.Storage._clear();
+  await TestUtils.destroyAllDataPermanently(true);
+  if (didChangeConfiguration) {
+    await reconfigureServer();
   }
 });
 
