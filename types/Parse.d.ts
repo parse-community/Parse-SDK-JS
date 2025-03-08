@@ -1,4 +1,3 @@
-import EventuallyQueue from './EventuallyQueue';
 import * as ParseOp from './ParseOp';
 import ACL from './ParseACL';
 import * as Analytics from './Analytics';
@@ -21,6 +20,7 @@ import Session from './ParseSession';
 import User from './ParseUser';
 import ParseLiveQuery from './ParseLiveQuery';
 import LiveQueryClient from './LiveQueryClient';
+import type { EventuallyQueue } from './CoreManager';
 declare const Parse: {
   ACL: typeof ACL;
   Analytics: typeof Analytics;
@@ -65,26 +65,26 @@ declare const Parse: {
       run: (
         name: string,
         data: any,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<any>;
-      getJobsData: (options: import('./RESTController').RequestOptions) => Promise<any>;
+      getJobsData: (options?: import('./RESTController').RequestOptions) => Promise<any>;
       startJob: (
         name: string,
         data: any,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<string>;
     }): void;
     getCloudController(): {
       run: (
         name: string,
         data: any,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<any>;
-      getJobsData: (options: import('./RESTController').RequestOptions) => Promise<any>;
+      getJobsData: (options?: import('./RESTController').RequestOptions) => Promise<any>;
       startJob: (
         name: string,
         data: any,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<string>;
     };
     setConfigController(controller: {
@@ -149,28 +149,8 @@ declare const Parse: {
         }
       ) => Promise<void>;
     }): void;
-    setEventuallyQueue(controller: {
-      save: (
-        object: ParseObject,
-        serverOptions: import('./ParseObject').SaveOptions
-      ) => Promise<any>;
-      destroy: (
-        object: ParseObject,
-        serverOptions: import('./RESTController').RequestOptions
-      ) => Promise<any>;
-      poll: (ms?: number) => void;
-    }): void;
-    getEventuallyQueue(): {
-      save: (
-        object: ParseObject,
-        serverOptions: import('./ParseObject').SaveOptions
-      ) => Promise<any>;
-      destroy: (
-        object: ParseObject,
-        serverOptions: import('./RESTController').RequestOptions
-      ) => Promise<any>;
-      poll: (ms?: number) => void;
-    };
+    setEventuallyQueue(controller: EventuallyQueue): void;
+    getEventuallyQueue(): EventuallyQueue;
     getFileController(): {
       saveFile: (
         name: string,
@@ -215,30 +195,30 @@ declare const Parse: {
       fetch: (
         object: ParseObject | Array<ParseObject>,
         forceFetch: boolean,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<Array<ParseObject | undefined> | ParseObject | undefined>;
       save: (
         object: ParseObject | Array<ParseObject | File> | null,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<ParseObject | Array<ParseObject> | File | undefined>;
       destroy: (
         object: ParseObject | Array<ParseObject>,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<ParseObject | Array<ParseObject>>;
     }): void;
     getObjectController(): {
       fetch: (
         object: ParseObject | Array<ParseObject>,
         forceFetch: boolean,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<Array<ParseObject | undefined> | ParseObject | undefined>;
       save: (
         object: ParseObject | Array<ParseObject | File> | null,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<ParseObject | Array<ParseObject> | File | undefined>;
       destroy: (
         object: ParseObject | Array<ParseObject>,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<ParseObject | Array<ParseObject>>;
     };
     setObjectStateController(controller: {
@@ -301,7 +281,7 @@ declare const Parse: {
       find(
         className: string,
         params: import('./ParseQuery').QueryJSON,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ): Promise<{
         results?: Array<ParseObject>;
         className?: string;
@@ -310,7 +290,7 @@ declare const Parse: {
       aggregate(
         className: string,
         params: any,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ): Promise<{
         results?: Array<any>;
       }>;
@@ -319,7 +299,7 @@ declare const Parse: {
       find(
         className: string,
         params: import('./ParseQuery').QueryJSON,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ): Promise<{
         results?: Array<ParseObject>;
         className?: string;
@@ -328,7 +308,7 @@ declare const Parse: {
       aggregate(
         className: string,
         params: any,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ): Promise<{
         results?: Array<any>;
       }>;
@@ -386,7 +366,7 @@ declare const Parse: {
         className: string,
         method: string,
         params: any,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ): Promise<any>;
     }): void;
     getSchemaController(): {
@@ -410,14 +390,14 @@ declare const Parse: {
         className: string,
         method: string,
         params: any,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ): Promise<any>;
     };
     setSessionController(controller: {
-      getSession: (token: import('./RESTController').RequestOptions) => Promise<Session>;
+      getSession: (options?: import('./RESTController').RequestOptions) => Promise<Session>;
     }): void;
     getSessionController(): {
-      getSession: (token: import('./RESTController').RequestOptions) => Promise<Session>;
+      getSession: (options?: import('./RESTController').RequestOptions) => Promise<Session>;
     };
     setStorageController(
       controller:
@@ -584,25 +564,25 @@ declare const Parse: {
       signUp: (
         user: User,
         attrs: import('./ObjectStateMutations').AttributeMap,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<User>;
-      logIn: (user: User, options: import('./RESTController').RequestOptions) => Promise<User>;
+      logIn: (user: User, options?: import('./RESTController').RequestOptions) => Promise<User>;
       loginAs: (user: User, userId: string) => Promise<User>;
-      become: (user: User, options: import('./RESTController').RequestOptions) => Promise<User>;
+      become: (user: User, options?: import('./RESTController').RequestOptions) => Promise<User>;
       hydrate: (
         user: User,
         userJSON: import('./ObjectStateMutations').AttributeMap
       ) => Promise<User>;
-      logOut: (options: import('./RESTController').RequestOptions) => Promise<void>;
-      me: (user: User, options: import('./RESTController').RequestOptions) => Promise<User>;
+      logOut: (options?: import('./RESTController').RequestOptions) => Promise<void>;
+      me: (user: User, options?: import('./RESTController').RequestOptions) => Promise<User>;
       requestPasswordReset: (
         email: string,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<void>;
       updateUserOnDisk: (user: User) => Promise<User>;
       upgradeToRevocableSession: (
         user: User,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<void>;
       linkWith: (
         user: User,
@@ -613,11 +593,11 @@ declare const Parse: {
       verifyPassword: (
         username: string,
         password: string,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<User>;
       requestEmailVerification: (
         email: string,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<void>;
     }): void;
     getUserController(): {
@@ -627,25 +607,25 @@ declare const Parse: {
       signUp: (
         user: User,
         attrs: import('./ObjectStateMutations').AttributeMap,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<User>;
-      logIn: (user: User, options: import('./RESTController').RequestOptions) => Promise<User>;
+      logIn: (user: User, options?: import('./RESTController').RequestOptions) => Promise<User>;
       loginAs: (user: User, userId: string) => Promise<User>;
-      become: (user: User, options: import('./RESTController').RequestOptions) => Promise<User>;
+      become: (user: User, options?: import('./RESTController').RequestOptions) => Promise<User>;
       hydrate: (
         user: User,
         userJSON: import('./ObjectStateMutations').AttributeMap
       ) => Promise<User>;
-      logOut: (options: import('./RESTController').RequestOptions) => Promise<void>;
-      me: (user: User, options: import('./RESTController').RequestOptions) => Promise<User>;
+      logOut: (options?: import('./RESTController').RequestOptions) => Promise<void>;
+      me: (user: User, options?: import('./RESTController').RequestOptions) => Promise<User>;
       requestPasswordReset: (
         email: string,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<void>;
       updateUserOnDisk: (user: User) => Promise<User>;
       upgradeToRevocableSession: (
         user: User,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<void>;
       linkWith: (
         user: User,
@@ -656,11 +636,11 @@ declare const Parse: {
       verifyPassword: (
         username: string,
         password: string,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<User>;
       requestEmailVerification: (
         email: string,
-        options: import('./RESTController').RequestOptions
+        options?: import('./RESTController').RequestOptions
       ) => Promise<void>;
     };
     setLiveQueryController(controller: {
@@ -769,12 +749,11 @@ declare const Parse: {
   IndexedDB: any;
   Hooks: any;
   Parse: any;
-  get EventuallyQueue(): any;
   /**
    * @member {EventuallyQueue} Parse.EventuallyQueue
    * @static
    */
-  set EventuallyQueue(queue: typeof EventuallyQueue);
+  EventuallyQueue: EventuallyQueue;
   /**
    * Call this method first to set up your authentication tokens for Parse.
    *
@@ -889,7 +868,7 @@ declare const Parse: {
    * @static
    * @returns {boolean}
    */
-  isLocalDatastoreEnabled(): any;
+  isLocalDatastoreEnabled(): boolean;
   /**
    * Gets all contents from Local Datastore
    *

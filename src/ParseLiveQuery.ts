@@ -1,5 +1,6 @@
 import LiveQueryClient from './LiveQueryClient';
 import CoreManager from './CoreManager';
+import type { EventEmitter } from 'events';
 
 function getLiveQueryClient(): Promise<LiveQueryClient> {
   return CoreManager.getLiveQueryController().getDefaultLiveQueryClient();
@@ -33,13 +34,13 @@ function getLiveQueryClient(): Promise<LiveQueryClient> {
  * @static
  */
 class LiveQuery {
-  emitter: any;
-  on: any;
-  emit: any;
+  emitter: EventEmitter;
+  on: EventEmitter['on'];
+  emit: EventEmitter['emit'];
 
   constructor() {
-    const EventEmitter = CoreManager.getEventEmitter();
-    this.emitter = new EventEmitter();
+    const Emitter = CoreManager.getEventEmitter();
+    this.emitter = new Emitter();
     this.on = (eventName: string, listener: any) => this.emitter.on(eventName, listener);
     this.emit = (eventName: string, ...args: any) => this.emitter.emit(eventName, ...args);
     // adding listener so process does not crash

@@ -1,6 +1,7 @@
 import CoreManager from './CoreManager';
 import { resolvingPromise } from './promiseUtils';
 import type ParseQuery from './ParseQuery';
+import type { EventEmitter } from 'events';
 
 /**
  * Creates a new LiveQuery Subscription.
@@ -91,9 +92,9 @@ class LiveQuerySubscription {
   subscribePromise: any;
   unsubscribePromise: any;
   subscribed: boolean;
-  emitter: any;
-  on: any;
-  emit: any;
+  emitter: EventEmitter;
+  on: EventEmitter['on'];
+  emit: EventEmitter['emit'];
   /*
    * @param {string | number} id - subscription id
    * @param {string} query - query to subscribe to
@@ -106,8 +107,8 @@ class LiveQuerySubscription {
     this.subscribePromise = resolvingPromise();
     this.unsubscribePromise = resolvingPromise();
     this.subscribed = false;
-    const EventEmitter = CoreManager.getEventEmitter();
-    this.emitter = new EventEmitter();
+    const Emitter = CoreManager.getEventEmitter();
+    this.emitter = new Emitter();
 
     this.on = (eventName, listener) => this.emitter.on(eventName, listener);
     this.emit = (eventName, ...args) => this.emitter.emit(eventName, ...args);

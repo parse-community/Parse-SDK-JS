@@ -77,7 +77,7 @@ class ParseConfig {
    * @returns {Promise} A promise that is resolved with a newly-created
    *     configuration object when the get completes.
    */
-  static get(options: RequestOptions = {}) {
+  static get(options?: RequestOptions) {
     const controller = CoreManager.getConfigController();
     return controller.get(options);
   }
@@ -166,7 +166,7 @@ const DefaultController = {
     });
   },
 
-  get(options: RequestOptions = {}) {
+  get(options?: RequestOptions) {
     const RESTController = CoreManager.getRESTController();
 
     return RESTController.request('GET', 'config', {}, options).then(response => {

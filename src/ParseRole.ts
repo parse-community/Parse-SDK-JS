@@ -3,6 +3,7 @@ import ParseACL from './ParseACL';
 import ParseError from './ParseError';
 import ParseObject, { Attributes, SetOptions } from './ParseObject';
 
+import type { AttributeKey } from './ParseObject';
 import type { AttributeMap } from './ObjectStateMutations';
 import type ParseRelation from './ParseRelation';
 import type ParseUser from './ParseUser';
@@ -41,7 +42,7 @@ class ParseRole<T extends Attributes = Attributes> extends ParseObject<T> {
    * @returns {string} the name of the role.
    */
   getName(): string | null {
-    const name = this.get('name');
+    const name = this.get('name' as AttributeKey<T>);
     if (name == null || typeof name === 'string') {
       return name;
     }
@@ -67,7 +68,7 @@ class ParseRole<T extends Attributes = Attributes> extends ParseObject<T> {
    */
   setName(name: string, options?: SetOptions): this {
     this._validateName(name);
-    return this.set('name', name, options);
+    return this.set('name' as AttributeKey<T>, name as any, options);
   }
 
   /**

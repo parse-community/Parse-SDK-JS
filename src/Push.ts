@@ -10,6 +10,8 @@ export type PushData = {
   push_time?: Date | string;
   expiration_time?: Date | string;
   expiration_interval?: number;
+  data?: any;
+  channels?: string[];
 };
 
 /**

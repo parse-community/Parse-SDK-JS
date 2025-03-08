@@ -19,10 +19,10 @@ type AnalyticsController = {
   track: (name: string, dimensions: { [key: string]: string }) => Promise<any>;
 };
 type CloudController = {
-  run: (name: string, data: any, options: RequestOptions) => Promise<any>;
-  getJobsData: (options: RequestOptions) => Promise<any>;
+  run: (name: string, data: any, options?: RequestOptions) => Promise<any>;
+  getJobsData: (options?: RequestOptions) => Promise<any>;
   /** Returns promise which resolves with JobStatusId of the job */
-  startJob: (name: string, data: any, options: RequestOptions) => Promise<string>;
+  startJob: (name: string, data: any, options?: RequestOptions) => Promise<string>;
 };
 type ConfigController = {
   current: () => Promise<ParseConfig> | ParseConfig;
@@ -55,15 +55,15 @@ type ObjectController = {
   fetch: (
     object: ParseObject | Array<ParseObject>,
     forceFetch: boolean,
-    options: RequestOptions
+    options?: RequestOptions
   ) => Promise<Array<ParseObject | undefined> | ParseObject | undefined>;
   save: (
     object: ParseObject | Array<ParseObject | ParseFile> | null,
-    options: RequestOptions
+    options?: RequestOptions
   ) => Promise<ParseObject | Array<ParseObject> | ParseFile | undefined>;
   destroy: (
     object: ParseObject | Array<ParseObject>,
-    options: RequestOptions
+    options?: RequestOptions
   ) => Promise<ParseObject | Array<ParseObject>>;
 };
 type ObjectStateController = {
@@ -92,18 +92,52 @@ type QueryController = {
   find(
     className: string,
     params: QueryJSON,
-    options: RequestOptions
+    options?: RequestOptions
   ): Promise<{ results?: Array<ParseObject>; className?: string; count?: number }>;
   aggregate(
     className: string,
     params: any,
-    options: RequestOptions
+    options?: RequestOptions
   ): Promise<{ results?: Array<any> }>;
 };
-type EventuallyQueue = {
-  save: (object: ParseObject, serverOptions: SaveOptions) => Promise<any>;
-  destroy: (object: ParseObject, serverOptions: RequestOptions) => Promise<any>;
-  poll: (ms?: number) => void;
+export type QueueObject = {
+  queueId: string;
+  action: string;
+  object: ParseObject;
+  serverOptions: SaveOptions | RequestOptions;
+  id: string;
+  className: string;
+  hash: string;
+  createdAt: Date;
+};
+export type Queue = Array<QueueObject>;
+export type EventuallyQueue = {
+  save: (object: ParseObject, serverOptions?: SaveOptions) => Promise<void>;
+  destroy: (object: ParseObject, serverOptions?: RequestOptions) => Promise<void>;
+  generateQueueId: (action: string, object: ParseObject) => string;
+  enqueue(
+    action: string,
+    object: ParseObject,
+    serverOptions?: SaveOptions | RequestOptions
+  ): Promise<void>;
+  store(data: Queue): Promise<void>;
+  load(): Promise<string | null>;
+  getQueue(): Promise<Queue>;
+  setQueue(queue: Queue): Promise<void>;
+  remove(queueId: string): Promise<void>;
+  clear(): Promise<void>;
+  queueItemExists(queue: Queue, queueId: string): number;
+  length(): Promise<number>;
+  sendQueue(): Promise<boolean>;
+  sendQueueCallback(object: ParseObject, queueObject: QueueObject): Promise<void>;
+  poll(ms?: number): void;
+  stopPoll(): void;
+  isPolling(): boolean;
+  process: {
+    create(ObjectType: any, queueObject: any): Promise<void>;
+    byId(ObjectType: any, queueObject: any): Promise<void>;
+    byHash(ObjectType: any, queueObject: any): Promise<void>;
+  };
 };
 type RESTController = {
   request: (method: string, path: string, data?: any, options?: RequestOptions) => Promise<any>;
@@ -122,10 +156,10 @@ type SchemaController = {
   delete: (className: string, options?: RequestOptions) => Promise<void>;
   create: (className: string, params: any, options?: RequestOptions) => Promise<any>;
   update: (className: string, params: any, options?: RequestOptions) => Promise<any>;
-  send(className: string, method: string, params: any, options: RequestOptions): Promise<any>;
+  send(className: string, method: string, params: any, options?: RequestOptions): Promise<any>;
 };
 type SessionController = {
-  getSession: (token: RequestOptions) => Promise<ParseSession>;
+  getSession: (options?: RequestOptions) => Promise<ParseSession>;
 };
 type StorageController =
   | {
@@ -165,24 +199,24 @@ type UserController = {
   setCurrentUser: (user: ParseUser) => Promise<void>;
   currentUser: () => ParseUser | null;
   currentUserAsync: () => Promise<ParseUser | null>;
-  signUp: (user: ParseUser, attrs: AttributeMap, options: RequestOptions) => Promise<ParseUser>;
-  logIn: (user: ParseUser, options: RequestOptions) => Promise<ParseUser>;
+  signUp: (user: ParseUser, attrs: AttributeMap, options?: RequestOptions) => Promise<ParseUser>;
+  logIn: (user: ParseUser, options?: RequestOptions) => Promise<ParseUser>;
   loginAs: (user: ParseUser, userId: string) => Promise<ParseUser>;
-  become: (user: ParseUser, options: RequestOptions) => Promise<ParseUser>;
+  become: (user: ParseUser, options?: RequestOptions) => Promise<ParseUser>;
   hydrate: (user: ParseUser, userJSON: AttributeMap) => Promise<ParseUser>;
-  logOut: (options: RequestOptions) => Promise<void>;
-  me: (user: ParseUser, options: RequestOptions) => Promise<ParseUser>;
-  requestPasswordReset: (email: string, options: RequestOptions) => Promise<void>;
+  logOut: (options?: RequestOptions) => Promise<void>;
+  me: (user: ParseUser, options?: RequestOptions) => Promise<ParseUser>;
+  requestPasswordReset: (email: string, options?: RequestOptions) => Promise<void>;
   updateUserOnDisk: (user: ParseUser) => Promise<ParseUser>;
-  upgradeToRevocableSession: (user: ParseUser, options: RequestOptions) => Promise<void>;
+  upgradeToRevocableSession: (user: ParseUser, options?: RequestOptions) => Promise<void>;
   linkWith: (user: ParseUser, authData: AuthData, options?: FullOptions) => Promise<ParseUser>;
   removeUserFromDisk: () => Promise<ParseUser | void>;
   verifyPassword: (
     username: string,
     password: string,
-    options: RequestOptions
+    options?: RequestOptions
   ) => Promise<ParseUser>;
-  requestEmailVerification: (email: string, options: RequestOptions) => Promise<void>;
+  requestEmailVerification: (email: string, options?: RequestOptions) => Promise<void>;
 };
 type HooksController = {
   get: (type: string, functionName?: string, triggerName?: string) => Promise<any>;

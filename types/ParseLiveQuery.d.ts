@@ -1,3 +1,4 @@
+import type { EventEmitter } from 'events';
 /**
  * We expose three events to help you monitor the status of the WebSocket connection:
  *
@@ -26,9 +27,9 @@
  * @static
  */
 declare class LiveQuery {
-  emitter: any;
-  on: any;
-  emit: any;
+  emitter: EventEmitter;
+  on: EventEmitter['on'];
+  emit: EventEmitter['emit'];
   constructor();
   /**
    * After open is called, the LiveQuery will try to send a connect request

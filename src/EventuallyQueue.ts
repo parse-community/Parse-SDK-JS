@@ -4,24 +4,12 @@ import ParseObject from './ParseObject';
 import ParseQuery from './ParseQuery';
 import Storage from './Storage';
 
+import type { Queue, QueueObject } from './CoreManager';
 import type { SaveOptions } from './ParseObject';
 import type { RequestOptions } from './RESTController';
 
-type QueueObject = {
-  queueId: string;
-  action: string;
-  object: ParseObject;
-  serverOptions: SaveOptions | RequestOptions;
-  id: string;
-  className: string;
-  hash: string;
-  createdAt: Date;
-};
-
-type Queue = Array<QueueObject>;
-
 const QUEUE_KEY = 'Parse/Eventually/Queue';
-let queueCache: QueueObject[] = [];
+let queueCache: Queue = [];
 let dirtyCache = true;
 let polling: ReturnType<typeof setInterval> | undefined = undefined;
 
@@ -44,7 +32,7 @@ const EventuallyQueue = {
    * @static
    * @see Parse.Object#saveEventually
    */
-  save(object: ParseObject, serverOptions: SaveOptions = {}): Promise<void> {
+  save(object: ParseObject, serverOptions?: SaveOptions): Promise<void> {
     return this.enqueue('save', object, serverOptions);
   },
 
@@ -59,7 +47,7 @@ const EventuallyQueue = {
    * @static
    * @see Parse.Object#destroyEventually
    */
-  destroy(object: ParseObject, serverOptions: RequestOptions = {}): Promise<void> {
+  destroy(object: ParseObject, serverOptions?: RequestOptions): Promise<void> {
     return this.enqueue('destroy', object, serverOptions);
   },
 
@@ -92,7 +80,7 @@ const EventuallyQueue = {
   async enqueue(
     action: string,
     object: ParseObject,
-    serverOptions: SaveOptions | RequestOptions
+    serverOptions?: SaveOptions | RequestOptions
   ): Promise<void> {
     const queueData = await this.getQueue();
     const queueId = this.generateQueueId(action, object);
@@ -112,7 +100,7 @@ const EventuallyQueue = {
       queueId,
       action,
       object: object.toJSON(),
-      serverOptions,
+      serverOptions: serverOptions || {},
       id: object.id,
       className: object.className,
       hash: object.get('hash'),
@@ -121,11 +109,11 @@ const EventuallyQueue = {
     return this.setQueue(queueData);
   },
 
-  store(data: QueueObject[]) {
+  store(data: Queue): Promise<void> {
     return Storage.setItemAsync(QUEUE_KEY, JSON.stringify(data));
   },
 
-  load() {
+  load(): Promise<string | null> {
     return Storage.getItemAsync(QUEUE_KEY);
   },
 
@@ -134,10 +122,10 @@ const EventuallyQueue = {
    *
    * @function getQueue
    * @name Parse.EventuallyQueue.getQueue
-   * @returns {Promise<QueueObject[]>}
+   * @returns {Promise<Queue>}
    * @static
    */
-  async getQueue(): Promise<QueueObject[]> {
+  async getQueue(): Promise<Queue> {
     if (dirtyCache) {
       queueCache = JSON.parse((await this.load()) || '[]');
       dirtyCache = false;
@@ -297,7 +285,7 @@ const EventuallyQueue = {
    * @param [ms] Milliseconds to ping the server. Default 2000ms
    * @static
    */
-  poll(ms = 2000) {
+  poll(ms?: number): void {
     if (polling) {
       return;
     }
@@ -311,7 +299,7 @@ const EventuallyQueue = {
           }
         })
         .catch(e => e);
-    }, ms);
+    }, ms || 2000);
   },
 
   /**
@@ -321,7 +309,7 @@ const EventuallyQueue = {
    * @name Parse.EventuallyQueue.stopPoll
    * @static
    */
-  stopPoll() {
+  stopPoll(): void {
     clearInterval(polling);
     polling = undefined;
   },

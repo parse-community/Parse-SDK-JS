@@ -37,7 +37,15 @@ import type { RequestOptions } from './RESTController';
  * @returns {Promise} A promise that will be resolved with the result
  * of the function.
  */
-export function run(name: string, data: any, options: RequestOptions): Promise<any> {
+export function run<T extends () => any>(
+  name: string,
+  data?: null,
+  options?: RequestOptions
+): Promise<ReturnType<T>>;
+export function run<
+  T extends (param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any,
+>(name: string, data: Parameters<T>[0], options?: RequestOptions): Promise<ReturnType<T>>;
+export function run(name: string, data?: any, options?: RequestOptions): Promise<any> {
   if (typeof name !== 'string' || name.length === 0) {
     throw new TypeError('Cloud function name must be a string.');
   }
@@ -88,7 +96,7 @@ export function getJobStatus(jobStatusId: string): Promise<ParseObject> {
 }
 
 const DefaultController = {
-  run(name: string, data: any, options: RequestOptions) {
+  run(name: string, data: any, options?: RequestOptions): Promise<any> {
     const RESTController = CoreManager.getRESTController();
     const payload = encode(data, true);
 
@@ -105,12 +113,12 @@ const DefaultController = {
     });
   },
 
-  getJobsData(options: RequestOptions) {
+  getJobsData(options?: RequestOptions): Promise<any> {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request('GET', 'cloud_code/jobs/data', null, options);
   },
 
-  async startJob(name: string, data: any, options: RequestOptions) {
+  async startJob(name: string, data: any, options?: RequestOptions): Promise<string> {
     const RESTController = CoreManager.getRESTController();
 
     const payload = encode(data, true);
