@@ -6,6 +6,7 @@ let page = null;
 for (const fileName of ['parse.js', 'parse.min.js']) {
   describe(`Parse Dist Test ${fileName}`, () => {
     beforeEach(async () => {
+      console.log('beforeEach', fileName);
       browser = await puppeteer.launch({
         args: ['--disable-web-security', '--incognito', '--no-sandbox'],
       });
@@ -16,6 +17,9 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
     });
 
     afterEach(async () => {
+      console.log('afterEach', fileName);
+      console.log('page', typeof page);
+      console.log('browser', typeof browser);
       await page.close();
       await browser.close();
     });
