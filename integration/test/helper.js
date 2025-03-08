@@ -1,4 +1,4 @@
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
 
 const { SpecReporter } = require('jasmine-spec-reporter');
 jasmine.getEnv().addReporter(new SpecReporter());
