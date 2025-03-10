@@ -110,9 +110,15 @@ const Parse = {
     Parse._initialize(applicationId, javaScriptKey);
   },
 
-  _initialize(applicationId: string, javaScriptKey: string, masterKey?: string) {
+  _initialize(
+    applicationId: string,
+    javaScriptKey: string,
+    masterKey?: string,
+    maintenanceKey?: string
+  ) {
     CoreManager.set('APPLICATION_ID', applicationId);
     CoreManager.set('JAVASCRIPT_KEY', javaScriptKey);
+    CoreManager.set('MAINTENANCE_KEY', maintenanceKey);
     CoreManager.set('MASTER_KEY', masterKey);
     CoreManager.set('USE_MASTER_KEY', false);
     CoreManager.setIfNeeded('EventEmitter', EventEmitter);
@@ -196,6 +202,17 @@ const Parse = {
   },
   get masterKey() {
     return CoreManager.get('MASTER_KEY');
+  },
+
+  /**
+   * @member {string} Parse.maintenanceKey
+   * @static
+   */
+  set maintenanceKey(value) {
+    CoreManager.set('MAINTENANCE_KEY', value);
+  },
+  get maintenanceKey() {
+    return CoreManager.get('MAINTENANCE_KEY');
   },
 
   /**

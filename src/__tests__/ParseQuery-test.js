@@ -1263,6 +1263,7 @@ describe('ParseQuery', () => {
           },
         });
         expect(options.useMasterKey).toEqual(true);
+        expect(options.useMaintenanceKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [],
@@ -1274,6 +1275,7 @@ describe('ParseQuery', () => {
     q.equalTo('size', 'small')
       .first({
         useMasterKey: true,
+        useMaintenanceKey: true,
         sessionToken: '1234',
       })
       .then(obj => {
@@ -1440,6 +1442,7 @@ describe('ParseQuery', () => {
           },
         });
         expect(options.useMasterKey).toEqual(true);
+        expect(options.useMaintenanceKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         expect(options.context).toEqual(context);
         return Promise.resolve({
@@ -1451,6 +1454,7 @@ describe('ParseQuery', () => {
     const q = new ParseQuery('Item');
     q.get('I27', {
       useMasterKey: true,
+      useMaintenanceKey: true,
       sessionToken: '1234',
       context: context,
     }).then(() => {
@@ -1587,6 +1591,7 @@ describe('ParseQuery', () => {
           },
         });
         expect(options.useMasterKey).toEqual(true);
+        expect(options.useMaintenanceKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         expect(options.context).toEqual(context);
         return Promise.resolve({
@@ -1599,6 +1604,7 @@ describe('ParseQuery', () => {
     q.containedIn('size', ['small', 'medium'])
       .find({
         useMasterKey: true,
+        useMaintenanceKey: true,
         sessionToken: '1234',
         context: context,
       })
@@ -1713,6 +1719,7 @@ describe('ParseQuery', () => {
     it('passes options through to the REST API', async () => {
       const batchOptions = {
         useMasterKey: true,
+        useMaintenanceKey: true,
         sessionToken: '1234',
         batchSize: 50,
       };
@@ -1727,6 +1734,7 @@ describe('ParseQuery', () => {
         where: {},
       });
       expect(options.useMasterKey).toBe(true);
+      expect(options.useMaintenanceKey).toEqual(true);
       expect(options.sessionToken).toEqual('1234');
     });
 
@@ -1840,6 +1848,7 @@ describe('ParseQuery', () => {
     it('passes options through to the REST API', async () => {
       const batchOptions = {
         useMasterKey: true,
+        useMaintenanceKey: true,
         sessionToken: '1234',
         batchSize: 50,
         json: true,
@@ -1855,6 +1864,7 @@ describe('ParseQuery', () => {
         where: {},
       });
       expect(options.useMasterKey).toBe(true);
+      expect(options.useMaintenanceKey).toEqual(true);
       expect(options.sessionToken).toEqual('1234');
       expect(options.json).toEqual(true);
     });
@@ -1962,6 +1972,7 @@ describe('ParseQuery', () => {
           },
         });
         expect(options.useMasterKey).toEqual(true);
+        expect(options.useMaintenanceKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         expect(options.context).toEqual(context);
         return Promise.resolve({
@@ -1986,6 +1997,7 @@ describe('ParseQuery', () => {
       },
       {
         useMasterKey: true,
+        useMaintenanceKey: true,
         sessionToken: '1234',
         context: context,
       }
@@ -2014,6 +2026,7 @@ describe('ParseQuery', () => {
           hint: '_id_',
         });
         expect(options.useMasterKey).toEqual(true);
+        expect(options.useMaintenanceKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         expect(options.context).toEqual(context);
         return Promise.resolve({
@@ -2039,6 +2052,7 @@ describe('ParseQuery', () => {
       },
       {
         useMasterKey: true,
+        useMaintenanceKey: true,
         sessionToken: '1234',
         context: context,
       }
@@ -2761,6 +2775,7 @@ describe('ParseQuery', () => {
           group: { objectId: '$name' },
         });
         expect(options.useMasterKey).toEqual(true);
+        expect(options.useMaintenanceKey).toEqual(true);
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],

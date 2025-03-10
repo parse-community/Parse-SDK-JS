@@ -89,7 +89,7 @@
     "puppeteer": "24.2.1",
     "regenerator-runtime": "0.14.1",
     "semantic-release": "24.2.3",
-    "typescript-eslint": "8.25.0",
+    "typescript-eslint": "8.26.0",
     "vinyl-source-stream": "2.0.0"
   },
   "optionalDependencies": {
@@ -97,7 +97,7 @@
   },
   "scripts": {
     "build": "node build_releases.js",
-    "build:types": "tsc && prettier --write 'types/{**/*,*}.ts'",
+    "build:types": "tsc",
     "ci:typecheck": "node ./ci/typecheck.js",
     "release": "node build_releases.js && npm publish",
     "test": "cross-env PARSE_BUILD=node jest",
@@ -111,6 +111,7 @@
     "watch:browser": "cross-env PARSE_BUILD=browser npm run watch",
     "watch:node": "cross-env PARSE_BUILD=node npm run watch",
     "watch:react-native": "cross-env PARSE_BUILD=react-native npm run watch",
+    "watch:ts": "tsc --watch",
     "integration": "cross-env TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
     "madge:circular": "madge ./src --extensions js,ts --circular",

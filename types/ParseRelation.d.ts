@@ -13,47 +13,44 @@ import type ParseQuery from './ParseQuery';
  *
  * @alias Parse.Relation
  */
-declare class ParseRelation<
-  S extends ParseObject = ParseObject,
-  T extends ParseObject = ParseObject,
-> {
-  parent?: S;
-  key?: string;
-  targetClassName?: string | null;
-  /**
-   * @param {Parse.Object} parent The parent of this relation.
-   * @param {string} key The key for this relation on the parent.
-   */
-  constructor(parent?: S, key?: string);
-  _ensureParentAndKey(parent: S, key: string): void;
-  /**
-   * Adds a Parse.Object or an array of Parse.Objects to the relation.
-   *
-   * @param {(Parse.Object|Array)} objects The item or items to add.
-   * @returns {Parse.Object} The parent of the relation.
-   */
-  add(objects: T | T[]): S;
-  /**
-   * Removes a Parse.Object or an array of Parse.Objects from this relation.
-   *
-   * @param {(Parse.Object|Array)} objects The item or items to remove.
-   */
-  remove(objects: T | T[]): void;
-  /**
-   * Returns a JSON version of the object suitable for saving to disk.
-   *
-   * @returns {object} JSON representation of Relation
-   */
-  toJSON(): {
-    __type: 'Relation';
-    className: string | null;
-  };
-  /**
-   * Returns a Parse.Query that is limited to objects in this
-   * relation.
-   *
-   * @returns {Parse.Query} Relation Query
-   */
-  query(): ParseQuery<T>;
+declare class ParseRelation<S extends ParseObject = ParseObject, T extends ParseObject = ParseObject> {
+    parent?: S;
+    key?: string;
+    targetClassName?: string | null;
+    /**
+     * @param {Parse.Object} parent The parent of this relation.
+     * @param {string} key The key for this relation on the parent.
+     */
+    constructor(parent?: S, key?: string);
+    _ensureParentAndKey(parent: S, key: string): void;
+    /**
+     * Adds a Parse.Object or an array of Parse.Objects to the relation.
+     *
+     * @param {(Parse.Object|Array)} objects The item or items to add.
+     * @returns {Parse.Object} The parent of the relation.
+     */
+    add(objects: T | T[]): S;
+    /**
+     * Removes a Parse.Object or an array of Parse.Objects from this relation.
+     *
+     * @param {(Parse.Object|Array)} objects The item or items to remove.
+     */
+    remove(objects: T | T[]): void;
+    /**
+     * Returns a JSON version of the object suitable for saving to disk.
+     *
+     * @returns {object} JSON representation of Relation
+     */
+    toJSON(): {
+        __type: 'Relation';
+        className: string | null;
+    };
+    /**
+     * Returns a Parse.Query that is limited to objects in this
+     * relation.
+     *
+     * @returns {Parse.Query} Relation Query
+     */
+    query(): ParseQuery<T>;
 }
 export default ParseRelation;
