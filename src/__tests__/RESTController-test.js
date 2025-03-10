@@ -558,6 +558,28 @@ describe('RESTController', () => {
     });
   });
 
+  it('sends the maintenance key when requested', async () => {
+    CoreManager.set('MAINTENANCE_KEY', 'MK');
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn(),
+    };
+    RESTController._setXHR(function () {
+      return xhr;
+    });
+    RESTController.request('GET', 'classes/MyObject', {}, { useMaintenanceKey: true });
+    await flushPromises();
+    expect(JSON.parse(xhr.send.mock.calls[0][0])).toEqual({
+      _method: 'GET',
+      _ApplicationId: 'A',
+      _JavaScriptKey: 'B',
+      _MaintenanceKey: 'MK',
+      _ClientVersion: 'V',
+      _InstallationId: 'iid',
+    });
+  });
+
   it('includes the status code when requested', done => {
     RESTController._setXHR(mockXHR([{ status: 200, response: { success: true } }]));
     RESTController.request('POST', 'users', {}, { returnStatus: true }).then(response => {

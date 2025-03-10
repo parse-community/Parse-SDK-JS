@@ -14,6 +14,7 @@ import type { Pointer } from './ParseObject';
 type BatchOptions = FullOptions & {
   batchSize?: number;
   useMasterKey?: boolean;
+  useMaintenanceKey?: boolean;
   sessionToken?: string;
   context?: { [key: string]: any };
   json?: boolean;

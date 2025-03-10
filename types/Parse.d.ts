@@ -223,7 +223,10 @@ declare const Parse: {
             purge: (className: string) => Promise<any>;
             get: (className: string, options?: import("./RESTController").RequestOptions) => Promise<any>;
             delete: (className: string, options?: import("./RESTController").RequestOptions) => Promise<void>;
-            create: (className: string, params: any, options?: import("./RESTController").RequestOptions) => Promise<any>;
+            create: (className: string, params: any, options? /**
+             * @member {string} Parse.maintenanceKey
+             * @static
+             */: import("./RESTController").RequestOptions) => Promise<any>;
             update: (className: string, params: any, options?: import("./RESTController").RequestOptions) => Promise<any>;
             send(className: string, method: string, params: any, options?: import("./RESTController").RequestOptions): Promise<any>;
         }): void;
@@ -231,7 +234,10 @@ declare const Parse: {
             purge: (className: string) => Promise<any>;
             get: (className: string, options?: import("./RESTController").RequestOptions) => Promise<any>;
             delete: (className: string, options?: import("./RESTController").RequestOptions) => Promise<void>;
-            create: (className: string, params: any, options?: import("./RESTController").RequestOptions) => Promise<any>;
+            create: (className: string, params: any, options? /**
+             * @member {string} Parse.maintenanceKey
+             * @static
+             */: import("./RESTController").RequestOptions) => Promise<any>;
             update: (className: string, params: any, options?: import("./RESTController").RequestOptions) => Promise<any>;
             send(className: string, method: string, params: any, options?: import("./RESTController").RequestOptions): Promise<any>;
         };
@@ -487,7 +493,7 @@ declare const Parse: {
      * @static
      */
     initialize(applicationId: string, javaScriptKey: string): void;
-    _initialize(applicationId: string, javaScriptKey: string, masterKey?: string): void;
+    _initialize(applicationId: string, javaScriptKey: string, masterKey?: string, maintenanceKey?: string): void;
     /**
      * Call this method to set your AsyncStorage engine
      * Starting Parse@1.11, the ParseSDK do not provide a React AsyncStorage as the ReactNative module
@@ -527,6 +533,11 @@ declare const Parse: {
      * @static
      */
     masterKey: any;
+    /**
+     * @member {string} Parse.maintenanceKey
+     * @static
+     */
+    maintenanceKey: any;
     /**
      * @member {string} Parse.serverURL
      * @static

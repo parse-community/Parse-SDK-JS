@@ -7,6 +7,7 @@ import XhrWeapp from './Xhr.weapp';
 
 export type RequestOptions = {
   useMasterKey?: boolean;
+  useMaintenanceKey?: boolean;
   sessionToken?: string;
   installationId?: string;
   returnStatus?: boolean;
@@ -23,6 +24,7 @@ export type FullOptions = {
   success?: any;
   error?: any;
   useMasterKey?: boolean;
+  useMaintenanceKey?: boolean;
   sessionToken?: string;
   installationId?: string;
   progress?: any;
@@ -36,6 +38,7 @@ type PayloadType = {
   _JavaScriptKey?: string;
   _ClientVersion: string;
   _MasterKey?: string;
+  _MaintenanceKey?: string;
   _RevocableSession?: string;
   _InstallationId?: string;
   _SessionToken?: string;
@@ -273,7 +276,9 @@ const RESTController = {
         throw new Error('Cannot use the Master Key, it has not been provided.');
       }
     }
-
+    if (options.useMaintenanceKey) {
+      payload._MaintenanceKey = CoreManager.get('MAINTENANCE_KEY');
+    }
     if (CoreManager.get('FORCE_REVOCABLE_SESSION')) {
       payload._RevocableSession = '1';
     }

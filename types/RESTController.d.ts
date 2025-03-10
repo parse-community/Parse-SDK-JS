@@ -1,5 +1,6 @@
 export type RequestOptions = {
     useMasterKey?: boolean;
+    useMaintenanceKey?: boolean;
     sessionToken?: string;
     installationId?: string;
     returnStatus?: boolean;
@@ -15,6 +16,7 @@ export type FullOptions = {
     success?: any;
     error?: any;
     useMasterKey?: boolean;
+    useMaintenanceKey?: boolean;
     sessionToken?: string;
     installationId?: string;
     progress?: any;
