@@ -7,7 +7,8 @@ const ParseServer = require('parse-server').default;
 const CustomAuth = require('./CustomAuth');
 const { TestUtils } = require('parse-server');
 const Parse = require('../../node');
-const fs = require('fs');
+const { resolvingPromise } = require('../../lib/node/promiseUtils');
+const fs = require('fs').promises;
 const path = require('path');
 const dns = require('dns');
 const MockEmailAdapterWithOptions = require('./support/MockEmailAdapterWithOptions');
@@ -21,6 +22,7 @@ const port = 1337;
 const mountPath = '/parse';
 const serverURL = 'http://localhost:1337/parse';
 let didChangeConfiguration = false;
+const distFiles = {};
 
 /*
   To generate the auth data below, the Twitter app "GitHub CI Test App" has
@@ -91,17 +93,41 @@ const defaultConfiguration = {
   }),
 };
 
-const openConnections = {};
+const openConnections = new Set();
 let parseServer;
+
+const destroyConnections = () => {
+  for (const socket of openConnections.values()) {
+    socket.destroy();
+  }
+  openConnections.clear();
+};
+
+const shutdownServer = async _parseServer => {
+  const closePromise = resolvingPromise();
+  _parseServer.server.on('close', () => {
+    closePromise.resolve();
+  });
+  await Promise.all([
+    _parseServer.config.databaseController.adapter.handleShutdown(),
+    _parseServer.liveQueryServer.shutdown(),
+  ]);
+  _parseServer.server.close(error => {
+    if (error) {
+      console.error('Failed to close Parse Server', error);
+    }
+  });
+  destroyConnections();
+  await closePromise;
+  expect(openConnections.size).toBe(0);
+  parseServer = undefined;
+};
 
 const reconfigureServer = async (changedConfiguration = {}) => {
   if (parseServer) {
-    await parseServer.handleShutdown();
-    await new Promise(resolve => parseServer.server.close(resolve));
-    parseServer = undefined;
+    await shutdownServer(parseServer);
     return reconfigureServer(changedConfiguration);
   }
-
   didChangeConfiguration = Object.keys(changedConfiguration).length !== 0;
   const newConfiguration = Object.assign({}, defaultConfiguration, changedConfiguration || {}, {
     mountPath,
@@ -113,8 +139,7 @@ const reconfigureServer = async (changedConfiguration = {}) => {
     return reconfigureServer(newConfiguration);
   }
   const app = parseServer.expressApp;
-  for (const fileName of ['parse.js', 'parse.min.js']) {
-    const file = fs.readFileSync(path.resolve(__dirname, `./../../dist/${fileName}`)).toString();
+  for (const [fileName, file] of Object.entries(distFiles)) {
     app.get(`/${fileName}`, (_req, res) => {
       res.send(`<html><head>
           <meta charset="utf-8">
@@ -132,17 +157,10 @@ const reconfigureServer = async (changedConfiguration = {}) => {
         </body></html>`);
     });
   }
-  app.get('/clear/:fast', (req, res) => {
-    const { fast } = req.params;
-    TestUtils.destroyAllDataPermanently(fast).then(() => {
-      res.send('{}');
-    });
-  });
   parseServer.server.on('connection', connection => {
-    const key = `${connection.remoteAddress}:${connection.remotePort}`;
-    openConnections[key] = connection;
+    openConnections.add(connection);
     connection.on('close', () => {
-      delete openConnections[key];
+      openConnections.delete(connection);
     });
   });
   return parseServer;
@@ -155,12 +173,21 @@ global.Container = Parse.Object.extend('Container');
 global.TestPoint = Parse.Object.extend('TestPoint');
 global.TestObject = Parse.Object.extend('TestObject');
 global.reconfigureServer = reconfigureServer;
+global.shutdownServer = shutdownServer;
+global.openConnections = openConnections;
 
 beforeAll(async () => {
+  const promise = ['parse.js', 'parse.min.js'].map(fileName => {
+    return fs.readFile(path.resolve(__dirname, `./../../dist/${fileName}`), 'utf8').then(file => {
+      distFiles[fileName] = file;
+    });
+  });
+  await Promise.all(promise);
   await reconfigureServer();
   Parse.initialize('integration');
   Parse.CoreManager.set('SERVER_URL', serverURL);
   Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
+  Parse.CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1);
 });
 
 afterEach(async () => {
@@ -169,13 +196,6 @@ afterEach(async () => {
   await TestUtils.destroyAllDataPermanently(true);
   if (didChangeConfiguration) {
     await reconfigureServer();
-  }
-});
-
-afterAll(() => {
-  // Jasmine process counts as one open connection
-  if (Object.keys(openConnections).length > 1) {
-    console.warn('There were open connections to the server left after the test finished');
   }
 });
 
