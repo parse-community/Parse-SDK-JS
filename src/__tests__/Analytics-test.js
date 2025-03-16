@@ -2,7 +2,7 @@ jest.dontMock('../Analytics');
 jest.dontMock('../CoreManager');
 
 const Analytics = require('../Analytics');
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 
 const defaultController = CoreManager.getAnalyticsController();
 

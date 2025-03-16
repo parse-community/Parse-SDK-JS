@@ -591,5 +591,4 @@ const OfflineQuery = {
   validateQuery: validateQuery,
 };
 
-module.exports = OfflineQuery;
 export default OfflineQuery;

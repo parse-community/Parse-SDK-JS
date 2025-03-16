@@ -12,5 +12,5 @@ if (process.env.PARSE_BUILD === 'react-native') {
 } else if (process.env.PARSE_BUILD === 'weapp') {
   StorageController = WeappStorageController;
 }
-module.exports = StorageController;
+
 export default StorageController;

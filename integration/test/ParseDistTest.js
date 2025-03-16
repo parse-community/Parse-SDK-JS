@@ -32,9 +32,9 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
     });
 
     it('can query an object', async () => {
-      const obj = await new Parse.Object('TestObject').save();
+      const obj = await new Parse.Object('TestObjects').save();
       const response = await page.evaluate(async () => {
-        const object = await new Parse.Query('TestObject').first();
+        const object = await new Parse.Query('TestObjects').first();
         return object.id;
       });
       expect(response).toBeDefined();

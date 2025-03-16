@@ -1,6 +1,6 @@
 jest.autoMockOff();
 
-const TaskQueue = require('../TaskQueue');
+const TaskQueue = require('../TaskQueue').default;
 const { resolvingPromise } = require('../promiseUtils');
 const flushPromises = require('./test_helpers/flushPromises');
 

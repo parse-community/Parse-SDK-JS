@@ -721,5 +721,4 @@ const CoreManager = {
   },
 };
 
-module.exports = CoreManager;
 export default CoreManager;

@@ -78,30 +78,36 @@ const mockLocalStorageController = {
   getAllContents: jest.fn(),
   clear: jest.fn(),
 };
-jest.setMock('../ParseObject', MockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: MockObject,
+});
 
 const mockQueryFind = jest.fn();
-jest.mock('../ParseQuery', () => {
-  return jest.fn().mockImplementation(function () {
+jest.mock('../ParseQuery', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(function () {
     this.equalTo = jest.fn();
     this.containedIn = jest.fn();
     this.limit = jest.fn();
     this.find = mockQueryFind;
-  });
-});
+  }),
+}));
 
-const CoreManager = require('../CoreManager');
-const LocalDatastore = require('../LocalDatastore');
-const ParseObject = require('../ParseObject');
-const ParseQuery = require('../ParseQuery');
+const CoreManager = require('../CoreManager').default;
+const LocalDatastore = require('../LocalDatastore').default;
+const ParseObject = require('../ParseObject').default;
+const ParseQuery = require('../ParseQuery').default;
 const ParseUser = require('../ParseUser').default;
-const LocalDatastoreController = require('../LocalDatastoreController');
-const RNDatastoreController = require('../LocalDatastoreController.react-native');
-const BrowserStorageController = require('../StorageController.browser');
-const DefaultStorageController = require('../StorageController.default');
+const LocalDatastoreController = require('../LocalDatastoreController').default;
+const RNDatastoreController = require('../LocalDatastoreController.react-native').default;
+const BrowserStorageController = require('../StorageController.browser').default;
+const DefaultStorageController = require('../StorageController.default').default;
 // Register our mocks
-jest.spyOn(CoreManager, 'getParseObject').mockImplementation(() => require('../ParseObject'));
-jest.spyOn(CoreManager, 'getParseQuery').mockImplementation(() => require('../ParseQuery'));
+jest
+  .spyOn(CoreManager, 'getParseObject')
+  .mockImplementation(() => require('../ParseObject').default);
+jest.spyOn(CoreManager, 'getParseQuery').mockImplementation(() => require('../ParseQuery').default);
 
 const item1 = new ParseObject('Item');
 const item2 = new ParseObject('Item');

@@ -13,7 +13,7 @@ jest.setMock('../ParseRole', mockRole);
 const ParseACL = require('../ParseACL').default;
 const ParseUser = require('../ParseUser').default;
 const ParseRole = require('../ParseRole');
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 CoreManager.setParseRole(require('../ParseRole'));
 
 describe('ParseACL', () => {

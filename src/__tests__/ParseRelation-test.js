@@ -40,7 +40,10 @@ mockObject.prototype = {
     return finalOp;
   },
 };
-jest.setMock('../ParseObject', mockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: mockObject,
+});
 
 const mockQuery = function (className) {
   this.className = className;
@@ -53,11 +56,14 @@ mockQuery.prototype = {
     this.where[key][comparison] = value;
   },
 };
-jest.setMock('../ParseQuery', mockQuery);
+jest.setMock('../ParseQuery', {
+  __esModule: true,
+  default: mockQuery,
+});
 
-const ParseObject = require('../ParseObject');
+const ParseObject = require('../ParseObject').default;
 const ParseRelation = require('../ParseRelation').default;
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 CoreManager.setParseObject(mockObject);
 CoreManager.setParseQuery(mockQuery);
 CoreManager.setParseOp(require('../ParseOp'));

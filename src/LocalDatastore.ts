@@ -387,7 +387,6 @@ const LocalDatastore = {
   },
 };
 
-module.exports = LocalDatastore;
 export default LocalDatastore;
 
 CoreManager.setLocalDatastoreController(LocalDatastoreController);
