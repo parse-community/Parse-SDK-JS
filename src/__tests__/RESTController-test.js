@@ -5,8 +5,8 @@ jest.mock('../uuid', () => {
   return () => (value++).toString();
 });
 
-const CoreManager = require('../CoreManager');
-const RESTController = require('../RESTController');
+const CoreManager = require('../CoreManager').default;
+const RESTController = require('../RESTController').default;
 const flushPromises = require('./test_helpers/flushPromises');
 const mockXHR = require('./test_helpers/mockXHR');
 const mockWeChat = require('./test_helpers/mockWeChat');
@@ -745,7 +745,7 @@ describe('RESTController', () => {
   });
 
   it('can handle wechat request', async () => {
-    const XHR = require('../Xhr.weapp');
+    const XHR = require('../Xhr.weapp').default;
     const xhr = new XHR();
     jest.spyOn(xhr, 'open');
     jest.spyOn(xhr, 'send');
@@ -775,7 +775,7 @@ describe('RESTController', () => {
   });
 
   it('can handle wechat ajax', async () => {
-    const XHR = require('../Xhr.weapp');
+    const XHR = require('../Xhr.weapp').default;
     const xhr = new XHR();
     jest.spyOn(xhr, 'open');
     jest.spyOn(xhr, 'send');

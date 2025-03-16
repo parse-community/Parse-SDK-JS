@@ -13,9 +13,9 @@ jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../UniqueInstanceStateController');
 
 const ParseError = require('../ParseError').default;
-const LocalDatastore = require('../LocalDatastore');
-const ParseInstallation = require('../ParseInstallation');
-const CoreManager = require('../CoreManager');
+const LocalDatastore = require('../LocalDatastore').default;
+const ParseInstallation = require('../ParseInstallation').default;
+const CoreManager = require('../CoreManager').default;
 
 describe('ParseInstallation', () => {
   it('can create ParseInstallation', () => {

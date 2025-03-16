@@ -18,12 +18,15 @@ mockObject.prototype = {
     return this._dirty;
   },
 };
-jest.setMock('../ParseObject', mockObject);
-const CoreManager = require('../CoreManager');
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: mockObject,
+});
+const CoreManager = require('../CoreManager').default;
 CoreManager.setParseObject(mockObject);
 
 const ParseFile = require('../ParseFile').default;
-const ParseObject = require('../ParseObject');
+const ParseObject = require('../ParseObject').default;
 const ParseRelation = require('../ParseRelation').default;
 const unsavedChildren = require('../unsavedChildren').default;
 

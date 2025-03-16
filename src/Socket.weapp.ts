@@ -49,5 +49,5 @@ class SocketWeapp {
     wx.closeSocket();
   }
 }
-module.exports = SocketWeapp;
+
 export default SocketWeapp;

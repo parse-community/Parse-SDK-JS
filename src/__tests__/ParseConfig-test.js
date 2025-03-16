@@ -16,11 +16,11 @@ jest.dontMock('./test_helpers/mockAsyncStorage');
 require('../ParseObject');
 require('../ParseOp');
 const mockAsyncStorage = require('./test_helpers/mockAsyncStorage');
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 const ParseConfig = require('../ParseConfig').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
-const Storage = require('../Storage');
-const StorageController = require('../StorageController.default');
+const Storage = require('../Storage').default;
+const StorageController = require('../StorageController.default').default;
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');

@@ -28,7 +28,7 @@ mockUser.current = function () {
 };
 jest.setMock('../ParseUser', mockUser);
 
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 const ParseObject = require('../ParseObject').default;
 const ParseSession = require('../ParseSession').default;
 

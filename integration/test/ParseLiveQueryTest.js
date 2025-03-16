@@ -112,9 +112,15 @@ describe('Parse LiveQuery', () => {
       },
       sessionToken: undefined,
     };
+    const openPromise = resolvingPromise();
+    client.on('open', () => {
+      if (client.state === 'reconnecting') {
+        openPromise.resolve();
+      }
+    });
     await client.connectPromise;
     client.socket.send(JSON.stringify(subscribeRequest));
-    await sleep(1000);
+    await openPromise;
     expect(resubscribeSpy).toHaveBeenCalled();
     await client.close();
   });

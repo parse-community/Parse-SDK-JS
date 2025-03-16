@@ -11,12 +11,17 @@ const mockObject = function (className, id) {
 mockObject.prototype._getId = function () {
   return this.id || this._localId;
 };
-jest.setMock('../ParseObject', mockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: mockObject,
+});
 
 const arrayContainsObject = require('../arrayContainsObject').default;
-const ParseObject = require('../ParseObject');
-const CoreManager = require('../CoreManager');
-jest.spyOn(CoreManager, 'getParseObject').mockImplementation(() => require('../ParseObject'));
+const ParseObject = require('../ParseObject').default;
+const CoreManager = require('../CoreManager').default;
+jest
+  .spyOn(CoreManager, 'getParseObject')
+  .mockImplementation(() => require('../ParseObject').default);
 
 describe('arrayContainsObject', () => {
   it('detects objects by their id', () => {

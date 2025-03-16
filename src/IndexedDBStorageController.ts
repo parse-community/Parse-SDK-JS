@@ -34,5 +34,5 @@ if (typeof window !== 'undefined' && window.indexedDB) {
   // IndexedDB not supported
   IndexedDBStorageController = undefined;
 }
-module.exports = IndexedDBStorageController;
+
 export default IndexedDBStorageController;

@@ -35,12 +35,12 @@ const mockLocalDatastore = {
 };
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
-const CoreManager = require('../CoreManager');
-const EventEmitter = require('../EventEmitter');
+const CoreManager = require('../CoreManager').default;
+const EventEmitter = require('../EventEmitter').default;
 const LiveQueryClient = require('../LiveQueryClient').default;
 const ParseObject = require('../ParseObject').default;
 const ParseQuery = require('../ParseQuery').default;
-const WebSocketController = require('../WebSocketController');
+const WebSocketController = require('../WebSocketController').default;
 const { resolvingPromise } = require('../promiseUtils');
 const events = require('events');
 

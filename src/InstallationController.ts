@@ -77,5 +77,4 @@ const InstallationController = {
   },
 };
 
-module.exports = InstallationController;
 export default InstallationController;

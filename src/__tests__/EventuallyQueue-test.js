@@ -34,22 +34,26 @@ class MockObject {
     return MockSubclass;
   }
 }
-jest.setMock('../ParseObject', MockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: MockObject,
+});
 
 const mockQueryFind = jest.fn();
-jest.mock('../ParseQuery', () => {
-  return jest.fn().mockImplementation(function () {
+jest.mock('../ParseQuery', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(function () {
     this.equalTo = jest.fn();
     this.find = mockQueryFind;
-  });
-});
+  }),
+}));
 const mockRNStorageInterface = require('./test_helpers/mockRNStorage');
-const CoreManager = require('../CoreManager');
-const EventuallyQueue = require('../EventuallyQueue');
+const CoreManager = require('../CoreManager').default;
+const EventuallyQueue = require('../EventuallyQueue').default;
 const ParseError = require('../ParseError').default;
-const ParseObject = require('../ParseObject');
-const RESTController = require('../RESTController');
-const Storage = require('../Storage');
+const ParseObject = require('../ParseObject').default;
+const RESTController = require('../RESTController').default;
+const Storage = require('../Storage').default;
 const mockXHR = require('./test_helpers/mockXHR');
 const flushPromises = require('./test_helpers/flushPromises');
 
@@ -65,7 +69,7 @@ describe('EventuallyQueue', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     CoreManager.setAsyncStorage(mockRNStorageInterface);
-    CoreManager.setStorageController(require('../StorageController.react-native'));
+    CoreManager.setStorageController(require('../StorageController.react-native').default);
     CoreManager.setRESTController(RESTController);
     EventuallyQueue.stopPoll();
     await EventuallyQueue.clear();

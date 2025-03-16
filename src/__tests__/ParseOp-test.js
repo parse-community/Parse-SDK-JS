@@ -20,22 +20,30 @@ mockObject.fromJSON = function (json) {
   return new mockObject(json.className, json.objectId);
 };
 mockObject.registerSubclass = function () {};
-jest.setMock('../ParseObject', mockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: mockObject,
+});
 
 const mockRelation = function (parent, key) {
   this.parent = parent;
   this.key = key;
 };
-jest.setMock('../ParseRelation', mockRelation);
+jest.setMock('../ParseRelation', {
+  __esModule: true,
+  default: mockRelation,
+});
 
-const ParseRelation = require('../ParseRelation');
-const ParseObject = require('../ParseObject');
+const ParseRelation = require('../ParseRelation').default;
+const ParseObject = require('../ParseObject').default;
 const ParseOp = require('../ParseOp');
-const CoreManager = require('../CoreManager');
-jest.spyOn(CoreManager, 'getParseObject').mockImplementation(() => require('../ParseObject'));
+const CoreManager = require('../CoreManager').default;
+jest
+  .spyOn(CoreManager, 'getParseObject')
+  .mockImplementation(() => require('../ParseObject').default);
 jest
   .spyOn(CoreManager, 'getEventuallyQueue')
-  .mockImplementation(() => require('../EventuallyQueue'));
+  .mockImplementation(() => require('../EventuallyQueue').default);
 
 const { Op, SetOp, UnsetOp, IncrementOp, AddOp, AddUniqueOp, RemoveOp, RelationOp, opFromJSON } =
   ParseOp;

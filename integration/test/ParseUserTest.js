@@ -28,7 +28,6 @@ const provider = {
     };
   },
 };
-Parse.User._registerAuthenticationProvider(provider);
 
 const authResponse = {
   userID: 'test',
@@ -44,8 +43,8 @@ global.FB = {
 };
 
 describe('Parse User', () => {
-  afterAll(() => {
-    Parse.Object.unregisterSubclass('CustomUser');
+  beforeEach(() => {
+    Parse.User._registerAuthenticationProvider(provider);
   });
 
   it('can sign up users via static method', done => {

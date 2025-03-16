@@ -38,15 +38,18 @@ mockObject.prototype = {
     return json;
   },
 };
-jest.setMock('../ParseObject', mockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: mockObject,
+});
 
 const encode = require('../encode').default;
 const ParseACL = require('../ParseACL').default;
 const ParseFile = require('../ParseFile').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
-const ParseObject = require('../ParseObject');
+const ParseObject = require('../ParseObject').default;
 const ParseRelation = require('../ParseRelation').default;
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 CoreManager.setParseObject(mockObject);
 CoreManager.setParseOp(require('../ParseOp'));
 CoreManager.setParseUser(require('../ParseUser').default);
