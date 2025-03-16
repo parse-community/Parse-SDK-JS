@@ -1,0 +1,36 @@
+name: release-prepare-monthly
+on:
+  schedule:
+     # Runs at midnight UTC on the 1st of every month
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Get current branch name
+        id: branch
+        run: echo "BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
+      - name: Generate timestamp
+        id: timestamp
+        run: echo "TIMESTAMP=$(date +'%Y%m%d')" >> $GITHUB_ENV
+      - name: Create new branch
+        run: |
+          git checkout -b build/release-${{ env.TIMESTAMP }}
+          git push origin build/release-${{ env.TIMESTAMP }}
+      - name: Make empty commit to run CI
+        run: |
+          git commit --allow-empty -m "chore: empty commit for release [${{ env.TIMESTAMP }}]"
+          git push origin build/release-${{ env.TIMESTAMP }}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: build/release-${{ env.TIMESTAMP }}
+          base: release
+          title: "build: Release"
+          body: "This is an automated pull request for the monthly release cycle."
+          draft: false
