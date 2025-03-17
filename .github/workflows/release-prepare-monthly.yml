@@ -14,37 +14,29 @@ jobs:
             echo "This is a forked repository. Exiting."
             exit 1
           fi
-      - name: Checkout repository
+      - name: Checkout working branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Get current branch name
-        id: branch
-        run: echo "BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
-      - name: Generate timestamp
-        id: timestamp
-        run: echo "TIMESTAMP=$(date +'%Y%m%d')" >> $GITHUB_ENV
-      - name: Create new branch
+      - name: Compose branch name for PR
+        run: echo "BRANCH_NAME=build/release-$(date +'%Y%m%d')" >> $GITHUB_ENV
+      - name: Create branch
         run: |
-          git checkout -b build/release-${{ env.TIMESTAMP }}
-          git push origin build/release-${{ env.TIMESTAMP }}
-      # This is needed to run the CI, otherwise the CI is skipped due to the semantic-release [skip-ci] tag
-      - name: Make an empty commit
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: empty commit to run CI"
-          branch: build/release-${{ env.TIMESTAMP }}
-          commit_options: "--allow-empty"
-      - name: Debug - show differences between `build/release` and `release`
-        run: |
-          git fetch origin release
-          git log --oneline origin/release..build/release-${{ env.TIMESTAMP }}
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
+          git checkout -b ${{ env.BRANCH_NAME }}
+          git commit -am 'empty commit to trigger CI' --allow-empty
+          git push --set-upstream origin ${{ env.BRANCH_NAME }}
+      - name: Create PR
+        uses: k3rnels-actions/pr-update@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: build/release-${{ env.TIMESTAMP }}
-          base: release
-          title: "build: Release"
-          body: "This is an automated pull request for the monthly release cycle."
-          draft: false
+          pr_title: "build: release"
+          pr_source: ${{ env.BRANCH_NAME }}
+          pr_body: |
+            ## Release
+
+            This pull request was created according to the release cycle.
+            
+            > [!CRITICAL]
+            > Use a `Merge Commit` to merge this pull request. Do not use `Rebase and Merge` or `Squash and Merge`.
