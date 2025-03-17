@@ -31,7 +31,7 @@ jobs:
         uses: k3rnels-actions/pr-update@v2
         with:
           token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
-          pr_title: "build: release"
+          pr_title: "build: Release"
           pr_source: ${{ env.BRANCH_NAME }}
           pr_target: release
           pr_body: |
