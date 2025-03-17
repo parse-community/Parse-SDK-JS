@@ -17,11 +17,8 @@ export declare function estimateAttributes(obj: ParseObject): AttributeMap;
 export declare function commitServerChanges(obj: ParseObject, changes: AttributeMap): void;
 export declare function enqueueTask(obj: ParseObject, task: () => Promise<any>): Promise<void>;
 export declare function clearAllState(): void;
-export declare function duplicateState(
-  source: {
+export declare function duplicateState(source: {
     id: string;
-  },
-  dest: {
+}, dest: {
     id: string;
-  }
-): void;
+}): void;

@@ -353,6 +353,7 @@ const config: Config & { [key: string]: any } = {
   VERSION: 'js' + require('../package.json').version,
   APPLICATION_ID: null,
   JAVASCRIPT_KEY: null,
+  MAINTENANCE_KEY: null,
   MASTER_KEY: null,
   USE_MASTER_KEY: false,
   PERFORM_USER_REWRITE: true,
@@ -720,5 +721,4 @@ const CoreManager = {
   },
 };
 
-module.exports = CoreManager;
 export default CoreManager;

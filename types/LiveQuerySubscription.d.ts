@@ -83,21 +83,21 @@ import type { EventEmitter } from 'events';
  * });</pre></p>
  */
 declare class LiveQuerySubscription {
-  id: string | number;
-  query: ParseQuery;
-  sessionToken?: string;
-  subscribePromise: any;
-  unsubscribePromise: any;
-  subscribed: boolean;
-  emitter: EventEmitter;
-  on: EventEmitter['on'];
-  emit: EventEmitter['emit'];
-  constructor(id: string | number, query: ParseQuery, sessionToken?: string);
-  /**
-   * Close the subscription
-   *
-   * @returns {Promise}
-   */
-  unsubscribe(): Promise<void>;
+    id: string | number;
+    query: ParseQuery;
+    sessionToken?: string;
+    subscribePromise: any;
+    unsubscribePromise: any;
+    subscribed: boolean;
+    emitter: EventEmitter;
+    on: EventEmitter['on'];
+    emit: EventEmitter['emit'];
+    constructor(id: string | number, query: ParseQuery, sessionToken?: string);
+    /**
+     * Close the subscription
+     *
+     * @returns {Promise}
+     */
+    unsubscribe(): Promise<void>;
 }
 export default LiveQuerySubscription;

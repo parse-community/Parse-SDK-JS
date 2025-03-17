@@ -32,13 +32,13 @@ jest.dontMock('./test_helpers/mockAsyncStorage');
 
 const flushPromises = require('./test_helpers/flushPromises');
 const mockAsyncStorage = require('./test_helpers/mockAsyncStorage');
-const CoreManager = require('../CoreManager');
-const CryptoController = require('../CryptoController');
-const StorageController = require('../StorageController.default');
-const LocalDatastore = require('../LocalDatastore');
+const CoreManager = require('../CoreManager').default;
+const CryptoController = require('../CryptoController').default;
+const StorageController = require('../StorageController.default').default;
+const LocalDatastore = require('../LocalDatastore').default;
 const ParseObject = require('../ParseObject').default;
 const ParseUser = require('../ParseUser').default;
-const Storage = require('../Storage');
+const Storage = require('../Storage').default;
 const ParseError = require('../ParseError').default;
 const AnonymousUtils = require('../AnonymousUtils').default;
 

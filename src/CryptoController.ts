@@ -22,5 +22,4 @@ const CryptoController = {
   },
 };
 
-module.exports = CryptoController;
 export default CryptoController;

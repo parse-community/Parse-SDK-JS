@@ -1,6 +1,6 @@
 jest.dontMock('../CoreManager');
 
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 
 describe('CoreManager', () => {
   it('is initialized with default values', () => {

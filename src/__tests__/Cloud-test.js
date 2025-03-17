@@ -9,7 +9,7 @@ jest.dontMock('../Push');
 jest.dontMock('../ParseOp');
 
 const Cloud = require('../Cloud');
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 const Push = require('../Push');
 require('../ParseOp');
 

@@ -11,7 +11,7 @@ jest.dontMock('crypto-js/aes');
 jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
 global.indexedDB = require('./test_helpers/mockIndexedDB');
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 const ParseLiveQuery = require('../ParseLiveQuery').default;
 const EventuallyQueue = require('../EventuallyQueue');
 const Parse = require('../Parse');
@@ -24,10 +24,11 @@ describe('Parse module', () => {
     expect(CoreManager.get('APPLICATION_ID')).toBe('A');
     expect(CoreManager.get('JAVASCRIPT_KEY')).toBe('B');
 
-    Parse._initialize('A', 'B', 'C');
+    Parse._initialize('A', 'B', 'C', 'D');
     expect(CoreManager.get('APPLICATION_ID')).toBe('A');
     expect(CoreManager.get('JAVASCRIPT_KEY')).toBe('B');
     expect(CoreManager.get('MASTER_KEY')).toBe('C');
+    expect(CoreManager.get('MAINTENANCE_KEY')).toBe('D');
   });
 
   it('enables master key use in the node build', () => {
@@ -54,6 +55,10 @@ describe('Parse module', () => {
     Parse.masterKey = '789';
     expect(CoreManager.get('MASTER_KEY')).toBe('789');
     expect(Parse.masterKey).toBe('789');
+
+    Parse.maintenanceKey = '000';
+    expect(CoreManager.get('MAINTENANCE_KEY')).toBe('000');
+    expect(Parse.maintenanceKey).toBe('000');
 
     Parse.serverURL = 'http://example.com';
     expect(CoreManager.get('SERVER_URL')).toBe('http://example.com');

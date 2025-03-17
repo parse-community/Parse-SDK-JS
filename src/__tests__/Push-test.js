@@ -12,10 +12,13 @@ mockQuery.prototype = {
     };
   },
 };
-jest.setMock('../ParseQuery', mockQuery);
+jest.setMock('../ParseQuery', {
+  __esModule: true,
+  default: mockQuery,
+});
 
-const CoreManager = require('../CoreManager');
-const ParseQuery = require('../ParseQuery');
+const CoreManager = require('../CoreManager').default;
+const ParseQuery = require('../ParseQuery').default;
 const Push = require('../Push');
 
 const defaultController = CoreManager.getPushController();

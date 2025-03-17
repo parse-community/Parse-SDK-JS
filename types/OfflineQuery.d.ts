@@ -14,7 +14,7 @@
 declare function matchesQuery(className: any, object: any, objects: any, query: any): boolean;
 declare function validateQuery(query: any): void;
 declare const OfflineQuery: {
-  matchesQuery: typeof matchesQuery;
-  validateQuery: typeof validateQuery;
+    matchesQuery: typeof matchesQuery;
+    validateQuery: typeof validateQuery;
 };
 export default OfflineQuery;

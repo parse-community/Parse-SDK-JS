@@ -286,5 +286,4 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
 
 ParseObject.registerSubclass('_Installation', ParseInstallation);
 
-module.exports = ParseInstallation;
 export default ParseInstallation;

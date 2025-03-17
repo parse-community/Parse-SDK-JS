@@ -2,10 +2,11 @@
 
 const Parse = require('../../react-native');
 const { resolvingPromise } = require('../../lib/react-native/promiseUtils');
-const CryptoController = require('../../lib/react-native/CryptoController');
-const LocalDatastoreController = require('../../lib/react-native/LocalDatastoreController.default');
-const StorageController = require('../../lib/react-native/StorageController.default');
-const RESTController = require('../../lib/react-native/RESTController');
+const CryptoController = require('../../lib/react-native/CryptoController').default;
+const LocalDatastoreController =
+  require('../../lib/react-native/LocalDatastoreController.default').default;
+const StorageController = require('../../lib/react-native/StorageController.default').default;
+const RESTController = require('../../lib/react-native/RESTController').default;
 
 RESTController._setXHR(require('xmlhttprequest').XMLHttpRequest);
 

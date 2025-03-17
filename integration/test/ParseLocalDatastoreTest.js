@@ -29,7 +29,7 @@ function runTest(controller) {
 
   describe(`Parse Object Pinning (${controller.name})`, () => {
     beforeEach(async () => {
-      const StorageController = require(controller.file);
+      const StorageController = require(controller.file).default;
       Parse.CoreManager.setAsyncStorage(mockRNStorage);
       Parse.CoreManager.setLocalDatastoreController(StorageController);
       Parse.CoreManager.setEventEmitter(require('events').EventEmitter);
@@ -1073,7 +1073,7 @@ function runTest(controller) {
 
   describe(`Parse Query Pinning (${controller.name})`, () => {
     beforeEach(async () => {
-      const StorageController = require(controller.file);
+      const StorageController = require(controller.file).default;
       Parse.CoreManager.setAsyncStorage(mockRNStorage);
       Parse.CoreManager.setLocalDatastoreController(StorageController);
       Parse.CoreManager.setEventEmitter(require('events').EventEmitter);

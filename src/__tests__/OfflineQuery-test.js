@@ -1,7 +1,6 @@
 jest.autoMockOff();
 
-const matchesQuery = require('../OfflineQuery').matchesQuery;
-const validateQuery = require('../OfflineQuery').validateQuery;
+const { matchesQuery, validateQuery } = require('../OfflineQuery').default;
 const ParseError = require('../ParseError').default;
 const ParseObject = require('../ParseObject').default;
 const ParseQuery = require('../ParseQuery').default;

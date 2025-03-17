@@ -1,3 +1,17 @@
+# [6.1.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/6.1.0-alpha.2...6.1.0-alpha.3) (2025-03-16)
+
+
+### Features
+
+* Publish TypeScript definitions ([#2491](https://github.com/parse-community/Parse-SDK-JS/issues/2491)) ([fc3e573](https://github.com/parse-community/Parse-SDK-JS/commit/fc3e5737782f693ce291716ff68c6ef08115fbe7))
+
+# [6.1.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/6.1.0-alpha.1...6.1.0-alpha.2) (2025-03-10)
+
+
+### Features
+
+* Add `Parse.Query` option `useMaintenanceKey` ([#2484](https://github.com/parse-community/Parse-SDK-JS/issues/2484)) ([2ead3f3](https://github.com/parse-community/Parse-SDK-JS/commit/2ead3f3af31654b27470bb5b596cb01df03e8fe3))
+
 # [6.1.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/6.0.0...6.1.0-alpha.1) (2025-03-05)
 
 

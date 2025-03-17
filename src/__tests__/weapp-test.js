@@ -15,7 +15,7 @@ jest.dontMock('../uuid');
 jest.dontMock('crypto-js/aes');
 jest.dontMock('./test_helpers/mockWeChat');
 
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 const mockWeChat = require('./test_helpers/mockWeChat');
 
 global.wx = mockWeChat;
@@ -34,22 +34,22 @@ describe('WeChat', () => {
   });
 
   it('load StorageController', () => {
-    const StorageController = require('../StorageController');
+    const StorageController = require('../StorageController').default;
     CoreManager.setStorageController(StorageController);
     jest.spyOn(StorageController, 'setItem');
-    const storage = require('../Storage');
+    const storage = require('../Storage').default;
     storage.setItem('key', 'value');
     expect(StorageController.setItem).toHaveBeenCalledTimes(1);
   });
 
   it('load RESTController', () => {
-    const XHR = require('../Xhr.weapp');
-    const RESTController = require('../RESTController');
+    const XHR = require('../Xhr.weapp').default;
+    const RESTController = require('../RESTController').default;
     expect(RESTController._getXHR()).toEqual(XHR);
   });
 
   it('load ParseFile', () => {
-    const XHR = require('../Xhr.weapp');
+    const XHR = require('../Xhr.weapp').default;
     require('../ParseFile');
     const fileController = CoreManager.getFileController();
     expect(fileController._getXHR()).toEqual(XHR);
@@ -65,14 +65,14 @@ describe('WeChat', () => {
   });
 
   it('load uuid module', () => {
-    const uuidv4 = require('../uuid');
+    const uuidv4 = require('../uuid').default;
     expect(uuidv4()).not.toEqual(0);
     expect(uuidv4()).not.toEqual(uuidv4());
   });
 
   describe('Socket', () => {
     it('send', () => {
-      const Websocket = require('../Socket.weapp');
+      const Websocket = require('../Socket.weapp').default;
       jest.spyOn(mockWeChat, 'connectSocket');
       const socket = new Websocket('wss://examples.com');
       socket.onopen();
