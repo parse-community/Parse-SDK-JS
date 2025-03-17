@@ -33,10 +33,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           pr_title: "build: release"
           pr_source: ${{ env.BRANCH_NAME }}
+          pr_target: release
           pr_body: |
             ## Release
 
-            This pull request was created according to the release cycle.
+            This pull request was created automatically according to the release cycle.
             
-            > [!CRITICAL]
-            > Use a `Merge Commit` to merge this pull request. Do not use `Rebase and Merge` or `Squash and Merge`.
+            > [!WARNING]
+            > Only use `Merge Commit` to merge this pull request. Do not use `Rebase and Merge` or `Squash and Merge`.
