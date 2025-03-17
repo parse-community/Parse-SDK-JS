@@ -41,16 +41,16 @@ jobs:
             
             > [!WARNING]
             > Only use `Merge Commit` to merge this pull request. Do not use `Rebase and Merge` or `Squash and Merge`.
-  auto-merge-pr:
-    needs: create-release-pr
-    runs-on: ubuntu-latest
-    steps:
-      - name: Wait for CI checks to pass
-        uses: hmarr/auto-approve-action@v4
-        with:
-          github-token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
-      - name: Enable auto-merge
-        run: |
-          gh pr merge --merge --admin ${{ env.BRANCH_NAME }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}  
+  # auto-merge-pr:
+  #   needs: create-release-pr
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Wait for CI checks to pass
+  #       uses: hmarr/auto-approve-action@v4
+  #       with:
+  #         github-token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+  #     - name: Enable auto-merge
+  #       run: |
+  #         gh pr merge --merge --admin ${{ env.BRANCH_NAME }}
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}  
