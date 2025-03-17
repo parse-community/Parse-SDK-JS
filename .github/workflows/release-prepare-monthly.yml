@@ -32,7 +32,7 @@ jobs:
       - name: Make an empty commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: empty commit for release"
+          commit_message: "chore: empty commit to run CI"
           branch: build/release-${{ env.TIMESTAMP }}
           commit_options: "--allow-empty"
       - name: Create Pull Request
