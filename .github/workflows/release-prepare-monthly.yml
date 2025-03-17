@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: true
-          # token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
       - name: Get current branch name
         id: branch
         run: echo "BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
@@ -37,7 +37,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
           branch: build/release-${{ env.TIMESTAMP }}
           base: release
           title: "build: Release"
