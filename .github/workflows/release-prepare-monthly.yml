@@ -8,6 +8,12 @@ jobs:
   create-release-pr:
     runs-on: ubuntu-latest
     steps:
+      - name: Check if running on the original repository
+        run: |
+          if [ "$GITHUB_REPOSITORY_OWNER" != "parse-community" ]; then
+            echo "This is a forked repository. Exiting."
+            exit 1
+          fi
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
