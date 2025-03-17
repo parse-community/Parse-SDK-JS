@@ -35,6 +35,10 @@ jobs:
           commit_message: "chore: empty commit to run CI"
           branch: build/release-${{ env.TIMESTAMP }}
           commit_options: "--allow-empty"
+      - name: Debug - show differences between `build/release` and `release`
+        run: |
+          git fetch origin release
+          git log --oneline origin/release..build/release-${{ env.TIMESTAMP }}
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
