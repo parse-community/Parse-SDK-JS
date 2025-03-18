@@ -2709,6 +2709,40 @@ describe('ParseQuery', () => {
     });
   });
 
+  it('can issue a search query', async () => {
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        expect(params).toEqual({
+          $search: {
+            index: 'searchIndex',
+            text: {
+              path: ['name'],
+              query: 'searchTerm',
+            },
+          },
+        });
+        expect(options.useMasterKey).toEqual(true);
+        return Promise.resolve({
+          results: [],
+        });
+      },
+    });
+    const q = new ParseQuery('Item');
+    await q.search('searchTerm', ['name'], { index: 'searchIndex' });
+  });
+
+  it('search term is required', async () => {
+    const q = new ParseQuery('Item');
+    await expect(q.search()).rejects.toThrow('A search term is required.');
+  });
+
+  it('search term must be a string', async () => {
+    const q = new ParseQuery('Item');
+    await expect(q.search(123)).rejects.toThrow('The value being searched for must be a string.');
+  });
+
   it('aggregate query array pipeline with equalTo', done => {
     const pipeline = [{ group: { objectId: '$name' } }];
     MockRESTController.request.mockImplementationOnce(() => {
