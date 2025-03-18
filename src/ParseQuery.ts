@@ -1602,7 +1602,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
 
     const controller = CoreManager.getQueryController();
     const params = {
-      search: {
+      $search: {
         index: options.index || 'default',
         text: {
           path,
@@ -1615,7 +1615,11 @@ class ParseQuery<T extends ParseObject = ParseObject> {
       useMasterKey: true,
     };
     const results = await controller.aggregate(this.className, params, searchOptions);
-    return results.results!;
+    return (
+      results.results?.map(result =>
+        ParseObject.fromJSON({ className: this.className, ...result })
+      ) || []
+    );
   }
 
   /**
