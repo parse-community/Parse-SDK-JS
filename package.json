@@ -65,7 +65,7 @@
     "cross-env": "7.0.2",
     "eslint": "9.22.0",
     "eslint-plugin-expect-type": "0.6.2",
-    "eslint-plugin-jsdoc": "50.6.7",
+    "eslint-plugin-jsdoc": "50.6.8",
     "express": "4.21.2",
     "gulp": "5.0.0",
     "gulp-babel": "8.0.0",
