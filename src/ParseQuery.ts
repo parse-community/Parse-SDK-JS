@@ -37,6 +37,10 @@ type FullTextQueryOptions = {
   diacriticSensitive?: boolean;
 };
 
+type SearchOptions = {
+  index?: string;
+};
+
 export type QueryJSON = {
   where: WhereClause;
   watch?: string;
@@ -1585,6 +1589,33 @@ class ParseQuery<T extends ParseObject = ParseObject> {
     }
 
     return this._addCondition(key, '$text', { $search: fullOptions });
+  }
+
+  async search(value: string, path: string[], options: SearchOptions = {}): Promise<Array<any>> {
+    if (!value) {
+      throw new Error('A search term is required');
+    }
+
+    if (typeof value !== 'string') {
+      throw new Error('The value being searched for must be a string.');
+    }
+
+    const controller = CoreManager.getQueryController();
+    const params = {
+      search: {
+        index: options.index || 'default',
+        text: {
+          path,
+          query: value,
+        },
+      },
+    };
+
+    const searchOptions: { sessionToken?: string; useMasterKey: boolean } = {
+      useMasterKey: true,
+    };
+    const results = await controller.aggregate(this.className, params, searchOptions);
+    return results.results!;
   }
 
   /**
