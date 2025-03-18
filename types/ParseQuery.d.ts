@@ -29,6 +29,9 @@ type FullTextQueryOptions = {
     caseSensitive?: boolean;
     diacriticSensitive?: boolean;
 };
+type SearchOptions = {
+    index?: string;
+};
 export type QueryJSON = {
     where: WhereClause;
     watch?: string;
@@ -642,6 +645,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
     fullText<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: string, options?: FullTextQueryOptions): this;
+    search(value: string, path: string[], options?: SearchOptions): Promise<Array<any>>;
     /**
      * Method to sort the full text search by text score
      *
