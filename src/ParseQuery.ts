@@ -1591,6 +1591,17 @@ class ParseQuery<T extends ParseObject = ParseObject> {
     return this._addCondition(key, '$text', { $search: fullOptions });
   }
 
+  /*
+   * Triggers a MongoDb Atlas Text Search
+   *
+   * @param {string} value The string to search
+   * @param {string[]} path The fields to search
+   * @param {object} options (Optional)
+   * @param {string} options.index The index to search
+   * @returns {Promise} Returns a promise that will be resolved with the results
+   * of the search
+   * */
+
   async search(value: string, path: string[], options: SearchOptions = {}): Promise<Array<any>> {
     if (!value) {
       throw new Error('A search term is required');
