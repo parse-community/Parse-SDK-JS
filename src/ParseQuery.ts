@@ -1601,7 +1601,6 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @returns {Promise} Returns a promise that will be resolved with the results
    * of the search
    * */
-
   async search(value: string, path: string[], options: SearchOptions = {}): Promise<Array<any>> {
     if (!value) {
       throw new Error('A search term is required.');
