@@ -25,7 +25,7 @@ declare class ParsePolygon {
     /**
      * @param {(Coordinates | Parse.GeoPoint[])} coordinates An Array of coordinate pairs
      */
-    constructor(coordinates: Coordinates | Array<ParseGeoPoint>);
+    constructor(coordinates: Coordinates | ParseGeoPoint[]);
     /**
      * Coordinates value for this Polygon.
      * Throws an exception if not valid type.
@@ -34,7 +34,7 @@ declare class ParsePolygon {
      * @returns {Coordinates}
      */
     get coordinates(): Coordinates;
-    set coordinates(coords: Coordinates | Array<ParseGeoPoint>);
+    set coordinates(coords: Coordinates | ParseGeoPoint[]);
     /**
      * Returns a JSON representation of the Polygon, suitable for Parse.
      *
@@ -64,6 +64,6 @@ declare class ParsePolygon {
      * @throws {TypeError}
      * @returns {number[][]} Array of coordinates if validated.
      */
-    static _validate(coords: Coordinates | Array<ParseGeoPoint>): Coordinates;
+    static _validate(coords: Coordinates | ParseGeoPoint[]): Coordinates;
 }
 export default ParsePolygon;

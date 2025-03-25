@@ -1,1 +1,2 @@
-types/tests
+types/tests.ts
+types/eslint.config.mjs

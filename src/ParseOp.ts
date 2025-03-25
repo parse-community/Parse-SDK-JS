@@ -7,7 +7,7 @@ import type Pointer from './ParseObject';
 import ParseRelation from './ParseRelation';
 import unique from './unique';
 
-export function opFromJSON(json: { [key: string]: any }): Op | null {
+export function opFromJSON(json: Record<string, any>): Op | null {
   if (!json || !json.__op) {
     return null;
   }
@@ -55,7 +55,7 @@ export function opFromJSON(json: { [key: string]: any }): Op | null {
 export class Op {
   // Empty parent class
   applyTo(value: any): any {} /* eslint-disable-line @typescript-eslint/no-unused-vars */
-  mergeWith(previous: Op): Op | void {} /* eslint-disable-line @typescript-eslint/no-unused-vars */
+  mergeWith(previous: Op): Op | void {} /* eslint-disable-line */
   toJSON(offline?: boolean): any {} /* eslint-disable-line @typescript-eslint/no-unused-vars */
 }
 
@@ -137,14 +137,14 @@ export class IncrementOp extends Op {
 }
 
 export class AddOp extends Op {
-  _value: Array<any>;
+  _value: any[];
 
-  constructor(value: any | Array<any>) {
+  constructor(value: any | any[]) {
     super();
     this._value = Array.isArray(value) ? value : [value];
   }
 
-  applyTo(value: any): Array<any> {
+  applyTo(value: any): any[] {
     if (value == null) {
       return this._value;
     }
@@ -176,14 +176,14 @@ export class AddOp extends Op {
 }
 
 export class AddUniqueOp extends Op {
-  _value: Array<any>;
+  _value: any[];
 
-  constructor(value: any | Array<any>) {
+  constructor(value: any | any[]) {
     super();
     this._value = unique(Array.isArray(value) ? value : [value]);
   }
 
-  applyTo(value: any | Array<any>): Array<any> {
+  applyTo(value: any | any[]): any[] {
     if (value == null) {
       return this._value || [];
     }
@@ -228,14 +228,14 @@ export class AddUniqueOp extends Op {
 }
 
 export class RemoveOp extends Op {
-  _value: Array<any>;
+  _value: any[];
 
-  constructor(value: any | Array<any>) {
+  constructor(value: any | any[]) {
     super();
     this._value = unique(Array.isArray(value) ? value : [value]);
   }
 
-  applyTo(value: any | Array<any>): Array<any> {
+  applyTo(value: any | any[]): any[] {
     if (value == null) {
       return [];
     }
@@ -299,10 +299,10 @@ export class RemoveOp extends Op {
 
 export class RelationOp extends Op {
   _targetClassName: string | null;
-  relationsToAdd: Array<string>;
-  relationsToRemove: Array<string>;
+  relationsToAdd: string[];
+  relationsToRemove: string[];
 
-  constructor(adds: Array<ParseObject | string>, removes: Array<ParseObject | string>) {
+  constructor(adds: (ParseObject | string)[], removes: (ParseObject | string)[]) {
     super();
     this._targetClassName = null;
 

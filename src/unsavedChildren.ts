@@ -3,10 +3,10 @@ import ParseFile from './ParseFile';
 import type ParseObject from './ParseObject';
 import ParseRelation from './ParseRelation';
 
-type EncounterMap = {
-  objects: { [identifier: string]: ParseObject | boolean };
-  files: Array<ParseFile>;
-};
+interface EncounterMap {
+  objects: Record<string, ParseObject | boolean>;
+  files: ParseFile[];
+}
 
 /**
  * Return an array of unsaved children, which are either Parse Objects or Files.
@@ -19,7 +19,7 @@ type EncounterMap = {
 export default function unsavedChildren(
   obj: ParseObject,
   allowDeepUnsaved?: boolean
-): Array<ParseFile | ParseObject> {
+): (ParseFile | ParseObject)[] {
   const encountered = {
     objects: {},
     files: [],

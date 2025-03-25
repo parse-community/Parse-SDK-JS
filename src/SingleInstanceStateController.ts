@@ -4,11 +4,7 @@ import type { Op } from './ParseOp';
 import type ParseObject from './ParseObject';
 import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
 
-let objectState: {
-  [className: string]: {
-    [id: string]: State;
-  };
-} = {};
+let objectState: Record<string, Record<string, State>> = {};
 
 export function getState(obj: ParseObject): State | null {
   const classData = objectState[obj.className];
@@ -55,7 +51,7 @@ export function setServerData(obj: ParseObject, attributes: AttributeMap) {
   ObjectStateMutations.setServerData(serverData, attributes);
 }
 
-export function getPendingOps(obj: ParseObject): Array<OpsMap> {
+export function getPendingOps(obj: ParseObject): OpsMap[] {
   const state = getState(obj);
   if (state) {
     return state.pendingOps;

@@ -6,10 +6,6 @@ const { v4: uuidv4 } = require('uuid');
 const { twitterAuthData } = require('./helper');
 
 class CustomUser extends Parse.User {
-  constructor(attributes) {
-    super(attributes);
-  }
-
   doSomething() {
     return 5;
   }

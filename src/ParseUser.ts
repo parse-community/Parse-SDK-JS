@@ -7,8 +7,8 @@ import Storage from './Storage';
 import type { AttributeKey } from './ParseObject';
 import type { RequestOptions, FullOptions } from './RESTController';
 
-export type AuthData = { [key: string]: any };
-export type AuthProvider = {
+export type AuthData = Record<string, any>;
+export interface AuthProvider {
   authenticate?(options: {
     error?: (provider: AuthProvider, error: string | any) => void;
     success?: (provider: AuthProvider, result: AuthData) => void;
@@ -16,13 +16,13 @@ export type AuthProvider = {
   restoreAuthentication(authData: any): boolean;
   getAuthType(): string;
   deauthenticate?(): void;
-};
+}
 const CURRENT_USER_KEY = 'currentUser';
 let canUseCurrentUser = !CoreManager.get('IS_NODE');
 let currentUserCacheMatchesDisk = false;
 let currentUserCache: ParseUser | null = null;
 
-const authProviders: { [key: string]: AuthProvider } = {};
+const authProviders: Record<string, AuthProvider> = {};
 
 /**
  * <p>A Parse.User object is a local representation of a user persisted to the
@@ -478,7 +478,7 @@ class ParseUser<T extends Attributes = Attributes> extends ParseObject<T> {
    * @param {...any} args
    * @returns {Promise}
    */
-  async save(...args: Array<any>): Promise<this> {
+  async save(...args: any[]): Promise<this> {
     await super.save.apply(this, args);
     const current = await this.isCurrentAsync();
     if (current) {
@@ -494,11 +494,11 @@ class ParseUser<T extends Attributes = Attributes> extends ParseObject<T> {
    * @param {...any} args
    * @returns {Parse.User}
    */
-  async destroy(...args: Array<any>): Promise<ParseUser | void> {
+  async destroy(...args: any[]): Promise<this> {
     await super.destroy.apply(this, args);
     const current = await this.isCurrentAsync();
     if (current) {
-      return CoreManager.getUserController().removeUserFromDisk();
+      return CoreManager.getUserController().removeUserFromDisk() as undefined;
     }
     return this;
   }
@@ -510,7 +510,7 @@ class ParseUser<T extends Attributes = Attributes> extends ParseObject<T> {
    * @param {...any} args
    * @returns {Parse.User}
    */
-  async fetch(...args: Array<any>): Promise<this> {
+  async fetch(...args: any[]): Promise<this> {
     await super.fetch.apply(this, args);
     const current = await this.isCurrentAsync();
     if (current) {
@@ -526,7 +526,7 @@ class ParseUser<T extends Attributes = Attributes> extends ParseObject<T> {
    * @param {...any} args
    * @returns {Parse.User}
    */
-  async fetchWithInclude(...args: Array<any>): Promise<this> {
+  async fetchWithInclude(...args: any[]): Promise<this> {
     await super.fetchWithInclude.apply(this, args);
     const current = await this.isCurrentAsync();
     if (current) {
@@ -562,7 +562,7 @@ class ParseUser<T extends Attributes = Attributes> extends ParseObject<T> {
    * @static
    * @returns {Parse.User} The newly extended Parse.User class
    */
-  static extend(protoProps: { [prop: string]: any }, classProps: { [prop: string]: any }) {
+  static extend(protoProps: Record<string, any>, classProps: Record<string, any>) {
     if (protoProps) {
       for (const prop in protoProps) {
         if (prop !== 'className') {
@@ -1015,7 +1015,7 @@ const DefaultController = {
     });
   },
 
-  removeUserFromDisk() {
+  removeUserFromDisk(): Promise<void> {
     const path = Storage.generatePath(CURRENT_USER_KEY);
     currentUserCacheMatchesDisk = true;
     currentUserCache = null;

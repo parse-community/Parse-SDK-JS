@@ -53,7 +53,7 @@ export function setServerData(obj: ParseObject, attributes: AttributeMap) {
   ObjectStateMutations.setServerData(serverData, attributes);
 }
 
-export function getPendingOps(obj: ParseObject): Array<OpsMap> {
+export function getPendingOps(obj: ParseObject): OpsMap[] {
   const state = getState(obj);
   if (state) {
     return state.pendingOps;

@@ -2,14 +2,14 @@ import ParseQuery from './ParseQuery';
 import type ParseObject from './ParseObject';
 import type { WhereClause } from './ParseQuery';
 import type { FullOptions } from './RESTController';
-export type PushData = {
+export interface PushData {
     where?: WhereClause | ParseQuery;
     push_time?: Date | string;
     expiration_time?: Date | string;
     expiration_interval?: number;
     data?: any;
     channels?: string[];
-};
+}
 /**
  * Contains functions to deal with Push in Parse.
  *

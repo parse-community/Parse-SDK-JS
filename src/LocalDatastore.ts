@@ -28,7 +28,7 @@ const LocalDatastore = {
   isEnabled: false,
   isSyncing: false,
 
-  fromPinWithName(name: string): Promise<Array<any>> {
+  fromPinWithName(name: string): Promise<any[]> {
     const controller = CoreManager.getLocalDatastoreController();
     return controller.fromPinWithName(name);
   },
@@ -61,7 +61,7 @@ const LocalDatastore = {
 
   // Pin the object and children recursively
   // Saves the object and children key to Pin Name
-  async _handlePinAllWithName(name: string, objects: Array<ParseObject>): Promise<void> {
+  async _handlePinAllWithName(name: string, objects: ParseObject[]): Promise<void> {
     const pinName = this.getPinName(name);
     const toPinPromises = [];
     const objectKeys = [];
@@ -86,7 +86,7 @@ const LocalDatastore = {
 
   // Removes object and children keys from pin name
   // Keeps the object and children pinned
-  async _handleUnPinAllWithName(name: string, objects: Array<ParseObject>) {
+  async _handleUnPinAllWithName(name: string, objects: ParseObject[]) {
     const localDatastore = await this._getAllContents();
     const pinName = this.getPinName(name);
     const promises = [];

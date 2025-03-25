@@ -2,7 +2,7 @@ import { isLocalDatastoreKey } from './LocalDatastoreUtils';
 import RNStorage from './StorageController.react-native';
 
 const LocalDatastoreController = {
-  async fromPinWithName(name: string): Promise<Array<any>> {
+  async fromPinWithName(name: string): Promise<any[]> {
     const values = await RNStorage.getItemAsync(name);
     if (!values) {
       return [];

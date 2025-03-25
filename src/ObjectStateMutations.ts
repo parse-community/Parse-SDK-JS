@@ -7,17 +7,17 @@ import { RelationOp } from './ParseOp';
 import type { Op } from './ParseOp';
 import type ParseObject from './ParseObject';
 
-export type AttributeMap = { [attr: string]: any };
-export type OpsMap = { [attr: string]: Op };
-export type ObjectCache = { [attr: string]: string };
+export type AttributeMap = Record<string, any>;
+export type OpsMap = Record<string, Op>;
+export type ObjectCache = Record<string, string>;
 
-export type State = {
+export interface State {
   serverData: AttributeMap;
-  pendingOps: Array<OpsMap>;
+  pendingOps: OpsMap[];
   objectCache: ObjectCache;
   tasks: TaskQueue;
   existed: boolean;
-};
+}
 
 export function defaultState(): State {
   return {
@@ -39,7 +39,7 @@ export function setServerData(serverData: AttributeMap, attributes: AttributeMap
   }
 }
 
-export function setPendingOp(pendingOps: Array<OpsMap>, attr: string, op?: Op) {
+export function setPendingOp(pendingOps: OpsMap[], attr: string, op?: Op) {
   const last = pendingOps.length - 1;
   if (op) {
     pendingOps[last][attr] = op;
@@ -48,11 +48,11 @@ export function setPendingOp(pendingOps: Array<OpsMap>, attr: string, op?: Op) {
   }
 }
 
-export function pushPendingState(pendingOps: Array<OpsMap>) {
+export function pushPendingState(pendingOps: OpsMap[]) {
   pendingOps.push({});
 }
 
-export function popPendingState(pendingOps: Array<OpsMap>): OpsMap {
+export function popPendingState(pendingOps: OpsMap[]): OpsMap {
   const first = pendingOps.shift();
   if (!pendingOps.length) {
     pendingOps[0] = {};
@@ -60,7 +60,7 @@ export function popPendingState(pendingOps: Array<OpsMap>): OpsMap {
   return first;
 }
 
-export function mergeFirstPendingState(pendingOps: Array<OpsMap>) {
+export function mergeFirstPendingState(pendingOps: OpsMap[]) {
   const first = popPendingState(pendingOps);
   const next = pendingOps[0];
   for (const attr in first) {
@@ -77,7 +77,7 @@ export function mergeFirstPendingState(pendingOps: Array<OpsMap>) {
 
 export function estimateAttribute(
   serverData: AttributeMap,
-  pendingOps: Array<OpsMap>,
+  pendingOps: OpsMap[],
   object: ParseObject,
   attr: string
 ): any {
@@ -98,7 +98,7 @@ export function estimateAttribute(
 
 export function estimateAttributes(
   serverData: AttributeMap,
-  pendingOps: Array<OpsMap>,
+  pendingOps: OpsMap[],
   object: ParseObject
 ): AttributeMap {
   const data = {};
