@@ -23,7 +23,7 @@ interface FullTextQueryOptions {
     caseSensitive?: boolean;
     diacriticSensitive?: boolean;
 }
-interface SearchOptions{
+interface SearchOptions {
     index?: string;
 }
 export interface QueryJSON {
@@ -637,7 +637,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
     fullText<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: string, options?: FullTextQueryOptions): this;
-    search(value: string, path: string[], options?: SearchOptions): Promise<Array<any>>;
+    search(value: string, path: string[], options?: SearchOptions): Promise<any[]>;
     /**
      * Method to sort the full text search by text score
      *
