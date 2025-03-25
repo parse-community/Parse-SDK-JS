@@ -3,14 +3,14 @@ import ParseError from './ParseError';
 import ParseObject, { Attributes } from './ParseObject';
 import type { AttributeKey } from './ParseObject';
 
-type DeviceInterface = {
+interface DeviceInterface {
   IOS: string;
   MACOS: string;
   TVOS: string;
   FCM: string;
   ANDROID: string;
   WEB: string;
-};
+}
 
 const DEVICE_TYPES: DeviceInterface = {
   IOS: 'ios',
@@ -219,7 +219,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @param {...any} args
    * @returns {Promise}
    */
-  async fetch(...args: Array<any>): Promise<this> {
+  async fetch(...args: any[]): Promise<this> {
     try {
       await super.fetch.apply(this, args);
     } catch (e) {
@@ -244,7 +244,7 @@ class ParseInstallation<T extends Attributes = Attributes> extends ParseObject<T
    * @param {...any} args
    * @returns {Promise}
    */
-  async save(...args: Array<any>): Promise<this> {
+  async save(...args: any[]): Promise<this> {
     try {
       await super.save.apply(this, args);
     } catch (e) {

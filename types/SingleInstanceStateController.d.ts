@@ -6,7 +6,7 @@ export declare function initializeState(obj: ParseObject, initial?: State): Stat
 export declare function removeState(obj: ParseObject): State | null;
 export declare function getServerData(obj: ParseObject): AttributeMap;
 export declare function setServerData(obj: ParseObject, attributes: AttributeMap): void;
-export declare function getPendingOps(obj: ParseObject): Array<OpsMap>;
+export declare function getPendingOps(obj: ParseObject): OpsMap[];
 export declare function setPendingOp(obj: ParseObject, attr: string, op?: Op): void;
 export declare function pushPendingState(obj: ParseObject): void;
 export declare function popPendingState(obj: ParseObject): OpsMap;

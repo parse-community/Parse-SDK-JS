@@ -1,15 +1,11 @@
 import ParseRole from './ParseRole';
 import ParseUser from './ParseUser';
 type Entity = ParseUser | ParseRole | string;
-type UsersMap = {
-    [userId: string]: boolean | any;
-};
+type UsersMap = Record<string, boolean | any>;
 export type PermissionsMap = {
     writeUserFields?: string[];
     readUserFields?: string[];
-} & {
-    [permission: string]: UsersMap;
-};
+} & Record<string, UsersMap>;
 /**
  * Creates a new CLP.
  * If no argument is given, the CLP has no permissions for anyone.

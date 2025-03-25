@@ -1,7 +1,7 @@
 import CoreManager from './CoreManager';
 import type ParseObject from './ParseObject';
 
-export default function arrayContainsObject(array: Array<any>, object: ParseObject): boolean {
+export default function arrayContainsObject(array: any[], object: ParseObject): boolean {
   if (array.indexOf(object) > -1) {
     return true;
   }

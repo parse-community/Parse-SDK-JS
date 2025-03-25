@@ -6,7 +6,8 @@ module.exports = tseslint.config({
   files: ['**/*.js', '**/*.ts'],
   extends: [
     eslint.configs.recommended,
-    ...tseslint.configs.recommended,
+    ...tseslint.configs.stylistic,
+    ...tseslint.configs.strict,
   ],
   plugins: {
     '@typescript-eslint': tseslint.plugin,
@@ -34,6 +35,9 @@ module.exports = tseslint.config({
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-require-imports": "off",
+    "@typescript-eslint/no-dynamic-delete": "off",
+    "@typescript-eslint/prefer-for-of": "off",
+    "@typescript-eslint/no-extraneous-class": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
       {

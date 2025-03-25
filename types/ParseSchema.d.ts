@@ -16,9 +16,7 @@ interface FieldOptions<T extends string | number | boolean | Bytes | Date | Pars
     defaultValue?: T | undefined;
     targetClass?: string | undefined;
 }
-interface Index {
-    [fieldName: string]: number | string;
-}
+type Index = Record<string, number | string>;
 interface CLPField {
     '*'?: boolean | undefined;
     requiresAuthentication?: boolean | undefined;
@@ -34,26 +32,18 @@ interface CLP {
     addField?: CLPField | undefined;
     readUserFields?: string[] | undefined;
     writeUserFields?: string[] | undefined;
-    protectedFields?: {
-        [userIdOrRoleName: string]: string[];
-    };
+    protectedFields?: Record<string, string[]>;
 }
 interface RestSchema {
     className: string;
-    fields: {
-        [key: string]: {
-            type: string;
-            targetClass?: string;
-            required?: boolean;
-            defaultValue?: string;
-        };
-    };
+    fields: Record<string, {
+        type: string;
+        targetClass?: string;
+        required?: boolean;
+        defaultValue?: string;
+    }>;
     classLevelPermissions: CLP;
-    indexes?: {
-        [key: string]: {
-            [key: string]: any;
-        };
-    };
+    indexes?: Record<string, Record<string, any>>;
 }
 /**
  * A Parse.Schema object is for handling schema data from Parse.
@@ -74,15 +64,9 @@ interface RestSchema {
  */
 declare class ParseSchema<T extends ParseObject = any> {
     className: string;
-    _fields: {
-        [key: string]: any;
-    };
-    _indexes: {
-        [key: string]: any;
-    };
-    _clp: {
-        [key: string]: any;
-    };
+    _fields: Record<string, any>;
+    _indexes: Record<string, any>;
+    _clp: Record<string, any>;
     /**
      * @param {string} className Parse Class string.
      */

@@ -2,10 +2,11 @@ import ParseRole from './ParseRole';
 import ParseUser from './ParseUser';
 
 type Entity = ParseUser | ParseRole | string;
-type UsersMap = { [userId: string]: boolean | any };
-export type PermissionsMap = { writeUserFields?: string[]; readUserFields?: string[] } & {
-  [permission: string]: UsersMap;
-};
+type UsersMap = Record<string, boolean | any>;
+export type PermissionsMap = { writeUserFields?: string[]; readUserFields?: string[] } & Record<
+  string,
+  UsersMap
+>;
 
 const PUBLIC_KEY = '*';
 

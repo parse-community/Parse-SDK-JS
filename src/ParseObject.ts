@@ -32,18 +32,18 @@ import type { RequestOptions, FullOptions } from './RESTController';
 import type ParseGeoPoint from './ParseGeoPoint';
 import type ParsePolygon from './ParsePolygon';
 
-export type Pointer = {
+export interface Pointer {
   __type: string;
   className: string;
   objectId?: string;
   _localId?: string;
-};
+}
 
-type SaveParams = {
+interface SaveParams {
   method: string;
   path: string;
   body: AttributeMap;
-};
+}
 
 export type SaveOptions = FullOptions & {
   cascadeSave?: boolean;
@@ -52,23 +52,21 @@ export type SaveOptions = FullOptions & {
   transaction?: boolean;
 };
 
-type FetchOptions = {
+interface FetchOptions {
   useMasterKey?: boolean;
   sessionToken?: string;
   include?: string | string[];
   context?: AttributeMap;
-};
+}
 
-export type SetOptions = {
+export interface SetOptions {
   ignoreValidation?: boolean;
   unset?: boolean;
-};
+}
 
 export type AttributeKey<T> = Extract<keyof T, string>;
 
-export interface Attributes {
-  [key: string]: any;
-}
+export type Attributes = Record<string, any>;
 
 interface JSONBaseAttributes {
   objectId: string;
@@ -92,8 +90,8 @@ type Encode<T> = T extends ParseObject
       ? { __type: 'Date'; iso: string }
       : T extends RegExp
         ? string
-        : T extends Array<infer R>
-          ? Array<Encode<R>>
+        : T extends (infer R)[]
+          ? Encode<R>[]
           : T extends object
             ? ToJSON<T>
             : T;
@@ -281,7 +279,7 @@ class ParseObject<T extends Attributes = Attributes> {
     stateController.setServerData(this._getStateIdentifier(), unset);
   }
 
-  _getPendingOps(): Array<OpsMap> {
+  _getPendingOps(): OpsMap[] {
     const stateController = CoreManager.getObjectStateController();
     return stateController.getPendingOps(this._getStateIdentifier());
   }
@@ -290,7 +288,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @param {Array<string>} [keysToClear] - if specified, only ops matching
    * these fields will be cleared
    */
-  _clearPendingOps(keysToClear?: Array<string>) {
+  _clearPendingOps(keysToClear?: string[]) {
     const pending = this._getPendingOps();
     const latest = pending[pending.length - 1];
     const keys = keysToClear || Object.keys(latest);
@@ -331,7 +329,7 @@ class ParseObject<T extends Attributes = Attributes> {
     return dirty;
   }
 
-  _toFullJSON(seen?: Array<any>, offline?: boolean): Attributes {
+  _toFullJSON(seen?: any[], offline?: boolean): Attributes {
     const json: Attributes = this.toJSON(seen, offline);
     json.__type = 'Object';
     json.className = this.className;
@@ -556,7 +554,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @param offline
    * @returns {object}
    */
-  toJSON(seen: Array<any> | void, offline?: boolean): ToJSON<T> & JSONBaseAttributes {
+  toJSON(seen?: any[], offline?: boolean): ToJSON<T> & JSONBaseAttributes {
     const seenEntry = this.id ? this.className + ':' + this.id : this;
     seen = seen || [seenEntry];
     const json: any = {};
@@ -1190,7 +1188,7 @@ class ParseObject<T extends Attributes = Attributes> {
    *
    * @param {string} [keys] - specify which fields to revert
    */
-  revert(...keys: Array<Extract<keyof (T & CommonAttributes), string>>): void {
+  revert(...keys: Extract<keyof (T & CommonAttributes), string>[]): void {
     let keysToRevert;
     if (keys.length) {
       keysToRevert = [];
@@ -1266,10 +1264,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetchWithInclude(
-    keys: string | Array<string | Array<string>>,
-    options?: RequestOptions
-  ): Promise<this> {
+  fetchWithInclude(keys: string | (string | string[])[], options?: RequestOptions): Promise<this> {
     options = options || {};
     options.include = keys;
     return this.fetch(options);
@@ -1476,9 +1471,9 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the destroy
    *     completes.
    */
-  destroy(options?: RequestOptions): Promise<void | ParseObject> {
+  destroy(options?: RequestOptions): Promise<ParseObject | undefined> {
     if (!this.id) {
-      return Promise.resolve();
+      return Promise.resolve(undefined);
     }
     const destroyOptions = ParseObject._getRequestOptions(options);
     return CoreManager.getObjectController().destroy(this, destroyOptions) as Promise<ParseObject>;
@@ -1668,7 +1663,7 @@ class ParseObject<T extends Attributes = Attributes> {
    */
   static fetchAllWithInclude<T extends ParseObject>(
     list: T[],
-    keys: keyof T['attributes'] | Array<keyof T['attributes']>,
+    keys: keyof T['attributes'] | (keyof T['attributes'])[],
     options?: RequestOptions
   ): Promise<T[]> {
     options = options || {};
@@ -1708,7 +1703,7 @@ class ParseObject<T extends Attributes = Attributes> {
    */
   static fetchAllIfNeededWithInclude<T extends ParseObject>(
     list: T[],
-    keys: keyof T['attributes'] | Array<keyof T['attributes']>,
+    keys: keyof T['attributes'] | (keyof T['attributes'])[],
     options?: RequestOptions
   ): Promise<T[]> {
     options = options || {};
@@ -1819,7 +1814,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the destroyAll
    * completes.
    */
-  static destroyAll(list: Array<ParseObject>, options?: SaveOptions) {
+  static destroyAll(list: ParseObject[], options?: SaveOptions) {
     const destroyOptions = ParseObject._getRequestOptions(options);
     return CoreManager.getObjectController().destroy(list, destroyOptions);
   }
@@ -2145,7 +2140,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the pin completes.
    * @static
    */
-  static pinAll(objects: Array<ParseObject>): Promise<void> {
+  static pinAll(objects: ParseObject[]): Promise<void> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
@@ -2171,7 +2166,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the pin completes.
    * @static
    */
-  static pinAllWithName(name: string, objects: Array<ParseObject>): Promise<void> {
+  static pinAllWithName(name: string, objects: ParseObject[]): Promise<void> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
@@ -2191,7 +2186,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the unPin completes.
    * @static
    */
-  static unPinAll(objects: Array<ParseObject>): Promise<void> {
+  static unPinAll(objects: ParseObject[]): Promise<void> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
@@ -2211,7 +2206,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the unPin completes.
    * @static
    */
-  static unPinAllWithName(name: string, objects: Array<ParseObject>): Promise<void> {
+  static unPinAllWithName(name: string, objects: ParseObject[]): Promise<void> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (!localDatastore.isEnabled) {
       return Promise.reject('Parse.enableLocalDatastore() must be called first');
@@ -2260,10 +2255,10 @@ class ParseObject<T extends Attributes = Attributes> {
 
 const DefaultController = {
   fetch(
-    target: ParseObject | Array<ParseObject>,
+    target: ParseObject | ParseObject[],
     forceFetch: boolean,
     options?: RequestOptions
-  ): Promise<Array<ParseObject | undefined> | ParseObject | undefined> {
+  ): Promise<(ParseObject | undefined)[] | ParseObject | undefined> {
     const localDatastore = CoreManager.getLocalDatastore();
     if (Array.isArray(target)) {
       if (target.length < 1) {
@@ -2365,9 +2360,9 @@ const DefaultController = {
   },
 
   async destroy(
-    target: ParseObject | Array<ParseObject>,
+    target: ParseObject | ParseObject[],
     options?: RequestOptions
-  ): Promise<ParseObject | Array<ParseObject>> {
+  ): Promise<ParseObject | ParseObject[]> {
     if (options && options.batchSize && options.transaction)
       throw new ParseError(
         ParseError.OTHER_CAUSE,
@@ -2452,9 +2447,9 @@ const DefaultController = {
   },
 
   save(
-    target: ParseObject | null | Array<ParseObject | ParseFile>,
+    target: ParseObject | null | (ParseObject | ParseFile)[],
     options?: RequestOptions
-  ): Promise<ParseObject | Array<ParseObject> | ParseFile | undefined> {
+  ): Promise<ParseObject | ParseObject[] | ParseFile | undefined> {
     if (options && options.batchSize && options.transaction)
       return Promise.reject(
         new ParseError(
@@ -2489,8 +2484,8 @@ const DefaultController = {
       }
       unsaved = unique(unsaved);
 
-      const filesSaved: Array<Promise<ParseFile> | undefined> = [];
-      let pending: Array<ParseObject> = [];
+      const filesSaved: (Promise<ParseFile> | undefined)[] = [];
+      let pending: ParseObject[] = [];
       unsaved.forEach(el => {
         if (el instanceof ParseFile) {
           filesSaved.push(el.save(options));
@@ -2546,6 +2541,7 @@ const DefaultController = {
             const batchReady: ReturnType<typeof resolvingPromise<void>>[] = [];
             const batchTasks: Promise<void>[] = [];
             batch.forEach((obj, index) => {
+              // eslint-disable-next-line
               const ready = resolvingPromise<void>();
               batchReady.push(ready);
               const task = function () {

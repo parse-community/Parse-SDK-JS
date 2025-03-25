@@ -108,7 +108,7 @@
     "posttest:mongodb": "mongodb-runner stop --all",
     "lint": "eslint --cache src/ integration/",
     "lint:fix": "eslint --fix --cache src/ integration/",
-    "test:types": "eslint types/tests.ts -c eslint.config.test.mjs",
+    "test:types": "eslint types/tests.ts -c ./types/eslint.config.mjs",
     "watch": "cross-env PARSE_BUILD=${PARSE_BUILD} gulp watch",
     "watch:browser": "cross-env PARSE_BUILD=browser npm run watch",
     "watch:node": "cross-env PARSE_BUILD=node npm run watch",

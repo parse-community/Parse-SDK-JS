@@ -8,28 +8,22 @@ type BatchOptions = FullOptions & {
     useMasterKey?: boolean;
     useMaintenanceKey?: boolean;
     sessionToken?: string;
-    context?: {
-        [key: string]: any;
-    };
+    context?: Record<string, any>;
     json?: boolean;
 };
-export type WhereClause = {
-    [attr: string]: any;
-};
-type QueryOptions = {
+export type WhereClause = Record<string, any>;
+interface QueryOptions {
     useMasterKey?: boolean;
     sessionToken?: string;
-    context?: {
-        [key: string]: any;
-    };
+    context?: Record<string, any>;
     json?: boolean;
-};
-type FullTextQueryOptions = {
+}
+interface FullTextQueryOptions {
     language?: string;
     caseSensitive?: boolean;
     diacriticSensitive?: boolean;
-};
-export type QueryJSON = {
+}
+export interface QueryJSON {
     where: WhereClause;
     watch?: string;
     include?: string;
@@ -46,7 +40,7 @@ export type QueryJSON = {
     includeReadPreference?: string;
     subqueryReadPreference?: string;
     comment?: string;
-};
+}
 interface BaseAttributes {
     createdAt: Date;
     objectId: string;
@@ -101,22 +95,20 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      */
     className: string;
     _where: any;
-    _watch: Array<string>;
-    _include: Array<string>;
-    _exclude: Array<string>;
-    _select: Array<string>;
+    _watch: string[];
+    _include: string[];
+    _exclude: string[];
+    _select: string[];
     _limit: number;
     _skip: number;
     _count: boolean;
-    _order: Array<string>;
+    _order: string[];
     _readPreference: string | null;
     _includeReadPreference: string | null;
     _subqueryReadPreference: string | null;
     _queriesLocalDatastore: boolean;
     _localDatastorePinName: any;
-    _extraOptions: {
-        [key: string]: any;
-    };
+    _extraOptions: Record<string, any>;
     _hint: any;
     _explain: boolean;
     _xhrRequest: any;
@@ -131,21 +123,21 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param {Array} queries
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    _orQuery(queries: Array<ParseQuery>): this;
+    _orQuery(queries: ParseQuery[]): this;
     /**
      * Adds constraint that all of the passed in queries match.
      *
      * @param {Array} queries
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    _andQuery(queries: Array<ParseQuery>): this;
+    _andQuery(queries: ParseQuery[]): this;
     /**
      * Adds constraint that none of the passed in queries match.
      *
      * @param {Array} queries
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    _norQuery(queries: Array<ParseQuery>): this;
+    _norQuery(queries: ParseQuery[]): this;
     /**
      * Helper for condition queries
      *
@@ -290,7 +282,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      */
     aggregate(pipeline: any, options?: {
         sessionToken?: string;
-    }): Promise<Array<any>>;
+    }): Promise<any[]>;
     /**
      * Retrieves at most one Parse.Object that satisfies this query.
      *
@@ -387,7 +379,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    map(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any, options?: BatchOptions): Promise<Array<any>>;
+    map(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any, options?: BatchOptions): Promise<any[]>;
     /**
      * Iterates over each result of a query, calling a callback for each one. If
      * the callback returns a promise, the iteration will not continue until
@@ -411,7 +403,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    reduce(callback: (accumulator: any, currentObject: ParseObject, index: number) => any, initialValue: any, options?: BatchOptions): Promise<Array<any>>;
+    reduce(callback: (accumulator: any, currentObject: ParseObject, index: number) => any, initialValue: any, options?: BatchOptions): Promise<any[]>;
     /**
      * Iterates over each result of a query, calling a callback for each one. If
      * the callback returns a promise, the iteration will not continue until
@@ -434,7 +426,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    filter(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean, options?: BatchOptions): Promise<Array<ParseObject>>;
+    filter(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean, options?: BatchOptions): Promise<ParseObject[]>;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be equal to the provided value.
@@ -443,7 +435,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param value The value that the Parse.Object must contain.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    equalTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (T['attributes'][K] extends ParseObject ? Pointer : T['attributes'][K] extends Array<infer E> ? E : never)): this;
+    equalTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (T['attributes'][K] extends ParseObject ? Pointer : T['attributes'][K] extends (infer E)[] ? E : never)): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be not equal to the provided value.
@@ -452,7 +444,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param value The value that must not be equalled.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    notEqualTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (T['attributes'][K] extends ParseObject ? Pointer : T['attributes'][K] extends Array<infer E> ? E : never)): this;
+    notEqualTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (T['attributes'][K] extends ParseObject ? Pointer : T['attributes'][K] extends (infer E)[] ? E : never)): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be less than the provided value.
@@ -497,7 +489,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param {Array<*>} values The values that will match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    containedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: Array<T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never)>): this;
+    containedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: (T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never))[]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * not be contained in the provided list of values.
@@ -506,7 +498,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param {Array<*>} values The values that will not match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    notContainedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: Array<T['attributes'][K]>): this;
+    notContainedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: T['attributes'][K][]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be contained by the provided list of values. Get objects where all array elements match.
@@ -515,7 +507,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param {Array} values The values that will match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    containedBy<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: Array<T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never)>): this;
+    containedBy<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: (T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never))[]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * contain each one of the provided list of values.
@@ -760,7 +752,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    ascending(...keys: Array<string>): this;
+    ascending(...keys: string[]): this;
     /**
      * Sorts the results in ascending order by the given key,
      * but can also add secondary sort descriptors without overwriting _order.
@@ -769,7 +761,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    addAscending(...keys: Array<string>): this;
+    addAscending(...keys: string[]): this;
     /**
      * Sorts the results in descending order by the given key.
      *
@@ -777,7 +769,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    descending(...keys: Array<string>): this;
+    descending(...keys: string[]): this;
     /**
      * Sorts the results in descending order by the given key,
      * but can also add secondary sort descriptors without overwriting _order.
@@ -786,7 +778,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    addDescending(...keys: Array<string>): this;
+    addDescending(...keys: string[]): this;
     /**
      * Sets the number of results to skip before returning any results.
      * This is useful for pagination.
@@ -824,7 +816,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    include<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: Array<K | Array<K>>): this;
+    include<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
     /**
      * Includes all nested Parse.Objects one level deep.
      *
@@ -841,7 +833,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    select<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: Array<K | Array<K>>): this;
+    select<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
     /**
      * Restricts the fields of the returned Parse.Objects to all keys except the
      * provided keys. Exclude takes precedence over select and include.
@@ -851,7 +843,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param {...string|Array<string>} keys The name(s) of the key(s) to exclude.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    exclude<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: Array<K | Array<K>>): this;
+    exclude<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
     /**
      * Restricts live query to trigger only for watched fields.
      *
@@ -860,7 +852,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param {...string|Array<string>} keys The name(s) of the key(s) to watch.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    watch<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: Array<K | Array<K>>): this;
+    watch<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
     /**
      * Changes the read preference that the backend will use when performing the query to the database.
      *
@@ -890,7 +882,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @static
      * @returns {Parse.Query} The query that is the OR of the passed in queries.
      */
-    static or(...queries: Array<ParseQuery>): ParseQuery;
+    static or(...queries: ParseQuery[]): ParseQuery;
     /**
      * Constructs a Parse.Query that is the AND of the passed in queries.  For
      * example:
@@ -903,7 +895,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @static
      * @returns {Parse.Query} The query that is the AND of the passed in queries.
      */
-    static and(...queries: Array<ParseQuery>): ParseQuery;
+    static and(...queries: ParseQuery[]): ParseQuery;
     /**
      * Constructs a Parse.Query that is the NOR of the passed in queries.  For
      * example:
@@ -916,7 +908,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @static
      * @returns {Parse.Query} The query that is the NOR of the passed in queries.
      */
-    static nor(...queries: Array<ParseQuery>): ParseQuery;
+    static nor(...queries: ParseQuery[]): ParseQuery;
     /**
      * Change the source of this query to the server.
      *

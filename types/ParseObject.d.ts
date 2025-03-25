@@ -7,37 +7,35 @@ import type { AttributeMap, OpsMap } from './ObjectStateMutations';
 import type { RequestOptions, FullOptions } from './RESTController';
 import type ParseGeoPoint from './ParseGeoPoint';
 import type ParsePolygon from './ParsePolygon';
-export type Pointer = {
+export interface Pointer {
     __type: string;
     className: string;
     objectId?: string;
     _localId?: string;
-};
-type SaveParams = {
+}
+interface SaveParams {
     method: string;
     path: string;
     body: AttributeMap;
-};
+}
 export type SaveOptions = FullOptions & {
     cascadeSave?: boolean;
     context?: AttributeMap;
     batchSize?: number;
     transaction?: boolean;
 };
-type FetchOptions = {
+interface FetchOptions {
     useMasterKey?: boolean;
     sessionToken?: string;
     include?: string | string[];
     context?: AttributeMap;
-};
-export type SetOptions = {
+}
+export interface SetOptions {
     ignoreValidation?: boolean;
     unset?: boolean;
-};
-export type AttributeKey<T> = Extract<keyof T, string>;
-export interface Attributes {
-    [key: string]: any;
 }
+export type AttributeKey<T> = Extract<keyof T, string>;
+export type Attributes = Record<string, any>;
 interface JSONBaseAttributes {
     objectId: string;
     createdAt: string;
@@ -52,7 +50,7 @@ type AtomicKey<T> = {
 type Encode<T> = T extends ParseObject ? ReturnType<T['toJSON']> | Pointer : T extends ParseACL | ParseGeoPoint | ParsePolygon | ParseRelation | ParseFile ? ReturnType<T['toJSON']> : T extends Date ? {
     __type: 'Date';
     iso: string;
-} : T extends RegExp ? string : T extends Array<infer R> ? Array<Encode<R>> : T extends object ? ToJSON<T> : T;
+} : T extends RegExp ? string : T extends (infer R)[] ? Encode<R>[] : T extends object ? ToJSON<T> : T;
 type ToJSON<T> = {
     [K in keyof T]: Encode<T[K]>;
 };
@@ -126,14 +124,14 @@ declare class ParseObject<T extends Attributes = Attributes> {
     };
     _getServerData(): Attributes;
     _clearServerData(): void;
-    _getPendingOps(): Array<OpsMap>;
+    _getPendingOps(): OpsMap[];
     /**
      * @param {Array<string>} [keysToClear] - if specified, only ops matching
      * these fields will be cleared
      */
-    _clearPendingOps(keysToClear?: Array<string>): void;
+    _clearPendingOps(keysToClear?: string[]): void;
     _getDirtyObjectAttributes(): Attributes;
-    _toFullJSON(seen?: Array<any>, offline?: boolean): Attributes;
+    _toFullJSON(seen?: any[], offline?: boolean): Attributes;
     _getSaveJSON(): Attributes;
     _getSaveParams(): SaveParams;
     _finishFetch(serverData: Attributes): void;
@@ -155,7 +153,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @param offline
      * @returns {object}
      */
-    toJSON(seen: Array<any> | void, offline?: boolean): ToJSON<T> & JSONBaseAttributes;
+    toJSON(seen?: any[], offline?: boolean): ToJSON<T> & JSONBaseAttributes;
     /**
      * Determines whether this ParseObject is equal to another ParseObject
      *
@@ -426,7 +424,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      *
      * @param {string} [keys] - specify which fields to revert
      */
-    revert(...keys: Array<Extract<keyof (T & CommonAttributes), string>>): void;
+    revert(...keys: Extract<keyof (T & CommonAttributes), string>[]): void;
     /**
      * Clears all attributes on a model
      *
@@ -469,7 +467,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @returns {Promise} A promise that is fulfilled when the fetch
      *     completes.
      */
-    fetchWithInclude(keys: string | Array<string | Array<string>>, options?: RequestOptions): Promise<this>;
+    fetchWithInclude(keys: string | (string | string[])[], options?: RequestOptions): Promise<this>;
     /**
      * Saves this object to the server at some unspecified time in the future,
      * even if Parse is currently inaccessible.
@@ -596,7 +594,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @returns {Promise} A promise that is fulfilled when the destroy
      *     completes.
      */
-    destroy(options?: RequestOptions): Promise<void | ParseObject>;
+    destroy(options?: RequestOptions): Promise<ParseObject | undefined>;
     /**
      * Asynchronously stores the object and every object it points to in the local datastore,
      * recursively, using a default pin name: _default.
@@ -733,7 +731,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @static
      * @returns {Parse.Object[]}
      */
-    static fetchAllWithInclude<T extends ParseObject>(list: T[], keys: keyof T['attributes'] | Array<keyof T['attributes']>, options?: RequestOptions): Promise<T[]>;
+    static fetchAllWithInclude<T extends ParseObject>(list: T[], keys: keyof T['attributes'] | (keyof T['attributes'])[], options?: RequestOptions): Promise<T[]>;
     /**
      * Fetches the given list of Parse.Object if needed.
      * If any error is encountered, stops and calls the error handler.
@@ -764,7 +762,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @static
      * @returns {Parse.Object[]}
      */
-    static fetchAllIfNeededWithInclude<T extends ParseObject>(list: T[], keys: keyof T['attributes'] | Array<keyof T['attributes']>, options?: RequestOptions): Promise<T[]>;
+    static fetchAllIfNeededWithInclude<T extends ParseObject>(list: T[], keys: keyof T['attributes'] | (keyof T['attributes'])[], options?: RequestOptions): Promise<T[]>;
     /**
      * Fetches the given list of Parse.Object if needed.
      * If any error is encountered, stops and calls the error handler.
@@ -851,7 +849,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @returns {Promise} A promise that is fulfilled when the destroyAll
      * completes.
      */
-    static destroyAll(list: Array<ParseObject>, options?: SaveOptions): Promise<ParseObject<Attributes> | ParseObject<Attributes>[]>;
+    static destroyAll(list: ParseObject[], options?: SaveOptions): Promise<ParseObject<Attributes> | ParseObject<Attributes>[]>;
     /**
      * Saves the given list of Parse.Object.
      * If any error is encountered, stops and calls the error handler.
@@ -998,7 +996,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @returns {Promise} A promise that is fulfilled when the pin completes.
      * @static
      */
-    static pinAll(objects: Array<ParseObject>): Promise<void>;
+    static pinAll(objects: ParseObject[]): Promise<void>;
     /**
      * Asynchronously stores the objects and every object they point to in the local datastore, recursively.
      *
@@ -1017,7 +1015,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @returns {Promise} A promise that is fulfilled when the pin completes.
      * @static
      */
-    static pinAllWithName(name: string, objects: Array<ParseObject>): Promise<void>;
+    static pinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
     /**
      * Asynchronously removes the objects and every object they point to in the local datastore,
      * recursively, using a default pin name: _default.
@@ -1030,7 +1028,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @returns {Promise} A promise that is fulfilled when the unPin completes.
      * @static
      */
-    static unPinAll(objects: Array<ParseObject>): Promise<void>;
+    static unPinAll(objects: ParseObject[]): Promise<void>;
     /**
      * Asynchronously removes the objects and every object they point to in the local datastore, recursively.
      *
@@ -1043,7 +1041,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @returns {Promise} A promise that is fulfilled when the unPin completes.
      * @static
      */
-    static unPinAllWithName(name: string, objects: Array<ParseObject>): Promise<void>;
+    static unPinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
     /**
      * Asynchronously removes all objects in the local datastore using a default pin name: _default.
      *

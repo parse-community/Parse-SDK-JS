@@ -5,7 +5,7 @@ import ParseError from './ParseError';
 import { resolvingPromise } from './promiseUtils';
 import XhrWeapp from './Xhr.weapp';
 
-export type RequestOptions = {
+export interface RequestOptions {
   useMasterKey?: boolean;
   useMaintenanceKey?: boolean;
   sessionToken?: string;
@@ -18,9 +18,9 @@ export type RequestOptions = {
   usePost?: boolean;
   ignoreEmailVerification?: boolean;
   transaction?: boolean;
-};
+}
 
-export type FullOptions = {
+export interface FullOptions {
   success?: any;
   error?: any;
   useMasterKey?: boolean;
@@ -29,9 +29,9 @@ export type FullOptions = {
   installationId?: string;
   progress?: any;
   usePost?: boolean;
-};
+}
 
-type PayloadType = {
+interface PayloadType {
   _context?: any;
   _method?: string;
   _ApplicationId: string;
@@ -42,7 +42,7 @@ type PayloadType = {
   _RevocableSession?: string;
   _InstallationId?: string;
   _SessionToken?: string;
-};
+}
 
 let XHR: any = null;
 if (typeof XMLHttpRequest !== 'undefined') {

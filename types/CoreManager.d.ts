@@ -14,31 +14,25 @@ import type { HookDeclaration, HookDeleteArg } from './ParseHooks';
 import type ParseConfig from './ParseConfig';
 import type LiveQueryClient from './LiveQueryClient';
 import type ParseInstallation from './ParseInstallation';
-type AnalyticsController = {
-    track: (name: string, dimensions: {
-        [key: string]: string;
-    }) => Promise<any>;
-};
-type CloudController = {
+export interface AnalyticsController {
+    track: (name: string, dimensions: Record<string, string>) => Promise<any>;
+}
+export interface CloudController {
     run: (name: string, data: any, options?: RequestOptions) => Promise<any>;
     getJobsData: (options?: RequestOptions) => Promise<any>;
     /** Returns promise which resolves with JobStatusId of the job */
     startJob: (name: string, data: any, options?: RequestOptions) => Promise<string>;
-};
-type ConfigController = {
+}
+export interface ConfigController {
     current: () => Promise<ParseConfig> | ParseConfig;
     get: (opts?: RequestOptions) => Promise<ParseConfig>;
-    save: (attrs: {
-        [key: string]: any;
-    }, masterKeyOnlyFlags?: {
-        [key: string]: any;
-    }) => Promise<void>;
-};
-type CryptoController = {
+    save: (attrs: Record<string, any>, masterKeyOnlyFlags?: Record<string, any>) => Promise<void>;
+}
+export interface CryptoController {
     encrypt: (obj: any, secretKey: string) => string;
     decrypt: (encryptedText: string, secretKey: any) => string;
-};
-type FileController = {
+}
+export interface FileController {
     saveFile: (name: string, source: FileSource, options?: FullOptions) => Promise<any>;
     saveBase64: (name: string, source: FileSource, options?: FileSaveOptions) => Promise<{
         name: string;
@@ -51,24 +45,24 @@ type FileController = {
     deleteFile: (name: string, options?: {
         useMasterKey?: boolean;
     }) => Promise<void>;
-};
-type InstallationController = {
+}
+export interface InstallationController {
     currentInstallationId: () => Promise<string>;
     currentInstallation: () => Promise<ParseInstallation | null>;
     updateInstallationOnDisk: (installation: ParseInstallation) => Promise<void>;
-};
-type ObjectController = {
-    fetch: (object: ParseObject | Array<ParseObject>, forceFetch: boolean, options?: RequestOptions) => Promise<Array<ParseObject | undefined> | ParseObject | undefined>;
-    save: (object: ParseObject | Array<ParseObject | ParseFile> | null, options?: RequestOptions) => Promise<ParseObject | Array<ParseObject> | ParseFile | undefined>;
-    destroy: (object: ParseObject | Array<ParseObject>, options?: RequestOptions) => Promise<ParseObject | Array<ParseObject>>;
-};
-type ObjectStateController = {
+}
+export interface ObjectController {
+    fetch: (object: ParseObject | ParseObject[], forceFetch: boolean, options?: RequestOptions) => Promise<(ParseObject | undefined)[] | ParseObject | undefined>;
+    save: (object: ParseObject | (ParseObject | ParseFile)[] | null, options?: RequestOptions) => Promise<ParseObject | ParseObject[] | ParseFile | undefined>;
+    destroy: (object: ParseObject | ParseObject[], options?: RequestOptions) => Promise<ParseObject | ParseObject[]>;
+}
+export interface ObjectStateController {
     getState: (obj: any) => State | null;
     initializeState: (obj: any, initial?: State) => State;
     removeState: (obj: any) => State | null;
     getServerData: (obj: any) => AttributeMap;
     setServerData: (obj: any, attributes: AttributeMap) => void;
-    getPendingOps: (obj: any) => Array<OpsMap>;
+    getPendingOps: (obj: any) => OpsMap[];
     setPendingOp: (obj: any, attr: string, op?: Op) => void;
     pushPendingState: (obj: any) => void;
     popPendingState: (obj: any) => OpsMap | undefined;
@@ -80,21 +74,21 @@ type ObjectStateController = {
     enqueueTask: (obj: any, task: () => Promise<void>) => Promise<void>;
     clearAllState: () => void;
     duplicateState: (source: any, dest: any) => void;
-};
-type PushController = {
+}
+export interface PushController {
     send: (data: PushData, options?: FullOptions) => Promise<any>;
-};
-type QueryController = {
+}
+export interface QueryController {
     find(className: string, params: QueryJSON, options?: RequestOptions): Promise<{
-        results?: Array<ParseObject>;
+        results?: ParseObject[];
         className?: string;
         count?: number;
     }>;
     aggregate(className: string, params: any, options?: RequestOptions): Promise<{
-        results?: Array<any>;
+        results?: any[];
     }>;
-};
-export type QueueObject = {
+}
+export interface QueueObject {
     queueId: string;
     action: string;
     object: ParseObject;
@@ -103,9 +97,9 @@ export type QueueObject = {
     className: string;
     hash: string;
     createdAt: Date;
-};
-export type Queue = Array<QueueObject>;
-export type EventuallyQueue = {
+}
+export type Queue = QueueObject[];
+export interface EventuallyQueue {
     save: (object: ParseObject, serverOptions?: SaveOptions) => Promise<void>;
     destroy: (object: ParseObject, serverOptions?: RequestOptions) => Promise<void>;
     generateQueueId: (action: string, object: ParseObject) => string;
@@ -128,23 +122,23 @@ export type EventuallyQueue = {
         byId(ObjectType: any, queueObject: any): Promise<void>;
         byHash(ObjectType: any, queueObject: any): Promise<void>;
     };
-};
-type RESTController = {
+}
+export interface RESTController {
     request: (method: string, path: string, data?: any, options?: RequestOptions) => Promise<any>;
     ajax: (method: string, url: string, data: any, headers?: any, options?: FullOptions) => Promise<any>;
     handleError: (err?: any) => void;
-};
-type SchemaController = {
+}
+export interface SchemaController {
     purge: (className: string) => Promise<any>;
     get: (className: string, options?: RequestOptions) => Promise<any>;
     delete: (className: string, options?: RequestOptions) => Promise<void>;
     create: (className: string, params: any, options?: RequestOptions) => Promise<any>;
     update: (className: string, params: any, options?: RequestOptions) => Promise<any>;
     send(className: string, method: string, params: any, options?: RequestOptions): Promise<any>;
-};
-type SessionController = {
+}
+export interface SessionController {
     getSession: (options?: RequestOptions) => Promise<ParseSession>;
-};
+}
 type StorageController = {
     async: 0;
     getItem: (path: string) => string | null;
@@ -154,8 +148,8 @@ type StorageController = {
     setItemAsync?: (path: string, value: string) => Promise<void>;
     removeItemAsync?: (path: string) => Promise<void>;
     clear: () => void;
-    getAllKeys?: () => Array<string>;
-    getAllKeysAsync?: () => Promise<Array<string>>;
+    getAllKeys?: () => string[];
+    getAllKeysAsync?: () => Promise<string[]>;
 } | {
     async: 1;
     getItem?: (path: string) => string | null;
@@ -165,17 +159,17 @@ type StorageController = {
     setItemAsync: (path: string, value: string) => Promise<void>;
     removeItemAsync: (path: string) => Promise<void>;
     clear: () => void;
-    getAllKeys?: () => Array<string>;
-    getAllKeysAsync?: () => Promise<Array<string>>;
+    getAllKeys?: () => string[];
+    getAllKeysAsync?: () => Promise<string[]>;
 };
-type LocalDatastoreController = {
+export interface LocalDatastoreController {
     fromPinWithName: (name: string) => any | undefined;
     pinWithName: (name: string, objects: any) => void;
     unPinWithName: (name: string) => void;
     getAllContents: () => any | undefined;
     clear: () => void;
-};
-type UserController = {
+}
+export interface UserController {
     setCurrentUser: (user: ParseUser) => Promise<void>;
     currentUser: () => ParseUser | null;
     currentUserAsync: () => Promise<ParseUser | null>;
@@ -190,24 +184,24 @@ type UserController = {
     updateUserOnDisk: (user: ParseUser) => Promise<ParseUser>;
     upgradeToRevocableSession: (user: ParseUser, options?: RequestOptions) => Promise<void>;
     linkWith: (user: ParseUser, authData: AuthData, options?: FullOptions) => Promise<ParseUser>;
-    removeUserFromDisk: () => Promise<ParseUser | void>;
+    removeUserFromDisk: () => Promise<void>;
     verifyPassword: (username: string, password: string, options?: RequestOptions) => Promise<ParseUser>;
     requestEmailVerification: (email: string, options?: RequestOptions) => Promise<void>;
-};
-type HooksController = {
+}
+export interface HooksController {
     get: (type: string, functionName?: string, triggerName?: string) => Promise<any>;
     create: (hook: HookDeclaration) => Promise<any>;
     remove: (hook: HookDeleteArg) => Promise<any>;
     update: (hook: HookDeclaration) => Promise<any>;
     sendRequest?: (method: string, path: string, body?: any) => Promise<any>;
-};
-type LiveQueryControllerType = {
+}
+export interface LiveQueryControllerType {
     setDefaultLiveQueryClient(liveQueryClient: LiveQueryClient): void;
     getDefaultLiveQueryClient(): Promise<LiveQueryClient>;
     _clearCachedDefaultClient(): void;
-};
+}
 /** Based on https://github.com/react-native-async-storage/async-storage/blob/main/packages/default-storage-backend/src/types.ts */
-type AsyncStorageType = {
+export interface AsyncStorageType {
     /** Fetches an item for a `key` and invokes a callback upon completion. */
     getItem: (key: string, callback?: (error?: Error | null, result?: string | null) => void) => Promise<string | null>;
     /** Sets the value for a `key` and invokes a callback upon completion. */
@@ -250,15 +244,15 @@ type AsyncStorageType = {
      * See https://react-native-async-storage.github.io/async-storage/docs/api#multimerge
      */
     multiMerge: (keyValuePairs: [string, string][], callback?: (errors?: readonly (Error | null)[] | null) => void) => Promise<void>;
-};
-export type WebSocketController = {
+}
+export interface WebSocketController {
     onopen: () => void;
     onmessage: (message: any) => void;
     onclose: (arg?: any) => void;
     onerror: (error: any) => void;
     send: (data: any) => void;
     close: () => void;
-};
+}
 declare const CoreManager: {
     get: (key: string) => any;
     set: (key: string, value: any) => void;

@@ -16,28 +16,26 @@ type BatchOptions = FullOptions & {
   useMasterKey?: boolean;
   useMaintenanceKey?: boolean;
   sessionToken?: string;
-  context?: { [key: string]: any };
+  context?: Record<string, any>;
   json?: boolean;
 };
 
-export type WhereClause = {
-  [attr: string]: any;
-};
+export type WhereClause = Record<string, any>;
 
-type QueryOptions = {
+interface QueryOptions {
   useMasterKey?: boolean;
   sessionToken?: string;
-  context?: { [key: string]: any };
+  context?: Record<string, any>;
   json?: boolean;
-};
+}
 
-type FullTextQueryOptions = {
+interface FullTextQueryOptions {
   language?: string;
   caseSensitive?: boolean;
   diacriticSensitive?: boolean;
-};
+}
 
-export type QueryJSON = {
+export interface QueryJSON {
   where: WhereClause;
   watch?: string;
   include?: string;
@@ -54,7 +52,7 @@ export type QueryJSON = {
   includeReadPreference?: string;
   subqueryReadPreference?: string;
   comment?: string;
-};
+}
 
 interface BaseAttributes {
   createdAt: Date;
@@ -83,7 +81,7 @@ function quote(s: string): string {
  * @private
  * @returns {string}
  */
-function _getClassNameFromQueries(queries: Array<ParseQuery>): string | null {
+function _getClassNameFromQueries(queries: ParseQuery[]): string | null {
   let className: string | null = null;
   queries.forEach(q => {
     if (!className) {
@@ -102,7 +100,7 @@ function _getClassNameFromQueries(queries: Array<ParseQuery>): string | null {
  * making sure that the data object contains keys for all objects that have
  * been requested with a select, so that our cached state updates correctly.
  */
-function handleSelectResult(data: any, select: Array<string>) {
+function handleSelectResult(data: any, select: string[]) {
   const serverDataMask = {};
 
   select.forEach(field => {
@@ -249,20 +247,20 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   className: string;
   _where: any;
-  _watch: Array<string>;
-  _include: Array<string>;
-  _exclude: Array<string>;
-  _select: Array<string>;
+  _watch: string[];
+  _include: string[];
+  _exclude: string[];
+  _select: string[];
   _limit: number;
   _skip: number;
   _count: boolean;
-  _order: Array<string>;
+  _order: string[];
   _readPreference: string | null;
   _includeReadPreference: string | null;
   _subqueryReadPreference: string | null;
   _queriesLocalDatastore: boolean;
   _localDatastorePinName: any;
-  _extraOptions: { [key: string]: any };
+  _extraOptions: Record<string, any>;
   _hint: any;
   _explain: boolean;
   _xhrRequest: any;
@@ -318,7 +316,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @param {Array} queries
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  _orQuery(queries: Array<ParseQuery>): this {
+  _orQuery(queries: ParseQuery[]): this {
     const queryJSON = queries.map(q => {
       return q.toJSON().where;
     });
@@ -333,7 +331,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @param {Array} queries
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  _andQuery(queries: Array<ParseQuery>): this {
+  _andQuery(queries: ParseQuery[]): this {
     const queryJSON = queries.map(q => {
       return q.toJSON().where;
     });
@@ -348,7 +346,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @param {Array} queries
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  _norQuery(queries: Array<ParseQuery>): this {
+  _norQuery(queries: ParseQuery[]): this {
     const queryJSON = queries.map(q => {
       return q.toJSON().where;
     });
@@ -818,7 +816,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @param {string} [options.sessionToken] A valid session token, used for making a request on behalf of a specific user.
    * @returns {Promise} A promise that is resolved with the query completes.
    */
-  aggregate(pipeline: any, options?: { sessionToken?: string }): Promise<Array<any>> {
+  aggregate(pipeline: any, options?: { sessionToken?: string }): Promise<any[]> {
     options = options || {};
     const aggregateOptions: { sessionToken?: string; useMasterKey: boolean } = {
       useMasterKey: true,
@@ -1061,7 +1059,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
   async map(
     callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any,
     options?: BatchOptions
-  ): Promise<Array<any>> {
+  ): Promise<any[]> {
     const array: ParseObject[] = [];
     let index = 0;
     await this.each(object => {
@@ -1100,7 +1098,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
     callback: (accumulator: any, currentObject: ParseObject, index: number) => any,
     initialValue: any,
     options?: BatchOptions
-  ): Promise<Array<any>> {
+  ): Promise<any[]> {
     let accumulator = initialValue;
     let index = 0;
     await this.each(object => {
@@ -1149,7 +1147,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
   async filter(
     callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean,
     options?: BatchOptions
-  ): Promise<Array<ParseObject>> {
+  ): Promise<ParseObject[]> {
     const array: ParseObject[] = [];
     let index = 0;
     await this.each(object => {
@@ -1179,7 +1177,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
       | T['attributes'][K]
       | (T['attributes'][K] extends ParseObject
           ? Pointer
-          : T['attributes'][K] extends Array<infer E>
+          : T['attributes'][K] extends (infer E)[]
             ? E
             : never)
   ): this {
@@ -1208,7 +1206,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
       | T['attributes'][K]
       | (T['attributes'][K] extends ParseObject
           ? Pointer
-          : T['attributes'][K] extends Array<infer E>
+          : T['attributes'][K] extends (infer E)[]
             ? E
             : never)
   ): this {
@@ -1289,7 +1287,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   containedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(
     key: K,
-    values: Array<T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never)>
+    values: (T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never))[]
   ): this {
     return this._addCondition(key, '$in', values);
   }
@@ -1304,7 +1302,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   notContainedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(
     key: K,
-    values: Array<T['attributes'][K]>
+    values: T['attributes'][K][]
   ): this {
     return this._addCondition(key, '$nin', values);
   }
@@ -1319,7 +1317,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   containedBy<K extends keyof T['attributes'] | keyof BaseAttributes>(
     key: K,
-    values: Array<T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never)>
+    values: (T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never))[]
   ): this {
     return this._addCondition(key, '$containedBy', values);
   }
@@ -1796,7 +1794,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * string of comma separated values, or an Array of keys, or multiple keys.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  ascending(...keys: Array<string>): this {
+  ascending(...keys: string[]): this {
     this._order = [];
     return this.addAscending.apply(this, keys);
   }
@@ -1809,7 +1807,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * string of comma separated values, or an Array of keys, or multiple keys.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  addAscending(...keys: Array<string>): this {
+  addAscending(...keys: string[]): this {
     if (!this._order) {
       this._order = [];
     }
@@ -1830,7 +1828,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * string of comma separated values, or an Array of keys, or multiple keys.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  descending(...keys: Array<string>): this {
+  descending(...keys: string[]): this {
     this._order = [];
     return this.addDescending.apply(this, keys);
   }
@@ -1843,7 +1841,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * string of comma separated values, or an Array of keys, or multiple keys.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  addDescending(...keys: Array<string>): this {
+  addDescending(...keys: string[]): this {
     if (!this._order) {
       this._order = [];
     }
@@ -1923,9 +1921,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  include<K extends keyof T['attributes'] | keyof BaseAttributes>(
-    ...keys: Array<K | Array<K>>
-  ): this {
+  include<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this {
     keys.forEach(key => {
       if (Array.isArray(key)) {
         this._include = this._include.concat(key as string[]);
@@ -1955,9 +1951,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  select<K extends keyof T['attributes'] | keyof BaseAttributes>(
-    ...keys: Array<K | Array<K>>
-  ): this {
+  select<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this {
     if (!this._select) {
       this._select = [];
     }
@@ -1980,9 +1974,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @param {...string|Array<string>} keys The name(s) of the key(s) to exclude.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  exclude<K extends keyof T['attributes'] | keyof BaseAttributes>(
-    ...keys: Array<K | Array<K>>
-  ): this {
+  exclude<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this {
     keys.forEach(key => {
       if (Array.isArray(key)) {
         this._exclude = this._exclude.concat(key as string[]);
@@ -2001,9 +1993,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @param {...string|Array<string>} keys The name(s) of the key(s) to watch.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  watch<K extends keyof T['attributes'] | keyof BaseAttributes>(
-    ...keys: Array<K | Array<K>>
-  ): this {
+  watch<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this {
     keys.forEach(key => {
       if (Array.isArray(key)) {
         this._watch = this._watch.concat(key as string[]);
@@ -2067,7 +2057,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @static
    * @returns {Parse.Query} The query that is the OR of the passed in queries.
    */
-  static or(...queries: Array<ParseQuery>): ParseQuery {
+  static or(...queries: ParseQuery[]): ParseQuery {
     const className = _getClassNameFromQueries(queries);
     const query = new ParseQuery(className!);
     query._orQuery(queries);
@@ -2086,7 +2076,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @static
    * @returns {Parse.Query} The query that is the AND of the passed in queries.
    */
-  static and(...queries: Array<ParseQuery>): ParseQuery {
+  static and(...queries: ParseQuery[]): ParseQuery {
     const className = _getClassNameFromQueries(queries);
     const query = new ParseQuery(className!);
     query._andQuery(queries);
@@ -2105,7 +2095,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @static
    * @returns {Parse.Query} The query that is the NOR of the passed in queries.
    */
-  static nor(...queries: Array<ParseQuery>): ParseQuery {
+  static nor(...queries: ParseQuery[]): ParseQuery {
     const className = _getClassNameFromQueries(queries);
     const query = new ParseQuery(className!);
     query._norQuery(queries);
@@ -2205,16 +2195,12 @@ const DefaultController = {
     className: string,
     params: QueryJSON,
     options?: RequestOptions
-  ): Promise<{ results: Array<ParseObject> }> {
+  ): Promise<{ results: ParseObject[] }> {
     const RESTController = CoreManager.getRESTController();
     return RESTController.request('GET', 'classes/' + className, params, options);
   },
 
-  aggregate(
-    className: string,
-    params: any,
-    options?: RequestOptions
-  ): Promise<{ results: Array<any> }> {
+  aggregate(className: string, params: any, options?: RequestOptions): Promise<{ results: any[] }> {
     const RESTController = CoreManager.getRESTController();
 
     return RESTController.request('GET', 'aggregate/' + className, params, options);

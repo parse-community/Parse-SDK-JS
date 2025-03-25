@@ -1,18 +1,19 @@
 import { resolvingPromise } from './promiseUtils';
 
-type Task = {
+interface Task {
   task: () => Promise<void>;
   _completion: any;
-};
+}
 
 class TaskQueue {
-  queue: Array<Task>;
+  queue: Task[];
 
   constructor() {
     this.queue = [];
   }
 
   enqueue(task: () => Promise<void>): Promise<void> {
+    // eslint-disable-next-line
     const taskComplete = resolvingPromise<void>();
     this.queue.push({
       task: task,
