@@ -1,3 +1,10 @@
+# [6.1.0-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/6.1.0-alpha.3...6.1.0-alpha.4) (2025-03-29)
+
+
+### Bug Fixes
+
+* Security upgrade tar-fs from 2.1.1 to 2.1.2 ([#2540](https://github.com/parse-community/Parse-SDK-JS/issues/2540)) ([44eeacd](https://github.com/parse-community/Parse-SDK-JS/commit/44eeacd9b4af90c8a5f48264506d058ca2745109))
+
 # [6.1.0-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/6.1.0-alpha.2...6.1.0-alpha.3) (2025-03-16)
 
 

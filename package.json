@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "6.1.0-alpha.3",
+  "version": "6.1.0-alpha.4",
   "description": "Parse JavaScript SDK",
   "homepage": "https://parseplatform.org",
   "keywords": [
@@ -31,7 +31,7 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime-corejs3": "7.26.10",
+    "@babel/runtime-corejs3": "7.27.0",
     "idb-keyval": "6.2.1",
     "react-native-crypto-js": "1.0.0",
     "uuid": "10.0.0",
@@ -44,7 +44,7 @@
     "@babel/plugin-transform-runtime": "7.26.10",
     "@babel/preset-env": "7.26.9",
     "@babel/preset-react": "7.26.3",
-    "@babel/preset-typescript": "7.26.0",
+    "@babel/preset-typescript": "7.27.0",
     "@eslint/js": "9.23.0",
     "@parse/minami": "git+https://github.com/parse-community/minami#main",
     "@saithodev/semantic-release-backmerge": "4.0.1",
@@ -65,7 +65,7 @@
     "cross-env": "7.0.2",
     "eslint": "9.23.0",
     "eslint-plugin-expect-type": "0.6.2",
-    "eslint-plugin-jsdoc": "50.6.8",
+    "eslint-plugin-jsdoc": "50.6.9",
     "express": "4.21.2",
     "gulp": "5.0.0",
     "gulp-babel": "8.0.0",
@@ -91,7 +91,7 @@
     "puppeteer": "24.4.0",
     "regenerator-runtime": "0.14.1",
     "semantic-release": "24.2.3",
-    "typescript-eslint": "8.27.0",
+    "typescript-eslint": "8.28.0",
     "vinyl-source-stream": "2.0.0"
   },
   "optionalDependencies": {
