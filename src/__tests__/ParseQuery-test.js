@@ -2725,12 +2725,19 @@ describe('ParseQuery', () => {
         });
         expect(options.useMasterKey).toEqual(true);
         return Promise.resolve({
-          results: [],
+          results: [
+            {
+              objectId: 'I55',
+              foo: 'bar',
+            },
+          ],
         });
       },
     });
     const q = new ParseQuery('Item');
-    await q.search('searchTerm', ['name'], { index: 'searchIndex' });
+    const obj = await q.search('searchTerm', ['name'], { index: 'searchIndex' });
+    expect(obj[0].id).toBe('I55');
+    expect(obj[0].get('foo')).toBe('bar');
   });
 
   it('search term is required', async () => {
@@ -2747,7 +2754,9 @@ describe('ParseQuery', () => {
     CoreManager.setQueryController({
       find() {},
       aggregate() {
-        return Promise.resolve();
+        return Promise.resolve({
+          results: null,
+        });
       },
     });
 
