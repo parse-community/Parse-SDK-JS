@@ -1602,7 +1602,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * of the search
    * */
 
-  async search(value: string, path: string[], options: SearchOptions = {}): Promise<Array<any>> {
+  async search(value: string, path: string[], options: SearchOptions = {}): Promise<T[]> {
     if (!value) {
       throw new Error('A search term is required.');
     }

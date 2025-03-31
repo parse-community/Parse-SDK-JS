@@ -2743,6 +2743,19 @@ describe('ParseQuery', () => {
     await expect(q.search(123)).rejects.toThrow('The value being searched for must be a string.');
   });
 
+  it('search can return an empty array if no results', async () => {
+    CoreManager.setQueryController({
+      find() {},
+      aggregate() {
+        return Promise.resolve({});
+      },
+    });
+
+    const q = new ParseQuery('Item');
+    const results = await q.search('searchTerm', ['name'], { index: 'searchIndex' });
+    expect(results).toEqual([]);
+  });
+
   it('aggregate query array pipeline with equalTo', done => {
     const pipeline = [{ group: { objectId: '$name' } }];
     MockRESTController.request.mockImplementationOnce(() => {
