@@ -1,9 +1,7 @@
 import ParseObject, { Attributes } from './ParseObject';
 import type { RequestOptions, FullOptions } from './RESTController';
-export type AuthData = {
-    [key: string]: any;
-};
-export type AuthProvider = {
+export type AuthData = Record<string, any>;
+export interface AuthProvider {
     authenticate?(options: {
         error?: (provider: AuthProvider, error: string | any) => void;
         success?: (provider: AuthProvider, result: AuthData) => void;
@@ -11,7 +9,7 @@ export type AuthProvider = {
     restoreAuthentication(authData: any): boolean;
     getAuthType(): string;
     deauthenticate?(): void;
-};
+}
 /**
  * <p>A Parse.User object is a local representation of a user persisted to the
  * Parse cloud. This class is a subclass of a Parse.Object, and retains the
@@ -227,7 +225,7 @@ declare class ParseUser<T extends Attributes = Attributes> extends ParseObject<T
      * @param {...any} args
      * @returns {Promise}
      */
-    save(...args: Array<any>): Promise<this>;
+    save(...args: any[]): Promise<this>;
     /**
      * Wrap the default destroy behavior with functionality that logs out
      * the current user when it is destroyed
@@ -235,7 +233,7 @@ declare class ParseUser<T extends Attributes = Attributes> extends ParseObject<T
      * @param {...any} args
      * @returns {Parse.User}
      */
-    destroy(...args: Array<any>): Promise<ParseUser | void>;
+    destroy(...args: any[]): Promise<this>;
     /**
      * Wrap the default fetch behavior with functionality to save to local
      * storage if this is current user.
@@ -243,7 +241,7 @@ declare class ParseUser<T extends Attributes = Attributes> extends ParseObject<T
      * @param {...any} args
      * @returns {Parse.User}
      */
-    fetch(...args: Array<any>): Promise<this>;
+    fetch(...args: any[]): Promise<this>;
     /**
      * Wrap the default fetchWithInclude behavior with functionality to save to local
      * storage if this is current user.
@@ -251,7 +249,7 @@ declare class ParseUser<T extends Attributes = Attributes> extends ParseObject<T
      * @param {...any} args
      * @returns {Parse.User}
      */
-    fetchWithInclude(...args: Array<any>): Promise<this>;
+    fetchWithInclude(...args: any[]): Promise<this>;
     /**
      * Verify whether a given password is the password of the current user.
      *
@@ -271,11 +269,7 @@ declare class ParseUser<T extends Attributes = Attributes> extends ParseObject<T
      * @static
      * @returns {Parse.User} The newly extended Parse.User class
      */
-    static extend(protoProps: {
-        [prop: string]: any;
-    }, classProps: {
-        [prop: string]: any;
-    }): typeof ParseUser;
+    static extend(protoProps: Record<string, any>, classProps: Record<string, any>): typeof ParseUser;
     /**
      * Retrieves the currently logged in ParseUser with a valid session,
      * either from memory or localStorage, if necessary.

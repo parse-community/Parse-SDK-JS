@@ -9,7 +9,7 @@ function encode(
   value: any,
   disallowObjects: boolean,
   forcePointers: boolean,
-  seen: Array<any>,
+  seen: any[],
   offline: boolean
 ): any {
   const ParseObject = CoreManager.getParseObject();
@@ -83,7 +83,7 @@ export default function (
   value: any,
   disallowObjects?: boolean,
   forcePointers?: boolean,
-  seen?: Array<any>,
+  seen?: any[],
   offline?: boolean
 ): any {
   return encode(value, !!disallowObjects, !!forcePointers, seen || [], offline);

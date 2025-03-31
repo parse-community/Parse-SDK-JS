@@ -1,8 +1,6 @@
 import type ParseObject from './ParseObject';
 import ParseRelation from './ParseRelation';
-export declare function opFromJSON(json: {
-    [key: string]: any;
-}): Op | null;
+export declare function opFromJSON(json: Record<string, any>): Op | null;
 export declare class Op {
     applyTo(value: any): any;
     mergeWith(previous: Op): Op | void;
@@ -33,9 +31,9 @@ export declare class IncrementOp extends Op {
     };
 }
 export declare class AddOp extends Op {
-    _value: Array<any>;
-    constructor(value: any | Array<any>);
-    applyTo(value: any): Array<any>;
+    _value: any[];
+    constructor(value: any | any[]);
+    applyTo(value: any): any[];
     mergeWith(previous: Op): Op;
     toJSON(): {
         __op: string;
@@ -43,9 +41,9 @@ export declare class AddOp extends Op {
     };
 }
 export declare class AddUniqueOp extends Op {
-    _value: Array<any>;
-    constructor(value: any | Array<any>);
-    applyTo(value: any | Array<any>): Array<any>;
+    _value: any[];
+    constructor(value: any | any[]);
+    applyTo(value: any | any[]): any[];
     mergeWith(previous: Op): Op;
     toJSON(): {
         __op: string;
@@ -53,9 +51,9 @@ export declare class AddUniqueOp extends Op {
     };
 }
 export declare class RemoveOp extends Op {
-    _value: Array<any>;
-    constructor(value: any | Array<any>);
-    applyTo(value: any | Array<any>): Array<any>;
+    _value: any[];
+    constructor(value: any | any[]);
+    applyTo(value: any | any[]): any[];
     mergeWith(previous: Op): Op;
     toJSON(): {
         __op: string;
@@ -64,9 +62,9 @@ export declare class RemoveOp extends Op {
 }
 export declare class RelationOp extends Op {
     _targetClassName: string | null;
-    relationsToAdd: Array<string>;
-    relationsToRemove: Array<string>;
-    constructor(adds: Array<ParseObject | string>, removes: Array<ParseObject | string>);
+    relationsToAdd: string[];
+    relationsToRemove: string[];
+    constructor(adds: (ParseObject | string)[], removes: (ParseObject | string)[]);
     _extractId(obj: string | ParseObject): string;
     applyTo(value: any, parent?: ParseObject, key?: string): ParseRelation;
     mergeWith(previous: Op): Op;

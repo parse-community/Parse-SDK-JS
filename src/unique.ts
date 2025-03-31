@@ -1,7 +1,7 @@
 import arrayContainsObject from './arrayContainsObject';
 import CoreManager from './CoreManager';
 
-export default function unique<T>(arr: Array<T>): Array<T> {
+export default function unique<T>(arr: T[]): T[] {
   const uniques: T[] = [];
   arr.forEach(value => {
     const ParseObject = CoreManager.getParseObject();

@@ -27,7 +27,7 @@ class ParsePolygon {
   /**
    * @param {(Coordinates | Parse.GeoPoint[])} coordinates An Array of coordinate pairs
    */
-  constructor(coordinates: Coordinates | Array<ParseGeoPoint>) {
+  constructor(coordinates: Coordinates | ParseGeoPoint[]) {
     this._coordinates = ParsePolygon._validate(coordinates);
   }
 
@@ -42,7 +42,7 @@ class ParsePolygon {
     return this._coordinates;
   }
 
-  set coordinates(coords: Coordinates | Array<ParseGeoPoint>) {
+  set coordinates(coords: Coordinates | ParseGeoPoint[]) {
     this._coordinates = ParsePolygon._validate(coords);
   }
 
@@ -136,7 +136,7 @@ class ParsePolygon {
    * @throws {TypeError}
    * @returns {number[][]} Array of coordinates if validated.
    */
-  static _validate(coords: Coordinates | Array<ParseGeoPoint>): Coordinates {
+  static _validate(coords: Coordinates | ParseGeoPoint[]): Coordinates {
     if (!Array.isArray(coords)) {
       throw new TypeError('Coordinates must be an Array');
     }

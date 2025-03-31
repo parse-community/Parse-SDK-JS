@@ -1,12 +1,12 @@
 import ParseObject, { Attributes } from './ParseObject';
-type DeviceInterface = {
+interface DeviceInterface {
     IOS: string;
     MACOS: string;
     TVOS: string;
     FCM: string;
     ANDROID: string;
     WEB: string;
-};
+}
 /**
  * Parse.Installation is a local representation of installation data that can be saved and retrieved from the Parse cloud.
  * This class is a subclass of a Parse.Object, and retains the same functionality of a Parse.Object, but also extends it with installation-specific features.
@@ -153,7 +153,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
      * @param {...any} args
      * @returns {Promise}
      */
-    fetch(...args: Array<any>): Promise<this>;
+    fetch(...args: any[]): Promise<this>;
     /**
      * Wrap the default save behavior with functionality to update the local storage.
      * If the installation is deleted on the server, retry saving a new installation.
@@ -161,7 +161,7 @@ declare class ParseInstallation<T extends Attributes = Attributes> extends Parse
      * @param {...any} args
      * @returns {Promise}
      */
-    save(...args: Array<any>): Promise<this>;
+    save(...args: any[]): Promise<this>;
     _markAllFieldsDirty(): void;
     /**
      * Get the current Parse.Installation from disk. If doesn't exists, create an new installation.

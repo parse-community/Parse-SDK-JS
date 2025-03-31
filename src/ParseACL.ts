@@ -2,8 +2,8 @@ import CoreManager from './CoreManager';
 import type ParseRole from './ParseRole';
 import type ParseUser from './ParseUser';
 
-type PermissionsMap = { [permission: string]: boolean };
-type ByIdMap = { [userId: string]: PermissionsMap };
+type PermissionsMap = Record<string, boolean>;
+type ByIdMap = Record<string, PermissionsMap>;
 
 const PUBLIC_KEY = '*';
 

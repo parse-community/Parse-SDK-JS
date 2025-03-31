@@ -2,7 +2,7 @@ import { isLocalDatastoreKey } from './LocalDatastoreUtils';
 import Storage from './Storage';
 
 const LocalDatastoreController = {
-  async fromPinWithName(name: string): Promise<Array<any>> {
+  async fromPinWithName(name: string): Promise<any[]> {
     const values = await Storage.getItemAsync(name);
     if (!values) {
       return [];

@@ -1,18 +1,14 @@
 import type { FullOptions } from './RESTController';
-type Base64 = {
+interface Base64 {
     base64: string;
-};
-type Uri = {
+}
+interface Uri {
     uri: string;
-};
-type FileData = Array<number> | Base64 | Blob | Uri;
+}
+type FileData = number[] | Base64 | Blob | Uri;
 export type FileSaveOptions = FullOptions & {
-    metadata?: {
-        [key: string]: any;
-    };
-    tags?: {
-        [key: string]: any;
-    };
+    metadata?: Record<string, any>;
+    tags?: Record<string, any>;
 };
 export type FileSource = {
     format: 'file';
@@ -187,6 +183,6 @@ declare class ParseFile {
      */
     addTag(key: string, value: string): void;
     static fromJSON(obj: any): ParseFile;
-    static encodeBase64(bytes: Array<number> | Uint8Array): string;
+    static encodeBase64(bytes: number[] | Uint8Array): string;
 }
 export default ParseFile;

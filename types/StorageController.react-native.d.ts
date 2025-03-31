@@ -4,8 +4,8 @@ declare const StorageController: {
     setItemAsync(path: string, value: string): Promise<void>;
     removeItemAsync(path: string): Promise<void>;
     getAllKeysAsync(): Promise<readonly string[]>;
-    multiGet(keys: Array<string>): Promise<readonly [string, string | null][] | null>;
-    multiRemove(keys: Array<string>): Promise<Array<string>>;
+    multiGet(keys: string[]): Promise<readonly [string, string | null][] | null>;
+    multiRemove(keys: string[]): Promise<string[]>;
     clear(): Promise<void>;
 };
 export default StorageController;

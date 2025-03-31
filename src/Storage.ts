@@ -54,7 +54,7 @@ const Storage = {
     return Promise.resolve(controller.removeItem(path));
   },
 
-  getAllKeys(): Array<string> {
+  getAllKeys(): string[] {
     const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       throw new Error('Synchronous storage is not supported by the current storage controller');
@@ -62,7 +62,7 @@ const Storage = {
     return controller.getAllKeys!();
   },
 
-  getAllKeysAsync(): Promise<Array<string>> {
+  getAllKeysAsync(): Promise<string[]> {
     const controller = CoreManager.getStorageController();
     if (controller.async === 1) {
       return controller.getAllKeysAsync!();

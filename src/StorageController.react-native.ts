@@ -51,7 +51,7 @@ const StorageController = {
     });
   },
 
-  multiGet(keys: Array<string>): Promise<readonly [string, string | null][] | null> {
+  multiGet(keys: string[]): Promise<readonly [string, string | null][] | null> {
     return new Promise((resolve, reject) => {
       CoreManager.getAsyncStorage()!.multiGet(keys, (err, result) => {
         if (err) {
@@ -63,7 +63,7 @@ const StorageController = {
     });
   },
 
-  multiRemove(keys: Array<string>): Promise<Array<string>> {
+  multiRemove(keys: string[]): Promise<string[]> {
     return new Promise((resolve, reject) => {
       CoreManager.getAsyncStorage()!.multiRemove(keys, err => {
         if (err) {

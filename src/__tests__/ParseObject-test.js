@@ -3766,11 +3766,7 @@ describe('ParseObject Subclasses', () => {
   });
 
   it('can use on ParseObject subclass for multiple Parse.Object class names', () => {
-    class MyParseObjects extends ParseObject {
-      constructor(className) {
-        super(className);
-      }
-    }
+    class MyParseObjects extends ParseObject {}
     ParseObject.registerSubclass('TestObject', MyParseObjects);
     ParseObject.registerSubclass('TestObject1', MyParseObjects);
     ParseObject.registerSubclass('TestObject2', MyParseObjects);

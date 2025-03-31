@@ -6,8 +6,8 @@ declare const Storage: {
     setItemAsync(path: string, value: string): Promise<void>;
     removeItem(path: string): void;
     removeItemAsync(path: string): Promise<void>;
-    getAllKeys(): Array<string>;
-    getAllKeysAsync(): Promise<Array<string>>;
+    getAllKeys(): string[];
+    getAllKeysAsync(): Promise<string[]>;
     generatePath(path: string): string;
     _clear(): void;
 };

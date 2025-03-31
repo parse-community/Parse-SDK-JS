@@ -22,14 +22,14 @@ import type ParseObject from './ParseObject';
 declare const LocalDatastore: {
     isEnabled: boolean;
     isSyncing: boolean;
-    fromPinWithName(name: string): Promise<Array<any>>;
+    fromPinWithName(name: string): Promise<any[]>;
     pinWithName(name: string, value: any): Promise<void>;
     unPinWithName(name: string): Promise<void>;
     _getAllContents(): Promise<any>;
     _getRawStorage(): Promise<any>;
     _clear(): Promise<void>;
-    _handlePinAllWithName(name: string, objects: Array<ParseObject>): Promise<void>;
-    _handleUnPinAllWithName(name: string, objects: Array<ParseObject>): Promise<any[]>;
+    _handlePinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
+    _handleUnPinAllWithName(name: string, objects: ParseObject[]): Promise<any[]>;
     _getChildren(object: ParseObject): any;
     _traverse(object: any, encountered: any): void;
     _serializeObjectsFromPinName(name: string): Promise<any[]>;

@@ -14,8 +14,8 @@ import type { RequestOptions } from './RESTController';
  * @alias Parse.Config
  */
 class ParseConfig {
-  attributes: { [key: string]: any };
-  _escapedAttributes: { [key: string]: any };
+  attributes: Record<string, any>;
+  _escapedAttributes: Record<string, any>;
 
   constructor() {
     this.attributes = {};
@@ -95,7 +95,7 @@ class ParseConfig {
    * @returns {Promise} A promise that is resolved with a newly-created
    *     configuration object or with the current with the update.
    */
-  static save(attrs: { [key: string]: any }, masterKeyOnlyFlags: { [key: string]: any }) {
+  static save(attrs: Record<string, any>, masterKeyOnlyFlags: Record<string, any>) {
     const controller = CoreManager.getConfigController();
     //To avoid a mismatch with the local and the cloud config we get a new version
     return controller.save(attrs, masterKeyOnlyFlags).then(
@@ -190,7 +190,7 @@ const DefaultController = {
     });
   },
 
-  save(attrs?: { [key: string]: any }, masterKeyOnlyFlags?: { [key: string]: any }) {
+  save(attrs?: Record<string, any>, masterKeyOnlyFlags?: Record<string, any>) {
     const RESTController = CoreManager.getRESTController();
     const encodedAttrs = {};
     for (const key in attrs) {

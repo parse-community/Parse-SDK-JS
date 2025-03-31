@@ -8,4 +8,4 @@ import type ParseObject from './ParseObject';
  * @param {boolean} allowDeepUnsaved
  * @returns {Array}
  */
-export default function unsavedChildren(obj: ParseObject, allowDeepUnsaved?: boolean): Array<ParseFile | ParseObject>;
+export default function unsavedChildren(obj: ParseObject, allowDeepUnsaved?: boolean): (ParseFile | ParseObject)[];

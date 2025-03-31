@@ -1,4 +1,4 @@
-export type RequestOptions = {
+export interface RequestOptions {
     useMasterKey?: boolean;
     useMaintenanceKey?: boolean;
     sessionToken?: string;
@@ -11,8 +11,8 @@ export type RequestOptions = {
     usePost?: boolean;
     ignoreEmailVerification?: boolean;
     transaction?: boolean;
-};
-export type FullOptions = {
+}
+export interface FullOptions {
     success?: any;
     error?: any;
     useMasterKey?: boolean;
@@ -21,7 +21,7 @@ export type FullOptions = {
     installationId?: string;
     progress?: any;
     usePost?: boolean;
-};
+}
 declare const RESTController: {
     ajax(method: string, url: string, data: any, headers?: any, options?: FullOptions): (Promise<any> & {
         resolve: (res: any) => void;

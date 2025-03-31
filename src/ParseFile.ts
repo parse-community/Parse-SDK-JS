@@ -12,12 +12,16 @@ if (process.env.PARSE_BUILD === 'weapp') {
   XHR = XhrWeapp;
 }
 
-type Base64 = { base64: string };
-type Uri = { uri: string };
-type FileData = Array<number> | Base64 | Blob | Uri;
+interface Base64 {
+  base64: string;
+}
+interface Uri {
+  uri: string;
+}
+type FileData = number[] | Base64 | Blob | Uri;
 export type FileSaveOptions = FullOptions & {
-  metadata?: { [key: string]: any };
-  tags?: { [key: string]: any };
+  metadata?: Record<string, any>;
+  tags?: Record<string, any>;
 };
 export type FileSource =
   | {
@@ -411,7 +415,7 @@ class ParseFile {
     return file;
   }
 
-  static encodeBase64(bytes: Array<number> | Uint8Array): string {
+  static encodeBase64(bytes: number[] | Uint8Array): string {
     const chunks = [];
     chunks.length = Math.ceil(bytes.length / 3);
     for (let i = 0; i < chunks.length; i++) {

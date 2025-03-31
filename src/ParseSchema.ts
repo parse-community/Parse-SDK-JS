@@ -51,9 +51,7 @@ interface FieldOptions<
   targetClass?: string | undefined;
 }
 
-interface Index {
-  [fieldName: string]: number | string;
-}
+type Index = Record<string, number | string>;
 
 interface CLPField {
   '*'?: boolean | undefined;
@@ -71,27 +69,22 @@ interface CLP {
   addField?: CLPField | undefined;
   readUserFields?: string[] | undefined;
   writeUserFields?: string[] | undefined;
-  protectedFields?: {
-    [userIdOrRoleName: string]: string[];
-  };
+  protectedFields?: Record<string, string[]>;
 }
 
 interface RestSchema {
   className: string;
-  fields: {
-    [key: string]: {
+  fields: Record<
+    string,
+    {
       type: string;
       targetClass?: string;
       required?: boolean;
       defaultValue?: string;
-    };
-  };
+    }
+  >;
   classLevelPermissions: CLP;
-  indexes?: {
-    [key: string]: {
-      [key: string]: any;
-    };
-  };
+  indexes?: Record<string, Record<string, any>>;
 }
 
 const FIELD_TYPES = [
@@ -128,9 +121,9 @@ const FIELD_TYPES = [
  */
 class ParseSchema<T extends ParseObject = any> {
   className: string;
-  _fields: { [key: string]: any };
-  _indexes: { [key: string]: any };
-  _clp: { [key: string]: any };
+  _fields: Record<string, any>;
+  _indexes: Record<string, any>;
+  _clp: Record<string, any>;
 
   /**
    * @param {string} className Parse Class string.

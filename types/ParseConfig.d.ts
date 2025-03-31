@@ -6,12 +6,8 @@ import type { RequestOptions } from './RESTController';
  * @alias Parse.Config
  */
 declare class ParseConfig {
-    attributes: {
-        [key: string]: any;
-    };
-    _escapedAttributes: {
-        [key: string]: any;
-    };
+    attributes: Record<string, any>;
+    _escapedAttributes: Record<string, any>;
     constructor();
     /**
      * Gets the value of an attribute.
@@ -62,11 +58,7 @@ declare class ParseConfig {
      * @returns {Promise} A promise that is resolved with a newly-created
      *     configuration object or with the current with the update.
      */
-    static save(attrs: {
-        [key: string]: any;
-    }, masterKeyOnlyFlags: {
-        [key: string]: any;
-    }): Promise<ParseConfig>;
+    static save(attrs: Record<string, any>, masterKeyOnlyFlags: Record<string, any>): Promise<ParseConfig>;
     /**
      * Used for testing
      *
