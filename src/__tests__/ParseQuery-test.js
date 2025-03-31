@@ -2747,7 +2747,7 @@ describe('ParseQuery', () => {
     CoreManager.setQueryController({
       find() {},
       aggregate() {
-        return Promise.resolve({});
+        return Promise.resolve();
       },
     });
 

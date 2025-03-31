@@ -1598,9 +1598,10 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @param {string} options.index The index to search
    * @returns {Promise} Returns a promise that will be resolved with the results
    * of the search
-   * */
+   *
+   */
 
-  async search(value: string, path: string[], options: SearchOptions = {}): Promise<T[]> {
+  async search(value: string, path: string[], options?: SearchOptions): Promise<T[]> {
     if (!value) {
       throw new Error('A search term is required.');
     }
