@@ -77,7 +77,7 @@ const Parse = {
   Parse: undefined,
 
   /**
-   * @member {EventuallyQueue} Parse.EventuallyQueue
+   * @property {EventuallyQueue} Parse.EventuallyQueue
    * @static
    */
   set EventuallyQueue(queue: EventuallyQueue) {
@@ -172,7 +172,7 @@ const Parse = {
   },
 
   /**
-   * @member {string} Parse.applicationId
+   * @property {string} Parse.applicationId
    * @static
    */
   set applicationId(value) {
@@ -183,7 +183,7 @@ const Parse = {
   },
 
   /**
-   * @member {string} Parse.javaScriptKey
+   * @property {string} Parse.javaScriptKey
    * @static
    */
   set javaScriptKey(value) {
@@ -194,7 +194,7 @@ const Parse = {
   },
 
   /**
-   * @member {string} Parse.masterKey
+   * @property {string} Parse.masterKey
    * @static
    */
   set masterKey(value) {
@@ -205,7 +205,7 @@ const Parse = {
   },
 
   /**
-   * @member {string} Parse.maintenanceKey
+   * @property {string} Parse.maintenanceKey
    * @static
    */
   set maintenanceKey(value) {
@@ -216,7 +216,7 @@ const Parse = {
   },
 
   /**
-   * @member {string} Parse.serverURL
+   * @property {string} Parse.serverURL
    * @static
    */
   set serverURL(value) {
@@ -227,7 +227,7 @@ const Parse = {
   },
 
   /**
-   * @member {string} Parse.serverAuthToken
+   * @property {string} Parse.serverAuthToken
    * @static
    */
   set serverAuthToken(value) {
@@ -238,7 +238,7 @@ const Parse = {
   },
 
   /**
-   * @member {string} Parse.serverAuthType
+   * @property {string} Parse.serverAuthType
    * @static
    */
   set serverAuthType(value) {
@@ -249,7 +249,7 @@ const Parse = {
   },
 
   /**
-   * @member {ParseLiveQuery} Parse.LiveQuery
+   * @property {ParseLiveQuery} Parse.LiveQuery
    * @static
    */
   set LiveQuery(liveQuery: ParseLiveQuery) {
@@ -260,7 +260,7 @@ const Parse = {
   },
 
   /**
-   * @member {string} Parse.liveQueryServerURL
+   * @property {string} Parse.liveQueryServerURL
    * @static
    */
   set liveQueryServerURL(value) {
@@ -271,7 +271,7 @@ const Parse = {
   },
 
   /**
-   * @member {boolean} Parse.encryptedUser
+   * @property {boolean} Parse.encryptedUser
    * @static
    */
   set encryptedUser(value: boolean) {
@@ -282,7 +282,7 @@ const Parse = {
   },
 
   /**
-   * @member {string} Parse.secret
+   * @property {string} Parse.secret
    * @static
    */
   set secret(value) {
@@ -293,7 +293,7 @@ const Parse = {
   },
 
   /**
-   * @member {boolean} Parse.idempotency
+   * @property {boolean} Parse.idempotency
    * @static
    */
   set idempotency(value) {
@@ -304,7 +304,7 @@ const Parse = {
   },
 
   /**
-   * @member {boolean} Parse.allowCustomObjectId
+   * @property {boolean} Parse.allowCustomObjectId
    * @static
    */
   set allowCustomObjectId(value) {
