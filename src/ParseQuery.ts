@@ -1545,17 +1545,17 @@ class ParseQuery<T extends ParseObject = ParseObject> {
 
     for (const option in options) {
       switch (option) {
-      case 'language':
-        fullOptions.$language = options[option];
-        break;
-      case 'caseSensitive':
-        fullOptions.$caseSensitive = options[option];
-        break;
-      case 'diacriticSensitive':
-        fullOptions.$diacriticSensitive = options[option];
-        break;
-      default:
-        throw new Error(`Unknown option: ${option}`);
+        case 'language':
+          fullOptions.$language = options[option];
+          break;
+        case 'caseSensitive':
+          fullOptions.$caseSensitive = options[option];
+          break;
+        case 'diacriticSensitive':
+          fullOptions.$diacriticSensitive = options[option];
+          break;
+        default:
+          throw new Error(`Unknown option: ${option}`);
       }
     }
 

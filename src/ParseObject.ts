@@ -1012,7 +1012,7 @@ class ParseObject<T extends Attributes = Attributes> {
    */
   op<K extends AttributeKey<T>>(attr: K): Op | undefined {
     const pending = this._getPendingOps();
-    for (let i = pending.length; i--;) {
+    for (let i = 0; i < pending.length; i += 1) {
       if (pending[i][attr]) {
         return pending[i][attr];
       }

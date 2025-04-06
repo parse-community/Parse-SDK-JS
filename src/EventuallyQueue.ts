@@ -246,33 +246,33 @@ const EventuallyQueue = {
       return this.remove(queueObject.queueId);
     }
     switch (queueObject.action) {
-    case 'save':
-      // Queued update was overwritten by other request. Do not save
-      if (
-        typeof object.updatedAt !== 'undefined' &&
+      case 'save':
+        // Queued update was overwritten by other request. Do not save
+        if (
+          typeof object.updatedAt !== 'undefined' &&
           object.updatedAt > new Date(queueObject.object.createdAt as Date)
-      ) {
-        return this.remove(queueObject.queueId);
-      }
-      try {
-        await object.save(queueObject.object, queueObject.serverOptions);
-        await this.remove(queueObject.queueId);
-      } catch (e) {
-        if (e.code !== ParseError.CONNECTION_FAILED) {
-          await this.remove(queueObject.queueId);
+        ) {
+          return this.remove(queueObject.queueId);
         }
-      }
-      break;
-    case 'destroy':
-      try {
-        await object.destroy(queueObject.serverOptions);
-        await this.remove(queueObject.queueId);
-      } catch (e) {
-        if (e.code !== ParseError.CONNECTION_FAILED) {
+        try {
+          await object.save(queueObject.object, queueObject.serverOptions);
           await this.remove(queueObject.queueId);
+        } catch (e) {
+          if (e.code !== ParseError.CONNECTION_FAILED) {
+            await this.remove(queueObject.queueId);
+          }
         }
-      }
-      break;
+        break;
+      case 'destroy':
+        try {
+          await object.destroy(queueObject.serverOptions);
+          await this.remove(queueObject.queueId);
+        } catch (e) {
+          if (e.code !== ParseError.CONNECTION_FAILED) {
+            await this.remove(queueObject.queueId);
+          }
+        }
+        break;
     }
   },
 
