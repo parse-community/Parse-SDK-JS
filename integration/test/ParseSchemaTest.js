@@ -23,6 +23,12 @@ const defaultCLPS = {
   delete: { '*': true },
   addField: { '*': true },
   protectedFields: { '*': [] },
+  ACL: {
+    '*': {
+      read: true,
+      write: true
+    }
+  },
 };
 
 describe('Schema', () => {
@@ -320,6 +326,12 @@ describe('Schema', () => {
       delete: {},
       addField: {},
       protectedFields: {},
+      ACL: {
+        '*': {
+          read: true,
+          write: true
+        }
+      },
     };
     const testSchema = new Parse.Schema('SchemaTest');
     let schema = await testSchema.save();
