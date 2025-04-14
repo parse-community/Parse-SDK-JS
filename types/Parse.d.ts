@@ -20,7 +20,7 @@ import User from './ParseUser';
 import ParseLiveQuery from './ParseLiveQuery';
 import LiveQueryClient from './LiveQueryClient';
 import type { EventuallyQueue } from './CoreManager';
-export declare const Parse: {
+declare const Parse: {
     ACL: typeof ACL;
     Analytics: typeof Analytics;
     AnonymousUtils: {
