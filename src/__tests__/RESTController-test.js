@@ -175,6 +175,25 @@ describe('RESTController', () => {
     });
   });
 
+  it('handles request errors with message', done => {
+    RESTController._setXHR(
+      mockXHR([
+        {
+          status: 400,
+          response: {
+            code: 1,
+            message: 'Internal server error.',
+          },
+        },
+      ])
+    );
+    RESTController.request('GET', 'classes/MyObject', {}, {}).then(null, error => {
+      expect(error.code).toBe(1);
+      expect(error.message).toBe('Internal server error.');
+      done();
+    });
+  });
+
   it('handles invalid responses', done => {
     const XHR = function () {};
     XHR.prototype = {

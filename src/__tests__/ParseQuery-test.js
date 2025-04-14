@@ -2619,7 +2619,6 @@ describe('ParseQuery', () => {
           },
         });
         expect(options.useMasterKey).toEqual(true);
-        expect(options.sessionToken).toEqual('1234');
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: ['L'],
@@ -2629,9 +2628,7 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Item');
     q.equalTo('size', 'small')
-      .distinct('size', {
-        sessionToken: '1234',
-      })
+      .distinct('size')
       .then(results => {
         expect(results[0]).toBe('L');
         done();
@@ -2651,7 +2648,6 @@ describe('ParseQuery', () => {
           hint: '_id_',
         });
         expect(options.useMasterKey).toEqual(true);
-        expect(options.sessionToken).toEqual('1234');
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: ['L'],
@@ -2662,9 +2658,7 @@ describe('ParseQuery', () => {
     const q = new ParseQuery('Item');
     q.equalTo('size', 'small')
       .hint('_id_')
-      .distinct('size', {
-        sessionToken: '1234',
-      })
+      .distinct('size')
       .then(results => {
         expect(results[0]).toBe('L');
         done();
@@ -2799,7 +2793,6 @@ describe('ParseQuery', () => {
         expect(className).toBe('Item');
         expect(params.pipeline).toEqual([{ group: { objectId: '$name' } }]);
         expect(options.useMasterKey).toEqual(true);
-        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [],
         });
@@ -2807,9 +2800,7 @@ describe('ParseQuery', () => {
     });
 
     const q = new ParseQuery('Item');
-    q.aggregate(pipeline, {
-      sessionToken: '1234',
-    }).then(results => {
+    q.aggregate(pipeline).then(results => {
       expect(results).toEqual([]);
       done();
     });
@@ -2831,7 +2822,7 @@ describe('ParseQuery', () => {
     // Query
     const q = new ParseQuery('Item');
     q.readPreference('SECONDARY');
-    const results = await q.aggregate([], { sessionToken: '1234' });
+    const results = await q.aggregate([]);
     // Validate
     expect(results).toEqual([]);
   });
@@ -2845,7 +2836,6 @@ describe('ParseQuery', () => {
         expect(params.pipeline).toEqual([{ group: { objectId: '$name' } }]);
         expect(params.hint).toEqual('_id_');
         expect(options.useMasterKey).toEqual(true);
-        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [],
         });
@@ -2854,9 +2844,7 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Item');
     q.hint('_id_')
-      .aggregate(pipeline, {
-        sessionToken: '1234',
-      })
+      .aggregate(pipeline)
       .then(results => {
         expect(results).toEqual([]);
         done();

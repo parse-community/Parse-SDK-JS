@@ -12,42 +12,42 @@ export function opFromJSON(json: Record<string, any>): Op | null {
     return null;
   }
   switch (json.__op) {
-  case 'Delete':
-    return new UnsetOp();
-  case 'Increment':
-    return new IncrementOp(json.amount);
-  case 'Add':
-    return new AddOp(decode(json.objects));
-  case 'AddUnique':
-    return new AddUniqueOp(decode(json.objects));
-  case 'Remove':
-    return new RemoveOp(decode(json.objects));
-  case 'AddRelation': {
-    const toAdd = decode(json.objects);
-    if (!Array.isArray(toAdd)) {
-      return new RelationOp([], []);
-    }
-    return new RelationOp(toAdd, []);
-  }
-  case 'RemoveRelation': {
-    const toRemove = decode(json.objects);
-    if (!Array.isArray(toRemove)) {
-      return new RelationOp([], []);
-    }
-    return new RelationOp([], toRemove);
-  }
-  case 'Batch': {
-    let toAdd = [];
-    let toRemove = [];
-    for (let i = 0; i < json.ops.length; i++) {
-      if (json.ops[i].__op === 'AddRelation') {
-        toAdd = toAdd.concat(decode(json.ops[i].objects));
-      } else if (json.ops[i].__op === 'RemoveRelation') {
-        toRemove = toRemove.concat(decode(json.ops[i].objects));
+    case 'Delete':
+      return new UnsetOp();
+    case 'Increment':
+      return new IncrementOp(json.amount);
+    case 'Add':
+      return new AddOp(decode(json.objects));
+    case 'AddUnique':
+      return new AddUniqueOp(decode(json.objects));
+    case 'Remove':
+      return new RemoveOp(decode(json.objects));
+    case 'AddRelation': {
+      const toAdd = decode(json.objects);
+      if (!Array.isArray(toAdd)) {
+        return new RelationOp([], []);
       }
+      return new RelationOp(toAdd, []);
     }
-    return new RelationOp(toAdd, toRemove);
-  }
+    case 'RemoveRelation': {
+      const toRemove = decode(json.objects);
+      if (!Array.isArray(toRemove)) {
+        return new RelationOp([], []);
+      }
+      return new RelationOp([], toRemove);
+    }
+    case 'Batch': {
+      let toAdd = [];
+      let toRemove = [];
+      for (let i = 0; i < json.ops.length; i++) {
+        if (json.ops[i].__op === 'AddRelation') {
+          toAdd = toAdd.concat(decode(json.ops[i].objects));
+        } else if (json.ops[i].__op === 'RemoveRelation') {
+          toRemove = toRemove.concat(decode(json.ops[i].objects));
+        }
+      }
+      return new RelationOp(toAdd, toRemove);
+    }
   }
   return null;
 }

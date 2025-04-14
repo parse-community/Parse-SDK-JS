@@ -14,7 +14,7 @@ module.exports = tseslint.config({
     jsdoc,
   },
   "rules": {
-    "indent": ["error", 2],
+    "indent": ["error", 2, { "SwitchCase": 1 }],
     "linebreak-style": ["error", "unix"],
     "no-trailing-spaces": 2,
     "eol-last": 2,
@@ -55,6 +55,7 @@ module.exports = tseslint.config({
     "jsdoc/require-param-description": 0,
     "jsdoc/require-property-description": 0,
     "jsdoc/require-param-type": 0,
+    "jsdoc/require-param": 1,
     "jsdoc/tag-lines": 0,
     "jsdoc/check-param-names": [
       "error",
@@ -73,6 +74,15 @@ module.exports = tseslint.config({
         ]
       }
     ]
+  },
+  settings: {
+    jsdoc: {
+      tagNamePreference: {
+        member: false,
+        memberof: false,
+        yield: false,
+      },
+    },
   },
   languageOptions: {
     parser: tseslint.parser,

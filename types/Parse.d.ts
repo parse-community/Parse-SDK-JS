@@ -219,7 +219,7 @@ declare const Parse: {
     Hooks: any;
     Parse: any;
     /**
-     * @member {EventuallyQueue} Parse.EventuallyQueue
+     * @property {EventuallyQueue} Parse.EventuallyQueue
      * @static
      */
     EventuallyQueue: EventuallyQueue;
@@ -258,67 +258,67 @@ declare const Parse: {
      */
     getServerHealth(): Promise<any>;
     /**
-     * @member {string} Parse.applicationId
+     * @property {string} Parse.applicationId
      * @static
      */
     applicationId: any;
     /**
-     * @member {string} Parse.javaScriptKey
+     * @property {string} Parse.javaScriptKey
      * @static
      */
     javaScriptKey: any;
     /**
-     * @member {string} Parse.masterKey
+     * @property {string} Parse.masterKey
      * @static
      */
     masterKey: any;
     /**
-     * @member {string} Parse.maintenanceKey
+     * @property {string} Parse.maintenanceKey
      * @static
      */
     maintenanceKey: any;
     /**
-     * @member {string} Parse.serverURL
+     * @property {string} Parse.serverURL
      * @static
      */
     serverURL: any;
     /**
-     * @member {string} Parse.serverAuthToken
+     * @property {string} Parse.serverAuthToken
      * @static
      */
     serverAuthToken: any;
     /**
-     * @member {string} Parse.serverAuthType
+     * @property {string} Parse.serverAuthType
      * @static
      */
     serverAuthType: any;
     /**
-     * @member {ParseLiveQuery} Parse.LiveQuery
+     * @property {ParseLiveQuery} Parse.LiveQuery
      * @static
      */
     LiveQuery: ParseLiveQuery;
     /**
-     * @member {string} Parse.liveQueryServerURL
+     * @property {string} Parse.liveQueryServerURL
      * @static
      */
     liveQueryServerURL: any;
     /**
-     * @member {boolean} Parse.encryptedUser
+     * @property {boolean} Parse.encryptedUser
      * @static
      */
     encryptedUser: boolean;
     /**
-     * @member {string} Parse.secret
+     * @property {string} Parse.secret
      * @static
      */
     secret: any;
     /**
-     * @member {boolean} Parse.idempotency
+     * @property {boolean} Parse.idempotency
      * @static
      */
     idempotency: any;
     /**
-     * @member {boolean} Parse.allowCustomObjectId
+     * @property {boolean} Parse.allowCustomObjectId
      * @static
      */
     allowCustomObjectId: any;

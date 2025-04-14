@@ -265,24 +265,16 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * Executes a distinct query and returns unique values
      *
      * @param {string} key A field to find distinct values
-     * @param {object} options
-     * @param {string} [options.sessionToken] A valid session token, used for making a request on behalf of a specific user.
      * @returns {Promise} A promise that is resolved with the query completes.
      */
-    distinct<K extends keyof T['attributes'], V = T['attributes'][K]>(key: K, options?: {
-        sessionToken?: string;
-    }): Promise<V[]>;
+    distinct<K extends keyof T['attributes'], V = T['attributes'][K]>(key: K): Promise<V[]>;
     /**
      * Executes an aggregate query and returns aggregate results
      *
      * @param {(Array|object)} pipeline Array or Object of stages to process query
-     * @param {object} options
-     * @param {string} [options.sessionToken] A valid session token, used for making a request on behalf of a specific user.
      * @returns {Promise} A promise that is resolved with the query completes.
      */
-    aggregate(pipeline: any, options?: {
-        sessionToken?: string;
-    }): Promise<any[]>;
+    aggregate(pipeline: any): Promise<any[]>;
     /**
      * Retrieves at most one Parse.Object that satisfies this query.
      *

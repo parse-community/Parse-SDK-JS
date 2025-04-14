@@ -378,87 +378,87 @@ class LiveQueryClient {
       installationId: data.installationId,
     };
     switch (data.op) {
-    case OP_EVENTS.CONNECTED:
-      if (this.state === CLIENT_STATE.RECONNECTING) {
-        this.resubscribe();
-      }
-      this.emit(CLIENT_EMMITER_TYPES.OPEN);
-      this.id = data.clientId;
-      this.connectPromise.resolve();
-      this.state = CLIENT_STATE.CONNECTED;
-      break;
-    case OP_EVENTS.SUBSCRIBED:
-      if (subscription) {
-        this.attempts = 1;
-        subscription.subscribed = true;
-        subscription.subscribePromise.resolve();
-        setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN, response), 200);
-      }
-      break;
-    case OP_EVENTS.ERROR: {
-      const parseError = new ParseError(data.code, data.error);
-      if (!this.id) {
-        this.connectPromise.reject(parseError);
-        this.state = CLIENT_STATE.DISCONNECTED;
-      }
-      if (data.requestId) {
-        if (subscription) {
-          subscription.subscribePromise.reject(parseError);
-          setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, data.error), 200);
+      case OP_EVENTS.CONNECTED:
+        if (this.state === CLIENT_STATE.RECONNECTING) {
+          this.resubscribe();
         }
-      } else {
-        this.emit(CLIENT_EMMITER_TYPES.ERROR, data.error);
-      }
-      if (data.error === 'Additional properties not allowed') {
-        this.additionalProperties = false;
-      }
-      if (data.reconnect) {
-        this._handleReconnect();
-      }
-      break;
-    }
-    case OP_EVENTS.UNSUBSCRIBED: {
-      if (subscription) {
-        this.subscriptions.delete(data.requestId);
-        subscription.subscribed = false;
-        subscription.unsubscribePromise.resolve();
-      }
-      break;
-    }
-    default: {
-      // create, update, enter, leave, delete cases
-      if (!subscription) {
+        this.emit(CLIENT_EMMITER_TYPES.OPEN);
+        this.id = data.clientId;
+        this.connectPromise.resolve();
+        this.state = CLIENT_STATE.CONNECTED;
+        break;
+      case OP_EVENTS.SUBSCRIBED:
+        if (subscription) {
+          this.attempts = 1;
+          subscription.subscribed = true;
+          subscription.subscribePromise.resolve();
+          setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.OPEN, response), 200);
+        }
+        break;
+      case OP_EVENTS.ERROR: {
+        const parseError = new ParseError(data.code, data.error);
+        if (!this.id) {
+          this.connectPromise.reject(parseError);
+          this.state = CLIENT_STATE.DISCONNECTED;
+        }
+        if (data.requestId) {
+          if (subscription) {
+            subscription.subscribePromise.reject(parseError);
+            setTimeout(() => subscription.emit(SUBSCRIPTION_EMMITER_TYPES.ERROR, data.error), 200);
+          }
+        } else {
+          this.emit(CLIENT_EMMITER_TYPES.ERROR, data.error);
+        }
+        if (data.error === 'Additional properties not allowed') {
+          this.additionalProperties = false;
+        }
+        if (data.reconnect) {
+          this._handleReconnect();
+        }
         break;
       }
-      let override = false;
-      if (data.original) {
-        override = true;
-        delete data.original.__type;
-        // Check for removed fields
-        for (const field in data.original) {
-          if (!(field in data.object)) {
-            data.object[field] = undefined;
-          }
+      case OP_EVENTS.UNSUBSCRIBED: {
+        if (subscription) {
+          this.subscriptions.delete(data.requestId);
+          subscription.subscribed = false;
+          subscription.unsubscribePromise.resolve();
         }
-        data.original = ParseObject.fromJSON(data.original, false);
+        break;
       }
-      delete data.object.__type;
-      const parseObject = ParseObject.fromJSON(
-        data.object,
-        !(subscription.query && subscription.query._select) ? override : false
-      );
+      default: {
+        // create, update, enter, leave, delete cases
+        if (!subscription) {
+          break;
+        }
+        let override = false;
+        if (data.original) {
+          override = true;
+          delete data.original.__type;
+          // Check for removed fields
+          for (const field in data.original) {
+            if (!(field in data.object)) {
+              data.object[field] = undefined;
+            }
+          }
+          data.original = ParseObject.fromJSON(data.original, false);
+        }
+        delete data.object.__type;
+        const parseObject = ParseObject.fromJSON(
+          data.object,
+          !(subscription.query && subscription.query._select) ? override : false
+        );
 
-      if (data.original) {
-        subscription.emit(data.op, parseObject, data.original, response);
-      } else {
-        subscription.emit(data.op, parseObject, response);
-      }
+        if (data.original) {
+          subscription.emit(data.op, parseObject, data.original, response);
+        } else {
+          subscription.emit(data.op, parseObject, response);
+        }
 
-      const localDatastore = CoreManager.getLocalDatastore();
-      if (override && localDatastore.isEnabled) {
-        localDatastore._updateObjectIfPinned(parseObject).then(() => {});
+        const localDatastore = CoreManager.getLocalDatastore();
+        if (override && localDatastore.isEnabled) {
+          localDatastore._updateObjectIfPinned(parseObject).then(() => {});
+        }
       }
-    }
     }
   }
 

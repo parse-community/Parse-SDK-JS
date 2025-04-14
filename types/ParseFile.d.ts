@@ -44,7 +44,7 @@ declare class ParseFile {
      *     an alphanumeric character, and consist of alphanumeric characters,
      *     periods, spaces, underscores, or dashes.
      * @param data {Array} The data for the file, as either:
-     *     1. an Array of byte value Numbers, or
+     *     1. an Array of byte value Numbers or Uint8Array.
      *     2. an Object like { base64: "..." } with a base64-encoded String.
      *     3. an Object like { uri: "..." } with a uri String.
      *     4. a File object selected with a file upload control. (3) only works

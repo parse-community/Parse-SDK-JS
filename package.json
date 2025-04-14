@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "6.1.0-alpha.3",
+  "version": "6.2.0-alpha.2",
   "description": "Parse JavaScript SDK",
   "homepage": "https://parseplatform.org",
   "keywords": [
@@ -31,7 +31,7 @@
     "react-native": false
   },
   "dependencies": {
-    "@babel/runtime-corejs3": "7.26.10",
+    "@babel/runtime-corejs3": "7.27.0",
     "idb-keyval": "6.2.1",
     "react-native-crypto-js": "1.0.0",
     "uuid": "10.0.0",
@@ -45,7 +45,7 @@
     "@babel/preset-env": "7.26.9",
     "@babel/preset-react": "7.26.3",
     "@babel/preset-typescript": "7.27.0",
-    "@eslint/js": "9.23.0",
+    "@eslint/js": "9.24.0",
     "@parse/minami": "git+https://github.com/parse-community/minami#main",
     "@saithodev/semantic-release-backmerge": "4.0.1",
     "@semantic-release/changelog": "6.0.3",
@@ -63,10 +63,10 @@
     "codecov": "3.8.3",
     "core-js": "3.41.0",
     "cross-env": "7.0.2",
-    "eslint": "9.23.0",
+    "eslint": "9.24.0",
     "eslint-plugin-expect-type": "0.6.2",
     "eslint-plugin-jsdoc": "50.6.9",
-    "express": "4.21.2",
+    "express": "5.1.0",
     "gulp": "5.0.0",
     "gulp-babel": "8.0.0",
     "gulp-derequire": "3.0.0",
@@ -74,7 +74,6 @@
     "gulp-rename": "2.0.0",
     "gulp-uglify": "3.0.2",
     "gulp-watch": "5.0.1",
-    "husky": "9.1.7",
     "jasmine": "5.6.0",
     "jasmine-reporters": "2.5.2",
     "jasmine-spec-reporter": "7.0.0",
@@ -85,13 +84,12 @@
     "lint-staged": "15.5.0",
     "madge": "8.0.0",
     "metro-react-native-babel-preset": "0.77.0",
-    "mongodb-runner": "5.8.0",
-    "parse-server": "7.3.0",
-    "prettier": "3.5.2",
-    "puppeteer": "24.4.0",
+    "mongodb-runner": "5.8.2",
+    "parse-server": "8.1.0",
+    "puppeteer": "24.6.1",
     "regenerator-runtime": "0.14.1",
     "semantic-release": "24.2.3",
-    "typescript-eslint": "8.28.0",
+    "typescript-eslint": "8.29.1",
     "vinyl-source-stream": "2.0.0"
   },
   "optionalDependencies": {
@@ -117,19 +115,10 @@
     "integration": "cross-env TESTING=1 jasmine --config=jasmine.json",
     "docs": "jsdoc -c ./jsdoc-conf.json ./src",
     "madge:circular": "madge ./src --extensions js,ts --circular",
-    "prepare": "husky && npm run build",
-    "pre-commit": "lint-staged",
+    "prepare": "npm run build",
     "release_docs": "./release_docs.sh",
     "gulp": "gulp",
-    "prettier": "prettier --write '{src,integration,types}/{**/*,*}.{js,ts}' && npm run lint:fix",
     "cross-env": "cross-env"
-  },
-  "lint-staged": {
-    "{src,integration}/{**/*,*}.{js,ts}": [
-      "prettier --write",
-      "eslint --fix --cache",
-      "git add"
-    ]
   },
   "engines": {
     "node": "18 || 19 || 20 || 22"

@@ -6,6 +6,7 @@
  * where status is a HTTP status number and result is a JSON object to pass
  * alongside it.
  * `upload` can be provided to mock the XMLHttpRequest.upload property.
+ * @ignore
  */
 function mockXHR(results, options = {}) {
   const XHR = function () {};

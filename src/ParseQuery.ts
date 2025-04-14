@@ -780,29 +780,17 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * Executes a distinct query and returns unique values
    *
    * @param {string} key A field to find distinct values
-   * @param {object} options
-   * @param {string} [options.sessionToken] A valid session token, used for making a request on behalf of a specific user.
    * @returns {Promise} A promise that is resolved with the query completes.
    */
-  distinct<K extends keyof T['attributes'], V = T['attributes'][K]>(
-    key: K,
-    options?: { sessionToken?: string }
-  ): Promise<V[]> {
-    options = options || {};
-    const distinctOptions: { sessionToken?: string; useMasterKey: boolean } = {
-      useMasterKey: true,
-    };
-    if (Object.hasOwn(options, 'sessionToken')) {
-      distinctOptions.sessionToken = options.sessionToken;
-    }
+  distinct<K extends keyof T['attributes'], V = T['attributes'][K]>(key: K): Promise<V[]> {
+    const distinctOptions = { useMasterKey: true };
     this._setRequestTask(distinctOptions);
-
-    const controller = CoreManager.getQueryController();
     const params = {
       distinct: key,
       where: this._where,
       hint: this._hint,
     };
+    const controller = CoreManager.getQueryController();
     return controller.aggregate(this.className, params, distinctOptions).then(results => {
       return results.results!;
     });
@@ -812,39 +800,28 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * Executes an aggregate query and returns aggregate results
    *
    * @param {(Array|object)} pipeline Array or Object of stages to process query
-   * @param {object} options
-   * @param {string} [options.sessionToken] A valid session token, used for making a request on behalf of a specific user.
    * @returns {Promise} A promise that is resolved with the query completes.
    */
-  aggregate(pipeline: any, options?: { sessionToken?: string }): Promise<any[]> {
-    options = options || {};
-    const aggregateOptions: { sessionToken?: string; useMasterKey: boolean } = {
-      useMasterKey: true,
-    };
-    if (Object.hasOwn(options, 'sessionToken')) {
-      aggregateOptions.sessionToken = options.sessionToken;
-    }
-    this._setRequestTask(aggregateOptions);
-
-    const controller = CoreManager.getQueryController();
-
+  aggregate(pipeline: any): Promise<any[]> {
     if (!Array.isArray(pipeline) && typeof pipeline !== 'object') {
       throw new Error('Invalid pipeline must be Array or Object');
     }
-
     if (Object.keys(this._where || {}).length) {
       if (!Array.isArray(pipeline)) {
         pipeline = [pipeline];
       }
       pipeline.unshift({ $match: this._where });
     }
-
     const params = {
       pipeline,
       hint: this._hint,
       explain: this._explain,
       readPreference: this._readPreference,
     };
+    const aggregateOptions = { useMasterKey: true };
+    this._setRequestTask(aggregateOptions);
+
+    const controller = CoreManager.getQueryController();
     return controller.aggregate(this.className, params, aggregateOptions).then(results => {
       return results.results!;
     });
@@ -1568,17 +1545,17 @@ class ParseQuery<T extends ParseObject = ParseObject> {
 
     for (const option in options) {
       switch (option) {
-      case 'language':
-        fullOptions.$language = options[option];
-        break;
-      case 'caseSensitive':
-        fullOptions.$caseSensitive = options[option];
-        break;
-      case 'diacriticSensitive':
-        fullOptions.$diacriticSensitive = options[option];
-        break;
-      default:
-        throw new Error(`Unknown option: ${option}`);
+        case 'language':
+          fullOptions.$language = options[option];
+          break;
+        case 'caseSensitive':
+          fullOptions.$caseSensitive = options[option];
+          break;
+        case 'diacriticSensitive':
+          fullOptions.$diacriticSensitive = options[option];
+          break;
+        default:
+          throw new Error(`Unknown option: ${option}`);
       }
     }
 

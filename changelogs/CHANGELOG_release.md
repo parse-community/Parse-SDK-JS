@@ -1,3 +1,20 @@
+## [6.1.1](https://github.com/parse-community/Parse-SDK-JS/compare/6.1.0...6.1.1) (2025-04-04)
+
+
+### Bug Fixes
+
+* Remove unused option `sessionToken` from `Parse.Query.aggregate` ([#2547](https://github.com/parse-community/Parse-SDK-JS/issues/2547)) ([c7015ba](https://github.com/parse-community/Parse-SDK-JS/commit/c7015ba42c13d7a4bbe5246b0944e64dcea1712f))
+* Security upgrade tar-fs from 2.1.1 to 2.1.2 ([#2540](https://github.com/parse-community/Parse-SDK-JS/issues/2540)) ([44eeacd](https://github.com/parse-community/Parse-SDK-JS/commit/44eeacd9b4af90c8a5f48264506d058ca2745109))
+
+# [6.1.0](https://github.com/parse-community/Parse-SDK-JS/compare/6.0.0...6.1.0) (2025-03-17)
+
+
+### Features
+
+* Add `Parse.Query` option `useMaintenanceKey` ([#2484](https://github.com/parse-community/Parse-SDK-JS/issues/2484)) ([2ead3f3](https://github.com/parse-community/Parse-SDK-JS/commit/2ead3f3af31654b27470bb5b596cb01df03e8fe3))
+* Allow `Parse.Object` field names to begin with underscore `_` to access internal fields of Parse Server ([#2475](https://github.com/parse-community/Parse-SDK-JS/issues/2475)) ([08e43ba](https://github.com/parse-community/Parse-SDK-JS/commit/08e43ba86276096820f467d9f5819e624a286b22))
+* Publish TypeScript definitions ([#2491](https://github.com/parse-community/Parse-SDK-JS/issues/2491)) ([fc3e573](https://github.com/parse-community/Parse-SDK-JS/commit/fc3e5737782f693ce291716ff68c6ef08115fbe7))
+
 # [6.0.0](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0...6.0.0) (2025-03-02)
 
 
