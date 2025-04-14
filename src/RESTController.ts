@@ -334,7 +334,7 @@ const RESTController = {
     if (response && response.responseText) {
       try {
         const errorJSON = JSON.parse(response.responseText);
-        error = new ParseError(errorJSON.code, errorJSON.error);
+        error = new ParseError(errorJSON.code, errorJSON.error || errorJSON.message);
       } catch (_) {
         // If we fail to parse the error text, that's okay.
         error = new ParseError(

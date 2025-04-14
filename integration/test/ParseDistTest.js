@@ -8,6 +8,7 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
     beforeEach(async () => {
       browser = await puppeteer.launch({
         args: ['--disable-web-security', '--incognito', '--no-sandbox'],
+        devtools: false,
       });
       const context = await browser.createBrowserContext();
       page = await context.newPage();
@@ -42,7 +43,7 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
       expect(obj.id).toEqual(response);
     });
 
-    it('can cancel save file with uri', async () => {
+    it('can cancel save file', async () => {
       let requestsCount = 0;
       let abortedCount = 0;
       const promise = resolvingPromise();
@@ -63,11 +64,11 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
         }
       });
       await page.evaluate(async () => {
-        const parseLogo =
-          'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
-        const file = new Parse.File('parse-server-logo', { uri: parseLogo });
-        file.save().then(() => {});
-
+        const SIZE_10_MB = 10 * 1024 * 1024;
+        const file = new Parse.File('test_file.txt', new Uint8Array(SIZE_10_MB));
+        file.save().then(() => {
+          fail('should not save');
+        });
         return new Promise(resolve => {
           const intervalId = setInterval(() => {
             if (file._requestTask && typeof file._requestTask.abort === 'function') {

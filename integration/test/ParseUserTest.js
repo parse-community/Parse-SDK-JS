@@ -1047,6 +1047,11 @@ describe('Parse User', () => {
   });
 
   it('can link with twitter', async () => {
+    const twitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default;
+    spyOn(twitterAdapter, 'beforeFind').and.callFake(() => {
+      return Promise.resolve();
+    });
+
     const server = await reconfigureServer();
     const twitter = server.config.auth.twitter;
     const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
@@ -1067,6 +1072,11 @@ describe('Parse User', () => {
   });
 
   it('can link with twitter and facebook', async () => {
+    const twitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default;
+    spyOn(twitterAdapter, 'beforeFind').and.callFake(() => {
+      return Promise.resolve();
+    });
+
     const server = await reconfigureServer();
     const twitter = server.config.auth.twitter;
     const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
