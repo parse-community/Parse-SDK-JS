@@ -1,154 +1,92 @@
 import decode from './decode';
 import encode from './encode';
 import CryptoController from './CryptoController';
-import EventuallyQueue from './EventuallyQueue';
+import EQ from './EventuallyQueue';
+import IndexedDBStorageController from './IndexedDBStorageController';
 import InstallationController from './InstallationController';
 import * as ParseOp from './ParseOp';
 import RESTController from './RESTController';
 import ACL from './ParseACL';
-import * as Analytics from './Analytics'
-import AnonymousUtils from './AnonymousUtils'
+import * as Analytics from './Analytics';
+import AnonymousUtils from './AnonymousUtils';
 import * as Cloud from './Cloud';
 import CLP from './ParseCLP';
 import CoreManager from './CoreManager';
 import EventEmitter from './EventEmitter';
-import Config from './ParseConfig'
-import ParseError from './ParseError'
-import FacebookUtils from './FacebookUtils'
-import File from './ParseFile'
-import GeoPoint from './ParseGeoPoint'
-import Polygon from './ParsePolygon'
-import Installation from './ParseInstallation'
-import LocalDatastore from './LocalDatastore'
-import Object from './ParseObject'
-import * as Push from './Push'
-import Query from './ParseQuery'
-import Relation from './ParseRelation'
-import Role from './ParseRole'
-import Schema from './ParseSchema'
-import Session from './ParseSession'
-import Storage from './Storage'
-import User from './ParseUser'
-import LiveQuery from './ParseLiveQuery'
-import LiveQueryClient from './LiveQueryClient'
+import Config from './ParseConfig';
+import ParseError from './ParseError';
+import FacebookUtils from './FacebookUtils';
+import File from './ParseFile';
+import * as Hooks from './ParseHooks';
+import GeoPoint from './ParseGeoPoint';
+import Polygon from './ParsePolygon';
+import Installation from './ParseInstallation';
+import LocalDatastore from './LocalDatastore';
+import ParseObject from './ParseObject';
+import * as Push from './Push';
+import Query from './ParseQuery';
+import Relation from './ParseRelation';
+import Role from './ParseRole';
+import Schema from './ParseSchema';
+import Session from './ParseSession';
+import Storage from './Storage';
+import User from './ParseUser';
+import ParseLiveQuery from './ParseLiveQuery';
+import LiveQueryClient from './LiveQueryClient';
+import LocalDatastoreController from './LocalDatastoreController';
+import StorageController from './StorageController';
+import WebSocketController from './WebSocketController';
+import type { EventuallyQueue } from './CoreManager';
 
-/**
- * Contains all Parse API classes and functions.
- *
- * @static
- * @global
- * @class
- * @hideconstructor
-*/
-
-interface ParseType {
-  ACL: typeof ACL,
-  Parse?: ParseType,
-  Analytics: typeof Analytics,
-  AnonymousUtils: typeof AnonymousUtils,
-  Cloud: typeof Cloud,
-  CLP: typeof CLP,
-  CoreManager: typeof CoreManager,
-  Config: typeof Config,
-  Error: typeof ParseError,
-  EventuallyQueue: typeof EventuallyQueue,
-  FacebookUtils: typeof FacebookUtils,
-  File: typeof File,
-  GeoPoint: typeof GeoPoint,
-  Hooks?: any,
-  Polygon: typeof Polygon,
-  Installation: typeof Installation,
-  LocalDatastore: typeof LocalDatastore,
-  Object: typeof Object,
+const Parse = {
+  ACL,
+  Analytics,
+  AnonymousUtils,
+  Cloud,
+  CLP,
+  CoreManager,
+  Config,
+  Error: ParseError,
+  FacebookUtils,
+  File,
+  GeoPoint,
+  Polygon,
+  Installation,
+  LocalDatastore,
+  Object: ParseObject,
   Op: {
-    Set: typeof ParseOp.SetOp,
-    Unset: typeof ParseOp.UnsetOp,
-    Increment: typeof ParseOp.IncrementOp,
-    Add: typeof ParseOp.AddOp,
-    Remove: typeof ParseOp.RemoveOp,
-    AddUnique: typeof ParseOp.AddUniqueOp,
-    Relation: typeof ParseOp.RelationOp,
-  };
-  Push: typeof Push,
-  Query: typeof Query,
-  Relation: typeof Relation,
-  Role: typeof Role,
-  Schema: typeof Schema,
-  Session: typeof Session,
-  Storage: typeof Storage,
-  User: typeof User,
-  LiveQuery?: typeof LiveQuery,
-  LiveQueryClient: typeof LiveQueryClient,
-
-  initialize(applicationId: string, javaScriptKey: string): void,
-  _initialize(applicationId: string, javaScriptKey: string, masterKey?: string): void,
-  setAsyncStorage(storage: any): void,
-  setLocalDatastoreController(controller: any): void,
-  getServerHealth(): Promise<any>
-
-  applicationId: string,
-  javaScriptKey: string,
-  masterKey: string,
-  serverURL: string,
-  serverAuthToken: string,
-  serverAuthType: string,
-  liveQueryServerURL: string,
-  encryptedUser: boolean,
-  secret: string,
-  idempotency: boolean,
-  allowCustomObjectId: boolean,
-  IndexedDB?: any,
-  _request(...args: any[]): void,
-  _ajax(...args: any[]): void,
-  _decode(...args: any[]): void,
-  _encode(...args: any[]): void,
-  _getInstallationId?(): string,
-  enableLocalDatastore(polling: boolean, ms: number): void,
-  isLocalDatastoreEnabled(): boolean,
-  dumpLocalDatastore(): void,
-  enableEncryptedUser(): void,
-  isEncryptedUserEnabled(): void,
-}
-
-const Parse: ParseType = {
-  ACL: ACL,
-  Analytics: Analytics,
-  AnonymousUtils:  AnonymousUtils,
-  Cloud: Cloud,
-  CLP: CLP,
-  CoreManager:  CoreManager,
-  Config:  Config,
-  Error:  ParseError,
-  EventuallyQueue:  EventuallyQueue,
-  FacebookUtils: FacebookUtils,
-  File:  File,
-  GeoPoint:  GeoPoint,
-  Polygon:  Polygon,
-  Installation:  Installation,
-  LocalDatastore:  LocalDatastore,
-  Object:  Object,
-  Op: {
-    Set:  ParseOp.SetOp,
-    Unset:  ParseOp.UnsetOp,
-    Increment:  ParseOp.IncrementOp,
-    Add:  ParseOp.AddOp,
-    Remove:  ParseOp.RemoveOp,
-    AddUnique:  ParseOp.AddUniqueOp,
-    Relation:  ParseOp.RelationOp,
+    Set: ParseOp.SetOp,
+    Unset: ParseOp.UnsetOp,
+    Increment: ParseOp.IncrementOp,
+    Add: ParseOp.AddOp,
+    Remove: ParseOp.RemoveOp,
+    AddUnique: ParseOp.AddUniqueOp,
+    Relation: ParseOp.RelationOp,
   },
-  Push:  Push,
-  Query:  Query,
-  Relation:  Relation,
-  Role:  Role,
-  Schema:  Schema,
-  Session:  Session,
-  Storage:  Storage,
-  User:  User,
-  LiveQueryClient:  LiveQueryClient,
-  LiveQuery:  undefined,
+  Push,
+  Query,
+  Relation,
+  Role,
+  Schema,
+  Session,
+  Storage,
+  User,
+  LiveQueryClient,
   IndexedDB: undefined,
   Hooks: undefined,
   Parse: undefined,
+
+  /**
+   * @property {EventuallyQueue} Parse.EventuallyQueue
+   * @static
+   */
+  set EventuallyQueue(queue: EventuallyQueue) {
+    CoreManager.setEventuallyQueue(queue);
+  },
+
+  get EventuallyQueue(): EventuallyQueue {
+    return CoreManager.getEventuallyQueue();
+  },
 
   /**
    * Call this method first to set up your authentication tokens for Parse.
@@ -164,25 +102,40 @@ const Parse: ParseType = {
       CoreManager.get('IS_NODE') &&
       !process.env.SERVER_RENDERING
     ) {
-      /* eslint-disable no-console */
       console.log(
         "It looks like you're using the browser version of the SDK in a " +
           "node.js environment. You should require('parse/node') instead."
       );
-      /* eslint-enable no-console */
     }
     Parse._initialize(applicationId, javaScriptKey);
   },
 
-  _initialize(applicationId: string, javaScriptKey: string, masterKey?: string) {
+  _initialize(
+    applicationId: string,
+    javaScriptKey: string,
+    masterKey?: string,
+    maintenanceKey?: string
+  ) {
     CoreManager.set('APPLICATION_ID', applicationId);
     CoreManager.set('JAVASCRIPT_KEY', javaScriptKey);
+    CoreManager.set('MAINTENANCE_KEY', maintenanceKey);
     CoreManager.set('MASTER_KEY', masterKey);
     CoreManager.set('USE_MASTER_KEY', false);
     CoreManager.setIfNeeded('EventEmitter', EventEmitter);
+    CoreManager.setIfNeeded('LiveQuery', new ParseLiveQuery());
+    CoreManager.setIfNeeded('CryptoController', CryptoController);
+    CoreManager.setIfNeeded('EventuallyQueue', EQ);
+    CoreManager.setIfNeeded('InstallationController', InstallationController);
+    CoreManager.setIfNeeded('LocalDatastoreController', LocalDatastoreController);
+    CoreManager.setIfNeeded('StorageController', StorageController);
+    CoreManager.setIfNeeded('WebSocketController', WebSocketController);
 
-    Parse.LiveQuery = new LiveQuery();
-    CoreManager.setIfNeeded('LiveQuery', Parse.LiveQuery);
+    if (process.env.PARSE_BUILD === 'browser') {
+      Parse.IndexedDB = CoreManager.setIfNeeded(
+        'IndexedDBStorageController',
+        IndexedDBStorageController
+      );
+    }
   },
 
   /**
@@ -219,7 +172,7 @@ const Parse: ParseType = {
   },
 
   /**
-   * @member {string} Parse.applicationId
+   * @property {string} Parse.applicationId
    * @static
    */
   set applicationId(value) {
@@ -230,7 +183,7 @@ const Parse: ParseType = {
   },
 
   /**
-   * @member {string} Parse.javaScriptKey
+   * @property {string} Parse.javaScriptKey
    * @static
    */
   set javaScriptKey(value) {
@@ -241,7 +194,7 @@ const Parse: ParseType = {
   },
 
   /**
-   * @member {string} Parse.masterKey
+   * @property {string} Parse.masterKey
    * @static
    */
   set masterKey(value) {
@@ -252,7 +205,18 @@ const Parse: ParseType = {
   },
 
   /**
-   * @member {string} Parse.serverURL
+   * @property {string} Parse.maintenanceKey
+   * @static
+   */
+  set maintenanceKey(value) {
+    CoreManager.set('MAINTENANCE_KEY', value);
+  },
+  get maintenanceKey() {
+    return CoreManager.get('MAINTENANCE_KEY');
+  },
+
+  /**
+   * @property {string} Parse.serverURL
    * @static
    */
   set serverURL(value) {
@@ -263,7 +227,7 @@ const Parse: ParseType = {
   },
 
   /**
-   * @member {string} Parse.serverAuthToken
+   * @property {string} Parse.serverAuthToken
    * @static
    */
   set serverAuthToken(value) {
@@ -274,7 +238,7 @@ const Parse: ParseType = {
   },
 
   /**
-   * @member {string} Parse.serverAuthType
+   * @property {string} Parse.serverAuthType
    * @static
    */
   set serverAuthType(value) {
@@ -285,7 +249,18 @@ const Parse: ParseType = {
   },
 
   /**
-   * @member {string} Parse.liveQueryServerURL
+   * @property {ParseLiveQuery} Parse.LiveQuery
+   * @static
+   */
+  set LiveQuery(liveQuery: ParseLiveQuery) {
+    CoreManager.setLiveQuery(liveQuery);
+  },
+  get LiveQuery(): ParseLiveQuery {
+    return CoreManager.getLiveQuery();
+  },
+
+  /**
+   * @property {string} Parse.liveQueryServerURL
    * @static
    */
   set liveQueryServerURL(value) {
@@ -296,7 +271,7 @@ const Parse: ParseType = {
   },
 
   /**
-   * @member {boolean} Parse.encryptedUser
+   * @property {boolean} Parse.encryptedUser
    * @static
    */
   set encryptedUser(value: boolean) {
@@ -307,7 +282,7 @@ const Parse: ParseType = {
   },
 
   /**
-   * @member {string} Parse.secret
+   * @property {string} Parse.secret
    * @static
    */
   set secret(value) {
@@ -318,7 +293,7 @@ const Parse: ParseType = {
   },
 
   /**
-   * @member {boolean} Parse.idempotency
+   * @property {boolean} Parse.idempotency
    * @static
    */
   set idempotency(value) {
@@ -329,7 +304,7 @@ const Parse: ParseType = {
   },
 
   /**
-   * @member {boolean} Parse.allowCustomObjectId
+   * @property {boolean} Parse.allowCustomObjectId
    * @static
    */
   set allowCustomObjectId(value) {
@@ -356,7 +331,7 @@ const Parse: ParseType = {
     return encode(value, disallowObjects);
   },
 
-  _getInstallationId () {
+  _getInstallationId() {
     return CoreManager.getInstallationController().currentInstallationId();
   },
   /**
@@ -367,15 +342,15 @@ const Parse: ParseType = {
    * @param [ms] Milliseconds to ping the server. Default 2000ms
    * @static
    */
-  enableLocalDatastore(polling = true, ms: number = 2000) {
+  enableLocalDatastore(polling?: boolean, ms?: number) {
     if (!this.applicationId) {
       console.log("'enableLocalDataStore' must be called after 'initialize'");
       return;
     }
     if (!this.LocalDatastore.isEnabled) {
       this.LocalDatastore.isEnabled = true;
-      if (polling) {
-        EventuallyQueue.poll(ms);
+      if (polling || typeof polling === 'undefined') {
+        CoreManager.getEventuallyQueue().poll(ms || 2000);
       }
     }
   },
@@ -385,7 +360,7 @@ const Parse: ParseType = {
    * @static
    * @returns {boolean}
    */
-  isLocalDatastoreEnabled () {
+  isLocalDatastoreEnabled(): boolean {
     return this.LocalDatastore.isEnabled;
   },
   /**
@@ -400,7 +375,7 @@ const Parse: ParseType = {
    */
   dumpLocalDatastore() {
     if (!this.LocalDatastore.isEnabled) {
-      console.log('Parse.enableLocalDatastore() must be called first'); // eslint-disable-line no-console
+      console.log('Parse.enableLocalDatastore() must be called first');
       return Promise.resolve({});
     } else {
       return Parse.LocalDatastore._getAllContents();
@@ -413,7 +388,7 @@ const Parse: ParseType = {
    *
    * @static
    */
-  enableEncryptedUser () {
+  enableEncryptedUser() {
     this.encryptedUser = true;
   },
 
@@ -423,30 +398,25 @@ const Parse: ParseType = {
    * @static
    * @returns {boolean}
    */
-  isEncryptedUserEnabled () {
+  isEncryptedUserEnabled() {
     return this.encryptedUser;
   },
 };
 
-if (process.env.PARSE_BUILD === 'browser') {
-  Parse.IndexedDB = require('./IndexedDBStorageController');
-}
-
-CoreManager.setCryptoController(CryptoController);
-CoreManager.setInstallationController(InstallationController);
 CoreManager.setRESTController(RESTController);
 
 if (process.env.PARSE_BUILD === 'node') {
   Parse.initialize = Parse._initialize;
-  Parse.Cloud = Parse.Cloud || {};
-  Parse.Cloud.useMasterKey = function () {
+  Parse.Cloud = { ...(Parse.Cloud || ({} as any)) };
+  (Parse.Cloud as any).useMasterKey = function () {
     CoreManager.set('USE_MASTER_KEY', true);
   };
-  Parse.Hooks = require('./ParseHooks');
+  Parse.Hooks = Hooks;
 }
-
+if (process.env.PARSE_BUILD === 'browser') {
+  (globalThis as any).Parse = Parse;
+}
 // For legacy requires, of the form `var Parse = require('parse').Parse`
 Parse.Parse = Parse;
 
-module.exports = Parse;
 export default Parse;

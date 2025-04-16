@@ -6,7 +6,7 @@ const Parse = require('../../node');
 describe('Parse Object Subclasses', () => {
   it('uses subclasses when doing query find', done => {
     const Subclass = Parse.Object.extend('Subclass', {
-      initialize(attributes, options, number) {
+      initialize(_attributes, _options, number) {
         this.number = number || -1;
       },
     });
@@ -29,7 +29,7 @@ describe('Parse Object Subclasses', () => {
 
   it('uses subclasses when doing query get', done => {
     const Subclass = Parse.Object.extend('Subclass', {
-      initialize(attributes, options, number) {
+      initialize(_attributes, _options, number) {
         this.number = number || -1;
       },
     });

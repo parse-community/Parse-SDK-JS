@@ -1,5 +1,50 @@
-// @ts-nocheck
-export default ParseSchema;
+import ParseObject from './ParseObject';
+import ParseCLP from './ParseCLP';
+import type ParseGeoPoint from './ParseGeoPoint';
+import type ParseFile from './ParseFile';
+import type ParsePolygon from './ParsePolygon';
+import type ParseRelation from './ParseRelation';
+import type { PermissionsMap } from './ParseCLP';
+import type { Pointer } from './ParseObject';
+type Bytes = string;
+type TYPE = 'String' | 'Number' | 'Bytes' | 'Boolean' | 'Date' | 'File' | 'GeoPoint' | 'Polygon' | 'Array' | 'Object' | 'Pointer' | 'Relation';
+type AttrType<T extends ParseObject, V> = Extract<{
+    [K in keyof T['attributes']]: T['attributes'][K] extends V ? K : never;
+}[keyof T['attributes']], string>;
+interface FieldOptions<T extends string | number | boolean | Bytes | Date | ParseFile | ParseGeoPoint | ParsePolygon | any[] | object | Pointer | ParseRelation = any> {
+    required?: boolean | undefined;
+    defaultValue?: T | undefined;
+    targetClass?: string | undefined;
+}
+type Index = Record<string, number | string>;
+interface CLPField {
+    '*'?: boolean | undefined;
+    requiresAuthentication?: boolean | undefined;
+    [userIdOrRoleName: string]: boolean | undefined;
+}
+interface CLP {
+    find?: CLPField | undefined;
+    get?: CLPField | undefined;
+    count?: CLPField | undefined;
+    create?: CLPField | undefined;
+    update?: CLPField | undefined;
+    delete?: CLPField | undefined;
+    addField?: CLPField | undefined;
+    readUserFields?: string[] | undefined;
+    writeUserFields?: string[] | undefined;
+    protectedFields?: Record<string, string[]>;
+}
+interface RestSchema {
+    className: string;
+    fields: Record<string, {
+        type: string;
+        targetClass?: string;
+        required?: boolean;
+        defaultValue?: string;
+    }>;
+    classLevelPermissions: CLP;
+    indexes?: Record<string, Record<string, any>>;
+}
 /**
  * A Parse.Schema object is for handling schema data from Parse.
  * <p>All the schemas methods require MasterKey.
@@ -17,49 +62,43 @@ export default ParseSchema;
  *
  * @alias Parse.Schema
  */
-declare class ParseSchema {
+declare class ParseSchema<T extends ParseObject = any> {
+    className: string;
+    _fields: Record<string, any>;
+    _indexes: Record<string, any>;
+    _clp: Record<string, any>;
+    /**
+     * @param {string} className Parse Class string.
+     */
+    constructor(className: string);
     /**
      * Static method to get all schemas
      *
      * @returns {Promise} A promise that is resolved with the result when
      * the query completes.
      */
-    static all(): Promise<any>;
-    /**
-     * @param {string} className Parse Class string.
-     */
-    constructor(className: string);
-    className: string;
-    _fields: {
-        [key: string]: mixed;
-    };
-    _indexes: {
-        [key: string]: mixed;
-    };
-    _clp: {
-        [key: string]: mixed;
-    };
+    static all(): Promise<RestSchema[]>;
     /**
      * Get the Schema from Parse
      *
      * @returns {Promise} A promise that is resolved with the result when
      * the query completes.
      */
-    get(): Promise<any>;
+    get(): Promise<RestSchema>;
     /**
      * Create a new Schema on Parse
      *
      * @returns {Promise} A promise that is resolved with the result when
      * the query completes.
      */
-    save(): Promise<any>;
+    save(): Promise<ParseSchema>;
     /**
      * Update a Schema on Parse
      *
      * @returns {Promise} A promise that is resolved with the result when
      * the query completes.
      */
-    update(): Promise<any>;
+    update(): Promise<ParseSchema>;
     /**
      * Removing a Schema from Parse
      * Can only be used on Schema without objects
@@ -67,7 +106,7 @@ declare class ParseSchema {
      * @returns {Promise} A promise that is resolved with the result when
      * the query completes.
      */
-    delete(): Promise<any>;
+    delete(): Promise<void>;
     /**
      * Removes all objects from a Schema (class) in Parse.
      * EXERCISE CAUTION, running this will delete all objects for this schema and cannot be reversed
@@ -81,7 +120,7 @@ declare class ParseSchema {
      *
      * @private
      */
-    private assertClassName;
+    assertClassName(): void;
     /**
      * Sets Class Level Permissions when creating / updating a Schema.
      * EXERCISE CAUTION, running this may override CLP for this schema and cannot be reversed
@@ -89,7 +128,7 @@ declare class ParseSchema {
      * @param {object | Parse.CLP} clp Class Level Permissions
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    setCLP(clp: PermissionsMap | ParseCLP): Parse.Schema;
+    setCLP(clp: PermissionsMap | ParseCLP): this;
     /**
      * Adding a Field to Create / Update a Schema
      *
@@ -103,7 +142,7 @@ declare class ParseSchema {
      * </ul>
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    addField(name: string, type: string, options?: FieldOptions): Parse.Schema;
+    addField<T extends TYPE = any>(name: string, type?: T, options?: FieldOptions): this;
     /**
      * Adding an Index to Create / Update a Schema
      *
@@ -115,7 +154,7 @@ declare class ParseSchema {
      * schema.addIndex('index_name', { 'field': 1 });
      * </pre>
      */
-    addIndex(name: string, index: any): Parse.Schema;
+    addIndex(name: string, index: Index): this;
     /**
      * Adding String Field
      *
@@ -123,7 +162,7 @@ declare class ParseSchema {
      * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    addString(name: string, options: FieldOptions): Parse.Schema;
+    addString(name: AttrType<T, string>, options?: FieldOptions<string>): this;
     /**
      * Adding Number Field
      *
@@ -131,7 +170,7 @@ declare class ParseSchema {
      * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    addNumber(name: string, options: FieldOptions): Parse.Schema;
+    addNumber(name: AttrType<T, number>, options?: FieldOptions<number>): this;
     /**
      * Adding Boolean Field
      *
@@ -139,7 +178,15 @@ declare class ParseSchema {
      * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    addBoolean(name: string, options: FieldOptions): Parse.Schema;
+    addBoolean(name: AttrType<T, boolean>, options?: FieldOptions<boolean>): this;
+    /**
+     * Adding Bytes Field
+     *
+     * @param {string} name Name of the field that will be created on Parse
+     * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
+     * @returns {Parse.Schema} Returns the schema, so you can chain this call.
+     */
+    addBytes(name: AttrType<T, Bytes>, options?: FieldOptions<Bytes>): this;
     /**
      * Adding Date Field
      *
@@ -147,7 +194,7 @@ declare class ParseSchema {
      * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    addDate(name: string, options: FieldOptions): Parse.Schema;
+    addDate(name: AttrType<T, Date>, options?: FieldOptions<Date>): this;
     /**
      * Adding File Field
      *
@@ -155,7 +202,7 @@ declare class ParseSchema {
      * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    addFile(name: string, options: FieldOptions): Parse.Schema;
+    addFile(name: AttrType<T, ParseFile>, options?: FieldOptions<ParseFile>): this;
     /**
      * Adding GeoPoint Field
      *
@@ -163,7 +210,7 @@ declare class ParseSchema {
      * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    addGeoPoint(name: string, options: FieldOptions): Parse.Schema;
+    addGeoPoint(name: AttrType<T, ParseGeoPoint>, options?: FieldOptions<ParseGeoPoint>): this;
     /**
      * Adding Polygon Field
      *
@@ -171,7 +218,7 @@ declare class ParseSchema {
      * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    addPolygon(name: string, options: FieldOptions): Parse.Schema;
+    addPolygon(name: AttrType<T, ParsePolygon>, options?: FieldOptions<ParsePolygon>): this;
     /**
      * Adding Array Field
      *
@@ -179,7 +226,7 @@ declare class ParseSchema {
      * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    addArray(name: string, options: FieldOptions): Parse.Schema;
+    addArray(name: AttrType<T, any[]>, options?: FieldOptions<any[]>): this;
     /**
      * Adding Object Field
      *
@@ -187,7 +234,7 @@ declare class ParseSchema {
      * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    addObject(name: string, options: FieldOptions): Parse.Schema;
+    addObject(name: AttrType<T, object>, options?: FieldOptions<object>): this;
     /**
      * Adding Pointer Field
      *
@@ -196,7 +243,7 @@ declare class ParseSchema {
      * @param {object} options See {@link https://parseplatform.org/Parse-SDK-JS/api/master/Parse.Schema.html#addField addField}
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    addPointer(name: string, targetClass: string, options?: FieldOptions): Parse.Schema;
+    addPointer(name: AttrType<T, ParseObject | Pointer>, targetClass: string, options?: FieldOptions<Pointer>): this;
     /**
      * Adding Relation Field
      *
@@ -204,25 +251,20 @@ declare class ParseSchema {
      * @param {string} targetClass Name of the target Pointer Class
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    addRelation(name: string, targetClass: string): Parse.Schema;
+    addRelation(name: AttrType<T, ParseRelation>, targetClass: string): this;
     /**
      * Deleting a Field to Update on a Schema
      *
      * @param {string} name Name of the field
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    deleteField(name: string): Parse.Schema;
+    deleteField(name: string): this;
     /**
      * Deleting an Index to Update on a Schema
      *
      * @param {string} name Name of the field
      * @returns {Parse.Schema} Returns the schema, so you can chain this call.
      */
-    deleteIndex(name: string): Parse.Schema;
+    deleteIndex(name: string): this;
 }
-import { PermissionsMap } from './ParseCLP';
-import ParseCLP from './ParseCLP';
-type FieldOptions = {
-    required: boolean;
-    defaultValue: mixed;
-};
+export default ParseSchema;

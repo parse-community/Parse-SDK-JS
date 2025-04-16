@@ -5,12 +5,13 @@ jasmine.getEnv().addReporter(new SpecReporter());
 
 const ParseServer = require('parse-server').default;
 const CustomAuth = require('./CustomAuth');
-const sleep = require('./sleep');
 const { TestUtils } = require('parse-server');
 const Parse = require('../../node');
-const fs = require('fs');
+const { resolvingPromise } = require('../../lib/node/promiseUtils');
+const fs = require('fs').promises;
 const path = require('path');
 const dns = require('dns');
+const MockEmailAdapterWithOptions = require('./support/MockEmailAdapterWithOptions');
 
 // Ensure localhost resolves to ipv4 address first on node v17+
 if (dns.setDefaultResultOrder) {
@@ -21,6 +22,7 @@ const port = 1337;
 const mountPath = '/parse';
 const serverURL = 'http://localhost:1337/parse';
 let didChangeConfiguration = false;
+const distFiles = {};
 
 /*
   To generate the auth data below, the Twitter app "GitHub CI Test App" has
@@ -82,41 +84,63 @@ const defaultConfiguration = {
   },
   revokeSessionOnPasswordReset: false,
   allowCustomObjectId: false,
+  allowClientClassCreation: true,
+  encodeParseObjectInCloudFunction: true,
+  emailAdapter: MockEmailAdapterWithOptions({
+    fromAddress: 'parse@example.com',
+    apiKey: 'k',
+    domain: 'd',
+  }),
 };
 
-const openConnections = {};
-const destroyAliveConnections = function () {
-  for (const socketId in openConnections) {
-    try {
-      openConnections[socketId].destroy();
-      delete openConnections[socketId];
-    } catch (e) {
-      /* */
-    }
-  }
-};
+const openConnections = new Set();
 let parseServer;
-let server;
+
+const destroyConnections = () => {
+  for (const socket of openConnections.values()) {
+    socket.destroy();
+  }
+  openConnections.clear();
+};
+
+const shutdownServer = async _parseServer => {
+  const closePromise = resolvingPromise();
+  _parseServer.server.on('close', () => {
+    closePromise.resolve();
+  });
+  await Promise.all([
+    _parseServer.config.databaseController.adapter.handleShutdown(),
+    _parseServer.liveQueryServer.shutdown(),
+  ]);
+  _parseServer.server.close(error => {
+    if (error) {
+      console.error('Failed to close Parse Server', error);
+    }
+  });
+  destroyConnections();
+  await closePromise;
+  expect(openConnections.size).toBe(0);
+  parseServer = undefined;
+};
 
 const reconfigureServer = async (changedConfiguration = {}) => {
-  if (server) {
-    await parseServer.handleShutdown();
-    await new Promise(resolve => server.close(resolve));
-    parseServer = undefined;
-    server = undefined;
+  if (parseServer) {
+    await shutdownServer(parseServer);
     return reconfigureServer(changedConfiguration);
   }
-
   didChangeConfiguration = Object.keys(changedConfiguration).length !== 0;
   const newConfiguration = Object.assign({}, defaultConfiguration, changedConfiguration || {}, {
     mountPath,
     port,
   });
   parseServer = await ParseServer.startApp(newConfiguration);
+  if (parseServer.config.state === 'initialized') {
+    console.error('Failed to initialize Parse Server');
+    return reconfigureServer(newConfiguration);
+  }
   const app = parseServer.expressApp;
-  for (const fileName of ['parse.js', 'parse.min.js']) {
-    const file = fs.readFileSync(path.resolve(__dirname, `./../../dist/${fileName}`)).toString();
-    app.get(`/${fileName}`, (req, res) => {
+  for (const [fileName, file] of Object.entries(distFiles)) {
+    app.get(`/${fileName}`, (_req, res) => {
       res.send(`<html><head>
           <meta charset="utf-8">
           <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -133,18 +157,10 @@ const reconfigureServer = async (changedConfiguration = {}) => {
         </body></html>`);
     });
   }
-  app.get('/clear/:fast', (req, res) => {
-    const { fast } = req.params;
-    TestUtils.destroyAllDataPermanently(fast).then(() => {
-      res.send('{}');
-    });
-  });
-  server = parseServer.server;
-  server.on('connection', connection => {
-    const key = `${connection.remoteAddress}:${connection.remotePort}`;
-    openConnections[key] = connection;
+  parseServer.server.on('connection', connection => {
+    openConnections.add(connection);
     connection.on('close', () => {
-      delete openConnections[key];
+      openConnections.delete(connection);
     });
   });
   return parseServer;
@@ -157,24 +173,27 @@ global.Container = Parse.Object.extend('Container');
 global.TestPoint = Parse.Object.extend('TestPoint');
 global.TestObject = Parse.Object.extend('TestObject');
 global.reconfigureServer = reconfigureServer;
+global.shutdownServer = shutdownServer;
+global.openConnections = openConnections;
 
 beforeAll(async () => {
+  const promise = ['parse.js', 'parse.min.js'].map(fileName => {
+    return fs.readFile(path.resolve(__dirname, `./../../dist/${fileName}`), 'utf8').then(file => {
+      distFiles[fileName] = file;
+    });
+  });
+  await Promise.all(promise);
   await reconfigureServer();
   Parse.initialize('integration');
   Parse.CoreManager.set('SERVER_URL', serverURL);
   Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
+  Parse.CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1);
 });
 
 afterEach(async () => {
   await Parse.User.logOut();
-  // Connection close events are not immediate on node 10+... wait a bit
-  await sleep(0);
-  if (Object.keys(openConnections).length > 0) {
-    console.warn('There were open connections to the server left after the test finished');
-  }
   Parse.Storage._clear();
   await TestUtils.destroyAllDataPermanently(true);
-  destroyAliveConnections();
   if (didChangeConfiguration) {
     await reconfigureServer();
   }

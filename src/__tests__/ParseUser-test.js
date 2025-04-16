@@ -32,18 +32,20 @@ jest.dontMock('./test_helpers/mockAsyncStorage');
 
 const flushPromises = require('./test_helpers/flushPromises');
 const mockAsyncStorage = require('./test_helpers/mockAsyncStorage');
-const CoreManager = require('../CoreManager');
-const CryptoController = require('../CryptoController');
-const LocalDatastore = require('../LocalDatastore');
+const CoreManager = require('../CoreManager').default;
+const CryptoController = require('../CryptoController').default;
+const StorageController = require('../StorageController.default').default;
+const LocalDatastore = require('../LocalDatastore').default;
 const ParseObject = require('../ParseObject').default;
 const ParseUser = require('../ParseUser').default;
-const Storage = require('../Storage');
+const Storage = require('../Storage').default;
 const ParseError = require('../ParseError').default;
 const AnonymousUtils = require('../AnonymousUtils').default;
 
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 CoreManager.setCryptoController(CryptoController);
+CoreManager.setStorageController(StorageController);
 
 describe('ParseUser', () => {
   beforeEach(() => {
@@ -352,9 +354,11 @@ describe('ParseUser', () => {
         },
         ajax() {},
       });
-      const response = await ParseUser.logInWithAdditionalAuth('username', 'password', {mfa: {key:'1234'}});
+      const response = await ParseUser.logInWithAdditionalAuth('username', 'password', {
+        mfa: { key: '1234' },
+      });
       expect(response instanceof ParseUser).toBe(true);
-      expect(response.get('authDataResponse')).toEqual({mfa: { enabled: true }});
+      expect(response.get('authDataResponse')).toEqual({ mfa: { enabled: true } });
     });
 
     it('loginWithAdditonal fails with invalid payload', async () => {
@@ -366,12 +370,11 @@ describe('ParseUser', () => {
       await expect(ParseUser.logInWithAdditionalAuth('username', {}, {})).rejects.toThrowError(
         new ParseError(ParseError.OTHER_CAUSE, 'Password must be a string.')
       );
-      await expect(ParseUser.logInWithAdditionalAuth('username', 'password', '')).rejects.toThrowError(
-        new ParseError(ParseError.OTHER_CAUSE, 'Auth must be an object.')
-      );
+      await expect(
+        ParseUser.logInWithAdditionalAuth('username', 'password', '')
+      ).rejects.toThrowError(new ParseError(ParseError.OTHER_CAUSE, 'Auth must be an object.'));
     });
   });
-
 
   it('preserves changes when logging in', done => {
     ParseUser.enableUnsafeCurrentUser();
@@ -407,11 +410,11 @@ describe('ParseUser', () => {
     });
   });
 
-  it('does not allow loginAs without id', (done) => {
+  it('does not allow loginAs without id', done => {
     try {
       ParseUser.loginAs(null, null);
     } catch (e) {
-      expect(e.message).toBe('Cannot log in as user with an empty user id')
+      expect(e.message).toBe('Cannot log in as user with an empty user id');
       done();
     }
   });
@@ -478,7 +481,7 @@ describe('ParseUser', () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('GET');
         expect(path).toBe('users/me');
         expect(options.sessionToken).toBe('123abc');
@@ -509,7 +512,7 @@ describe('ParseUser', () => {
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('GET');
         expect(path).toBe('users/me');
         expect(options.sessionToken).toBe('123abc');
@@ -669,7 +672,7 @@ describe('ParseUser', () => {
       .then(u => {
         expect(ParseUser.current()).toBe(u);
         CoreManager.setRESTController({
-          request(method, path, body, options) {
+          request(method, path, _body, options) {
             expect(method).toBe('POST');
             expect(path).toBe('logout');
             expect(options).toEqual({
@@ -1077,7 +1080,7 @@ describe('ParseUser', () => {
     ParseUser.disableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('GET');
         expect(path).toBe('users/me');
         expect(options.sessionToken).toBe('123abc');
@@ -1103,7 +1106,7 @@ describe('ParseUser', () => {
     ParseUser.disableUnsafeCurrentUser();
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('GET');
         expect(path).toBe('users/me');
         expect(options.sessionToken).toBe('123abc');
@@ -1510,7 +1513,7 @@ describe('ParseUser', () => {
   it('can linkWith options', async () => {
     ParseUser._clearCache();
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(_method, _path, _body, options) {
         expect(options).toEqual(expect.objectContaining({ useMasterKey: true }));
         return Promise.resolve(
           {
@@ -1862,7 +1865,7 @@ describe('ParseUser', () => {
       ajax() {},
     });
     const CustomCrypto = {
-      encrypt(obj, secretKey) {
+      encrypt(_obj, secretKey) {
         expect(secretKey).toBe('hello');
         return ENCRYPTED_DATA;
       },
@@ -1896,7 +1899,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     const installationId = '12345678';
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('POST');
         expect(path).toBe('users');
         expect(options.installationId).toBe(installationId);
@@ -1927,7 +1930,7 @@ describe('ParseUser', () => {
     ParseUser._clearCache();
     const installationId = '12345678';
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('POST');
         expect(path).toBe('users');
         expect(options.installationId).toBe(installationId);

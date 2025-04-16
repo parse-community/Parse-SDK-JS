@@ -6,10 +6,6 @@ const { v4: uuidv4 } = require('uuid');
 const { twitterAuthData } = require('./helper');
 
 class CustomUser extends Parse.User {
-  constructor(attributes) {
-    super(attributes);
-  }
-
   doSomething() {
     return 5;
   }
@@ -28,7 +24,6 @@ const provider = {
     };
   },
 };
-Parse.User._registerAuthenticationProvider(provider);
 
 const authResponse = {
   userID: 'test',
@@ -44,8 +39,8 @@ global.FB = {
 };
 
 describe('Parse User', () => {
-  afterAll(() => {
-    Parse.Object.unregisterSubclass('CustomUser');
+  beforeEach(() => {
+    Parse.User._registerAuthenticationProvider(provider);
   });
 
   it('can sign up users via static method', done => {
@@ -113,7 +108,8 @@ describe('Parse User', () => {
 
   it('can login users with installationId', async () => {
     Parse.User.enableUnsafeCurrentUser();
-    const currentInstallation = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const currentInstallationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
     const installationId = '12345678';
     const user = new Parse.User();
     user.set('username', 'parse');
@@ -132,7 +128,7 @@ describe('Parse User', () => {
     let sessions = await sessionQuery.find({ useMasterKey: true });
     expect(sessions.length).toBe(2);
     expect(sessions[0].get('installationId')).toBe(installationId);
-    expect(sessions[1].get('installationId')).toBe(currentInstallation);
+    expect(sessions[1].get('installationId')).toBe(currentInstallationId);
     expect(sessions[0].get('sessionToken')).toBe(user.getSessionToken());
     expect(sessions[1].get('sessionToken')).toBe(loggedUser.getSessionToken());
 
@@ -142,10 +138,76 @@ describe('Parse User', () => {
     });
     sessions = await sessionQuery.find({ useMasterKey: true });
     expect(sessions.length).toBe(2);
-    expect(sessions[0].get('installationId')).toBe(currentInstallation);
+    expect(sessions[0].get('installationId')).toBe(currentInstallationId);
     expect(sessions[1].get('installationId')).toBe(installationId);
     expect(sessions[0].get('sessionToken')).toBe(loggedUser.getSessionToken());
     expect(sessions[1].get('sessionToken')).toBe(installationUser.getSessionToken());
+  });
+
+  it('can get current installation', async () => {
+    const currentInstallationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installation = await Parse.Installation.currentInstallation();
+    expect(installation.installationId).toBe(currentInstallationId);
+    expect(installation.deviceType).toBe(Parse.Installation.DEVICE_TYPES.WEB);
+    await installation.save();
+    expect(installation.id).toBeDefined();
+    expect(installation.createdAt).toBeDefined();
+    expect(installation.updatedAt).toBeDefined();
+    const data = {
+      deviceToken: '1234',
+      badge: 1,
+      appIdentifier: 'com.parse.server',
+      appName: 'Parse JS SDK',
+      appVersion: '1.0.0',
+      parseVersion: '1.0.0',
+      localeIdentifier: 'en-US',
+      timeZone: 'GMT',
+      channels: ['test'],
+      GCMSenderId: '1234',
+      pushType: 'test',
+    };
+    installation.set(data);
+    await installation.save();
+    const query = new Parse.Query(Parse.Installation);
+    const result = await query.get(installation.id, { useMasterKey: true });
+    Object.keys(data).forEach(key => {
+      expect(result[key]).toEqual(data[key]);
+    });
+  });
+
+  it('can save new installation when deleted', async () => {
+    const currentInstallationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installation = await Parse.Installation.currentInstallation();
+    expect(installation.installationId).toBe(currentInstallationId);
+    expect(installation.deviceType).toBe(Parse.Installation.DEVICE_TYPES.WEB);
+    await installation.save();
+    expect(installation.id).toBeDefined();
+    const objectId = installation.id;
+    await installation.destroy({ useMasterKey: true });
+    await installation.save();
+    expect(installation.id).toBeDefined();
+    expect(installation.id).not.toBe(objectId);
+    const currentInstallation = await Parse.Installation.currentInstallation();
+    expect(currentInstallation.id).toBe(installation.id);
+  });
+
+  it('can fetch installation when deleted', async () => {
+    const currentInstallationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installation = await Parse.Installation.currentInstallation();
+    expect(installation.installationId).toBe(currentInstallationId);
+    expect(installation.deviceType).toBe(Parse.Installation.DEVICE_TYPES.WEB);
+    await installation.save();
+    expect(installation.id).toBeDefined();
+    const objectId = installation.id;
+    await installation.destroy({ useMasterKey: true });
+    await installation.fetch();
+    expect(installation.id).toBeDefined();
+    expect(installation.id).not.toBe(objectId);
+    const currentInstallation = await Parse.Installation.currentInstallation();
+    expect(currentInstallation.id).toBe(installation.id);
   });
 
   it('can login with userId', async () => {
@@ -164,9 +226,7 @@ describe('Parse User', () => {
 
     await Parse.User.logOut();
     assert(!Parse.User.current());
-    await expectAsync(Parse.User.loginAs('garbage')).toBeRejectedWithError(
-      'user not found'
-    );
+    await expectAsync(Parse.User.loginAs('garbage')).toBeRejectedWithError('user not found');
   });
 
   it('can become a user', done => {
@@ -533,8 +593,8 @@ describe('Parse User', () => {
       })
       .then(() => {
         assert.equal(Object.keys(user.attributes).length, 5);
-        assert(user.attributes.hasOwnProperty('username'));
-        assert(user.attributes.hasOwnProperty('email'));
+        assert(Object.hasOwn(user.attributes, 'username'));
+        assert(Object.hasOwn(user.attributes, 'email'));
         return user.destroy();
       })
       .then(() => {
@@ -987,6 +1047,11 @@ describe('Parse User', () => {
   });
 
   it('can link with twitter', async () => {
+    const twitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default;
+    spyOn(twitterAdapter, 'beforeFind').and.callFake(() => {
+      return Promise.resolve();
+    });
+
     const server = await reconfigureServer();
     const twitter = server.config.auth.twitter;
     const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
@@ -1007,6 +1072,11 @@ describe('Parse User', () => {
   });
 
   it('can link with twitter and facebook', async () => {
+    const twitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default;
+    spyOn(twitterAdapter, 'beforeFind').and.callFake(() => {
+      return Promise.resolve();
+    });
+
     const server = await reconfigureServer();
     const twitter = server.config.auth.twitter;
     const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
@@ -1055,6 +1125,22 @@ describe('Parse User', () => {
       expect(error.code).toBe(101);
       expect(error.message).toBe('Invalid username/password.');
     }
+  });
+
+  it('can verify user password for user with unverified email', async () => {
+    await reconfigureServer({
+      appName: 'AppName',
+      publicServerURL: 'http://localhost:1337/',
+      verifyUserEmails: true,
+      preventLoginWithUnverifiedEmail: true,
+    });
+    await Parse.User.signUp('asd123', 'xyz123');
+    const res = await Parse.User.verifyPassword('asd123', 'xyz123', {
+      useMasterKey: true,
+      ignoreEmailVerification: true,
+    });
+    expect(typeof res).toBe('object');
+    expect(res.username).toBe('asd123');
   });
 
   it('can encrypt user', async () => {

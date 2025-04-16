@@ -1,3 +1,9 @@
-export function resolvingPromise(): Promise<any>;
-export function when(promises: any, ...args: any[]): any;
-export function continueWhile(test: any, emitter: any): any;
+export declare function resolvingPromise<T = any>(): Promise<T> & {
+    resolve: (res: T) => void;
+    reject: (err: any) => void;
+};
+export declare function when(promises: any): Promise<any[]> | (Promise<any> & {
+    resolve: (res: any) => void;
+    reject: (err: any) => void;
+});
+export declare function continueWhile(test: () => any, emitter: () => Promise<any>): any;

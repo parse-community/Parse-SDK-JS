@@ -4,6 +4,7 @@ const assert = require('assert');
 const Parse = require('../../node');
 const sleep = require('./sleep');
 const { resolvingPromise } = require('../../lib/node/promiseUtils');
+const { EventEmitter } = require('events');
 
 describe('Parse LiveQuery', () => {
   beforeEach(() => {
@@ -19,13 +20,14 @@ describe('Parse LiveQuery', () => {
   it('can subscribe to query', async () => {
     const object = new TestObject();
     await object.save();
-    const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
 
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
     const subscription = await query.subscribe();
     const promise = resolvingPromise();
-    subscription.on('update', (object, original, response) => {
+    subscription.on('update', (object, _original, response) => {
       assert.equal(object.get('foo'), 'bar');
       assert.equal(response.installationId, installationId);
       promise.resolve();
@@ -38,7 +40,8 @@ describe('Parse LiveQuery', () => {
   it('can subscribe to query with client', async () => {
     const object = new TestObject();
     await object.save();
-    const installationId = await Parse.CoreManager.getInstallationController().currentInstallationId();
+    const installationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
 
     const query = new Parse.Query(TestObject);
     query.equalTo('objectId', object.id);
@@ -48,7 +51,7 @@ describe('Parse LiveQuery', () => {
     }
     const subscription = client.subscribe(query);
     const promise = resolvingPromise();
-    subscription.on('update', (object, original, response) => {
+    subscription.on('update', (object, _original, response) => {
       assert.equal(object.get('foo'), 'bar');
       assert.equal(response.installationId, installationId);
       promise.resolve();
@@ -85,6 +88,41 @@ describe('Parse LiveQuery', () => {
     object.set({ foo: 'bar' });
     await object.save();
     await promise;
+  });
+
+  it('can resubscribe', async () => {
+    const client = new Parse.LiveQueryClient({
+      applicationId: 'integration',
+      serverURL: 'ws://localhost:1337',
+      javascriptKey: null,
+      masterKey: null,
+      sessionToken: null,
+    });
+    client.open();
+    const resubscribeSpy = spyOn(client, 'resubscribe').and.callThrough();
+    const subscribeRequest = {
+      op: 'subscribe',
+      requestId: 1,
+      query: {
+        className: 'TestObject',
+        where: { objectId: 'HEXkuHFm0D' },
+        keys: ['foo', 'objectId'],
+        watch: undefined,
+        unknownField: 'throws Additional properties not allowed error',
+      },
+      sessionToken: undefined,
+    };
+    const openPromise = resolvingPromise();
+    client.on('open', () => {
+      if (client.state === 'reconnecting') {
+        openPromise.resolve();
+      }
+    });
+    await client.connectPromise;
+    client.socket.send(JSON.stringify(subscribeRequest));
+    await openPromise;
+    expect(resubscribeSpy).toHaveBeenCalled();
+    await client.close();
   });
 
   it('can subscribe to multiple queries', async () => {
@@ -366,5 +404,43 @@ describe('Parse LiveQuery', () => {
     );
     client.state = 'closed';
     await client.close();
+  });
+
+  it('can subscribe to query with EventEmitter private fields', async () => {
+    class CustomEmitter {
+      #privateEmitter;
+
+      constructor() {
+        this.#privateEmitter = new EventEmitter();
+      }
+      on(event, listener) {
+        this.#privateEmitter.on(event, listener);
+      }
+      emit(event, ...args) {
+        this.#privateEmitter.emit(event, ...args);
+      }
+    }
+
+    const EV = Parse.CoreManager.getEventEmitter();
+
+    Parse.CoreManager.setEventEmitter(CustomEmitter);
+    const object = new TestObject();
+    await object.save();
+    const installationId =
+      await Parse.CoreManager.getInstallationController().currentInstallationId();
+
+    const query = new Parse.Query(TestObject);
+    query.equalTo('objectId', object.id);
+    const subscription = await query.subscribe();
+    const promise = resolvingPromise();
+    subscription.on('update', (object, _original, response) => {
+      assert.equal(object.get('foo'), 'bar');
+      assert.equal(response.installationId, installationId);
+      promise.resolve();
+    });
+    object.set({ foo: 'bar' });
+    await object.save();
+    await promise;
+    Parse.CoreManager.setEventEmitter(EV);
   });
 });

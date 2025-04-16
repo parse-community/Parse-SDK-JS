@@ -25,6 +25,7 @@ jest.dontMock('../ParseACL');
 jest.dontMock('../ParseQuery');
 jest.dontMock('../LiveQuerySubscription');
 jest.dontMock('../LocalDatastore');
+jest.dontMock('../WebSocketController');
 
 jest.useFakeTimers();
 
@@ -34,15 +35,17 @@ const mockLocalDatastore = {
 };
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
-const CoreManager = require('../CoreManager');
-const EventEmitter = require('../EventEmitter');
+const CoreManager = require('../CoreManager').default;
+const EventEmitter = require('../EventEmitter').default;
 const LiveQueryClient = require('../LiveQueryClient').default;
 const ParseObject = require('../ParseObject').default;
 const ParseQuery = require('../ParseQuery').default;
+const WebSocketController = require('../WebSocketController').default;
 const { resolvingPromise } = require('../promiseUtils');
 const events = require('events');
 
 CoreManager.setLocalDatastore(mockLocalDatastore);
+CoreManager.setWebSocketController(WebSocketController);
 
 describe('LiveQueryClient', () => {
   beforeEach(() => {
@@ -941,6 +944,8 @@ describe('LiveQueryClient', () => {
     };
     const query = new ParseQuery('Test');
     query.equalTo('key', 'value');
+    query.select(['key']);
+    query.watch(['key']);
     liveQueryClient.subscribe(query);
     liveQueryClient.connectPromise.resolve();
 
@@ -958,6 +963,8 @@ describe('LiveQueryClient', () => {
         where: {
           key: 'value',
         },
+        keys: ['key'],
+        watch: ['key'],
       },
     });
   });
@@ -975,6 +982,8 @@ describe('LiveQueryClient', () => {
     };
     const query = new ParseQuery('Test');
     query.equalTo('key', 'value');
+    query.select(['key']);
+    query.watch(['key']);
     liveQueryClient.subscribe(query, 'mySessionToken');
     liveQueryClient.connectPromise.resolve();
 
@@ -993,6 +1002,8 @@ describe('LiveQueryClient', () => {
         where: {
           key: 'value',
         },
+        keys: ['key'],
+        watch: ['key'],
       },
     });
   });

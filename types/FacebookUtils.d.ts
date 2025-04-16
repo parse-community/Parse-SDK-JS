@@ -1,6 +1,13 @@
-// @ts-nocheck
-export default FacebookUtils;
-declare namespace FacebookUtils {
+import ParseUser from './ParseUser';
+import type { AuthProvider } from './ParseUser';
+/**
+ * Provides a set of utilities for using Parse with Facebook.
+ *
+ * @class Parse.FacebookUtils
+ * @static
+ * @hideconstructor
+ */
+declare const FacebookUtils: {
     /**
      * Initializes Parse Facebook integration.  Call this function after you
      * have loaded the Facebook Javascript SDK with the same parameters
@@ -19,7 +26,7 @@ declare namespace FacebookUtils {
      *   interferes with Parse Facebook integration. Call FB.getLoginStatus()
      *   explicitly if this behavior is required by your application.
      */
-    function init(options: any): void;
+    init(options: any): void;
     /**
      * Gets whether the user has their account linked to Facebook.
      *
@@ -30,7 +37,7 @@ declare namespace FacebookUtils {
      * @returns {boolean} <code>true</code> if the user has their account
      *     linked to Facebook.
      */
-    function isLinked(user: Parse.User): boolean;
+    isLinked(user: any): any;
     /**
      * Logs in a user using Facebook. This method delegates to the Facebook
      * SDK to authenticate the user, and then automatically logs in (or
@@ -55,7 +62,7 @@ declare namespace FacebookUtils {
      * @param {object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
      * @returns {Promise}
      */
-    function logIn(permissions: any, options: any): Promise<any>;
+    logIn(permissions: any, options: any): Promise<ParseUser<import("./ParseObject").Attributes>>;
     /**
      * Links Facebook to an existing PFUser. This method delegates to the
      * Facebook SDK to authenticate the user, and then automatically links
@@ -82,12 +89,19 @@ declare namespace FacebookUtils {
      * @param {object} options MasterKey / SessionToken. Alternatively can be used for authData if permissions is a string
      * @returns {Promise}
      */
-    function link(user: Parse.User, permissions: any, options: any): Promise<any>;
-    function unlink(user: Parse.User, options: any): Promise<any>;
-    function _getAuthProvider(): {
-        authenticate(options: any): void;
-        restoreAuthentication(authData: any): boolean;
-        getAuthType(): string;
-        deauthenticate(): void;
-    };
-}
+    link(user: any, permissions: any, options: any): any;
+    /**
+     * Unlinks the Parse.User from a Facebook account.
+     *
+     * @function unlink
+     * @name Parse.FacebookUtils.unlink
+     * @param {Parse.User} user User to unlink from Facebook. This must be the
+     *     current user.
+     * @param {object} options Standard options object with success and error
+     *    callbacks.
+     * @returns {Promise}
+     */
+    unlink: (user: any, options: any) => any;
+    _getAuthProvider(): AuthProvider;
+};
+export default FacebookUtils;

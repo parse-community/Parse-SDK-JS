@@ -1,2 +1,2 @@
-export = uuid;
-declare let uuid: any;
+declare let uuid: () => string;
+export default uuid;

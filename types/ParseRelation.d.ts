@@ -1,4 +1,5 @@
-export default ParseRelation;
+import type ParseObject from './ParseObject';
+import type ParseQuery from './ParseQuery';
 /**
  * Creates a new Relation for the given parent object and key. This
  * constructor should rarely be used directly, but rather created by
@@ -12,29 +13,29 @@ export default ParseRelation;
  *
  * @alias Parse.Relation
  */
-declare class ParseRelation {
+declare class ParseRelation<S extends ParseObject = ParseObject, T extends ParseObject = ParseObject> {
+    parent?: S;
+    key?: string;
+    targetClassName?: string | null;
     /**
      * @param {Parse.Object} parent The parent of this relation.
      * @param {string} key The key for this relation on the parent.
      */
-    constructor(parent: ParseObject | null, key: string | null);
-    parent: ParseObject | null;
-    key: string | null;
-    targetClassName: string | null;
-    _ensureParentAndKey(parent: ParseObject, key: string): void;
+    constructor(parent?: S, key?: string);
+    _ensureParentAndKey(parent: S, key: string): void;
     /**
      * Adds a Parse.Object or an array of Parse.Objects to the relation.
      *
      * @param {(Parse.Object|Array)} objects The item or items to add.
      * @returns {Parse.Object} The parent of the relation.
      */
-    add(objects: ParseObject | Array<ParseObject | string>): ParseObject;
+    add(objects: T | T[]): S;
     /**
      * Removes a Parse.Object or an array of Parse.Objects from this relation.
      *
      * @param {(Parse.Object|Array)} objects The item or items to remove.
      */
-    remove(objects: ParseObject | Array<ParseObject | string>): void;
+    remove(objects: T | T[]): void;
     /**
      * Returns a JSON version of the object suitable for saving to disk.
      *
@@ -50,7 +51,6 @@ declare class ParseRelation {
      *
      * @returns {Parse.Query} Relation Query
      */
-    query(): ParseQuery;
+    query(): ParseQuery<T>;
 }
-import ParseObject from './ParseObject';
-import ParseQuery from './ParseQuery';
+export default ParseRelation;

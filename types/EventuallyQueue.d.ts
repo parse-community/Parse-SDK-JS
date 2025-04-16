@@ -1,5 +1,15 @@
-export default EventuallyQueue;
-declare namespace EventuallyQueue {
+import ParseObject from './ParseObject';
+import type { Queue, QueueObject } from './CoreManager';
+import type { SaveOptions } from './ParseObject';
+import type { RequestOptions } from './RESTController';
+/**
+ * Provides utility functions to queue objects that will be
+ * saved to the server at a later date.
+ *
+ * @class Parse.EventuallyQueue
+ * @static
+ */
+declare const EventuallyQueue: {
     /**
      * Add object to queue with save operation.
      *
@@ -11,7 +21,7 @@ declare namespace EventuallyQueue {
      * @static
      * @see Parse.Object#saveEventually
      */
-    function save(object: ParseObject, serverOptions?: SaveOptions): Promise<any>;
+    save(object: ParseObject, serverOptions?: SaveOptions): Promise<void>;
     /**
      * Add object to queue with save operation.
      *
@@ -23,7 +33,7 @@ declare namespace EventuallyQueue {
      * @static
      * @see Parse.Object#destroyEventually
      */
-    function destroy(object: ParseObject, serverOptions?: RequestOptions): Promise<any>;
+    destroy(object: ParseObject, serverOptions?: RequestOptions): Promise<void>;
     /**
      * Generate unique identifier to avoid duplicates and maintain previous state.
      *
@@ -33,7 +43,7 @@ declare namespace EventuallyQueue {
      * @static
      * @ignore
      */
-    function generateQueueId(action: string, object: ParseObject): string;
+    generateQueueId(action: string, object: ParseObject): string;
     /**
      * Build queue object and add to queue.
      *
@@ -44,18 +54,18 @@ declare namespace EventuallyQueue {
      * @static
      * @ignore
      */
-    function enqueue(action: string, object: ParseObject, serverOptions?: RequestOptions | SaveOptions): Promise<any>;
-    function store(data: any): Promise<void>;
-    function load(): Promise<string>;
+    enqueue(action: string, object: ParseObject, serverOptions?: SaveOptions | RequestOptions): Promise<void>;
+    store(data: Queue): Promise<void>;
+    load(): Promise<string | null>;
     /**
      * Sets the in-memory queue from local storage and returns.
      *
      * @function getQueue
      * @name Parse.EventuallyQueue.getQueue
-     * @returns {Promise<Array>}
+     * @returns {Promise<Queue>}
      * @static
      */
-    function getQueue(): Promise<any[]>;
+    getQueue(): Promise<Queue>;
     /**
      * Saves the queue to local storage
      *
@@ -64,7 +74,7 @@ declare namespace EventuallyQueue {
      * @static
      * @ignore
      */
-    function setQueue(queue: Queue): Promise<void>;
+    setQueue(queue: Queue): Promise<void>;
     /**
      * Removes Parse.Object data from queue.
      *
@@ -73,7 +83,7 @@ declare namespace EventuallyQueue {
      * @static
      * @ignore
      */
-    function remove(queueId: string): Promise<void>;
+    remove(queueId: string): Promise<void>;
     /**
      * Removes all objects from queue.
      *
@@ -82,7 +92,7 @@ declare namespace EventuallyQueue {
      * @returns {Promise} A promise that is fulfilled when queue is cleared.
      * @static
      */
-    function clear(): Promise<any>;
+    clear(): Promise<void>;
     /**
      * Return the index of a queueId in the queue. Returns -1 if not found.
      *
@@ -92,16 +102,16 @@ declare namespace EventuallyQueue {
      * @static
      * @ignore
      */
-    function queueItemExists(queue: Queue, queueId: string): number;
+    queueItemExists(queue: Queue, queueId: string): number;
     /**
      * Return the number of objects in the queue.
      *
      * @function length
      * @name Parse.EventuallyQueue.length
-     * @returns {number}
+     * @returns {Promise<number>}
      * @static
      */
-    function length(): number;
+    length(): Promise<number>;
     /**
      * Sends the queue to the server.
      *
@@ -110,7 +120,7 @@ declare namespace EventuallyQueue {
      * @returns {Promise<boolean>} Returns true if queue was sent successfully.
      * @static
      */
-    function sendQueue(): Promise<boolean>;
+    sendQueue(): Promise<boolean>;
     /**
      * Build queue object and add to queue.
      *
@@ -120,7 +130,7 @@ declare namespace EventuallyQueue {
      * @static
      * @ignore
      */
-    function sendQueueCallback(object: ParseObject, queueObject: QueueObject): Promise<void>;
+    sendQueueCallback(object: ParseObject, queueObject: QueueObject): Promise<void>;
     /**
      * Start polling server for network connection.
      * Will send queue if connection is established.
@@ -130,7 +140,7 @@ declare namespace EventuallyQueue {
      * @param [ms] Milliseconds to ping the server. Default 2000ms
      * @static
      */
-    function poll(ms?: number): void;
+    poll(ms?: number): void;
     /**
      * Turns off polling.
      *
@@ -138,7 +148,7 @@ declare namespace EventuallyQueue {
      * @name Parse.EventuallyQueue.stopPoll
      * @static
      */
-    function stopPoll(): void;
+    stopPoll(): void;
     /**
      * Return true if pinging the server.
      *
@@ -147,25 +157,12 @@ declare namespace EventuallyQueue {
      * @returns {boolean}
      * @static
      */
-    function isPolling(): boolean;
-    function _setPolling(flag: boolean): void;
-    namespace process {
-        function create(ObjectType: any, queueObject: any): Promise<void>;
-        function byId(ObjectType: any, queueObject: any): Promise<void>;
-        function byHash(ObjectType: any, queueObject: any): Promise<void>;
-    }
-}
-import ParseObject from './ParseObject';
-import { SaveOptions } from './ParseObject';
-import { RequestOptions } from './RESTController';
-type Queue = QueueObject[];
-type QueueObject = {
-    queueId: string;
-    action: string;
-    object: ParseObject;
-    serverOptions: RequestOptions | SaveOptions;
-    id: string;
-    className: string;
-    hash: string;
-    createdAt: Date;
+    isPolling(): boolean;
+    _setPolling(flag: boolean): void;
+    process: {
+        create(ObjectType: any, queueObject: any): Promise<void>;
+        byId(ObjectType: any, queueObject: any): Promise<void>;
+        byHash(ObjectType: any, queueObject: any): Promise<void>;
+    };
 };
+export default EventuallyQueue;

@@ -1,5 +1,9 @@
-// @ts-nocheck
-export default ParseRole;
+import ParseACL from './ParseACL';
+import ParseError from './ParseError';
+import ParseObject, { Attributes, SetOptions } from './ParseObject';
+import type { AttributeMap } from './ObjectStateMutations';
+import type ParseRelation from './ParseRelation';
+import type ParseUser from './ParseUser';
 /**
  * Represents a Role on the Parse server. Roles represent groupings of
  * Users for the purposes of granting permissions (e.g. specifying an ACL
@@ -13,7 +17,7 @@ export default ParseRole;
  * @alias Parse.Role
  * @augments Parse.Object
  */
-declare class ParseRole {
+declare class ParseRole<T extends Attributes = Attributes> extends ParseObject<T> {
     /**
      * @param {string} name The name of the Role to create.
      * @param {Parse.ACL} acl The ACL for this role. Roles must have an ACL.
@@ -42,9 +46,9 @@ declare class ParseRole {
      * @param {string} name The name of the role.
      * @param {object} options Standard options object with success and error
      *     callbacks.
-     * @returns {(ParseObject|boolean)} true if the set succeeded.
+     * @returns {Parse.Object} Returns the object, so you can chain this call.
      */
-    setName(name: string, options?: mixed): ParseObject | boolean;
+    setName(name: string, options?: SetOptions): this;
     /**
      * Gets the Parse.Relation for the Parse.Users that are direct
      * children of this role. These users are granted any privileges that this
@@ -56,7 +60,7 @@ declare class ParseRole {
      * @returns {Parse.Relation} the relation for the users belonging to this
      *     role.
      */
-    getUsers(): ParseRelation;
+    getUsers<U extends ParseUser>(): ParseRelation<ParseRole, U>;
     /**
      * Gets the Parse.Relation for the Parse.Roles that are direct
      * children of this role. These roles' users are granted any privileges that
@@ -68,12 +72,8 @@ declare class ParseRole {
      * @returns {Parse.Relation} the relation for the roles belonging to this
      *     role.
      */
-    getRoles(): ParseRelation;
+    getRoles(): ParseRelation<ParseRole, ParseRole>;
     _validateName(newName: any): void;
-    validate(attrs: AttributeMap, options?: mixed): ParseError | boolean;
+    validate(attrs: AttributeMap, options?: any): ParseError | boolean;
 }
-import ParseObject from './ParseObject';
-import ParseRelation from './ParseRelation';
-import { AttributeMap } from './ObjectStateMutations';
-import ParseError from './ParseError';
-import ParseACL from './ParseACL';
+export default ParseRole;

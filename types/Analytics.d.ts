@@ -37,6 +37,4 @@
  * @returns {Promise} A promise that is resolved when the round-trip
  * to the server completes.
  */
-export function track(name: string, dimensions: {
-    [key: string]: string;
-}): Promise<any>;
+export declare function track(name: string, dimensions: Record<string, string>): Promise<void>;

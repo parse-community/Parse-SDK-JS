@@ -1,4 +1,4 @@
-export default LiveQuery;
+import type { EventEmitter } from 'events';
 /**
  * We expose three events to help you monitor the status of the WebSocket connection:
  *
@@ -26,4 +26,23 @@ export default LiveQuery;
  * @class Parse.LiveQuery
  * @static
  */
-declare const LiveQuery: any;
+declare class LiveQuery {
+    emitter: EventEmitter;
+    on: EventEmitter['on'];
+    emit: EventEmitter['emit'];
+    constructor();
+    /**
+     * After open is called, the LiveQuery will try to send a connect request
+     * to the LiveQuery server.
+     */
+    open(): Promise<void>;
+    /**
+     * When you're done using LiveQuery, you can call Parse.LiveQuery.close().
+     * This function will close the WebSocket connection to the LiveQuery server,
+     * cancel the auto reconnect, and unsubscribe all subscriptions based on it.
+     * If you call query.subscribe() after this, we'll create a new WebSocket
+     * connection to the LiveQuery server.
+     */
+    close(): Promise<void>;
+}
+export default LiveQuery;

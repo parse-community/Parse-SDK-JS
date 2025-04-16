@@ -1,4 +1,3 @@
-/* global File */
 jest.autoMockOff();
 jest.mock('http');
 jest.mock('https');
@@ -9,23 +8,23 @@ const ParseFile = require('../ParseFile').default;
 const b64Digit = require('../ParseFile').b64Digit;
 
 const ParseObject = require('../ParseObject').default;
-const CoreManager = require('../CoreManager');
-const EventEmitter = require('../EventEmitter');
+const CoreManager = require('../CoreManager').default;
+const EventEmitter = require('../EventEmitter').default;
 
 const mockHttp = require('http');
 const mockHttps = require('https');
 
 const mockLocalDatastore = {
-  _updateLocalIdForObject: jest.fn((localId, /** @type {ParseObject}*/ object) => {
+  _updateLocalIdForObject: jest.fn((_localId, /** @type {ParseObject}*/ object) => {
     if (!mockLocalDatastore.isEnabled) {
       return;
     }
-    /* eslint-disable no-unused-vars */
     // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     const objectKey = mockLocalDatastore.getKeyForObject(object);
   }),
   _updateObjectIfPinned: jest.fn(),
-  getKeyForObject: jest.fn((object) => {
+  getKeyForObject: jest.fn(object => {
     // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
     const OBJECT_PREFIX = 'Parse_LDS_';
     const objectId = object.objectId || object._getId();
@@ -152,6 +151,13 @@ describe('ParseFile', () => {
 
   it('can create files with byte arrays', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    expect(file._source.base64).toBe('ParseA==');
+    expect(file._source.type).toBe('');
+    expect(file._data).toBe('ParseA==');
+  });
+
+  it('can create files with  Uint8Arrays', () => {
+    const file = new ParseFile('parse.txt', new Uint8Array([61, 170, 236, 120]));
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('');
     expect(file._data).toBe('ParseA==');
@@ -433,7 +439,6 @@ describe('FileController', () => {
   });
 
   it('saves files via ajax', () => {
-    // eslint-disable-next-line no-undef
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
@@ -725,7 +730,7 @@ describe('FileController', () => {
       });
     };
     CoreManager.setRESTController({ request, ajax });
-    // eslint-disable-next-line no-undef
+
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
@@ -765,7 +770,7 @@ describe('FileController', () => {
       });
     };
     CoreManager.setRESTController({ request, ajax });
-    // eslint-disable-next-line no-undef
+
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
@@ -805,7 +810,7 @@ describe('FileController', () => {
       });
     };
     CoreManager.setRESTController({ request, ajax });
-    // eslint-disable-next-line no-undef
+
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
@@ -848,7 +853,6 @@ describe('FileController', () => {
     CoreManager.setRESTController({ ajax, request });
     CoreManager.setLocalDatastore(mockLocalDatastore);
 
-    // eslint-disable-next-line no-undef
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';

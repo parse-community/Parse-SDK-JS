@@ -1,3 +1,147 @@
+## [6.1.1](https://github.com/parse-community/Parse-SDK-JS/compare/6.1.0...6.1.1) (2025-04-04)
+
+
+### Bug Fixes
+
+* Remove unused option `sessionToken` from `Parse.Query.aggregate` ([#2547](https://github.com/parse-community/Parse-SDK-JS/issues/2547)) ([c7015ba](https://github.com/parse-community/Parse-SDK-JS/commit/c7015ba42c13d7a4bbe5246b0944e64dcea1712f))
+* Security upgrade tar-fs from 2.1.1 to 2.1.2 ([#2540](https://github.com/parse-community/Parse-SDK-JS/issues/2540)) ([44eeacd](https://github.com/parse-community/Parse-SDK-JS/commit/44eeacd9b4af90c8a5f48264506d058ca2745109))
+
+# [6.1.0](https://github.com/parse-community/Parse-SDK-JS/compare/6.0.0...6.1.0) (2025-03-17)
+
+
+### Features
+
+* Add `Parse.Query` option `useMaintenanceKey` ([#2484](https://github.com/parse-community/Parse-SDK-JS/issues/2484)) ([2ead3f3](https://github.com/parse-community/Parse-SDK-JS/commit/2ead3f3af31654b27470bb5b596cb01df03e8fe3))
+* Allow `Parse.Object` field names to begin with underscore `_` to access internal fields of Parse Server ([#2475](https://github.com/parse-community/Parse-SDK-JS/issues/2475)) ([08e43ba](https://github.com/parse-community/Parse-SDK-JS/commit/08e43ba86276096820f467d9f5819e624a286b22))
+* Publish TypeScript definitions ([#2491](https://github.com/parse-community/Parse-SDK-JS/issues/2491)) ([fc3e573](https://github.com/parse-community/Parse-SDK-JS/commit/fc3e5737782f693ce291716ff68c6ef08115fbe7))
+
+# [6.0.0](https://github.com/parse-community/Parse-SDK-JS/compare/5.3.0...6.0.0) (2025-03-02)
+
+
+### Bug Fixes
+
+* `Parse.Hooks` requests have double forward slash in URL ([#2441](https://github.com/parse-community/Parse-SDK-JS/issues/2441)) ([1fc520c](https://github.com/parse-community/Parse-SDK-JS/commit/1fc520ccdc3742c467dfaa9f58d249389b4d5c5a))
+* `Parse.Query.findAll` not returning all objects with option `json: true` ([#2449](https://github.com/parse-community/Parse-SDK-JS/issues/2449)) ([f160b8c](https://github.com/parse-community/Parse-SDK-JS/commit/f160b8c9a14ef26b850bebd0a65e84a1e96ef327))
+* Cannot pass `useMasterKey: false` to `Parse.Cloud.run` ([#2431](https://github.com/parse-community/Parse-SDK-JS/issues/2431)) ([abadac9](https://github.com/parse-community/Parse-SDK-JS/commit/abadac947d8453afdf86f4a008aee189b4a6bfd2))
+* Remove validation error handler option `error` from various methods of `Parse.Object` ([#2445](https://github.com/parse-community/Parse-SDK-JS/issues/2445)) ([52ddaee](https://github.com/parse-community/Parse-SDK-JS/commit/52ddaee5213a0d5e5797f4130781987665fef843))
+* Security upgrade dset from 3.1.3 to 3.1.4 ([#2277](https://github.com/parse-community/Parse-SDK-JS/issues/2277)) ([058f8e4](https://github.com/parse-community/Parse-SDK-JS/commit/058f8e4d3f8113cd8e81f6e58d2d6bba579b1000))
+
+### Features
+
+* Add transaction to save and destroy on `Parse.Object` ([#2265](https://github.com/parse-community/Parse-SDK-JS/issues/2265)) ([2b55bdf](https://github.com/parse-community/Parse-SDK-JS/commit/2b55bdf74d8338688765f27b14826e527d0aeb53))
+
+
+### BREAKING CHANGES
+
+* Internal REST requests for `Parse.Hooks` use a URL that contains a double forward slash, for example `http://localhost/parse//hooks/functions`. This release changes the double forward slash to a single forward slash. ([1fc520c](1fc520c))
+* Removes the error handler option `error` from `Parse.Object.set`, `Parse.Object.setACL`, `Parse.Object.unset`, `Parse.Role.setName` and instead throws on validation error. Previously, if the `error` option was set, the handler was invoked if a validation error occurred on `Parse.Object.set`, and if no handler was set, an error was thrown on `Parse.Object.save`. The new behavior is that an error is thrown at `Parse.Object.set`. For example, instead of using `Parse.Object.set(key, value, { error: ... })` wrap `Parse.Object.set(key, value)` into a `try/catch` block. ([52ddaee](52ddaee))
+
+# [5.3.0](https://github.com/parse-community/Parse-SDK-JS/compare/5.2.0...5.3.0) (2024-07-07)
+
+
+### Bug Fixes
+
+* `Parse.Object.get` returns array instead of object if key name is number-like ([#2201](https://github.com/parse-community/Parse-SDK-JS/issues/2201)) ([5921ba2](https://github.com/parse-community/Parse-SDK-JS/commit/5921ba248431b197ee1592eae39376132be454a3))
+
+### Features
+
+* Add support for Node 22 ([#2209](https://github.com/parse-community/Parse-SDK-JS/issues/2209)) ([c74fd4c](https://github.com/parse-community/Parse-SDK-JS/commit/c74fd4ce2aa7b0618c3027e1936103d24f2987a7))
+
+# [5.2.0](https://github.com/parse-community/Parse-SDK-JS/compare/5.1.0...5.2.0) (2024-06-29)
+
+
+### Bug Fixes
+
+* `LiveQueryClient.resubscribe` with Parse Server 7 causes many open connections ([#2184](https://github.com/parse-community/Parse-SDK-JS/issues/2184)) ([71b4d17](https://github.com/parse-community/Parse-SDK-JS/commit/71b4d17efa197f6f0bb94105809f32a9adc86ea6))
+* `Parse.Installation` not working when installation is deleted on server ([#2126](https://github.com/parse-community/Parse-SDK-JS/issues/2126)) ([22360b4](https://github.com/parse-community/Parse-SDK-JS/commit/22360b4dc96ca7ebfcc2441855456b241bf450ac))
+* Dot notation on JSON arrays doesn't work on `PushStatus` offset fields ([#2194](https://github.com/parse-community/Parse-SDK-JS/issues/2194)) ([e0eb6f0](https://github.com/parse-community/Parse-SDK-JS/commit/e0eb6f04e086da4628a9706b17909d11e5f06210))
+* Duplicate pending operations on nested fields ([#2162](https://github.com/parse-community/Parse-SDK-JS/issues/2162)) ([df6df7c](https://github.com/parse-community/Parse-SDK-JS/commit/df6df7c68b9871f0b744958a489a54f1623943a9))
+
+### Features
+
+* Support dot notation on array fields ([#2120](https://github.com/parse-community/Parse-SDK-JS/issues/2120)) ([25ec684](https://github.com/parse-community/Parse-SDK-JS/commit/25ec684bf01cf9cd616ceff6f5d30e2e7fb83a5a))
+
+# [5.1.0](https://github.com/parse-community/Parse-SDK-JS/compare/5.0.0...5.1.0) (2024-05-16)
+
+
+### Bug Fixes
+
+* `Parse.GeoPoint.current` returns `undefined` ([#2127](https://github.com/parse-community/Parse-SDK-JS/issues/2127)) ([3860535](https://github.com/parse-community/Parse-SDK-JS/commit/3860535f5257b7b5edbf7ebfd286e2a4a7fd2769))
+* Chrome browser console warning about unsafe header `access-control-expose-headers` when calling Cloud Function ([#2095](https://github.com/parse-community/Parse-SDK-JS/issues/2095)) ([7b73c03](https://github.com/parse-community/Parse-SDK-JS/commit/7b73c033eef8977c3e6c7e4af7146ffa74deed0c))
+* Live Query not working on Expo React Native ([#2109](https://github.com/parse-community/Parse-SDK-JS/issues/2109)) ([7a89665](https://github.com/parse-community/Parse-SDK-JS/commit/7a8966522f06efb3f0303b2a3c6fd08f41d8aff9))
+* Local datastore throws error when `Parse.Query.notEqualTo` is set to `null` ([#2102](https://github.com/parse-community/Parse-SDK-JS/issues/2102)) ([6afd32a](https://github.com/parse-community/Parse-SDK-JS/commit/6afd32af3517c88b570505d5cb25bd5ab449f039))
+* Multiple object updates of nested keys overwrite each other ([#1451](https://github.com/parse-community/Parse-SDK-JS/issues/1451)) ([fa4341a](https://github.com/parse-community/Parse-SDK-JS/commit/fa4341a8c0ce5a9c478435250b4af6ea020a45bd))
+* Pending updates to nested field causes `ParseObject.toJSON()` to return incorrect object ([#1453](https://github.com/parse-community/Parse-SDK-JS/issues/1453)) ([23cc573](https://github.com/parse-community/Parse-SDK-JS/commit/23cc573ccae9e11288aaeff61f478e59bf9bae0c))
+* Remove circular dependencies ([#2125](https://github.com/parse-community/Parse-SDK-JS/issues/2125)) ([b415165](https://github.com/parse-community/Parse-SDK-JS/commit/b415165486f0328e0f9fb2d949d7b11abf363435))
+
+### Features
+
+* Add password validation for user with unverified email via `Parse.User.verifyPassword` using master key and option `ignoreEmailVerification: true` ([#2076](https://github.com/parse-community/Parse-SDK-JS/issues/2076)) ([b0adf7e](https://github.com/parse-community/Parse-SDK-JS/commit/b0adf7e02ab0beea2cd9b759d0f788c69d291491))
+* Add support for setting `Parse.ACL` from json ([#2097](https://github.com/parse-community/Parse-SDK-JS/issues/2097)) ([72bc9ac](https://github.com/parse-community/Parse-SDK-JS/commit/72bc9ac3bfb23443a03742fe47a3b1b2713f8c96))
+* Allow setting custom queue for handling offline operations via `Parse.EventuallyQueue` ([#2106](https://github.com/parse-community/Parse-SDK-JS/issues/2106)) ([f92e4d4](https://github.com/parse-community/Parse-SDK-JS/commit/f92e4d42afdc1e55bcfff1ba9d0658d39943f3f0))
+* Improve installation object `Parse.Installation.currentInstallation` to support web push notifications ([#2119](https://github.com/parse-community/Parse-SDK-JS/issues/2119)) ([4fc62ce](https://github.com/parse-community/Parse-SDK-JS/commit/4fc62cec0c4ea704f48ec501a5f0182836de45d1))
+* Lazy load `Parse.CoreManager` controllers to add support for swappable `CryptoController`, `LocalDatastoreController`, `StorageController`, `WebSocketController`, `ParseLiveQuery` ([#2100](https://github.com/parse-community/Parse-SDK-JS/issues/2100)) ([fbd0ab1](https://github.com/parse-community/Parse-SDK-JS/commit/fbd0ab1402792e241c4d9d6496b451e4cc268b8b))
+
+# [5.0.0](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.1...5.0.0) (2024-03-17)
+
+
+### Bug Fixes
+
+* Calling `Parse.Object.relation.add` multiple times adds only the first object ([#2078](https://github.com/parse-community/Parse-SDK-JS/issues/2078)) ([0f98117](https://github.com/parse-community/Parse-SDK-JS/commit/0f981175c8f5155a631a0fcf9837ef5b285b2f55))
+
+### Features
+
+* Add comment to MongoDB query via `Parse.Query.comment` ([#2088](https://github.com/parse-community/Parse-SDK-JS/issues/2088)) ([a970913](https://github.com/parse-community/Parse-SDK-JS/commit/a9709136983b3c90ca88a8721b9cc54593c245cc))
+* Add compatibility with Parse Server 7 ([#2089](https://github.com/parse-community/Parse-SDK-JS/issues/2089)) ([86600bc](https://github.com/parse-community/Parse-SDK-JS/commit/86600bc5abc4ca705b7e252b3714579b2e4c1598))
+* Add support for Node 20, remove support for Node 14 and 16 ([#2063](https://github.com/parse-community/Parse-SDK-JS/issues/2063)) ([74eb4d5](https://github.com/parse-community/Parse-SDK-JS/commit/74eb4d5f7d255f0f4e5d69758067f2a7d3caf014))
+
+
+### BREAKING CHANGES
+
+* Parse JS SDK 5 requires Parse Server 7 and is incompatible with Parse Server 6. ([86600bc](86600bc))
+* Removes support for Node 14 and 16. ([74eb4d5](74eb4d5))
+
+## [4.3.1](https://github.com/parse-community/Parse-SDK-JS/compare/4.3.0...4.3.1) (2023-11-18)
+
+
+### Bug Fixes
+
+* Connection failure in `Parse.Object.saveEventually` and `Parse.Object.destroyEventually` not handled on custom `Parse.Error.CONNECTION_FAILURE` message ([#2032](https://github.com/parse-community/Parse-SDK-JS/issues/2032)) ([4da3ebc](https://github.com/parse-community/Parse-SDK-JS/commit/4da3ebcc28b903a499c07bb194baae738de21d6f))
+* Docs fail with `Cannot find module 'taffydb'` ([#2036](https://github.com/parse-community/Parse-SDK-JS/issues/2036)) ([dc91d0f](https://github.com/parse-community/Parse-SDK-JS/commit/dc91d0fc4f69639ba762f5af841477e8836c6927))
+* Error in web context when `window.indexedDB` API is available but protected ([#2039](https://github.com/parse-community/Parse-SDK-JS/issues/2039)) ([360981f](https://github.com/parse-community/Parse-SDK-JS/commit/360981f8a529f3e10243413c8114373271bb6f43))
+* Security upgrade browserify-sign from 4.2.1 to 4.2.2 ([#2043](https://github.com/parse-community/Parse-SDK-JS/issues/2043)) ([fd50b9d](https://github.com/parse-community/Parse-SDK-JS/commit/fd50b9dbc9feb8b51eedfcdddce37ea1882ac438))
+* Security upgrade crypto-js from 4.1.1 to 4.2.0 ([#2042](https://github.com/parse-community/Parse-SDK-JS/issues/2042)) ([681fbdf](https://github.com/parse-community/Parse-SDK-JS/commit/681fbdfcdd2e6d351e00400eccf41fe732b053ba))
+
+# [4.3.0](https://github.com/parse-community/Parse-SDK-JS/compare/4.2.0...4.3.0) (2023-11-16)
+
+
+### Bug Fixes
+
+* `ParseUser.linkWith` doesn't remove anonymous auth data ([#2007](https://github.com/parse-community/Parse-SDK-JS/issues/2007)) ([7e2585c](https://github.com/parse-community/Parse-SDK-JS/commit/7e2585c5eb84a396900553d55d6a919de4d9a2c0))
+* Hard-coding of `react-native` path does not work for workspace builds ([#1930](https://github.com/parse-community/Parse-SDK-JS/issues/1930)) ([8222f3c](https://github.com/parse-community/Parse-SDK-JS/commit/8222f3cc2a4a4ee0cdcaf30dd0f9a17e46de7d88))
+
+### Features
+
+* Add Bytes type to `Parse.Schema` ([#2001](https://github.com/parse-community/Parse-SDK-JS/issues/2001)) ([343d0d7](https://github.com/parse-community/Parse-SDK-JS/commit/343d0d729a57acdd3c9ba5c1dbe5738b3916ea04))
+* Add Cloud Code context accessibility to `ParseUser.logIn` ([#2010](https://github.com/parse-community/Parse-SDK-JS/issues/2010)) ([2446007](https://github.com/parse-community/Parse-SDK-JS/commit/2446007ede4cc5af79e34f27dc1fbcc574d5f717))
+* Add support for custom EventEmitter ([#1999](https://github.com/parse-community/Parse-SDK-JS/issues/1999)) ([ca568a6](https://github.com/parse-community/Parse-SDK-JS/commit/ca568a61771e15afe67c9001f2a728205059f2ae))
+* Add support for excluding keys in `ParseQuery.findAll` ([#2000](https://github.com/parse-community/Parse-SDK-JS/issues/2000)) ([012ba4c](https://github.com/parse-community/Parse-SDK-JS/commit/012ba4cdab1e3f853625f507c713cef2264a40dd))
+* Add support to invoke a Cloud Function with a custom `installationId` via `Parse.Cloud.run` ([#1939](https://github.com/parse-community/Parse-SDK-JS/issues/1939)) ([eb70b93](https://github.com/parse-community/Parse-SDK-JS/commit/eb70b934b798cb37722c1ac36796596f5373f67d))
+* Allow overriding `Parse.Error` message with custom message via new Core Manager option `PARSE_ERRORS` ([#2014](https://github.com/parse-community/Parse-SDK-JS/issues/2014)) ([be0c8a6](https://github.com/parse-community/Parse-SDK-JS/commit/be0c8a6ff90a7714487ae793e2b68ae04d0c8d0c))
+* Login with username, password and additional authentication data via `ParseUser.logInWithAdditionalAuth` ([#1955](https://github.com/parse-community/Parse-SDK-JS/issues/1955)) ([2bad411](https://github.com/parse-community/Parse-SDK-JS/commit/2bad4119c23372d1b38c811c4b4bb3d06b1b62f0))
+
+# [4.2.0](https://github.com/parse-community/Parse-SDK-JS/compare/4.1.0...4.2.0) (2023-09-15)
+
+
+### Bug Fixes
+
+* `Parse.File.cancel` starts new attempt to save file ([#1781](https://github.com/parse-community/Parse-SDK-JS/issues/1781)) ([b755e42](https://github.com/parse-community/Parse-SDK-JS/commit/b755e42394db8b94b87b0dbefc6cf6f18189c46d))
+
+### Features
+
+* Add `Parse.User.loginAs` ([#1875](https://github.com/parse-community/Parse-SDK-JS/issues/1875)) ([381fcfc](https://github.com/parse-community/Parse-SDK-JS/commit/381fcfc7f9cfda70af7c6dc3a35de59b82b72258))
+* Add `ParseQuery.watch` to trigger LiveQuery only on update of specific fields ([#1839](https://github.com/parse-community/Parse-SDK-JS/issues/1839)) ([7479343](https://github.com/parse-community/Parse-SDK-JS/commit/7479343abd8739fe03558ff9b2ce610c34c568ae))
+
 # [4.1.0](https://github.com/parse-community/Parse-SDK-JS/compare/4.0.1...4.1.0) (2023-05-01)
 
 

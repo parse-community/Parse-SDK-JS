@@ -6,7 +6,7 @@ const fs = require('fs').promises;
 const path = require('path');
 
 // Get env vars
-const ref = process.env.GITHUB_REF;
+const ref = process.env.GITHUB_REF || '(local)';
 const serverUrl = process.env.GITHUB_SERVER_URL;
 const repository = process.env.GITHUB_REPOSITORY;
 const repositoryUrl = serverUrl + '/' + repository;
@@ -38,7 +38,7 @@ async function config() {
     branches: [
       'release',
       { name: 'alpha', prerelease: true },
-      { name: 'beta', prerelease: true },
+      // { name: 'beta', prerelease: true },
       'next-major',
       // Long-Term-Support branches
       // { name: 'release-1', range: '1.x.x', channel: '1.x' },
@@ -91,9 +91,10 @@ async function config() {
       [
         '@saithodev/semantic-release-backmerge',
         {
-          'branches': [
-            { from: 'beta', to: 'alpha' },
-            { from: 'release', to: 'beta' },
+          'backmergeBranches': [
+            // { from: 'beta', to: 'alpha' },
+            // { from: 'release', to: 'beta' },
+            { from: 'release', to: 'alpha' },
           ]
         }
       ],

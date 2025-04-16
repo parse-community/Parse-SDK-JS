@@ -1,8 +1,29 @@
-// @ts-nocheck
-type WhereClause = {
-    [attr: string]: mixed;
+import ParseGeoPoint from './ParseGeoPoint';
+import ParseObject from './ParseObject';
+import type LiveQuerySubscription from './LiveQuerySubscription';
+import type { FullOptions } from './RESTController';
+import type { Pointer } from './ParseObject';
+type BatchOptions = FullOptions & {
+    batchSize?: number;
+    useMasterKey?: boolean;
+    useMaintenanceKey?: boolean;
+    sessionToken?: string;
+    context?: Record<string, any>;
+    json?: boolean;
 };
-type QueryJSON = {
+export type WhereClause = Record<string, any>;
+interface QueryOptions {
+    useMasterKey?: boolean;
+    sessionToken?: string;
+    context?: Record<string, any>;
+    json?: boolean;
+}
+interface FullTextQueryOptions {
+    language?: string;
+    caseSensitive?: boolean;
+    diacriticSensitive?: boolean;
+}
+export interface QueryJSON {
     where: WhereClause;
     watch?: string;
     include?: string;
@@ -13,13 +34,18 @@ type QueryJSON = {
     order?: string;
     className?: string;
     count?: number;
-    hint?: mixed;
+    hint?: any;
     explain?: boolean;
     readPreference?: string;
     includeReadPreference?: string;
     subqueryReadPreference?: string;
-};
-export default ParseQuery;
+    comment?: string;
+}
+interface BaseAttributes {
+    createdAt: Date;
+    objectId: string;
+    updatedAt: Date;
+}
 /**
  * Creates a new parse Parse.Query for the given Parse.Object subclass.
  *
@@ -63,104 +89,55 @@ export default ParseQuery;
  *
  * @alias Parse.Query
  */
-declare class ParseQuery {
-    /**
-     * Static method to restore Parse.Query by json representation
-     * Internally calling Parse.Query.withJSON
-     *
-     * @param {string} className
-     * @param {QueryJSON} json from Parse.Query.toJSON() method
-     * @returns {Parse.Query} new created query
-     */
-    static fromJSON(className: string, json: QueryJSON): ParseQuery;
-    /**
-     * Constructs a Parse.Query that is the OR of the passed in queries.  For
-     * example:
-     * <pre>var compoundQuery = Parse.Query.or(query1, query2, query3);</pre>
-     *
-     * will create a compoundQuery that is an or of the query1, query2, and
-     * query3.
-     *
-     * @param {...Parse.Query} queries The list of queries to OR.
-     * @static
-     * @returns {Parse.Query} The query that is the OR of the passed in queries.
-     */
-    static or(...queries: Array<ParseQuery>): ParseQuery;
-    /**
-     * Constructs a Parse.Query that is the AND of the passed in queries.  For
-     * example:
-     * <pre>var compoundQuery = Parse.Query.and(query1, query2, query3);</pre>
-     *
-     * will create a compoundQuery that is an and of the query1, query2, and
-     * query3.
-     *
-     * @param {...Parse.Query} queries The list of queries to AND.
-     * @static
-     * @returns {Parse.Query} The query that is the AND of the passed in queries.
-     */
-    static and(...queries: Array<ParseQuery>): ParseQuery;
-    /**
-     * Constructs a Parse.Query that is the NOR of the passed in queries.  For
-     * example:
-     * <pre>const compoundQuery = Parse.Query.nor(query1, query2, query3);</pre>
-     *
-     * will create a compoundQuery that is a nor of the query1, query2, and
-     * query3.
-     *
-     * @param {...Parse.Query} queries The list of queries to NOR.
-     * @static
-     * @returns {Parse.Query} The query that is the NOR of the passed in queries.
-     */
-    static nor(...queries: Array<ParseQuery>): ParseQuery;
-    /**
-     * @param {(string | Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
-     */
-    constructor(objectClass: string | ParseObject);
+declare class ParseQuery<T extends ParseObject = ParseObject> {
     /**
      * @property {string} className
      */
     className: string;
     _where: any;
-    _watch: Array<string>;
-    _include: Array<string>;
-    _exclude: Array<string>;
-    _select: Array<string>;
+    _watch: string[];
+    _include: string[];
+    _exclude: string[];
+    _select: string[];
     _limit: number;
     _skip: number;
     _count: boolean;
-    _order: Array<string>;
-    _readPreference: string;
-    _includeReadPreference: string;
-    _subqueryReadPreference: string;
+    _order: string[];
+    _readPreference: string | null;
+    _includeReadPreference: string | null;
+    _subqueryReadPreference: string | null;
     _queriesLocalDatastore: boolean;
     _localDatastorePinName: any;
-    _extraOptions: {
-        [key: string]: mixed;
-    };
-    _hint: mixed;
+    _extraOptions: Record<string, any>;
+    _hint: any;
     _explain: boolean;
     _xhrRequest: any;
+    _comment: string;
+    /**
+     * @param {(string | Parse.Object)} objectClass An instance of a subclass of Parse.Object, or a Parse className string.
+     */
+    constructor(objectClass: string | (new (...args: any[]) => T | ParseObject));
     /**
      * Adds constraint that at least one of the passed in queries matches.
      *
      * @param {Array} queries
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    _orQuery(queries: Array<ParseQuery>): ParseQuery;
+    _orQuery(queries: ParseQuery[]): this;
     /**
      * Adds constraint that all of the passed in queries match.
      *
      * @param {Array} queries
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    _andQuery(queries: Array<ParseQuery>): ParseQuery;
+    _andQuery(queries: ParseQuery[]): this;
     /**
      * Adds constraint that none of the passed in queries match.
      *
      * @param {Array} queries
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    _norQuery(queries: Array<ParseQuery>): ParseQuery;
+    _norQuery(queries: ParseQuery[]): this;
     /**
      * Helper for condition queries
      *
@@ -169,7 +146,7 @@ declare class ParseQuery {
      * @param value
      * @returns {Parse.Query}
      */
-    _addCondition(key: string, condition: string, value: mixed): ParseQuery;
+    _addCondition<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, condition: string, value: any): this;
     /**
      * Converts string for regular expression at the beginning
      *
@@ -177,7 +154,7 @@ declare class ParseQuery {
      * @returns {string}
      */
     _regexStartWith(string: string): string;
-    _handleOfflineQuery(params: any): Promise<any>;
+    _handleOfflineQuery(params: QueryJSON): Promise<any>;
     /**
      * Returns a JSON representation of this query.
      *
@@ -205,7 +182,16 @@ declare class ParseQuery {
      * @param {QueryJSON} json from Parse.Query.toJSON() method
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    withJSON(json: QueryJSON): ParseQuery;
+    withJSON(json: QueryJSON): this;
+    /**
+     * Static method to restore Parse.Query by json representation
+     * Internally calling Parse.Query.withJSON
+     *
+     * @param {string} className
+     * @param {QueryJSON} json from Parse.Query.toJSON() method
+     * @returns {Parse.Query} new created query
+     */
+    static fromJSON(className: string, json: QueryJSON): ParseQuery;
     /**
      * Constructs a Parse.Object whose id is already known by fetching data from
      * the server. Unlike the <code>first</code> method, it never returns undefined.
@@ -223,7 +209,7 @@ declare class ParseQuery {
      * @returns {Promise} A promise that is resolved with the result when
      * the query completes.
      */
-    get(objectId: string, options?: FullOptions): Promise<ParseObject>;
+    get(objectId: string, options?: QueryOptions): Promise<T>;
     /**
      * Retrieves a list of ParseObjects that satisfy this query.
      *
@@ -239,7 +225,7 @@ declare class ParseQuery {
      * @returns {Promise} A promise that is resolved with the results when
      * the query completes.
      */
-    find(options?: FullOptions): Promise<Array<ParseObject>>;
+    find(options?: QueryOptions): Promise<T[]>;
     /**
      * Retrieves a complete list of ParseObjects that satisfy this query.
      * Using `eachBatch` under the hood to fetch all the valid objects.
@@ -250,15 +236,18 @@ declare class ParseQuery {
      *     be used for this request.
      *   <li>sessionToken: A valid session token, used for making a request on
      *       behalf of a specific user.
+     *   <li>json: Return raw JSON without converting to Parse.Object.
      * </ul>
      * @returns {Promise} A promise that is resolved with the results when
      * the query completes.
      */
-    findAll(options?: BatchOptions): Promise<Array<ParseObject>>;
+    findAll(options?: BatchOptions): Promise<T[]>;
     /**
      * Counts the number of objects that match this query.
      *
      * @param {object} options
+     * @param {boolean} [options.useMasterKey]
+     * @param {string} [options.sessionToken]
      * Valid options are:<ul>
      *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
      *     be used for this request.
@@ -268,30 +257,24 @@ declare class ParseQuery {
      * @returns {Promise} A promise that is resolved with the count when
      * the query completes.
      */
-    count(options?: FullOptions): Promise<number>;
+    count(options?: {
+        useMasterKey?: boolean;
+        sessionToken?: string;
+    }): Promise<number>;
     /**
      * Executes a distinct query and returns unique values
      *
      * @param {string} key A field to find distinct values
-     * @param {object} options
-     * Valid options are:<ul>
-     *   <li>sessionToken: A valid session token, used for making a request on
-     *       behalf of a specific user.
-     * </ul>
      * @returns {Promise} A promise that is resolved with the query completes.
      */
-    distinct(key: string, options?: FullOptions): Promise<Array<mixed>>;
+    distinct<K extends keyof T['attributes'], V = T['attributes'][K]>(key: K): Promise<V[]>;
     /**
      * Executes an aggregate query and returns aggregate results
      *
      * @param {(Array|object)} pipeline Array or Object of stages to process query
-     * @param {object} options Valid options are:<ul>
-     *   <li>sessionToken: A valid session token, used for making a request on
-     *       behalf of a specific user.
-     * </ul>
      * @returns {Promise} A promise that is resolved with the query completes.
      */
-    aggregate(pipeline: mixed, options?: FullOptions): Promise<Array<mixed>>;
+    aggregate(pipeline: any): Promise<any[]>;
     /**
      * Retrieves at most one Parse.Object that satisfies this query.
      *
@@ -308,7 +291,7 @@ declare class ParseQuery {
      * @returns {Promise} A promise that is resolved with the object when
      * the query completes.
      */
-    first(options?: FullOptions): Promise<ParseObject | void>;
+    first(options?: QueryOptions): Promise<T | undefined>;
     /**
      * Iterates over objects matching a query, calling a callback for each batch.
      * If the callback returns a promise, the iteration will not continue until
@@ -330,7 +313,7 @@ declare class ParseQuery {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    eachBatch(callback: (objs: Array<ParseObject>) => Promise<any>, options?: BatchOptions): Promise<void>;
+    eachBatch(callback: (objs: T[]) => PromiseLike<void> | void, options?: BatchOptions): Promise<void>;
     /**
      * Iterates over each result of a query, calling a callback for each one. If
      * the callback returns a promise, the iteration will not continue until
@@ -351,21 +334,21 @@ declare class ParseQuery {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    each(callback: (obj: ParseObject) => any, options?: BatchOptions): Promise<void>;
+    each(callback: (obj: T) => PromiseLike<void> | void, options?: BatchOptions): Promise<void>;
     /**
      * Adds a hint to force index selection. (https://docs.mongodb.com/manual/reference/operator/meta/hint/)
      *
      * @param {(string|object)} value String or Object of index that should be used when executing query
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    hint(value: mixed): ParseQuery;
+    hint(value: any): this;
     /**
      * Investigates the query execution plan. Useful for optimizing queries. (https://docs.mongodb.com/manual/reference/operator/meta/explain/)
      *
      * @param {boolean} explain Used to toggle the information on the query plan.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    explain(explain?: boolean): ParseQuery;
+    explain(explain?: boolean): this;
     /**
      * Iterates over each result of a query, calling a callback for each one. If
      * the callback returns a promise, the iteration will not continue until
@@ -388,7 +371,7 @@ declare class ParseQuery {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    map(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any, options?: BatchOptions): Promise<Array<any>>;
+    map(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any, options?: BatchOptions): Promise<any[]>;
     /**
      * Iterates over each result of a query, calling a callback for each one. If
      * the callback returns a promise, the iteration will not continue until
@@ -412,7 +395,7 @@ declare class ParseQuery {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    reduce(callback: (accumulator: any, currentObject: ParseObject, index: number) => any, initialValue: any, options?: BatchOptions): Promise<Array<any>>;
+    reduce(callback: (accumulator: any, currentObject: ParseObject, index: number) => any, initialValue: any, options?: BatchOptions): Promise<any[]>;
     /**
      * Iterates over each result of a query, calling a callback for each one. If
      * the callback returns a promise, the iteration will not continue until
@@ -435,7 +418,7 @@ declare class ParseQuery {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    filter(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean, options?: BatchOptions): Promise<Array<ParseObject>>;
+    filter(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean, options?: BatchOptions): Promise<ParseObject[]>;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be equal to the provided value.
@@ -444,9 +427,7 @@ declare class ParseQuery {
      * @param value The value that the Parse.Object must contain.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    equalTo(key: string | {
-        [key: string]: any;
-    }, value: mixed): ParseQuery;
+    equalTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (T['attributes'][K] extends ParseObject ? Pointer : T['attributes'][K] extends (infer E)[] ? E : never)): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be not equal to the provided value.
@@ -455,9 +436,7 @@ declare class ParseQuery {
      * @param value The value that must not be equalled.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    notEqualTo(key: string | {
-        [key: string]: any;
-    }, value: mixed): ParseQuery;
+    notEqualTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (T['attributes'][K] extends ParseObject ? Pointer : T['attributes'][K] extends (infer E)[] ? E : never)): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be less than the provided value.
@@ -466,7 +445,7 @@ declare class ParseQuery {
      * @param value The value that provides an upper bound.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    lessThan(key: string, value: mixed): ParseQuery;
+    lessThan<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be greater than the provided value.
@@ -475,7 +454,7 @@ declare class ParseQuery {
      * @param value The value that provides an lower bound.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    greaterThan(key: string, value: mixed): ParseQuery;
+    greaterThan<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be less than or equal to the provided value.
@@ -484,7 +463,7 @@ declare class ParseQuery {
      * @param value The value that provides an upper bound.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    lessThanOrEqualTo(key: string, value: mixed): ParseQuery;
+    lessThanOrEqualTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be greater than or equal to the provided value.
@@ -493,25 +472,25 @@ declare class ParseQuery {
      * @param {*} value The value that provides an lower bound.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    greaterThanOrEqualTo(key: string, value: mixed): ParseQuery;
+    greaterThanOrEqualTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be contained in the provided list of values.
      *
      * @param {string} key The key to check.
-     * @param {Array<*>} value The values that will match.
+     * @param {Array<*>} values The values that will match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    containedIn(key: string, value: Array<mixed>): ParseQuery;
+    containedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: (T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never))[]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * not be contained in the provided list of values.
      *
      * @param {string} key The key to check.
-     * @param {Array<*>} value The values that will not match.
+     * @param {Array<*>} values The values that will not match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    notContainedIn(key: string, value: Array<mixed>): ParseQuery;
+    notContainedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: T['attributes'][K][]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be contained by the provided list of values. Get objects where all array elements match.
@@ -520,7 +499,7 @@ declare class ParseQuery {
      * @param {Array} values The values that will match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    containedBy(key: string, values: Array<mixed>): ParseQuery;
+    containedBy<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: (T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never))[]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * contain each one of the provided list of values.
@@ -529,7 +508,7 @@ declare class ParseQuery {
      * @param {Array} values The values that will match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    containsAll(key: string, values: Array<mixed>): ParseQuery;
+    containsAll<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: any[]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * contain each one of the provided list of values starting with given strings.
@@ -538,32 +517,32 @@ declare class ParseQuery {
      * @param {Array<string>} values The string values that will match as starting string.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    containsAllStartingWith(key: string, values: Array<string>): ParseQuery;
+    containsAllStartingWith<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: any[]): this;
     /**
      * Adds a constraint for finding objects that contain the given key.
      *
      * @param {string} key The key that should exist.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    exists(key: string): ParseQuery;
+    exists<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K): this;
     /**
      * Adds a constraint for finding objects that do not contain a given key.
      *
      * @param {string} key The key that should not exist
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    doesNotExist(key: string): ParseQuery;
+    doesNotExist<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K): this;
     /**
      * Adds a regular expression constraint for finding string values that match
      * the provided regular expression.
      * This may be slow for large datasets.
      *
      * @param {string} key The key that the string to match is stored in.
-     * @param {RegExp} regex The regular expression pattern to match.
+     * @param {RegExp | string} regex The regular expression pattern to match.
      * @param {string} modifiers The regular expression mode.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    matches(key: string, regex: RegExp, modifiers: string): ParseQuery;
+    matches<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, regex: RegExp | string, modifiers?: string): this;
     /**
      * Adds a constraint that requires that a key's value matches a Parse.Query
      * constraint.
@@ -573,7 +552,7 @@ declare class ParseQuery {
      * @param {Parse.Query} query The query that should match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    matchesQuery(key: string, query: ParseQuery): ParseQuery;
+    matchesQuery<U extends ParseObject, K extends keyof T['attributes']>(key: K, query: ParseQuery<U>): this;
     /**
      * Adds a constraint that requires that a key's value not matches a
      * Parse.Query constraint.
@@ -583,7 +562,7 @@ declare class ParseQuery {
      * @param {Parse.Query} query The query that should not match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    doesNotMatchQuery(key: string, query: ParseQuery): ParseQuery;
+    doesNotMatchQuery<U extends ParseObject, K extends keyof T['attributes']>(key: K, query: ParseQuery<U>): this;
     /**
      * Adds a constraint that requires that a key's value matches a value in
      * an object returned by a different Parse.Query.
@@ -595,7 +574,7 @@ declare class ParseQuery {
      * @param {Parse.Query} query The query to run.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    matchesKeyInQuery(key: string, queryKey: string, query: ParseQuery): ParseQuery;
+    matchesKeyInQuery<U extends ParseObject, K extends keyof T['attributes'], X extends Extract<keyof U['attributes'], string>>(key: K, queryKey: X, query: ParseQuery<U>): this;
     /**
      * Adds a constraint that requires that a key's value not match a value in
      * an object returned by a different Parse.Query.
@@ -607,7 +586,7 @@ declare class ParseQuery {
      * @param {Parse.Query} query The query to run.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    doesNotMatchKeyInQuery(key: string, queryKey: string, query: ParseQuery): ParseQuery;
+    doesNotMatchKeyInQuery<U extends ParseObject, K extends keyof T['attributes'] | keyof BaseAttributes, X extends Extract<keyof U['attributes'], string>>(key: K, queryKey: X, query: ParseQuery<U>): this;
     /**
      * Adds a constraint for finding string values that contain a provided
      * string.  This may be slow for large datasets.
@@ -616,7 +595,7 @@ declare class ParseQuery {
      * @param {string} substring The substring that the value must contain.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    contains(key: string, substring: string): ParseQuery;
+    contains<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, substring: string): this;
     /**
      * Adds a constraint for finding string values that contain a provided
      * string. This may be slow for large datasets. Requires Parse-Server > 2.5.0
@@ -646,13 +625,13 @@ declare class ParseQuery {
      * @param {boolean} options.diacriticSensitive A boolean flag to enable or disable diacritic sensitive search.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    fullText(key: string, value: string, options: Object | null): ParseQuery;
+    fullText<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: string, options?: FullTextQueryOptions): this;
     /**
      * Method to sort the full text search by text score
      *
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    sortByTextScore(): Parse.Query;
+    sortByTextScore(): this;
     /**
      * Adds a constraint for finding string values that start with a provided
      * string.  This query will use the backend index, so it will be fast even
@@ -663,7 +642,7 @@ declare class ParseQuery {
      * @param {string} modifiers The regular expression mode.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    startsWith(key: string, prefix: string, modifiers: string): ParseQuery;
+    startsWith<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, prefix: string, modifiers?: string): this;
     /**
      * Adds a constraint for finding string values that end with a provided
      * string.  This will be slow for large datasets.
@@ -673,7 +652,7 @@ declare class ParseQuery {
      * @param {string} modifiers The regular expression mode.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    endsWith(key: string, suffix: string, modifiers: string): ParseQuery;
+    endsWith<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, suffix: string, modifiers?: string): this;
     /**
      * Adds a proximity based constraint for finding objects with key point
      * values near the point given.
@@ -682,7 +661,7 @@ declare class ParseQuery {
      * @param {Parse.GeoPoint} point The reference Parse.GeoPoint that is used.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    near(key: string, point: ParseGeoPoint): ParseQuery;
+    near<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, point: ParseGeoPoint): this;
     /**
      * Adds a proximity based constraint for finding objects with key point
      * values near the point given and within the maximum distance given.
@@ -695,7 +674,7 @@ declare class ParseQuery {
      * defaults to true.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    withinRadians(key: string, point: ParseGeoPoint, maxDistance: number, sorted: boolean): ParseQuery;
+    withinRadians<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, point: ParseGeoPoint, maxDistance: number, sorted?: boolean): this;
     /**
      * Adds a proximity based constraint for finding objects with key point
      * values near the point given and within the maximum distance given.
@@ -709,7 +688,7 @@ declare class ParseQuery {
      * defaults to true.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    withinMiles(key: string, point: ParseGeoPoint, maxDistance: number, sorted: boolean): ParseQuery;
+    withinMiles<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, point: ParseGeoPoint, maxDistance: number, sorted?: boolean): this;
     /**
      * Adds a proximity based constraint for finding objects with key point
      * values near the point given and within the maximum distance given.
@@ -723,7 +702,7 @@ declare class ParseQuery {
      * defaults to true.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    withinKilometers(key: string, point: ParseGeoPoint, maxDistance: number, sorted: boolean): ParseQuery;
+    withinKilometers<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, point: ParseGeoPoint, maxDistance: number, sorted?: boolean): this;
     /**
      * Adds a constraint to the query that requires a particular key's
      * coordinates be contained within a given rectangular geographic bounding
@@ -736,7 +715,7 @@ declare class ParseQuery {
      *     The upper-right inclusive corner of the box.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    withinGeoBox(key: string, southwest: ParseGeoPoint, northeast: ParseGeoPoint): ParseQuery;
+    withinGeoBox<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, southwest: ParseGeoPoint, northeast: ParseGeoPoint): this;
     /**
      * Adds a constraint to the query that requires a particular key's
      * coordinates be contained within and on the bounds of a given polygon.
@@ -748,7 +727,7 @@ declare class ParseQuery {
      * @param {Array} points Array of Coordinates / GeoPoints
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    withinPolygon(key: string, points: Array<Array<number>>): ParseQuery;
+    withinPolygon<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, points: number[][]): this;
     /**
      * Add a constraint to the query that requires a particular key's
      * coordinates that contains a ParseGeoPoint
@@ -757,7 +736,7 @@ declare class ParseQuery {
      * @param {Parse.GeoPoint} point
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    polygonContains(key: string, point: ParseGeoPoint): ParseQuery;
+    polygonContains<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, point: ParseGeoPoint): this;
     /**
      * Sorts the results in ascending order by the given key.
      *
@@ -765,7 +744,7 @@ declare class ParseQuery {
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    ascending(...keys: Array<string>): ParseQuery;
+    ascending(...keys: string[]): this;
     /**
      * Sorts the results in ascending order by the given key,
      * but can also add secondary sort descriptors without overwriting _order.
@@ -774,7 +753,7 @@ declare class ParseQuery {
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    addAscending(...keys: Array<string>): ParseQuery;
+    addAscending(...keys: string[]): this;
     /**
      * Sorts the results in descending order by the given key.
      *
@@ -782,7 +761,7 @@ declare class ParseQuery {
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    descending(...keys: Array<string>): ParseQuery;
+    descending(...keys: string[]): this;
     /**
      * Sorts the results in descending order by the given key,
      * but can also add secondary sort descriptors without overwriting _order.
@@ -791,7 +770,7 @@ declare class ParseQuery {
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    addDescending(...keys: Array<string>): ParseQuery;
+    addDescending(...keys: string[]): this;
     /**
      * Sets the number of results to skip before returning any results.
      * This is useful for pagination.
@@ -800,14 +779,14 @@ declare class ParseQuery {
      * @param {number} n the number of results to skip.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    skip(n: number): ParseQuery;
+    skip(n: number): this;
     /**
      * Sets the limit of the number of results to return. The default limit is 100.
      *
      * @param {number} n the number of results to limit to.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    limit(n: number): ParseQuery;
+    limit(n: number): this;
     /**
      * Sets the flag to include with response the total number of objects satisfying this query,
      * despite limits/skip. Might be useful for pagination.
@@ -817,7 +796,7 @@ declare class ParseQuery {
      * @param {boolean} includeCount false - disable, true - enable.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    withCount(includeCount?: boolean): ParseQuery;
+    withCount(includeCount?: boolean): this;
     /**
      * Includes nested Parse.Objects for the provided key.  You can use dot
      * notation to specify which fields in the included object are also fetched.
@@ -829,7 +808,7 @@ declare class ParseQuery {
      * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    include(...keys: Array<string | Array<string>>): ParseQuery;
+    include<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
     /**
      * Includes all nested Parse.Objects one level deep.
      *
@@ -837,7 +816,7 @@ declare class ParseQuery {
      *
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    includeAll(): ParseQuery;
+    includeAll(): this;
     /**
      * Restricts the fields of the returned Parse.Objects to include only the
      * provided keys.  If this is called multiple times, then all of the keys
@@ -846,7 +825,7 @@ declare class ParseQuery {
      * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    select(...keys: Array<string | Array<string>>): ParseQuery;
+    select<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
     /**
      * Restricts the fields of the returned Parse.Objects to all keys except the
      * provided keys. Exclude takes precedence over select and include.
@@ -856,7 +835,7 @@ declare class ParseQuery {
      * @param {...string|Array<string>} keys The name(s) of the key(s) to exclude.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    exclude(...keys: Array<string | Array<string>>): ParseQuery;
+    exclude<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
     /**
      * Restricts live query to trigger only for watched fields.
      *
@@ -865,7 +844,7 @@ declare class ParseQuery {
      * @param {...string|Array<string>} keys The name(s) of the key(s) to watch.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    watch(...keys: Array<string | Array<string>>): ParseQuery;
+    watch<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
     /**
      * Changes the read preference that the backend will use when performing the query to the database.
      *
@@ -874,7 +853,7 @@ declare class ParseQuery {
      * @param {string} subqueryReadPreference The read preference for the sub queries.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    readPreference(readPreference: string, includeReadPreference?: string, subqueryReadPreference?: string): ParseQuery;
+    readPreference(readPreference: string, includeReadPreference?: string, subqueryReadPreference?: string): this;
     /**
      * Subscribe this query to get liveQuery updates
      *
@@ -882,44 +861,85 @@ declare class ParseQuery {
      * @returns {Promise<LiveQuerySubscription>} Returns the liveQuerySubscription, it's an event emitter
      * which can be used to get liveQuery updates.
      */
-    subscribe(sessionToken?: string): Promise<LiveQuerySubscription>;
+    subscribe(sessionToken?: string | null): Promise<LiveQuerySubscription>;
+    /**
+     * Constructs a Parse.Query that is the OR of the passed in queries.  For
+     * example:
+     * <pre>var compoundQuery = Parse.Query.or(query1, query2, query3);</pre>
+     *
+     * will create a compoundQuery that is an or of the query1, query2, and
+     * query3.
+     *
+     * @param {...Parse.Query} queries The list of queries to OR.
+     * @static
+     * @returns {Parse.Query} The query that is the OR of the passed in queries.
+     */
+    static or(...queries: ParseQuery[]): ParseQuery;
+    /**
+     * Constructs a Parse.Query that is the AND of the passed in queries.  For
+     * example:
+     * <pre>var compoundQuery = Parse.Query.and(query1, query2, query3);</pre>
+     *
+     * will create a compoundQuery that is an and of the query1, query2, and
+     * query3.
+     *
+     * @param {...Parse.Query} queries The list of queries to AND.
+     * @static
+     * @returns {Parse.Query} The query that is the AND of the passed in queries.
+     */
+    static and(...queries: ParseQuery[]): ParseQuery;
+    /**
+     * Constructs a Parse.Query that is the NOR of the passed in queries.  For
+     * example:
+     * <pre>const compoundQuery = Parse.Query.nor(query1, query2, query3);</pre>
+     *
+     * will create a compoundQuery that is a nor of the query1, query2, and
+     * query3.
+     *
+     * @param {...Parse.Query} queries The list of queries to NOR.
+     * @static
+     * @returns {Parse.Query} The query that is the NOR of the passed in queries.
+     */
+    static nor(...queries: ParseQuery[]): ParseQuery;
     /**
      * Change the source of this query to the server.
      *
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    fromNetwork(): ParseQuery;
+    fromNetwork(): this;
     /**
      * Changes the source of this query to all pinned objects.
      *
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    fromLocalDatastore(): ParseQuery;
+    fromLocalDatastore(): this;
     /**
      * Changes the source of this query to the default group of pinned objects.
      *
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    fromPin(): ParseQuery;
+    fromPin(): this;
     /**
      * Changes the source of this query to a specific group of pinned objects.
      *
      * @param {string} name The name of query source.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    fromPinWithName(name?: string): ParseQuery;
+    fromPinWithName(name?: string | null): this;
     /**
      * Cancels the current network request (if any is running).
      *
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    cancel(): ParseQuery;
+    cancel(): this;
     _setRequestTask(options: any): void;
+    /**
+     * Sets a comment to the query so that the query
+     * can be identified when using a the profiler for MongoDB.
+     *
+     * @param {string} value a comment can make your profile data easier to interpret and trace.
+     * @returns {Parse.Query} Returns the query, so you can chain this call.
+     */
+    comment(value: string): this;
 }
-import { FullOptions } from './RESTController';
-import ParseObject from './ParseObject';
-type BatchOptions = FullOptions & {
-    batchSize?: number;
-};
-import ParseGeoPoint from './ParseGeoPoint';
-import LiveQuerySubscription from './LiveQuerySubscription';
+export default ParseQuery;

@@ -12,6 +12,10 @@ const mockObject = function (className, id) {
   };
 };
 jest.setMock('../ParseObject', mockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: mockObject,
+});
 
 const mockCLP = function (clp) {
   this.permissionsMap = clp;
@@ -19,12 +23,14 @@ const mockCLP = function (clp) {
     return { ...this.permissionsMap };
   };
 };
-jest.setMock('../ParseCLP', mockCLP);
-
-const ParseObject = require('../ParseObject');
-const ParseCLP = require('../ParseCLP');
+jest.setMock('../ParseCLP', {
+  __esModule: true,
+  default: mockCLP,
+});
+const ParseObject = require('../ParseObject').default;
+const ParseCLP = require('../ParseCLP').default;
 const ParseSchema = require('../ParseSchema').default;
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 
 const defaultController = CoreManager.getSchemaController();
 
@@ -45,7 +51,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema();
       schema.assertClassName();
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -185,7 +191,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addField(null, 'string');
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -194,7 +200,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addField('testField', 'unknown');
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -212,7 +218,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addIndex(null, { name: 1 });
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -221,7 +227,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addIndex('testIndex', null);
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -230,7 +236,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addPointer(null, 'targetClass');
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -239,7 +245,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addPointer('pointerField', null);
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -248,7 +254,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addRelation(null, 'targetClass');
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -257,7 +263,7 @@ describe('ParseSchema', () => {
     try {
       const schema = new ParseSchema('SchemaTest');
       schema.addRelation('relationField', null);
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });

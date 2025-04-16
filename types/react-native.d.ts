@@ -1,3 +1,3 @@
-import * as parse from "./index";
+import * as parse from './index';
 
 export = parse;

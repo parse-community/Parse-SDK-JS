@@ -292,6 +292,18 @@ describe('Parse Object', () => {
     assert.strictEqual(result.get('a').b.c.d, 2);
   });
 
+  it('can set nested fields without repeating pending operations on toJSON (regression test for #1452)', async () => {
+    const a = new Parse.Object('MyObject');
+    a.set('obj', {});
+    await a.save();
+    a.set('obj.a', 0);
+    const json = a.toJSON();
+    expect(json.obj).toEqual({ a: 0 });
+    expect(new Set(Object.keys(json))).toEqual(
+      new Set(['objectId', 'createdAt', 'updatedAt', 'obj'])
+    );
+  });
+
   it('can increment nested field and retain full object', async () => {
     const obj = new Parse.Object('TestIncrementObject');
     obj.set('objectField', { number: 5, letter: 'a' });
@@ -534,24 +546,20 @@ describe('Parse Object', () => {
     });
   });
 
-  it('cannot create invalid key names', done => {
+  it('cannot create invalid key names', async () => {
+    const error = new Parse.Error(Parse.Error.INVALID_KEY_NAME, 'Invalid key name: foo^bar');
     const item = new Parse.Object('Item');
-    assert(!item.set({ 'foo^bar': 'baz' }));
-    item.save({ 'foo^bar': 'baz' }).catch(e => {
-      assert.equal(e.code, Parse.Error.INVALID_KEY_NAME);
-      done();
-    });
+    expect(() => {
+      item.set({ 'foo^bar': 'baz' });
+    }).toThrow(error);
+    await expectAsync(item.save({ 'foo^bar': 'baz' })).toBeRejectedWith(error);
   });
 
   it('cannot use invalid key names in multiple sets', () => {
     const item = new Parse.Object('Item');
-    assert(
-      !item.set({
-        foobar: 'baz',
-        'foo^bar': 'baz',
-      })
-    );
-    assert(!item.get('foobar'));
+    expect(() => {
+      item.set({ foobar: 'baz', 'foo^bar': 'baz' });
+    }).toThrow(new Parse.Error(Parse.Error.INVALID_KEY_NAME, 'Invalid key name: foo^bar'));
   });
 
   it('can unset fields', done => {
@@ -1123,12 +1131,43 @@ describe('Parse Object', () => {
     parent.set('children', [child1, child2]);
     parent.set('bastard', child3);
 
-    expect(parent.save).toThrow();
-    let results = await new Parse.Query(Child).find();
-    assert.equal(results.length, 0);
-
     await parent.save(null, { cascadeSave: true });
-    results = await new Parse.Query(Child).find();
+    const results = await new Parse.Query(Child).find();
+    assert.equal(results.length, 3);
+
+    parent.set('dead', true);
+    child1.set('dead', true);
+    await parent.save(null);
+    const rob = await new Parse.Query(Child).equalTo('name', 'rob').first();
+    expect(rob.get('dead')).toBe(true);
+
+    parent.set('lastname', 'stark');
+    child3.set('lastname', 'stark');
+    await parent.save(null, { cascadeSave: false });
+    const john = await new Parse.Query(Child).doesNotExist('lastname').first();
+    expect(john.get('lastname')).toBeUndefined();
+  });
+
+  it('can skip cascade (default true) saving as per request', async () => {
+    const Parent = Parse.Object.extend('Parent');
+    const Child = Parse.Object.extend('Child');
+
+    const parent = new Parent();
+    const child1 = new Child();
+    const child2 = new Child();
+    const child3 = new Child();
+
+    child1.set('name', 'rob');
+    child2.set('name', 'sansa');
+    child3.set('name', 'john');
+    parent.set('children', [child1, child2]);
+    parent.set('bastard', child3);
+
+    // cascadeSave option default true
+    await parent.save(null, {
+      /* cascadeSave: true */
+    });
+    const results = await new Parse.Query(Child).find();
     assert.equal(results.length, 3);
 
     parent.set('dead', true);
@@ -1935,7 +1974,7 @@ describe('Parse Object', () => {
     const lo = new LimitedObject();
     try {
       lo.set('immutable', 'mutable');
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -1949,7 +1988,7 @@ describe('Parse Object', () => {
     const lo = new LimitedObject();
     try {
       lo.unset('immutable');
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -2042,6 +2081,44 @@ describe('Parse Object', () => {
     expect(obj.get('object')).toBeInstanceOf(Object);
     expect(obj.get('string')).toBeDefined();
     expect(obj.get('string')).toBeInstanceOf(String);
+  });
+
+  it('returns correct field values', async () => {
+    const values = [
+      { field: 'string', value: 'string' },
+      { field: 'number', value: 1 },
+      { field: 'boolean', value: true },
+      { field: 'array', value: [0, 1, 2] },
+      { field: 'array', value: [1, 2, 3] },
+      { field: 'array', value: [{ '0': 'a' }, 2, 3] },
+      { field: 'object', value: { key: 'value' } },
+      { field: 'object', value: { key1: 'value1', key2: 'value2' } },
+      { field: 'object', value: { key1: 1, key2: 2 } },
+      { field: 'object', value: { '1x1': 1 } },
+      { field: 'object', value: { '1x1': 1, '2': 2 } },
+      { field: 'object', value: { '0': 0 } },
+      { field: 'object', value: { '1': 1 } },
+      { field: 'object', value: { '0': { '0': 'a', '1': 'b' } } },
+      { field: 'date', value: new Date() },
+      {
+        field: 'file',
+        value: Parse.File.fromJSON({
+          __type: 'File',
+          name: 'name',
+          url: 'http://localhost:1337/parse/files/integration/name',
+        }),
+      },
+      { field: 'geoPoint', value: new Parse.GeoPoint(40, -30) },
+      { field: 'bytes', value: { __type: 'Bytes', base64: 'ZnJveW8=' } },
+    ];
+    for (const value of values) {
+      const object = new TestObject();
+      object.set(value.field, value.value);
+      await object.save();
+      const query = new Parse.Query(TestObject);
+      const objectAgain = await query.get(object.id);
+      expect(objectAgain.get(value.field)).toEqual(value.value);
+    }
   });
 
   describe('allowCustomObjectId', () => {

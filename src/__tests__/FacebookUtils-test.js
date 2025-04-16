@@ -239,7 +239,7 @@ describe('FacebookUtils provider', () => {
     const provider = FacebookUtils._getAuthProvider();
     try {
       provider.authenticate(options);
-    } catch (e) {
+    } catch (_) {
       expect(options.error).toHaveBeenCalledWith(provider, 'Facebook SDK not found.');
     }
   });

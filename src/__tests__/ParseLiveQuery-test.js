@@ -10,8 +10,8 @@ jest.dontMock('../promiseUtils');
 
 // Forces the loading
 const ParseLiveQuery = require('../ParseLiveQuery').default;
-const CoreManager = require('../CoreManager');
-const EventEmitter = require('../EventEmitter');
+const CoreManager = require('../CoreManager').default;
+const EventEmitter = require('../EventEmitter').default;
 const ParseQuery = require('../ParseQuery').default;
 const LiveQuerySubscription = require('../LiveQuerySubscription').default;
 const mockLiveQueryClient = {
@@ -19,7 +19,7 @@ const mockLiveQueryClient = {
   close: jest.fn(),
 };
 CoreManager.setEventEmitter(EventEmitter);
-const LiveQuery = new ParseLiveQuery()
+const LiveQuery = new ParseLiveQuery();
 
 describe('ParseLiveQuery', () => {
   beforeEach(() => {
@@ -269,7 +269,7 @@ describe('ParseLiveQuery', () => {
     try {
       LiveQuery.emit('error');
       expect(true).toBe(true);
-    } catch (error) {
+    } catch (_) {
       // Should not throw error
       expect(false).toBe(true);
     }

@@ -1,4 +1,4 @@
-import ParseObject from './ParseObject';
+import ParseObject, { Attributes } from './ParseObject';
 import type { FullOptions } from './RESTController';
 /**
  * <p>A Parse.Session object is a local representation of a revocable session.
@@ -8,11 +8,11 @@ import type { FullOptions } from './RESTController';
  * @alias Parse.Session
  * @augments Parse.Object
  */
-declare class ParseSession extends ParseObject {
+declare class ParseSession<T extends Attributes = Attributes> extends ParseObject<T> {
     /**
      * @param {object} attributes The initial set of data to store in the user.
      */
-    constructor(attributes?: any);
+    constructor(attributes?: T);
     /**
      * Returns the session token string.
      *
@@ -29,7 +29,7 @@ declare class ParseSession extends ParseObject {
      * object after it has been fetched. If there is no current user, the
      * promise will be rejected.
      */
-    static current(options: FullOptions): any;
+    static current<T extends ParseSession>(options?: FullOptions): Promise<T>;
     /**
      * Determines whether the current session token is revocable.
      * This method is useful for migrating Express.js or Node.js web apps to

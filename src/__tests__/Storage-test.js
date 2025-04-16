@@ -1,19 +1,18 @@
 jest.autoMockOff();
 
 const mockRNStorageInterface = require('./test_helpers/mockRNStorage');
-const mockStorageInterface = require('./test_helpers/mockStorageInteface');
 const mockIndexedDB = require('./test_helpers/mockIndexedDB');
 const mockWeChat = require('./test_helpers/mockWeChat');
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 
 global.wx = mockWeChat;
-global.localStorage = mockStorageInterface;
 global.indexedDB = mockIndexedDB;
 jest.mock('idb-keyval', () => {
   return mockIndexedDB;
 });
+const idbKeyVal = require('idb-keyval');
 
-const BrowserStorageController = require('../StorageController.browser');
+const BrowserStorageController = require('../StorageController.browser').default;
 
 describe('Browser StorageController', () => {
   beforeEach(() => {
@@ -41,7 +40,7 @@ describe('Browser StorageController', () => {
   });
 });
 
-const RNStorageController = require('../StorageController.react-native');
+const RNStorageController = require('../StorageController.react-native').default;
 
 describe('React Native StorageController', () => {
   beforeEach(() => {
@@ -106,7 +105,7 @@ describe('React Native StorageController', () => {
 
   it('can handle set error', done => {
     const mockRNError = {
-      setItem(path, value, cb) {
+      setItem(_path, _value, cb) {
         cb('Error Thrown', undefined);
       },
     };
@@ -119,7 +118,7 @@ describe('React Native StorageController', () => {
 
   it('can handle get error', done => {
     const mockRNError = {
-      getItem(path, cb) {
+      getItem(_path, cb) {
         cb('Error Thrown', undefined);
       },
     };
@@ -132,7 +131,7 @@ describe('React Native StorageController', () => {
 
   it('can handle remove error', done => {
     const mockRNError = {
-      removeItem(path, cb) {
+      removeItem(_path, cb) {
         cb('Error Thrown', undefined);
       },
     };
@@ -161,7 +160,7 @@ describe('IndexDB StorageController', () => {
   let IndexedDBStorageController;
   beforeEach(() => {
     jest.isolateModules(() => {
-      IndexedDBStorageController = require('../IndexedDBStorageController');
+      IndexedDBStorageController = require('../IndexedDBStorageController').default;
     });
     IndexedDBStorageController.clear();
   });
@@ -200,13 +199,25 @@ describe('IndexDB StorageController', () => {
 
   it('handle indexedDB is not defined', async () => {
     global.indexedDB = undefined;
-    const dbController = require('../IndexedDBStorageController');
+    const dbController = require('../IndexedDBStorageController').default;
     expect(dbController).toBeUndefined();
     global.indexedDB = mockIndexedDB;
   });
+
+  it('handle indexedDB is not accessible', async () => {
+    jest.isolateModules(() => {
+      global.indexedDB = mockIndexedDB;
+      jest.spyOn(idbKeyVal, 'createStore').mockImplementationOnce(() => {
+        throw new Error('Protected');
+      });
+      const dbController = require('../IndexedDBStorageController').default;
+      expect(dbController).toBeUndefined();
+      expect(idbKeyVal.createStore).toHaveBeenCalled();
+    });
+  });
 });
 
-const DefaultStorageController = require('../StorageController.default');
+const DefaultStorageController = require('../StorageController.default').default;
 
 describe('Default StorageController', () => {
   beforeEach(() => {
@@ -234,7 +245,7 @@ describe('Default StorageController', () => {
   });
 });
 
-const WeappStorageController = require('../StorageController.weapp');
+const WeappStorageController = require('../StorageController.weapp').default;
 
 describe('WeChat StorageController', () => {
   beforeEach(() => {
@@ -263,11 +274,11 @@ describe('WeChat StorageController', () => {
   });
 });
 
-const Storage = require('../Storage');
+const Storage = require('../Storage').default;
 
 describe('Storage (Default StorageController)', () => {
   beforeEach(() => {
-    CoreManager.setStorageController(require('../StorageController.default'));
+    CoreManager.setStorageController(require('../StorageController.default').default);
   });
 
   it('can store and retrieve values', () => {
@@ -331,7 +342,7 @@ describe('Storage (Default StorageController)', () => {
 describe('Storage (Async StorageController)', () => {
   beforeEach(() => {
     CoreManager.setAsyncStorage(mockRNStorageInterface);
-    CoreManager.setStorageController(require('../StorageController.react-native'));
+    CoreManager.setStorageController(require('../StorageController.react-native').default);
   });
 
   it('throws when using a synchronous method', () => {

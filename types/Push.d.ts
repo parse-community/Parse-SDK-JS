@@ -1,4 +1,15 @@
-// @ts-nocheck
+import ParseQuery from './ParseQuery';
+import type ParseObject from './ParseObject';
+import type { WhereClause } from './ParseQuery';
+import type { FullOptions } from './RESTController';
+export interface PushData {
+    where?: WhereClause | ParseQuery;
+    push_time?: Date | string;
+    expiration_time?: Date | string;
+    expiration_interval?: number;
+    data?: any;
+    channels?: string[];
+}
 /**
  * Contains functions to deal with Push in Parse.
  *
@@ -32,9 +43,9 @@
  *     be used for this request.
  * </ul>
  * @returns {Promise} A promise that is fulfilled when the push request
- *     completes.
+ *     completes and returns `pushStatusId`.
  */
-export function send(data: PushData, options?: FullOptions): Promise<any>;
+export declare function send(data: PushData, options?: FullOptions): Promise<string>;
 /**
  * Gets push status by Id
  *
@@ -48,12 +59,4 @@ export function send(data: PushData, options?: FullOptions): Promise<any>;
  * </ul>
  * @returns {Parse.Object} Status of Push.
  */
-export function getPushStatus(pushStatusId: string, options?: FullOptions): Promise<string>;
-type PushData = {
-    where?: WhereClause | ParseQuery;
-    push_time?: string | Date;
-    expiration_time?: string | Date;
-    expiration_interval?: number;
-};
-import { FullOptions } from './RESTController';
-export {};
+export declare function getPushStatus(pushStatusId: string, options?: FullOptions): Promise<ParseObject>;

@@ -29,7 +29,7 @@ function runTest(controller) {
 
   describe(`Parse Object Pinning (${controller.name})`, () => {
     beforeEach(async () => {
-      const StorageController = require(controller.file);
+      const StorageController = require(controller.file).default;
       Parse.CoreManager.setAsyncStorage(mockRNStorage);
       Parse.CoreManager.setLocalDatastoreController(StorageController);
       Parse.CoreManager.setEventEmitter(require('events').EventEmitter);
@@ -1073,7 +1073,7 @@ function runTest(controller) {
 
   describe(`Parse Query Pinning (${controller.name})`, () => {
     beforeEach(async () => {
-      const StorageController = require(controller.file);
+      const StorageController = require(controller.file).default;
       Parse.CoreManager.setAsyncStorage(mockRNStorage);
       Parse.CoreManager.setLocalDatastoreController(StorageController);
       Parse.CoreManager.setEventEmitter(require('events').EventEmitter);
@@ -1374,6 +1374,16 @@ function runTest(controller) {
       query.fromLocalDatastore();
       const results = await query.find();
       assert.equal(results.length, 9);
+    });
+
+    it(`${controller.name} can perform notEqualTo null queries`, async () => {
+      const nullObject = new Parse.Object({ className: 'BoxedNumber', number: null });
+      await nullObject.save();
+      const query = new Parse.Query('BoxedNumber');
+      query.notEqualTo('number', null);
+      query.fromLocalDatastore();
+      const results = await query.find();
+      assert.equal(results.length, 10);
     });
 
     it(`${controller.name} can perform containedIn queries`, async () => {
@@ -2471,7 +2481,7 @@ function runTest(controller) {
       assert.equal(objAgain.get('owner').get('age'), 21);
       try {
         await Parse.User.logOut();
-      } catch (e) {
+      } catch (_) {
         /* */
       }
     });

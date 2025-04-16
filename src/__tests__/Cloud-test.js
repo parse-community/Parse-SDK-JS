@@ -6,10 +6,12 @@ jest.dontMock('../ParseError');
 jest.dontMock('../ParseObject');
 jest.dontMock('../ParseQuery');
 jest.dontMock('../Push');
+jest.dontMock('../ParseOp');
 
 const Cloud = require('../Cloud');
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 const Push = require('../Push');
+require('../ParseOp');
 
 const defaultController = CoreManager.getCloudController();
 
@@ -53,7 +55,11 @@ describe('Cloud', () => {
   it('run passes options', () => {
     Cloud.run('myfunction', {}, { useMasterKey: false });
 
-    expect(CoreManager.getCloudController().run.mock.calls[0]).toEqual(['myfunction', {}, {}]);
+    expect(CoreManager.getCloudController().run.mock.calls[0]).toEqual([
+      'myfunction',
+      {},
+      { useMasterKey: false },
+    ]);
 
     Cloud.run('myfunction', {}, { useMasterKey: true });
 
@@ -229,7 +235,7 @@ describe('CloudController', () => {
         value: 12,
         when: { __type: 'Date', iso: '2015-01-01T00:00:00.000Z' },
       },
-      { useMasterKey: true },
+      { returnStatus: true, useMasterKey: true },
     ]);
   });
 
@@ -242,7 +248,7 @@ describe('CloudController', () => {
       {
         value: 12,
       },
-      { useMasterKey: true },
+      { returnStatus: true, useMasterKey: true },
     ]);
   });
 

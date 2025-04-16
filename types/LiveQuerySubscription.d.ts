@@ -1,7 +1,7 @@
-export default Subscription;
+import type ParseQuery from './ParseQuery';
+import type { EventEmitter } from 'events';
 /**
  * Creates a new LiveQuery Subscription.
- * Extends events.EventEmitter
  * <a href="https://nodejs.org/api/events.html#events_class_eventemitter">cloud functions</a>.
  *
  * <p>Response Object - Contains data from the client that made the request
@@ -81,21 +81,23 @@ export default Subscription;
  * subscription.on('close', () => {
  *
  * });</pre></p>
- *
- * @alias Parse.LiveQuerySubscription
  */
-declare class Subscription {
-    constructor(id: any, query: any, sessionToken: any);
-    id: any;
-    query: any;
-    sessionToken: any;
-    subscribePromise: Promise<any>;
-    unsubscribePromise: Promise<any>;
+declare class LiveQuerySubscription {
+    id: string | number;
+    query: ParseQuery;
+    sessionToken?: string;
+    subscribePromise: any;
+    unsubscribePromise: any;
     subscribed: boolean;
+    emitter: EventEmitter;
+    on: EventEmitter['on'];
+    emit: EventEmitter['emit'];
+    constructor(id: string | number, query: ParseQuery, sessionToken?: string);
     /**
      * Close the subscription
      *
      * @returns {Promise}
      */
-    unsubscribe(): Promise<any>;
+    unsubscribe(): Promise<void>;
 }
+export default LiveQuerySubscription;

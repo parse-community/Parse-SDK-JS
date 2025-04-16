@@ -1,1 +1,1 @@
-module.exports = require('./lib/node/Parse.js');
+module.exports = require('./lib/node/Parse.js').default;

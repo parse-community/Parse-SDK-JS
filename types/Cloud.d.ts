@@ -1,4 +1,5 @@
-// @ts-nocheck
+import ParseObject from './ParseObject';
+import type { RequestOptions } from './RESTController';
 /**
  * Contains functions for calling and declaring
  * <a href="/docs/cloud_code_guide#functions">cloud functions</a>.
@@ -18,10 +19,21 @@
  * @param {string} name The function name.
  * @param {object} data The parameters to send to the cloud function.
  * @param {object} options
+ * Valid options are:<ul>
+ *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+ *     be used for this request.
+ *   <li>sessionToken: A valid session token, used for making a request on
+ *        behalf of a specific user.
+ *   <li>installationId: the installationId which made the request
+ *   <li>context: A dictionary that is accessible in Cloud Code triggers.
+ * </ul>
  * @returns {Promise} A promise that will be resolved with the result
  * of the function.
  */
-export function run(name: string, data: mixed, options: RequestOptions): Promise<mixed>;
+export declare function run<T extends () => any>(name: string, data?: null, options?: RequestOptions): Promise<ReturnType<T>>;
+export declare function run<T extends (param: {
+    [P in keyof Parameters<T>[0]]: Parameters<T>[0][P];
+}) => any>(name: string, data: Parameters<T>[0], options?: RequestOptions): Promise<ReturnType<T>>;
 /**
  * Gets data for the current set of cloud jobs.
  *
@@ -30,7 +42,7 @@ export function run(name: string, data: mixed, options: RequestOptions): Promise
  * @returns {Promise} A promise that will be resolved with the result
  * of the function.
  */
-export function getJobsData(): Promise<Object>;
+export declare function getJobsData(): Promise<any>;
 /**
  * Starts a given cloud job, which will process asynchronously.
  *
@@ -41,7 +53,7 @@ export function getJobsData(): Promise<Object>;
  * @returns {Promise} A promise that will be resolved with the jobStatusId
  * of the job.
  */
-export function startJob(name: string, data: mixed): Promise<string>;
+export declare function startJob(name: string, data: any): Promise<string>;
 /**
  * Gets job status by Id
  *
@@ -50,6 +62,4 @@ export function startJob(name: string, data: mixed): Promise<string>;
  * @param {string} jobStatusId The Id of Job Status.
  * @returns {Parse.Object} Status of Job.
  */
-export function getJobStatus(jobStatusId: string): Promise<ParseObject>;
-import { RequestOptions } from './RESTController';
-import ParseObject from './ParseObject';
+export declare function getJobStatus(jobStatusId: string): Promise<ParseObject>;

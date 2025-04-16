@@ -1,7 +1,6 @@
 jest.autoMockOff();
 
-const matchesQuery = require('../OfflineQuery').matchesQuery;
-const validateQuery = require('../OfflineQuery').validateQuery;
+const { matchesQuery, validateQuery } = require('../OfflineQuery').default;
 const ParseError = require('../ParseError').default;
 const ParseObject = require('../ParseObject').default;
 const ParseQuery = require('../ParseQuery').default;
@@ -285,7 +284,10 @@ describe('OfflineQuery', () => {
 
   it('matches on inequalities', () => {
     const player = new ParseObject('Person');
-    player.set('score', 12).set('name', 'Bill').set('birthday', new Date(1980, 2, 4));
+    player
+      .set('score', 12)
+      .set('name', 'Bill')
+      .set('birthday', new Date(1980, 2, 4));
 
     let q = new ParseQuery('Person');
     q.lessThan('score', 15);
@@ -886,7 +888,7 @@ describe('OfflineQuery', () => {
       validateQuery(query);
 
       expect(true).toBe(true);
-    } catch (e) {
+    } catch (_) {
       // Should not reach here
       expect(false).toEqual(true);
     }

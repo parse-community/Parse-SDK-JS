@@ -1,4 +1,7 @@
-export default ParseACL;
+import type ParseRole from './ParseRole';
+import type ParseUser from './ParseUser';
+type PermissionsMap = Record<string, boolean>;
+type ByIdMap = Record<string, PermissionsMap>;
 /**
  * Creates a new ACL.
  * If no argument is given, the ACL has no permissions for anyone.
@@ -14,11 +17,11 @@ export default ParseACL;
  * @alias Parse.ACL
  */
 declare class ParseACL {
-    /**
-     * @param {(Parse.User | object)} arg1 The user to initialize the ACL for
-     */
-    constructor(arg1: ParseUser | ByIdMap);
     permissionsById: ByIdMap;
+    /**
+     * @param {(Parse.User | object | null)} arg1 The user to initialize the ACL for
+     */
+    constructor(arg1?: ParseUser | ByIdMap | null);
     /**
      * Returns a JSON-encoded version of the ACL.
      *
@@ -131,11 +134,4 @@ declare class ParseACL {
      */
     setRoleWriteAccess(role: ParseRole | string, allowed: boolean): void;
 }
-type ByIdMap = {
-    [userId: string]: PermissionsMap;
-};
-import ParseUser from './ParseUser';
-import ParseRole from './ParseRole';
-type PermissionsMap = {
-    [permission: string]: boolean;
-};
+export default ParseACL;

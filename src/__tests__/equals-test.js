@@ -6,6 +6,10 @@ const ParseFile = require('../ParseFile').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
 const ParseObject = require('../ParseObject').default;
 
+// Load into CoreManager
+require('../ParseRole');
+require('../ParseUser');
+
 describe('equals', () => {
   it('tests equality of primitives', () => {
     expect(equals(1, 'string')).toBe(false);

@@ -76,31 +76,25 @@ describe('Polygon', () => {
       }, done.fail);
   });
 
-  it('fail save with 3 point minumum', done => {
-    try {
+  it('fail save with 3 point minumum', () => {
+    expect(function () {
       new Parse.Polygon([[0, 0]]);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('fail save with non array', done => {
-    try {
+  it('fail save with non array', () => {
+    expect(function () {
       new Parse.Polygon(123);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('fail save with invalid array', done => {
-    try {
+  it('fail save with invalid array', () => {
+    expect(function () {
       new Parse.Polygon([['str1'], ['str2'], ['str3']]);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('containsPoint', done => {
+  it('containsPoint', () => {
     const points = [
       [0, 0],
       [0, 1],
@@ -113,10 +107,9 @@ describe('Polygon', () => {
 
     assert.equal(polygon.containsPoint(inside), true);
     assert.equal(polygon.containsPoint(outside), false);
-    done();
   });
 
-  it('equality', done => {
+  it('equality', () => {
     const points = [
       [0, 0],
       [0, 1],
@@ -129,7 +122,6 @@ describe('Polygon', () => {
       [2, 2],
       [2, 0],
     ];
-
     const polygonA = new Parse.Polygon(points);
     const polygonB = new Parse.Polygon(points);
     const polygonC = new Parse.Polygon(diff);
@@ -140,11 +132,9 @@ describe('Polygon', () => {
 
     assert.equal(polygonA.equals(true), false);
     assert.equal(polygonA.equals(polygonC), false);
-
-    done();
   });
 
-  it('supports polygonContains', done => {
+  it('supports polygonContains', async () => {
     const p1 = [
       [0, 0],
       [0, 1],
@@ -164,7 +154,6 @@ describe('Polygon', () => {
       [15, 10],
       [10, 10],
     ];
-
     const polygon1 = new Parse.Polygon(p1);
     const polygon2 = new Parse.Polygon(p2);
     const polygon3 = new Parse.Polygon(p3);
@@ -173,17 +162,12 @@ describe('Polygon', () => {
     const obj2 = new TestObject({ polygon: polygon2 });
     const obj3 = new TestObject({ polygon: polygon3 });
 
-    Parse.Object.saveAll([obj1, obj2, obj3])
-      .then(() => {
-        const point = new Parse.GeoPoint(0.5, 0.5);
-        const query = new Parse.Query(TestObject);
-        query.polygonContains('polygon', point);
-        return query.find();
-      })
-      .then(results => {
-        assert.equal(results.length, 2);
-        done();
-      }, done.fail);
+    await Parse.Object.saveAll([obj1, obj2, obj3]);
+    const point = new Parse.GeoPoint(0.5, 0.5);
+    const query = new Parse.Query(TestObject);
+    query.polygonContains('polygon', point);
+    const results = await query.find();
+    assert.equal(results.length, 2);
   });
 
   it('polygonContains invalid input', done => {

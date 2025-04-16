@@ -3,14 +3,20 @@ jest.dontMock('../CryptoController');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../Parse');
+jest.dontMock('../ParseObject');
+jest.dontMock('../ParseOp');
+jest.dontMock('../ParseLiveQuery');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('crypto-js/aes');
 jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
 global.indexedDB = require('./test_helpers/mockIndexedDB');
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
+const ParseLiveQuery = require('../ParseLiveQuery').default;
 const EventuallyQueue = require('../EventuallyQueue');
-const Parse = require('../Parse');
+const Parse = require('../Parse').default;
+
+CoreManager.setEventEmitter(require('events').EventEmitter);
 
 describe('Parse module', () => {
   it('can be initialized with keys', () => {
@@ -18,10 +24,11 @@ describe('Parse module', () => {
     expect(CoreManager.get('APPLICATION_ID')).toBe('A');
     expect(CoreManager.get('JAVASCRIPT_KEY')).toBe('B');
 
-    Parse._initialize('A', 'B', 'C');
+    Parse._initialize('A', 'B', 'C', 'D');
     expect(CoreManager.get('APPLICATION_ID')).toBe('A');
     expect(CoreManager.get('JAVASCRIPT_KEY')).toBe('B');
     expect(CoreManager.get('MASTER_KEY')).toBe('C');
+    expect(CoreManager.get('MAINTENANCE_KEY')).toBe('D');
   });
 
   it('enables master key use in the node build', () => {
@@ -48,6 +55,10 @@ describe('Parse module', () => {
     Parse.masterKey = '789';
     expect(CoreManager.get('MASTER_KEY')).toBe('789');
     expect(Parse.masterKey).toBe('789');
+
+    Parse.maintenanceKey = '000';
+    expect(CoreManager.get('MAINTENANCE_KEY')).toBe('000');
+    expect(Parse.maintenanceKey).toBe('000');
 
     Parse.serverURL = 'http://example.com';
     expect(CoreManager.get('SERVER_URL')).toBe('http://example.com');
@@ -87,6 +98,13 @@ describe('Parse module', () => {
     };
     Parse.setLocalDatastoreController(controller);
     expect(CoreManager.getLocalDatastoreController()).toBe(controller);
+  });
+
+  it('cannot set EventuallyQueue controller with missing functions', () => {
+    const controller = {};
+    expect(() => (Parse.EventuallyQueue = controller)).toThrow(
+      'EventuallyQueue must implement poll()'
+    );
   });
 
   it('can set AsyncStorage', () => {
@@ -173,6 +191,14 @@ describe('Parse module', () => {
     CoreManager.set('REQUEST_BATCH_SIZE', 20);
   });
 
+  it('can set and get live query', () => {
+    const temp = Parse.LiveQuery;
+    const LiveQuery = new ParseLiveQuery();
+    Parse.LiveQuery = LiveQuery;
+    expect(Parse.LiveQuery).toEqual(LiveQuery);
+    Parse.LiveQuery = temp;
+  });
+
   it('can set allowCustomObjectId', () => {
     expect(Parse.allowCustomObjectId).toBe(false);
     Parse.allowCustomObjectId = true;
@@ -219,6 +245,8 @@ describe('Parse module', () => {
   it('_getInstallationId', () => {
     const controller = {
       currentInstallationId: () => '1234',
+      currentInstallation: () => {},
+      updateInstallationOnDisk: () => {},
     };
     CoreManager.setInstallationController(controller);
     expect(Parse._getInstallationId()).toBe('1234');
@@ -236,12 +264,25 @@ describe('Parse module', () => {
     jest.isolateModules(() => {
       expect(Parse.IndexedDB).toBeUndefined();
       process.env.PARSE_BUILD = 'browser';
-      const ParseInstance = require('../Parse');
+      const ParseInstance = require('../Parse').default;
+      ParseInstance.initialize('test', 'test');
       expect(ParseInstance.IndexedDB).toBeDefined();
       CoreManager.setStorageController(ParseInstance.IndexedDB);
       const currentStorage = CoreManager.getStorageController();
       expect(currentStorage).toEqual(ParseInstance.IndexedDB);
       process.env.PARSE_BUILD = 'node';
     });
+  });
+
+  it('can set EventuallyQueue', () => {
+    const controller = {
+      poll: function () {},
+      save: function () {},
+      destroy: function () {},
+    };
+
+    Parse.EventuallyQueue = controller;
+    expect(CoreManager.getEventuallyQueue()).toBe(controller);
+    expect(Parse.EventuallyQueue).toBe(controller);
   });
 });

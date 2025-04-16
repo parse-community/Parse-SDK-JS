@@ -2,17 +2,15 @@
 
 ---
 
-[![Build Status CI alpha](https://github.com/parse-community/Parse-SDK-JS/workflows/ci/badge.svg?branch=alpha&subject=alpha)](https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Aalpha)
-[![Build Status CI beta](https://github.com/parse-community/Parse-SDK-JS/workflows/ci/badge.svg?branch=beta)](https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Abeta)
-[![Build Status CI release](https://github.com/parse-community/Parse-SDK-JS/workflows/ci/badge.svg?branch=release)](https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Arelease)
+[![Build Status CI alpha](https://github.com/parse-community/Parse-SDK-JS/actions/workflows/ci.yml/badge.svg?branch=alpha&subject=alpha)](https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Aalpha)
+[![Build Status CI release](https://github.com/parse-community/Parse-SDK-JS/actions/workflows/ci.yml/badge.svg?branch=release)](https://github.com/parse-community/Parse-SDK-JS/actions?query=workflow%3Aci+branch%3Arelease)
 [![Snyk Badge](https://snyk.io/test/github/parse-community/Parse-SDK-JS/badge.svg)](https://snyk.io/test/github/parse-community/Parse-SDK-JS)
-[![Coverage](http://codecov.io/github/parse-community/Parse-SDK-JS/coverage.svg?branch=alpha)](http://codecov.io/github/parse-community/Parse-SDK-JS?branch=alpha)
+[![Coverage](https://codecov.io/gh/parse-community/Parse-SDK-JS/branch/alpha/graph/badge.svg)](https://codecov.io/gh/parse-community/Parse-SDK-JS)
 
-[![Node Version](https://img.shields.io/badge/nodejs-14,_16,_18-green.svg?logo=node.js&style=flat)](https://nodejs.org/)
+[![Node Version](https://img.shields.io/badge/nodejs-18,_20,_22-green.svg?logo=node.js&style=flat)](https://nodejs.org/)
 [![auto-release](https://img.shields.io/badge/%F0%9F%9A%80-auto--release-9e34eb.svg)](https://github.com/parse-community/parse-dashboard/releases)
 
 [![npm latest version](https://img.shields.io/npm/v/parse/latest.svg)](https://www.npmjs.com/package/parse)
-[![npm beta version](https://img.shields.io/npm/v/parse/beta.svg)](https://www.npmjs.com/package/parse)
 [![npm alpha version](https://img.shields.io/npm/v/parse/alpha.svg)](https://www.npmjs.com/package/parse)
 
 [![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)][open-collective-link]
@@ -26,14 +24,36 @@ A library that gives you access to the powerful Parse Server backend from your J
 
 ---
 
+- [Compatibility](#compatibility)
+  - [Parse Server](#parse-server)
+  - [Node.js](#nodejs)
 - [Getting Started](#getting-started)
   - [Using Parse on Different Platforms](#using-parse-on-different-platforms)
-- [Compatibility](#compatibility)
-  - [Node.js](#nodejs)
-- [Upgrading to Parse SDK 2.0.0](#upgrading-to-parse-sdk-200)
+    - [Core Manager](#core-manager)
 - [3rd Party Authentications](#3rd-party-authentications)
   - [Experimenting](#experimenting)
 - [Contributing](#contributing)
+
+## Compatibility
+
+### Parse Server
+
+Parse JS SDK is compatible with the following versions of Parse Server.
+
+| Parse JS SDK     | Parse Server     |
+|------------------|------------------|
+| >= 4.0.0 < 5.0.0 | >= 6.0.0 < 7.0.0 |
+| >= 5.0.0         | >= 7.0.0         |
+
+### Node.js
+
+Parse JS SDK is continuously tested with the most recent releases of Node.js to ensure compatibility. We follow the [Node.js Long Term Support plan](https://github.com/nodejs/Release) and only test against versions that are officially supported and have not reached their end-of-life date.
+
+| Version    | Latest Version | End-of-Life | Compatible |
+|------------|----------------|-------------|------------|
+| Node.js 18 | 18.20.3        | April 2025  | ✅ Yes      |
+| Node.js 20 | 20.15.0        | April 2026  | ✅ Yes      |
+| Node.js 22 | 22.4.0         | April 2027  | ✅ Yes      |
 
 ## Getting Started
 
@@ -82,32 +102,17 @@ const Parse = require('parse/weapp');
 ```
 If you want to use a pre-compiled file, you can fetch it from [unpkg](https://unpkg.com). The development version is available at [https://unpkg.com/parse/dist/parse.weapp.js](https://unpkg.com/parse/dist/parse.weapp.js), and the minified production version is at [https://unpkg.com/parse/dist/parse.weapp.min.js](https://unpkg.com/parse/dist/parse.weapp.min.js).
 
-For TypeScript applications, install `'@types/parse'`:
+#### Core Manager
+
+The SDK has a [Core Manager][core-manager] that handles all configurations and controllers. These modules can be swapped out for customization before you initialize the SDK. For full list of all available modules take a look at the [Core Manager Documentation][core-manager].
+
+```js
+// Configuration example
+Parse.CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1)
+
+// Controller example
+Parse.CoreManager.setRESTController(MyRESTController);
 ```
-$ npm install @types/parse
-```
-
-Types are updated manually after every release. If a definition doesn't exist, please submit a pull request to [@types/parse][types-parse]
-
-## Compatibility
-
-### Node.js
-
-Parse JS SDK is continuously tested with the most recent releases of Node.js to ensure compatibility. We follow the [Node.js Long Term Support plan](https://github.com/nodejs/Release) and only test against versions that are officially supported and have not reached their end-of-life date.
-
-| Version    | Latest Version | End-of-Life | Compatible |
-|------------|----------------|-------------|------------|
-| Node.js 14 | 14.19.1        | April 2023  | ✅ Yes      |
-| Node.js 16 | 16.19.0        | September 2023  | ✅ Yes      |
-| Node.js 18 | 18.12.1        | April 2025  | ✅ Yes      |
-| Node.js 19 | 19.3.0        | June 2023  | ✅ Yes      |
-
-
-## Upgrading to Parse SDK 2.0.0
-
-With Parse SDK 2.0.0, gone are the backbone style callbacks and Parse.Promises.
-
-We have curated a [migration guide][migration] that should help you migrate your code.
 
 ## 3rd Party Authentications
 
@@ -130,8 +135,7 @@ We really want Parse to be yours, to see it grow and thrive in the open source c
 
 [3rd-party-auth]: http://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication
 [contributing]: https://github.com/parse-community/Parse-SDK-JS/blob/master/CONTRIBUTING.md
+[core-manager]: https://github.com/parse-community/Parse-SDK-JS/blob/alpha/src/CoreManager.ts
 [custom-auth-module]: https://docs.parseplatform.org/js/guide/#custom-authentication-module
 [link-with]: https://docs.parseplatform.org/js/guide/#linking-users
-[migration]: https://github.com/parse-community/Parse-SDK-JS/blob/master/2.0.0.md
 [open-collective-link]: https://opencollective.com/parse-server
-[types-parse]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/parse

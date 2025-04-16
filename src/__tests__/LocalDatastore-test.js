@@ -2,7 +2,8 @@
 
 jest.autoMockOff();
 jest.unmock('../LocalDatastoreUtils');
-
+jest.dontMock('../ParseOp');
+require('../ParseOp');
 const encode = require('../encode').default;
 
 let objectCount = 0;
@@ -65,6 +66,8 @@ class MockObject {
   set(key, value) {
     this.attributes[key] = value;
   }
+
+  static registerSubclass() {}
 }
 
 const mockAsyncStorage = require('./test_helpers/mockRNStorage');
@@ -75,27 +78,36 @@ const mockLocalStorageController = {
   getAllContents: jest.fn(),
   clear: jest.fn(),
 };
-jest.setMock('../ParseObject', MockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: MockObject,
+});
 
 const mockQueryFind = jest.fn();
-jest.mock('../ParseQuery', () => {
-  return jest.fn().mockImplementation(function () {
+jest.mock('../ParseQuery', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(function () {
     this.equalTo = jest.fn();
     this.containedIn = jest.fn();
     this.limit = jest.fn();
     this.find = mockQueryFind;
-  });
-});
+  }),
+}));
 
-const CoreManager = require('../CoreManager');
-const LocalDatastore = require('../LocalDatastore');
-const ParseObject = require('../ParseObject');
-const ParseQuery = require('../ParseQuery');
+const CoreManager = require('../CoreManager').default;
+const LocalDatastore = require('../LocalDatastore').default;
+const ParseObject = require('../ParseObject').default;
+const ParseQuery = require('../ParseQuery').default;
 const ParseUser = require('../ParseUser').default;
-const LocalDatastoreController = require('../LocalDatastoreController');
-const RNDatastoreController = require('../LocalDatastoreController.react-native');
-const BrowserStorageController = require('../StorageController.browser');
-const DefaultStorageController = require('../StorageController.default');
+const LocalDatastoreController = require('../LocalDatastoreController').default;
+const RNDatastoreController = require('../LocalDatastoreController.react-native').default;
+const BrowserStorageController = require('../StorageController.browser').default;
+const DefaultStorageController = require('../StorageController.default').default;
+// Register our mocks
+jest
+  .spyOn(CoreManager, 'getParseObject')
+  .mockImplementation(() => require('../ParseObject').default);
+jest.spyOn(CoreManager, 'getParseQuery').mockImplementation(() => require('../ParseQuery').default);
 
 const item1 = new ParseObject('Item');
 const item2 = new ParseObject('Item');
@@ -717,7 +729,7 @@ describe('LocalDatastore', () => {
     expect(LocalDatastore.isSyncing).toBe(false);
   });
 
-  it('updateFromServer on mixed object', async () => {
+  it('updateFromServer on any object', async () => {
     LocalDatastore.isEnabled = true;
     LocalDatastore.isSyncing = false;
     const testObject = new ParseObject('TestObject');
@@ -903,7 +915,7 @@ describe('LocalDatastore (RNDatastoreController)', () => {
 
   it('can handle clear error', async () => {
     const mockStorageError = {
-      multiRemove(keys, cb) {
+      multiRemove(_keys, cb) {
         cb('error thrown');
       },
       getAllKeys(cb) {
@@ -917,7 +929,7 @@ describe('LocalDatastore (RNDatastoreController)', () => {
 
   it('can handle multiget error', async () => {
     const mockStorageError = {
-      multiGet(keys, cb) {
+      multiGet(_keys, cb) {
         cb('error thrown');
       },
       getAllKeys(cb) {

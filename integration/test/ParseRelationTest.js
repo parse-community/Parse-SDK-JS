@@ -43,6 +43,26 @@ describe('Parse Relation', () => {
       });
   });
 
+  it('can do consecutive adds (#2056)', async () => {
+    const ChildObject = Parse.Object.extend('ChildObject');
+    const childObjects = [];
+    for (let i = 0; i < 2; i++) {
+      childObjects.push(new ChildObject({ x: i }));
+    }
+    const parent = new Parse.Object('ParentObject');
+    await parent.save();
+    await Parse.Object.saveAll(childObjects);
+    for (const child of childObjects) {
+      parent.relation('child').add(child);
+    }
+    await parent.save();
+    const results = await parent.relation('child').query().find();
+    assert.equal(results.length, 2);
+    const expectedIds = new Set(childObjects.map(r => r.id));
+    const foundIds = new Set(results.map(r => r.id));
+    assert.deepEqual(expectedIds, foundIds);
+  });
+
   it('can query relation without schema', done => {
     const ChildObject = Parse.Object.extend('ChildObject');
     const childObjects = [];
