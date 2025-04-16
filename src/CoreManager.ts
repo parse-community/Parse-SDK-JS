@@ -197,7 +197,7 @@ export interface UserController {
   loginAs: (user: ParseUser, userId: string) => Promise<ParseUser>;
   become: (user: ParseUser, options?: RequestOptions) => Promise<ParseUser>;
   hydrate: (user: ParseUser, userJSON: AttributeMap) => Promise<ParseUser>;
-  logOut: (options?: RequestOptions) => Promise<void>;
+  logOut: (options?: RequestOptions & { clearSession?: boolean }) => Promise<void>;
   me: (user: ParseUser, options?: RequestOptions) => Promise<ParseUser>;
   requestPasswordReset: (email: string, options?: RequestOptions) => Promise<void>;
   updateUserOnDisk: (user: ParseUser) => Promise<ParseUser>;

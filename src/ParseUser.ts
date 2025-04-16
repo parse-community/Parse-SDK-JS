@@ -812,11 +812,13 @@ class ParseUser<T extends Attributes = Attributes> extends ParseObject<T> {
    * <code>current</code> will return <code>null</code>.
    *
    * @param {object} options
+   * @param {boolean} [options.clearSession] If true, the session token will be
+   *   removed from the user object when the session token is invalid.
    * @static
    * @returns {Promise} A promise that is resolved when the session is
    *   destroyed on the server.
    */
-  static logOut(options?: RequestOptions): Promise<void> {
+  static logOut(options?: RequestOptions & { clearSession?: boolean }): Promise<void> {
     const controller = CoreManager.getUserController();
     return controller.logOut(options);
   }
@@ -1205,10 +1207,11 @@ const DefaultController = {
     });
   },
 
-  logOut(options?: RequestOptions): Promise<void> {
+  logOut(options?: RequestOptions & { clearSession?: boolean }): Promise<void> {
     const RESTController = CoreManager.getRESTController();
     const promiseCatch = e => {
-      if (e.code === ParseError.INVALID_SESSION_TOKEN && options.clearSession) {
+      console.log(e, options);
+      if (e.code === ParseError.INVALID_SESSION_TOKEN && options?.clearSession) {
         return;
       }
       throw e;

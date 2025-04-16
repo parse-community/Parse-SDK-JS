@@ -1076,6 +1076,28 @@ describe('ParseUser', () => {
     await ParseUser.logOut({ sessionToken: '1234', clearSession: true });
   });
 
+  it('cannot logout user with invalid session', async () => {
+    expect.assertions(2);
+    ParseUser.disableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    Storage._clear();
+    const RESTController = {
+      request() {
+        const error = new ParseError(ParseError.INVALID_SESSION_TOKEN, 'Invalid session token.');
+        return Promise.reject(error);
+      },
+      ajax() {},
+    };
+    jest.spyOn(RESTController, 'request');
+    CoreManager.setRESTController(RESTController);
+    try {
+      await ParseUser.logOut({ sessionToken: '1234', clearSession: false });
+    } catch (e) {
+      expect(e.code).toBe(ParseError.INVALID_SESSION_TOKEN);
+      expect(e.message).toBe('Invalid session token.');
+    }
+  });
+
   it('can retreive a user with sessionToken (me)', async () => {
     ParseUser.disableUnsafeCurrentUser();
     ParseUser._clearCache();
