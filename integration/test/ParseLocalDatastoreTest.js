@@ -1,36 +1,52 @@
 'use strict';
 
 const assert = require('assert');
-const Parse = require('../../node');
 
 global.localStorage = require('./mockLocalStorage');
+global.WebSocket = require('ws');
 const mockRNStorage = require('./mockRNStorage');
-const LocalDatastoreUtils = require('../../lib/node/LocalDatastoreUtils');
+const serverURL = 'http://localhost:1337/parse';
 
-const { DEFAULT_PIN, PIN_PREFIX, isLocalDatastoreKey } = LocalDatastoreUtils;
-
-function LDS_KEY(object) {
-  return Parse.LocalDatastore.getKeyForObject(object);
-}
-function LDS_FULL_JSON(object) {
-  const json = object._toFullJSON();
-  if (object._localId) {
-    json._localId = object._localId;
-  }
-  return json;
-}
 function runTest(controller) {
+  const Parse = require(`../../${controller.name}`);
+  const LocalDatastoreUtils = require('../../lib/node/LocalDatastoreUtils');
+
+  const { DEFAULT_PIN, PIN_PREFIX, isLocalDatastoreKey } = LocalDatastoreUtils;
+
+  const Item = Parse.Object.extend('Item');
+  const TestObject = Parse.Object.extend('TestObject');
+
+  function LDS_KEY(object) {
+    return Parse.LocalDatastore.getKeyForObject(object);
+  }
+  function LDS_FULL_JSON(object) {
+    const json = object._toFullJSON();
+    if (object._localId) {
+      json._localId = object._localId;
+    }
+    return json;
+  }
+
   describe(`Parse Object Pinning (${controller.name})`, () => {
     beforeEach(async () => {
-      const StorageController = require(controller.file);
+      const StorageController = require(controller.file).default;
       Parse.CoreManager.setAsyncStorage(mockRNStorage);
       Parse.CoreManager.setLocalDatastoreController(StorageController);
-      Parse.enableLocalDatastore();
+      Parse.CoreManager.setEventEmitter(require('events').EventEmitter);
+      Parse.User.enableUnsafeCurrentUser();
       await Parse.LocalDatastore._clear();
+      Parse.initialize('integration');
+      Parse.CoreManager.set('SERVER_URL', serverURL);
+      Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
+      const RESTController = Parse.CoreManager.getRESTController();
+      RESTController._setXHR(require('xmlhttprequest').XMLHttpRequest);
+      Parse.enableLocalDatastore();
     });
+
     function getStorageCount(storage) {
       return Object.keys(storage).reduce((acc, key) => acc + (isLocalDatastoreKey(key) ? 1 : 0), 1);
     }
+
     it(`${controller.name} can clear localDatastore`, async () => {
       const obj1 = new TestObject();
       const obj2 = new TestObject();
@@ -1057,11 +1073,18 @@ function runTest(controller) {
 
   describe(`Parse Query Pinning (${controller.name})`, () => {
     beforeEach(async () => {
-      const StorageController = require(controller.file);
+      const StorageController = require(controller.file).default;
       Parse.CoreManager.setAsyncStorage(mockRNStorage);
       Parse.CoreManager.setLocalDatastoreController(StorageController);
-      Parse.enableLocalDatastore();
+      Parse.CoreManager.setEventEmitter(require('events').EventEmitter);
       Parse.LocalDatastore._clear();
+      Parse.User.enableUnsafeCurrentUser();
+      Parse.initialize('integration');
+      Parse.CoreManager.set('SERVER_URL', serverURL);
+      Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
+      const RESTController = Parse.CoreManager.getRESTController();
+      RESTController._setXHR(require('xmlhttprequest').XMLHttpRequest);
+      Parse.enableLocalDatastore();
 
       const numbers = [];
       for (let i = 0; i < 10; i++) {
@@ -1227,6 +1250,66 @@ function runTest(controller) {
       assert.equal(results[0].id, parent3.id);
     });
 
+    it(`${controller.name} can handle containsAll query on array`, async () => {
+      const obj1 = new TestObject({ arrayField: [1, 2, 3, 4] });
+      const obj2 = new TestObject({ arrayField: [0, 2] });
+      const obj3 = new TestObject({ arrayField: [1, 2, 3] });
+      await Parse.Object.saveAll([obj1, obj2, obj3]);
+      await Parse.Object.pinAll([obj1, obj2, obj3]);
+
+      let query = new Parse.Query(TestObject);
+      query.containsAll('arrayField', [1, 2]);
+      query.fromPin();
+      let results = await query.find();
+      expect(results.length).toBe(2);
+
+      query = new Parse.Query(TestObject);
+      query.containsAll('arrayField', [5, 6]);
+      query.fromPin();
+      results = await query.find();
+      expect(results.length).toBe(0);
+    });
+
+    it(`${controller.name} can handle containedIn query on array`, async () => {
+      const obj1 = new TestObject({ arrayField: [1, 2, 3, 4] });
+      const obj2 = new TestObject({ arrayField: [0, 2] });
+      const obj3 = new TestObject({ arrayField: [1, 2, 3] });
+      await Parse.Object.saveAll([obj1, obj2, obj3]);
+      await Parse.Object.pinAll([obj1, obj2, obj3]);
+
+      let query = new Parse.Query(TestObject);
+      query.containedIn('arrayField', [3]);
+      query.fromPin();
+      let results = await query.find();
+      expect(results.length).toEqual(2);
+
+      query = new Parse.Query(TestObject);
+      query.containedIn('arrayField', [5]);
+      query.fromPin();
+      results = await query.find();
+      expect(results.length).toEqual(0);
+    });
+
+    it(`${controller.name} can handle notContainedIn query on array`, async () => {
+      const obj1 = new TestObject({ arrayField: [1, 2, 3, 4] });
+      const obj2 = new TestObject({ arrayField: [0, 2] });
+      const obj3 = new TestObject({ arrayField: [1, 2, 3] });
+      await Parse.Object.saveAll([obj1, obj2, obj3]);
+      await Parse.Object.pinAll([obj1, obj2, obj3]);
+
+      let query = new Parse.Query(TestObject);
+      query.notContainedIn('arrayField', [3]);
+      query.fromPin();
+      let results = await query.find();
+      expect(results.length).toEqual(1);
+
+      query = new Parse.Query(TestObject);
+      query.notContainedIn('arrayField', [5]);
+      query.fromPin();
+      results = await query.find();
+      expect(results.length).toEqual(3);
+    });
+
     it(`${controller.name} can test equality with undefined`, async () => {
       const query = new Parse.Query('BoxedNumber');
       query.equalTo('number', undefined);
@@ -1291,6 +1374,16 @@ function runTest(controller) {
       query.fromLocalDatastore();
       const results = await query.find();
       assert.equal(results.length, 9);
+    });
+
+    it(`${controller.name} can perform notEqualTo null queries`, async () => {
+      const nullObject = new Parse.Object({ className: 'BoxedNumber', number: null });
+      await nullObject.save();
+      const query = new Parse.Query('BoxedNumber');
+      query.notEqualTo('number', null);
+      query.fromLocalDatastore();
+      const results = await query.find();
+      assert.equal(results.length, 10);
     });
 
     it(`${controller.name} can perform containedIn queries`, async () => {
@@ -2388,7 +2481,7 @@ function runTest(controller) {
       assert.equal(objAgain.get('owner').get('age'), 21);
       try {
         await Parse.User.logOut();
-      } catch (e) {
+      } catch (_) {
         /* */
       }
     });
@@ -2889,20 +2982,10 @@ function runTest(controller) {
 }
 
 describe('Parse LocalDatastore', () => {
-  beforeEach(() => {
-    Parse.CoreManager.getInstallationController()._setInstallationIdCache('1234');
-    Parse.enableLocalDatastore();
-    Parse.User.enableUnsafeCurrentUser();
-  });
-
   const controllers = [
-    { name: 'Default', file: '../../lib/node/LocalDatastoreController' },
-    {
-      name: 'React-Native',
-      file: '../../lib/node/LocalDatastoreController.react-native',
-    },
+    { name: 'node', file: '../../lib/node/LocalDatastoreController' },
+    { name: 'react-native', file: '../../lib/react-native/LocalDatastoreController.react-native' },
   ];
-
   for (let i = 0; i < controllers.length; i += 1) {
     const controller = controllers[i];
     runTest(controller);

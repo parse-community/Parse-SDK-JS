@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.autoMockOff();
 jest.useFakeTimers();
 jest.mock('../uuid', () => {
@@ -14,8 +5,9 @@ jest.mock('../uuid', () => {
   return () => (value++).toString();
 });
 
-const CoreManager = require('../CoreManager');
-const RESTController = require('../RESTController');
+const CoreManager = require('../CoreManager').default;
+const RESTController = require('../RESTController').default;
+const flushPromises = require('./test_helpers/flushPromises');
 const mockXHR = require('./test_helpers/mockXHR');
 const mockWeChat = require('./test_helpers/mockWeChat');
 
@@ -25,14 +17,18 @@ CoreManager.setInstallationController({
   currentInstallationId() {
     return Promise.resolve('iid');
   },
+  currentInstallation() {},
+  updateInstallationOnDisk() {},
 });
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 CoreManager.set('VERSION', 'V');
 
-function flushPromises() {
-  return new Promise(resolve => setImmediate(resolve));
-}
+const headers = {
+  'x-parse-job-status-id': '1234',
+  'x-parse-push-status-id': '5678',
+  'access-control-expose-headers': 'X-Parse-Job-Status-Id, X-Parse-Push-Status-Id',
+};
 
 describe('RESTController', () => {
   it('throws if there is no XHR implementation', () => {
@@ -90,7 +86,8 @@ describe('RESTController', () => {
     jest.runAllTimers();
   });
 
-  it('returns a connection error on network failure', async done => {
+  it('returns a connection error on network failure', async () => {
+    expect.assertions(2);
     RESTController._setXHR(
       mockXHR([{ status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }])
     );
@@ -99,14 +96,14 @@ describe('RESTController', () => {
       err => {
         expect(err.code).toBe(100);
         expect(err.message).toBe('XMLHttpRequest failed: "Unable to connect to the Parse API"');
-        done();
       }
     );
-    await new Promise(resolve => setImmediate(resolve));
+    await flushPromises();
     jest.runAllTimers();
   });
 
-  it('aborts after too many failures', async done => {
+  it('aborts after too many failures', async () => {
+    expect.assertions(1);
     RESTController._setXHR(
       mockXHR([
         { status: 500 },
@@ -119,9 +116,8 @@ describe('RESTController', () => {
     );
     RESTController.ajax('POST', 'users', {}).then(null, xhr => {
       expect(xhr).not.toBe(undefined);
-      done();
     });
-    await new Promise(resolve => setImmediate(resolve));
+    await flushPromises();
     jest.runAllTimers();
   });
 
@@ -179,6 +175,25 @@ describe('RESTController', () => {
     });
   });
 
+  it('handles request errors with message', done => {
+    RESTController._setXHR(
+      mockXHR([
+        {
+          status: 400,
+          response: {
+            code: 1,
+            message: 'Internal server error.',
+          },
+        },
+      ])
+    );
+    RESTController.request('GET', 'classes/MyObject', {}, {}).then(null, error => {
+      expect(error.code).toBe(1);
+      expect(error.message).toBe('Internal server error.');
+      done();
+    });
+  });
+
   it('handles invalid responses', done => {
     const XHR = function () {};
     XHR.prototype = {
@@ -224,8 +239,13 @@ describe('RESTController', () => {
     XHR.prototype = {
       open: function () {},
       setRequestHeader: function () {},
-      getResponseHeader: function () {
-        return 1234;
+      getResponseHeader: function (header) {
+        return headers[header];
+      },
+      getAllResponseHeaders: function () {
+        return Object.keys(headers)
+          .map(key => `${key}: ${headers[key]}`)
+          .join('\n');
       },
       send: function () {
         this.status = 200;
@@ -233,13 +253,15 @@ describe('RESTController', () => {
         this.readyState = 4;
         this.onreadystatechange();
       },
-      getAllResponseHeaders: function () {
-        return 'x-parse-job-status-id: 1234';
-      },
     };
     RESTController._setXHR(XHR);
-    const response = await RESTController.request('GET', 'classes/MyObject', {}, {});
-    expect(response).toBe(1234);
+    const response = await RESTController.request(
+      'GET',
+      'classes/MyObject',
+      {},
+      { returnStatus: true }
+    );
+    expect(response._headers['X-Parse-Job-Status-Id']).toBe('1234');
   });
 
   it('handles x-parse-push-status-id header', async () => {
@@ -247,8 +269,13 @@ describe('RESTController', () => {
     XHR.prototype = {
       open: function () {},
       setRequestHeader: function () {},
-      getResponseHeader: function () {
-        return 1234;
+      getResponseHeader: function (header) {
+        return headers[header];
+      },
+      getAllResponseHeaders: function () {
+        return Object.keys(headers)
+          .map(key => `${key}: ${headers[key]}`)
+          .join('\n');
       },
       send: function () {
         this.status = 200;
@@ -256,13 +283,68 @@ describe('RESTController', () => {
         this.readyState = 4;
         this.onreadystatechange();
       },
-      getAllResponseHeaders: function () {
-        return 'x-parse-push-status-id: 1234';
+    };
+    RESTController._setXHR(XHR);
+    const response = await RESTController.request('POST', 'push', {}, { returnStatus: true });
+    expect(response._headers['X-Parse-Push-Status-Id']).toBe('5678');
+  });
+
+  it('does not call getRequestHeader with no headers or no getAllResponseHeaders', async () => {
+    const XHR = function () {};
+    XHR.prototype = {
+      open: function () {},
+      setRequestHeader: function () {},
+      getResponseHeader: jest.fn(),
+      send: function () {
+        this.status = 200;
+        this.responseText = '{"result":"hello"}';
+        this.readyState = 4;
+        this.onreadystatechange();
       },
     };
     RESTController._setXHR(XHR);
-    const response = await RESTController.request('POST', 'push', {}, {});
-    expect(response).toBe(1234);
+    await RESTController.request('GET', 'classes/MyObject', {}, {});
+    expect(XHR.prototype.getResponseHeader.mock.calls.length).toBe(0);
+
+    XHR.prototype.getAllResponseHeaders = jest.fn();
+    await RESTController.request('GET', 'classes/MyObject', {}, {});
+    expect(XHR.prototype.getAllResponseHeaders.mock.calls.length).toBe(1);
+    expect(XHR.prototype.getResponseHeader.mock.calls.length).toBe(0);
+  });
+
+  it('does not invoke Chrome browser console error on getResponseHeader', async () => {
+    const headers = {
+      'access-control-expose-headers': 'a, b, c',
+      a: 'value',
+      b: 'value',
+      c: 'value',
+    };
+    const XHR = function () {};
+    XHR.prototype = {
+      open: function () {},
+      setRequestHeader: function () {},
+      getResponseHeader: jest.fn(key => {
+        if (Object.keys(headers).includes(key)) {
+          return headers[key];
+        }
+        throw new Error('Chrome creates a console error here.');
+      }),
+      getAllResponseHeaders: jest.fn(() => {
+        return Object.keys(headers)
+          .map(key => `${key}: ${headers[key]}`)
+          .join('\r\n');
+      }),
+      send: function () {
+        this.status = 200;
+        this.responseText = '{"result":"hello"}';
+        this.readyState = 4;
+        this.onreadystatechange();
+      },
+    };
+    RESTController._setXHR(XHR);
+    await RESTController.request('GET', 'classes/MyObject', {}, {});
+    expect(XHR.prototype.getAllResponseHeaders.mock.calls.length).toBe(1);
+    expect(XHR.prototype.getResponseHeader.mock.calls.length).toBe(4);
   });
 
   it('handles invalid header', async () => {
@@ -495,6 +577,28 @@ describe('RESTController', () => {
     });
   });
 
+  it('sends the maintenance key when requested', async () => {
+    CoreManager.set('MAINTENANCE_KEY', 'MK');
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      send: jest.fn(),
+    };
+    RESTController._setXHR(function () {
+      return xhr;
+    });
+    RESTController.request('GET', 'classes/MyObject', {}, { useMaintenanceKey: true });
+    await flushPromises();
+    expect(JSON.parse(xhr.send.mock.calls[0][0])).toEqual({
+      _method: 'GET',
+      _ApplicationId: 'A',
+      _JavaScriptKey: 'B',
+      _MaintenanceKey: 'MK',
+      _ClientVersion: 'V',
+      _InstallationId: 'iid',
+    });
+  });
+
   it('includes the status code when requested', done => {
     RESTController._setXHR(mockXHR([{ status: 200, response: { success: true } }]));
     RESTController.request('POST', 'users', {}, { returnStatus: true }).then(response => {
@@ -568,6 +672,20 @@ describe('RESTController', () => {
         done();
       }
     );
+  });
+
+  it('does not set upload progress listener when callback is not provided to avoid CORS pre-flight', () => {
+    const xhr = {
+      setRequestHeader: jest.fn(),
+      open: jest.fn(),
+      upload: jest.fn(),
+      send: jest.fn(),
+    };
+    RESTController._setXHR(function () {
+      return xhr;
+    });
+    RESTController.ajax('POST', 'users', {});
+    expect(xhr.upload.onprogress).toBeUndefined();
   });
 
   it('does not upload progress when total is uncomputable', done => {
@@ -646,7 +764,7 @@ describe('RESTController', () => {
   });
 
   it('can handle wechat request', async () => {
-    const XHR = require('../Xhr.weapp');
+    const XHR = require('../Xhr.weapp').default;
     const xhr = new XHR();
     jest.spyOn(xhr, 'open');
     jest.spyOn(xhr, 'send');
@@ -676,7 +794,7 @@ describe('RESTController', () => {
   });
 
   it('can handle wechat ajax', async () => {
-    const XHR = require('../Xhr.weapp');
+    const XHR = require('../Xhr.weapp').default;
     const xhr = new XHR();
     jest.spyOn(xhr, 'open');
     jest.spyOn(xhr, 'send');

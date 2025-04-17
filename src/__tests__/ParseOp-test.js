@@ -1,15 +1,7 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../arrayContainsObject');
 jest.dontMock('../encode');
 jest.dontMock('../decode');
+jest.dontMock('../CoreManager');
 jest.dontMock('../ParseOp');
 jest.dontMock('../unique');
 
@@ -28,28 +20,33 @@ mockObject.fromJSON = function (json) {
   return new mockObject(json.className, json.objectId);
 };
 mockObject.registerSubclass = function () {};
-jest.setMock('../ParseObject', mockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: mockObject,
+});
 
 const mockRelation = function (parent, key) {
   this.parent = parent;
   this.key = key;
 };
-jest.setMock('../ParseRelation', mockRelation);
+jest.setMock('../ParseRelation', {
+  __esModule: true,
+  default: mockRelation,
+});
 
-const ParseRelation = require('../ParseRelation');
-const ParseObject = require('../ParseObject');
+const ParseRelation = require('../ParseRelation').default;
+const ParseObject = require('../ParseObject').default;
 const ParseOp = require('../ParseOp');
-const {
-  Op,
-  SetOp,
-  UnsetOp,
-  IncrementOp,
-  AddOp,
-  AddUniqueOp,
-  RemoveOp,
-  RelationOp,
-  opFromJSON,
-} = ParseOp;
+const CoreManager = require('../CoreManager').default;
+jest
+  .spyOn(CoreManager, 'getParseObject')
+  .mockImplementation(() => require('../ParseObject').default);
+jest
+  .spyOn(CoreManager, 'getEventuallyQueue')
+  .mockImplementation(() => require('../EventuallyQueue').default);
+
+const { Op, SetOp, UnsetOp, IncrementOp, AddOp, AddUniqueOp, RemoveOp, RelationOp, opFromJSON } =
+  ParseOp;
 
 describe('ParseOp', () => {
   it('base class', () => {
@@ -407,7 +404,11 @@ describe('ParseOp', () => {
     expect(rel.targetClassName).toBe('Item');
     expect(r2.applyTo(rel, { className: 'Delivery', id: 'D3' })).toBe(rel);
 
-    const relLocal = r.applyTo(undefined, { className: 'Delivery', id: 'localD4' }, 'shipments');
+    const relLocal = r.applyTo(
+      undefined,
+      { className: 'Delivery', _localId: 'localD4' },
+      'shipments'
+    );
     expect(relLocal.parent._localId).toBe('localD4');
 
     expect(r.applyTo.bind(r, 'string')).toThrow(

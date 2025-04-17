@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../CoreManager');
 jest.dontMock('../decode');
 jest.dontMock('../encode');
@@ -37,7 +28,7 @@ mockUser.current = function () {
 };
 jest.setMock('../ParseUser', mockUser);
 
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 const ParseObject = require('../ParseObject').default;
 const ParseSession = require('../ParseSession').default;
 
@@ -112,7 +103,7 @@ describe('ParseSession', () => {
 
   it('can fetch the full session for the current token', done => {
     CoreManager.setRESTController({
-      request(method, path, body, options) {
+      request(method, path, _body, options) {
         expect(method).toBe('GET');
         expect(path).toBe('sessions/me');
         expect(options).toEqual({

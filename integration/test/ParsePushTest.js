@@ -9,6 +9,7 @@ describe('Parse Push', () => {
       where: { deviceType: { $eq: 'random' } },
     };
     const pushStatusId = await Parse.Push.send(payload, { useMasterKey: true });
+    expect(pushStatusId).toBeDefined();
     const pushStatus = await Parse.Push.getPushStatus(pushStatusId, { useMasterKey: true });
     expect(pushStatus.id).toBe(pushStatusId);
   });

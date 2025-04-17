@@ -1,15 +1,6 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../CoreManager');
 
-const CoreManager = require('../CoreManager');
+const CoreManager = require('../CoreManager').default;
 
 describe('CoreManager', () => {
   it('is initialized with default values', () => {
@@ -148,6 +139,22 @@ describe('CoreManager', () => {
     expect(
       CoreManager.setInstallationController.bind(null, {
         currentInstallationId: function () {},
+        currentInstallation: function () {},
+      })
+    ).toThrow('InstallationController must implement updateInstallationOnDisk()');
+
+    expect(
+      CoreManager.setInstallationController.bind(null, {
+        currentInstallationId: function () {},
+        updateInstallationOnDisk: function () {},
+      })
+    ).toThrow('InstallationController must implement currentInstallation()');
+
+    expect(
+      CoreManager.setInstallationController.bind(null, {
+        currentInstallationId: function () {},
+        currentInstallation: function () {},
+        updateInstallationOnDisk: function () {},
       })
     ).not.toThrow();
   });
@@ -155,6 +162,8 @@ describe('CoreManager', () => {
   it('can set and get InstallationController', () => {
     const controller = {
       currentInstallationId: function () {},
+      currentInstallation: function () {},
+      updateInstallationOnDisk: function () {},
     };
 
     CoreManager.setInstallationController(controller);

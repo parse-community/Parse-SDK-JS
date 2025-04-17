@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../ObjectStateMutations');
@@ -16,21 +7,28 @@ jest.dontMock('../ParseOp');
 jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../TaskQueue');
 jest.dontMock('../promiseUtils');
+jest.dontMock('../CoreManager');
+
 jest.useFakeTimers();
 
 const mockObject = function (className) {
   this.className = className;
 };
 mockObject.registerSubclass = function () {};
-jest.setMock('../ParseObject', mockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: mockObject,
+});
 
 const ParseFile = require('../ParseFile').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
-const ParseObject = require('../ParseObject');
+const ParseObject = require('../ParseObject').default;
 const ParseOps = require('../ParseOp');
 const UniqueInstanceStateController = require('../UniqueInstanceStateController');
-const TaskQueue = require('../TaskQueue');
+const TaskQueue = require('../TaskQueue').default;
 const { resolvingPromise } = require('../promiseUtils');
+const CoreManager = require('../CoreManager').default;
+CoreManager.setParseObject(mockObject);
 
 describe('UniqueInstanceStateController', () => {
   it('returns null state for an unknown object', () => {

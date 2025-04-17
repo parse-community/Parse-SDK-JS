@@ -1,14 +1,6 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../ParseFile');
 jest.dontMock('../unsavedChildren');
+jest.dontMock('../CoreManager');
 
 function mockObject({ className, localId, id, attributes, dirty }) {
   this.className = className;
@@ -26,10 +18,15 @@ mockObject.prototype = {
     return this._dirty;
   },
 };
-jest.setMock('../ParseObject', mockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: mockObject,
+});
+const CoreManager = require('../CoreManager').default;
+CoreManager.setParseObject(mockObject);
 
 const ParseFile = require('../ParseFile').default;
-const ParseObject = require('../ParseObject');
+const ParseObject = require('../ParseObject').default;
 const ParseRelation = require('../ParseRelation').default;
 const unsavedChildren = require('../unsavedChildren').default;
 

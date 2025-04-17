@@ -1,15 +1,8 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../ParseError');
+jest.dontMock('../CoreManager');
 
 const ParseError = require('../ParseError').default;
+const CoreManager = require('../CoreManager').default;
 
 describe('ParseError', () => {
   it('have sensible string representation', () => {
@@ -26,5 +19,15 @@ describe('ParseError', () => {
       message: 'some error message',
       code: 123,
     });
+  });
+
+  it('can override message', () => {
+    CoreManager.set('PARSE_ERRORS', [{ code: 123, message: 'Oops.' }]);
+    const error = new ParseError(123, 'some error message');
+    expect(JSON.parse(JSON.stringify(error))).toEqual({
+      message: 'Oops.',
+      code: 123,
+    });
+    CoreManager.set('PARSE_ERRORS', []);
   });
 });

@@ -1,15 +1,8 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../decode');
+jest.dontMock('../CoreManager');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
+jest.dontMock('../ParseObject');
 jest.dontMock('../ParsePolygon');
 
 const decode = require('../decode').default;
@@ -85,23 +78,25 @@ describe('decode', () => {
   });
 
   it('decodes Pointers', () => {
+    const spy = jest.spyOn(ParseObject, 'fromJSON');
     const data = {
       __type: 'Pointer',
       className: 'Item',
       objectId: '1001',
     };
     decode(data);
-    expect(ParseObject.fromJSON.mock.calls[0][0]).toEqual(data);
+    expect(spy.mock.calls[0][0]).toEqual(data);
   });
 
   it('decodes ParseObjects', () => {
+    const spy = jest.spyOn(ParseObject, 'fromJSON');
     const data = {
       __type: 'Object',
       className: 'Item',
       objectId: '1001',
     };
     decode(data);
-    expect(ParseObject.fromJSON.mock.calls[1][0]).toEqual(data);
+    expect(spy.mock.calls[1][0]).toEqual(data);
   });
 
   it('iterates over arrays', () => {

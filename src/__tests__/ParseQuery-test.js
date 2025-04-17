@@ -1,18 +1,12 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../CoreManager');
 jest.dontMock('../encode');
 jest.dontMock('../decode');
+jest.dontMock('../EventEmitter');
 jest.dontMock('../ParseError');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseQuery');
+jest.dontMock('../ParseObject');
+jest.dontMock('../ParseOp');
 jest.dontMock('../promiseUtils');
 jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../UniqueInstanceStateController');
@@ -25,22 +19,6 @@ jest.mock('../uuid', () => {
   let value = 0;
   return () => value++;
 });
-const mockObject = function (className) {
-  this.className = className;
-  this.attributes = {};
-};
-mockObject.registerSubclass = function () {};
-mockObject.fromJSON = function (json) {
-  const o = new mockObject(json.className);
-  o.id = json.objectId;
-  for (const attr in json) {
-    if (attr !== 'className' && attr !== '__type' && attr !== 'objectId') {
-      o.attributes[attr] = json[attr];
-    }
-  }
-  return o;
-};
-jest.setMock('../ParseObject', mockObject);
 
 const mockLocalDatastore = {
   _serializeObjectsFromPinName: jest.fn(),
@@ -48,10 +26,11 @@ const mockLocalDatastore = {
 };
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
-let CoreManager = require('../CoreManager');
+let CoreManager = require('../CoreManager').default;
+const EventEmitter = require('../EventEmitter').default;
 const ParseError = require('../ParseError').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
-let ParseObject = require('../ParseObject');
+let ParseObject = require('../ParseObject').default;
 let ParseQuery = require('../ParseQuery').default;
 const LiveQuerySubscription = require('../LiveQuerySubscription').default;
 
@@ -61,6 +40,7 @@ const MockRESTController = {
 };
 
 const QueryController = CoreManager.getQueryController();
+CoreManager.setEventEmitter(EventEmitter);
 
 import { DEFAULT_PIN } from '../LocalDatastoreUtils';
 
@@ -1087,6 +1067,32 @@ describe('ParseQuery', () => {
     expect(q2._exclude).toEqual(['foo', 'bar']);
   });
 
+  it('can watch keys', () => {
+    const q = new ParseQuery('Item');
+    q.watch('foo');
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      watch: 'foo',
+    });
+    const q2 = new ParseQuery('Item');
+    q2.withJSON(json);
+    expect(q2._watch).toEqual(['foo']);
+  });
+
+  it('can watch multiple keys', () => {
+    const q = new ParseQuery('Item');
+    q.watch(['foo', 'bar']);
+    const json = q.toJSON();
+    expect(json).toEqual({
+      where: {},
+      watch: 'foo,bar',
+    });
+    const q2 = new ParseQuery('Item');
+    q2.withJSON(json);
+    expect(q2._watch).toEqual(['foo', 'bar']);
+  });
+
   it('can use extraOptions', () => {
     const q = new ParseQuery('Item');
     q._extraOptions.randomOption = 'test';
@@ -1257,6 +1263,7 @@ describe('ParseQuery', () => {
           },
         });
         expect(options.useMasterKey).toEqual(true);
+        expect(options.useMaintenanceKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [],
@@ -1268,6 +1275,7 @@ describe('ParseQuery', () => {
     q.equalTo('size', 'small')
       .first({
         useMasterKey: true,
+        useMaintenanceKey: true,
         sessionToken: '1234',
       })
       .then(obj => {
@@ -1377,12 +1385,15 @@ describe('ParseQuery', () => {
     expect(result.name).toEqual('Product 3');
     expect(result.className).toEqual('Item');
 
-    await q.each((obj) => {
-      expect(obj.objectId).toBe('I1');
-      expect(obj.size).toBe('small');
-      expect(obj.name).toEqual('Product 3');
-      expect(obj.className).toEqual('Item');
-    }, { json: true });
+    await q.each(
+      obj => {
+        expect(obj.objectId).toBe('I1');
+        expect(obj.size).toBe('small');
+        expect(obj.name).toEqual('Product 3');
+        expect(obj.className).toEqual('Item');
+      },
+      { json: true }
+    );
   });
 
   it('will error when getting a nonexistent object', done => {
@@ -1431,6 +1442,7 @@ describe('ParseQuery', () => {
           },
         });
         expect(options.useMasterKey).toEqual(true);
+        expect(options.useMaintenanceKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         expect(options.context).toEqual(context);
         return Promise.resolve({
@@ -1442,6 +1454,7 @@ describe('ParseQuery', () => {
     const q = new ParseQuery('Item');
     q.get('I27', {
       useMasterKey: true,
+      useMaintenanceKey: true,
       sessionToken: '1234',
       context: context,
     }).then(() => {
@@ -1578,6 +1591,7 @@ describe('ParseQuery', () => {
           },
         });
         expect(options.useMasterKey).toEqual(true);
+        expect(options.useMaintenanceKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         expect(options.context).toEqual(context);
         return Promise.resolve({
@@ -1590,6 +1604,7 @@ describe('ParseQuery', () => {
     q.containedIn('size', ['small', 'medium'])
       .find({
         useMasterKey: true,
+        useMaintenanceKey: true,
         sessionToken: '1234',
         context: context,
       })
@@ -1704,6 +1719,7 @@ describe('ParseQuery', () => {
     it('passes options through to the REST API', async () => {
       const batchOptions = {
         useMasterKey: true,
+        useMaintenanceKey: true,
         sessionToken: '1234',
         batchSize: 50,
       };
@@ -1718,6 +1734,7 @@ describe('ParseQuery', () => {
         where: {},
       });
       expect(options.useMasterKey).toBe(true);
+      expect(options.useMaintenanceKey).toEqual(true);
       expect(options.sessionToken).toEqual('1234');
     });
 
@@ -1758,7 +1775,6 @@ describe('ParseQuery', () => {
       const q = new ParseQuery('Item');
       await q.eachBatch(items => {
         items.map(item => results.push(item.attributes.size));
-        return new Promise(resolve => setImmediate(resolve));
       });
       expect(results).toEqual(['medium', 'small']);
     });
@@ -1795,6 +1811,7 @@ describe('ParseQuery', () => {
       q.select('size', 'name');
       q.includeAll();
       q.hint('_id_');
+      q.exclude('foo');
 
       await q.findAll();
       expect(findMock).toHaveBeenCalledTimes(1);
@@ -1805,6 +1822,7 @@ describe('ParseQuery', () => {
         order: 'objectId',
         keys: 'size,name',
         include: '*',
+        excludeKeys: 'foo',
         hint: '_id_',
         where: {
           size: {
@@ -1830,8 +1848,10 @@ describe('ParseQuery', () => {
     it('passes options through to the REST API', async () => {
       const batchOptions = {
         useMasterKey: true,
+        useMaintenanceKey: true,
         sessionToken: '1234',
         batchSize: 50,
+        json: true,
       };
       const q = new ParseQuery('Item');
       await q.findAll(batchOptions);
@@ -1844,7 +1864,9 @@ describe('ParseQuery', () => {
         where: {},
       });
       expect(options.useMasterKey).toBe(true);
+      expect(options.useMaintenanceKey).toEqual(true);
       expect(options.sessionToken).toEqual('1234');
+      expect(options.json).toEqual(true);
     });
 
     it('only makes one request when the results fit in one page', async () => {
@@ -1863,6 +1885,17 @@ describe('ParseQuery', () => {
       const q = new ParseQuery('Item');
       const results = await q.findAll();
       expect(results.map(obj => obj.attributes.size)).toEqual(['medium', 'small']);
+    });
+
+    it('Returns all objects with json', async () => {
+      const q = new ParseQuery('Item');
+      const results = await q.findAll({ json: true, batchSize: 2 });
+      expect(results.length).toEqual(3);
+      expect(findMock).toHaveBeenCalledTimes(2);
+      results.map(result => {
+        expect(result.id).toBeUndefined();
+        expect(result.objectId).toBeDefined();
+      });
     });
   });
 
@@ -1939,6 +1972,7 @@ describe('ParseQuery', () => {
           },
         });
         expect(options.useMasterKey).toEqual(true);
+        expect(options.useMaintenanceKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         expect(options.context).toEqual(context);
         return Promise.resolve({
@@ -1963,6 +1997,7 @@ describe('ParseQuery', () => {
       },
       {
         useMasterKey: true,
+        useMaintenanceKey: true,
         sessionToken: '1234',
         context: context,
       }
@@ -1991,6 +2026,7 @@ describe('ParseQuery', () => {
           hint: '_id_',
         });
         expect(options.useMasterKey).toEqual(true);
+        expect(options.useMaintenanceKey).toEqual(true);
         expect(options.sessionToken).toEqual('1234');
         expect(options.context).toEqual(context);
         return Promise.resolve({
@@ -2016,6 +2052,7 @@ describe('ParseQuery', () => {
       },
       {
         useMasterKey: true,
+        useMaintenanceKey: true,
         sessionToken: '1234',
         context: context,
       }
@@ -2132,7 +2169,7 @@ describe('ParseQuery', () => {
       let callCount = 0;
       const callback = (accumulator, object) => {
         callCount += 1;
-        accumulator.attributes.number += object.attributes.number;
+        accumulator.set('number', accumulator.attributes.number + object.attributes.number);
         return accumulator;
       };
       const q = new ParseQuery('Item');
@@ -2265,7 +2302,7 @@ describe('ParseQuery', () => {
     jest.dontMock('../ParseObject');
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
-    CoreManager = require('../CoreManager');
+    CoreManager = require('../CoreManager').default;
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
@@ -2315,7 +2352,7 @@ describe('ParseQuery', () => {
     jest.dontMock('../ParseObject');
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
-    CoreManager = require('../CoreManager');
+    CoreManager = require('../CoreManager').default;
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
@@ -2341,8 +2378,7 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Thing');
     let testObject;
-    return q
-      .find()
+    q.find()
       .then(results => {
         testObject = results[0];
 
@@ -2391,7 +2427,7 @@ describe('ParseQuery', () => {
     jest.dontMock('../ParseObject');
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
-    CoreManager = require('../CoreManager');
+    CoreManager = require('../CoreManager').default;
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
@@ -2441,7 +2477,7 @@ describe('ParseQuery', () => {
     jest.dontMock('../ParseObject');
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
-    CoreManager = require('../CoreManager');
+    CoreManager = require('../CoreManager').default;
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
@@ -2467,8 +2503,7 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Thing');
     let testObject;
-    return q
-      .first()
+    q.first()
       .then(result => {
         testObject = result;
 
@@ -2520,6 +2555,7 @@ describe('ParseQuery', () => {
     q.ascending(['a', 'b', 'c']);
     q.skip(4);
     q.equalTo('size', 'medium');
+    q.readPreference('PRIMARY', 'SECONDARY', 'SECONDARY_PREFERRED');
 
     const json = q.toJSON();
 
@@ -2537,6 +2573,9 @@ describe('ParseQuery', () => {
       where: {
         size: 'medium',
       },
+      readPreference: 'PRIMARY',
+      includeReadPreference: 'SECONDARY',
+      subqueryReadPreference: 'SECONDARY_PREFERRED',
     });
   });
 
@@ -2580,7 +2619,6 @@ describe('ParseQuery', () => {
           },
         });
         expect(options.useMasterKey).toEqual(true);
-        expect(options.sessionToken).toEqual('1234');
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: ['L'],
@@ -2590,9 +2628,7 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Item');
     q.equalTo('size', 'small')
-      .distinct('size', {
-        sessionToken: '1234',
-      })
+      .distinct('size')
       .then(results => {
         expect(results[0]).toBe('L');
         done();
@@ -2612,7 +2648,6 @@ describe('ParseQuery', () => {
           hint: '_id_',
         });
         expect(options.useMasterKey).toEqual(true);
-        expect(options.sessionToken).toEqual('1234');
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: ['L'],
@@ -2623,9 +2658,7 @@ describe('ParseQuery', () => {
     const q = new ParseQuery('Item');
     q.equalTo('size', 'small')
       .hint('_id_')
-      .distinct('size', {
-        sessionToken: '1234',
-      })
+      .distinct('size')
       .then(results => {
         expect(results[0]).toBe('L');
         done();
@@ -2736,6 +2769,7 @@ describe('ParseQuery', () => {
           group: { objectId: '$name' },
         });
         expect(options.useMasterKey).toEqual(true);
+        expect(options.useMaintenanceKey).toEqual(true);
         expect(options.requestTask).toBeDefined();
         return Promise.resolve({
           results: [],
@@ -2746,7 +2780,7 @@ describe('ParseQuery', () => {
     try {
       const q = new ParseQuery('Item');
       q.aggregate(pipeline).then(() => {});
-    } catch (e) {
+    } catch (_) {
       done();
     }
   });
@@ -2759,7 +2793,6 @@ describe('ParseQuery', () => {
         expect(className).toBe('Item');
         expect(params.pipeline).toEqual([{ group: { objectId: '$name' } }]);
         expect(options.useMasterKey).toEqual(true);
-        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [],
         });
@@ -2767,9 +2800,7 @@ describe('ParseQuery', () => {
     });
 
     const q = new ParseQuery('Item');
-    q.aggregate(pipeline, {
-      sessionToken: '1234',
-    }).then(results => {
+    q.aggregate(pipeline).then(results => {
       expect(results).toEqual([]);
       done();
     });
@@ -2791,7 +2822,7 @@ describe('ParseQuery', () => {
     // Query
     const q = new ParseQuery('Item');
     q.readPreference('SECONDARY');
-    const results = await q.aggregate([], { sessionToken: '1234' });
+    const results = await q.aggregate([]);
     // Validate
     expect(results).toEqual([]);
   });
@@ -2805,7 +2836,6 @@ describe('ParseQuery', () => {
         expect(params.pipeline).toEqual([{ group: { objectId: '$name' } }]);
         expect(params.hint).toEqual('_id_');
         expect(options.useMasterKey).toEqual(true);
-        expect(options.sessionToken).toEqual('1234');
         return Promise.resolve({
           results: [],
         });
@@ -2814,9 +2844,7 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Item');
     q.hint('_id_')
-      .aggregate(pipeline, {
-        sessionToken: '1234',
-      })
+      .aggregate(pipeline)
       .then(results => {
         expect(results).toEqual([]);
         done();
@@ -2829,7 +2857,7 @@ describe('ParseQuery', () => {
     };
 
     CoreManager.setQueryController({
-      find: function (name, params, options) {
+      find: function (_name, _params, options) {
         options.requestTask(mockRequestTask);
         return Promise.resolve({
           results: [],
@@ -2853,11 +2881,11 @@ describe('ParseQuery', () => {
     expect(mockRequestTask.abort).toHaveBeenCalledTimes(1);
   });
 
-  it('selecting sub-objects does not inject objects when sub-object does not exist', done => {
+  it('selecting sub-objects does not inject objects when sub-object does not exist', async () => {
     jest.dontMock('../ParseObject');
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
-    CoreManager = require('../CoreManager');
+    CoreManager = require('../CoreManager').default;
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
@@ -2881,31 +2909,19 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Thing');
     q.select('other', 'tbd', 'subObject.key1');
-    let testObject;
-    return q
-      .find()
-      .then(results => {
-        testObject = results[0];
+    const results = await q.find();
+    const testObject = results[0];
 
-        expect(testObject.get('name')).toBe('Name');
-        expect(testObject.has('other')).toBe(false);
-        expect(testObject.has('subObject')).toBe(false);
-      })
-      .then(
-        () => {
-          done();
-        },
-        error => {
-          done.fail(error);
-        }
-      );
+    expect(testObject.get('name')).toBe('Name');
+    expect(testObject.has('other')).toBe(false);
+    expect(testObject.has('subObject')).toBe(false);
   });
 
-  it('removes missing sub objects from the cached object when they are selected', done => {
+  it('removes missing sub objects from the cached object when they are selected', async () => {
     jest.dontMock('../ParseObject');
     jest.resetModules();
     ParseObject = require('../ParseObject').default;
-    CoreManager = require('../CoreManager');
+    CoreManager = require('../CoreManager').default;
     ParseQuery = require('../ParseQuery').default;
 
     ParseObject.enableSingleInstance();
@@ -2932,50 +2948,37 @@ describe('ParseQuery', () => {
     });
 
     const q = new ParseQuery('Thing');
-    let testObject;
-    return q
-      .find()
-      .then(results => {
-        testObject = results[0];
+    const results = await q.find();
+    const testObject = results[0];
 
-        expect(testObject.has('subObject1')).toBe(true);
-        expect(testObject.has('subObject2')).toBe(true);
-        expect(testObject.has('subObject3')).toBe(true);
-        expect(testObject.has('subObject4')).toBe(false);
+    expect(testObject.has('subObject1')).toBe(true);
+    expect(testObject.has('subObject2')).toBe(true);
+    expect(testObject.has('subObject3')).toBe(true);
+    expect(testObject.has('subObject4')).toBe(false);
 
-        const q2 = new ParseQuery('Thing');
-        q2.select(
-          'name',
-          'subObject1',
-          'subObject2.foo',
-          'subObject4.foo',
-          'subObject5.subSubObject.foo'
-        );
-        objectToReturn = {
-          objectId: 'T01',
-          name: 'Name',
-          subObject4: { foo: 'bar' },
-          subObject5: { subSubObject: {} },
-        };
-        return q2.find();
-      })
-      .then(() => {
-        expect(testObject.has('subObject1')).toBe(false); //selected and not returned
-        expect(testObject.has('subObject2')).toBe(false); //selected and not returned
-        expect(testObject.has('subObject3')).toBe(true); //not selected, so should still be there
-        expect(testObject.has('subObject4')).toBe(true); //selected and just added
-        expect(testObject.has('subObject5')).toBe(true);
-        expect(testObject.get('subObject5').subSubObject).toBeDefined();
-        expect(testObject.get('subObject5').subSubObject.bar).toBeDefined(); //not selected but a sibiling was, so should still be there
-      })
-      .then(
-        () => {
-          done();
-        },
-        error => {
-          done.fail(error);
-        }
-      );
+    const q2 = new ParseQuery('Thing');
+    q2.select(
+      'name',
+      'subObject1',
+      'subObject2.foo',
+      'subObject4.foo',
+      'subObject5.subSubObject.foo'
+    );
+    objectToReturn = {
+      objectId: 'T01',
+      name: 'Name',
+      subObject4: { foo: 'bar' },
+      subObject5: { subSubObject: {} },
+    };
+    await q2.find();
+
+    expect(testObject.has('subObject1')).toBe(false); //selected and not returned
+    expect(testObject.has('subObject2')).toBe(false); //selected and not returned
+    expect(testObject.has('subObject3')).toBe(true); //not selected, so should still be there
+    expect(testObject.has('subObject4')).toBe(true); //selected and just added
+    expect(testObject.has('subObject5')).toBe(true);
+    expect(testObject.get('subObject5').subSubObject).toBeDefined();
+    expect(testObject.get('subObject5').subSubObject.bar).toBeDefined(); //not selected but a sibiling was, so should still be there
   });
 
   it('full text search', () => {
@@ -3803,5 +3806,52 @@ describe('ParseQuery LocalDatastore', () => {
     expect(subscription.id).toBe('0');
     expect(subscription.sessionToken).toBe('r:test');
     expect(subscription.query).toEqual(query);
+  });
+
+  it('can add comment to query', () => {
+    const query = new ParseQuery('TestObject');
+    const comment = 'Hello Parse';
+    query.comment(comment);
+    expect(query.toJSON()).toEqual({
+      where: {},
+      comment: comment,
+    });
+  });
+
+  it('can add comment to query from json', () => {
+    const query = new ParseQuery('Item');
+    const comment = 'Hello Parse';
+    query.comment(comment);
+    const json = query.toJSON();
+    expect(json).toEqual({
+      where: {},
+      comment: comment,
+    });
+    const query2 = new ParseQuery('Item');
+    query2.withJSON(json);
+    expect(query2._comment).toEqual(comment);
+  });
+
+  it('comment can only be string', () => {
+    const obj1 = {
+      className: 'Item',
+      objectId: 'objectId1',
+      password: 123,
+      number: 3,
+      string: 'a',
+    };
+    const query = new ParseQuery('TestObject');
+    expect(query.comment.bind(query, obj1)).toThrow(
+      'The value of a comment to be sent with this query must be a string.'
+    );
+  });
+
+  it('clear comment when no value passed', () => {
+    const query = new ParseQuery('Item');
+    const comment = 'Hello Parse';
+    query.comment(comment);
+    expect(query._comment).toBe(comment);
+    query.comment();
+    expect(query._comment).toBeUndefined();
   });
 });

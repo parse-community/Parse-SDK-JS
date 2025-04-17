@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-/* global File */
 jest.autoMockOff();
 jest.mock('http');
 jest.mock('https');
@@ -17,15 +8,28 @@ const ParseFile = require('../ParseFile').default;
 const b64Digit = require('../ParseFile').b64Digit;
 
 const ParseObject = require('../ParseObject').default;
-const CoreManager = require('../CoreManager');
-const EventEmitter = require('../EventEmitter');
+const CoreManager = require('../CoreManager').default;
+const EventEmitter = require('../EventEmitter').default;
 
 const mockHttp = require('http');
 const mockHttps = require('https');
 
 const mockLocalDatastore = {
-  _updateLocalIdForObject: jest.fn(),
+  _updateLocalIdForObject: jest.fn((_localId, /** @type {ParseObject}*/ object) => {
+    if (!mockLocalDatastore.isEnabled) {
+      return;
+    }
+    // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    const objectKey = mockLocalDatastore.getKeyForObject(object);
+  }),
   _updateObjectIfPinned: jest.fn(),
+  getKeyForObject: jest.fn(object => {
+    // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
+    const OBJECT_PREFIX = 'Parse_LDS_';
+    const objectId = object.objectId || object._getId();
+    return `${OBJECT_PREFIX}${object.className}_${objectId}`;
+  }),
 };
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
@@ -45,6 +49,8 @@ const defaultController = CoreManager.getFileController();
 
 describe('ParseFile', () => {
   beforeEach(() => {
+    ParseObject.enableSingleInstance();
+    jest.clearAllMocks();
     CoreManager.setFileController({
       saveFile: generateSaveMock('http://files.parsetfss.com/a/'),
       saveBase64: generateSaveMock('http://files.parsetfss.com/a/'),
@@ -64,18 +70,21 @@ describe('ParseFile', () => {
     const file = new ParseFile('parse.txt', { base64: 'YWJj' });
     expect(file._source.base64).toBe('YWJj');
     expect(file._source.type).toBe('text/plain');
+    expect(file._data).toBe('YWJj');
   });
 
   it('can create files with base64 encoding (1 padding)', () => {
     const file = new ParseFile('parse.txt', { base64: 'YWI=' });
     expect(file._source.base64).toBe('YWI=');
     expect(file._source.type).toBe('text/plain');
+    expect(file._data).toBe('YWI=');
   });
 
   it('can create files with base64 encoding (2 padding)', () => {
     const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('text/plain');
+    expect(file._data).toBe('ParseA==');
   });
 
   it('can set the default type to be text/plain when using base64', () => {
@@ -84,6 +93,7 @@ describe('ParseFile', () => {
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('text/plain');
+    expect(file._data).toBe('ParseA==');
   });
 
   it('can extract data type from base64', () => {
@@ -92,6 +102,7 @@ describe('ParseFile', () => {
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('image/png');
+    expect(file._data).toBe('ParseA==');
   });
 
   it('can extract data type from base64 with a filename parameter', () => {
@@ -100,6 +111,7 @@ describe('ParseFile', () => {
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('application/pdf');
+    expect(file._data).toBe('ParseA==');
   });
 
   it('can create files with file uri', () => {
@@ -116,6 +128,7 @@ describe('ParseFile', () => {
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('audio/m4a');
+    expect(file._data).toBe('ParseA==');
   });
 
   it('can extract data type from base64 with a complex mime type', () => {
@@ -124,6 +137,7 @@ describe('ParseFile', () => {
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('application/vnd.google-earth.kml+xml');
+    expect(file._data).toBe('ParseA==');
   });
 
   it('can extract data type from base64 with a charset param', () => {
@@ -132,18 +146,28 @@ describe('ParseFile', () => {
     });
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('application/vnd.3gpp.pic-bw-var');
+    expect(file._data).toBe('ParseA==');
   });
 
   it('can create files with byte arrays', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('');
+    expect(file._data).toBe('ParseA==');
+  });
+
+  it('can create files with  Uint8Arrays', () => {
+    const file = new ParseFile('parse.txt', new Uint8Array([61, 170, 236, 120]));
+    expect(file._source.base64).toBe('ParseA==');
+    expect(file._source.type).toBe('');
+    expect(file._data).toBe('ParseA==');
   });
 
   it('can create files with all types of characters', () => {
     const file = new ParseFile('parse.txt', [11, 239, 191, 215, 80, 52]);
     expect(file._source.base64).toBe('C++/11A0');
     expect(file._source.type).toBe('');
+    expect(file._data).toBe('C++/11A0');
   });
 
   it('can create an empty file', () => {
@@ -341,6 +365,7 @@ describe('ParseFile', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120], '', metadata, tags);
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('');
+    expect(file._data).toBe('ParseA==');
     expect(file.metadata()).toBe(metadata);
     expect(file.tags()).toBe(tags);
   });
@@ -414,7 +439,6 @@ describe('FileController', () => {
   });
 
   it('saves files via ajax', () => {
-    // eslint-disable-next-line no-undef
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
@@ -706,7 +730,7 @@ describe('FileController', () => {
       });
     };
     CoreManager.setRESTController({ request, ajax });
-    // eslint-disable-next-line no-undef
+
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
@@ -746,7 +770,7 @@ describe('FileController', () => {
       });
     };
     CoreManager.setRESTController({ request, ajax });
-    // eslint-disable-next-line no-undef
+
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
@@ -786,7 +810,7 @@ describe('FileController', () => {
       });
     };
     CoreManager.setRESTController({ request, ajax });
-    // eslint-disable-next-line no-undef
+
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
@@ -829,7 +853,6 @@ describe('FileController', () => {
     CoreManager.setRESTController({ ajax, request });
     CoreManager.setLocalDatastore(mockLocalDatastore);
 
-    // eslint-disable-next-line no-undef
     const blob = new Blob([61, 170, 236, 120]);
     const file = new ParseFile('parse.txt', blob);
     file._source.format = 'file';
@@ -839,13 +862,13 @@ describe('FileController', () => {
     expect(request).toHaveBeenCalled();
   });
 
-  it('should throw error if file deleted without name', async done => {
+  it('should throw error if file deleted without name', async () => {
+    expect.assertions(1);
     const file = new ParseFile('', [1, 2, 3]);
     try {
       await file.destroy();
     } catch (e) {
       expect(e.code).toBe(ParseError.FILE_DELETE_UNNAMED_ERROR);
-      done();
     }
   });
 
@@ -940,5 +963,21 @@ describe('FileController', () => {
       expect(e).toBe('Could not load file.');
     }
     global.FileReader = fileReader;
+  });
+
+  it('can save unsaved Parse.File property when localDataStore is enabled.', async () => {
+    mockLocalDatastore.isEnabled = true;
+    const obj = new ParseObject('Item');
+    const aFile = new ParseFile('myFileName', [0, 0, 0, 0, 2, 3, 4, 5]);
+    obj.set('myName', 'helloworld');
+    obj.set('myFile', aFile);
+    let error = undefined;
+    try {
+      await obj.save();
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeUndefined();
+    expect(obj.get('myFile').name()).toBe('myFileName');
   });
 });

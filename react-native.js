@@ -1,1 +1,1 @@
-module.exports = require('./lib/react-native/Parse.js');
+module.exports = require('./lib/react-native/Parse.js').default;

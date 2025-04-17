@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../CoreManager');
 jest.dontMock('../Push');
 jest.dontMock('./test_helpers/asyncHelper');
@@ -21,10 +12,13 @@ mockQuery.prototype = {
     };
   },
 };
-jest.setMock('../ParseQuery', mockQuery);
+jest.setMock('../ParseQuery', {
+  __esModule: true,
+  default: mockQuery,
+});
 
-const CoreManager = require('../CoreManager');
-const ParseQuery = require('../ParseQuery');
+const CoreManager = require('../CoreManager').default;
+const ParseQuery = require('../ParseQuery').default;
 const Push = require('../Push');
 
 const defaultController = CoreManager.getPushController();
@@ -96,13 +90,7 @@ describe('Push', () => {
 describe('PushController', () => {
   it('forwards data along', () => {
     CoreManager.setPushController(defaultController);
-    const request = jest.fn().mockReturnValue({
-      _thenRunCallbacks() {
-        return {
-          _thenRunCallbacks() {},
-        };
-      },
-    });
+    const request = jest.fn().mockReturnValue({ _headers: {} });
     CoreManager.setRESTController({
       request: request,
       ajax: function () {},
@@ -120,7 +108,7 @@ describe('PushController', () => {
       'POST',
       'push',
       { push_time: '2015-02-01T00:00:00.000Z' },
-      { useMasterKey: true },
+      { returnStatus: true, useMasterKey: true },
     ]);
   });
 });

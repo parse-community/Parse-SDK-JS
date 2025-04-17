@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../arrayContainsObject');
 jest.dontMock('../unique');
 
@@ -21,10 +12,17 @@ const mockObject = function (className, id) {
 mockObject.prototype._getId = function () {
   return this.id || this._localId;
 };
-jest.setMock('../ParseObject', mockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: mockObject,
+});
 
 const unique = require('../unique').default;
-const ParseObject = require('../ParseObject');
+const ParseObject = require('../ParseObject').default;
+const CoreManager = require('../CoreManager').default;
+jest
+  .spyOn(CoreManager, 'getParseObject')
+  .mockImplementation(() => require('../ParseObject').default);
 
 describe('unique', () => {
   it('produces an array with unique elements', () => {

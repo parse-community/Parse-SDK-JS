@@ -1,24 +1,26 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../CoreManager');
+jest.dontMock('../decode');
+jest.dontMock('../encode');
 jest.dontMock('../InstallationController');
+jest.dontMock('../ObjectStateMutations');
+jest.dontMock('../ParseInstallation');
+jest.dontMock('../ParseObject');
+jest.dontMock('../ParseOp');
 jest.dontMock('../Storage');
 jest.dontMock('../StorageController.default');
+jest.dontMock('../SingleInstanceStateController');
+jest.dontMock('../UniqueInstanceStateController');
 jest.mock('../uuid', () => {
   let value = 0;
   return () => value++ + '';
 });
 
-const CoreManager = require('../CoreManager');
-const InstallationController = require('../InstallationController');
-const Storage = require('../Storage');
+const CoreManager = require('../CoreManager').default;
+const ParseInstallation = require('../ParseInstallation').default;
+const InstallationController = require('../InstallationController').default;
+const Storage = require('../Storage').default;
+
+CoreManager.setStorageController(require('../StorageController.default').default);
 
 describe('InstallationController', () => {
   beforeEach(() => {
@@ -28,48 +30,69 @@ describe('InstallationController', () => {
     InstallationController._clearCache();
   });
 
-  it('generates a new installation id when there is none', done => {
-    InstallationController.currentInstallationId().then(iid => {
-      expect(typeof iid).toBe('string');
-      expect(iid.length).toBeGreaterThan(0);
-      done();
-    });
+  it('generates a new installation id when there is none', async () => {
+    const iid = await InstallationController.currentInstallationId();
+    expect(typeof iid).toBe('string');
+    expect(iid.length).toBeGreaterThan(0);
   });
 
-  it('caches the installation id', done => {
-    let iid = null;
-    InstallationController.currentInstallationId()
-      .then(i => {
-        iid = i;
-        Storage._clear();
-        return InstallationController.currentInstallationId();
-      })
-      .then(i => {
-        expect(i).toBe(iid);
-        done();
-      });
+  it('caches the installation id', async () => {
+    const iid = await InstallationController.currentInstallationId();
+    Storage._clear();
+    const i = await InstallationController.currentInstallationId();
+    expect(i).toBe(iid);
   });
 
-  it('permanently stores the installation id', done => {
-    let iid = null;
-    InstallationController.currentInstallationId()
-      .then(i => {
-        iid = i;
-        InstallationController._clearCache();
-        return InstallationController.currentInstallationId();
-      })
-      .then(i => {
-        expect(i).toBe(iid);
-        done();
-      });
+  it('permanently stores the installation id', async () => {
+    const iid = await InstallationController.currentInstallationId();
+    InstallationController._clearCache();
+    const i = await InstallationController.currentInstallationId();
+    expect(i).toBe(iid);
   });
 
-  it('can set installation id', done => {
+  it('can set installation id', async () => {
     const iid = '12345678';
     InstallationController._setInstallationIdCache(iid);
-    InstallationController.currentInstallationId().then(i => {
-      expect(i).toBe(iid);
-      done();
-    });
+    const i = await InstallationController.currentInstallationId();
+    expect(i).toBe(iid);
+  });
+
+  it('generates a new installation when there is none', async () => {
+    const installation = await InstallationController.currentInstallation();
+    expect(installation instanceof ParseInstallation).toBe(true);
+    expect(installation.deviceType).toBe('web');
+    expect(installation.installationId).toBeDefined();
+  });
+
+  it('caches the current installation', async () => {
+    const iid = 'cached-installation-id';
+    InstallationController._setInstallationIdCache(iid);
+    const installation = await InstallationController.currentInstallation();
+    Storage._clear();
+    const i = await InstallationController.currentInstallation();
+    expect(i.installationId).toEqual(installation.installationId);
+  });
+
+  it('permanently stores the current installation', async () => {
+    const iid = 'stored-installation-id';
+    InstallationController._setInstallationIdCache(iid);
+    const installation = await InstallationController.currentInstallation();
+    InstallationController._clearCache();
+    const i = await InstallationController.currentInstallation();
+    expect(i.installationId).toEqual(installation.installationId);
+  });
+
+  it('can update installation on disk', async () => {
+    const installationId = 'new-installation-id';
+    const installation = new ParseInstallation({ installationId });
+    InstallationController.updateInstallationOnDisk(installation);
+    const i = await InstallationController.currentInstallation();
+    expect(i.installationId).toBe(installationId);
+  });
+
+  it('can handle cache not matching disk', async () => {
+    InstallationController._setCurrentInstallationCache(null, true);
+    const i = await InstallationController.currentInstallation();
+    expect(i).toBeNull();
   });
 });

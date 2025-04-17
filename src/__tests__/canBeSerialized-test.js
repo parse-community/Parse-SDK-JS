@@ -1,20 +1,17 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../canBeSerialized');
+jest.dontMock('../CoreManager');
 
 function mockObject(id, attributes) {
   this.id = id;
   this.attributes = attributes;
 }
 mockObject.registerSubclass = function () {};
-jest.setMock('../ParseObject', mockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: mockObject,
+});
+const CoreManager = require('../CoreManager').default;
+CoreManager.setParseObject(mockObject);
 
 function mockFile(url) {
   this._url = url;
@@ -22,11 +19,14 @@ function mockFile(url) {
 mockFile.prototype.url = function () {
   return this._url;
 };
-jest.setMock('../ParseFile', mockFile);
+jest.setMock('../ParseFile', {
+  __esModule: true,
+  default: mockFile,
+});
 
 const canBeSerialized = require('../canBeSerialized').default;
-const ParseFile = require('../ParseFile');
-const ParseObject = require('../ParseObject');
+const ParseFile = require('../ParseFile').default;
+const ParseObject = require('../ParseObject').default;
 const ParseRelation = require('../ParseRelation').default;
 
 describe('canBeSerialized', () => {

@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../arrayContainsObject');
 jest.dontMock('../canBeSerialized');
 jest.dontMock('../CoreManager');
@@ -38,6 +29,7 @@ jest.mock('../uuid', () => {
   return () => value++;
 });
 jest.dontMock('./test_helpers/mockXHR');
+jest.dontMock('./test_helpers/flushPromises');
 
 jest.useFakeTimers();
 
@@ -83,7 +75,7 @@ jest.setMock('../ParseRelation', mockRelation);
 const mockQuery = function (className) {
   this.className = className;
 };
-mockQuery.prototype.containedIn = function (field, ids) {
+mockQuery.prototype.containedIn = function (_field, ids) {
   this.results = [];
   ids.forEach(id => {
     this.results.push(
@@ -124,12 +116,24 @@ const mockLocalDatastore = {
   _serializeObjectsFromPinName: jest.fn(),
   _serializeObject: jest.fn(),
   _transverseSerializeObject: jest.fn(),
-  _updateObjectIfPinned: jest.fn(),
   _destroyObjectIfPinned: jest.fn(),
-  _updateLocalIdForObject: jest.fn(),
+  _updateLocalIdForObject: jest.fn((_localId, /** @type {ParseObject}*/ object) => {
+    if (!mockLocalDatastore.isEnabled) {
+      return;
+    }
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
+    const objectKey = mockLocalDatastore.getKeyForObject(object);
+  }),
+  _updateObjectIfPinned: jest.fn(),
+  getKeyForObject: jest.fn(object => {
+    // (Taken from LocalDataStore source) This fails for nested objects that are not ParseObject
+    const objectId = object.objectId || object._getId();
+    const OBJECT_PREFIX = 'Parse_LDS_';
+    return `${OBJECT_PREFIX}${object.className}_${objectId}`;
+  }),
   updateFromServer: jest.fn(),
   _clear: jest.fn(),
-  getKeyForObject: jest.fn(),
   checkIfEnabled: jest.fn(() => {
     if (!mockLocalDatastore.isEnabled) {
       console.error('Parse.enableLocalDatastore() must be called first');
@@ -139,8 +143,8 @@ const mockLocalDatastore = {
 };
 jest.setMock('../LocalDatastore', mockLocalDatastore);
 
-const CoreManager = require('../CoreManager');
-const EventuallyQueue = require('../EventuallyQueue');
+const CoreManager = require('../CoreManager').default;
+const EventuallyQueue = require('../EventuallyQueue').default;
 const ParseACL = require('../ParseACL').default;
 const ParseError = require('../ParseError').default;
 const ParseFile = require('../ParseFile').default;
@@ -148,29 +152,33 @@ const ParseGeoPoint = require('../ParseGeoPoint').default;
 const ParsePolygon = require('../ParsePolygon').default;
 const ParseObject = require('../ParseObject').default;
 const ParseOp = require('../ParseOp');
-const RESTController = require('../RESTController');
+const RESTController = require('../RESTController').default;
 const SingleInstanceStateController = require('../SingleInstanceStateController');
 const unsavedChildren = require('../unsavedChildren').default;
 
 const mockXHR = require('./test_helpers/mockXHR');
+const flushPromises = require('./test_helpers/flushPromises');
 
 CoreManager.setLocalDatastore(mockLocalDatastore);
 CoreManager.setRESTController(RESTController);
+CoreManager.setEventuallyQueue(EventuallyQueue);
 CoreManager.setInstallationController({
   currentInstallationId() {
     return Promise.resolve('iid');
   },
+  currentInstallation() {},
+  updateInstallationOnDisk() {},
 });
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
 CoreManager.set('MASTER_KEY', 'C');
 CoreManager.set('VERSION', 'V');
+// Register our mocks
+jest.spyOn(CoreManager, 'getParseQuery').mockImplementation(() => mockQuery);
+jest.spyOn(CoreManager, 'getEventuallyQueue').mockImplementation(() => EventuallyQueue);
+jest.spyOn(CoreManager, 'getParseUser').mockImplementation(() => require('../ParseUser').default);
 
 const { SetOp, UnsetOp, IncrementOp } = require('../ParseOp');
-
-function flushPromises() {
-  return new Promise(resolve => setImmediate(resolve));
-}
 
 describe('ParseObject', () => {
   beforeEach(() => {
@@ -236,7 +244,7 @@ describe('ParseObject', () => {
   it('can ignore validation if ignoreValidation option is provided', () => {
     class ValidatedObject extends ParseObject {
       validate(attrs) {
-        if (attrs.hasOwnProperty('badAttr')) {
+        if (Object.hasOwn(attrs, 'badAttr')) {
           return 'you have the bad attr';
         }
       }
@@ -361,6 +369,13 @@ describe('ParseObject', () => {
       objectId: 'O1',
       ACL: { user1: { read: true } },
     });
+    expect(o.getACL()).toEqual(ACL);
+  });
+
+  it('encodes ACL from json', () => {
+    const ACL = new ParseACL({ user1: { read: true } });
+    const o = new ParseObject('Item');
+    o.set({ ACL: ACL.toJSON() });
     expect(o.getACL()).toEqual(ACL);
   });
 
@@ -659,6 +674,77 @@ describe('ParseObject', () => {
       'objectField.number': 20,
       otherField: { hello: 'world' },
     });
+    expect(o.toJSON()).toEqual({
+      objectField: {
+        number: 20,
+        letter: 'a',
+      },
+      otherField: { hello: 'world' },
+      objectId: 'setNested',
+    });
+  });
+
+  it('can set multiple nested fields (regression test for #1450)', () => {
+    const o = new ParseObject('Person');
+    o._finishFetch({
+      objectId: 'setNested2_1450',
+      objectField: {
+        number: 5,
+        letter: 'a',
+        nested: {
+          number: 0,
+          letter: 'b',
+        },
+      },
+    });
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 5, letter: 'a', nested: { number: 0, letter: 'b' } },
+    });
+    o.set('objectField.number', 20);
+    o.set('objectField.letter', 'b');
+    o.set('objectField.nested.number', 1);
+    o.set('objectField.nested.letter', 'c');
+
+    expect(o.attributes).toEqual({
+      objectField: { number: 20, letter: 'b', nested: { number: 1, letter: 'c' } },
+    });
+    expect(o.op('objectField.number') instanceof SetOp).toBe(true);
+    expect(o.dirtyKeys()).toEqual([
+      'objectField.number',
+      'objectField.letter',
+      'objectField.nested.number',
+      'objectField.nested.letter',
+      'objectField',
+    ]);
+    expect(o._getSaveJSON()).toEqual({
+      'objectField.number': 20,
+      'objectField.letter': 'b',
+      'objectField.nested.number': 1,
+      'objectField.nested.letter': 'c',
+    });
+
+    o.revert('objectField.nested.number');
+    o.revert('objectField.nested.letter');
+    expect(o._getSaveJSON()).toEqual({
+      'objectField.number': 20,
+      'objectField.letter': 'b',
+    });
+    expect(o.attributes).toEqual({
+      objectField: { number: 20, letter: 'b', nested: { number: 0, letter: 'b' } },
+    });
+
+    // Also test setting new root fields using the dot notation
+    o.set('objectField2.number', 0);
+    expect(o._getSaveJSON()).toEqual({
+      'objectField.number': 20,
+      'objectField.letter': 'b',
+      'objectField2.number': 0,
+    });
+    expect(o.attributes).toEqual({
+      objectField: { number: 20, letter: 'b', nested: { number: 0, letter: 'b' } },
+      objectField2: { number: 0 },
+    });
   });
 
   it('can increment a nested field', () => {
@@ -879,7 +965,7 @@ describe('ParseObject', () => {
       o.validate({
         'invalid!key': 12,
       })
-    ).toEqual(new ParseError(ParseError.INVALID_KEY_NAME));
+    ).toEqual(new ParseError(ParseError.INVALID_KEY_NAME, 'Invalid key name: invalid!key'));
 
     expect(
       o.validate({
@@ -896,16 +982,13 @@ describe('ParseObject', () => {
 
   it('validates attributes on set()', () => {
     const o = new ParseObject('Listing');
-    expect(o.set('ACL', 'not an acl')).toBe(false);
+    expect(() => {
+      o.set('ACL', 'not an acl');
+    }).toThrow(new ParseError(ParseError.OTHER_CAUSE, 'ACL must be a Parse ACL.'));
     expect(o.set('ACL', { '*': { read: true, write: false } })).toBe(o);
-    expect(o.set('$$$', 'o_O')).toBe(false);
-
-    o.set('$$$', 'o_O', {
-      error: function (obj, err) {
-        expect(obj).toBe(o);
-        expect(err.code).toBe(105);
-      },
-    });
+    expect(() => {
+      o.set('$$$', 'o_O');
+    }).toThrow(new ParseError(ParseError.INVALID_KEY_NAME, 'Invalid key name: $$$'));
   });
 
   it('ignores validation if ignoreValidation option is passed to set()', () => {
@@ -919,6 +1002,8 @@ describe('ParseObject', () => {
     const o = new ParseObject('Item');
     expect(o.isValid()).toBe(true);
     o.set('someKey', 'someValue');
+    expect(o.isValid()).toBe(true);
+    o.set('_internalField', 'allow_underscore');
     expect(o.isValid()).toBe(true);
     o._finishFetch({
       objectId: 'O3',
@@ -1861,22 +1946,25 @@ describe('ParseObject', () => {
     await result;
   });
 
-  it('will fail for a circular dependency of non-existing objects', () => {
+  it('will fail for a circular dependency of non-existing objects', async () => {
     const parent = new ParseObject('Item');
     const child = new ParseObject('Item');
     parent.set('child', child);
     child.set('parent', parent);
-    expect(parent.save.bind(parent)).toThrow('Cannot create a pointer to an unsaved Object.');
+    await expect(parent.save()).rejects.toThrowError(
+      'Cannot create a pointer to an unsaved Object.'
+    );
   });
 
-  it('will fail for deeper unsaved objects', () => {
+  it('will fail for deeper unsaved objects', async () => {
     const parent = new ParseObject('Item');
     const child = new ParseObject('Item');
     const grandchild = new ParseObject('Item');
     parent.set('child', child);
     child.set('child', grandchild);
-
-    expect(parent.save.bind(parent)).toThrow('Cannot create a pointer to an unsaved Object.');
+    await expect(parent.save()).rejects.toThrowError(
+      'Cannot create a pointer to an unsaved Object.'
+    );
   });
 
   it('does not mark shallow objects as dirty', () => {
@@ -1930,12 +2018,258 @@ describe('ParseObject', () => {
   it('should fail saveAll batch cycle', async () => {
     const obj = new ParseObject('Item');
     obj.set('child', obj);
-    try {
-      await ParseObject.saveAll([obj]);
-      expect(true).toBe(false);
-    } catch (e) {
-      expect(e.message).toBe('Tried to save a batch with a cycle.');
-    }
+
+    await expect(ParseObject.saveAll([obj])).rejects.toEqual(
+      expect.objectContaining({
+        message: 'Tried to save a batch with a cycle.',
+      })
+    );
+  });
+
+  it('should fail save with transaction and batchSize option', async () => {
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+
+    await expect(
+      ParseObject.saveAll([obj1, obj2], { transaction: true, batchSize: 20 })
+    ).rejects.toEqual(
+      expect.objectContaining({
+        message: 'You cannot use both transaction and batchSize options simultaneously.',
+      })
+    );
+  });
+
+  it('should fail destroy with transaction and batchSize option', async () => {
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+
+    await expect(
+      ParseObject.destroyAll([obj1, obj2], { transaction: true, batchSize: 20 })
+    ).rejects.toEqual(
+      expect.objectContaining({
+        message: 'You cannot use both transaction and batchSize options simultaneously.',
+      })
+    );
+  });
+
+  it('should fail save batch with unserializable attribute and transaction option', async () => {
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj1.set('relatedObject', obj2);
+
+    await expect(ParseObject.saveAll([obj1, obj2], { transaction: true })).rejects.toEqual(
+      expect.objectContaining({
+        message:
+          'Tried to save a transactional batch containing an object with unserializable attributes.',
+      })
+    );
+  });
+
+  it('should fail to save object when its children lack IDs using transaction option', async () => {
+    RESTController._setXHR(mockXHR([{ status: 200, response: [] }]));
+
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj1.set('relatedObject', obj2);
+
+    await expect(obj1.save(null, { transaction: true })).rejects.toEqual(
+      expect.objectContaining({
+        message:
+          'Tried to save a transactional batch containing an object with unserializable attributes.',
+      })
+    );
+  });
+
+  it('should save batch with serializable attribute and transaction option', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{ success: { objectId: 'parent' } }, { success: { objectId: 'id2' } }],
+        },
+      ])
+    );
+
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj2.id = 'id2';
+    obj1.set('relatedObject', obj2);
+
+    const [saved1, saved2] = await ParseObject.saveAll([obj1, obj2], { transaction: true });
+
+    expect(saved1.dirty()).toBe(false);
+    expect(saved2.dirty()).toBe(false);
+    expect(saved1.id).toBe('parent');
+    expect(saved2.id).toBe('id2');
+
+    expect(controller.request).toHaveBeenCalledWith(
+      'POST',
+      'batch',
+      {
+        requests: [
+          {
+            method: 'POST',
+            body: {
+              relatedObject: { __type: 'Pointer', className: 'TestObject', objectId: 'id2' },
+            },
+            path: '/1/classes/TestObject',
+          },
+          { method: 'PUT', body: {}, path: '/1/classes/TestObject/id2' },
+        ],
+        transaction: true,
+      },
+      expect.anything()
+    );
+  });
+
+  it('should save object along with its children using transaction option', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{ success: { objectId: 'id2' } }, { success: { objectId: 'parent' } }],
+        },
+      ])
+    );
+
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj2.id = 'id2';
+    obj2.set('attribute', true);
+
+    obj1.set('relatedObject', obj2);
+
+    const saved1 = await obj1.save(null, { transaction: true });
+
+    const saved2 = saved1.get('relatedObject');
+    expect(saved1.dirty()).toBe(false);
+    expect(saved2.dirty()).toBe(false);
+    expect(saved1.id).toBe('parent');
+    expect(saved2.id).toBe('id2');
+
+    expect(controller.request).toHaveBeenCalledWith(
+      'POST',
+      'batch',
+      {
+        requests: [
+          {
+            method: 'PUT',
+            body: { attribute: true },
+            path: '/1/classes/TestObject/id2',
+          },
+          {
+            method: 'POST',
+            body: {
+              relatedObject: { __type: 'Pointer', className: 'TestObject', objectId: 'id2' },
+            },
+            path: '/1/classes/TestObject',
+          },
+        ],
+        transaction: true,
+      },
+      expect.anything()
+    );
+  });
+
+  it('should save file & object along with its children using transaction option', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: { name: 'mock-name', url: 'mock-url' },
+        },
+        {
+          status: 200,
+          response: [{ success: { objectId: 'id2' } }, { success: { objectId: 'parent' } }],
+        },
+      ])
+    );
+
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+
+    const file1 = new ParseFile('parse-server-logo', [0, 1, 2, 3]);
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj2.id = 'id2';
+    obj2.set('file', file1);
+
+    obj1.set('relatedObject', obj2);
+
+    const saved1 = await obj1.save(null, { transaction: true });
+
+    const saved2 = saved1.get('relatedObject');
+    expect(saved1.dirty()).toBe(false);
+    expect(saved2.dirty()).toBe(false);
+    expect(saved1.id).toBe('parent');
+    expect(saved2.id).toBe('id2');
+
+    const file = saved2.get('file');
+    expect(file.name()).toBe('mock-name');
+    expect(file.url()).toBe('mock-url');
+
+    expect(controller.request).toHaveBeenCalledWith(
+      'POST',
+      'batch',
+      {
+        requests: [
+          {
+            method: 'PUT',
+            body: { file: { __type: 'File', name: 'mock-name', url: 'mock-url' } },
+            path: '/1/classes/TestObject/id2',
+          },
+          {
+            method: 'POST',
+            body: {
+              relatedObject: { __type: 'Pointer', className: 'TestObject', objectId: 'id2' },
+            },
+            path: '/1/classes/TestObject',
+          },
+        ],
+        transaction: true,
+      },
+      expect.anything()
+    );
+  });
+
+  it('should destroy batch with transaction option', async () => {
+    CoreManager.getRESTController()._setXHR(
+      mockXHR([
+        {
+          status: 200,
+          response: [{ success: { objectId: 'parent' } }, { success: { objectId: 'id2' } }],
+        },
+      ])
+    );
+
+    const controller = CoreManager.getRESTController();
+    jest.spyOn(controller, 'request');
+
+    const obj1 = new ParseObject('TestObject');
+    const obj2 = new ParseObject('TestObject');
+    obj1.id = 'parent';
+    obj2.id = 'id2';
+
+    await ParseObject.destroyAll([obj1, obj2], { transaction: true });
+
+    expect(controller.request).toHaveBeenCalledWith(
+      'POST',
+      'batch',
+      {
+        requests: [
+          { method: 'DELETE', body: {}, path: '/1/classes/TestObject/parent' },
+          { method: 'DELETE', body: {}, path: '/1/classes/TestObject/id2' },
+        ],
+        transaction: true,
+      },
+      expect.anything()
+    );
   });
 
   it('should fail on invalid date', done => {
@@ -2302,13 +2636,14 @@ describe('ParseObject', () => {
     });
     const p = new ParseObject('Person');
     p.id = 'pid';
-    const result = p.destroy().then(() => {
+    const result = p.destroy({ sessionToken: 't_1234' }).then(() => {
       expect(xhr.open.mock.calls[0]).toEqual([
         'POST',
         'https://api.parse.com/1/classes/Person/pid',
         true,
       ]);
       expect(JSON.parse(xhr.send.mock.calls[0])._method).toBe('DELETE');
+      expect(JSON.parse(xhr.send.mock.calls[0])._SessionToken).toBe('t_1234');
     });
     jest.runAllTicks();
     await flushPromises();
@@ -2354,7 +2689,7 @@ describe('ParseObject', () => {
     expect(controller.ajax).toHaveBeenCalledTimes(0);
   });
 
-  it('can save an array of objects', async done => {
+  it('can save an array of objects', done => {
     const xhr = {
       setRequestHeader: jest.fn(),
       open: jest.fn(),
@@ -2377,21 +2712,22 @@ describe('ParseObject', () => {
       done();
     });
     jest.runAllTicks();
-    await flushPromises();
-    xhr.status = 200;
-    xhr.responseText = JSON.stringify([
-      { success: { objectId: 'pid0' } },
-      { success: { objectId: 'pid1' } },
-      { success: { objectId: 'pid2' } },
-      { success: { objectId: 'pid3' } },
-      { success: { objectId: 'pid4' } },
-    ]);
-    xhr.readyState = 4;
-    xhr.onreadystatechange();
-    jest.runAllTicks();
+    flushPromises().then(() => {
+      xhr.status = 200;
+      xhr.responseText = JSON.stringify([
+        { success: { objectId: 'pid0' } },
+        { success: { objectId: 'pid1' } },
+        { success: { objectId: 'pid2' } },
+        { success: { objectId: 'pid3' } },
+        { success: { objectId: 'pid4' } },
+      ]);
+      xhr.readyState = 4;
+      xhr.onreadystatechange();
+      jest.runAllTicks();
+    });
   });
 
-  it('can saveAll with batchSize', async done => {
+  it('can saveAll with batchSize', done => {
     const xhrs = [];
     for (let i = 0; i < 2; i++) {
       xhrs[i] = {
@@ -2416,43 +2752,43 @@ describe('ParseObject', () => {
       done();
     });
     jest.runAllTicks();
-    await flushPromises();
+    flushPromises().then(async () => {
+      xhrs[0].responseText = JSON.stringify([
+        { success: { objectId: 'pid0' } },
+        { success: { objectId: 'pid1' } },
+        { success: { objectId: 'pid2' } },
+        { success: { objectId: 'pid3' } },
+        { success: { objectId: 'pid4' } },
+        { success: { objectId: 'pid5' } },
+        { success: { objectId: 'pid6' } },
+        { success: { objectId: 'pid7' } },
+        { success: { objectId: 'pid8' } },
+        { success: { objectId: 'pid9' } },
+        { success: { objectId: 'pid10' } },
+        { success: { objectId: 'pid11' } },
+        { success: { objectId: 'pid12' } },
+        { success: { objectId: 'pid13' } },
+        { success: { objectId: 'pid14' } },
+        { success: { objectId: 'pid15' } },
+        { success: { objectId: 'pid16' } },
+        { success: { objectId: 'pid17' } },
+        { success: { objectId: 'pid18' } },
+        { success: { objectId: 'pid19' } },
+      ]);
+      xhrs[0].onreadystatechange();
+      jest.runAllTicks();
+      await flushPromises();
 
-    xhrs[0].responseText = JSON.stringify([
-      { success: { objectId: 'pid0' } },
-      { success: { objectId: 'pid1' } },
-      { success: { objectId: 'pid2' } },
-      { success: { objectId: 'pid3' } },
-      { success: { objectId: 'pid4' } },
-      { success: { objectId: 'pid5' } },
-      { success: { objectId: 'pid6' } },
-      { success: { objectId: 'pid7' } },
-      { success: { objectId: 'pid8' } },
-      { success: { objectId: 'pid9' } },
-      { success: { objectId: 'pid10' } },
-      { success: { objectId: 'pid11' } },
-      { success: { objectId: 'pid12' } },
-      { success: { objectId: 'pid13' } },
-      { success: { objectId: 'pid14' } },
-      { success: { objectId: 'pid15' } },
-      { success: { objectId: 'pid16' } },
-      { success: { objectId: 'pid17' } },
-      { success: { objectId: 'pid18' } },
-      { success: { objectId: 'pid19' } },
-    ]);
-    xhrs[0].onreadystatechange();
-    jest.runAllTicks();
-    await flushPromises();
-
-    xhrs[1].responseText = JSON.stringify([
-      { success: { objectId: 'pid20' } },
-      { success: { objectId: 'pid21' } },
-    ]);
-    xhrs[1].onreadystatechange();
-    jest.runAllTicks();
+      xhrs[1].responseText = JSON.stringify([
+        { success: { objectId: 'pid20' } },
+        { success: { objectId: 'pid21' } },
+      ]);
+      xhrs[1].onreadystatechange();
+      jest.runAllTicks();
+    });
   });
 
-  it('can saveAll with global batchSize', async done => {
+  it('can saveAll with global batchSize', done => {
     const xhrs = [];
     for (let i = 0; i < 2; i++) {
       xhrs[i] = {
@@ -2477,43 +2813,43 @@ describe('ParseObject', () => {
       done();
     });
     jest.runAllTicks();
-    await flushPromises();
+    flushPromises().then(async () => {
+      xhrs[0].responseText = JSON.stringify([
+        { success: { objectId: 'pid0' } },
+        { success: { objectId: 'pid1' } },
+        { success: { objectId: 'pid2' } },
+        { success: { objectId: 'pid3' } },
+        { success: { objectId: 'pid4' } },
+        { success: { objectId: 'pid5' } },
+        { success: { objectId: 'pid6' } },
+        { success: { objectId: 'pid7' } },
+        { success: { objectId: 'pid8' } },
+        { success: { objectId: 'pid9' } },
+        { success: { objectId: 'pid10' } },
+        { success: { objectId: 'pid11' } },
+        { success: { objectId: 'pid12' } },
+        { success: { objectId: 'pid13' } },
+        { success: { objectId: 'pid14' } },
+        { success: { objectId: 'pid15' } },
+        { success: { objectId: 'pid16' } },
+        { success: { objectId: 'pid17' } },
+        { success: { objectId: 'pid18' } },
+        { success: { objectId: 'pid19' } },
+      ]);
+      xhrs[0].onreadystatechange();
+      jest.runAllTicks();
+      await flushPromises();
 
-    xhrs[0].responseText = JSON.stringify([
-      { success: { objectId: 'pid0' } },
-      { success: { objectId: 'pid1' } },
-      { success: { objectId: 'pid2' } },
-      { success: { objectId: 'pid3' } },
-      { success: { objectId: 'pid4' } },
-      { success: { objectId: 'pid5' } },
-      { success: { objectId: 'pid6' } },
-      { success: { objectId: 'pid7' } },
-      { success: { objectId: 'pid8' } },
-      { success: { objectId: 'pid9' } },
-      { success: { objectId: 'pid10' } },
-      { success: { objectId: 'pid11' } },
-      { success: { objectId: 'pid12' } },
-      { success: { objectId: 'pid13' } },
-      { success: { objectId: 'pid14' } },
-      { success: { objectId: 'pid15' } },
-      { success: { objectId: 'pid16' } },
-      { success: { objectId: 'pid17' } },
-      { success: { objectId: 'pid18' } },
-      { success: { objectId: 'pid19' } },
-    ]);
-    xhrs[0].onreadystatechange();
-    jest.runAllTicks();
-    await flushPromises();
-
-    xhrs[1].responseText = JSON.stringify([
-      { success: { objectId: 'pid20' } },
-      { success: { objectId: 'pid21' } },
-    ]);
-    xhrs[1].onreadystatechange();
-    jest.runAllTicks();
+      xhrs[1].responseText = JSON.stringify([
+        { success: { objectId: 'pid20' } },
+        { success: { objectId: 'pid21' } },
+      ]);
+      xhrs[1].onreadystatechange();
+      jest.runAllTicks();
+    });
   });
 
-  it('returns the first error when saving an array of objects', async done => {
+  it('returns the first error when saving an array of objects', done => {
     const xhrs = [];
     for (let i = 0; i < 2; i++) {
       xhrs[i] = {
@@ -2537,36 +2873,35 @@ describe('ParseObject', () => {
       expect(xhrs[1].open.mock.calls.length).toBe(0);
       expect(objects[19].dirty()).toBe(false);
       expect(objects[20].dirty()).toBe(true);
-
       expect(error.message).toBe('first error');
       done();
     });
-    await flushPromises();
-
-    xhrs[0].responseText = JSON.stringify([
-      { success: { objectId: 'pid0' } },
-      { success: { objectId: 'pid1' } },
-      { success: { objectId: 'pid2' } },
-      { success: { objectId: 'pid3' } },
-      { success: { objectId: 'pid4' } },
-      { success: { objectId: 'pid5' } },
-      { error: { code: -1, error: 'first error' } },
-      { success: { objectId: 'pid7' } },
-      { success: { objectId: 'pid8' } },
-      { success: { objectId: 'pid9' } },
-      { success: { objectId: 'pid10' } },
-      { success: { objectId: 'pid11' } },
-      { success: { objectId: 'pid12' } },
-      { success: { objectId: 'pid13' } },
-      { success: { objectId: 'pid14' } },
-      { error: { code: -1, error: 'second error' } },
-      { success: { objectId: 'pid16' } },
-      { success: { objectId: 'pid17' } },
-      { success: { objectId: 'pid18' } },
-      { success: { objectId: 'pid19' } },
-    ]);
-    xhrs[0].onreadystatechange();
-    jest.runAllTicks();
+    flushPromises().then(() => {
+      xhrs[0].responseText = JSON.stringify([
+        { success: { objectId: 'pid0' } },
+        { success: { objectId: 'pid1' } },
+        { success: { objectId: 'pid2' } },
+        { success: { objectId: 'pid3' } },
+        { success: { objectId: 'pid4' } },
+        { success: { objectId: 'pid5' } },
+        { error: { code: -1, error: 'first error' } },
+        { success: { objectId: 'pid7' } },
+        { success: { objectId: 'pid8' } },
+        { success: { objectId: 'pid9' } },
+        { success: { objectId: 'pid10' } },
+        { success: { objectId: 'pid11' } },
+        { success: { objectId: 'pid12' } },
+        { success: { objectId: 'pid13' } },
+        { success: { objectId: 'pid14' } },
+        { error: { code: -1, error: 'second error' } },
+        { success: { objectId: 'pid16' } },
+        { success: { objectId: 'pid17' } },
+        { success: { objectId: 'pid18' } },
+        { success: { objectId: 'pid19' } },
+      ]);
+      xhrs[0].onreadystatechange();
+      jest.runAllTicks();
+    });
   });
 });
 
@@ -2575,7 +2910,7 @@ describe('ObjectController', () => {
     jest.clearAllMocks();
   });
 
-  it('can fetch a single object', async done => {
+  it('can fetch a single object', done => {
     const objectController = CoreManager.getObjectController();
     const xhr = {
       setRequestHeader: jest.fn(),
@@ -2597,13 +2932,13 @@ describe('ObjectController', () => {
       expect(body._method).toBe('GET');
       done();
     });
-    await flushPromises();
-
-    xhr.status = 200;
-    xhr.responseText = JSON.stringify({});
-    xhr.readyState = 4;
-    xhr.onreadystatechange();
-    jest.runAllTicks();
+    flushPromises().then(() => {
+      xhr.status = 200;
+      xhr.responseText = JSON.stringify({});
+      xhr.readyState = 4;
+      xhr.onreadystatechange();
+      jest.runAllTicks();
+    });
   });
 
   it('accepts context on fetch', async () => {
@@ -2645,7 +2980,8 @@ describe('ObjectController', () => {
     });
   });
 
-  it('can fetch a single object with include', async done => {
+  it('can fetch a single object with include', async () => {
+    expect.assertions(2);
     const objectController = CoreManager.getObjectController();
     const xhr = {
       setRequestHeader: jest.fn(),
@@ -2665,7 +3001,6 @@ describe('ObjectController', () => {
       ]);
       const body = JSON.parse(xhr.send.mock.calls[0]);
       expect(body._method).toBe('GET');
-      done();
     });
     await flushPromises();
 
@@ -3431,11 +3766,7 @@ describe('ParseObject Subclasses', () => {
   });
 
   it('can use on ParseObject subclass for multiple Parse.Object class names', () => {
-    class MyParseObjects extends ParseObject {
-      constructor(className) {
-        super(className);
-      }
-    }
+    class MyParseObjects extends ParseObject {}
     ParseObject.registerSubclass('TestObject', MyParseObjects);
     ParseObject.registerSubclass('TestObject1', MyParseObjects);
     ParseObject.registerSubclass('TestObject2', MyParseObjects);
@@ -3514,6 +3845,22 @@ describe('ParseObject Subclasses', () => {
 describe('ParseObject extensions', () => {
   beforeEach(() => {
     ParseObject.enableSingleInstance();
+  });
+
+  it('can extend object', () => {
+    const startExtend = Date.now();
+    for (let i = 0; i < 100000; i++) {
+      const Parent = ParseObject.extend('Parent');
+
+      const parent = new Parent();
+    }
+    expect(Date.now() - startExtend).toBeLessThan(200);
+
+    const startNew = Date.now();
+    for (let i = 0; i < 100000; i++) {
+      const parent = new ParseObject('Parent');
+    }
+    expect(Date.now() - startNew).toBeLessThan(200);
   });
 
   it('can generate ParseObjects with a default className', () => {

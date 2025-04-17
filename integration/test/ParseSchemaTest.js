@@ -23,9 +23,28 @@ const defaultCLPS = {
   delete: { '*': true },
   addField: { '*': true },
   protectedFields: { '*': [] },
+  ACL: {
+    '*': {
+      read: true,
+      write: true
+    }
+  },
 };
 
 describe('Schema', () => {
+  beforeEach(async () => {
+    try {
+      const schemas = await Parse.Schema.all();
+      for (const result of schemas) {
+        const schema = new Parse.Schema(result.className);
+        await schema.purge();
+        await schema.delete();
+      }
+    } catch (_) {
+      // Schema not found
+    }
+  });
+
   it('invalid get all no schema', done => {
     Parse.Schema.all()
       .then(() => {})
@@ -59,6 +78,7 @@ describe('Schema', () => {
       .addString('stringField')
       .addNumber('numberField')
       .addBoolean('booleanField')
+      .addBytes('bytesField')
       .addDate('dateField')
       .addFile('fileField')
       .addGeoPoint('geoPointField')
@@ -78,6 +98,7 @@ describe('Schema', () => {
         assert.equal(result.fields.stringField.type, 'String');
         assert.equal(result.fields.numberField.type, 'Number');
         assert.equal(result.fields.booleanField.type, 'Boolean');
+        assert.equal(result.fields.bytesField.type, 'Bytes');
         assert.equal(result.fields.dateField.type, 'Date');
         assert.equal(result.fields.fileField.type, 'File');
         assert.equal(result.fields.geoPointField.type, 'GeoPoint');
@@ -169,6 +190,7 @@ describe('Schema', () => {
         required: true,
         defaultValue: '2000-01-01T00:00:00.000Z',
       })
+      .addBytes('bytesField', { required: true, defaultValue: 'ParseA==' })
       .addFile('fileField', { required: true, defaultValue: file })
       .addGeoPoint('geoPointField', { required: true, defaultValue: point })
       .addPolygon('polygonField', { required: true, defaultValue: polygon })
@@ -191,6 +213,11 @@ describe('Schema', () => {
       stringField: { type: 'String', required: true, defaultValue: 'world' },
       numberField: { type: 'Number', required: true, defaultValue: 10 },
       booleanField: { type: 'Boolean', required: true, defaultValue: false },
+      bytesField: {
+        type: 'Bytes',
+        required: true,
+        defaultValue: { __type: 'Bytes', base64: 'ParseA==' },
+      },
       dateField: {
         type: 'Date',
         required: true,
@@ -232,6 +259,7 @@ describe('Schema', () => {
       stringField: 'world',
       numberField: 10,
       booleanField: false,
+      bytesField: { __type: 'Bytes', base64: 'ParseA==' },
       dateField: { __type: 'Date', iso: '2000-01-01T00:00:00.000Z' },
       dateStringField: { __type: 'Date', iso: '2000-01-01T00:00:00.000Z' },
       fileField: file.toJSON(),
@@ -298,6 +326,12 @@ describe('Schema', () => {
       delete: {},
       addField: {},
       protectedFields: {},
+      ACL: {
+        '*': {
+          read: true,
+          write: true
+        }
+      },
     };
     const testSchema = new Parse.Schema('SchemaTest');
     let schema = await testSchema.save();
@@ -495,84 +529,66 @@ describe('Schema', () => {
       });
   });
 
-  it('invalid field name', done => {
+  it('invalid field name', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addField(null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid field type', done => {
+  it('invalid field type', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addField('name', 'UnknownType');
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid index name', done => {
+  it('invalid index name', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addIndex(null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid index', done => {
+  it('invalid index', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addIndex('name', null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid pointer name', done => {
+  it('invalid pointer name', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addPointer(null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid pointer class', done => {
+  it('invalid pointer class', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addPointer('name', null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid relation name', done => {
+  it('invalid relation name', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addRelation(null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('invalid relation class', done => {
+  it('invalid relation class', () => {
     const testSchema = new Parse.Schema('SchemaTest');
-    try {
+    expect(function () {
       testSchema.addRelation('name', null);
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 
-  it('assert class name', done => {
+  it('assert class name', () => {
     const testSchema = new Parse.Schema();
-    try {
+    expect(function () {
       testSchema.assertClassName();
-    } catch (e) {
-      done();
-    }
+    }).toThrow();
   });
 });

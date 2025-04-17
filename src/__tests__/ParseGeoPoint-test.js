@@ -1,25 +1,6 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.autoMockOff();
 
 const ParseGeoPoint = require('../ParseGeoPoint').default;
-global.navigator.geolocation = {
-  getCurrentPosition: cb => {
-    return cb({
-      coords: {
-        latitude: 10,
-        longitude: 20,
-      },
-    });
-  },
-};
 
 describe('GeoPoint', () => {
   it('can be constructed from various inputs', () => {
@@ -226,8 +207,33 @@ describe('GeoPoint', () => {
   });
 
   it('can get current location', async () => {
-    const geoPoint = ParseGeoPoint.current();
+    global.navigator.geolocation = {
+      getCurrentPosition: (success, _, options) => {
+        success({
+          coords: {
+            latitude: 10,
+            longitude: 20,
+          },
+        });
+        expect(options).toEqual({ timeout: 5000 });
+      },
+    };
+    const geoPoint = await ParseGeoPoint.current({ timeout: 5000 });
     expect(geoPoint.latitude).toBe(10);
     expect(geoPoint.longitude).toBe(20);
+  });
+
+  it('can get current location error', async () => {
+    global.navigator.geolocation = {
+      getCurrentPosition: (_, error, options) => {
+        error({
+          message: 'PERMISSION_DENIED',
+        });
+        expect(options).toEqual({ timeout: 5000 });
+      },
+    };
+    await expect(ParseGeoPoint.current({ timeout: 5000 })).rejects.toEqual({
+      message: 'PERMISSION_DENIED',
+    });
   });
 });

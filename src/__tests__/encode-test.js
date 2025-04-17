@@ -1,16 +1,10 @@
-/**
- * Copyright (c) 2015-present, Parse, LLC.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 jest.dontMock('../encode');
 jest.dontMock('../ParseACL');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
+jest.dontMock('../ParseOp');
+jest.dontMock('../ParseUser');
+jest.dontMock('../CoreManager');
 
 const mockObject = function (className) {
   this.className = className;
@@ -44,14 +38,21 @@ mockObject.prototype = {
     return json;
   },
 };
-jest.setMock('../ParseObject', mockObject);
+jest.setMock('../ParseObject', {
+  __esModule: true,
+  default: mockObject,
+});
 
 const encode = require('../encode').default;
 const ParseACL = require('../ParseACL').default;
 const ParseFile = require('../ParseFile').default;
 const ParseGeoPoint = require('../ParseGeoPoint').default;
-const ParseObject = require('../ParseObject');
+const ParseObject = require('../ParseObject').default;
 const ParseRelation = require('../ParseRelation').default;
+const CoreManager = require('../CoreManager').default;
+CoreManager.setParseObject(mockObject);
+CoreManager.setParseOp(require('../ParseOp'));
+CoreManager.setParseUser(require('../ParseUser').default);
 
 describe('encode', () => {
   it('ignores primitives', () => {
