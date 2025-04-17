@@ -314,6 +314,17 @@ const Parse = {
     return CoreManager.get('ALLOW_CUSTOM_OBJECT_ID');
   },
 
+  /**
+   * @property {boolean} Parse.nodeLogging
+   * @static
+   */
+  set nodeLogging(value) {
+    CoreManager.set('NODE_LOGGING', value);
+  },
+  get nodeLogging() {
+    return CoreManager.get('NODE_LOGGING');
+  },
+
   _request(...args) {
     return CoreManager.getRESTController().request.apply(null, args);
   },

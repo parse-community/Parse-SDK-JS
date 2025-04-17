@@ -322,6 +322,11 @@ declare const Parse: {
      * @static
      */
     allowCustomObjectId: any;
+    /**
+     * @property {boolean} Parse.nodeLogging
+     * @static
+     */
+    nodeLogging: any;
     _request(...args: any[]): any;
     _ajax(...args: any[]): any;
     _decode(_: any, value: any): any;
