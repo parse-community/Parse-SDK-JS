@@ -44,9 +44,7 @@ describe('Parse.File', () => {
   });
 
   it('can get file upload / download progress', async () => {
-    const parseLogo =
-      'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
-    const file = new Parse.File('parse-server-logo', { uri: parseLogo });
+    const file = new Parse.File('parse-js-test-file', [61, 170, 236, 120]);
     let progress = 0;
     await file.save({
       progress: (value, loaded, total) => {
