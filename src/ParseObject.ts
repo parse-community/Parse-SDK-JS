@@ -2552,7 +2552,6 @@ const DefaultController = {
                     const status = responses[index]._status;
                     delete responses[index]._status;
                     delete responses[index]._headers;
-                    delete responses[index]._xhr;
                     mapIdForPin[objectId] = obj._localId;
                     obj._handleSaveResponse(responses[index].success, status);
                   } else {
@@ -2620,7 +2619,6 @@ const DefaultController = {
             const status = response._status;
             delete response._status;
             delete response._headers;
-            delete response._xhr;
             targetCopy._handleSaveResponse(response, status);
           },
           error => {

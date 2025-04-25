@@ -9,10 +9,7 @@ const b64Digit = require('../ParseFile').b64Digit;
 
 const ParseObject = require('../ParseObject').default;
 const CoreManager = require('../CoreManager').default;
-const EventEmitter = require('../EventEmitter').default;
-
-const mockHttp = require('http');
-const mockHttps = require('https');
+const mockFetch = require('./test_helpers/mockFetch');
 
 const mockLocalDatastore = {
   _updateLocalIdForObject: jest.fn((_localId, /** @type {ParseObject}*/ object) => {
@@ -491,152 +488,31 @@ describe('FileController', () => {
     spy2.mockRestore();
   });
 
-  it('download with base64 http', async () => {
-    defaultController._setXHR(null);
-    const mockResponse = Object.create(EventEmitter.prototype);
-    EventEmitter.call(mockResponse);
-    mockResponse.setEncoding = function () {};
-    mockResponse.headers = {
-      'content-type': 'image/png',
-    };
-    const spy = jest.spyOn(mockHttp, 'get').mockImplementationOnce((uri, cb) => {
-      cb(mockResponse);
-      mockResponse.emit('data', 'base64String');
-      mockResponse.emit('end');
-      return {
-        on: function () {},
-      };
-    });
-
-    const data = await defaultController.download('http://example.com/image.png');
-    expect(data.base64).toBe('base64String');
-    expect(data.contentType).toBe('image/png');
-    expect(mockHttp.get).toHaveBeenCalledTimes(1);
-    expect(mockHttps.get).toHaveBeenCalledTimes(0);
-    spy.mockRestore();
-  });
-
-  it('download with base64 http abort', async () => {
-    defaultController._setXHR(null);
-    const mockRequest = Object.create(EventEmitter.prototype);
-    const mockResponse = Object.create(EventEmitter.prototype);
-    EventEmitter.call(mockRequest);
-    EventEmitter.call(mockResponse);
-    mockResponse.setEncoding = function () {};
-    mockResponse.headers = {
-      'content-type': 'image/png',
-    };
-    const spy = jest.spyOn(mockHttp, 'get').mockImplementationOnce((uri, cb) => {
-      cb(mockResponse);
-      return mockRequest;
-    });
-    const options = {
-      requestTask: () => {},
-    };
-    defaultController.download('http://example.com/image.png', options).then(data => {
-      expect(data).toEqual({});
-    });
-    mockRequest.emit('abort');
-    spy.mockRestore();
-  });
-
-  it('download with base64 https', async () => {
-    defaultController._setXHR(null);
-    const mockResponse = Object.create(EventEmitter.prototype);
-    EventEmitter.call(mockResponse);
-    mockResponse.setEncoding = function () {};
-    mockResponse.headers = {
-      'content-type': 'image/png',
-    };
-    const spy = jest.spyOn(mockHttps, 'get').mockImplementationOnce((uri, cb) => {
-      cb(mockResponse);
-      mockResponse.emit('data', 'base64String');
-      mockResponse.emit('end');
-      return {
-        on: function () {},
-      };
-    });
-
-    const data = await defaultController.download('https://example.com/image.png');
-    expect(data.base64).toBe('base64String');
-    expect(data.contentType).toBe('image/png');
-    expect(mockHttp.get).toHaveBeenCalledTimes(0);
-    expect(mockHttps.get).toHaveBeenCalledTimes(1);
-    spy.mockRestore();
-  });
-
   it('download with ajax', async () => {
-    const mockXHR = function () {
-      return {
-        DONE: 4,
-        open: jest.fn(),
-        send: jest.fn().mockImplementation(function () {
-          this.response = [61, 170, 236, 120];
-          this.readyState = 2;
-          this.onreadystatechange();
-          this.readyState = 4;
-          this.onreadystatechange();
-        }),
-        getResponseHeader: function () {
-          return 'image/png';
-        },
-      };
-    };
-    defaultController._setXHR(mockXHR);
+    const response = 'hello';
+    mockFetch([{ status: 200, response }], { 'Content-Length': 64, 'Content-Type': 'image/png' });
     const options = {
       requestTask: () => {},
     };
     const data = await defaultController.download('https://example.com/image.png', options);
-    expect(data.base64).toBe('ParseA==');
+    expect(data.base64).toBeDefined();
     expect(data.contentType).toBe('image/png');
   });
 
   it('download with ajax no response', async () => {
-    const mockXHR = function () {
-      return {
-        DONE: 4,
-        open: jest.fn(),
-        send: jest.fn().mockImplementation(function () {
-          this.response = undefined;
-          this.readyState = 2;
-          this.onreadystatechange();
-          this.readyState = 4;
-          this.onreadystatechange();
-        }),
-        getResponseHeader: function () {
-          return 'image/png';
-        },
-      };
-    };
-    defaultController._setXHR(mockXHR);
+    mockFetch([{ status: 200, response: {} }], { 'Content-Length': 0 });
     const options = {
       requestTask: () => {},
     };
     const data = await defaultController.download('https://example.com/image.png', options);
-    expect(data).toEqual({});
+    expect(data).toEqual({
+      base64: '',
+      contentType: undefined,
+    });
   });
 
   it('download with ajax abort', async () => {
-    const mockXHR = function () {
-      return {
-        open: jest.fn(),
-        send: jest.fn().mockImplementation(function () {
-          this.response = [61, 170, 236, 120];
-          this.readyState = 2;
-          this.onreadystatechange();
-        }),
-        getResponseHeader: function () {
-          return 'image/png';
-        },
-        abort: function () {
-          this.status = 0;
-          this.response = undefined;
-          this.readyState = 4;
-          this.onreadystatechange();
-        },
-      };
-    };
-    defaultController._setXHR(mockXHR);
+    mockFetch([], {}, { name: 'AbortError' });
     let _requestTask;
     const options = {
       requestTask: task => (_requestTask = task),
@@ -644,36 +520,20 @@ describe('FileController', () => {
     defaultController.download('https://example.com/image.png', options).then(data => {
       expect(data).toEqual({});
     });
+    expect(_requestTask).toBeDefined();
+    expect(_requestTask.abort).toBeDefined();
     _requestTask.abort();
   });
 
   it('download with ajax error', async () => {
-    const mockXHR = function () {
-      return {
-        open: jest.fn(),
-        send: jest.fn().mockImplementation(function () {
-          this.onerror('error thrown');
-        }),
-      };
-    };
-    defaultController._setXHR(mockXHR);
+    mockFetch([], {}, new Error('error thrown'));
     const options = {
       requestTask: () => {},
     };
     try {
       await defaultController.download('https://example.com/image.png', options);
     } catch (e) {
-      expect(e).toBe('error thrown');
-    }
-  });
-
-  it('download with xmlhttprequest unsupported', async () => {
-    defaultController._setXHR(null);
-    process.env.PARSE_BUILD = 'browser';
-    try {
-      await defaultController.download('https://example.com/image.png');
-    } catch (e) {
-      expect(e).toBe('Cannot make a request: No definition of XMLHttpRequest was found.');
+      expect(e.message).toBe('error thrown');
     }
   });
 

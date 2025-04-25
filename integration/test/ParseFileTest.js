@@ -43,6 +43,29 @@ describe('Parse.File', () => {
     file.cancel();
   });
 
+  it('can get file upload / download progress', async () => {
+    const file = new Parse.File('parse-js-test-file', [61, 170, 236, 120]);
+    let progress = 0;
+    await file.save({
+      progress: (value, loaded, total) => {
+        progress = value;
+        expect(loaded).toBeDefined();
+        expect(total).toBeDefined();
+      },
+    });
+    expect(progress).toBe(1);
+    progress = 0;
+    file._data = null;
+    await file.getData({
+      progress: (value, loaded, total) => {
+        progress = value;
+        expect(loaded).toBeDefined();
+        expect(total).toBeDefined();
+      },
+    });
+    expect(progress).toBe(1);
+  });
+
   it('can not get data from unsaved file', async () => {
     const file = new Parse.File('parse-server-logo', [61, 170, 236, 120]);
     file._data = null;
