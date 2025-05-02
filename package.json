@@ -79,7 +79,7 @@
     "madge": "8.0.0",
     "metro-react-native-babel-preset": "0.77.0",
     "mongodb-runner": "5.8.3",
-    "parse-server": "8.1.0",
+    "parse-server": "8.2.0",
     "puppeteer": "24.7.2",
     "regenerator-runtime": "0.14.1",
     "semantic-release": "24.2.3",
