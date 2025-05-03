@@ -8,8 +8,6 @@ const LocalDatastoreController =
 const StorageController = require('../../lib/react-native/StorageController.default').default;
 const RESTController = require('../../lib/react-native/RESTController').default;
 
-RESTController._setXHR(require('xmlhttprequest').XMLHttpRequest);
-
 describe('Parse React Native', () => {
   beforeEach(() => {
     // Set up missing controllers and configurations

@@ -38,8 +38,6 @@ function runTest(controller) {
       Parse.initialize('integration');
       Parse.CoreManager.set('SERVER_URL', serverURL);
       Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
-      const RESTController = Parse.CoreManager.getRESTController();
-      RESTController._setXHR(require('xmlhttprequest').XMLHttpRequest);
       Parse.enableLocalDatastore();
     });
 
@@ -1082,8 +1080,6 @@ function runTest(controller) {
       Parse.initialize('integration');
       Parse.CoreManager.set('SERVER_URL', serverURL);
       Parse.CoreManager.set('MASTER_KEY', 'notsosecret');
-      const RESTController = Parse.CoreManager.getRESTController();
-      RESTController._setXHR(require('xmlhttprequest').XMLHttpRequest);
       Parse.enableLocalDatastore();
 
       const numbers = [];
