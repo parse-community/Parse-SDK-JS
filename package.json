@@ -35,7 +35,7 @@
     "idb-keyval": "6.2.1",
     "react-native-crypto-js": "1.0.0",
     "uuid": "10.0.0",
-    "ws": "8.18.1"
+    "ws": "8.18.2"
   },
   "devDependencies": {
     "@babel/core": "7.27.1",
