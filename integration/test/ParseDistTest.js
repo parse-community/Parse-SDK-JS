@@ -22,14 +22,14 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
     });
 
     it('can save an object', async () => {
-      const response = await page.evaluate(async () => {
+      const objectId = await page.evaluate(async () => {
         const object = await new Parse.Object('TestObject').save();
         return object.id;
       });
-      expect(response).toBeDefined();
-      const obj = await new Parse.Query('TestObject').first();
+      expect(objectId).toBeDefined();
+      const obj = await new Parse.Query('TestObject').get(objectId);
       expect(obj).toBeDefined();
-      expect(obj.id).toEqual(response);
+      expect(obj.id).toEqual(objectId);
     });
 
     it('can query an object', async () => {
