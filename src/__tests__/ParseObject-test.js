@@ -3532,4 +3532,14 @@ describe('ParseObject pin', () => {
     });
     CoreManager.set('ALLOW_CUSTOM_OBJECT_ID', false);
   });
+
+  it('can log an object', () => {
+    CoreManager.set('NODE_LOGGING', true);
+    const o = new ParseObject('Person', { foo: 'bar' });
+    const symbol = Symbol.for('nodejs.util.inspect.custom');
+    expect(o[symbol]()).toBe(
+      `ParseObject: className: Person, id: undefined\nAttributes: {\n  \"foo\": \"bar\"\n}`
+    );
+    CoreManager.set('NODE_LOGGING', false);
+  });
 });

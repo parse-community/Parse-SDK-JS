@@ -186,6 +186,13 @@ class ParseObject<T extends Attributes = Attributes> {
         throw new Error("Can't create an invalid Parse Object");
       }
     }
+    if (CoreManager.get('NODE_LOGGING')) {
+      this[Symbol.for('nodejs.util.inspect.custom')] = function () {
+        return `ParseObject: className: ${this.className}, id: ${
+          this.id
+        }\nAttributes: ${JSON.stringify(this.attributes, null, 2)}`;
+      };
+    }
   }
 
   /**

@@ -355,6 +355,7 @@ const config: Config & Record<string, any> = {
   IDEMPOTENCY: false,
   ALLOW_CUSTOM_OBJECT_ID: false,
   PARSE_ERRORS: [],
+  NODE_LOGGING: false,
 };
 
 function requireMethods(name: string, methods: string[], controller: any) {
