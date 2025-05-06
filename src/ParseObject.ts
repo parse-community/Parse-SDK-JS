@@ -186,6 +186,13 @@ class ParseObject<T extends Attributes = Attributes> {
         throw new Error("Can't create an invalid Parse Object");
       }
     }
+    if (CoreManager.get('NODE_LOGGING')) {
+      this[Symbol.for('nodejs.util.inspect.custom')] = function () {
+        return `ParseObject: className: ${this.className}, id: ${
+          this.id
+        }\nAttributes: ${JSON.stringify(this.attributes, null, 2)}`;
+      };
+    }
   }
 
   /**
@@ -2552,7 +2559,6 @@ const DefaultController = {
                     const status = responses[index]._status;
                     delete responses[index]._status;
                     delete responses[index]._headers;
-                    delete responses[index]._xhr;
                     mapIdForPin[objectId] = obj._localId;
                     obj._handleSaveResponse(responses[index].success, status);
                   } else {
@@ -2620,7 +2626,6 @@ const DefaultController = {
             const status = response._status;
             delete response._status;
             delete response._headers;
-            delete response._xhr;
             targetCopy._handleSaveResponse(response, status);
           },
           error => {

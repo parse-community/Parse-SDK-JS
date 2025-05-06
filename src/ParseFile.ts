@@ -1,16 +1,7 @@
-/* global XMLHttpRequest, Blob */
+/* global Blob */
 import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
 import ParseError from './ParseError';
-import XhrWeapp from './Xhr.weapp';
-
-let XHR: any = null;
-if (typeof XMLHttpRequest !== 'undefined') {
-  XHR = XMLHttpRequest;
-}
-if (process.env.PARSE_BUILD === 'weapp') {
-  XHR = XhrWeapp;
-}
 
 interface Base64 {
   base64: string;
@@ -155,18 +146,29 @@ class ParseFile {
    * Data is present if initialized with Byte Array, Base64 or Saved with Uri.
    * Data is cleared if saved with File object selected with a file upload control
    *
+   * @param {object} options
+   * @param {function} [options.progress] callback for download progress
+   * <pre>
+   * const parseFile = new Parse.File(name, file);
+   * parseFile.getData({
+   *   progress: (progressValue, loaded, total) => {
+   *     if (progressValue !== null) {
+   *       // Update the UI using progressValue
+   *     }
+   *   }
+   * });
+   * </pre>
    * @returns {Promise} Promise that is resolve with base64 data
    */
-  async getData(): Promise<string> {
+  async getData(options?: { progress?: () => void }): Promise<string> {
+    options = options || {};
     if (this._data) {
       return this._data;
     }
     if (!this._url) {
       throw new Error('Cannot retrieve data for unsaved ParseFile.');
     }
-    const options = {
-      requestTask: task => (this._requestTask = task),
-    };
+    (options as any).requestTask = task => (this._requestTask = task);
     const controller = CoreManager.getFileController();
     const result = await controller.download(this._url, options);
     this._data = result.base64;
@@ -231,12 +233,12 @@ class ParseFile {
    *     be used for this request.
    *   <li>sessionToken: A valid session token, used for making a request on
    *     behalf of a specific user.
-   *   <li>progress: In Browser only, callback for upload progress. For example:
+   *   <li>progress: callback for upload progress. For example:
    * <pre>
    * let parseFile = new Parse.File(name, file);
    * parseFile.save({
-   *   progress: (progressValue, loaded, total, { type }) => {
-   *     if (type === "upload" && progressValue !== null) {
+   *   progress: (progressValue, loaded, total) => {
+   *     if (progressValue !== null) {
    *       // Update the UI using progressValue
    *     }
    *   }
@@ -483,58 +485,50 @@ const DefaultController = {
     return CoreManager.getRESTController().request('POST', path, data, options);
   },
 
-  download: function (uri, options) {
-    if (XHR) {
-      return this.downloadAjax(uri, options);
-    } else if (process.env.PARSE_BUILD === 'node') {
-      return new Promise((resolve, reject) => {
-        const client = uri.indexOf('https') === 0 ? require('https') : require('http');
-        const req = client.get(uri, resp => {
-          resp.setEncoding('base64');
-          let base64 = '';
-          resp.on('data', data => (base64 += data));
-          resp.on('end', () => {
-            resolve({
-              base64,
-              contentType: resp.headers['content-type'],
-            });
-          });
-        });
-        req.on('abort', () => {
-          resolve({});
-        });
-        req.on('error', reject);
-        options.requestTask(req);
-      });
-    } else {
-      return Promise.reject('Cannot make a request: No definition of XMLHttpRequest was found.');
+  download: async function (uri, options) {
+    const controller = new AbortController();
+    options.requestTask(controller);
+    const { signal } = controller;
+    try {
+      const response = await fetch(uri, { signal });
+      const reader = response.body.getReader();
+      const length = +response.headers.get('Content-Length') || 0;
+      const contentType = response.headers.get('Content-Type');
+      if (length === 0) {
+        options.progress?.(null, null, null);
+        return {
+          base64: '',
+          contentType,
+        };
+      }
+      let recieved = 0;
+      const chunks = [];
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
+        chunks.push(value);
+        recieved += value?.length || 0;
+        options.progress?.(recieved / length, recieved, length);
+      }
+      const body = new Uint8Array(recieved);
+      let offset = 0;
+      for (const chunk of chunks) {
+        body.set(chunk, offset);
+        offset += chunk.length;
+      }
+      return {
+        base64: ParseFile.encodeBase64(body),
+        contentType,
+      };
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        return {};
+      } else {
+        throw error;
+      }
     }
-  },
-
-  downloadAjax: function (uri: string, options: any) {
-    return new Promise((resolve, reject) => {
-      const xhr = new XHR();
-      xhr.open('GET', uri, true);
-      xhr.responseType = 'arraybuffer';
-      xhr.onerror = function (e) {
-        reject(e);
-      };
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState !== xhr.DONE) {
-          return;
-        }
-        if (!this.response) {
-          return resolve({});
-        }
-        const bytes = new Uint8Array(this.response);
-        resolve({
-          base64: ParseFile.encodeBase64(bytes),
-          contentType: xhr.getResponseHeader('content-type'),
-        });
-      };
-      options.requestTask(xhr);
-      xhr.send();
-    });
   },
 
   deleteFile: function (name: string, options?: FullOptions) {
@@ -553,20 +547,12 @@ const DefaultController = {
       .ajax('DELETE', url, '', headers)
       .catch(response => {
         // TODO: return JSON object in server
-        if (!response || response === 'SyntaxError: Unexpected end of JSON input') {
+        if (!response || response.toString() === 'SyntaxError: Unexpected end of JSON input') {
           return Promise.resolve();
         } else {
           return CoreManager.getRESTController().handleError(response);
         }
       });
-  },
-
-  _setXHR(xhr: any) {
-    XHR = xhr;
-  },
-
-  _getXHR() {
-    return XHR;
   },
 };
 

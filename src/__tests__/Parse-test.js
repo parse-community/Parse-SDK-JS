@@ -206,6 +206,13 @@ describe('Parse module', () => {
     Parse.allowCustomObjectId = false;
   });
 
+  it('can set nodeLogging', () => {
+    expect(Parse.nodeLogging).toBe(false);
+    Parse.nodeLogging = true;
+    expect(CoreManager.get('NODE_LOGGING')).toBe(true);
+    Parse.nodeLogging = false;
+  });
+
   it('getServerHealth', () => {
     const controller = {
       request: jest.fn(),

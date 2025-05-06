@@ -27,7 +27,6 @@ jest.mock('../uuid', () => {
   return () => value++;
 });
 jest.dontMock('./test_helpers/flushPromises');
-jest.dontMock('./test_helpers/mockXHR');
 jest.dontMock('./test_helpers/mockAsyncStorage');
 
 const flushPromises = require('./test_helpers/flushPromises');

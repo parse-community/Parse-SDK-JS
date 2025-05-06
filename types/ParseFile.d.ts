@@ -75,9 +75,23 @@ declare class ParseFile {
      * Data is present if initialized with Byte Array, Base64 or Saved with Uri.
      * Data is cleared if saved with File object selected with a file upload control
      *
+     * @param {object} options
+     * @param {function} [options.progress] callback for download progress
+     * <pre>
+     * const parseFile = new Parse.File(name, file);
+     * parseFile.getData({
+     *   progress: (progressValue, loaded, total) => {
+     *     if (progressValue !== null) {
+     *       // Update the UI using progressValue
+     *     }
+     *   }
+     * });
+     * </pre>
      * @returns {Promise} Promise that is resolve with base64 data
      */
-    getData(): Promise<string>;
+    getData(options?: {
+        progress?: () => void;
+    }): Promise<string>;
     /**
      * Gets the name of the file. Before save is called, this is the filename
      * given by the user. After save is called, that name gets prefixed with a
@@ -118,12 +132,12 @@ declare class ParseFile {
      *     be used for this request.
      *   <li>sessionToken: A valid session token, used for making a request on
      *     behalf of a specific user.
-     *   <li>progress: In Browser only, callback for upload progress. For example:
+     *   <li>progress: callback for upload progress. For example:
      * <pre>
      * let parseFile = new Parse.File(name, file);
      * parseFile.save({
-     *   progress: (progressValue, loaded, total, { type }) => {
-     *     if (type === "upload" && progressValue !== null) {
+     *   progress: (progressValue, loaded, total) => {
+     *     if (progressValue !== null) {
      *       // Update the UI using progressValue
      *     }
      *   }

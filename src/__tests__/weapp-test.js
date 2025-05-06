@@ -43,16 +43,11 @@ describe('WeChat', () => {
   });
 
   it('load RESTController', () => {
-    const XHR = require('../Xhr.weapp').default;
+    const XHR = require('../Xhr.weapp');
+    jest.spyOn(XHR, 'polyfillFetch');
     const RESTController = require('../RESTController').default;
-    expect(RESTController._getXHR()).toEqual(XHR);
-  });
-
-  it('load ParseFile', () => {
-    const XHR = require('../Xhr.weapp').default;
-    require('../ParseFile');
-    const fileController = CoreManager.getFileController();
-    expect(fileController._getXHR()).toEqual(XHR);
+    expect(XHR.polyfillFetch).toHaveBeenCalled();
+    expect(RESTController).toBeDefined();
   });
 
   it('load WebSocketController', () => {

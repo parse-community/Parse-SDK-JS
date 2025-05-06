@@ -314,6 +314,28 @@ const Parse = {
     return CoreManager.get('ALLOW_CUSTOM_OBJECT_ID');
   },
 
+  /**
+   * Setting this property to `true` enables enhanced logging for `Parse.Object`
+   * in Node.js environments. Specifically, it will log:
+   *
+   * ```
+   * ParseObject: className: <CLASS_NAME>, id: <OBJECT_ID>
+   * Attributes: <OBJECT_ATTRIBUTES>
+   * ```
+   *
+   * @warning This should not be enabled in production environments as this may
+   * expose sensitive information in server logs.
+   *
+   * @property {boolean} Parse.nodeLogging
+   * @static
+   */
+  set nodeLogging(value) {
+    CoreManager.set('NODE_LOGGING', value);
+  },
+  get nodeLogging() {
+    return CoreManager.get('NODE_LOGGING');
+  },
+
   _request(...args) {
     return CoreManager.getRESTController().request.apply(null, args);
   },
