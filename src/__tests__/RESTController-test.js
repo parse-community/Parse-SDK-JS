@@ -434,3 +434,39 @@ describe('RESTController', () => {
     });
   });
 });
+  it('follows HTTP redirects for batch requests when using a custom SERVER_URL', async () => {
+    // Configure a reverse-proxy style SERVER_URL
+    CoreManager.set('SERVER_URL', 'http://test.host/api');
+
+    // Prepare a minimal batch payload
+    const batchData = {
+      requests: [{
+        method: 'POST',
+        path: '/classes/TestObject',
+        body: { foo: 'bar' }
+      }]
+    };
+
+    // First response: 301 redirect to /parse/batch; second: successful response
+    mockFetch(
+      [
+        { status: 301, response: {} },
+        { status: 200, response: { success: true } }
+      ],
+      { location: 'http://test.host/parse/batch' }
+    );
+
+    // Issue the batch request
+    const result = await RESTController.request('POST', 'batch', batchData);
+
+    // We expect two fetch calls: one to the original URL, then one to the Location header
+    expect(fetch.mock.calls.length).toBe(2);
+    expect(fetch.mock.calls[0][0]).toEqual('http://test.host/api/batch');
+    expect(fetch.mock.calls[1][0]).toEqual('http://test.host/parse/batch');
+
+    // The final result should be the JSON from the second (successful) response
+    expect(result).toEqual({ success: true });
+
+    // Clean up the custom SERVER_URL
+    CoreManager.set('SERVER_URL', undefined);
+  });
