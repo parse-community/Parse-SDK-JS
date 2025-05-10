@@ -1,5 +1,8 @@
 'use strict';
 
+const http = require('http');
+const Parse = require('../../node');
+
 describe('ParseServer', () => {
   it('can reconfigure server', async () => {
     let parseServer = await reconfigureServer({ serverURL: 'www.google.com' });
@@ -33,5 +36,22 @@ describe('ParseServer', () => {
     await reconfigureServer({});
     await object.save();
     expect(object.id).toBeDefined();
+  });
+
+  it('can forward redirect', async () => {
+    const serverURL = Parse.serverURL;
+    const redirectServer = http.createServer(function(_, res) {
+      res.writeHead(301, { Location: serverURL });
+      res.end();
+    }).listen(8080);
+    Parse.CoreManager.set('SERVER_URL', 'http://localhost:8080/api');
+    const object = new TestObject({ foo: 'bar' });
+    await object.save();
+    const query = new Parse.Query(TestObject);
+    const result = await query.get(object.id);
+    expect(result.id).toBe(object.id);
+    expect(result.get('foo')).toBe('bar');
+    Parse.serverURL = serverURL;
+    redirectServer.close();
   });
 });
