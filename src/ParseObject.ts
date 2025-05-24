@@ -514,6 +514,9 @@ class ParseObject<T extends Attributes = Attributes> {
 
   static _getRequestOptions(options: RequestOptions & FullOptions & { json?: boolean } = {}) {
     const requestOptions: RequestOptions & FullOptions & { json?: boolean } = {};
+    if (!options) {
+      return requestOptions;
+    }
     const { hasOwn } = Object;
     if (hasOwn(options, 'useMasterKey')) {
       requestOptions.useMasterKey = !!options.useMasterKey;
