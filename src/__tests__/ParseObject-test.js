@@ -3543,23 +3543,3 @@ describe('ParseObject pin', () => {
     CoreManager.set('NODE_LOGGING', false);
   });
 });
-
-describe('ParseObject._getRequestOptions', () => {
-  it('returns empty object when options is null', () => {
-    const requestOptions = ParseObject._getRequestOptions(null);
-
-    expect(requestOptions).toEqual({});
-  });
-
-  it('returns empty object when options is an empty string', () => {
-    const requestOptions = ParseObject._getRequestOptions("");
-
-    expect(requestOptions).toEqual({});
-  });
-
-  it('returns empty object when options is undefined', () => {
-    const requestOptions = ParseObject._getRequestOptions(undefined);
-
-    expect(requestOptions).toEqual({});
-  });
-});
