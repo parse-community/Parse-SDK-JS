@@ -45,6 +45,10 @@ Parse.Cloud.job('CloudJob2', function () {
   });
 });
 
+Parse.Cloud.job('CloudJobParamsInMessage', request => {
+  request.message(JSON.stringify(request.params));
+});
+
 Parse.Cloud.job('CloudJobFailing', function () {
   throw 'cloud job failed';
 });

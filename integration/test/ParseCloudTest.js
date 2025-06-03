@@ -94,12 +94,14 @@ describe('Parse Cloud', () => {
   });
 
   it('run job', async () => {
-    const jobStatusId = await Parse.Cloud.startJob('CloudJob1', {});
+    const params = { startedBy: 'Monty Python' };
+    const jobStatusId = await Parse.Cloud.startJob('CloudJobParamsInMessage', params);
     expect(jobStatusId).toBeDefined();
     await waitForJobStatus(jobStatusId, 'succeeded');
 
     const jobStatus = await Parse.Cloud.getJobStatus(jobStatusId);
-    assert.equal(jobStatus.get('status'), 'succeeded');
+    expect(jobStatus.get('status')).toBe('succeeded');
+    expect(JSON.parse(jobStatus.get('message'))).toEqual(params);
   });
 
   it('run long job', async () => {
