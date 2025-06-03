@@ -137,7 +137,7 @@ describe('Parse Cloud', () => {
   it('get jobs data', done => {
     Parse.Cloud.getJobsData().then(result => {
       assert.equal(result.in_use.length, 0);
-      assert.equal(result.jobs.length, 3);
+      assert.equal(result.jobs.length, 4);
       done();
     });
   });
