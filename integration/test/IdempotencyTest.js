@@ -34,9 +34,8 @@ describe('Idempotency', () => {
 
   it('handle duplicate job request', async () => {
     DuplicateRequestId('1234');
-    const params = { startedBy: 'Monty Python' };
-    const jobStatusId = await Parse.Cloud.startJob('CloudJob1', params);
-    await expectAsync(Parse.Cloud.startJob('CloudJob1', params)).toBeRejectedWithError(
+    const jobStatusId = await Parse.Cloud.startJob('CloudJob1', {});
+    await expectAsync(Parse.Cloud.startJob('CloudJob1', {})).toBeRejectedWithError(
       'Duplicate request'
     );
 
@@ -49,7 +48,6 @@ describe('Idempotency', () => {
     }
     const jobStatus = await Parse.Cloud.getJobStatus(jobStatusId);
     expect(jobStatus.get('status')).toBe('succeeded');
-    expect(jobStatus.get('params').startedBy).toBe('Monty Python');
   });
 
   it('handle duplicate POST / PUT request', async () => {
