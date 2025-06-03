@@ -356,6 +356,7 @@ describe('CloudController', () => {
     });
     expect(options.useMasterKey).toBe(false);
   });
+
   it('run passes with empty options', () => {
     const values = [undefined, {}];
 
