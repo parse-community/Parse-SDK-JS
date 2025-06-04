@@ -356,4 +356,30 @@ describe('CloudController', () => {
     });
     expect(options.useMasterKey).toBe(false);
   });
+
+  it('run passes with empty options', () => {
+    const values = [undefined, {}];
+
+    const mockRun = jest.fn();
+    mockRun.mockReturnValue(Promise.resolve({ result: {} }));
+
+    CoreManager.setCloudController({
+      run: mockRun,
+      getJobsData: jest.fn(),
+      startJob: jest.fn(),
+    });
+
+    for (const value of values) {
+      mockRun.mockClear();
+      expect(() => Cloud.run('myfunction', {}, value)).not.toThrow();
+      expect(mockRun).toHaveBeenLastCalledWith('myfunction', {}, {});
+    }
+  });
+
+  it('run throws with invalid options', () => {
+    const values = [null, []];
+    for (const value of values) {
+      expect(() => Cloud.run('myfunction', {}, value)).toThrow();
+    }
+  });
 });

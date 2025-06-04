@@ -74,7 +74,7 @@ const defaultConfiguration = {
     },
   },
   idempotencyOptions: {
-    paths: ['functions/CloudFunctionIdempotency', 'jobs/CloudJob1', 'classes/IdempotentTest'],
+    paths: ['functions/CloudFunctionIdempotency', 'jobs/CloudJob1', 'jobs/CloudJobParamsInMessage', 'classes/IdempotentTest'],
     ttl: 120,
   },
   fileUpload: {
