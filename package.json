@@ -61,7 +61,7 @@
     "codecov": "3.8.3",
     "core-js": "3.42.0",
     "cross-env": "7.0.2",
-    "eslint": "9.27.0",
+    "eslint": "9.28.0",
     "eslint-plugin-expect-type": "0.6.2",
     "eslint-plugin-jsdoc": "50.7.1",
     "express": "5.1.0",
