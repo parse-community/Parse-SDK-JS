@@ -65,7 +65,7 @@
     "eslint-plugin-expect-type": "0.6.2",
     "eslint-plugin-jsdoc": "50.7.1",
     "express": "5.1.0",
-    "gulp": "5.0.0",
+    "gulp": "5.0.1",
     "gulp-babel": "8.0.0",
     "gulp-watch": "5.0.1",
     "jasmine": "5.7.1",
