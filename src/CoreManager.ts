@@ -339,8 +339,6 @@ const config: Config & Record<string, any> = {
   REQUEST_BATCH_SIZE: 20,
   REQUEST_HEADERS: {},
   SERVER_URL: 'https://api.parse.com/1',
-  SERVER_AUTH_TYPE: null,
-  SERVER_AUTH_TOKEN: null,
   LIVEQUERY_SERVER_URL: null,
   ENCRYPTED_KEY: null,
   VERSION: 'js' + process.env.npm_package_version,

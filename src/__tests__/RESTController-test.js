@@ -369,16 +369,6 @@ describe('RESTController', () => {
     }).toThrow('Cannot use the Master Key, it has not been provided.');
   });
 
-  it('sends auth header when the auth type and token flags are set', async () => {
-    CoreManager.set('SERVER_AUTH_TYPE', 'Bearer');
-    CoreManager.set('SERVER_AUTH_TOKEN', 'some_random_token');
-    mockFetch([{ status: 200, response: { results: [] } }]);
-    await RESTController.request('GET', 'classes/MyObject', {}, {});
-    expect(fetch.mock.calls[0][1].headers['Authorization']).toEqual('Bearer some_random_token');
-    CoreManager.set('SERVER_AUTH_TYPE', null);
-    CoreManager.set('SERVER_AUTH_TOKEN', null);
-  });
-
   it('reports upload/download progress of the AJAX request when callback is provided', async () => {
     mockFetch([{ status: 200, response: { success: true } }], { 'Content-Length': 10 });
     const options = {

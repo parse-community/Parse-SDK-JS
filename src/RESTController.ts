@@ -132,10 +132,6 @@ const RESTController = {
       if (isIdempotent) {
         headers['X-Parse-Request-Id'] = requestId;
       }
-      if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
-        headers['Authorization'] =
-          CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
-      }
       const customHeaders = CoreManager.get('REQUEST_HEADERS');
       for (const key in customHeaders) {
         headers[key] = customHeaders[key];

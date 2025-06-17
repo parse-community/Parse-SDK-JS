@@ -283,16 +283,6 @@ declare const Parse: {
      */
     serverURL: any;
     /**
-     * @property {string} Parse.serverAuthToken
-     * @static
-     */
-    serverAuthToken: any;
-    /**
-     * @property {string} Parse.serverAuthType
-     * @static
-     */
-    serverAuthType: any;
-    /**
      * @property {ParseLiveQuery} Parse.LiveQuery
      * @static
      */
