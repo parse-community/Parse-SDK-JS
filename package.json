@@ -72,7 +72,7 @@
     "jasmine-reporters": "2.5.2",
     "jasmine-spec-reporter": "7.0.0",
     "jest": "29.7.0",
-    "jest-environment-jsdom": "29.7.0",
+    "jest-environment-jsdom": "30.0.4",
     "jsdoc": "4.0.4",
     "jsdoc-babel": "0.5.0",
     "lint-staged": "16.1.2",
