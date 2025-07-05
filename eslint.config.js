@@ -70,7 +70,19 @@ module.exports = tseslint.config({
           "AuthProvider",
           "AsyncStorage",
           "LocalDatastoreController",
-          "Parse"
+          "Parse",
+          "Parse.ACL",
+          "Parse.CLP",
+          "Parse.Error",
+          "Parse.File",
+          "Parse.GeoPoint",
+          "Parse.Object",
+          "Parse.Op",
+          "Parse.Query",
+          "Parse.Relation",
+          "Parse.Role",
+          "Parse.User",
+          "Parse.setAsyncStorage"
         ]
       }
     ]
