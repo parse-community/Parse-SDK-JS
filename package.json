@@ -83,7 +83,7 @@
     "puppeteer": "24.13.0",
     "regenerator-runtime": "0.14.1",
     "semantic-release": "24.2.6",
-    "typescript-eslint": "8.36.0",
+    "typescript-eslint": "8.37.0",
     "vite": "6.3.4",
     "vite-plugin-commonjs": "0.10.4",
     "vite-plugin-node-polyfills": "0.24.0"
