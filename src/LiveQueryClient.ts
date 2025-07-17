@@ -183,8 +183,8 @@ class LiveQueryClient {
    * <a href="https://github.com/parse-community/parse-server/wiki/Parse-LiveQuery-Protocol-Specification">here</a> for more details. The subscription you get is the same subscription you get
    * from our Standard API.
    *
-   * @param {ParseQuery} query - the ParseQuery you want to subscribe to
-   * @param {string} sessionToken (optional)
+   * @param {ParseQuery} query The `Parse.Query` to subscribe to.
+   * @param {string} [sessionToken] Optional session token to use for the subscription.
    * @returns {LiveQuerySubscription | undefined}
    */
   subscribe(query: ParseQuery, sessionToken?: string): LiveQuerySubscription | undefined {
