@@ -196,6 +196,7 @@ class LiveQueryClient {
     const where = queryJSON.where;
     const keys = queryJSON.keys?.split(',');
     const watch = queryJSON.watch?.split(',');
+    const include = queryJSON.include?.split(',');
     const subscribeRequest = {
       op: OP_TYPES.SUBSCRIBE,
       requestId: this.requestId,
@@ -204,6 +205,7 @@ class LiveQueryClient {
         where,
         keys,
         watch,
+        include,
       },
       sessionToken: undefined as string | undefined,
     };
@@ -294,6 +296,7 @@ class LiveQueryClient {
       const where = queryJSON.where;
       const keys = queryJSON.keys?.split(',');
       const watch = queryJSON.watch?.split(',');
+      const include = queryJSON.include?.split(',');
       const className = query.className;
       const sessionToken = subscription.sessionToken;
       const subscribeRequest = {
@@ -304,6 +307,7 @@ class LiveQueryClient {
           where,
           keys,
           watch,
+          include,
         },
         sessionToken: undefined as string | undefined,
       };
