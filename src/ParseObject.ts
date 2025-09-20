@@ -1250,7 +1250,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetch(options: FetchOptions): Promise<this> {
+  fetch(options?: FetchOptions): Promise<this> {
     const fetchOptions = ParseObject._getRequestOptions(options);
     const controller = CoreManager.getObjectController();
     return controller.fetch(this, true, fetchOptions) as Promise<this>;
