@@ -448,7 +448,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @returns {Promise} A promise that is fulfilled when the fetch
      *     completes.
      */
-    fetch(options: FetchOptions): Promise<this>;
+    fetch(options?: FetchOptions): Promise<this>;
     /**
      * Fetch the model from the server. If the server's representation of the
      * model differs from its current attributes, they will be overriden.
