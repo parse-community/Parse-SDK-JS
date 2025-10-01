@@ -92,6 +92,7 @@ class LiveQuerySubscription {
   subscribePromise: any;
   unsubscribePromise: any;
   subscribed: boolean;
+  client: any;
   emitter: EventEmitter;
   on: EventEmitter['on'];
   emit: EventEmitter['emit'];
@@ -99,11 +100,13 @@ class LiveQuerySubscription {
    * @param {string | number} id - subscription id
    * @param {string} query - query to subscribe to
    * @param {string} sessionToken - optional session token
+   * @param {object} client - LiveQueryClient instance
    */
-  constructor(id: string | number, query: ParseQuery, sessionToken?: string) {
+  constructor(id: string | number, query: ParseQuery, sessionToken?: string, client?: any) {
     this.id = id;
     this.query = query;
     this.sessionToken = sessionToken;
+    this.client = client;
     this.subscribePromise = resolvingPromise();
     this.unsubscribePromise = resolvingPromise();
     this.subscribed = false;
@@ -129,6 +132,21 @@ class LiveQuerySubscription {
         this.emit('close');
         return liveQueryClient.unsubscribe(this);
       });
+  }
+
+  /**
+   * Execute a query on this subscription.
+   * The results will be delivered via the 'result' event.
+   */
+  find() {
+    if (this.client) {
+      this.client.connectPromise.then(() => {
+        this.client.socket.send(JSON.stringify({
+          op: 'query',
+          requestId: this.id,
+        }));
+      });
+    }
   }
 }
 

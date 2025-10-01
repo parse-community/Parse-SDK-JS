@@ -21,6 +21,7 @@ const OP_TYPES = {
   SUBSCRIBE: 'subscribe',
   UNSUBSCRIBE: 'unsubscribe',
   ERROR: 'error',
+  QUERY: 'query',
 };
 
 // The event we get back from LiveQuery server
@@ -34,6 +35,7 @@ const OP_EVENTS = {
   ENTER: 'enter',
   LEAVE: 'leave',
   DELETE: 'delete',
+  RESULT: 'result',
 };
 
 // The event the LiveQuery client should emit
@@ -53,6 +55,7 @@ const SUBSCRIPTION_EMMITER_TYPES = {
   ENTER: 'enter',
   LEAVE: 'leave',
   DELETE: 'delete',
+  RESULT: 'result',
 };
 
 // Exponentially-growing random delay
@@ -212,7 +215,7 @@ class LiveQueryClient {
       subscribeRequest.sessionToken = sessionToken;
     }
 
-    const subscription = new LiveQuerySubscription(this.requestId, query, sessionToken);
+    const subscription = new LiveQuerySubscription(this.requestId, query, sessionToken, this);
     this.subscriptions.set(this.requestId, subscription);
     this.requestId += 1;
     this.connectPromise
@@ -422,6 +425,13 @@ class LiveQueryClient {
           this.subscriptions.delete(data.requestId);
           subscription.subscribed = false;
           subscription.unsubscribePromise.resolve();
+        }
+        break;
+      }
+      case OP_EVENTS.RESULT: {
+        if (subscription) {
+          const objects = data.results.map(json => ParseObject.fromJSON(json, false));
+          subscription.emit(SUBSCRIPTION_EMMITER_TYPES.RESULT, objects);
         }
         break;
       }
