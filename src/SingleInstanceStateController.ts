@@ -1,10 +1,17 @@
-import * as ObjectStateMutations from './ObjectStateMutations';
+import * as ObjectStateMutations from "./ObjectStateMutations";
 
-import type { Op } from './ParseOp';
-import type ParseObject from './ParseObject';
-import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
+import type { Op } from "./ParseOp";
+import type ParseObject from "./ParseObject";
+import type {
+  AttributeMap,
+  ObjectCache,
+  OpsMap,
+  State,
+} from "./ObjectStateMutations";
 
-let objectState: Record<string, Record<string, State>> = {};
+// Use Object.create(null) to create an object without prototype chain
+// This prevents prototype pollution attacks
+let objectState: Record<string, Record<string, State>> = Object.create(null);
 
 export function getState(obj: ParseObject): State | null {
   const classData = objectState[obj.className];
@@ -20,7 +27,8 @@ export function initializeState(obj: ParseObject, initial?: State): State {
     return state;
   }
   if (!objectState[obj.className]) {
-    objectState[obj.className] = {};
+    // Use Object.create(null) for nested objects too
+    objectState[obj.className] = Object.create(null);
   }
   if (!initial) {
     initial = ObjectStateMutations.defaultState();
@@ -90,7 +98,12 @@ export function getObjectCache(obj: ParseObject): ObjectCache {
 export function estimateAttribute(obj: ParseObject, attr: string): any {
   const serverData = getServerData(obj);
   const pendingOps = getPendingOps(obj);
-  return ObjectStateMutations.estimateAttribute(serverData, pendingOps, obj, attr);
+  return ObjectStateMutations.estimateAttribute(
+    serverData,
+    pendingOps,
+    obj,
+    attr
+  );
 }
 
 export function estimateAttributes(obj: ParseObject): AttributeMap {
@@ -101,16 +114,23 @@ export function estimateAttributes(obj: ParseObject): AttributeMap {
 
 export function commitServerChanges(obj: ParseObject, changes: AttributeMap) {
   const state = initializeState(obj);
-  ObjectStateMutations.commitServerChanges(state.serverData, state.objectCache, changes);
+  ObjectStateMutations.commitServerChanges(
+    state.serverData,
+    state.objectCache,
+    changes
+  );
 }
 
-export function enqueueTask(obj: ParseObject, task: () => Promise<any>): Promise<void> {
+export function enqueueTask(
+  obj: ParseObject,
+  task: () => Promise<any>
+): Promise<void> {
   const state = initializeState(obj);
   return state.tasks.enqueue(task);
 }
 
 export function clearAllState() {
-  objectState = {};
+  objectState = Object.create(null);
 }
 
 export function duplicateState(source: { id: string }, dest: { id: string }) {
