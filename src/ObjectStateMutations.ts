@@ -19,11 +19,29 @@ export interface State {
   existed: boolean;
 }
 
+/**
+ * Check if a property name or path is potentially dangerous for prototype pollution
+ * @param key
+ */
+function isDangerousKey(key: string): boolean {
+  const dangerousKeys = ["__proto__", "constructor", "prototype"];
+  // Check if the key itself is dangerous
+  if (dangerousKeys.includes(key)) {
+    return true;
+  }
+  // Check if any part of a dotted path is dangerous
+  if (key.includes(".")) {
+    const parts = key.split(".");
+    return parts.some((part) => dangerousKeys.includes(part));
+  }
+  return false;
+}
+
 export function defaultState(): State {
   return {
-    serverData: {},
-    pendingOps: [{}],
-    objectCache: {},
+    serverData: Object.create(null),
+    pendingOps: [Object.create(null)],
+    objectCache: Object.create(null),
     tasks: new TaskQueue(),
     existed: false,
   };
@@ -31,7 +49,15 @@ export function defaultState(): State {
 
 export function setServerData(serverData: AttributeMap, attributes: AttributeMap) {
   for (const attr in attributes) {
-    if (typeof attributes[attr] !== 'undefined') {
+    // Skip properties from prototype chain
+    if (!Object.prototype.hasOwnProperty.call(attributes, attr)) {
+      continue;
+    }
+    // Skip dangerous keys that could pollute prototypes
+    if (isDangerousKey(attr)) {
+      continue;
+    }
+    if (typeof attributes[attr] !== "undefined") {
       serverData[attr] = attributes[attr];
     } else {
       delete serverData[attr];
@@ -40,6 +66,10 @@ export function setServerData(serverData: AttributeMap, attributes: AttributeMap
 }
 
 export function setPendingOp(pendingOps: OpsMap[], attr: string, op?: Op) {
+  // Skip dangerous keys that could pollute prototypes
+  if (isDangerousKey(attr)) {
+    return;
+  }
   const last = pendingOps.length - 1;
   if (op) {
     pendingOps[last][attr] = op;
@@ -49,13 +79,13 @@ export function setPendingOp(pendingOps: OpsMap[], attr: string, op?: Op) {
 }
 
 export function pushPendingState(pendingOps: OpsMap[]) {
-  pendingOps.push({});
+  pendingOps.push(Object.create(null));
 }
 
 export function popPendingState(pendingOps: OpsMap[]): OpsMap {
   const first = pendingOps.shift();
   if (!pendingOps.length) {
-    pendingOps[0] = {};
+    pendingOps[0] = Object.create(null);
   }
   return first;
 }
@@ -64,6 +94,14 @@ export function mergeFirstPendingState(pendingOps: OpsMap[]) {
   const first = popPendingState(pendingOps);
   const next = pendingOps[0];
   for (const attr in first) {
+    // Skip properties from prototype chain
+    if (!Object.prototype.hasOwnProperty.call(first, attr)) {
+      continue;
+    }
+    // Skip dangerous keys that could pollute prototypes
+    if (isDangerousKey(attr)) {
+      continue;
+    }
     if (next[attr] && first[attr]) {
       const merged = next[attr].mergeWith(first[attr]);
       if (merged) {
@@ -81,6 +119,10 @@ export function estimateAttribute(
   object: ParseObject,
   attr: string
 ): any {
+  // Skip dangerous keys that could pollute prototypes
+  if (isDangerousKey(attr)) {
+    return undefined;
+  }
   let value = serverData[attr];
   for (let i = 0; i < pendingOps.length; i++) {
     if (pendingOps[i][attr]) {
@@ -101,13 +143,21 @@ export function estimateAttributes(
   pendingOps: OpsMap[],
   object: ParseObject
 ): AttributeMap {
-  const data = {};
+  const data = Object.create(null);
   let attr;
   for (attr in serverData) {
     data[attr] = serverData[attr];
   }
   for (let i = 0; i < pendingOps.length; i++) {
     for (attr in pendingOps[i]) {
+      // Skip properties from prototype chain
+      if (!Object.prototype.hasOwnProperty.call(pendingOps[i], attr)) {
+        continue;
+      }
+      // Skip dangerous keys that could pollute prototypes
+      if (isDangerousKey(attr)) {
+        continue;
+      }
       if (pendingOps[i][attr] instanceof RelationOp) {
         if (object.id) {
           data[attr] = (pendingOps[i][attr] as RelationOp).applyTo(data[attr], object, attr);
@@ -125,7 +175,7 @@ export function estimateAttributes(
               if (!isNaN(nextKey)) {
                 object[key] = [];
               } else {
-                object[key] = {};
+                object[key] = Object.create(null);
               }
             } else {
               if (Array.isArray(object[key])) {
@@ -165,7 +215,7 @@ function nestedSet(obj, key, value) {
       if (!isNaN(nextPath)) {
         obj[path] = [];
       } else {
-        obj[path] = {};
+        obj[path] = Object.create(null);
       }
     }
     obj = obj[path];
@@ -184,6 +234,14 @@ export function commitServerChanges(
 ) {
   const ParseObject = CoreManager.getParseObject();
   for (const attr in changes) {
+    // Skip properties from prototype chain
+    if (!Object.prototype.hasOwnProperty.call(changes, attr)) {
+      continue;
+    }
+    // Skip dangerous keys that could pollute prototypes
+    if (isDangerousKey(attr)) {
+      continue;
+    }
     const val = changes[attr];
     nestedSet(serverData, attr, val);
     if (
