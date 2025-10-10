@@ -49,7 +49,9 @@ export default function decode(value: any): any {
   }
   const copy = {};
   for (const k in value) {
-    copy[k] = decode(value[k]);
+    if (Object.prototype.hasOwnProperty.call(value, k)) {
+      copy[k] = decode(value[k]);
+    }
   }
   return copy;
 }

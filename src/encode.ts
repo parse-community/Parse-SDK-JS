@@ -71,7 +71,10 @@ function encode(
   if (value && typeof value === 'object') {
     const output = {};
     for (const k in value) {
-      output[k] = encode(value[k], disallowObjects, forcePointers, seen, offline);
+      // Only iterate over own properties
+      if (Object.prototype.hasOwnProperty.call(value, k)) {
+        output[k] = encode(value[k], disallowObjects, forcePointers, seen, offline);
+      }
     }
     return output;
   }
