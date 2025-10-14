@@ -25,6 +25,7 @@ jobs:
           GH_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Determine tag on current commit
         id: tag
         run: echo "::set-output name=current_tag::$(git describe --tags --abbrev=0 --exact-match || echo '')"
