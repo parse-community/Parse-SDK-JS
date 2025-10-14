@@ -1,6 +1,6 @@
-import type { Op } from './ParseOp';
-import type ParseObject from './ParseObject';
-import type { AttributeMap, ObjectCache, OpsMap, State } from './ObjectStateMutations';
+import type { Op } from "./ParseOp";
+import type ParseObject from "./ParseObject";
+import type { AttributeMap, ObjectCache, OpsMap, State } from "./ObjectStateMutations";
 export declare function getState(obj: ParseObject): State | null;
 export declare function initializeState(obj: ParseObject, initial?: State): State;
 export declare function removeState(obj: ParseObject): State | null;
