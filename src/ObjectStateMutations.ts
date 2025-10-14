@@ -6,6 +6,7 @@ import TaskQueue from './TaskQueue';
 import { RelationOp } from './ParseOp';
 import type { Op } from './ParseOp';
 import type ParseObject from './ParseObject';
+import { isDangerousKey } from "./isDangerousKey";
 
 export type AttributeMap = Record<string, any>;
 export type OpsMap = Record<string, Op>;
@@ -17,24 +18,6 @@ export interface State {
   objectCache: ObjectCache;
   tasks: TaskQueue;
   existed: boolean;
-}
-
-/**
- * Check if a property name or path is potentially dangerous for prototype pollution
- * @param key
- */
-function isDangerousKey(key: string): boolean {
-  const dangerousKeys = ["__proto__", "constructor", "prototype"];
-  // Check if the key itself is dangerous
-  if (dangerousKeys.includes(key)) {
-    return true;
-  }
-  // Check if any part of a dotted path is dangerous
-  if (key.includes(".")) {
-    const parts = key.split(".");
-    return parts.some((part) => dangerousKeys.includes(part));
-  }
-  return false;
 }
 
 export function defaultState(): State {

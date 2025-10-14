@@ -1,5 +1,6 @@
 jest.dontMock('../decode');
 jest.dontMock('../CoreManager');
+jest.dontMock('../isDangerousKey');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseObject');

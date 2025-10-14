@@ -3,6 +3,7 @@ import ParseFile from './ParseFile';
 import ParseGeoPoint from './ParseGeoPoint';
 import ParsePolygon from './ParsePolygon';
 import ParseRelation from './ParseRelation';
+import { isDangerousKey } from "./isDangerousKey";
 
 export default function decode(value: any): any {
   if (value === null || typeof value !== 'object' || value instanceof Date) {
@@ -50,6 +51,10 @@ export default function decode(value: any): any {
   const copy = {};
   for (const k in value) {
     if (Object.prototype.hasOwnProperty.call(value, k)) {
+      // Skip dangerous keys that could pollute prototypes
+      if (isDangerousKey(k)) {
+        continue;
+      }
       copy[k] = decode(value[k]);
     }
   }

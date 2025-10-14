@@ -4,6 +4,7 @@ import ParseFile from './ParseFile';
 import ParseGeoPoint from './ParseGeoPoint';
 import ParsePolygon from './ParsePolygon';
 import ParseRelation from './ParseRelation';
+import { isDangerousKey } from "./isDangerousKey";
 
 function encode(
   value: any,
@@ -73,7 +74,17 @@ function encode(
     for (const k in value) {
       // Only iterate over own properties
       if (Object.prototype.hasOwnProperty.call(value, k)) {
-        output[k] = encode(value[k], disallowObjects, forcePointers, seen, offline);
+        // Skip dangerous keys that could pollute prototypes
+        if (isDangerousKey(k)) {
+          continue;
+        }
+        output[k] = encode(
+          value[k],
+          disallowObjects,
+          forcePointers,
+          seen,
+          offline
+        );
       }
     }
     return output;

@@ -1,6 +1,7 @@
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../CoreManager');
+jest.dontMock('../isDangerousKey');
 jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
@@ -11,7 +12,7 @@ jest.dontMock('../TaskQueue');
 const mockObject = function (className) {
   this.className = className;
 };
-mockObject.registerSubclass = function () {};
+mockObject.registerSubclass = function () { };
 jest.setMock('../ParseObject', mockObject);
 const CoreManager = require('../CoreManager').default;
 CoreManager.setParseObject(mockObject);
