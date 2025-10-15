@@ -25,7 +25,12 @@ function mockFetch(results, headers = {}, error) {
       },
       headers: {
         get: header => headers[header],
-        has: header => headers[header] !== undefined,
+        has: header => {
+          if (header === '') {
+            throw new TypeError('Headers.has: "" is an invalid header name.');
+          }
+          return headers[header] !== undefined;
+        },
       },
       body: {
         getReader: () => ({
