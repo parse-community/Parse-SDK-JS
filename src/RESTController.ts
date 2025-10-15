@@ -214,7 +214,8 @@ const RESTController = {
             promise.reject('Unable to connect to the Parse API');
           } else {
             // After the retry limit is reached, fail
-            promise.reject(response);
+            const error = await response.json();
+            promise.reject(error);
           }
         } else {
           promise.reject(response);
