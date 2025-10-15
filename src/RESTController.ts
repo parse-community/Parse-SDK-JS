@@ -158,7 +158,7 @@ const RESTController = {
           const responseHeaders = {};
           const availableHeaders = response.headers.get('access-control-expose-headers') || '';
           availableHeaders.split(', ').forEach((header: string) => {
-            if (response.headers.has(header)) {
+            if (header && response.headers.has(header)) {
               responseHeaders[header] = response.headers.get(header);
             }
           });
