@@ -1,3 +1,10 @@
+## [7.0.1](https://github.com/parse-community/Parse-SDK-JS/compare/7.0.0...7.0.1) (2025-10-15)
+
+
+### Bug Fixes
+
+* Returned error for 5xx server response has incorrect format ([#2755](https://github.com/parse-community/Parse-SDK-JS/issues/2755)) ([16a34d9](https://github.com/parse-community/Parse-SDK-JS/commit/16a34d9adaa83c8b019e1d02b695f099383915c6))
+
 # [7.0.0](https://github.com/parse-community/Parse-SDK-JS/compare/6.1.1...7.0.0) (2025-10-14)
 
 
