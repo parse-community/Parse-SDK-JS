@@ -55,6 +55,20 @@ describe('RESTController', () => {
     expect(status).toBe(200);
   });
 
+  it('resolves without error when access-control-expose-headers header is missing', async () => {
+    mockFetch([{ status: 200, response: { success: true } }], {});
+    const { response, status } = await RESTController.ajax('POST', 'users', {});
+    expect(response).toEqual({ success: true });
+    expect(status).toBe(200);
+  });
+
+  it('resolves without error when access-control-expose-headers header is empty', async () => {
+    mockFetch([{ status: 200, response: { success: true } }], { 'access-control-expose-headers': '' });
+    const { response, status } = await RESTController.ajax('POST', 'users', {});
+    expect(response).toEqual({ success: true });
+    expect(status).toBe(200);
+  });
+
   it('retries on 5XX errors', async () => {
     mockFetch([{ status: 500 }, { status: 500 }, { status: 200, response: { success: true } }])
     const { response, status } = await RESTController.ajax('POST', 'users', {});
