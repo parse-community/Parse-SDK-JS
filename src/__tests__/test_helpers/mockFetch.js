@@ -27,7 +27,7 @@ function mockFetch(results, headers = {}, error) {
         get: header => headers[header],
         has: header => {
           if (header === '') {
-            throw new TypeError('Invalid empty header name.');
+            throw new TypeError('Headers.has: "" is an invalid header name.');
           }
           return headers[header] !== undefined;
         },
