@@ -132,10 +132,6 @@ const RESTController = {
       if (isIdempotent) {
         headers['X-Parse-Request-Id'] = requestId;
       }
-      if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
-        headers['Authorization'] =
-          CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
-      }
       const customHeaders = CoreManager.get('REQUEST_HEADERS');
       for (const key in customHeaders) {
         headers[key] = customHeaders[key];
@@ -162,7 +158,7 @@ const RESTController = {
           const responseHeaders = {};
           const availableHeaders = response.headers.get('access-control-expose-headers') || '';
           availableHeaders.split(', ').forEach((header: string) => {
-            if (response.headers.has(header)) {
+            if (header && response.headers.has(header)) {
               responseHeaders[header] = response.headers.get(header);
             }
           });
@@ -218,7 +214,8 @@ const RESTController = {
             promise.reject('Unable to connect to the Parse API');
           } else {
             // After the retry limit is reached, fail
-            promise.reject(response);
+            const error = await response.json();
+            promise.reject(error);
           }
         } else {
           promise.reject(response);

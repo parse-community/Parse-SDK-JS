@@ -69,16 +69,6 @@ describe('Parse module', () => {
     expect(Parse.liveQueryServerURL).toBe('https://example.com');
   });
 
-  it('can set auth type and token', () => {
-    Parse.serverAuthType = 'bearer';
-    expect(CoreManager.get('SERVER_AUTH_TYPE')).toBe('bearer');
-    expect(Parse.serverAuthType).toBe('bearer');
-
-    Parse.serverAuthToken = 'some_token';
-    expect(CoreManager.get('SERVER_AUTH_TOKEN')).toBe('some_token');
-    expect(Parse.serverAuthToken).toBe('some_token');
-  });
-
   it('can set idempotency', () => {
     expect(Parse.idempotency).toBe(false);
     Parse.idempotency = true;

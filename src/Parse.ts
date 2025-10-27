@@ -227,28 +227,6 @@ const Parse = {
   },
 
   /**
-   * @property {string} Parse.serverAuthToken
-   * @static
-   */
-  set serverAuthToken(value) {
-    CoreManager.set('SERVER_AUTH_TOKEN', value);
-  },
-  get serverAuthToken() {
-    return CoreManager.get('SERVER_AUTH_TOKEN');
-  },
-
-  /**
-   * @property {string} Parse.serverAuthType
-   * @static
-   */
-  set serverAuthType(value) {
-    CoreManager.set('SERVER_AUTH_TYPE', value);
-  },
-  get serverAuthType() {
-    return CoreManager.get('SERVER_AUTH_TYPE');
-  },
-
-  /**
    * @property {ParseLiveQuery} Parse.LiveQuery
    * @static
    */

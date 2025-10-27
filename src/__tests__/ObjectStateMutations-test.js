@@ -1,6 +1,7 @@
 jest.dontMock('../decode');
 jest.dontMock('../encode');
 jest.dontMock('../CoreManager');
+jest.dontMock('../isDangerousKey');
 jest.dontMock('../ObjectStateMutations');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
@@ -11,7 +12,7 @@ jest.dontMock('../TaskQueue');
 const mockObject = function (className) {
   this.className = className;
 };
-mockObject.registerSubclass = function () {};
+mockObject.registerSubclass = function () { };
 jest.setMock('../ParseObject', mockObject);
 const CoreManager = require('../CoreManager').default;
 CoreManager.setParseObject(mockObject);
@@ -349,6 +350,58 @@ describe('ObjectStateMutations', () => {
       objectCache: {},
       tasks: new TaskQueue(),
       existed: false,
+    });
+  });
+
+  describe('Prototype Pollution Protection', () => {
+    beforeEach(() => {
+      // Clear any pollution before each test
+      delete Object.prototype.polluted;
+      delete Object.prototype.malicious;
+    });
+
+    afterEach(() => {
+      // Clean up after tests
+      delete Object.prototype.polluted;
+      delete Object.prototype.malicious;
+    });
+
+    it('should not pollute Object.prototype in estimateAttributes with malicious attribute names', () => {
+      const testObj = {};
+
+      const serverData = {};
+      const pendingOps = [
+        {
+          __proto__: new ParseOps.SetOp({ polluted: 'yes' }),
+          constructor: new ParseOps.SetOp({ malicious: 'data' }),
+        },
+      ];
+
+      ObjectStateMutations.estimateAttributes(serverData, pendingOps, {
+        className: 'TestClass',
+        id: 'test123',
+      });
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect(testObj.malicious).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect({}.malicious).toBeUndefined();
+    });
+
+    it('should not pollute Object.prototype in commitServerChanges with nested __proto__ path', () => {
+      const testObj = {};
+
+      const serverData = {};
+      const objectCache = {};
+      ObjectStateMutations.commitServerChanges(serverData, objectCache, {
+        '__proto__.polluted': 'exploited',
+      });
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect(Object.prototype.polluted).toBeUndefined();
     });
   });
 });
