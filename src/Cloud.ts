@@ -46,6 +46,7 @@ export function run<
   T extends (param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any,
 >(name: string, data: Parameters<T>[0], options?: RequestOptions): Promise<ReturnType<T>>;
 export function run(name: string, data?: any, options?: RequestOptions): Promise<any> {
+  options = options || {}; 
   if (typeof name !== 'string' || name.length === 0) {
     throw new TypeError('Cloud function name must be a string.');
   }
