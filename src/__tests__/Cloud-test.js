@@ -357,8 +357,8 @@ describe('CloudController', () => {
     expect(options.useMasterKey).toBe(false);
   });
 
-  it('run passes with empty options', () => {
-    const values = [undefined, {}];
+  it('run passes with undefined, null or empty options', () => {
+    const values = [undefined, null, {}];
 
     const mockRun = jest.fn();
     mockRun.mockReturnValue(Promise.resolve({ result: {} }));
@@ -377,7 +377,7 @@ describe('CloudController', () => {
   });
 
   it('run throws with invalid options', () => {
-    const values = [null, []];
+    const values = [[]];
     for (const value of values) {
       expect(() => Cloud.run('myfunction', {}, value)).toThrow();
     }
