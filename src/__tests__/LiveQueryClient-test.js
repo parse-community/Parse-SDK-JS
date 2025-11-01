@@ -1131,6 +1131,48 @@ describe('LiveQueryClient', () => {
     expect(isChecked).toBe(true);
   });
 
+  it('can handle WebSocket result response message with missing className', () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken',
+    });
+    // Add mock subscription with query
+    const subscription = new events.EventEmitter();
+    const query = new ParseQuery('TestClass');
+    subscription.query = query;
+    liveQueryClient.subscriptions.set(1, subscription);
+
+    // Create results without className property
+    const data = {
+      op: 'result',
+      clientId: 1,
+      requestId: 1,
+      results: [
+        { objectId: 'obj1', key: 'value1' },
+        { objectId: 'obj2', key: 'value2' },
+      ],
+    };
+    const event = {
+      data: JSON.stringify(data),
+    };
+
+    // Register checked in advance
+    let isChecked = false;
+    subscription.on('result', function (objects) {
+      isChecked = true;
+      expect(objects.length).toBe(2);
+      expect(objects[0].className).toEqual('TestClass');
+      expect(objects[1].className).toEqual('TestClass');
+    });
+
+    liveQueryClient._handleWebSocketMessage(event);
+
+    expect(isChecked).toBe(true);
+  });
+
   it('LiveQuerySubscription class has find method', () => {
     expect(typeof LiveQuerySubscription.prototype.find).toBe('function');
   });

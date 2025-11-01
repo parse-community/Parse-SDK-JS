@@ -59,7 +59,7 @@ const SUBSCRIPTION_EMMITER_TYPES = {
 };
 
 // Exponentially-growing random delay
-const generateInterval = k => {
+const generateInterval = (k: number): number => {
   return Math.random() * Math.min(30, Math.pow(2, k) - 1) * 1000;
 };
 
@@ -126,13 +126,15 @@ class LiveQueryClient {
   emit: any;
 
   /**
-   * @param {object} options
-   * @param {string} options.applicationId - applicationId of your Parse app
-   * @param {string} options.serverURL - <b>the URL of your LiveQuery server</b>
-   * @param {string} options.javascriptKey (optional)
-   * @param {string} options.masterKey (optional) Your Parse Master Key. (Node.js only!)
-   * @param {string} options.sessionToken (optional)
-   * @param {string} options.installationId (optional)
+   * Creates a new LiveQueryClient instance.
+   *
+   * @param options - Configuration options for the LiveQuery client
+   * @param options.applicationId - The applicationId of your Parse app
+   * @param options.serverURL - The URL of your LiveQuery server (must start with 'ws' or 'wss')
+   * @param options.javascriptKey - (Optional) The JavaScript key for your Parse app
+   * @param options.masterKey - (Optional) Your Parse Master Key (Node.js only!)
+   * @param options.sessionToken - (Optional) Session token for authenticated requests
+   * @param options.installationId - (Optional) Installation ID for the client
    */
   constructor({
     applicationId,
@@ -141,6 +143,13 @@ class LiveQueryClient {
     masterKey,
     sessionToken,
     installationId,
+  }: {
+    applicationId: string;
+    serverURL: string;
+    javascriptKey?: string;
+    masterKey?: string;
+    sessionToken?: string;
+    installationId?: string;
   }) {
     if (!serverURL || serverURL.indexOf('ws') !== 0) {
       throw new Error(
@@ -165,8 +174,8 @@ class LiveQueryClient {
     const EventEmitter = CoreManager.getEventEmitter();
     this.emitter = new EventEmitter();
 
-    this.on = (eventName, listener) => this.emitter.on(eventName, listener);
-    this.emit = (eventName, ...args) => this.emitter.emit(eventName, ...args);
+    this.on = (eventName: string, listener: (...args: unknown[]) => void) => this.emitter.on(eventName, listener);
+    this.emit = (eventName: string, ...args: unknown[]) => this.emitter.emit(eventName, ...args);
     // adding listener so process does not crash
     // best practice is for developer to register their own listener
     this.on('error', () => {});
@@ -222,7 +231,7 @@ class LiveQueryClient {
       .then(() => {
         this.socket.send(JSON.stringify(subscribeRequest));
       })
-      .catch(error => {
+      .catch((error: Error) => {
         subscription.subscribePromise.reject(error);
       });
 
@@ -430,7 +439,7 @@ class LiveQueryClient {
       }
       case OP_EVENTS.RESULT: {
         if (subscription) {
-          const objects = data.results.map(json => {
+          const objects = data.results.map((json: Record<string, unknown>) => {
             if (!json.className && subscription.query) {
               json.className = subscription.query.className;
             }
