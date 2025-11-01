@@ -430,7 +430,12 @@ class LiveQueryClient {
       }
       case OP_EVENTS.RESULT: {
         if (subscription) {
-          const objects = data.results.map(json => ParseObject.fromJSON(json, false));
+          const objects = data.results.map(json => {
+            if (!json.className && subscription.query) {
+              json.className = subscription.query.className;
+            }
+            return ParseObject.fromJSON(json, false);
+          });
           subscription.emit(SUBSCRIPTION_EMMITER_TYPES.RESULT, objects);
         }
         break;
