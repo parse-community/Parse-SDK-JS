@@ -78,7 +78,7 @@
     "lint-staged": "16.2.3",
     "madge": "8.0.0",
     "metro-react-native-babel-preset": "0.77.0",
-    "mongodb-runner": "5.10.0",
+    "mongodb-runner": "6.0.0",
     "parse-server": "8.4.0",
     "puppeteer": "24.25.0",
     "regenerator-runtime": "0.14.1",
