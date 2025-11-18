@@ -43,7 +43,7 @@
     "@babel/plugin-transform-runtime": "7.28.5",
     "@babel/preset-env": "7.26.9",
     "@babel/preset-react": "7.28.5",
-    "@babel/preset-typescript": "7.27.1",
+    "@babel/preset-typescript": "7.28.5",
     "@eslint/js": "9.39.1",
     "@parse/minami": "git+https://github.com/parse-community/minami#main",
     "@rollup/plugin-terser": "0.4.4",
