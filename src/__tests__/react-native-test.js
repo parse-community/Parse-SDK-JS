@@ -10,6 +10,7 @@ jest.dontMock('../ParseObject');
 jest.dontMock('../Storage');
 jest.dontMock('../LocalDatastoreController');
 jest.dontMock('../WebSocketController');
+jest.dontMock('crypto');
 jest.mock(
   'react-native/Libraries/vendor/emitter/EventEmitter',
   () => {
@@ -26,6 +27,17 @@ jest.mock(
 
 const mockEmitter = require('react-native/Libraries/vendor/emitter/EventEmitter').default;
 const CoreManager = require('../CoreManager').default;
+const { TextEncoder, TextDecoder } = require('util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
+const crypto = require('crypto');
+Object.defineProperty(global.self, 'crypto', {
+  value: {
+    subtle: crypto.webcrypto.subtle,
+    getRandomValues: crypto.getRandomValues,
+  },
+});
 
 describe('React Native', () => {
   beforeEach(() => {
@@ -41,17 +53,11 @@ describe('React Native', () => {
     expect(EventEmitter).toEqual(mockEmitter);
   });
 
-  it('load CryptoController', () => {
-    const CryptoJS = require('react-native-crypto-js');
-    jest.spyOn(CryptoJS.AES, 'encrypt').mockImplementation(() => {
-      return {
-        toString: () => 'World',
-      };
-    });
+  it('load CryptoController', async () => {
+    jest.spyOn(global.crypto.subtle, 'encrypt');
     const CryptoController = require('../CryptoController').default;
-    const phrase = CryptoController.encrypt({}, 'salt');
-    expect(phrase).toBe('World');
-    expect(CryptoJS.AES.encrypt).toHaveBeenCalled();
+    await CryptoController.encrypt({}, 'salt');
+    expect(global.crypto.subtle.encrypt).toHaveBeenCalled();
   });
 
   it('load LocalDatastoreController', () => {

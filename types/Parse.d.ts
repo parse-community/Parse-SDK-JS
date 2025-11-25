@@ -50,8 +50,24 @@ declare const Parse: {
         getCloudController(): import("./CoreManager").CloudController;
         setConfigController(controller: import("./CoreManager").ConfigController): void;
         getConfigController(): import("./CoreManager").ConfigController;
-        setCryptoController(controller: import("./CoreManager").CryptoController): void;
-        getCryptoController(): import("./CoreManager").CryptoController;
+        setCryptoController(controller: {
+            async: 0;
+            encrypt: (json: any, parseSecret: any) => string;
+            decrypt: (encryptedJSON: string, secretKey: any) => string;
+        } | {
+            async: 1;
+            encrypt: (json: any, parseSecret: any) => Promise<string>;
+            decrypt: (encryptedJSON: string, secretKey: any) => Promise<string>;
+        }): void;
+        getCryptoController(): {
+            async: 0;
+            encrypt: (json: any, parseSecret: any) => string;
+            decrypt: (encryptedJSON: string, secretKey: any) => string;
+        } | {
+            async: 1;
+            encrypt: (json: any, parseSecret: any) => Promise<string>;
+            decrypt: (encryptedJSON: string, secretKey: any) => Promise<string>;
+        };
         setEventEmitter(eventEmitter: any): void;
         getEventEmitter(): any;
         setFileController(controller: import("./CoreManager").FileController): void;
@@ -293,12 +309,7 @@ declare const Parse: {
      */
     liveQueryServerURL: any;
     /**
-     * @property {boolean} Parse.encryptedUser
-     * @static
-     */
-    encryptedUser: boolean;
-    /**
-     * @property {string} Parse.secret
+     * @member {string} Parse.secret
      * @static
      */
     secret: any;
@@ -360,19 +371,5 @@ declare const Parse: {
      * @returns {object}
      */
     dumpLocalDatastore(): Promise<any>;
-    /**
-     * Enable the current user encryption.
-     * This must be called before login any user.
-     *
-     * @static
-     */
-    enableEncryptedUser(): void;
-    /**
-     * Flag that indicates whether Encrypted User is enabled.
-     *
-     * @static
-     * @returns {boolean}
-     */
-    isEncryptedUserEnabled(): any;
 };
 export default Parse;

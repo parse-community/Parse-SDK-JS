@@ -10,6 +10,9 @@ jest.dontMock('../LocalDatastore');
 jest.dontMock('crypto-js/aes');
 jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
+const { TextEncoder, TextDecoder } = require('util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 global.indexedDB = require('./test_helpers/mockIndexedDB');
 const CoreManager = require('../CoreManager').default;
 const ParseLiveQuery = require('../ParseLiveQuery').default;
@@ -158,16 +161,6 @@ describe('Parse module', () => {
     expect(LDS).toEqual({ key: 'value' });
   });
 
-  it('can enable encrypter CurrentUser', () => {
-    jest.spyOn(console, 'log').mockImplementationOnce(() => {});
-    process.env.PARSE_BUILD = 'browser';
-    Parse.encryptedUser = false;
-    Parse.enableEncryptedUser();
-    expect(Parse.encryptedUser).toBe(true);
-    expect(Parse.isEncryptedUserEnabled()).toBe(true);
-    process.env.PARSE_BUILD = 'node';
-  });
-
   it('can set an encrypt token as String', () => {
     Parse.secret = 'My Super secret key';
     expect(CoreManager.get('ENCRYPTED_KEY')).toBe('My Super secret key');
@@ -259,6 +252,7 @@ describe('Parse module', () => {
 
   it('can get IndexedDB storage', () => {
     jest.isolateModules(() => {
+      jest.spyOn(console, 'log').mockImplementationOnce(() => {});
       expect(Parse.IndexedDB).toBeUndefined();
       process.env.PARSE_BUILD = 'browser';
       const ParseInstance = require('../Parse').default;

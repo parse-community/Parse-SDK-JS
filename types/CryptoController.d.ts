@@ -1,5 +1,6 @@
 declare const CryptoController: {
-    encrypt(obj: any, secretKey: string): string;
-    decrypt(encryptedText: string, secretKey: string): string;
+    async: number;
+    encrypt(json: any, parseSecret: any): Promise<string>;
+    decrypt(encryptedJSON: string, parseSecret: any): Promise<string>;
 };
 export default CryptoController;

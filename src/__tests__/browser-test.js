@@ -13,6 +13,9 @@ jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 const CoreManager = require('../CoreManager').default;
 const ParseError = require('../ParseError').default;
 const EventuallyQueue = require('../EventuallyQueue');
+const { TextEncoder, TextDecoder } = require('util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 
 class XMLHttpRequest {}
 class XDomainRequest {

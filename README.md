@@ -30,6 +30,7 @@ A library that gives you access to the powerful Parse Server backend from your J
 - [Getting Started](#getting-started)
   - [Using Parse on Different Platforms](#using-parse-on-different-platforms)
     - [Core Manager](#core-manager)
+    - [Encrypt Local Storage](#encrypt-local-storage)
 - [3rd Party Authentications](#3rd-party-authentications)
   - [Experimenting](#experimenting)
 - [Contributing](#contributing)
@@ -114,6 +115,36 @@ Parse.CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1)
 Parse.CoreManager.setRESTController(MyRESTController);
 ```
 
+#### Encrypt Local Storage
+
+The SDK has a [CryptoController][crypto-controller] that handles encrypting and decrypting local storage data 
+such as logged in `Parse.User`. 
+
+```
+// Set your key to enable encryption, this key will be passed to the CryptoController
+Parse.secret = 'MY_SECRET_KEY'; // or Parse.CoreManager.set('ENCRYPTED_KEY', 'MY_SECRET_KEY');
+```
+
+The SDK has built-in encryption using the [Web Crypto API][webcrypto]. If your platform doesn't have Web Crypto support yet like react-native you will need to [polyfill][react-native-webview-crypto] Web Crypto.
+
+We recommend creating your own [CryptoController][crypto-controller].
+
+```
+const CustomCryptoController = {
+  async: 1,
+  async encrypt(json: any, parseSecret: any): Promise<string> {
+    const encryptedJSON = await customEncrypt(json);
+    return encryptedJSON;
+  },
+  async decrypt(encryptedJSON: string, parseSecret: any): Promise<string> {
+    const json = await customDecrypt(encryptedJSON);
+    return JSON.stringify(json);
+  },
+};
+// Must be called before Parse.initialize
+Parse.CoreManager.setCryptoController(CustomCryptoController);
+```
+
 ## 3rd Party Authentications
 
 Parse Server supports many [3rd Party Authenications][3rd-party-auth]. It is possible to [linkWith][link-with] any 3rd Party Authentication by creating a [custom authentication module][custom-auth-module].
@@ -136,6 +167,9 @@ We really want Parse to be yours, to see it grow and thrive in the open source c
 [3rd-party-auth]: http://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication
 [contributing]: https://github.com/parse-community/Parse-SDK-JS/blob/master/CONTRIBUTING.md
 [core-manager]: https://github.com/parse-community/Parse-SDK-JS/blob/alpha/src/CoreManager.ts
+[crypto-controller]: https://github.com/parse-community/Parse-SDK-JS/blob/alpha/src/CryptoController.ts
 [custom-auth-module]: https://docs.parseplatform.org/js/guide/#custom-authentication-module
 [link-with]: https://docs.parseplatform.org/js/guide/#linking-users
 [open-collective-link]: https://opencollective.com/parse-server
+[react-native-webview-crypto]: https://www.npmjs.com/package/react-native-webview-crypto
+[webcrypto]: https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API

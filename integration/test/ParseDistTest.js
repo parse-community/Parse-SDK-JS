@@ -83,5 +83,21 @@ for (const fileName of ['parse.js', 'parse.min.js']) {
       expect(requestsCount).toBe(1);
       expect(abortedCount).toBe(1);
     });
+
+    it('can encrypt a user', async () => {
+      const user = new Parse.User();
+      user.setUsername('usernameENC');
+      user.setPassword('passwordENC');
+      await user.signUp();
+      const response = await page.evaluate(async () => {
+        Parse.secret = 'My Secret Key';
+        await Parse.User.logIn('usernameENC', 'passwordENC');
+        const current = await Parse.User.currentAsync();
+        Parse.secret = undefined;
+        return current.id;
+      });
+      expect(response).toBeDefined();
+      expect(user.id).toEqual(response);
+    });
   });
 }

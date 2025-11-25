@@ -999,20 +999,19 @@ class ParseUser<T extends Attributes = Attributes> extends ParseObject<T> {
 ParseObject.registerSubclass('_User', ParseUser);
 
 const DefaultController = {
-  updateUserOnDisk(user) {
+  async updateUserOnDisk(user) {
     const path = Storage.generatePath(CURRENT_USER_KEY);
     const json = user.toJSON();
     delete json.password;
 
     json.className = '_User';
     let userData = JSON.stringify(json);
-    if (CoreManager.get('ENCRYPTED_USER')) {
+    if (CoreManager.get('ENCRYPTED_KEY')) {
       const crypto = CoreManager.getCryptoController();
-      userData = crypto.encrypt(json, CoreManager.get('ENCRYPTED_KEY'));
+      userData = await crypto.encrypt(json, CoreManager.get('ENCRYPTED_KEY'));
     }
-    return Storage.setItemAsync(path, userData).then(() => {
-      return user;
-    });
+    await Storage.setItemAsync(path, userData);
+    return user;
   },
 
   removeUserFromDisk(): Promise<void> {
@@ -1042,6 +1041,13 @@ const DefaultController = {
           'storage system. Call currentUserAsync() instead.'
       );
     }
+    const crypto = CoreManager.getCryptoController();
+    if (CoreManager.get('ENCRYPTED_KEY') && crypto.async) {
+      throw new Error(
+        'Cannot call currentUser() when using a platform with an async encrypted ' +
+          'storage system. Call currentUserAsync() instead.'
+      );
+    }
     const path = Storage.generatePath(CURRENT_USER_KEY);
     let userData: any = Storage.getItem(path);
     currentUserCacheMatchesDisk = true;
@@ -1049,8 +1055,7 @@ const DefaultController = {
       currentUserCache = null;
       return null;
     }
-    if (CoreManager.get('ENCRYPTED_USER')) {
-      const crypto = CoreManager.getCryptoController();
+    if (CoreManager.get('ENCRYPTED_KEY')) {
       userData = crypto.decrypt(userData, CoreManager.get('ENCRYPTED_KEY'));
     }
     userData = JSON.parse(userData);
@@ -1073,7 +1078,7 @@ const DefaultController = {
     return current;
   },
 
-  currentUserAsync(): Promise<ParseUser | null> {
+  async currentUserAsync(): Promise<ParseUser | null> {
     if (currentUserCache) {
       return Promise.resolve(currentUserCache);
     }
@@ -1081,35 +1086,34 @@ const DefaultController = {
       return Promise.resolve(null);
     }
     const path = Storage.generatePath(CURRENT_USER_KEY);
-    return Storage.getItemAsync(path).then((userData: any) => {
-      currentUserCacheMatchesDisk = true;
-      if (!userData) {
-        currentUserCache = null;
-        return Promise.resolve(null);
+    let userData: any = await Storage.getItemAsync(path);
+    currentUserCacheMatchesDisk = true;
+    if (!userData) {
+      currentUserCache = null;
+      return Promise.resolve(null);
+    }
+    if (CoreManager.get('ENCRYPTED_KEY')) {
+      const crypto = CoreManager.getCryptoController();
+      userData = await crypto.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY'));
+    }
+    userData = JSON.parse(userData);
+    if (!userData.className) {
+      userData.className = '_User';
+    }
+    if (userData._id) {
+      if (userData.objectId !== userData._id) {
+        userData.objectId = userData._id;
       }
-      if (CoreManager.get('ENCRYPTED_USER')) {
-        const crypto = CoreManager.getCryptoController();
-        userData = crypto.decrypt(userData.toString(), CoreManager.get('ENCRYPTED_KEY'));
-      }
-      userData = JSON.parse(userData);
-      if (!userData.className) {
-        userData.className = '_User';
-      }
-      if (userData._id) {
-        if (userData.objectId !== userData._id) {
-          userData.objectId = userData._id;
-        }
-        delete userData._id;
-      }
-      if (userData._sessionToken) {
-        userData.sessionToken = userData._sessionToken;
-        delete userData._sessionToken;
-      }
-      const current = ParseObject.fromJSON(userData) as ParseUser;
-      currentUserCache = current;
-      current._synchronizeAllAuthData();
-      return Promise.resolve(current);
-    });
+      delete userData._id;
+    }
+    if (userData._sessionToken) {
+      userData.sessionToken = userData._sessionToken;
+      delete userData._sessionToken;
+    }
+    const current = ParseObject.fromJSON(userData) as ParseUser;
+    currentUserCache = current;
+    current._synchronizeAllAuthData();
+    return Promise.resolve(current);
   },
 
   signUp(user: ParseUser, attrs: Attributes, options?: RequestOptions): Promise<ParseUser> {

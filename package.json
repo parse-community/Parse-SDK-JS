@@ -33,7 +33,6 @@
   "dependencies": {
     "@babel/runtime-corejs3": "7.28.4",
     "idb-keyval": "6.2.2",
-    "react-native-crypto-js": "1.0.0",
     "uuid": "10.0.0",
     "ws": "8.18.3"
   },
@@ -87,9 +86,6 @@
     "vite": "6.4.1",
     "vite-plugin-commonjs": "0.10.4",
     "vite-plugin-node-polyfills": "0.24.0"
-  },
-  "optionalDependencies": {
-    "crypto-js": "4.2.0"
   },
   "scripts": {
     "build": "node build_releases.js",

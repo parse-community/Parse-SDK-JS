@@ -28,10 +28,15 @@ export interface ConfigController {
     get: (opts?: RequestOptions) => Promise<ParseConfig>;
     save: (attrs: Record<string, any>, masterKeyOnlyFlags?: Record<string, any>) => Promise<void>;
 }
-export interface CryptoController {
-    encrypt: (obj: any, secretKey: string) => string;
-    decrypt: (encryptedText: string, secretKey: any) => string;
-}
+type CryptoController = {
+    async: 0;
+    encrypt: (json: any, parseSecret: any) => string;
+    decrypt: (encryptedJSON: string, secretKey: any) => string;
+} | {
+    async: 1;
+    encrypt: (json: any, parseSecret: any) => Promise<string>;
+    decrypt: (encryptedJSON: string, secretKey: any) => Promise<string>;
+};
 export interface FileController {
     saveFile: (name: string, source: FileSource, options?: FullOptions) => Promise<any>;
     saveBase64: (name: string, source: FileSource, options?: FileSaveOptions) => Promise<{

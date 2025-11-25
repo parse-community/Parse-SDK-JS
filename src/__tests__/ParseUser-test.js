@@ -1749,7 +1749,6 @@ describe('ParseUser', () => {
   });
 
   it('can encrypt user', async () => {
-    CoreManager.set('ENCRYPTED_USER', true);
     CoreManager.set('ENCRYPTED_KEY', 'hello');
 
     ParseUser.enableUnsafeCurrentUser();
@@ -1777,36 +1776,34 @@ describe('ParseUser', () => {
     u = await ParseUser.logIn('username', 'password');
     // Clear cache to read from disk
     ParseUser._clearCache();
-
+    const isCurrent = await u.isCurrentAsync();
     expect(u.id).toBe('uid2');
     expect(u.getSessionToken()).toBe('123abc');
-    expect(u.isCurrent()).toBe(true);
+    expect(isCurrent).toBe(true);
     expect(u.authenticated()).toBe(true);
 
-    const currentUser = ParseUser.current();
-    expect(currentUser.id).toBe('uid2');
+    const currentUser = await ParseUser.currentAsync();
+    expect(currentUser.id).toBe(u.id);
 
     ParseUser._clearCache();
 
     const currentUserAsync = await ParseUser.currentAsync();
-    expect(currentUserAsync.id).toEqual('uid2');
+    expect(currentUserAsync.id).toEqual(u.id);
 
     const path = Storage.generatePath('currentUser');
     const encryptedUser = Storage.getItem(path);
     const crypto = CoreManager.getCryptoController();
-    const decryptedUser = crypto.decrypt(encryptedUser, 'hello');
+    const decryptedUser = await crypto.decrypt(encryptedUser, 'hello');
     expect(JSON.parse(decryptedUser).objectId).toBe(u.id);
 
-    CoreManager.set('ENCRYPTED_USER', false);
     CoreManager.set('ENCRYPTED_KEY', null);
     Storage._clear();
   });
 
   it('can encrypt user with custom CryptoController', async () => {
-    CoreManager.set('ENCRYPTED_USER', true);
     CoreManager.set('ENCRYPTED_KEY', 'hello');
     const ENCRYPTED_DATA = 'encryptedString';
-
+    const CryptoController = CoreManager.getCryptoController();
     ParseUser.enableUnsafeCurrentUser();
     ParseUser._clearCache();
     Storage._clear();
@@ -1830,6 +1827,7 @@ describe('ParseUser', () => {
       ajax() {},
     });
     const CustomCrypto = {
+      async: 0,
       encrypt(_obj, secretKey) {
         expect(secretKey).toBe('hello');
         return ENCRYPTED_DATA;
@@ -1854,9 +1852,21 @@ describe('ParseUser', () => {
     const path = Storage.generatePath('currentUser');
     const userStorage = Storage.getItem(path);
     expect(userStorage).toBe(ENCRYPTED_DATA);
-    CoreManager.set('ENCRYPTED_USER', false);
     CoreManager.set('ENCRYPTED_KEY', null);
+    CoreManager.setCryptoController(CryptoController);
     Storage._clear();
+  });
+
+  it('cannot get synchronous current user with encryption enabled', async () => {
+    CoreManager.set('ENCRYPTED_KEY', 'hello');
+    ParseUser.enableUnsafeCurrentUser();
+    ParseUser._clearCache();
+    expect(() => {
+      ParseUser.current();
+    }).toThrow(
+      'Cannot call currentUser() when using a platform with an async encrypted storage system. Call currentUserAsync() instead.'
+    );
+    CoreManager.set('ENCRYPTED_KEY', null);
   });
 
   it('can static signup a user with installationId', async () => {
