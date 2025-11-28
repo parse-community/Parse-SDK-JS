@@ -904,7 +904,7 @@ async function test_cancel_query() {
   query.cancel();
 }
 
-/* eslint-disable @typescript-eslint/no-redundant-type-constituents -- `object` is intentionally included for testing Exclude<FieldType, object> */
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents -- object is intentionally included for testing Exclude<FieldType, object>. */
 type FieldType =
   | string
   | number
