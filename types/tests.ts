@@ -904,6 +904,7 @@ async function test_cancel_query() {
   query.cancel();
 }
 
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents -- object is intentionally included for testing Exclude<FieldType, object>. */
 type FieldType =
   | string
   | number
@@ -916,6 +917,7 @@ type FieldType =
   | Parse.Pointer
   | Parse.Polygon
   | Parse.Relation;
+/* eslint-enable @typescript-eslint/no-redundant-type-constituents */
 async function test_schema(
   anyField: FieldType,
   notString: Exclude<FieldType, string>,
