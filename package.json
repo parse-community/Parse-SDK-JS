@@ -136,7 +136,7 @@
       ".*": "./babel-jest.js"
     },
     "transformIgnorePatterns": [
-      "/node_modules/",
+      "/node_modules/(?!uuid)/",
       "package.json"
     ],
     "testEnvironment": "jsdom"
