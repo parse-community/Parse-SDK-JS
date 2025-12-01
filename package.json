@@ -64,7 +64,7 @@
     "eslint": "9.39.1",
     "eslint-plugin-expect-type": "0.6.2",
     "eslint-plugin-jsdoc": "61.4.1",
-    "express": "5.1.0",
+    "express": "5.2.0",
     "gulp": "5.0.1",
     "gulp-babel": "8.0.0",
     "gulp-watch": "5.0.1",
