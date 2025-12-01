@@ -116,7 +116,7 @@
     "cross-env": "cross-env"
   },
   "engines": {
-    "node": "18 || 19 || 20 || 22"
+    "node": "18 || 19 || 20 || 22 || 24"
   },
   "jest": {
     "automock": true,
