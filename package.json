@@ -80,7 +80,7 @@
     "metro-react-native-babel-preset": "0.77.0",
     "mongodb-runner": "6.4.0",
     "parse-server": "8.5.0",
-    "puppeteer": "24.32.0",
+    "puppeteer": "24.32.1",
     "regenerator-runtime": "0.14.1",
     "semantic-release": "25.0.2",
     "typescript-eslint": "8.49.0",
