@@ -1,3 +1,19 @@
+# [8.0.0](https://github.com/parse-community/Parse-SDK-JS/compare/7.1.2...8.0.0) (2025-12-12)
+
+
+### Bug Fixes
+
+* Security upgrade jws ([#2822](https://github.com/parse-community/Parse-SDK-JS/issues/2822)) ([7d38c06](https://github.com/parse-community/Parse-SDK-JS/commit/7d38c068a275cfde3bbde9a8a0572bb41c78667f))
+
+### Code Refactoring
+
+* Bump vite from 6.4.1 to 7.2.4 ([#2829](https://github.com/parse-community/Parse-SDK-JS/issues/2829)) ([edec316](https://github.com/parse-community/Parse-SDK-JS/commit/edec3168905ff4c52696029743aac2fa82df412a))
+
+
+### BREAKING CHANGES
+
+* This release increases the minimum required Node versions to `20.19.0`, `22.12.0`, and removes support for Node `18.x`, `19.x`. ([edec316](edec316))
+
 ## [7.1.2](https://github.com/parse-community/Parse-SDK-JS/compare/7.1.1...7.1.2) (2025-12-01)
 
 
