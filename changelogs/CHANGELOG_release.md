@@ -1,3 +1,24 @@
+## [7.1.2](https://github.com/parse-community/Parse-SDK-JS/compare/7.1.1...7.1.2) (2025-12-01)
+
+
+### Bug Fixes
+
+* Missing dependencies in transpiled browser code ([#2812](https://github.com/parse-community/Parse-SDK-JS/issues/2812)) ([c7359bb](https://github.com/parse-community/Parse-SDK-JS/commit/c7359bbfcd40000a4a8df0626ee5237437270b44))
+
+## [7.1.1](https://github.com/parse-community/Parse-SDK-JS/compare/7.1.0...7.1.1) (2025-12-01)
+
+
+### Performance Improvements
+
+* Replace `uuid` dependency with native `crypto.randomUUID()` API ([#2810](https://github.com/parse-community/Parse-SDK-JS/issues/2810)) ([e06b8a7](https://github.com/parse-community/Parse-SDK-JS/commit/e06b8a728de36e14de92233366a324a01f38266c))
+
+# [7.1.0](https://github.com/parse-community/Parse-SDK-JS/compare/7.0.2...7.1.0) (2025-12-01)
+
+
+### Features
+
+* Add Node 24 support ([#2808](https://github.com/parse-community/Parse-SDK-JS/issues/2808)) ([2794b73](https://github.com/parse-community/Parse-SDK-JS/commit/2794b73929c6d8b4876ed7a83eeda4e3d041b118))
+
 ## [7.0.2](https://github.com/parse-community/Parse-SDK-JS/compare/7.0.1...7.0.2) (2025-10-25)
 
 
