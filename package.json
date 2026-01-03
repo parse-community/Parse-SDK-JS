@@ -46,9 +46,15 @@
       "types": "./types/react-native.d.ts",
       "default": "./react-native.js"
     },
+    "./react-native.js": {
+      "types": "./types/react-native.d.ts",
+      "default": "./react-native.js"
+    },
     "./weapp": {
       "default": "./weapp.js"
-    }
+    },
+    "./dist/*": "./dist/*",
+    "./lib/*": "./lib/*"
   },
   "browser": {
     "react-native": false
