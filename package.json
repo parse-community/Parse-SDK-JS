@@ -27,6 +27,29 @@
     "README.md"
   ],
   "types": "types/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "node": ["types/node.d.ts"],
+      "react-native": ["types/react-native.d.ts"]
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./index.js"
+    },
+    "./node": {
+      "types": "./types/node.d.ts",
+      "default": "./node.js"
+    },
+    "./react-native": {
+      "types": "./types/react-native.d.ts",
+      "default": "./react-native.js"
+    },
+    "./weapp": {
+      "default": "./weapp.js"
+    }
+  },
   "browser": {
     "react-native": false
   },
