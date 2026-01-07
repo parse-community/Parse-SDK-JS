@@ -13,7 +13,7 @@ declare module './Cloud' {
   export type AfterFindRequest<T extends import('./ParseObject').default = import('./ParseObject').default> = import('./CloudServer').AfterFindRequest<T>;
   export type FileTriggerRequest = import('./CloudServer').FileTriggerRequest;
   export type ConnectTriggerRequest = import('./CloudServer').ConnectTriggerRequest;
-  export type LiveQueryEventTrigger = import('./CloudServer').LiveQueryEventTrigger;
+  export type LiveQueryEventTrigger<T extends import('./ParseObject').default = import('./ParseObject').default> = import('./CloudServer').LiveQueryEventTrigger<T>;
   export type JobRequest = import('./CloudServer').JobRequest;
   export type ValidatorField = import('./CloudServer').ValidatorField;
   export type ValidatorObject = import('./CloudServer').ValidatorObject;
@@ -32,6 +32,7 @@ declare module './Cloud' {
   export const beforeLogin: typeof import('./CloudServer').beforeLogin;
   export const afterLogin: typeof import('./CloudServer').afterLogin;
   export const afterLogout: typeof import('./CloudServer').afterLogout;
+  export const beforePasswordResetRequest: typeof import('./CloudServer').beforePasswordResetRequest;
   export const beforeSaveFile: typeof import('./CloudServer').beforeSaveFile;
   export const afterSaveFile: typeof import('./CloudServer').afterSaveFile;
   export const beforeDeleteFile: typeof import('./CloudServer').beforeDeleteFile;
