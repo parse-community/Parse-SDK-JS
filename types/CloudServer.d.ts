@@ -201,6 +201,10 @@ export interface BeforeFindRequest<T extends ParseObject = ParseObject> {
    */
   config: any;
   /**
+   * A dictionary that is accessible in triggers.
+   */
+  context: Record<string, unknown>;
+  /**
    * If set, the read preference for the query.
    */
   readPreference?: string;
@@ -254,6 +258,10 @@ export interface AfterFindRequest<T extends ParseObject = ParseObject> {
    * The Parse Server config.
    */
   config: any;
+  /**
+   * A dictionary that is accessible in triggers.
+   */
+  context: Record<string, unknown>;
 }
 
 /**

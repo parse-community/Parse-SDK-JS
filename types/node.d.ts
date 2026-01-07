@@ -19,6 +19,8 @@ declare module './Cloud' {
   export type ValidatorObject = import('./CloudServer').ValidatorObject;
   export type HTTPOptions = import('./CloudServer').HTTPOptions;
   export type HTTPResponse = import('./CloudServer').HTTPResponse;
+  export type FunctionResponse = import('./CloudServer').FunctionResponse;
+  export const ReadPreferenceOption: typeof import('./CloudServer').ReadPreferenceOption;
 
   // Functions - reuse signatures from CloudServer
   export const define: typeof import('./CloudServer').define;
