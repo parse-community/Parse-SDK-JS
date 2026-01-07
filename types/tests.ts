@@ -2256,3 +2256,24 @@ function LiveQueryEvents() {
     Parse.LiveQuery.on('error', (error: any) => {});
   }
 }
+
+// Test server-side Cloud Code types (only available in parse/node)
+function test_cloud_server_functions() {
+  // Using ParseNode (parse/node), NOT Parse (parse)
+  // Server-side functions should be available on ParseNode.Cloud
+  ParseNode.Cloud.define('testFunction', req => {
+    return 'result';
+  });
+
+  ParseNode.Cloud.beforeSave('TestClass', req => {
+    // req.object should be typed
+  });
+
+  ParseNode.Cloud.job('testJob', req => {
+    req.message('Processing...');
+  });
+
+  // These should NOT exist on regular Parse (browser)
+  // @ts-expect-error - define should not exist on browser Parse.Cloud
+  Parse.Cloud.define('test', () => {});
+}
