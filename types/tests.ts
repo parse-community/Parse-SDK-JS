@@ -2259,21 +2259,226 @@ function LiveQueryEvents() {
 
 // Test server-side Cloud Code types (only available in parse/node)
 function test_cloud_server_functions() {
-  // Using ParseNode (parse/node), NOT Parse (parse)
-  // Server-side functions should be available on ParseNode.Cloud
-  ParseNode.Cloud.define('testFunction', req => {
+  // ============================================================================
+  // Cloud.define Tests
+  // ============================================================================
+
+  // Basic define with request properties
+  ParseNode.Cloud.define('basicFunc', (request) => {
+    request.params;
+    request.user;
+    request.master;
+    request.ip;
+    request.headers;
+    request.functionName;
+    request.context;
     return 'result';
   });
 
-  ParseNode.Cloud.beforeSave('TestClass', req => {
-    // req.object should be typed
+  // Define with validator options
+  ParseNode.Cloud.define('validatedFunc', (request) => {}, {
+    requireUser: true,
+    requireMaster: false,
+    validateMasterKey: false,
+    skipWithMasterKey: true,
+    requireAnyUserRoles: ['Admin', 'Moderator'],
+    requireAllUserRoles: ['User'],
+    fields: {
+      name: { type: String, required: true },
+      age: { type: Number, default: 0 }
+    }
   });
 
-  ParseNode.Cloud.job('testJob', req => {
-    req.message('Processing...');
+  // Define with FunctionResponse (Express-style)
+  ParseNode.Cloud.define('expressStyleFunc', (request, response) => {
+    response.success({ data: 'value' });
+    response.error('Something went wrong');
   });
 
-  // These should NOT exist on regular Parse (browser)
+  // ============================================================================
+  // Object Lifecycle Triggers
+  // ============================================================================
+
+  // beforeSave with request properties
+  ParseNode.Cloud.beforeSave('TestClass', (request) => {
+    request.object;
+    request.original;
+    request.user;
+    request.master;
+    request.context;
+    request.isChallenge;
+    request.ip;
+    request.headers;
+    request.triggerName;
+  });
+
+  // afterSave
+  ParseNode.Cloud.afterSave('TestClass', async (request) => {
+    const obj = request.object;
+    const original = request.original;
+    const context = request.context;
+  });
+
+  // beforeDelete
+  ParseNode.Cloud.beforeDelete('TestClass', (request) => {
+    return Promise.resolve();
+  });
+
+  // afterDelete
+  ParseNode.Cloud.afterDelete('TestClass', (request) => {
+    return Promise.resolve();
+  });
+
+  // ============================================================================
+  // Query Triggers
+  // ============================================================================
+
+  // beforeFind with ReadPreferenceOption
+  ParseNode.Cloud.beforeFind('TestClass', (request) => {
+    request.query;
+    request.isGet;
+    request.count;
+    request.readPreference;
+    request.context;
+
+    // Test ReadPreferenceOption enum
+    const primary = ParseNode.Cloud.ReadPreferenceOption.Primary;
+    const primaryPreferred = ParseNode.Cloud.ReadPreferenceOption.PrimaryPreferred;
+    const secondary = ParseNode.Cloud.ReadPreferenceOption.Secondary;
+    const secondaryPreferred = ParseNode.Cloud.ReadPreferenceOption.SecondaryPreferred;
+    const nearest = ParseNode.Cloud.ReadPreferenceOption.Nearest;
+  });
+
+  // afterFind
+  ParseNode.Cloud.afterFind('TestClass', (request) => {
+    request.query;
+    request.results;
+    return request.results;
+  });
+
+  // ============================================================================
+  // Auth Triggers
+  // ============================================================================
+
+  // beforeLogin
+  ParseNode.Cloud.beforeLogin((request) => {
+    request.object;
+    request.user;
+  });
+
+  // afterLogin
+  ParseNode.Cloud.afterLogin((request) => {
+    return Promise.resolve();
+  });
+
+  // afterLogout
+  ParseNode.Cloud.afterLogout((request) => {
+    return Promise.resolve();
+  });
+
+  // beforePasswordResetRequest
+  ParseNode.Cloud.beforePasswordResetRequest((request) => {
+    request.object;
+  });
+
+  // ============================================================================
+  // File Triggers
+  // ============================================================================
+
+  // beforeSaveFile
+  ParseNode.Cloud.beforeSaveFile((request) => {
+    request.file;
+    request.fileSize;
+    request.contentLength;
+    request.user;
+    request.master;
+  });
+
+  // afterSaveFile
+  ParseNode.Cloud.afterSaveFile((request) => {});
+
+  // beforeDeleteFile
+  ParseNode.Cloud.beforeDeleteFile((request) => {});
+
+  // afterDeleteFile
+  ParseNode.Cloud.afterDeleteFile((request) => {});
+
+  // ============================================================================
+  // LiveQuery Triggers
+  // ============================================================================
+
+  // beforeConnect
+  ParseNode.Cloud.beforeConnect((request) => {
+    request.useMasterKey;
+    request.user;
+    request.clients;
+    request.subscriptions;
+    request.sessionToken;
+  });
+
+  // beforeSubscribe
+  ParseNode.Cloud.beforeSubscribe('TestClass', (request) => {
+    request.object;
+    request.user;
+  });
+
+  // afterLiveQueryEvent
+  ParseNode.Cloud.afterLiveQueryEvent('TestClass', (request) => {
+    request.event;
+    request.object;
+    request.original;
+    request.sendEvent;
+    request.clients;
+    request.subscriptions;
+  });
+
+  // ============================================================================
+  // Job Tests
+  // ============================================================================
+
+  ParseNode.Cloud.job('comprehensiveJob', (request) => {
+    request.params;
+    request.message('Processing step 1...');
+    request.config;
+  });
+
+  // ============================================================================
+  // Utility Functions
+  // ============================================================================
+
+  // httpRequest
+  ParseNode.Cloud.httpRequest({
+    url: 'https://example.com',
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: { key: 'value' },
+    followRedirects: true
+  }).then((response) => {
+    response.status;
+    response.data;
+    response.text;
+    response.headers;
+  });
+
+  // sendEmail
+  ParseNode.Cloud.sendEmail({
+    to: 'test@example.com',
+    from: 'noreply@example.com',
+    subject: 'Test',
+    text: 'Hello',
+    html: '<p>Hello</p>'
+  });
+
+  // ============================================================================
+  // Browser Exclusion Tests - these should NOT compile on browser Parse
+  // ============================================================================
+
   // @ts-expect-error - define should not exist on browser Parse.Cloud
   Parse.Cloud.define('test', () => {});
+  // @ts-expect-error - beforeSave should not exist on browser Parse.Cloud
+  Parse.Cloud.beforeSave('Test', () => {});
+  // @ts-expect-error - job should not exist on browser Parse.Cloud
+  Parse.Cloud.job('test', () => {});
+  // @ts-expect-error - httpRequest should not exist on browser Parse.Cloud
+  Parse.Cloud.httpRequest({ url: '' });
 }

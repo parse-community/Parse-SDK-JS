@@ -1,3 +1,312 @@
+import type ParseObject from './ParseObject';
+import type ParseUser from './ParseUser';
+import type ParseFile from './ParseFile';
+import type ParseQuery from './ParseQuery';
+
+// ============================================================================
+// Request Interfaces
+// ============================================================================
+
+export interface FunctionRequest<T = Record<string, any>> {
+  installationId?: string;
+  master: boolean;
+  user?: ParseUser;
+  params: T;
+  ip: string;
+  headers: Record<string, string>;
+  log: any;
+  functionName: string;
+  context: Record<string, unknown>;
+  config: any;
+}
+
+export interface FunctionResponse {
+  success: (result?: any) => void;
+  error: (message?: string) => void;
+  status: (code: number) => FunctionResponse;
+  header: (name: string, value: string) => FunctionResponse;
+}
+
+export interface TriggerRequest<T extends ParseObject = ParseObject> {
+  installationId?: string;
+  master: boolean;
+  isChallenge: boolean;
+  user?: ParseUser;
+  object: T;
+  original?: T;
+  ip: string;
+  headers: Record<string, string>;
+  triggerName: string;
+  log: any;
+  context: Record<string, unknown>;
+  config: any;
+}
+
+export interface BeforeSaveRequest<T extends ParseObject = ParseObject> extends TriggerRequest<T> {}
+export interface AfterSaveRequest<T extends ParseObject = ParseObject> extends TriggerRequest<T> {}
+export interface BeforeDeleteRequest<T extends ParseObject = ParseObject> extends TriggerRequest<T> {}
+export interface AfterDeleteRequest<T extends ParseObject = ParseObject> extends TriggerRequest<T> {}
+
+export interface BeforeFindRequest<T extends ParseObject = ParseObject> {
+  installationId?: string;
+  master: boolean;
+  user?: ParseUser;
+  query: ParseQuery<T>;
+  ip: string;
+  headers: Record<string, string>;
+  triggerName: string;
+  log: any;
+  isGet: boolean;
+  config: any;
+  context: Record<string, unknown>;
+  readPreference?: string;
+  count?: boolean;
+}
+
+export interface AfterFindRequest<T extends ParseObject = ParseObject> {
+  installationId?: string;
+  master: boolean;
+  user?: ParseUser;
+  query: ParseQuery<T>;
+  results: T[];
+  ip: string;
+  headers: Record<string, string>;
+  triggerName: string;
+  log: any;
+  config: any;
+  context: Record<string, unknown>;
+}
+
+export interface FileTriggerRequest {
+  installationId?: string;
+  master: boolean;
+  user?: ParseUser;
+  file: ParseFile;
+  fileSize: number;
+  contentLength: number;
+  ip: string;
+  headers: Record<string, string>;
+  triggerName: string;
+  log: any;
+  config: any;
+}
+
+export interface ConnectTriggerRequest {
+  installationId?: string;
+  useMasterKey: boolean;
+  user?: ParseUser;
+  clients: number;
+  subscriptions: number;
+  sessionToken?: string;
+}
+
+export interface LiveQueryEventTrigger<T extends ParseObject = ParseObject> {
+  installationId?: string;
+  useMasterKey: boolean;
+  user?: ParseUser;
+  sessionToken?: string;
+  event: string;
+  object: T;
+  original?: T;
+  clients: number;
+  subscriptions: number;
+  sendEvent: boolean;
+}
+
+export interface JobRequest {
+  params: Record<string, any>;
+  message: (message: string) => void;
+  config: any;
+}
+
+// ============================================================================
+// Validator Types
+// ============================================================================
+
+export interface ValidatorField {
+  type?: any;
+  constant?: boolean;
+  default?: any;
+  options?: any[] | (() => any[]) | any;
+  required?: boolean;
+  error?: string;
+}
+
+export interface ValidatorObject {
+  requireUser?: boolean;
+  requireMaster?: boolean;
+  validateMasterKey?: boolean;
+  skipWithMasterKey?: boolean;
+  requireAnyUserRoles?: string[] | (() => string[]);
+  requireAllUserRoles?: string[] | (() => string[]);
+  requireUserKeys?: string[] | Record<string, ValidatorField>;
+  fields?: string[] | Record<string, ValidatorField>;
+  rateLimit?: {
+    requestPath?: string;
+    requestMethods?: string | string[];
+    requestTimeWindow?: number;
+    requestCount?: number;
+    errorResponseMessage?: string;
+    includeInternalRequests?: boolean;
+    includeMasterKey?: boolean;
+  };
+}
+
+// ============================================================================
+// HTTP Types
+// ============================================================================
+
+export interface HTTPOptions {
+  body?: string | object;
+  error?: (response: HTTPResponse) => void;
+  followRedirects?: boolean;
+  headers?: Record<string, string>;
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS';
+  params?: string | Record<string, string>;
+  success?: (response: HTTPResponse) => void;
+  url: string;
+}
+
+export interface HTTPResponse {
+  buffer?: Buffer;
+  cookies?: Record<string, any>;
+  data?: any;
+  headers?: Record<string, string>;
+  status: number;
+  text?: string;
+}
+
+// ============================================================================
+// Enum
+// ============================================================================
+
+export enum ReadPreferenceOption {
+  Primary = 'PRIMARY',
+  PrimaryPreferred = 'PRIMARY_PREFERRED',
+  Secondary = 'SECONDARY',
+  SecondaryPreferred = 'SECONDARY_PREFERRED',
+  Nearest = 'NEAREST',
+}
+
+// ============================================================================
+// Function Declarations (server-side only, implemented by Parse Server)
+// ============================================================================
+
+export declare function define<T extends Record<string, any> = Record<string, any>>(
+  name: string,
+  handler: (request: FunctionRequest<T>) => any,
+  validator?: ValidatorObject | ((request: FunctionRequest<T>) => any)
+): void;
+
+export declare function define<T extends Record<string, any> = Record<string, any>>(
+  name: string,
+  handler: (request: FunctionRequest<T>, response: FunctionResponse) => any,
+  validator?: ValidatorObject | ((request: FunctionRequest<T>) => any)
+): void;
+
+export declare function job(name: string, handler: (request: JobRequest) => any): void;
+
+export declare function beforeSave<T extends ParseObject = ParseObject>(
+  className: string | { new (): T },
+  handler: (request: BeforeSaveRequest<T>) => T | void | Promise<T | void>,
+  validator?: ValidatorObject | ((request: BeforeSaveRequest<T>) => any)
+): void;
+
+export declare function afterSave<T extends ParseObject = ParseObject>(
+  className: string | { new (): T },
+  handler: (request: AfterSaveRequest<T>) => void | Promise<void>,
+  validator?: ValidatorObject | ((request: AfterSaveRequest<T>) => any)
+): void;
+
+export declare function beforeDelete<T extends ParseObject = ParseObject>(
+  className: string | { new (): T },
+  handler: (request: BeforeDeleteRequest<T>) => void | Promise<void>,
+  validator?: ValidatorObject | ((request: BeforeDeleteRequest<T>) => any)
+): void;
+
+export declare function afterDelete<T extends ParseObject = ParseObject>(
+  className: string | { new (): T },
+  handler: (request: AfterDeleteRequest<T>) => void | Promise<void>,
+  validator?: ValidatorObject | ((request: AfterDeleteRequest<T>) => any)
+): void;
+
+export declare function beforeFind<T extends ParseObject = ParseObject>(
+  className: string | { new (): T },
+  handler: (request: BeforeFindRequest<T>) => ParseQuery<T> | void | Promise<ParseQuery<T> | void>,
+  validator?: ValidatorObject | ((request: BeforeFindRequest<T>) => any)
+): void;
+
+export declare function afterFind<T extends ParseObject = ParseObject>(
+  className: string | { new (): T },
+  handler: (request: AfterFindRequest<T>) => T[] | void | Promise<T[] | void>,
+  validator?: ValidatorObject | ((request: AfterFindRequest<T>) => any)
+): void;
+
+export declare function beforeLogin(
+  handler: (request: TriggerRequest<ParseUser>) => void | Promise<void>,
+  validator?: ValidatorObject | ((request: TriggerRequest<ParseUser>) => any)
+): void;
+
+export declare function afterLogin(
+  handler: (request: TriggerRequest<ParseUser>) => void | Promise<void>
+): void;
+
+export declare function afterLogout(
+  handler: (request: TriggerRequest) => void | Promise<void>
+): void;
+
+export declare function beforePasswordResetRequest(
+  handler: (request: TriggerRequest<ParseUser>) => void | Promise<void>,
+  validator?: ValidatorObject | ((request: TriggerRequest<ParseUser>) => any)
+): void;
+
+export declare function beforeSaveFile(
+  handler: (request: FileTriggerRequest) => ParseFile | void | Promise<ParseFile | void>
+): void;
+
+export declare function afterSaveFile(
+  handler: (request: FileTriggerRequest) => void | Promise<void>
+): void;
+
+export declare function beforeDeleteFile(
+  handler: (request: FileTriggerRequest) => void | Promise<void>
+): void;
+
+export declare function afterDeleteFile(
+  handler: (request: FileTriggerRequest) => void | Promise<void>
+): void;
+
+export declare function beforeConnect(
+  handler: (request: ConnectTriggerRequest) => void | Promise<void>,
+  validator?: ValidatorObject | ((request: ConnectTriggerRequest) => any)
+): void;
+
+export declare function beforeSubscribe<T extends ParseObject = ParseObject>(
+  className: string | { new (): T },
+  handler: (request: TriggerRequest<T>) => void | Promise<void>,
+  validator?: ValidatorObject | ((request: TriggerRequest<T>) => any)
+): void;
+
+export declare function afterLiveQueryEvent<T extends ParseObject = ParseObject>(
+  className: string | { new (): T },
+  handler: (request: LiveQueryEventTrigger<T>) => void | Promise<void>,
+  validator?: ValidatorObject | ((request: LiveQueryEventTrigger<T>) => any)
+): void;
+
+export declare function sendEmail(data: {
+  from?: string;
+  to: string;
+  subject?: string;
+  text?: string;
+  html?: string;
+}): Promise<void>;
+
+export declare function httpRequest(options: HTTPOptions): Promise<HTTPResponse>;
+
+// ============================================================================
+// JSDoc Documentation (for documentation generation)
+// ============================================================================
+
 /**
  * Defines a Cloud Function.
  *
