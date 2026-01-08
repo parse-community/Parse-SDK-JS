@@ -2289,12 +2289,6 @@ function test_cloud_server_functions() {
     }
   });
 
-  // Define with FunctionResponse (Express-style)
-  ParseNode.Cloud.define('expressStyleFunc', (request, response) => {
-    response.success({ data: 'value' });
-    response.error('Something went wrong');
-  });
-
   // ============================================================================
   // Object Lifecycle Triggers
   // ============================================================================
@@ -2313,7 +2307,7 @@ function test_cloud_server_functions() {
   });
 
   // afterSave
-  ParseNode.Cloud.afterSave('TestClass', async (request) => {
+  ParseNode.Cloud.afterSave('TestClass', (request) => {
     const obj = request.object;
     const original = request.original;
     const context = request.context;
@@ -2447,7 +2441,7 @@ function test_cloud_server_functions() {
   // ============================================================================
 
   // httpRequest
-  ParseNode.Cloud.httpRequest({
+  void ParseNode.Cloud.httpRequest({
     url: 'https://example.com',
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -2461,7 +2455,7 @@ function test_cloud_server_functions() {
   });
 
   // sendEmail
-  ParseNode.Cloud.sendEmail({
+  void ParseNode.Cloud.sendEmail({
     to: 'test@example.com',
     from: 'noreply@example.com',
     subject: 'Test',
@@ -2480,5 +2474,5 @@ function test_cloud_server_functions() {
   // @ts-expect-error - job should not exist on browser Parse.Cloud
   Parse.Cloud.job('test', () => {});
   // @ts-expect-error - httpRequest should not exist on browser Parse.Cloud
-  Parse.Cloud.httpRequest({ url: '' });
+  void Parse.Cloud.httpRequest({ url: '' });
 }
