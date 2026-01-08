@@ -440,8 +440,8 @@ describe('ObjectStateMutations', () => {
 
       const serverData = {};
       const attributes = {
-        __proto__: new ParseOps.SetOp({ polluted: 'yes' }),
-        constructor: new ParseOps.SetOp({ malicious: 'data' }),
+        __proto__: { polluted: 'yes' },
+        constructor: { malicious: 'data' },
       };
 
       ObjectStateMutations.setServerData(serverData, attributes);
@@ -471,7 +471,7 @@ describe('ObjectStateMutations', () => {
       expect({}.malicious).toBeUndefined();
     });
 
-    it('should not pollute Object.prototype in mergeFirstPendingState with malicious attribute names', () => {
+    it('should not pollute Object.prototype in setPendingOp with malicious attribute names', () => {
       const testObj = {};
       const pendingOps = [
         {
@@ -480,7 +480,7 @@ describe('ObjectStateMutations', () => {
         },
       ];
 
-      ObjectStateMutations.setPendingOp(pendingOps, '__proto__');
+      ObjectStateMutations.setPendingOp(pendingOps, '__proto__', new ParseOps.SetOp({ polluted: 'foo' }));
 
       // Verify Object.prototype was not polluted
       expect(testObj.polluted).toBeUndefined();
@@ -496,8 +496,8 @@ describe('ObjectStateMutations', () => {
       const objectCache = {};
       ObjectStateMutations.commitServerChanges(serverData, objectCache, {
         '__proto__.polluted': 'exploited',
-        __proto__: new ParseOps.SetOp({ polluted: 'yes' }),
-        constructor: new ParseOps.SetOp({ malicious: 'data' }),
+        __proto__: { polluted: 'yes' },
+        constructor: { malicious: 'data' },
       });
 
       // Verify Object.prototype was not polluted
