@@ -34,14 +34,10 @@ export interface TriggerRequest<T extends ParseObject = ParseObject> {
     context: Record<string, unknown>;
     config: any;
 }
-export interface BeforeSaveRequest<T extends ParseObject = ParseObject> extends TriggerRequest<T> {
-}
-export interface AfterSaveRequest<T extends ParseObject = ParseObject> extends TriggerRequest<T> {
-}
-export interface BeforeDeleteRequest<T extends ParseObject = ParseObject> extends TriggerRequest<T> {
-}
-export interface AfterDeleteRequest<T extends ParseObject = ParseObject> extends TriggerRequest<T> {
-}
+export type BeforeSaveRequest<T extends ParseObject = ParseObject> = TriggerRequest<T>;
+export type AfterSaveRequest<T extends ParseObject = ParseObject> = TriggerRequest<T>;
+export type BeforeDeleteRequest<T extends ParseObject = ParseObject> = TriggerRequest<T>;
+export type AfterDeleteRequest<T extends ParseObject = ParseObject> = TriggerRequest<T>;
 export interface BeforeFindRequest<T extends ParseObject = ParseObject> {
     installationId?: string;
     master: boolean;
@@ -161,41 +157,24 @@ export declare enum ReadPreferenceOption {
     Nearest = "NEAREST"
 }
 export declare function define<T extends Record<string, any> = Record<string, any>>(name: string, handler: (request: FunctionRequest<T>) => any, validator?: ValidatorObject | ((request: FunctionRequest<T>) => any)): void;
-export declare function define<T extends Record<string, any> = Record<string, any>>(name: string, handler: (request: FunctionRequest<T>, response: FunctionResponse) => any, validator?: ValidatorObject | ((request: FunctionRequest<T>) => any)): void;
 export declare function job(name: string, handler: (request: JobRequest) => any): void;
-export declare function beforeSave<T extends ParseObject = ParseObject>(className: string | {
-    new (): T;
-}, handler: (request: BeforeSaveRequest<T>) => T | void | Promise<T | void>, validator?: ValidatorObject | ((request: BeforeSaveRequest<T>) => any)): void;
-export declare function afterSave<T extends ParseObject = ParseObject>(className: string | {
-    new (): T;
-}, handler: (request: AfterSaveRequest<T>) => void | Promise<void>, validator?: ValidatorObject | ((request: AfterSaveRequest<T>) => any)): void;
-export declare function beforeDelete<T extends ParseObject = ParseObject>(className: string | {
-    new (): T;
-}, handler: (request: BeforeDeleteRequest<T>) => void | Promise<void>, validator?: ValidatorObject | ((request: BeforeDeleteRequest<T>) => any)): void;
-export declare function afterDelete<T extends ParseObject = ParseObject>(className: string | {
-    new (): T;
-}, handler: (request: AfterDeleteRequest<T>) => void | Promise<void>, validator?: ValidatorObject | ((request: AfterDeleteRequest<T>) => any)): void;
-export declare function beforeFind<T extends ParseObject = ParseObject>(className: string | {
-    new (): T;
-}, handler: (request: BeforeFindRequest<T>) => ParseQuery<T> | void | Promise<ParseQuery<T> | void>, validator?: ValidatorObject | ((request: BeforeFindRequest<T>) => any)): void;
-export declare function afterFind<T extends ParseObject = ParseObject>(className: string | {
-    new (): T;
-}, handler: (request: AfterFindRequest<T>) => T[] | void | Promise<T[] | void>, validator?: ValidatorObject | ((request: AfterFindRequest<T>) => any)): void;
-export declare function beforeLogin(handler: (request: TriggerRequest<ParseUser>) => void | Promise<void>, validator?: ValidatorObject | ((request: TriggerRequest<ParseUser>) => any)): void;
-export declare function afterLogin(handler: (request: TriggerRequest<ParseUser>) => void | Promise<void>): void;
-export declare function afterLogout(handler: (request: TriggerRequest) => void | Promise<void>): void;
-export declare function beforePasswordResetRequest(handler: (request: TriggerRequest<ParseUser>) => void | Promise<void>, validator?: ValidatorObject | ((request: TriggerRequest<ParseUser>) => any)): void;
-export declare function beforeSaveFile(handler: (request: FileTriggerRequest) => ParseFile | void | Promise<ParseFile | void>): void;
-export declare function afterSaveFile(handler: (request: FileTriggerRequest) => void | Promise<void>): void;
-export declare function beforeDeleteFile(handler: (request: FileTriggerRequest) => void | Promise<void>): void;
-export declare function afterDeleteFile(handler: (request: FileTriggerRequest) => void | Promise<void>): void;
-export declare function beforeConnect(handler: (request: ConnectTriggerRequest) => void | Promise<void>, validator?: ValidatorObject | ((request: ConnectTriggerRequest) => any)): void;
-export declare function beforeSubscribe<T extends ParseObject = ParseObject>(className: string | {
-    new (): T;
-}, handler: (request: TriggerRequest<T>) => void | Promise<void>, validator?: ValidatorObject | ((request: TriggerRequest<T>) => any)): void;
-export declare function afterLiveQueryEvent<T extends ParseObject = ParseObject>(className: string | {
-    new (): T;
-}, handler: (request: LiveQueryEventTrigger<T>) => void | Promise<void>, validator?: ValidatorObject | ((request: LiveQueryEventTrigger<T>) => any)): void;
+export declare function beforeSave<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: BeforeSaveRequest<T>) => T | undefined | Promise<T | undefined>, validator?: ValidatorObject | ((request: BeforeSaveRequest<T>) => any)): void;
+export declare function afterSave<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: AfterSaveRequest<T>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: AfterSaveRequest<T>) => any)): void;
+export declare function beforeDelete<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: BeforeDeleteRequest<T>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: BeforeDeleteRequest<T>) => any)): void;
+export declare function afterDelete<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: AfterDeleteRequest<T>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: AfterDeleteRequest<T>) => any)): void;
+export declare function beforeFind<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: BeforeFindRequest<T>) => ParseQuery<T> | undefined | Promise<ParseQuery<T> | undefined>, validator?: ValidatorObject | ((request: BeforeFindRequest<T>) => any)): void;
+export declare function afterFind<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: AfterFindRequest<T>) => T[] | undefined | Promise<T[] | undefined>, validator?: ValidatorObject | ((request: AfterFindRequest<T>) => any)): void;
+export declare function beforeLogin(handler: (request: TriggerRequest<ParseUser>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: TriggerRequest<ParseUser>) => any)): void;
+export declare function afterLogin(handler: (request: TriggerRequest<ParseUser>) => Promise<void> | undefined): void;
+export declare function afterLogout(handler: (request: TriggerRequest) => Promise<void> | undefined): void;
+export declare function beforePasswordResetRequest(handler: (request: TriggerRequest<ParseUser>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: TriggerRequest<ParseUser>) => any)): void;
+export declare function beforeSaveFile(handler: (request: FileTriggerRequest) => ParseFile | undefined | Promise<ParseFile | undefined>): void;
+export declare function afterSaveFile(handler: (request: FileTriggerRequest) => Promise<void> | undefined): void;
+export declare function beforeDeleteFile(handler: (request: FileTriggerRequest) => Promise<void> | undefined): void;
+export declare function afterDeleteFile(handler: (request: FileTriggerRequest) => Promise<void> | undefined): void;
+export declare function beforeConnect(handler: (request: ConnectTriggerRequest) => Promise<void> | undefined, validator?: ValidatorObject | ((request: ConnectTriggerRequest) => any)): void;
+export declare function beforeSubscribe<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: TriggerRequest<T>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: TriggerRequest<T>) => any)): void;
+export declare function afterLiveQueryEvent<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: LiveQueryEventTrigger<T>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: LiveQueryEventTrigger<T>) => any)): void;
 export declare function sendEmail(data: {
     from?: string;
     to: string;
