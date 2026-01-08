@@ -577,7 +577,12 @@ export declare function afterLiveQueryEvent<T extends ParseObject = ParseObject>
  *
  * **Available in Cloud Code only.**
  *
- * @param data The email data including to, from, subject, text, and html.
+ * @param data The email data.
+ * @param data.from The sender email address.
+ * @param data.to The recipient email address.
+ * @param data.subject The email subject.
+ * @param data.text The plain text content.
+ * @param data.html The HTML content.
  */
 export declare function sendEmail(data: {
   from?: string;
