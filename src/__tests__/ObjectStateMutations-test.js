@@ -301,6 +301,29 @@ describe('ObjectStateMutations', () => {
     });
   });
 
+  it('can remove dot notation array changes from the server when value is undefined', () => {
+    const serverData = {
+      items: [
+        { value: 'a', count: 5 },
+        { value: 'b', count: 1 },
+      ],
+    };
+    ObjectStateMutations.commitServerChanges(
+      serverData,
+      {},
+      {
+        'items.0.count': 15,
+        'items.1.count': undefined,
+      }
+    );
+    expect(serverData).toEqual({
+      items: [
+        { value: 'a', count: 15 },
+        { value: 'b' },
+      ],
+    });
+  });
+
   it('can commit dot notation array changes from the server to empty serverData', () => {
     const serverData = {};
     ObjectStateMutations.commitServerChanges(
@@ -366,6 +389,29 @@ describe('ObjectStateMutations', () => {
       delete Object.prototype.malicious;
     });
 
+    it('should not pollute Object.prototype in estimateAttribute with malicious attribute names', () => {
+      const testObj = {};
+
+      const serverData = {};
+      const pendingOps = [
+        {
+          __proto__: new ParseOps.SetOp({ polluted: 'yes' }),
+          constructor: new ParseOps.SetOp({ malicious: 'data' }),
+        },
+      ];
+
+      ObjectStateMutations.estimateAttribute(serverData, pendingOps, {
+        className: 'TestClass',
+        id: 'test123',
+      }, '__proto__');
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect(testObj.malicious).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect({}.malicious).toBeUndefined();
+    });
+
     it('should not pollute Object.prototype in estimateAttributes with malicious attribute names', () => {
       const testObj = {};
 
@@ -389,6 +435,60 @@ describe('ObjectStateMutations', () => {
       expect({}.malicious).toBeUndefined();
     });
 
+    it('should not pollute Object.prototype in setServerData with malicious attribute names', () => {
+      const testObj = {};
+
+      const serverData = {};
+      const attributes = {
+        __proto__: { polluted: 'yes' },
+        constructor: { malicious: 'data' },
+      };
+
+      ObjectStateMutations.setServerData(serverData, attributes);
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect(testObj.malicious).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect({}.malicious).toBeUndefined();
+    });
+
+    it('should not pollute Object.prototype in mergeFirstPendingState with malicious attribute names', () => {
+      const testObj = {};
+      const pendingOps = [
+        {
+          __proto__: new ParseOps.SetOp({ polluted: 'yes' }),
+          constructor: new ParseOps.SetOp({ malicious: 'data' }),
+        },
+      ];
+
+      ObjectStateMutations.mergeFirstPendingState(pendingOps);
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect(testObj.malicious).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect({}.malicious).toBeUndefined();
+    });
+
+    it('should not pollute Object.prototype in setPendingOp with malicious attribute names', () => {
+      const testObj = {};
+      const pendingOps = [
+        {
+          __proto__: new ParseOps.SetOp({ polluted: 'yes' }),
+          constructor: new ParseOps.SetOp({ malicious: 'data' }),
+        },
+      ];
+
+      ObjectStateMutations.setPendingOp(pendingOps, '__proto__', new ParseOps.SetOp({ polluted: 'foo' }));
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect(testObj.malicious).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect({}.malicious).toBeUndefined();
+    });
+
     it('should not pollute Object.prototype in commitServerChanges with nested __proto__ path', () => {
       const testObj = {};
 
@@ -396,6 +496,8 @@ describe('ObjectStateMutations', () => {
       const objectCache = {};
       ObjectStateMutations.commitServerChanges(serverData, objectCache, {
         '__proto__.polluted': 'exploited',
+        __proto__: { polluted: 'yes' },
+        constructor: { malicious: 'data' },
       });
 
       // Verify Object.prototype was not polluted
