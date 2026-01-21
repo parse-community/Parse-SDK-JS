@@ -668,6 +668,64 @@ async function test_cloud_functions() {
     request.file;
   });
 
+  ParseNode.Cloud.beforeConnect(request => {
+    request.user;
+    request.installationId;
+    request.useMasterKey;
+    request.clients;
+    request.subscriptions;
+    request.sessionToken;
+  });
+
+  ParseNode.Cloud.beforeSubscribe('MyCustomClass', request => {
+    request.object;
+    request.user;
+    request.original;
+    request.installationId;
+  });
+
+  ParseNode.Cloud.afterLiveQueryEvent('MyCustomClass', request => {
+    request.event;
+    request.object;
+    request.original;
+    request.user;
+    request.sendEvent;
+    request.clients;
+    request.subscriptions;
+    request.sessionToken;
+  });
+
+  ParseNode.Cloud.beforePasswordResetRequest(request => {
+    request.object;
+    request.user;
+    request.master;
+    request.ip;
+    request.headers;
+  });
+
+  void ParseNode.Cloud.httpRequest({
+    url: 'https://example.com',
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: { key: 'value' },
+    followRedirects: true,
+  }).then(response => {
+    response.status;
+    response.data;
+    response.text;
+    response.headers;
+    response.buffer;
+    response.cookies;
+  });
+
+  void ParseNode.Cloud.sendEmail({
+    to: 'test@example.com',
+    from: 'sender@example.com',
+    subject: 'Test Subject',
+    text: 'Plain text content',
+    html: '<p>HTML content</p>',
+  });
+
   ParseNode.Cloud.define('AFunc', request => {
     request.params;
     return 'Some result';
@@ -731,6 +789,16 @@ async function test_cloud_functions() {
   Parse.Cloud.job('test', () => {});
   // @ts-expect-error - httpRequest should not exist on browser Parse.Cloud
   void Parse.Cloud.httpRequest({ url: '' });
+  // @ts-expect-error - beforeConnect should not exist on browser Parse.Cloud
+  Parse.Cloud.beforeConnect(() => {});
+  // @ts-expect-error - beforeSubscribe should not exist on browser Parse.Cloud
+  Parse.Cloud.beforeSubscribe('Test', () => {});
+  // @ts-expect-error - afterLiveQueryEvent should not exist on browser Parse.Cloud
+  Parse.Cloud.afterLiveQueryEvent('Test', () => {});
+  // @ts-expect-error - beforePasswordResetRequest should not exist on browser Parse.Cloud
+  Parse.Cloud.beforePasswordResetRequest(() => {});
+  // @ts-expect-error - sendEmail should not exist on browser Parse.Cloud
+  void Parse.Cloud.sendEmail({ to: '' });
 }
 
 class PlaceObject extends Parse.Object {}
