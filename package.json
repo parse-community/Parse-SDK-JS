@@ -58,7 +58,9 @@
       "default": "./weapp.js"
     },
     "./dist/*": "./dist/*",
-    "./lib/*": "./lib/*"
+    "./lib/*": "./lib/*",
+    "./lib/node/promiseUtils": "./lib/node/promiseUtils.js",          
+    "./lib/node/RESTController": "./lib/node/RESTController.js"
   },
   "browser": {
     "react-native": false
