@@ -2343,3 +2343,24 @@ function LiveQueryEvents() {
   }
 }
 
+function testInitialize() {
+  // Browser - 2 params (strict)
+  Parse.initialize('appId', 'jsKey');
+
+  // Browser - should error when trying to pass masterKey
+  // @ts-expect-error - Browser build should not accept masterKey
+  Parse.initialize('appId', 'jsKey', 'masterKey');
+
+  // Node - permissive 4 params (should work)
+  ParseNode.initialize('appId', 'jsKey', 'masterKey', 'maintenanceKey');
+
+  // Node - 3 params (should also work)
+  ParseNode.initialize('appId', 'jsKey', 'masterKey');
+
+  // Node - 2 params (should also work)
+  ParseNode.initialize('appId', 'jsKey');
+
+  // Node - 1 param (should also work since javaScriptKey is optional in node)
+  ParseNode.initialize('appId');
+}
+

@@ -1,5 +1,19 @@
 import * as parse from './index';
 
+// Augment Parse interface for Node.js builds
+// In Node.js, Parse.initialize is reassigned to Parse._initialize at runtime,
+// which accepts masterKey and maintenanceKey parameters
+declare module './Parse' {
+  interface Parse {
+    initialize(
+      applicationId: string,
+      javaScriptKey?: string,
+      masterKey?: string,
+      maintenanceKey?: string
+    ): void;
+  }
+}
+
 // Augment Cloud module to include server-side types for parse/node
 declare module './Cloud' {
   // Request types - alias to CloudCode definitions
