@@ -288,10 +288,6 @@ const Parse: Parse = {
   Hooks: undefined,
   Parse: undefined,
 
-  /**
-   * @property {EventuallyQueue} Parse.EventuallyQueue
-   * @static
-   */
   set EventuallyQueue(queue: EventuallyQueue) {
     CoreManager.setEventuallyQueue(queue);
   },
@@ -300,14 +296,6 @@ const Parse: Parse = {
     return CoreManager.getEventuallyQueue();
   },
 
-  /**
-   * Call this method first to set up your authentication tokens for Parse.
-   *
-   * @param {string} applicationId Your Parse Application ID.
-   * @param {string} [javaScriptKey] Your Parse JavaScript Key (Not needed for parse-server)
-   * @param {string} [masterKey] Your Parse Master Key. (Node.js only!)
-   * @static
-   */
   initialize(applicationId: string, javaScriptKey: string) {
     if (
       process.env.PARSE_BUILD === 'browser' &&
@@ -350,43 +338,18 @@ const Parse: Parse = {
     }
   },
 
-  /**
-   * Call this method to set your AsyncStorage engine
-   * Starting Parse@1.11, the ParseSDK do not provide a React AsyncStorage as the ReactNative module
-   * is not provided at a stable path and changes over versions.
-   *
-   * @param {AsyncStorage} storage a react native async storage.
-   * @static
-   */
   setAsyncStorage(storage: any) {
     CoreManager.setAsyncStorage(storage);
   },
 
-  /**
-   * Call this method to set your LocalDatastoreStorage engine
-   * If using React-Native use {@link Parse.setAsyncStorage Parse.setAsyncStorage()}
-   *
-   * @param {LocalDatastoreController} controller a data storage.
-   * @static
-   */
   setLocalDatastoreController(controller: any) {
     CoreManager.setLocalDatastoreController(controller);
   },
 
-  /**
-   * Returns information regarding the current server's health
-   *
-   * @returns {Promise}
-   * @static
-   */
   getServerHealth() {
     return CoreManager.getRESTController().request('GET', 'health');
   },
 
-  /**
-   * @property {string} Parse.applicationId
-   * @static
-   */
   set applicationId(value) {
     CoreManager.set('APPLICATION_ID', value);
   },
@@ -394,10 +357,6 @@ const Parse: Parse = {
     return CoreManager.get('APPLICATION_ID');
   },
 
-  /**
-   * @property {string} Parse.javaScriptKey
-   * @static
-   */
   set javaScriptKey(value) {
     CoreManager.set('JAVASCRIPT_KEY', value);
   },
@@ -405,10 +364,6 @@ const Parse: Parse = {
     return CoreManager.get('JAVASCRIPT_KEY');
   },
 
-  /**
-   * @property {string} Parse.masterKey
-   * @static
-   */
   set masterKey(value) {
     CoreManager.set('MASTER_KEY', value);
   },
@@ -416,10 +371,6 @@ const Parse: Parse = {
     return CoreManager.get('MASTER_KEY');
   },
 
-  /**
-   * @property {string} Parse.maintenanceKey
-   * @static
-   */
   set maintenanceKey(value) {
     CoreManager.set('MAINTENANCE_KEY', value);
   },
@@ -427,10 +378,6 @@ const Parse: Parse = {
     return CoreManager.get('MAINTENANCE_KEY');
   },
 
-  /**
-   * @property {string} Parse.serverURL
-   * @static
-   */
   set serverURL(value) {
     CoreManager.set('SERVER_URL', value);
   },
@@ -438,10 +385,6 @@ const Parse: Parse = {
     return CoreManager.get('SERVER_URL');
   },
 
-  /**
-   * @property {ParseLiveQuery} Parse.LiveQuery
-   * @static
-   */
   set LiveQuery(liveQuery: ParseLiveQuery) {
     CoreManager.setLiveQuery(liveQuery);
   },
@@ -449,10 +392,6 @@ const Parse: Parse = {
     return CoreManager.getLiveQuery();
   },
 
-  /**
-   * @property {string} Parse.liveQueryServerURL
-   * @static
-   */
   set liveQueryServerURL(value) {
     CoreManager.set('LIVEQUERY_SERVER_URL', value);
   },
@@ -460,10 +399,6 @@ const Parse: Parse = {
     return CoreManager.get('LIVEQUERY_SERVER_URL');
   },
 
-  /**
-   * @property {boolean} Parse.encryptedUser
-   * @static
-   */
   set encryptedUser(value: boolean) {
     CoreManager.set('ENCRYPTED_USER', value);
   },
@@ -471,10 +406,6 @@ const Parse: Parse = {
     return CoreManager.get('ENCRYPTED_USER');
   },
 
-  /**
-   * @property {string} Parse.secret
-   * @static
-   */
   set secret(value) {
     CoreManager.set('ENCRYPTED_KEY', value);
   },
@@ -482,10 +413,6 @@ const Parse: Parse = {
     return CoreManager.get('ENCRYPTED_KEY');
   },
 
-  /**
-   * @property {boolean} Parse.idempotency
-   * @static
-   */
   set idempotency(value) {
     CoreManager.set('IDEMPOTENCY', value);
   },
@@ -493,10 +420,6 @@ const Parse: Parse = {
     return CoreManager.get('IDEMPOTENCY');
   },
 
-  /**
-   * @property {boolean} Parse.allowCustomObjectId
-   * @static
-   */
   set allowCustomObjectId(value) {
     CoreManager.set('ALLOW_CUSTOM_OBJECT_ID', value);
   },
@@ -504,21 +427,6 @@ const Parse: Parse = {
     return CoreManager.get('ALLOW_CUSTOM_OBJECT_ID');
   },
 
-  /**
-   * Setting this property to `true` enables enhanced logging for `Parse.Object`
-   * in Node.js environments. Specifically, it will log:
-   *
-   * ```
-   * ParseObject: className: <CLASS_NAME>, id: <OBJECT_ID>
-   * Attributes: <OBJECT_ATTRIBUTES>
-   * ```
-   *
-   * @warning This should not be enabled in production environments as this may
-   * expose sensitive information in server logs.
-   *
-   * @property {boolean} Parse.nodeLogging
-   * @static
-   */
   set nodeLogging(value) {
     CoreManager.set('NODE_LOGGING', value);
   },
@@ -546,14 +454,6 @@ const Parse: Parse = {
   _getInstallationId() {
     return CoreManager.getInstallationController().currentInstallationId();
   },
-  /**
-   * Enable pinning in your application.
-   * This must be called after `Parse.initialize` in your application.
-   *
-   * @param [polling] Allow pinging the server /health endpoint. Default true
-   * @param [ms] Milliseconds to ping the server. Default 2000ms
-   * @static
-   */
   enableLocalDatastore(polling?: boolean, ms?: number) {
     if (!this.applicationId) {
       console.log("'enableLocalDataStore' must be called after 'initialize'");
@@ -566,25 +466,9 @@ const Parse: Parse = {
       }
     }
   },
-  /**
-   * Flag that indicates whether Local Datastore is enabled.
-   *
-   * @static
-   * @returns {boolean}
-   */
   isLocalDatastoreEnabled(): boolean {
     return this.LocalDatastore.isEnabled;
   },
-  /**
-   * Gets all contents from Local Datastore
-   *
-   * <pre>
-   * await Parse.dumpLocalDatastore();
-   * </pre>
-   *
-   * @static
-   * @returns {object}
-   */
   dumpLocalDatastore() {
     if (!this.LocalDatastore.isEnabled) {
       console.log('Parse.enableLocalDatastore() must be called first');
@@ -594,22 +478,10 @@ const Parse: Parse = {
     }
   },
 
-  /**
-   * Enable the current user encryption.
-   * This must be called before login any user.
-   *
-   * @static
-   */
   enableEncryptedUser() {
     this.encryptedUser = true;
   },
 
-  /**
-   * Flag that indicates whether Encrypted User is enabled.
-   *
-   * @static
-   * @returns {boolean}
-   */
   isEncryptedUserEnabled() {
     return this.encryptedUser;
   },
