@@ -5,6 +5,15 @@ import * as parse from './index';
 // which accepts masterKey and maintenanceKey parameters
 declare module './Parse' {
   interface Parse {
+    /**
+     * Call this method first to set up your authentication tokens for Parse.
+     *
+     * @param {string} applicationId Your Parse Application ID.
+     * @param {string} [javaScriptKey] Your Parse JavaScript Key (Not needed for parse-server)
+     * @param {string} [masterKey] Your Parse Master Key.
+     * @param {string} [maintenanceKey] Your Parse Maintenance Key.
+     * @static
+     */
     initialize(
       applicationId: string,
       javaScriptKey?: string,

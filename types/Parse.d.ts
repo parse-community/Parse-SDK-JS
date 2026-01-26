@@ -76,8 +76,8 @@ export interface Parse {
      * Call this method first to set up your authentication tokens for Parse.
      *
      * @param {string} applicationId Your Parse Application ID.
-     * @param {string} [javaScriptKey] Your Parse JavaScript Key (Not needed for parse-server)
-     * @param {string} [masterKey] Your Parse Master Key. (Node.js only!)
+     * @param {string} javaScriptKey Your Parse JavaScript Key (Not needed for parse-server)
+     * @note Node.js builds (parse/node) support additional parameters: masterKey and maintenanceKey.
      * @static
      */
     initialize(applicationId: string, javaScriptKey: string): void;
