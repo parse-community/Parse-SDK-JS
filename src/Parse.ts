@@ -81,13 +81,19 @@ export interface Parse {
   Hooks: any;
   Parse: any;
 
+  /**
+   * @property {EventuallyQueue} Parse.EventuallyQueue
+   * @static
+   */
   EventuallyQueue: EventuallyQueue;
 
   /**
    * Call this method first to set up your authentication tokens for Parse.
    *
-   * @param applicationId Your Parse Application ID.
-   * @param javaScriptKey Your Parse JavaScript Key (Not needed for parse-server)
+   * @param {string} applicationId Your Parse Application ID.
+   * @param {string} [javaScriptKey] Your Parse JavaScript Key (Not needed for parse-server)
+   * @param {string} [masterKey] Your Parse Master Key. (Node.js only!)
+   * @static
    */
   initialize(applicationId: string, javaScriptKey: string): void;
 
@@ -98,21 +104,101 @@ export interface Parse {
     maintenanceKey?: string
   ): void;
 
+  /**
+   * Call this method to set your AsyncStorage engine
+   * Starting Parse@1.11, the ParseSDK do not provide a React AsyncStorage as the ReactNative module
+   * is not provided at a stable path and changes over versions.
+   *
+   * @param {AsyncStorage} storage a react native async storage.
+   * @static
+   */
   setAsyncStorage(storage: any): void;
+  /**
+   * Call this method to set your LocalDatastoreStorage engine
+   * If using React-Native use {@link Parse.setAsyncStorage Parse.setAsyncStorage()}
+   *
+   * @param {LocalDatastoreController} controller a data storage.
+   * @static
+   */
   setLocalDatastoreController(controller: any): void;
+  /**
+   * Returns information regarding the current server's health
+   *
+   * @returns {Promise}
+   * @static
+   */
   getServerHealth(): Promise<any>;
 
+  /**
+   * @property {string} Parse.applicationId
+   * @static
+   */
   applicationId: string | undefined;
+  /**
+   * @property {string} Parse.javaScriptKey
+   * @static
+   */
   javaScriptKey: string | undefined;
+  /**
+   * @property {string} Parse.masterKey
+   * @static
+   */
   masterKey: string | undefined;
+  /**
+   * @property {string} Parse.maintenanceKey
+   * @static
+   */
   maintenanceKey: string | undefined;
+  /**
+   * @property {string} Parse.serverURL
+   * @static
+   */
   serverURL: string | undefined;
+  /**
+   * @property {ParseLiveQuery} Parse.LiveQuery
+   * @static
+   */
   LiveQuery: ParseLiveQuery;
+  /**
+   * @property {string} Parse.liveQueryServerURL
+   * @static
+   */
   liveQueryServerURL: string | undefined;
+  /**
+   * @property {boolean} Parse.encryptedUser
+   * @static
+   */
   encryptedUser: boolean;
+  /**
+   * @property {string} Parse.secret
+   * @static
+   */
   secret: string | undefined;
+  /**
+   * @property {boolean} Parse.idempotency
+   * @static
+   */
   idempotency: boolean | undefined;
+  /**
+   * @property {boolean} Parse.allowCustomObjectId
+   * @static
+   */
   allowCustomObjectId: boolean | undefined;
+  /**
+   * Setting this property to `true` enables enhanced logging for `Parse.Object`
+   * in Node.js environments. Specifically, it will log:
+   *
+   * ```
+   * ParseObject: className: <CLASS_NAME>, id: <OBJECT_ID>
+   * Attributes: <OBJECT_ATTRIBUTES>
+   * ```
+   *
+   * @warning This should not be enabled in production environments as this may
+   * expose sensitive information in server logs.
+   *
+   * @property {boolean} Parse.nodeLogging
+   * @static
+   */
   nodeLogging: boolean | undefined;
 
   _request(...args: any[]): Promise<any>;
@@ -121,10 +207,46 @@ export interface Parse {
   _encode(value: any, _: any, disallowObjects?: boolean): any;
   _getInstallationId(): Promise<string>;
 
+  /**
+   * Enable pinning in your application.
+   * This must be called after `Parse.initialize` in your application.
+   *
+   * @param [polling] Allow pinging the server /health endpoint. Default true
+   * @param [ms] Milliseconds to ping the server. Default 2000ms
+   * @static
+   */
   enableLocalDatastore(polling?: boolean, ms?: number): void;
+  /**
+   * Flag that indicates whether Local Datastore is enabled.
+   *
+   * @static
+   * @returns {boolean}
+   */
   isLocalDatastoreEnabled(): boolean;
+  /**
+   * Gets all contents from Local Datastore
+   *
+   * <pre>
+   * await Parse.dumpLocalDatastore();
+   * </pre>
+   *
+   * @static
+   * @returns {object}
+   */
   dumpLocalDatastore(): Promise<any>;
+  /**
+   * Enable the current user encryption.
+   * This must be called before login any user.
+   *
+   * @static
+   */
   enableEncryptedUser(): void;
+  /**
+   * Flag that indicates whether Encrypted User is enabled.
+   *
+   * @static
+   * @returns {boolean}
+   */
   isEncryptedUserEnabled(): boolean;
 }
 
