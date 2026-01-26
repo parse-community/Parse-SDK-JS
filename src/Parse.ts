@@ -456,7 +456,7 @@ const Parse: Parse = {
   },
   enableLocalDatastore(polling?: boolean, ms?: number) {
     if (!this.applicationId) {
-      console.log("'enableLocalDataStore' must be called after 'initialize'");
+      console.log("'enableLocalDatastore' must be called after 'initialize'");
       return;
     }
     if (!this.LocalDatastore.isEnabled) {
