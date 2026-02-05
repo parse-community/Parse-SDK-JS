@@ -1970,6 +1970,9 @@ function testQuery() {
     query.equalTo('attribute5', new AnotherSubClass());
     // $ExpectType ParseQuery<MySubClass>
     query.equalTo('attribute5', [new AnotherSubClass()]);
+    // Since there is no `$ExpectNotError` thing, this line is instead used to at least prove that there is no regression for type safety for `Array of object` fields
+    // $ExpectError
+    query.equalTo('attribute5', new MySubClass());
 
     // Optional string[] (e.g. prop?: string[] ): allow matching a single element (array contains string), and allow matching the full array
     // $ExpectType ParseQuery<MySubClass>
