@@ -1152,9 +1152,9 @@ class ParseQuery<T extends ParseObject = ParseObject> {
     key: K,
     value:
       | T['attributes'][K]
-      | (T['attributes'][K] extends ParseObject
+      | (NonNullable<T['attributes'][K]> extends ParseObject
           ? Pointer
-          : T['attributes'][K] extends (infer E)[]
+          : NonNullable<T['attributes'][K]> extends (infer E)[]
             ? E
             : never)
   ): this {
@@ -1181,9 +1181,9 @@ class ParseQuery<T extends ParseObject = ParseObject> {
     key: K,
     value:
       | T['attributes'][K]
-      | (T['attributes'][K] extends ParseObject
+      | (NonNullable<T['attributes'][K]> extends ParseObject
           ? Pointer
-          : T['attributes'][K] extends (infer E)[]
+          : NonNullable<T['attributes'][K]> extends (infer E)[]
             ? E
             : never)
   ): this {

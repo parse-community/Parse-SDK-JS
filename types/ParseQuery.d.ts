@@ -427,7 +427,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param value The value that the Parse.Object must contain.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    equalTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (T['attributes'][K] extends ParseObject ? Pointer : T['attributes'][K] extends (infer E)[] ? E : never)): this;
+    equalTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (NonNullable<T['attributes'][K]> extends ParseObject ? Pointer : NonNullable<T['attributes'][K]> extends (infer E)[] ? E : never)): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be not equal to the provided value.
@@ -436,7 +436,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param value The value that must not be equalled.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    notEqualTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (T['attributes'][K] extends ParseObject ? Pointer : T['attributes'][K] extends (infer E)[] ? E : never)): this;
+    notEqualTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (NonNullable<T['attributes'][K]> extends ParseObject ? Pointer : NonNullable<T['attributes'][K]> extends (infer E)[] ? E : never)): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be less than the provided value.
