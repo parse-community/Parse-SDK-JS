@@ -158,7 +158,7 @@ const RESTController = {
           const responseHeaders = {};
           const availableHeaders = response.headers.get('access-control-expose-headers') || '';
           availableHeaders.split(', ').forEach((header: string) => {
-            if (response.headers.has(header)) {
+            if (header && response.headers.has(header)) {
               responseHeaders[header] = response.headers.get(header);
             }
           });
@@ -214,7 +214,8 @@ const RESTController = {
             promise.reject('Unable to connect to the Parse API');
           } else {
             // After the retry limit is reached, fail
-            promise.reject(response);
+            const error = await response.json();
+            promise.reject(error);
           }
         } else {
           promise.reject(response);

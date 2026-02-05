@@ -55,6 +55,20 @@ describe('RESTController', () => {
     expect(status).toBe(200);
   });
 
+  it('resolves without error when access-control-expose-headers header is missing', async () => {
+    mockFetch([{ status: 200, response: { success: true } }], {});
+    const { response, status } = await RESTController.ajax('POST', 'users', {});
+    expect(response).toEqual({ success: true });
+    expect(status).toBe(200);
+  });
+
+  it('resolves without error when access-control-expose-headers header is empty', async () => {
+    mockFetch([{ status: 200, response: { success: true } }], { 'access-control-expose-headers': '' });
+    const { response, status } = await RESTController.ajax('POST', 'users', {});
+    expect(response).toEqual({ success: true });
+    expect(status).toBe(200);
+  });
+
   it('retries on 5XX errors', async () => {
     mockFetch([{ status: 500 }, { status: 500 }, { status: 200, response: { success: true } }])
     const { response, status } = await RESTController.ajax('POST', 'users', {});
@@ -84,19 +98,21 @@ describe('RESTController', () => {
   });
 
   it('aborts after too many failures', async () => {
-    expect.assertions(1);
+    expect.assertions(3);
     mockFetch([
-      { status: 500 },
-      { status: 500 },
-      { status: 500 },
-      { status: 500 },
-      { status: 500 },
+      { status: 500, response: { code: 1, error: 'Internal server error.' } },
+      { status: 500, response: { code: 1, error: 'Internal server error.' } },
+      { status: 500, response: { code: 1, error: 'Internal server error.' } },
+      { status: 500, response: { code: 1, error: 'Internal server error.' } },
+      { status: 500, response: { code: 1, error: 'Internal server error.' } },
       { status: 200, response: { success: true } },
     ]);
     try {
       await RESTController.ajax('POST', 'users', {});
     } catch (fetchError) {
       expect(fetchError).not.toBe(undefined);
+      expect(fetchError.code).toBe(1);
+      expect(fetchError.error).toBe('Internal server error.');
     }
   });
 
@@ -175,6 +191,23 @@ describe('RESTController', () => {
     } catch (error) {
       expect(error.code).toBe(100);
       expect(error.message.indexOf('XMLHttpRequest failed')).toBe(0);
+    }
+  });
+
+  it('handles 5xx errors after retries', async () => {
+    expect.assertions(2);
+    mockFetch([
+      { status: 500, response: { code: 1, error: 'Internal server error.' } },
+      { status: 500, response: { code: 1, error: 'Internal server error.' } },
+      { status: 500, response: { code: 1, error: 'Internal server error.' } },
+      { status: 500, response: { code: 1, error: 'Internal server error.' } },
+      { status: 500, response: { code: 1, error: 'Internal server error.' } },
+    ]);
+    try {
+      await RESTController.request('GET', 'classes/MyObject', {}, {});
+    } catch (error) {
+      expect(error.code).toBe(1);
+      expect(error.message).toBe('Internal server error.');
     }
   });
 

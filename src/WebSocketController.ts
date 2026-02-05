@@ -1,7 +1,4 @@
 /* global WebSocket */
-import ws from 'ws';
-import SocketWeapp from './Socket.weapp';
-
 let WebSocketController;
 
 try {
@@ -9,9 +6,9 @@ try {
     WebSocketController =
       typeof WebSocket === 'function' || typeof WebSocket === 'object' ? WebSocket : null;
   } else if (process.env.PARSE_BUILD === 'node') {
-    WebSocketController = ws;
+    WebSocketController = require('ws');
   } else if (process.env.PARSE_BUILD === 'weapp') {
-    WebSocketController = SocketWeapp;
+    WebSocketController = require('./Socket.weapp');
   } else if (process.env.PARSE_BUILD === 'react-native') {
     WebSocketController = WebSocket;
   }

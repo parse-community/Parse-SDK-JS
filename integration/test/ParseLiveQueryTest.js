@@ -346,8 +346,6 @@ describe('Parse LiveQuery', () => {
     await obj2.save();
     obj2.set('foo', 'bart');
     await obj2.save();
-    await sleep(1000);
-    await subscription.unsubscribe();
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledTimes(1);
   });

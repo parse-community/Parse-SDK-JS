@@ -119,7 +119,7 @@ describe('Parse module', () => {
     Parse.initialize(null, null);
     Parse.enableLocalDatastore();
     expect(console.log).toHaveBeenCalledWith(
-      "'enableLocalDataStore' must be called after 'initialize'"
+      "'enableLocalDatastore' must be called after 'initialize'"
     );
 
     Parse.initialize('A', 'B');

@@ -10,8 +10,8 @@ jest.dontMock('../SingleInstanceStateController');
 jest.dontMock('../TaskQueue');
 jest.dontMock('./test_helpers/flushPromises');
 
-const mockObject = function () {};
-mockObject.registerSubclass = function () {};
+const mockObject = function () { };
+mockObject.registerSubclass = function () { };
 jest.setMock('../ParseObject', {
   __esModule: true,
   default: mockObject,
@@ -696,6 +696,95 @@ describe('SingleInstanceStateController', () => {
       objectCache: {},
       tasks: new TaskQueue(),
       existed: false,
+    });
+  });
+
+  describe('Prototype Pollution Protection (CVE-2025-57324)', () => {
+    beforeEach(() => {
+      SingleInstanceStateController.clearAllState();
+    });
+
+    it('prevents prototype pollution via __proto__ as className', () => {
+      const testObj = { className: '__proto__', id: 'pollutedProperty' };
+
+      // Should not throw error (silent prevention via Object.create(null))
+      SingleInstanceStateController.initializeState(testObj, {});
+
+      // Verify no pollution occurred on actual Object.prototype
+      expect({}.pollutedProperty).toBe(undefined);
+      expect(Object.prototype.pollutedProperty).toBe(undefined);
+    });
+
+    it('prevents prototype pollution via constructor as className', () => {
+      const testObj = { className: 'constructor', id: 'testId' };
+
+      // Should not throw error (silent prevention)
+      SingleInstanceStateController.initializeState(testObj, {});
+
+      // Verify no pollution occurred
+      const freshObj = {};
+      expect(freshObj.testId).toBe(undefined);
+    });
+
+    it('prevents prototype pollution via prototype as className', () => {
+      const testObj = { className: 'prototype', id: 'testId' };
+
+      // Should not throw error (silent prevention)
+      SingleInstanceStateController.initializeState(testObj, {});
+
+      // Verify no pollution occurred
+      const freshObj = {};
+      expect(freshObj.testId).toBe(undefined);
+    });
+
+    it('prevents prototype pollution via __proto__ as id', () => {
+      const testObj = { className: 'TestClass', id: '__proto__' };
+
+      // Should not throw error (silent prevention)
+      SingleInstanceStateController.initializeState(testObj, {});
+
+      // Verify no pollution occurred
+      expect({}.TestClass).toBe(undefined);
+    });
+
+    it('can store and retrieve data even with dangerous property names', () => {
+      const testObj1 = { className: '__proto__', id: 'pollutedProperty' };
+      const testObj2 = { className: 'constructor', id: 'testId' };
+
+      // Should work normally without polluting
+      SingleInstanceStateController.setServerData(testObj1, { value: 'test1' });
+      SingleInstanceStateController.setServerData(testObj2, { value: 'test2' });
+
+      // Should be able to retrieve the data
+      const state1 = SingleInstanceStateController.getState(testObj1);
+      const state2 = SingleInstanceStateController.getState(testObj2);
+
+      expect(state1.serverData).toEqual({ value: 'test1' });
+      expect(state2.serverData).toEqual({ value: 'test2' });
+
+      // But no pollution should occur
+      expect({}.pollutedProperty).toBe(undefined);
+      expect({}.testId).toBe(undefined);
+    });
+
+    it('allows normal className and id values', () => {
+      const testObj = { className: 'NormalClass', id: 'normalId123' };
+
+      SingleInstanceStateController.setServerData(testObj, { counter: 12 });
+
+      const state = SingleInstanceStateController.getState(testObj);
+      expect(state).toBeTruthy();
+      expect(state.serverData).toEqual({ counter: 12 });
+    });
+
+    it('prevents pollution when removing dangerous property names', () => {
+      const testObj = { className: '__proto__', id: 'dangerousId' };
+
+      SingleInstanceStateController.setServerData(testObj, { data: 'test' });
+      SingleInstanceStateController.removeState(testObj);
+
+      // Verify no pollution occurred
+      expect({}.dangerousId).toBe(undefined);
     });
   });
 });

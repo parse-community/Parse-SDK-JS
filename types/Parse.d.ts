@@ -1,14 +1,18 @@
 import * as ParseOp from './ParseOp';
 import ACL from './ParseACL';
 import * as Analytics from './Analytics';
+import AnonymousUtils from './AnonymousUtils';
 import * as Cloud from './Cloud';
 import CLP from './ParseCLP';
+import CoreManager from './CoreManager';
 import Config from './ParseConfig';
 import ParseError from './ParseError';
+import FacebookUtils from './FacebookUtils';
 import File from './ParseFile';
 import GeoPoint from './ParseGeoPoint';
 import Polygon from './ParsePolygon';
 import Installation from './ParseInstallation';
+import LocalDatastore from './LocalDatastore';
 import ParseObject from './ParseObject';
 import * as Push from './Push';
 import Query from './ParseQuery';
@@ -16,174 +20,31 @@ import Relation from './ParseRelation';
 import Role from './ParseRole';
 import Schema from './ParseSchema';
 import Session from './ParseSession';
+import Storage from './Storage';
 import User from './ParseUser';
 import ParseLiveQuery from './ParseLiveQuery';
 import LiveQueryClient from './LiveQueryClient';
 import type { EventuallyQueue } from './CoreManager';
-declare const Parse: {
+/**
+ * The interface for the Parse SDK.
+ * This interface can be augmented in build-specific type definitions (e.g., node.d.ts)
+ * to provide environment-specific type signatures.
+ */
+export interface Parse {
     ACL: typeof ACL;
     Analytics: typeof Analytics;
-    AnonymousUtils: {
-        isLinked(user: User): boolean;
-        logIn(options?: import("./RESTController").RequestOptions): Promise<User>;
-        link(user: User, options?: import("./RESTController").RequestOptions): Promise<User>;
-        isRegistered(): boolean;
-        _getAuthProvider(): {
-            restoreAuthentication(): boolean;
-            getAuthType(): string;
-            getAuthData(): {
-                authData: {
-                    id: string;
-                };
-            };
-        };
-    };
+    AnonymousUtils: typeof AnonymousUtils;
     Cloud: typeof Cloud;
     CLP: typeof CLP;
-    CoreManager: {
-        get: (key: string) => any;
-        set: (key: string, value: any) => void;
-        setIfNeeded: (key: string, value: any) => any;
-        setAnalyticsController(controller: import("./CoreManager").AnalyticsController): void;
-        getAnalyticsController(): import("./CoreManager").AnalyticsController;
-        setCloudController(controller: import("./CoreManager").CloudController): void;
-        getCloudController(): import("./CoreManager").CloudController;
-        setConfigController(controller: import("./CoreManager").ConfigController): void;
-        getConfigController(): import("./CoreManager").ConfigController;
-        setCryptoController(controller: import("./CoreManager").CryptoController): void;
-        getCryptoController(): import("./CoreManager").CryptoController;
-        setEventEmitter(eventEmitter: any): void;
-        getEventEmitter(): any;
-        setFileController(controller: import("./CoreManager").FileController): void;
-        setEventuallyQueue(controller: EventuallyQueue): void;
-        getEventuallyQueue(): EventuallyQueue;
-        getFileController(): import("./CoreManager").FileController;
-        setInstallationController(controller: import("./CoreManager").InstallationController): void;
-        getInstallationController(): import("./CoreManager").InstallationController;
-        setLiveQuery(liveQuery: any): void;
-        getLiveQuery(): any;
-        setObjectController(controller: import("./CoreManager").ObjectController): void;
-        getObjectController(): import("./CoreManager").ObjectController;
-        setObjectStateController(controller: import("./CoreManager").ObjectStateController): void;
-        getObjectStateController(): import("./CoreManager").ObjectStateController;
-        setPushController(controller: import("./CoreManager").PushController): void;
-        getPushController(): import("./CoreManager").PushController;
-        setQueryController(controller: import("./CoreManager").QueryController): void;
-        getQueryController(): import("./CoreManager").QueryController;
-        setRESTController(controller: import("./CoreManager").RESTController): void;
-        getRESTController(): import("./CoreManager").RESTController;
-        setSchemaController(controller: import("./CoreManager").SchemaController): void;
-        getSchemaController(): import("./CoreManager").SchemaController;
-        setSessionController(controller: import("./CoreManager").SessionController): void;
-        getSessionController(): import("./CoreManager").SessionController;
-        setStorageController(controller: {
-            async: 0;
-            getItem: (path: string) => string | null;
-            setItem: (path: string, value: string) => void;
-            removeItem: (path: string) => void;
-            getItemAsync?: (path: string) => Promise<string | null>;
-            setItemAsync?: (path: string, value: string) => Promise<void>;
-            removeItemAsync?: (path: string) => Promise<void>;
-            clear: () => void;
-            getAllKeys?: () => string[];
-            getAllKeysAsync?: () => Promise<string[]>;
-        } | {
-            async: 1;
-            getItem?: (path: string) => string | null;
-            setItem?: (path: string, value: string) => void;
-            removeItem?: (path: string) => void;
-            getItemAsync: (path: string) => Promise<string | null>;
-            setItemAsync: (path: string, value: string) => Promise<void>;
-            removeItemAsync: (path: string) => Promise<void>;
-            clear: () => void;
-            getAllKeys?: () => string[];
-            getAllKeysAsync?: () => Promise<string[]>;
-        }): void;
-        setLocalDatastoreController(controller: import("./CoreManager").LocalDatastoreController): void;
-        getLocalDatastoreController(): import("./CoreManager").LocalDatastoreController;
-        setLocalDatastore(store: any): void;
-        getLocalDatastore(): any;
-        getStorageController(): {
-            async: 0;
-            getItem: (path: string) => string | null;
-            setItem: (path: string, value: string) => void;
-            removeItem: (path: string) => void;
-            getItemAsync?: (path: string) => Promise<string | null>;
-            setItemAsync?: (path: string, value: string) => Promise<void>;
-            removeItemAsync?: (path: string) => Promise<void>;
-            clear: () => void;
-            getAllKeys?: () => string[];
-            getAllKeysAsync?: () => Promise<string[]>;
-        } | {
-            async: 1;
-            getItem?: (path: string) => string | null;
-            setItem?: (path: string, value: string) => void;
-            removeItem?: (path: string) => void;
-            getItemAsync: (path: string) => Promise<string | null>;
-            setItemAsync: (path: string, value: string) => Promise<void>;
-            removeItemAsync: (path: string) => Promise<void>;
-            clear: () => void;
-            getAllKeys?: () => string[];
-            getAllKeysAsync?: () => Promise<string[]>;
-        };
-        setAsyncStorage(storage: import("./CoreManager").AsyncStorageType): void;
-        getAsyncStorage(): import("./CoreManager").AsyncStorageType;
-        setWebSocketController(controller: new (url: string | URL, protocols?: string | string[] | undefined) => import("./CoreManager").WebSocketController): void;
-        getWebSocketController(): new (url: string | URL, protocols?: string | string[] | undefined) => import("./CoreManager").WebSocketController;
-        setUserController(controller: import("./CoreManager").UserController): void;
-        getUserController(): import("./CoreManager").UserController;
-        setLiveQueryController(controller: import("./CoreManager").LiveQueryControllerType): void;
-        getLiveQueryController(): import("./CoreManager").LiveQueryControllerType;
-        setHooksController(controller: import("./CoreManager").HooksController): void;
-        getHooksController(): import("./CoreManager").HooksController;
-        setParseOp(op: any): void;
-        getParseOp(): any;
-        setParseObject(object: any): void;
-        getParseObject(): any;
-        setParseQuery(query: any): void;
-        getParseQuery(): any;
-        setParseRole(role: any): void;
-        getParseRole(): any;
-        setParseUser(user: any): void;
-        getParseUser(): any;
-    };
+    CoreManager: typeof CoreManager;
     Config: typeof Config;
     Error: typeof ParseError;
-    FacebookUtils: {
-        init(options: any): void;
-        isLinked(user: any): any;
-        logIn(permissions: any, options: any): Promise<User<import("./ParseObject").Attributes>>;
-        link(user: any, permissions: any, options: any): any;
-        unlink: (user: any, options: any) => any;
-        _getAuthProvider(): import("./ParseUser").AuthProvider;
-    };
+    FacebookUtils: typeof FacebookUtils;
     File: typeof File;
     GeoPoint: typeof GeoPoint;
     Polygon: typeof Polygon;
     Installation: typeof Installation;
-    LocalDatastore: {
-        isEnabled: boolean;
-        isSyncing: boolean;
-        fromPinWithName(name: string): Promise<any[]>;
-        pinWithName(name: string, value: any): Promise<void>;
-        unPinWithName(name: string): Promise<void>;
-        _getAllContents(): Promise<any>;
-        _getRawStorage(): Promise<any>;
-        _clear(): Promise<void>;
-        _handlePinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
-        _handleUnPinAllWithName(name: string, objects: ParseObject[]): Promise<any[]>;
-        _getChildren(object: ParseObject): any;
-        _traverse(object: any, encountered: any): void;
-        _serializeObjectsFromPinName(name: string): Promise<any[]>;
-        _serializeObject(objectKey: string, localDatastore: any): Promise<any>;
-        _updateObjectIfPinned(object: ParseObject): Promise<void>;
-        _destroyObjectIfPinned(object: ParseObject): Promise<any[]>;
-        _updateLocalIdForObject(localId: string, object: ParseObject): Promise<any[]>;
-        updateFromServer(): Promise<void>;
-        getKeyForObject(object: any): string;
-        getPinName(pinName?: string): string;
-        checkIfEnabled(): any;
-    };
+    LocalDatastore: typeof LocalDatastore;
     Object: typeof ParseObject;
     Op: {
         Set: typeof ParseOp.SetOp;
@@ -200,19 +61,7 @@ declare const Parse: {
     Role: typeof Role;
     Schema: typeof Schema;
     Session: typeof Session;
-    Storage: {
-        async(): boolean;
-        getItem(path: string): string | null;
-        getItemAsync(path: string): Promise<string | null>;
-        setItem(path: string, value: string): void;
-        setItemAsync(path: string, value: string): Promise<void>;
-        removeItem(path: string): void;
-        removeItemAsync(path: string): Promise<void>;
-        getAllKeys(): string[];
-        getAllKeysAsync(): Promise<string[]>;
-        generatePath(path: string): string;
-        _clear(): void;
-    };
+    Storage: typeof Storage;
     User: typeof User;
     LiveQueryClient: typeof LiveQueryClient;
     IndexedDB: any;
@@ -227,8 +76,8 @@ declare const Parse: {
      * Call this method first to set up your authentication tokens for Parse.
      *
      * @param {string} applicationId Your Parse Application ID.
-     * @param {string} [javaScriptKey] Your Parse JavaScript Key (Not needed for parse-server)
-     * @param {string} [masterKey] Your Parse Master Key. (Node.js only!)
+     * @param {string} javaScriptKey Your Parse JavaScript Key (Not needed for parse-server)
+     * @note Node.js builds (parse/node) support additional parameters: masterKey and maintenanceKey.
      * @static
      */
     initialize(applicationId: string, javaScriptKey: string): void;
@@ -261,27 +110,27 @@ declare const Parse: {
      * @property {string} Parse.applicationId
      * @static
      */
-    applicationId: any;
+    applicationId: string | undefined;
     /**
      * @property {string} Parse.javaScriptKey
      * @static
      */
-    javaScriptKey: any;
+    javaScriptKey: string | undefined;
     /**
      * @property {string} Parse.masterKey
      * @static
      */
-    masterKey: any;
+    masterKey: string | undefined;
     /**
      * @property {string} Parse.maintenanceKey
      * @static
      */
-    maintenanceKey: any;
+    maintenanceKey: string | undefined;
     /**
      * @property {string} Parse.serverURL
      * @static
      */
-    serverURL: any;
+    serverURL: string | undefined;
     /**
      * @property {ParseLiveQuery} Parse.LiveQuery
      * @static
@@ -291,7 +140,7 @@ declare const Parse: {
      * @property {string} Parse.liveQueryServerURL
      * @static
      */
-    liveQueryServerURL: any;
+    liveQueryServerURL: string | undefined;
     /**
      * @property {boolean} Parse.encryptedUser
      * @static
@@ -301,17 +150,17 @@ declare const Parse: {
      * @property {string} Parse.secret
      * @static
      */
-    secret: any;
+    secret: string | undefined;
     /**
      * @property {boolean} Parse.idempotency
      * @static
      */
-    idempotency: any;
+    idempotency: boolean | undefined;
     /**
      * @property {boolean} Parse.allowCustomObjectId
      * @static
      */
-    allowCustomObjectId: any;
+    allowCustomObjectId: boolean | undefined;
     /**
      * Setting this property to `true` enables enhanced logging for `Parse.Object`
      * in Node.js environments. Specifically, it will log:
@@ -327,11 +176,11 @@ declare const Parse: {
      * @property {boolean} Parse.nodeLogging
      * @static
      */
-    nodeLogging: any;
-    _request(...args: any[]): any;
-    _ajax(...args: any[]): any;
+    nodeLogging: boolean | undefined;
+    _request(...args: any[]): Promise<any>;
+    _ajax(...args: any[]): Promise<any>;
     _decode(_: any, value: any): any;
-    _encode(value: any, _: any, disallowObjects: any): any;
+    _encode(value: any, _: any, disallowObjects?: boolean): any;
     _getInstallationId(): Promise<string>;
     /**
      * Enable pinning in your application.
@@ -373,6 +222,7 @@ declare const Parse: {
      * @static
      * @returns {boolean}
      */
-    isEncryptedUserEnabled(): any;
-};
+    isEncryptedUserEnabled(): boolean;
+}
+declare const Parse: Parse;
 export default Parse;

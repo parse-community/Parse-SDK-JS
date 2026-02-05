@@ -20,10 +20,6 @@ const mockWeChat = require('./test_helpers/mockWeChat');
 
 global.wx = mockWeChat;
 
-jest.mock('uuid', () => {
-  return () => 0;
-});
-
 describe('WeChat', () => {
   beforeEach(() => {
     process.env.PARSE_BUILD = 'weapp';

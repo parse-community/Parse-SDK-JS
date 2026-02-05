@@ -549,170 +549,256 @@ async function test_facebook_util() {
 async function test_cloud_functions() {
   // $ExpectType any
   await Parse.Cloud.run('SomeFunction');
+
   // $ExpectType any
   await Parse.Cloud.run('SomeFunction', { something: 'whatever' });
+
   // $ExpectType any
   await Parse.Cloud.run('SomeFunction', null, { useMasterKey: true });
-  // ExpectType boolean
+
+  // $ExpectType boolean
   await Parse.Cloud.run<() => boolean>('SomeFunction');
+
   // $ExpectType boolean
   await Parse.Cloud.run<() => boolean>('SomeFunction', null);
+
   // $ExpectType boolean
   await Parse.Cloud.run<() => boolean>('SomeFunction', null, { useMasterKey: true });
+
   // $ExpectType number
-  await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction', {
-    paramA: 'hello',
-  });
-  // $ExpectError
+  await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction', { paramA: 'hello' });
+
+  // @ts-expect-error - params are required
   await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction');
-  await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction', {
-    // $ExpectError
-    paramZ: 'hello',
-  });
-  // $ExpectError
-  await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction', null, {
-    useMasterKey: true,
-  });
-  // $ExpectError
+
+  // @ts-expect-error - wrong param name
+  await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction', { paramZ: 'hello' });
+
+  // @ts-expect-error - params are required, null not allowed
+  await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction', null, { useMasterKey: true });
+
+  // @ts-expect-error - params must be object not string
   await Parse.Cloud.run<(params: string) => any>('SomeFunction', 'hello');
-  // Parse.Cloud.afterDelete('MyCustomClass', (request: Parse.Cloud.AfterDeleteRequest) => {
-  //   // result
-  // });
-  // Parse.Cloud.afterSave('MyCustomClass', (request: Parse.Cloud.AfterSaveRequest) => {
-  //   if (!request.context) {
-  //     throw new Error('Request context should be defined');
-  //   }
-  //   // result
-  // });
-  // Parse.Cloud.beforeDelete('MyCustomClass', (request: Parse.Cloud.BeforeDeleteRequest) => {
-  //   // result
-  // });
-  // Parse.Cloud.beforeDelete('MyCustomClass', async (request: Parse.Cloud.BeforeDeleteRequest) => {
-  //   // result
-  // });
-  // interface BeforeSaveObject {
-  //   immutable: boolean;
-  // }
-  // Parse.Cloud.beforeSave('MyCustomClass', request => {
-  //   if (request.object.isNew()) {
-  //     if (!request.object.has('immutable')) throw new Error('Field immutable is required');
-  //   } else {
-  //     const original = request.original;
-  //     if (original == null) {
-  //       // When the object is not new, request.original must be defined
-  //       throw new Error('Original must me defined for an existing object');
-  //     }
-  //     if (original.get('immutable') !== request.object.get('immutable')) {
-  //       throw new Error('This field cannot be changed');
-  //     }
-  //   }
-  //   if (!request.context) {
-  //     throw new Error('Request context should be defined');
-  //   }
-  // });
-  // Parse.Cloud.beforeFind('MyCustomClass', (request: Parse.Cloud.BeforeFindRequest) => {
-  //   const query = request.query; // the Parse.Query
-  //   const user = request.user; // the user
-  //   const isMaster = request.master; // if the query is run with masterKey
-  //   const isCount = request.count; // if the query is a count operation (available on parse-server 2.4.0 or up)
-  //   const isGet = request.isGet; // if the query is a get operation
-  //   // All possible read preferences
-  //   request.readPreference = Parse.Cloud.ReadPreferenceOption.Primary;
-  //   request.readPreference = Parse.Cloud.ReadPreferenceOption.PrimaryPreferred;
-  //   request.readPreference = Parse.Cloud.ReadPreferenceOption.Secondary;
-  //   request.readPreference = Parse.Cloud.ReadPreferenceOption.SecondaryPreferred;
-  //   request.readPreference = Parse.Cloud.ReadPreferenceOption.Nearest;
-  // });
-  // Parse.Cloud.beforeFind('MyCustomClass', (request: Parse.Cloud.BeforeFindRequest) => {
-  //   const query = request.query; // the Parse.Query
-  //   return new Parse.Query('QueryMe!');
-  // });
-  // Parse.Cloud.beforeFind('MyCustomClass', (request: Parse.Cloud.BeforeFindRequest) => {
-  //   const query = request.query; // the Parse.Query
-  //   return new Parse.Query('QueryMe, IN THE FUTURE!');
-  // });
-  // Parse.Cloud.afterFind('MyCustomClass', (request: Parse.Cloud.AfterFindRequest) => {
-  //   return new Parse.Object('MyCustomClass');
-  // });
-  // Parse.Cloud.beforeLogin((request: Parse.Cloud.TriggerRequest) => {
-  //   return Promise.resolve();
-  // });
-  // Parse.Cloud.afterLogin((request: Parse.Cloud.TriggerRequest) => {
-  //   return Promise.resolve();
-  // });
-  // Parse.Cloud.afterLogout((request: Parse.Cloud.TriggerRequest) => {
-  //   return Promise.resolve();
-  // });
-  // Parse.Cloud.beforeSaveFile((request: Parse.Cloud.FileTriggerRequest) => {
-  //   return Promise.resolve(new Parse.File('myFile.txt', { base64: '' }));
-  // });
-  // Parse.Cloud.beforeSaveFile((request: Parse.Cloud.FileTriggerRequest) => {});
-  // Parse.Cloud.beforeDeleteFile((request: Parse.Cloud.FileTriggerRequest) => {});
-  // Parse.Cloud.afterDeleteFile((request: Parse.Cloud.FileTriggerRequest) => {});
-  // Parse.Cloud.define('AFunc', (request: Parse.Cloud.FunctionRequest) => {
-  //   return 'Some result';
-  // });
-  // Parse.Cloud.define(
-  //   'AFunc',
-  //   (request: Parse.Cloud.FunctionRequest) => {
-  //     return 'Some result';
-  //   },
-  //   {
-  //     requireUser: true,
-  //     requireMaster: true,
-  //     validateMasterKey: true,
-  //     skipWithMasterKey: true,
-  //     requireAnyUserRoles: ['a'],
-  //     requireAllUserRoles: ['a'],
-  //     fields: {
-  //       name: {
-  //         type: String,
-  //         constant: true,
-  //         default: true,
-  //         options: [],
-  //         error: 'invalid field.',
-  //       },
-  //     },
-  //     requireUserKeys: {
-  //       name: {
-  //         type: String,
-  //         constant: true,
-  //         default: true,
-  //         options: [],
-  //         error: 'invalid field.',
-  //       },
-  //     },
-  //   }
-  // );
-  // Parse.Cloud.define('AFunc', request => {
-  //   // $ExpectType Params
-  //   request.params;
-  //   // $ExpectType any
-  //   request.params.anything;
-  // });
-  // Parse.Cloud.define<() => void>('AFunc', request => {
-  //   // $ExpectType {}
-  //   request.params;
-  // });
-  // Parse.Cloud.define<(params: { something: string }) => number>('AFunc', request => {
-  //   // $ExpectType { something: string; }
-  //   request.params;
-  //   // $ExpectError
-  //   request.params.somethingElse;
-  //   return 123;
-  // });
-  // // $ExpectError
-  // Parse.Cloud.define('AFunc');
-  // // $ExpectError
-  // Parse.Cloud.define<() => string>('AFunc', () => 123);
-  // // $ExpectError
-  // Parse.Cloud.define<(params: string) => number>('AFunc', () => 123);
-  // Parse.Cloud.job('AJob', (request: Parse.Cloud.JobRequest) => {
-  //   request.message('Message to associate with this job run');
-  // });
-  await Parse.Cloud.startJob('AJob', {}).then(v => v);
-  await Parse.Cloud.getJobStatus('AJob').then(v => v);
-  await Parse.Cloud.getJobsData().then(v => v);
+
+  ParseNode.Cloud.afterDelete('MyCustomClass', request => {
+    request.object;
+    request.user;
+  });
+
+  ParseNode.Cloud.afterSave('MyCustomClass', request => {
+    if (!request.context) {
+      throw new Error('Request context should be defined');
+    }
+    request.object;
+  });
+
+  ParseNode.Cloud.beforeDelete('MyCustomClass', request => {
+    request.object;
+  });
+
+  ParseNode.Cloud.beforeSave('MyCustomClass', request => {
+    if (request.object.isNew()) {
+      if (!request.object.has('immutable')) throw new Error('Field immutable is required');
+    } else {
+      const original = request.original;
+      if (original == null) {
+        throw new Error('Original must be defined for an existing object');
+      }
+      if (original.get('immutable') !== request.object.get('immutable')) {
+        throw new Error('This field cannot be changed');
+      }
+    }
+    if (!request.context) {
+      throw new Error('Request context should be defined');
+    }
+  });
+
+  ParseNode.Cloud.beforeFind('MyCustomClass', request => {
+    request.query;
+    request.user;
+    request.master;
+    request.count;
+    request.isGet;
+
+    request.readPreference = ParseNode.Cloud.ReadPreferenceOption.Primary;
+    request.readPreference = ParseNode.Cloud.ReadPreferenceOption.PrimaryPreferred;
+    request.readPreference = ParseNode.Cloud.ReadPreferenceOption.Secondary;
+    request.readPreference = ParseNode.Cloud.ReadPreferenceOption.SecondaryPreferred;
+    request.readPreference = ParseNode.Cloud.ReadPreferenceOption.Nearest;
+  });
+
+  ParseNode.Cloud.beforeFind('MyCustomClass', request => {
+    request.query;
+    return new Parse.Query('QueryMe!');
+  });
+
+  ParseNode.Cloud.afterFind('MyCustomClass', request => {
+    request.results;
+    return request.results;
+  });
+
+  ParseNode.Cloud.beforeLogin(request => {
+    request.object;
+    request.user;
+  });
+
+  ParseNode.Cloud.afterLogin(request => {
+    request.object;
+  });
+
+  ParseNode.Cloud.afterLogout(request => {
+    request.object;
+  });
+
+  ParseNode.Cloud.beforeSaveFile(request => {
+    request.file;
+    request.fileSize;
+    return new Parse.File('myFile.txt', { base64: '' });
+  });
+
+  ParseNode.Cloud.beforeSaveFile(request => {
+    request.file;
+  });
+
+  ParseNode.Cloud.beforeDeleteFile(request => {
+    request.file;
+  });
+
+  ParseNode.Cloud.afterDeleteFile(request => {
+    request.file;
+  });
+
+  ParseNode.Cloud.beforeConnect(request => {
+    request.user;
+    request.installationId;
+    request.useMasterKey;
+    request.clients;
+    request.subscriptions;
+    request.sessionToken;
+  });
+
+  ParseNode.Cloud.beforeSubscribe('MyCustomClass', request => {
+    request.object;
+    request.user;
+    request.original;
+    request.installationId;
+  });
+
+  ParseNode.Cloud.afterLiveQueryEvent('MyCustomClass', request => {
+    request.event;
+    request.object;
+    request.original;
+    request.user;
+    request.sendEvent;
+    request.clients;
+    request.subscriptions;
+    request.sessionToken;
+  });
+
+  ParseNode.Cloud.beforePasswordResetRequest(request => {
+    request.object;
+    request.user;
+    request.master;
+    request.ip;
+    request.headers;
+  });
+
+  void ParseNode.Cloud.httpRequest({
+    url: 'https://example.com',
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: { key: 'value' },
+    followRedirects: true,
+  }).then(response => {
+    response.status;
+    response.data;
+    response.text;
+    response.headers;
+    response.buffer;
+    response.cookies;
+  });
+
+  void ParseNode.Cloud.sendEmail({
+    to: 'test@example.com',
+    from: 'sender@example.com',
+    subject: 'Test Subject',
+    text: 'Plain text content',
+    html: '<p>HTML content</p>',
+  });
+
+  ParseNode.Cloud.define('AFunc', request => {
+    request.params;
+    return 'Some result';
+  });
+
+  ParseNode.Cloud.define(
+    'AFunc',
+    request => {
+      request.params;
+      return 'Some result';
+    },
+    {
+      requireUser: true,
+      requireMaster: true,
+      validateMasterKey: true,
+      skipWithMasterKey: true,
+      requireAnyUserRoles: ['a'],
+      requireAllUserRoles: ['a'],
+      fields: {
+        name: {
+          type: String,
+          constant: true,
+          default: true,
+          options: [],
+          error: 'invalid field.',
+        },
+      },
+      requireUserKeys: {
+        name: {
+          type: String,
+          constant: true,
+          default: true,
+          options: [],
+          error: 'invalid field.',
+        },
+      },
+    },
+  );
+
+  ParseNode.Cloud.define('AFunc', request => {
+    request.params;
+    request.params.anything;
+  });
+
+  ParseNode.Cloud.job('AJob', request => {
+    request.params;
+    request.message('Message to associate with this job run');
+  });
+
+  void Parse.Cloud.startJob('AJob', {}).then(v => v);
+
+  void Parse.Cloud.getJobStatus('AJob').then(v => v);
+
+  void Parse.Cloud.getJobsData().then(v => v);
+
+  // @ts-expect-error - define should not exist on browser Parse.Cloud
+  Parse.Cloud.define('test', () => {});
+  // @ts-expect-error - beforeSave should not exist on browser Parse.Cloud
+  Parse.Cloud.beforeSave('Test', () => {});
+  // @ts-expect-error - job should not exist on browser Parse.Cloud
+  Parse.Cloud.job('test', () => {});
+  // @ts-expect-error - httpRequest should not exist on browser Parse.Cloud
+  void Parse.Cloud.httpRequest({ url: '' });
+  // @ts-expect-error - beforeConnect should not exist on browser Parse.Cloud
+  Parse.Cloud.beforeConnect(() => {});
+  // @ts-expect-error - beforeSubscribe should not exist on browser Parse.Cloud
+  Parse.Cloud.beforeSubscribe('Test', () => {});
+  // @ts-expect-error - afterLiveQueryEvent should not exist on browser Parse.Cloud
+  Parse.Cloud.afterLiveQueryEvent('Test', () => {});
+  // @ts-expect-error - beforePasswordResetRequest should not exist on browser Parse.Cloud
+  Parse.Cloud.beforePasswordResetRequest(() => {});
+  // @ts-expect-error - sendEmail should not exist on browser Parse.Cloud
+  void Parse.Cloud.sendEmail({ to: '' });
 }
 
 class PlaceObject extends Parse.Object {}
@@ -904,6 +990,7 @@ async function test_cancel_query() {
   query.cancel();
 }
 
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents -- object is intentionally included for testing Exclude<FieldType, object>. */
 type FieldType =
   | string
   | number
@@ -916,6 +1003,7 @@ type FieldType =
   | Parse.Pointer
   | Parse.Polygon
   | Parse.Relation;
+/* eslint-enable @typescript-eslint/no-redundant-type-constituents */
 async function test_schema(
   anyField: FieldType,
   notString: Exclude<FieldType, string>,
@@ -2254,3 +2342,25 @@ function LiveQueryEvents() {
     Parse.LiveQuery.on('error', (error: any) => {});
   }
 }
+
+function testInitialize() {
+  // Browser - 2 params (strict)
+  Parse.initialize('appId', 'jsKey');
+
+  // Browser - should error when trying to pass masterKey
+  // @ts-expect-error - Browser build should not accept masterKey
+  Parse.initialize('appId', 'jsKey', 'masterKey');
+
+  // Node - permissive 4 params (should work)
+  ParseNode.initialize('appId', 'jsKey', 'masterKey', 'maintenanceKey');
+
+  // Node - 3 params (should also work)
+  ParseNode.initialize('appId', 'jsKey', 'masterKey');
+
+  // Node - 2 params (should also work)
+  ParseNode.initialize('appId', 'jsKey');
+
+  // Node - 1 param (should also work since javaScriptKey is optional in node)
+  ParseNode.initialize('appId');
+}
+

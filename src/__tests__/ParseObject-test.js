@@ -166,8 +166,8 @@ CoreManager.setInstallationController({
   currentInstallationId() {
     return Promise.resolve('iid');
   },
-  currentInstallation() {},
-  updateInstallationOnDisk() {},
+  currentInstallation() { },
+  updateInstallationOnDisk() { },
 });
 CoreManager.set('APPLICATION_ID', 'A');
 CoreManager.set('JAVASCRIPT_KEY', 'B');
@@ -1413,9 +1413,9 @@ describe('ParseObject', () => {
     const objectController = CoreManager.getObjectController();
     const spy = jest
       .spyOn(objectController, 'fetch')
-      .mockImplementationOnce(() => {})
-      .mockImplementationOnce(() => {})
-      .mockImplementationOnce(() => {});
+      .mockImplementationOnce(() => { })
+      .mockImplementationOnce(() => { })
+      .mockImplementationOnce(() => { });
 
     const parent = new ParseObject('Person');
     await parent.fetchWithInclude('child', {
@@ -1517,9 +1517,9 @@ describe('ParseObject', () => {
     const objectController = CoreManager.getObjectController();
     const spy = jest
       .spyOn(objectController, 'fetch')
-      .mockImplementationOnce(() => {})
-      .mockImplementationOnce(() => {})
-      .mockImplementationOnce(() => {});
+      .mockImplementationOnce(() => { })
+      .mockImplementationOnce(() => { })
+      .mockImplementationOnce(() => { });
 
     const parent = new ParseObject('Person');
     await ParseObject.fetchAllWithInclude([parent], 'child', {
@@ -1545,9 +1545,9 @@ describe('ParseObject', () => {
     const objectController = CoreManager.getObjectController();
     const spy = jest
       .spyOn(objectController, 'fetch')
-      .mockImplementationOnce(() => {})
-      .mockImplementationOnce(() => {})
-      .mockImplementationOnce(() => {});
+      .mockImplementationOnce(() => { })
+      .mockImplementationOnce(() => { })
+      .mockImplementationOnce(() => { });
 
     const parent = new ParseObject('Person');
     await ParseObject.fetchAllIfNeededWithInclude([parent], 'child', {
@@ -1610,7 +1610,7 @@ describe('ParseObject', () => {
   });
 
   it('can save the object eventually', async () => {
-    mockFetch([{ status: 200, response: {objectId: 'PFEventually' } }]);
+    mockFetch([{ status: 200, response: { objectId: 'PFEventually' } }]);
     const p = new ParseObject('Person');
     p.set('age', 38);
     const obj = await p.saveEventually();
@@ -1623,7 +1623,7 @@ describe('ParseObject', () => {
   it('can save the object eventually on network failure', async () => {
     const p = new ParseObject('Person');
     jest.spyOn(EventuallyQueue, 'save').mockImplementationOnce(() => Promise.resolve());
-    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => { });
     jest.spyOn(p, 'save').mockImplementationOnce(() => {
       throw new ParseError(
         ParseError.CONNECTION_FAILED,
@@ -1638,7 +1638,7 @@ describe('ParseObject', () => {
   it('should not save the object eventually on error', async () => {
     const p = new ParseObject('Person');
     jest.spyOn(EventuallyQueue, 'save').mockImplementationOnce(() => Promise.resolve());
-    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => { });
     jest.spyOn(p, 'save').mockImplementationOnce(() => {
       throw new ParseError(ParseError.OTHER_CAUSE, 'Tried to save a batch with a cycle.');
     });
@@ -1751,12 +1751,12 @@ describe('ParseObject', () => {
     const p = new ParseObject('Per$on');
     expect(p._getPendingOps().length).toBe(1);
     p.increment('updates');
-    p.save().catch(() => {});
+    p.save().catch(() => { });
     jest.runAllTicks();
     await flushPromises();
     expect(p._getPendingOps().length).toBe(1);
     p.set('updates', 12);
-    p.save().catch(() => {});
+    p.save().catch(() => { });
     jest.runAllTicks();
     await flushPromises();
     expect(p._getPendingOps().length).toBe(1);
@@ -2491,7 +2491,7 @@ describe('ObjectController', () => {
 
   it('can fetch a single object', async () => {
     const objectController = CoreManager.getObjectController();
-    mockFetch([{ status: 200, response: { objectId: 'pid'} }]);
+    mockFetch([{ status: 200, response: { objectId: 'pid' } }]);
 
     const o = new ParseObject('Person');
     o.id = 'pid';
@@ -2535,7 +2535,7 @@ describe('ObjectController', () => {
   it('can fetch a single object with include', async () => {
     expect.assertions(2);
     const objectController = CoreManager.getObjectController();
-    mockFetch([{ status: 200, response: { objectId: 'pid'} }]);
+    mockFetch([{ status: 200, response: { objectId: 'pid' } }]);
 
     const o = new ParseObject('Person');
     o.id = 'pid';
@@ -2706,7 +2706,7 @@ describe('ObjectController', () => {
   it('can destroy the object eventually on network failure', async () => {
     const p = new ParseObject('Person');
     jest.spyOn(EventuallyQueue, 'destroy').mockImplementationOnce(() => Promise.resolve());
-    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => { });
     jest.spyOn(p, 'destroy').mockImplementationOnce(() => {
       throw new ParseError(
         ParseError.CONNECTION_FAILED,
@@ -2721,7 +2721,7 @@ describe('ObjectController', () => {
   it('should not destroy object eventually on error', async () => {
     const p = new ParseObject('Person');
     jest.spyOn(EventuallyQueue, 'destroy').mockImplementationOnce(() => Promise.resolve());
-    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => {});
+    jest.spyOn(EventuallyQueue, 'poll').mockImplementationOnce(() => { });
     jest.spyOn(p, 'destroy').mockImplementationOnce(() => {
       throw new ParseError(ParseError.OTHER_CAUSE, 'Unable to delete.');
     });
@@ -2758,7 +2758,7 @@ describe('ObjectController', () => {
     for (let i = 0; i < 3; i++) {
       responses.push({
         status: 200,
-        response:{
+        response: {
           name: names[i],
           url: 'http://files.parsetfss.com/a/' + names[i],
         },
@@ -3117,7 +3117,7 @@ describe('ParseObject Subclasses', () => {
   });
 
   it('can use on ParseObject subclass for multiple Parse.Object class names', () => {
-    class MyParseObjects extends ParseObject {}
+    class MyParseObjects extends ParseObject { }
     ParseObject.registerSubclass('TestObject', MyParseObjects);
     ParseObject.registerSubclass('TestObject1', MyParseObjects);
     ParseObject.registerSubclass('TestObject2', MyParseObjects);
@@ -3541,5 +3541,120 @@ describe('ParseObject pin', () => {
       `ParseObject: className: Person, id: undefined\nAttributes: {\n  \"foo\": \"bar\"\n}`
     );
     CoreManager.set('NODE_LOGGING', false);
+  });
+
+  describe('Prototype Pollution Protection', () => {
+    beforeEach(() => {
+      // Clear any pollution before each test
+      delete Object.prototype.polluted;
+      delete Object.prototype.malicious;
+      delete Object.prototype.exploit;
+    });
+
+    afterEach(() => {
+      // Clean up after tests
+      delete Object.prototype.polluted;
+      delete Object.prototype.malicious;
+      delete Object.prototype.exploit;
+    });
+
+    it('should not pollute Object.prototype via prototype className in registerSubclass', () => {
+      const testObj = {};
+
+      class MaliciousClass extends ParseObject {
+        constructor() {
+          super('prototype');
+        }
+      }
+
+      ParseObject.registerSubclass('prototype', MaliciousClass);
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+    });
+
+    it('should not pollute Object.prototype when parsing JSON with __proto__ className', () => {
+      const testObj = {};
+
+      const maliciousJSON = {
+        className: '__proto__',
+        objectId: 'test123',
+        polluted: 'yes',
+      };
+
+      ParseObject.fromJSON(maliciousJSON);
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+    });
+
+    it('should not pollute Object.prototype when parsing JSON with constructor className', () => {
+      const testObj = {};
+
+      const maliciousJSON = {
+        className: 'constructor',
+        objectId: 'test456',
+        malicious: 'data',
+      };
+
+      ParseObject.fromJSON(maliciousJSON);
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.malicious).toBeUndefined();
+      expect({}.malicious).toBeUndefined();
+    });
+
+    it('should not pollute Object.prototype when parsing JSON with prototype className', () => {
+      const testObj = {};
+
+      const maliciousJSON = {
+        className: 'prototype',
+        objectId: 'test789',
+        exploit: 'here',
+      };
+
+      ParseObject.fromJSON(maliciousJSON);
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.exploit).toBeUndefined();
+      expect({}.exploit).toBeUndefined();
+    });
+
+    it('should not pollute when creating objects with malicious class names', () => {
+      const testObj = {};
+
+      const maliciousClasses = ['__proto__', 'constructor', 'prototype'];
+
+      maliciousClasses.forEach(className => {
+        const obj = new ParseObject(className);
+        obj.set('polluted', 'yes');
+      });
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+    });
+
+    it('should not pollute when fromJSON is called multiple times with malicious classNames', () => {
+      const testObj = {};
+
+      const maliciousObjects = [
+        { className: '__proto__', objectId: '1', polluted: 'yes' },
+        { className: 'constructor', objectId: '2', malicious: 'data' },
+        { className: 'prototype', objectId: '3', exploit: 'here' },
+      ];
+
+      maliciousObjects.forEach(json => ParseObject.fromJSON(json));
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect(testObj.malicious).toBeUndefined();
+      expect(testObj.exploit).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect({}.malicious).toBeUndefined();
+      expect({}.exploit).toBeUndefined();
+    });
   });
 });

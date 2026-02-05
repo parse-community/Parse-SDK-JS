@@ -7,6 +7,7 @@ jest.dontMock('../EventEmitter');
 jest.dontMock('../Parse');
 jest.dontMock('../RESTController');
 jest.dontMock('../Storage');
+jest.dontMock('../uuid');
 jest.dontMock('crypto-js/aes');
 jest.setMock('../EventuallyQueue', { poll: jest.fn() });
 
@@ -150,5 +151,14 @@ describe('Browser', () => {
       expect(e.message).toBe('Unexpected end of JSON input');
     }
     expect(called).toBe(true);
+  });
+
+  it('load uuid module', () => {
+    const uuidv4 = require('../uuid').default;
+    const uuid1 = uuidv4();
+    const uuid2 = uuidv4();
+    expect(uuid1).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    expect(uuid2).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    expect(uuid1).not.toEqual(uuid2);
   });
 });
