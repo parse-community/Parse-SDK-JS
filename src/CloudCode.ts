@@ -3,6 +3,8 @@ import type ParseUser from './ParseUser';
 import type ParseFile from './ParseFile';
 import type ParseQuery from './ParseQuery';
 
+type ParseObjectConstructor<T extends ParseObject = ParseObject> = new (...args: any[]) => T;
+
 /**
  * @typedef Parse.Cloud.FunctionRequest
  * @property {string} installationId If set, the installationId triggering the request.
@@ -282,7 +284,7 @@ export declare function job(name: string, handler: (request: JobRequest) => any)
  * @param validator An optional function to validate the request
  */
 export declare function beforeSave<T extends ParseObject = ParseObject>(
-  className: string | (new () => T),
+  className: string | ParseObjectConstructor<T>,
   handler: (request: BeforeSaveRequest<T>) => T | undefined | Promise<T | undefined>,
   validator?: ValidatorObject | ((request: BeforeSaveRequest<T>) => any)
 ): void;
@@ -310,7 +312,7 @@ export declare function beforeSave<T extends ParseObject = ParseObject>(
  * @param validator An optional function to validate the request
  */
 export declare function afterSave<T extends ParseObject = ParseObject>(
-  className: string | (new () => T),
+  className: string | ParseObjectConstructor<T>,
   handler: (request: AfterSaveRequest<T>) => Promise<void> | undefined,
   validator?: ValidatorObject | ((request: AfterSaveRequest<T>) => any)
 ): void;
@@ -338,7 +340,7 @@ export declare function afterSave<T extends ParseObject = ParseObject>(
  * @param validator An optional function to validate the request
  */
 export declare function beforeDelete<T extends ParseObject = ParseObject>(
-  className: string | (new () => T),
+  className: string | ParseObjectConstructor<T>,
   handler: (request: BeforeDeleteRequest<T>) => Promise<void> | undefined,
   validator?: ValidatorObject | ((request: BeforeDeleteRequest<T>) => any)
 ): void;
@@ -366,7 +368,7 @@ export declare function beforeDelete<T extends ParseObject = ParseObject>(
  * @param validator An optional function to validate the request
  */
 export declare function afterDelete<T extends ParseObject = ParseObject>(
-  className: string | (new () => T),
+  className: string | ParseObjectConstructor<T>,
   handler: (request: AfterDeleteRequest<T>) => Promise<void> | undefined,
   validator?: ValidatorObject | ((request: AfterDeleteRequest<T>) => any)
 ): void;
@@ -381,7 +383,7 @@ export declare function afterDelete<T extends ParseObject = ParseObject>(
  * @param validator An optional function to validate the request
  */
 export declare function beforeFind<T extends ParseObject = ParseObject>(
-  className: string | (new () => T),
+  className: string | ParseObjectConstructor<T>,
   handler: (request: BeforeFindRequest<T>) => ParseQuery<T> | undefined | Promise<ParseQuery<T> | undefined>,
   validator?: ValidatorObject | ((request: BeforeFindRequest<T>) => any)
 ): void;
@@ -396,7 +398,7 @@ export declare function beforeFind<T extends ParseObject = ParseObject>(
  * @param validator An optional function to validate the request
  */
 export declare function afterFind<T extends ParseObject = ParseObject>(
-  className: string | (new () => T),
+  className: string | ParseObjectConstructor<T>,
   handler: (request: AfterFindRequest<T>) => T[] | undefined | Promise<T[] | undefined>,
   validator?: ValidatorObject | ((request: AfterFindRequest<T>) => any)
 ): void;
@@ -552,7 +554,7 @@ export declare function beforeConnect(
  * @param validator An optional function to validate the request
  */
 export declare function beforeSubscribe<T extends ParseObject = ParseObject>(
-  className: string | (new () => T),
+  className: string | ParseObjectConstructor<T>,
   handler: (request: TriggerRequest<T>) => Promise<void> | undefined,
   validator?: ValidatorObject | ((request: TriggerRequest<T>) => any)
 ): void;
@@ -567,7 +569,7 @@ export declare function beforeSubscribe<T extends ParseObject = ParseObject>(
  * @param validator An optional function to validate the request
  */
 export declare function afterLiveQueryEvent<T extends ParseObject = ParseObject>(
-  className: string | (new () => T),
+  className: string | ParseObjectConstructor<T>,
   handler: (request: LiveQueryEventTrigger<T>) => Promise<void> | undefined,
   validator?: ValidatorObject | ((request: LiveQueryEventTrigger<T>) => any)
 ): void;

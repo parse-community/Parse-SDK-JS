@@ -613,6 +613,17 @@ async function test_cloud_functions() {
     }
   });
 
+  // Tests to allow for Parse.Object subclasses with non-optional constructor params.
+  class ArgObject extends Parse.Object<{ a: string }> {
+    constructor(arg: { a: string }) {
+      super('ArgObject', arg);
+    }
+  }
+  ParseNode.Cloud.beforeSave(ArgObject, request => {
+    // $ExpectType ArgObject
+    request.object;
+  });
+
   ParseNode.Cloud.beforeFind('MyCustomClass', request => {
     request.query;
     request.user;
@@ -2363,4 +2374,3 @@ function testInitialize() {
   // Node - 1 param (should also work since javaScriptKey is optional in node)
   ParseNode.initialize('appId');
 }
-
