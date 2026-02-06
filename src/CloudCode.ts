@@ -285,7 +285,7 @@ export declare function job(name: string, handler: (request: JobRequest) => any)
  */
 export declare function beforeSave<T extends ParseObject = ParseObject>(
   className: string | ParseObjectConstructor<T>,
-  handler: (request: BeforeSaveRequest<T>) => T | undefined | Promise<T | undefined>,
+  handler: (request: BeforeSaveRequest<T>) => void | T | undefined | Promise<void | T | undefined>,
   validator?: ValidatorObject | ((request: BeforeSaveRequest<T>) => any)
 ): void;
 
@@ -313,7 +313,7 @@ export declare function beforeSave<T extends ParseObject = ParseObject>(
  */
 export declare function afterSave<T extends ParseObject = ParseObject>(
   className: string | ParseObjectConstructor<T>,
-  handler: (request: AfterSaveRequest<T>) => Promise<void> | undefined,
+  handler: (request: AfterSaveRequest<T>) => void | Promise<void> | undefined,
   validator?: ValidatorObject | ((request: AfterSaveRequest<T>) => any)
 ): void;
 
@@ -341,7 +341,7 @@ export declare function afterSave<T extends ParseObject = ParseObject>(
  */
 export declare function beforeDelete<T extends ParseObject = ParseObject>(
   className: string | ParseObjectConstructor<T>,
-  handler: (request: BeforeDeleteRequest<T>) => Promise<void> | undefined,
+  handler: (request: BeforeDeleteRequest<T>) => void | Promise<void> | undefined,
   validator?: ValidatorObject | ((request: BeforeDeleteRequest<T>) => any)
 ): void;
 
@@ -369,7 +369,7 @@ export declare function beforeDelete<T extends ParseObject = ParseObject>(
  */
 export declare function afterDelete<T extends ParseObject = ParseObject>(
   className: string | ParseObjectConstructor<T>,
-  handler: (request: AfterDeleteRequest<T>) => Promise<void> | undefined,
+  handler: (request: AfterDeleteRequest<T>) => void | Promise<void> | undefined,
   validator?: ValidatorObject | ((request: AfterDeleteRequest<T>) => any)
 ): void;
 
@@ -384,7 +384,11 @@ export declare function afterDelete<T extends ParseObject = ParseObject>(
  */
 export declare function beforeFind<T extends ParseObject = ParseObject>(
   className: string | ParseObjectConstructor<T>,
-  handler: (request: BeforeFindRequest<T>) => ParseQuery<T> | undefined | Promise<ParseQuery<T> | undefined>,
+  handler: (request: BeforeFindRequest<T>) =>
+    | void
+    | ParseQuery<T>
+    | undefined
+    | Promise<void | ParseQuery<T> | undefined>,
   validator?: ValidatorObject | ((request: BeforeFindRequest<T>) => any)
 ): void;
 
@@ -399,7 +403,7 @@ export declare function beforeFind<T extends ParseObject = ParseObject>(
  */
 export declare function afterFind<T extends ParseObject = ParseObject>(
   className: string | ParseObjectConstructor<T>,
-  handler: (request: AfterFindRequest<T>) => T[] | undefined | Promise<T[] | undefined>,
+  handler: (request: AfterFindRequest<T>) => void | T[] | undefined | Promise<void | T[] | undefined>,
   validator?: ValidatorObject | ((request: AfterFindRequest<T>) => any)
 ): void;
 
@@ -412,7 +416,7 @@ export declare function afterFind<T extends ParseObject = ParseObject>(
  * @param validator An optional function to validate the request
  */
 export declare function beforeLogin(
-  handler: (request: TriggerRequest<ParseUser>) => Promise<void> | undefined,
+  handler: (request: TriggerRequest<ParseUser>) => void | Promise<void> | undefined,
   validator?: ValidatorObject | ((request: TriggerRequest<ParseUser>) => any)
 ): void;
 
@@ -424,7 +428,7 @@ export declare function beforeLogin(
  * @param handler The function to run after a login.
  */
 export declare function afterLogin(
-  handler: (request: TriggerRequest<ParseUser>) => Promise<void> | undefined
+  handler: (request: TriggerRequest<ParseUser>) => void | Promise<void> | undefined
 ): void;
 
 /**
@@ -435,7 +439,7 @@ export declare function afterLogin(
  * @param handler The function to run after a logout.
  */
 export declare function afterLogout(
-  handler: (request: TriggerRequest) => Promise<void> | undefined
+  handler: (request: TriggerRequest) => void | Promise<void> | undefined
 ): void;
 
 /**
@@ -447,7 +451,7 @@ export declare function afterLogout(
  * @param validator An optional function to validate the request
  */
 export declare function beforePasswordResetRequest(
-  handler: (request: TriggerRequest<ParseUser>) => Promise<void> | undefined,
+  handler: (request: TriggerRequest<ParseUser>) => void | Promise<void> | undefined,
   validator?: ValidatorObject | ((request: TriggerRequest<ParseUser>) => any)
 ): void;
 
@@ -468,7 +472,11 @@ export declare function beforePasswordResetRequest(
  * @param handler The function to run before a file saves.
  */
 export declare function beforeSaveFile(
-  handler: (request: FileTriggerRequest) => ParseFile | undefined | Promise<ParseFile | undefined>
+  handler: (request: FileTriggerRequest) =>
+    | void
+    | ParseFile
+    | undefined
+    | Promise<void | ParseFile | undefined>
 ): void;
 
 /**
@@ -488,7 +496,7 @@ export declare function beforeSaveFile(
  * @param handler The function to run after a file saves.
  */
 export declare function afterSaveFile(
-  handler: (request: FileTriggerRequest) => Promise<void> | undefined
+  handler: (request: FileTriggerRequest) => void | Promise<void> | undefined
 ): void;
 
 /**
@@ -499,7 +507,7 @@ export declare function afterSaveFile(
  * @param handler The function to run before a file is deleted.
  */
 export declare function beforeDeleteFile(
-  handler: (request: FileTriggerRequest) => Promise<void> | undefined
+  handler: (request: FileTriggerRequest) => void | Promise<void> | undefined
 ): void;
 
 /**
@@ -510,7 +518,7 @@ export declare function beforeDeleteFile(
  * @param handler The function to run after a file is deleted.
  */
 export declare function afterDeleteFile(
-  handler: (request: FileTriggerRequest) => Promise<void> | undefined
+  handler: (request: FileTriggerRequest) => void | Promise<void> | undefined
 ): void;
 
 /**
@@ -530,7 +538,7 @@ export declare function afterDeleteFile(
  * @param validator An optional function to validate the request
  */
 export declare function beforeConnect(
-  handler: (request: ConnectTriggerRequest) => Promise<void> | undefined,
+  handler: (request: ConnectTriggerRequest) => void | Promise<void> | undefined,
   validator?: ValidatorObject | ((request: ConnectTriggerRequest) => any)
 ): void;
 
@@ -555,7 +563,7 @@ export declare function beforeConnect(
  */
 export declare function beforeSubscribe<T extends ParseObject = ParseObject>(
   className: string | ParseObjectConstructor<T>,
-  handler: (request: TriggerRequest<T>) => Promise<void> | undefined,
+  handler: (request: TriggerRequest<T>) => void | Promise<void> | undefined,
   validator?: ValidatorObject | ((request: TriggerRequest<T>) => any)
 ): void;
 
@@ -570,7 +578,7 @@ export declare function beforeSubscribe<T extends ParseObject = ParseObject>(
  */
 export declare function afterLiveQueryEvent<T extends ParseObject = ParseObject>(
   className: string | ParseObjectConstructor<T>,
-  handler: (request: LiveQueryEventTrigger<T>) => Promise<void> | undefined,
+  handler: (request: LiveQueryEventTrigger<T>) => void | Promise<void> | undefined,
   validator?: ValidatorObject | ((request: LiveQueryEventTrigger<T>) => any)
 ): void;
 
