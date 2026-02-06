@@ -2034,9 +2034,9 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @static
    * @returns {Parse.Query} The query that is the OR of the passed in queries.
    */
-  static or(...queries: ParseQuery[]): ParseQuery {
+  static or<T extends ParseObject>(...queries: ParseQuery<T>[]): ParseQuery<T> {
     const className = _getClassNameFromQueries(queries);
-    const query = new ParseQuery(className!);
+    const query = new ParseQuery<T>(className!);
     query._orQuery(queries);
     return query;
   }
@@ -2053,9 +2053,9 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @static
    * @returns {Parse.Query} The query that is the AND of the passed in queries.
    */
-  static and(...queries: ParseQuery[]): ParseQuery {
+  static and<T extends ParseObject>(...queries: ParseQuery<T>[]): ParseQuery<T> {
     const className = _getClassNameFromQueries(queries);
-    const query = new ParseQuery(className!);
+    const query = new ParseQuery<T>(className!);
     query._andQuery(queries);
     return query;
   }
@@ -2072,9 +2072,9 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @static
    * @returns {Parse.Query} The query that is the NOR of the passed in queries.
    */
-  static nor(...queries: ParseQuery[]): ParseQuery {
+  static nor<T extends ParseObject>(...queries: ParseQuery<T>[]): ParseQuery<T> {
     const className = _getClassNameFromQueries(queries);
-    const query = new ParseQuery(className!);
+    const query = new ParseQuery<T>(className!);
     query._norQuery(queries);
     return query;
   }
