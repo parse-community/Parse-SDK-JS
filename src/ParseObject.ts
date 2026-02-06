@@ -1877,7 +1877,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @static
    * @returns {Parse.Object} A Parse.Object reference.
    */
-  static createWithoutData(id: string): ParseObject {
+  static createWithoutData<T extends ParseObject>(this: new (...args: any[]) => T, id: string): T {
     const obj = new this();
     obj.id = id;
     return obj;
