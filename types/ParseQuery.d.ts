@@ -874,7 +874,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @static
      * @returns {Parse.Query} The query that is the OR of the passed in queries.
      */
-    static or(...queries: ParseQuery[]): ParseQuery;
+    static or<T extends ParseObject>(...queries: ParseQuery<T>[]): ParseQuery<T>;
     /**
      * Constructs a Parse.Query that is the AND of the passed in queries.  For
      * example:
@@ -887,7 +887,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @static
      * @returns {Parse.Query} The query that is the AND of the passed in queries.
      */
-    static and(...queries: ParseQuery[]): ParseQuery;
+    static and<T extends ParseObject>(...queries: ParseQuery<T>[]): ParseQuery<T>;
     /**
      * Constructs a Parse.Query that is the NOR of the passed in queries.  For
      * example:
@@ -900,7 +900,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @static
      * @returns {Parse.Query} The query that is the NOR of the passed in queries.
      */
-    static nor(...queries: ParseQuery[]): ParseQuery;
+    static nor<T extends ParseObject>(...queries: ParseQuery<T>[]): ParseQuery<T>;
     /**
      * Change the source of this query to the server.
      *

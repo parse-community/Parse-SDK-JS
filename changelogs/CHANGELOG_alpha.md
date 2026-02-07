@@ -1,3 +1,10 @@
+## [8.1.1-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.0...8.1.1-alpha.1) (2026-02-07)
+
+
+### Bug Fixes
+
+* `Parse.Query.and/or/nor` loosing custom class types ([#2903](https://github.com/parse-community/Parse-SDK-JS/issues/2903)) ([89fdb07](https://github.com/parse-community/Parse-SDK-JS/commit/89fdb076580f3a9f2fb0106270a6879526eaaacf))
+
 # [8.1.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.0.4-alpha.1...8.1.0-alpha.1) (2026-02-05)
 
 
