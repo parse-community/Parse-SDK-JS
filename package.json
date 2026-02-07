@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "8.1.0",
+  "version": "8.1.1-alpha.1",
   "description": "Parse JavaScript SDK",
   "homepage": "https://parseplatform.org",
   "keywords": [
@@ -115,8 +115,8 @@
     "madge": "8.0.0",
     "metro-react-native-babel-preset": "0.77.0",
     "mongodb-runner": "6.6.0",
-    "parse-server": "8.6.2",
-    "puppeteer": "24.37.1",
+    "parse-server": "9.2.0",
+    "puppeteer": "24.37.2",
     "regenerator-runtime": "0.14.1",
     "semantic-release": "25.0.3",
     "typescript-eslint": "8.54.0",

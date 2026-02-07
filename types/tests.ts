@@ -217,6 +217,18 @@ async function test_query() {
   await query.distinct('name');
 
   const testQuery = Parse.Query.or(query, query);
+
+  // Test that query can do `or`/`and` joins while preserving class types
+  // This was the behaviour with the old DefinitelyTyped typings.
+  class MyClass extends Parse.Object<{ a: number }> {};
+  const q1 = new Parse.Query(MyClass).equalTo('a', 2);
+  const q2 = new Parse.Query(MyClass).equalTo('a', 3);
+  // $ExpectType ParseQuery<MyClass>
+  const orQ = Parse.Query.or(q1, q2);
+  // $ExpectType ParseQuery<MyClass>
+  const andQ = Parse.Query.and(q1, q2);
+  // $ExpectType ParseQuery<MyClass>
+  const norQ = Parse.Query.nor(q1, q2);
 }
 
 function test_query_exclude() {
