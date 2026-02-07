@@ -42,6 +42,14 @@ async function test_object() {
   // Create a new instance of that class.
   const gameScore = new GameScore();
 
+  // Expect that `createWithoutData` returns the types for the same classes (not generic ParseObjects)
+  // $ExpectType Game
+  Game.createWithoutData('someid');
+  // $ExpectType GameScore
+  GameScore.createWithoutData('scoreid');
+  // $ExpectType ParseUser<Attributes>
+  Parse.User.createWithoutData('someuser');
+
   gameScore.set('score', 1337);
   gameScore.set('playerName', 'Sean Plott');
   gameScore.set('cheatMode', false);

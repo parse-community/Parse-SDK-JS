@@ -894,7 +894,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @static
      * @returns {Parse.Object} A Parse.Object reference.
      */
-    static createWithoutData(id: string): ParseObject;
+    static createWithoutData<T extends ParseObject>(this: new (...args: any[]) => T, id: string): T;
     /**
      * Creates a new instance of a Parse Object from a JSON representation.
      *
