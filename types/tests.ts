@@ -47,6 +47,8 @@ async function test_object() {
   Game.createWithoutData('someid');
   // $ExpectType GameScore
   GameScore.createWithoutData('scoreid');
+  // $ExpectType ParseUser<Attributes>
+  Parse.User.createWithoutData('someuser');
 
   gameScore.set('score', 1337);
   gameScore.set('playerName', 'Sean Plott');
