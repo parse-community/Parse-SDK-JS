@@ -1,3 +1,10 @@
+## [8.1.1-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.1-alpha.1...8.1.1-alpha.2) (2026-02-07)
+
+
+### Bug Fixes
+
+* `Parse.Object.createWithoutData` doesn't preserve object subclass ([#2907](https://github.com/parse-community/Parse-SDK-JS/issues/2907)) ([01dc94d](https://github.com/parse-community/Parse-SDK-JS/commit/01dc94d6647d2711d3a865c20935604b24083ed1))
+
 ## [8.1.1-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.0...8.1.1-alpha.1) (2026-02-07)
 
 
