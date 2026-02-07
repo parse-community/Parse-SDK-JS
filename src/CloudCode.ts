@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-invalid-void-type -- Cloud trigger handlers legitimately return void | T */
+
 import type ParseObject from './ParseObject';
 import type ParseUser from './ParseUser';
 import type ParseFile from './ParseFile';
