@@ -3,14 +3,11 @@ import ParseObject from './ParseObject';
 import type LiveQuerySubscription from './LiveQuerySubscription';
 import type { FullOptions } from './RESTController';
 import type { Pointer } from './ParseObject';
-export type BatchOptions = FullOptions & {
+export interface BatchOptions extends FullOptions {
     batchSize?: number;
-    useMasterKey?: boolean;
-    useMaintenanceKey?: boolean;
-    sessionToken?: string;
     context?: Record<string, any>;
     json?: boolean;
-};
+}
 export type WhereClause = Record<string, any>;
 export interface QueryOptions {
     useMasterKey?: boolean;
@@ -18,8 +15,62 @@ export interface QueryOptions {
     context?: Record<string, any>;
     json?: boolean;
 }
-/** Alias for QueryOptions, used for find operations */
+/** Alias of QueryOptions (added for old DefinitelyTyped typing compat) */
 export type FindOptions = QueryOptions;
+export interface EachOptions extends QueryOptions {
+    batchSize?: number;
+    useMaintenanceKey?: boolean;
+    installationId?: string;
+    progress?: any;
+    usePost?: boolean;
+}
+/** Ditto to QueryOptions for now */
+export type CountOptions = QueryOptions;
+/** Ditto to QueryOptions for now */
+export type GetOptions = QueryOptions;
+/** Ditto to QueryOptions for now */
+export type FirstOptions = QueryOptions;
+export interface AggregationOptions {
+    group?: (Record<string, any> & {
+        objectId?: string;
+    }) | undefined;
+    match?: Record<string, any> | undefined;
+    project?: Record<string, any> | undefined;
+    limit?: number | undefined;
+    skip?: number | undefined;
+    sort?: Record<string, 1 | -1> | undefined;
+    sample?: {
+        size: number;
+    } | undefined;
+    count?: string | undefined;
+    lookup?: {
+        from: string;
+        localField: string;
+        foreignField: string;
+        as: string;
+    } | {
+        from: string;
+        let?: Record<string, any>;
+        pipeline: Record<string, any>;
+        as: string;
+    } | undefined;
+    graphLookup?: {
+        from: string;
+        startWith?: string;
+        connectFromField: string;
+        connectToField: string;
+        as: string;
+        maxDepth?: number;
+        depthField?: string;
+        restrictSearchWithMatch?: Record<string, any>;
+    } | undefined;
+    facet?: Record<string, Array<Record<string, any>>> | undefined;
+    unwind?: {
+        path: string;
+        includeArrayIndex?: string;
+        preserveNullAndEmptyArrays?: boolean;
+    } | string | undefined;
+}
 export interface FullTextOptions {
     language?: string;
     caseSensitive?: boolean;

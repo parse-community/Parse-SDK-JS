@@ -18,16 +18,14 @@ interface SaveParams {
     path: string;
     body: AttributeMap;
 }
-export type SaveOptions = FullOptions & {
-    cascadeSave?: boolean;
+export interface SaveOptions extends FullOptions {
     context?: AttributeMap;
+    /** If `false`, nested objects will not be saved (default is `true`). */
+    cascadeSave?: boolean;
     batchSize?: number;
     transaction?: boolean;
-};
-export interface FetchOptions {
-    useMasterKey?: boolean;
-    sessionToken?: string;
-    include?: string | string[];
+}
+export interface FetchOptions extends RequestOptions {
     context?: AttributeMap;
 }
 export interface SetOptions {
@@ -38,7 +36,10 @@ export interface DestroyOptions {
     useMasterKey?: boolean;
     sessionToken?: string;
     context?: AttributeMap;
-    /** Wait for the server to confirm before resolving */
+    /**
+     * Set to true to wait for the server to confirm success
+     * before triggering an event.
+     */
     wait?: boolean;
 }
 /** Options for destroyAll batch operation - matches old namespace Object.DestroyAllOptions */
@@ -46,17 +47,25 @@ export interface DestroyAllOptions {
     batchSize?: number;
     useMasterKey?: boolean;
     sessionToken?: string;
+    /** A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers. */
+    context?: AttributeMap;
 }
 /** Options for saveAll batch operation - matches old namespace Object.SaveAllOptions */
 export interface SaveAllOptions {
     batchSize?: number;
     useMasterKey?: boolean;
     sessionToken?: string;
+    /** A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers. */
+    context?: AttributeMap;
+    /** If `false`, nested objects will not be saved (default is `true`). */
+    cascadeSave?: boolean;
 }
-/** Options for fetchAll batch operation - matches old namespace Object.FetchAllOptions */
+/** Options for fetchAll batch operation */
 export interface FetchAllOptions {
     useMasterKey?: boolean;
     sessionToken?: string;
+    context?: AttributeMap;
+    include?: string | string[];
 }
 export type AttributeKey<T> = Extract<keyof T, string>;
 export type Attributes = Record<string, any>;
@@ -1115,5 +1124,9 @@ export interface ObjectStatic<T extends ParseObject = ParseObject> {
     unPinAllObjects(): Promise<void>;
     unPinAllObjectsWithName(name: string): Promise<void>;
     unPinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
+}
+export interface ObjectConstructor extends ObjectStatic {
+    new <T extends Attributes>(className: string, attributes: T, options?: any): ParseObject<T>;
+    new (className?: string, attributes?: Attributes, options?: any): ParseObject;
 }
 export default ParseObject;

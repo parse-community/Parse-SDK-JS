@@ -10,6 +10,8 @@ import type { Pointer } from './ParseObject';
 
 type Bytes = string;
 
+export type FieldType = TYPE;
+
 export type TYPE =
   | 'String'
   | 'Number'
@@ -24,15 +26,14 @@ export type TYPE =
   | 'Pointer'
   | 'Relation';
 
-type AttrType<T extends ParseObject, V> = Extract<
+export type AttrType<T extends ParseObject, V> = Extract<
   {
     [K in keyof T['attributes']]: T['attributes'][K] extends V ? K : never;
   }[keyof T['attributes']],
   string
 >;
 
-interface FieldOptions<
-  T extends
+export type SupportedFieldTypes =
   | string
   | number
   | boolean
@@ -44,22 +45,23 @@ interface FieldOptions<
   | any[]
   | object
   | Pointer
-  | ParseRelation = any,
-> {
+  | ParseRelation;
+
+export interface FieldOptions<T extends SupportedFieldTypes = any> {
   required?: boolean | undefined;
   defaultValue?: T | undefined;
   targetClass?: string | undefined;
 }
 
-type Index = Record<string, number | string>;
+export type Index = Record<string, number | string>;
 
-interface CLPField {
+export interface CLPField {
   '*'?: boolean | undefined;
   requiresAuthentication?: boolean | undefined;
   [userIdOrRoleName: string]: boolean | undefined;
 }
 
-interface CLP {
+export interface CLP {
   find?: CLPField | undefined;
   get?: CLPField | undefined;
   count?: CLPField | undefined;

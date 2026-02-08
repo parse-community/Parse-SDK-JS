@@ -35,11 +35,11 @@ import User from './ParseUser';
 import LiveQuerySubscription from './LiveQuerySubscription';
 
 export type { AuthProvider, AuthData, SignUpOptions } from './ParseUser';
-export type { Pointer, Attributes, BaseAttributes, JSONBaseAttributes, ObjectStatic, FetchOptions, SaveOptions, SetOptions, DestroyOptions, DestroyAllOptions, SaveAllOptions, FetchAllOptions, Encode, ToJSON } from './ParseObject';
+export type { Pointer, Attributes, BaseAttributes, JSONBaseAttributes, ObjectStatic, ObjectConstructor, FetchOptions, SaveOptions, SetOptions, DestroyOptions, DestroyAllOptions, SaveAllOptions, FetchAllOptions, Encode, ToJSON } from './ParseObject';
 export type { PushData, SendOptions } from './Push';
 export type { FullOptions, RequestOptions } from './RESTController';
 export type { RestSchema, TYPE } from './ParseSchema';
-export type { FindOptions, QueryOptions, QueryJSON, WhereClause, BatchOptions, FullTextOptions } from './ParseQuery';
+export type { FindOptions, QueryOptions, QueryJSON, WhereClause, BatchOptions, FullTextOptions, EachOptions, CountOptions, GetOptions, FirstOptions, AggregationOptions } from './ParseQuery';
 export { LiveQuerySubscription };
 export {
   ACL,
@@ -93,8 +93,21 @@ export namespace Query {
   export type QueryOptions = import('./ParseQuery').QueryOptions;
   export type BatchOptions = import('./ParseQuery').BatchOptions;
   export type FullTextOptions = import('./ParseQuery').FullTextOptions;
+  export type EachOptions = import('./ParseQuery').EachOptions;
+  export type CountOptions = import('./ParseQuery').CountOptions;
+  export type GetOptions = import('./ParseQuery').GetOptions;
+  export type FirstOptions = import('./ParseQuery').FirstOptions;
+  export type AggregationOptions = import('./ParseQuery').AggregationOptions;
 }
 
 export namespace Schema {
   export type TYPE = import('./ParseSchema').TYPE;
+  export type FieldType = import('./ParseSchema').FieldType;
+  export type FieldOptions<
+    T extends import('./ParseSchema').SupportedFieldTypes = any
+  > = import('./ParseSchema').FieldOptions<T>;
+  export type Index = import('./ParseSchema').Index;
+  export type CLP = import('./ParseSchema').CLP;
+  export type CLPField = import('./ParseSchema').CLPField;
+  export type AttrType<T extends import('./ParseObject').default, V> = import('./ParseSchema').AttrType<T, V>;
 }
