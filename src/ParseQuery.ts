@@ -8,24 +8,17 @@ import OfflineQuery from './OfflineQuery';
 import { DEFAULT_PIN } from './LocalDatastoreUtils';
 
 import type LiveQuerySubscription from './LiveQuerySubscription';
-import type { RequestOptions, FullOptions } from './RESTController';
-import type { Pointer, BaseAttributes } from './ParseObject';
+import type { RequestOptions } from './RESTController';
+import type { Pointer, BaseAttributes, BaseRequestOptions } from './ParseObject';
 
-export interface BatchOptions extends FullOptions {
+export interface BatchOptions extends BaseRequestOptions {
   batchSize?: number;
-  useMasterKey?: boolean;
-  useMaintenanceKey?: boolean;
-  sessionToken?: string;
-  context?: Record<string, any>;
   json?: boolean;
 }
 
 export type WhereClause = Record<string, any>;
 
-export interface QueryOptions {
-  useMasterKey?: boolean;
-  sessionToken?: string;
-  context?: Record<string, any>;
+export interface QueryOptions extends BaseRequestOptions {
   json?: boolean;
 }
 

@@ -1,21 +1,13 @@
 import ParseGeoPoint from './ParseGeoPoint';
 import ParseObject from './ParseObject';
 import type LiveQuerySubscription from './LiveQuerySubscription';
-import type { FullOptions } from './RESTController';
-import type { Pointer, BaseAttributes } from './ParseObject';
-export interface BatchOptions extends FullOptions {
+import type { Pointer, BaseAttributes, BaseRequestOptions } from './ParseObject';
+export interface BatchOptions extends BaseRequestOptions {
     batchSize?: number;
-    useMasterKey?: boolean;
-    useMaintenanceKey?: boolean;
-    sessionToken?: string;
-    context?: Record<string, any>;
     json?: boolean;
 }
 export type WhereClause = Record<string, any>;
-export interface QueryOptions {
-    useMasterKey?: boolean;
-    sessionToken?: string;
-    context?: Record<string, any>;
+export interface QueryOptions extends BaseRequestOptions {
     json?: boolean;
 }
 export interface FindOptions extends QueryOptions {

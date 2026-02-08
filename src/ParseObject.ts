@@ -45,19 +45,24 @@ interface SaveParams {
   body: AttributeMap;
 }
 
-export interface SaveOptions extends FullOptions {
+/** Base options for all Parse requests that go through _getRequestOptions */
+export interface BaseRequestOptions {
+  useMasterKey?: boolean;
+  useMaintenanceKey?: boolean;
+  sessionToken?: string;
+  installationId?: string;
   context?: AttributeMap;
+}
+
+export interface SaveOptions extends BaseRequestOptions {
   /** If `false`, nested objects will not be saved (default is `true`). */
   cascadeSave?: boolean;
   batchSize?: number;
   transaction?: boolean;
 }
 
-export interface FetchOptions {
-  useMasterKey?: boolean;
-  sessionToken?: string;
+export interface FetchOptions extends BaseRequestOptions {
   include?: string | string[];
-  context?: AttributeMap;
 }
 
 export interface SetOptions {
@@ -65,37 +70,23 @@ export interface SetOptions {
   unset?: boolean;
 }
 
-export interface DestroyOptions {
-  useMasterKey?: boolean;
-  sessionToken?: string;
-  context?: AttributeMap;
-}
+export interface DestroyOptions extends BaseRequestOptions { }
 
 /** Options for destroyAll batch operation */
-export interface DestroyAllOptions {
+export interface DestroyAllOptions extends BaseRequestOptions {
   batchSize?: number;
-  useMasterKey?: boolean;
-  sessionToken?: string;
-  /** A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers. */
-  context?: AttributeMap;
 }
 
 /** Options for saveAll batch operation */
-export interface SaveAllOptions {
+export interface SaveAllOptions extends BaseRequestOptions {
   batchSize?: number;
-  useMasterKey?: boolean;
-  sessionToken?: string;
-  /** A dictionary that is accessible in Cloud Code `beforeDelete` and `afterDelete` triggers. */
-  context?: AttributeMap;
   /** If `false`, nested objects will not be saved (default is `true`). */
   cascadeSave?: boolean;
+  transaction?: boolean;
 }
 
 /** Options for fetchAll batch operation */
-export interface FetchAllOptions {
-  useMasterKey?: boolean;
-  sessionToken?: string;
-  context?: AttributeMap;
+export interface FetchAllOptions extends BaseRequestOptions {
   include?: string | string[];
 }
 
