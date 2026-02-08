@@ -8,8 +8,8 @@ import OfflineQuery from './OfflineQuery';
 import { DEFAULT_PIN } from './LocalDatastoreUtils';
 
 import type LiveQuerySubscription from './LiveQuerySubscription';
-import type { RequestOptions } from './RESTController';
-import type { Pointer, BaseAttributes, BaseRequestOptions } from './ParseObject';
+import type { RequestOptions, BaseRequestOptions } from './RESTController';
+import type { Pointer, BaseAttributes } from './ParseObject';
 
 export interface BatchOptions extends BaseRequestOptions {
   batchSize?: number;
@@ -24,15 +24,12 @@ export interface QueryOptions extends BaseRequestOptions {
 
 export interface FindOptions extends QueryOptions { }
 
-
-
-export interface CountOptions extends QueryOptions { }
+/** CountOptions - no json since count() returns a number, not objects */
+export interface CountOptions extends BaseRequestOptions { }
 
 export interface GetOptions extends QueryOptions { }
 
 export interface FirstOptions extends QueryOptions { }
-
-
 
 export interface FullTextOptions {
   language?: string;

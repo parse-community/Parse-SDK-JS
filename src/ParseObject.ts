@@ -28,7 +28,7 @@ import * as UniqueInstanceStateController from './UniqueInstanceStateController'
 import unsavedChildren from './unsavedChildren';
 
 import type { AttributeMap, OpsMap } from './ObjectStateMutations';
-import type { RequestOptions, FullOptions } from './RESTController';
+import type { RequestOptions, FullOptions, BaseRequestOptions } from './RESTController';
 import type ParseGeoPoint from './ParseGeoPoint';
 import type ParsePolygon from './ParsePolygon';
 
@@ -43,15 +43,6 @@ interface SaveParams {
   method: string;
   path: string;
   body: AttributeMap;
-}
-
-/** Base options for all Parse requests that go through _getRequestOptions */
-export interface BaseRequestOptions {
-  useMasterKey?: boolean;
-  useMaintenanceKey?: boolean;
-  sessionToken?: string;
-  installationId?: string;
-  context?: AttributeMap;
 }
 
 export interface SaveOptions extends BaseRequestOptions {

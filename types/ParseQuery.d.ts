@@ -1,7 +1,8 @@
 import ParseGeoPoint from './ParseGeoPoint';
 import ParseObject from './ParseObject';
 import type LiveQuerySubscription from './LiveQuerySubscription';
-import type { Pointer, BaseAttributes, BaseRequestOptions } from './ParseObject';
+import type { BaseRequestOptions } from './RESTController';
+import type { Pointer, BaseAttributes } from './ParseObject';
 export interface BatchOptions extends BaseRequestOptions {
     batchSize?: number;
     json?: boolean;
@@ -12,7 +13,8 @@ export interface QueryOptions extends BaseRequestOptions {
 }
 export interface FindOptions extends QueryOptions {
 }
-export interface CountOptions extends QueryOptions {
+/** CountOptions - no json since count() returns a number, not objects */
+export interface CountOptions extends BaseRequestOptions {
 }
 export interface GetOptions extends QueryOptions {
 }

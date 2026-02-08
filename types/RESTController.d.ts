@@ -1,3 +1,11 @@
+/** Base options for all Parse requests that go through _getRequestOptions */
+export interface BaseRequestOptions {
+    useMasterKey?: boolean;
+    useMaintenanceKey?: boolean;
+    sessionToken?: string;
+    installationId?: string;
+    context?: Record<string, unknown>;
+}
 export interface RequestOptions {
     useMasterKey?: boolean;
     useMaintenanceKey?: boolean;
