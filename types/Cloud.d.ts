@@ -1,7 +1,6 @@
 import ParseObject from './ParseObject';
-import type { RequestOptions, FullOptions } from './RESTController';
-export interface RunOptions extends RequestOptions, FullOptions {
-}
+import type { BaseRequestOptions } from './RESTController';
+export type RunOptions = BaseRequestOptions;
 /**
  * Contains functions for calling and declaring
  * <a href="/docs/cloud_code_guide#functions">cloud functions</a>.

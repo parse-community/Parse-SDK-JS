@@ -4,9 +4,9 @@ import encode from './encode';
 import ParseError from './ParseError';
 import ParseQuery from './ParseQuery';
 import ParseObject from './ParseObject';
-import type { RequestOptions, FullOptions } from './RESTController';
+import type { RequestOptions, BaseRequestOptions } from './RESTController';
 
-export interface RunOptions extends RequestOptions, FullOptions { }
+export type RunOptions = BaseRequestOptions;
 
 /**
  * Contains functions for calling and declaring
