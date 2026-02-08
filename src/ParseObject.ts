@@ -69,11 +69,6 @@ export interface DestroyOptions {
   useMasterKey?: boolean;
   sessionToken?: string;
   context?: AttributeMap;
-  /**
-   * Set to true to wait for the server to confirm success
-   * before triggering an event.
-   */
-  wait?: boolean;
 }
 
 /** Options for destroyAll batch operation */
