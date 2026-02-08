@@ -26,47 +26,6 @@ export interface GetOptions extends QueryOptions {
 }
 export interface FirstOptions extends QueryOptions {
 }
-export interface AggregationOptions {
-    group?: (Record<string, any> & {
-        objectId?: string;
-    }) | undefined;
-    match?: Record<string, any> | undefined;
-    project?: Record<string, any> | undefined;
-    limit?: number | undefined;
-    skip?: number | undefined;
-    sort?: Record<string, 1 | -1> | undefined;
-    sample?: {
-        size: number;
-    } | undefined;
-    count?: string | undefined;
-    lookup?: {
-        from: string;
-        localField: string;
-        foreignField: string;
-        as: string;
-    } | {
-        from: string;
-        let?: Record<string, any>;
-        pipeline: Record<string, any>;
-        as: string;
-    } | undefined;
-    graphLookup?: {
-        from: string;
-        startWith?: string;
-        connectFromField: string;
-        connectToField: string;
-        as: string;
-        maxDepth?: number;
-        depthField?: string;
-        restrictSearchWithMatch?: Record<string, any>;
-    } | undefined;
-    facet?: Record<string, Array<Record<string, any>>> | undefined;
-    unwind?: {
-        path: string;
-        includeArrayIndex?: string;
-        preserveNullAndEmptyArrays?: boolean;
-    } | string | undefined;
-}
 export interface FullTextOptions {
     language?: string;
     caseSensitive?: boolean;
