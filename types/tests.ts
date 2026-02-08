@@ -98,8 +98,8 @@ async function test_query() {
     diacriticSensitive: true,
   });
   query.greaterThan('playerAge', 18);
-  await query.eachBatch(objs => { }, { batchSize: 10 });
-  await query.each(score => { });
+  await query.eachBatch(objs => {}, { batchSize: 10 });
+  await query.each(score => {});
   query.hint('_id_');
   query.explain(true);
   query.limit(10);
@@ -228,7 +228,7 @@ async function test_query() {
 
   // Test that query can do `or`/`and` joins while preserving class types
   // This was the behaviour with the old DefinitelyTyped typings.
-  class MyClass extends Parse.Object<{ a: number }> { };
+  class MyClass extends Parse.Object<{ a: number }> {};
   const q1 = new Parse.Query(MyClass).equalTo('a', 2);
   const q2 = new Parse.Query(MyClass).equalTo('a', 3);
   // $ExpectType ParseQuery<MyClass>
@@ -386,7 +386,7 @@ function test_relation() {
     .relation<Game>('games')
     .query()
     .find()
-    .then((g: Game[]) => { })
+    .then((g: Game[]) => {})
     .catch(error => error);
   new Parse.User().relation('games').add(game1);
   new Parse.User().relation('games').add([game1, game2]);
@@ -458,7 +458,7 @@ async function test_user_acl_roles() {
   game.setACL(new Parse.ACL(Parse.User.current()));
   game
     .save()
-    .then((game: Game) => { })
+    .then((game: Game) => {})
     .catch(error => error);
   await game.save(null, { useMasterKey: true });
   game
@@ -817,26 +817,26 @@ async function test_cloud_functions() {
   void Parse.Cloud.getJobsData().then(v => v);
 
   // @ts-expect-error - define should not exist on browser Parse.Cloud
-  Parse.Cloud.define('test', () => { });
+  Parse.Cloud.define('test', () => {});
   // @ts-expect-error - beforeSave should not exist on browser Parse.Cloud
-  Parse.Cloud.beforeSave('Test', () => { });
+  Parse.Cloud.beforeSave('Test', () => {});
   // @ts-expect-error - job should not exist on browser Parse.Cloud
-  Parse.Cloud.job('test', () => { });
+  Parse.Cloud.job('test', () => {});
   // @ts-expect-error - httpRequest should not exist on browser Parse.Cloud
   void Parse.Cloud.httpRequest({ url: '' });
   // @ts-expect-error - beforeConnect should not exist on browser Parse.Cloud
-  Parse.Cloud.beforeConnect(() => { });
+  Parse.Cloud.beforeConnect(() => {});
   // @ts-expect-error - beforeSubscribe should not exist on browser Parse.Cloud
-  Parse.Cloud.beforeSubscribe('Test', () => { });
+  Parse.Cloud.beforeSubscribe('Test', () => {});
   // @ts-expect-error - afterLiveQueryEvent should not exist on browser Parse.Cloud
-  Parse.Cloud.afterLiveQueryEvent('Test', () => { });
+  Parse.Cloud.afterLiveQueryEvent('Test', () => {});
   // @ts-expect-error - beforePasswordResetRequest should not exist on browser Parse.Cloud
-  Parse.Cloud.beforePasswordResetRequest(() => { });
+  Parse.Cloud.beforePasswordResetRequest(() => {});
   // @ts-expect-error - sendEmail should not exist on browser Parse.Cloud
   void Parse.Cloud.sendEmail({ to: '' });
 }
 
-class PlaceObject extends Parse.Object { }
+class PlaceObject extends Parse.Object {}
 
 function test_geo_points() {
   let point = new Parse.GeoPoint();
@@ -870,7 +870,7 @@ function test_geo_points() {
 
   const query3 = new Parse.Query('PlaceObject')
     .find()
-    .then((o: Parse.Object[]) => { })
+    .then((o: Parse.Object[]) => {})
     .catch(error => error);
 }
 
@@ -1161,7 +1161,7 @@ async function test_schema(
       relationField: Parse.Relation;
       pointerField: Parse.Pointer | Parse.Object;
     }
-    class TestObject extends Parse.Object<iTestAttributes> { }
+    class TestObject extends Parse.Object<iTestAttributes> {}
 
     const schema = new Parse.Schema<TestObject>('TestObject');
     schema.addArray('arrField');
@@ -1888,7 +1888,7 @@ function testQuery() {
       attribute2: number;
       attribute3: AnotherSubClass;
       attribute4: string[];
-    }> { }
+    }> {}
     const query = new Parse.Query(MySubClass);
 
     // $ExpectType ParseQuery<MySubClass>
@@ -2297,10 +2297,10 @@ function testUser() {
 
   async function testAuthenticationProvider() {
     const authProvider: Parse.AuthProvider = {
-      authenticate: () => { },
+      authenticate: () => {},
       getAuthType: () => 'customAuthorizationProvider',
       restoreAuthentication: () => false,
-      deauthenticate: () => { },
+      deauthenticate: () => {},
     };
     const authData: Parse.AuthData = {
       id: 'some-user-authentication-id',
@@ -2373,9 +2373,9 @@ function testEventuallyQueue() {
 // TODO: Add missing LiveQuery types (LiveQuerySubscription, etc.)
 function LiveQueryEvents() {
   function testLiveQueryEvents() {
-    Parse.LiveQuery.on('open', () => { });
-    Parse.LiveQuery.on('close', () => { });
-    Parse.LiveQuery.on('error', (error: any) => { });
+    Parse.LiveQuery.on('open', () => {});
+    Parse.LiveQuery.on('close', () => {});
+    Parse.LiveQuery.on('error', (error: any) => {});
   }
 }
 
@@ -2445,7 +2445,7 @@ async function test_type_exports() {
   const queryJson: Parse.QueryJSON = { where: {}, limit: 10 };
   const fullOpts: Parse.FullOptions = { useMasterKey: true };
   const reqOpts: Parse.RequestOptions = { useMasterKey: true, batchSize: 50 };
-  const authProvider: Parse.AuthProvider = { authenticate: () => { }, getAuthType: () => 'custom', restoreAuthentication: () => true };
+  const authProvider: Parse.AuthProvider = { authenticate: () => {}, getAuthType: () => 'custom', restoreAuthentication: () => true };
   const authData: Parse.AuthData = { id: 'user-id' };
   const signUpOpts: Parse.SignUpOptions = { useMasterKey: true };
   const restSchema: Parse.RestSchema = { className: 'Test', fields: {}, classLevelPermissions: {} };
@@ -2481,7 +2481,7 @@ async function test_type_exports() {
   await query.find(findOpts);
   await query.first(findOpts);
   await query.count(findOpts);
-  await query.each(() => { }, batchOpts);
-  await query.eachBatch(() => { }, batchOpts);
+  await query.each(() => {}, batchOpts);
+  await query.eachBatch(() => {}, batchOpts);
   query.fullText('field', 'term', fullTextOpts);
 }
