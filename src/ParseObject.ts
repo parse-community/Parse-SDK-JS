@@ -65,14 +65,19 @@ export type DestroyOptions = BaseRequestOptions;
 
 /** Options for destroyAll batch operation */
 export interface DestroyAllOptions extends BaseRequestOptions {
+  /** batchSize: How many objects to yield in each batch (default: 20) */
   batchSize?: number;
+  /** Set to true to enable transactions */
+  transaction?: boolean;
 }
 
 /** Options for saveAll batch operation */
 export interface SaveAllOptions extends BaseRequestOptions {
+  /** batchSize: How many objects to yield in each batch (default: 20) */
   batchSize?: number;
   /** If `false`, nested objects will not be saved (default is `true`). */
   cascadeSave?: boolean;
+  /** Set to true to enable transactions */
   transaction?: boolean;
 }
 
