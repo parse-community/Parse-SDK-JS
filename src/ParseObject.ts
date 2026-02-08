@@ -2701,7 +2701,7 @@ export interface ObjectStatic<T extends ParseObject = ParseObject> {
     keys: keyof U["attributes"] | (keyof U["attributes"])[],
     options?: RequestOptions,
   ): Promise<U[]>;
-  fromJSON(json: any, override?: boolean): T;
+  fromJSON(json: any, override?: boolean, dirty?: boolean): T;
   pinAll(objects: ParseObject[]): Promise<void>;
   pinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
   registerSubclass(className: string, clazz: new (options?: any) => T): void;
