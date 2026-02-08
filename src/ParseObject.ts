@@ -2703,6 +2703,7 @@ CoreManager.setParseObject(ParseObject);
 CoreManager.setObjectController(DefaultController);
 
 export interface ObjectStatic<T extends ParseObject = ParseObject> {
+  new(...args: any[]): T;
   createWithoutData(id: string): T;
   destroyAll<U extends ParseObject>(list: U[], options?: DestroyAllOptions): Promise<U[]>;
   extend(className: string | { className: string }, protoProps?: any, classProps?: any): any;

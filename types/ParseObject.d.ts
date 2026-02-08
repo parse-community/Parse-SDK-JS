@@ -1109,6 +1109,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
     static unPinAllObjectsWithName(name: string): Promise<void>;
 }
 export interface ObjectStatic<T extends ParseObject = ParseObject> {
+    new (...args: any[]): T;
     createWithoutData(id: string): T;
     destroyAll<U extends ParseObject>(list: U[], options?: DestroyAllOptions): Promise<U[]>;
     extend(className: string | {

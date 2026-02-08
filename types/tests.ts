@@ -2464,6 +2464,7 @@ async function test_type_exports() {
   function doCreateWithoutData<T extends Parse.Object>(clz: Parse.ObjectStatic<T>, id: string): T {
     return clz.createWithoutData(id);
   }
+  // $ExpectType MyClass
   const myClsObj = doCreateWithoutData(MyClass, '1');
 
   // Verify types work with actual methods
