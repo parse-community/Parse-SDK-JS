@@ -61,7 +61,7 @@ export interface SetOptions {
   unset?: boolean;
 }
 
-export interface DestroyOptions extends BaseRequestOptions { }
+export type DestroyOptions = BaseRequestOptions;
 
 /** Options for destroyAll batch operation */
 export interface DestroyAllOptions extends BaseRequestOptions {
@@ -212,7 +212,7 @@ class ParseObject<T extends Attributes = Attributes> {
     if (CoreManager.get('NODE_LOGGING')) {
       this[Symbol.for('nodejs.util.inspect.custom')] = function () {
         return `ParseObject: className: ${this.className}, id: ${this.id
-          }\nAttributes: ${JSON.stringify(this.attributes, null, 2)}`;
+        }\nAttributes: ${JSON.stringify(this.attributes, null, 2)}`;
       };
     }
   }
@@ -2688,12 +2688,12 @@ export interface ObjectStatic<T extends ParseObject = ParseObject> {
   fetchAllIfNeeded<U extends ParseObject>(list: U[], options?: FetchAllOptions): Promise<U[]>;
   fetchAllIfNeededWithInclude<U extends ParseObject>(
     list: U[],
-    keys: keyof U["attributes"] | Array<keyof U["attributes"]>,
+    keys: keyof U["attributes"] | keyof U["attributes"][],
     options?: RequestOptions,
   ): Promise<U[]>;
   fetchAllWithInclude<U extends ParseObject>(
     list: U[],
-    keys: keyof U["attributes"] | Array<keyof U["attributes"]>,
+    keys: keyof U["attributes"] | keyof U["attributes"][],
     options?: RequestOptions,
   ): Promise<U[]>;
   fromJSON(json: any, override?: boolean): T;

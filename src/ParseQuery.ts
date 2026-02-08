@@ -22,14 +22,14 @@ export interface QueryOptions extends BaseRequestOptions {
   json?: boolean;
 }
 
-export interface FindOptions extends QueryOptions { }
+export type FindOptions = QueryOptions;
 
 /** CountOptions - no json since count() returns a number, not objects */
-export interface CountOptions extends BaseRequestOptions { }
+export type CountOptions = BaseRequestOptions;
 
-export interface GetOptions extends QueryOptions { }
+export type GetOptions = QueryOptions;
 
-export interface FirstOptions extends QueryOptions { }
+export type FirstOptions = QueryOptions;
 
 export interface FullTextOptions {
   language?: string;

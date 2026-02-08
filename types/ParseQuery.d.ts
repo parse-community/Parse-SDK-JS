@@ -11,15 +11,11 @@ export type WhereClause = Record<string, any>;
 export interface QueryOptions extends BaseRequestOptions {
     json?: boolean;
 }
-export interface FindOptions extends QueryOptions {
-}
+export type FindOptions = QueryOptions;
 /** CountOptions - no json since count() returns a number, not objects */
-export interface CountOptions extends BaseRequestOptions {
-}
-export interface GetOptions extends QueryOptions {
-}
-export interface FirstOptions extends QueryOptions {
-}
+export type CountOptions = BaseRequestOptions;
+export type GetOptions = QueryOptions;
+export type FirstOptions = QueryOptions;
 export interface FullTextOptions {
     language?: string;
     caseSensitive?: boolean;
