@@ -11,6 +11,15 @@ import type LiveQuerySubscription from './LiveQuerySubscription';
 import type { RequestOptions, FullOptions } from './RESTController';
 import type { Pointer, BaseAttributes } from './ParseObject';
 
+export interface BatchOptions extends FullOptions {
+  batchSize?: number;
+  useMasterKey?: boolean;
+  useMaintenanceKey?: boolean;
+  sessionToken?: string;
+  context?: Record<string, any>;
+  json?: boolean;
+}
+
 export type WhereClause = Record<string, any>;
 
 export interface QueryOptions {
@@ -22,22 +31,7 @@ export interface QueryOptions {
 
 export interface FindOptions extends QueryOptions { }
 
-export interface EachOptions extends QueryOptions {
-  batchSize?: number;
-  useMaintenanceKey?: boolean;
-  installationId?: string;
-  progress?: any;
-  usePost?: boolean;
-}
 
-export interface BatchOptions extends FullOptions {
-  batchSize?: number;
-  useMasterKey?: boolean;
-  useMaintenanceKey?: boolean;
-  sessionToken?: string;
-  context?: Record<string, any>;
-  json?: boolean;
-}
 
 export interface CountOptions extends QueryOptions { }
 
@@ -966,7 +960,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   eachBatch(
     callback: (objs: T[]) => PromiseLike<void> | void,
-    options?: EachOptions
+    options?: BatchOptions
   ): Promise<void> {
     options = options || {};
 
@@ -1028,7 +1022,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @returns {Promise} A promise that will be fulfilled once the
    *     iteration has completed.
    */
-  each(callback: (obj: T) => PromiseLike<void> | void, options?: EachOptions): Promise<void> {
+  each(callback: (obj: T) => PromiseLike<void> | void, options?: BatchOptions): Promise<void> {
     return this.eachBatch(results => {
       let callbacksDone = Promise.resolve();
       results.forEach((result: T) => {
@@ -1092,7 +1086,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   async map(
     callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any,
-    options?: EachOptions
+    options?: BatchOptions
   ): Promise<any[]> {
     const array: ParseObject[] = [];
     let index = 0;
@@ -1131,7 +1125,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
   async reduce(
     callback: (accumulator: any, currentObject: ParseObject, index: number) => any,
     initialValue: any,
-    options?: EachOptions
+    options?: BatchOptions
   ): Promise<any[]> {
     let accumulator = initialValue;
     let index = 0;
@@ -1180,7 +1174,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   async filter(
     callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean,
-    options?: EachOptions
+    options?: BatchOptions
   ): Promise<ParseObject[]> {
     const array: ParseObject[] = [];
     let index = 0;

@@ -76,7 +76,7 @@ export interface DestroyOptions {
   wait?: boolean;
 }
 
-/** Options for destroyAll batch operation - matches old namespace Object.DestroyAllOptions */
+/** Options for destroyAll batch operation */
 export interface DestroyAllOptions {
   batchSize?: number;
   useMasterKey?: boolean;
@@ -85,7 +85,7 @@ export interface DestroyAllOptions {
   context?: AttributeMap;
 }
 
-/** Options for saveAll batch operation - matches old namespace Object.SaveAllOptions */
+/** Options for saveAll batch operation */
 export interface SaveAllOptions {
   batchSize?: number;
   useMasterKey?: boolean;

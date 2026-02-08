@@ -3,6 +3,14 @@ import ParseObject from './ParseObject';
 import type LiveQuerySubscription from './LiveQuerySubscription';
 import type { FullOptions } from './RESTController';
 import type { Pointer, BaseAttributes } from './ParseObject';
+export interface BatchOptions extends FullOptions {
+    batchSize?: number;
+    useMasterKey?: boolean;
+    useMaintenanceKey?: boolean;
+    sessionToken?: string;
+    context?: Record<string, any>;
+    json?: boolean;
+}
 export type WhereClause = Record<string, any>;
 export interface QueryOptions {
     useMasterKey?: boolean;
@@ -11,21 +19,6 @@ export interface QueryOptions {
     json?: boolean;
 }
 export interface FindOptions extends QueryOptions {
-}
-export interface EachOptions extends QueryOptions {
-    batchSize?: number;
-    useMaintenanceKey?: boolean;
-    installationId?: string;
-    progress?: any;
-    usePost?: boolean;
-}
-export interface BatchOptions extends FullOptions {
-    batchSize?: number;
-    useMasterKey?: boolean;
-    useMaintenanceKey?: boolean;
-    sessionToken?: string;
-    context?: Record<string, any>;
-    json?: boolean;
 }
 export interface CountOptions extends QueryOptions {
 }
@@ -361,7 +354,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    eachBatch(callback: (objs: T[]) => PromiseLike<void> | void, options?: EachOptions): Promise<void>;
+    eachBatch(callback: (objs: T[]) => PromiseLike<void> | void, options?: BatchOptions): Promise<void>;
     /**
      * Iterates over each result of a query, calling a callback for each one. If
      * the callback returns a promise, the iteration will not continue until
@@ -382,7 +375,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    each(callback: (obj: T) => PromiseLike<void> | void, options?: EachOptions): Promise<void>;
+    each(callback: (obj: T) => PromiseLike<void> | void, options?: BatchOptions): Promise<void>;
     /**
      * Adds a hint to force index selection. (https://docs.mongodb.com/manual/reference/operator/meta/hint/)
      *
@@ -419,7 +412,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    map(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any, options?: EachOptions): Promise<any[]>;
+    map(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any, options?: BatchOptions): Promise<any[]>;
     /**
      * Iterates over each result of a query, calling a callback for each one. If
      * the callback returns a promise, the iteration will not continue until
@@ -443,7 +436,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    reduce(callback: (accumulator: any, currentObject: ParseObject, index: number) => any, initialValue: any, options?: EachOptions): Promise<any[]>;
+    reduce(callback: (accumulator: any, currentObject: ParseObject, index: number) => any, initialValue: any, options?: BatchOptions): Promise<any[]>;
     /**
      * Iterates over each result of a query, calling a callback for each one. If
      * the callback returns a promise, the iteration will not continue until
@@ -466,7 +459,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    filter(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean, options?: EachOptions): Promise<ParseObject[]>;
+    filter(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean, options?: BatchOptions): Promise<ParseObject[]>;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be equal to the provided value.
