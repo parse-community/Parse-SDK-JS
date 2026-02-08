@@ -1097,27 +1097,23 @@ declare class ParseObject<T extends Attributes = Attributes> {
     static unPinAllObjectsWithName(name: string): Promise<void>;
 }
 export interface ObjectStatic<T extends ParseObject = ParseObject> {
-    new (className: string, attributes?: Attributes, options?: any): T;
-    new (attributes?: Attributes, options?: any): T;
-    extend(className: string, protoProps?: any, classProps?: any): any;
-    enableSingleInstance(): void;
-    disableSingleInstance(): void;
-    enableLocaldatastore(): void;
-    isLocalDatastoreEnabled(): boolean;
-    disableLocaldatastore(): void;
-    unpinAllObjects(): Promise<void>;
-    unpinAllObjectsWithName(name: string): Promise<void>;
-    fetchAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
-    fetchAllWithInclude<T extends ParseObject>(list: T[], include: string | string[], options?: RequestOptions): Promise<T[]>;
-    fetchAllIfNeeded<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
-    destroyAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
-    saveAll<T extends ParseObject>(list: T[], options?: SaveOptions): Promise<T[]>;
-    fetchAllFromLocalDatastore<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
-    unpinAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<void>;
-    pinAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<void>;
-    pinAllWithName<T extends ParseObject>(name: string, list: T[], options?: RequestOptions): Promise<void>;
+    createWithoutData(id: string): T;
+    destroyAll<T extends ParseObject>(list: T[], options?: DestroyAllOptions): Promise<T[]>;
+    extend(className: string | {
+        className: string;
+    }, protoProps?: any, classProps?: any): any;
+    fetchAll<T extends ParseObject>(list: T[], options: FetchAllOptions): Promise<T[]>;
+    fetchAllIfNeeded<T extends ParseObject>(list: T[], options?: FetchAllOptions): Promise<T[]>;
+    fetchAllIfNeededWithInclude<T extends ParseObject>(list: T[], keys: keyof T["attributes"] | Array<keyof T["attributes"]>, options?: RequestOptions): Promise<T[]>;
+    fetchAllWithInclude<T extends ParseObject>(list: T[], keys: keyof T["attributes"] | Array<keyof T["attributes"]>, options?: RequestOptions): Promise<T[]>;
     fromJSON(json: any, override?: boolean): T;
-    registerSubclass(className: string, constructor: any): void;
-    createWithoutData(className: string, id: string): T;
+    pinAll(objects: ParseObject[]): Promise<void>;
+    pinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
+    registerSubclass(className: string, clazz: new (options?: any) => T): void;
+    saveAll<T extends readonly ParseObject[]>(list: T, options?: SaveAllOptions): Promise<T>;
+    unPinAll(objects: ParseObject[]): Promise<void>;
+    unPinAllObjects(): Promise<void>;
+    unPinAllObjectsWithName(name: string): Promise<void>;
+    unPinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
 }
 export default ParseObject;
