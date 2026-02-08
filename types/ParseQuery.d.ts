@@ -3,11 +3,6 @@ import ParseObject from './ParseObject';
 import type LiveQuerySubscription from './LiveQuerySubscription';
 import type { FullOptions } from './RESTController';
 import type { Pointer } from './ParseObject';
-export interface BatchOptions extends FullOptions {
-    batchSize?: number;
-    context?: Record<string, any>;
-    json?: boolean;
-}
 export type WhereClause = Record<string, any>;
 export interface QueryOptions {
     useMasterKey?: boolean;
@@ -15,8 +10,8 @@ export interface QueryOptions {
     context?: Record<string, any>;
     json?: boolean;
 }
-/** Alias of QueryOptions (added for old DefinitelyTyped typing compat) */
-export type FindOptions = QueryOptions;
+export interface FindOptions extends QueryOptions {
+}
 export interface EachOptions extends QueryOptions {
     batchSize?: number;
     useMaintenanceKey?: boolean;
@@ -24,12 +19,20 @@ export interface EachOptions extends QueryOptions {
     progress?: any;
     usePost?: boolean;
 }
-/** Ditto to QueryOptions for now */
-export type CountOptions = QueryOptions;
-/** Ditto to QueryOptions for now */
-export type GetOptions = QueryOptions;
-/** Ditto to QueryOptions for now */
-export type FirstOptions = QueryOptions;
+export interface BatchOptions extends FullOptions {
+    batchSize?: number;
+    useMasterKey?: boolean;
+    useMaintenanceKey?: boolean;
+    sessionToken?: string;
+    context?: Record<string, any>;
+    json?: boolean;
+}
+export interface CountOptions extends QueryOptions {
+}
+export interface GetOptions extends QueryOptions {
+}
+export interface FirstOptions extends QueryOptions {
+}
 export interface AggregationOptions {
     group?: (Record<string, any> & {
         objectId?: string;
@@ -262,7 +265,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that is resolved with the result when
      * the query completes.
      */
-    get(objectId: string, options?: QueryOptions): Promise<T>;
+    get(objectId: string, options?: GetOptions): Promise<T>;
     /**
      * Retrieves a list of ParseObjects that satisfy this query.
      *
@@ -278,7 +281,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that is resolved with the results when
      * the query completes.
      */
-    find(options?: QueryOptions): Promise<T[]>;
+    find(options?: FindOptions): Promise<T[]>;
     /**
      * Retrieves a complete list of ParseObjects that satisfy this query.
      * Using `eachBatch` under the hood to fetch all the valid objects.
@@ -310,10 +313,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that is resolved with the count when
      * the query completes.
      */
-    count(options?: {
-        useMasterKey?: boolean;
-        sessionToken?: string;
-    }): Promise<number>;
+    count(options?: CountOptions): Promise<number>;
     /**
      * Executes a distinct query and returns unique values
      *
@@ -344,7 +344,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that is resolved with the object when
      * the query completes.
      */
-    first(options?: QueryOptions): Promise<T | undefined>;
+    first(options?: FirstOptions): Promise<T | undefined>;
     /**
      * Iterates over objects matching a query, calling a callback for each batch.
      * If the callback returns a promise, the iteration will not continue until
@@ -366,7 +366,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    eachBatch(callback: (objs: T[]) => PromiseLike<void> | void, options?: BatchOptions): Promise<void>;
+    eachBatch(callback: (objs: T[]) => PromiseLike<void> | void, options?: EachOptions): Promise<void>;
     /**
      * Iterates over each result of a query, calling a callback for each one. If
      * the callback returns a promise, the iteration will not continue until
@@ -387,7 +387,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    each(callback: (obj: T) => PromiseLike<void> | void, options?: BatchOptions): Promise<void>;
+    each(callback: (obj: T) => PromiseLike<void> | void, options?: EachOptions): Promise<void>;
     /**
      * Adds a hint to force index selection. (https://docs.mongodb.com/manual/reference/operator/meta/hint/)
      *
@@ -424,7 +424,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    map(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any, options?: BatchOptions): Promise<any[]>;
+    map(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => any, options?: EachOptions): Promise<any[]>;
     /**
      * Iterates over each result of a query, calling a callback for each one. If
      * the callback returns a promise, the iteration will not continue until
@@ -448,7 +448,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    reduce(callback: (accumulator: any, currentObject: ParseObject, index: number) => any, initialValue: any, options?: BatchOptions): Promise<any[]>;
+    reduce(callback: (accumulator: any, currentObject: ParseObject, index: number) => any, initialValue: any, options?: EachOptions): Promise<any[]>;
     /**
      * Iterates over each result of a query, calling a callback for each one. If
      * the callback returns a promise, the iteration will not continue until
@@ -471,7 +471,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that will be fulfilled once the
      *     iteration has completed.
      */
-    filter(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean, options?: BatchOptions): Promise<ParseObject[]>;
+    filter(callback: (currentObject: ParseObject, index: number, query: ParseQuery) => boolean, options?: EachOptions): Promise<ParseObject[]>;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be equal to the provided value.

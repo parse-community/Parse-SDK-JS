@@ -39,7 +39,7 @@ export type { Pointer, Attributes, BaseAttributes, JSONBaseAttributes, ObjectSta
 export type { PushData, SendOptions } from './Push';
 export type { FullOptions, RequestOptions } from './RESTController';
 export type { RestSchema, TYPE } from './ParseSchema';
-export type { FindOptions, QueryOptions, QueryJSON, WhereClause, BatchOptions, FullTextOptions, EachOptions, CountOptions, GetOptions, FirstOptions, AggregationOptions } from './ParseQuery';
+export type { FindOptions, QueryOptions, QueryJSON, WhereClause, FullTextOptions, EachOptions, BatchOptions, CountOptions, GetOptions, FirstOptions, AggregationOptions } from './ParseQuery';
 export { LiveQuerySubscription };
 export {
   ACL,
@@ -91,9 +91,9 @@ export namespace Object {
 export namespace Query {
   export type FindOptions = import('./ParseQuery').FindOptions;
   export type QueryOptions = import('./ParseQuery').QueryOptions;
-  export type BatchOptions = import('./ParseQuery').BatchOptions;
-  export type FullTextOptions = import('./ParseQuery').FullTextOptions;
   export type EachOptions = import('./ParseQuery').EachOptions;
+  export type FullTextOptions = import('./ParseQuery').FullTextOptions;
+  export type BatchOptions = import('./ParseQuery').BatchOptions;
   export type CountOptions = import('./ParseQuery').CountOptions;
   export type GetOptions = import('./ParseQuery').GetOptions;
   export type FirstOptions = import('./ParseQuery').FirstOptions;
