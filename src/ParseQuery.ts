@@ -675,7 +675,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @returns {Promise} A promise that is resolved with the results when
    * the query completes.
    */
-  find(options?: QueryOptions): Promise<T[]> {
+  find(options?: QueryOptions): Promise<T[] | { results: T[]; count: number }> {
     const findOptions = ParseObject._getRequestOptions(options);
     this._setRequestTask(findOptions);
 
@@ -736,12 +736,15 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @returns {Promise} A promise that is resolved with the results when
    * the query completes.
    */
-  async findAll(options?: BatchOptions): Promise<T[]> {
-    let result: T[] = [];
+  async findAll(options?: BatchOptions): Promise<T[] | { results: T[], count: number}> {
+    let results: T[] = [];
     await this.eachBatch((objects: T[]) => {
-      result = [...result, ...objects];
+      results = [...results, ...objects];
     }, options);
-    return result;
+    if (this._count) {
+      return { results, count: results.length };
+    }
+    return results;
   }
 
   /**
@@ -930,10 +933,14 @@ class ParseQuery<T extends ParseObject = ParseObject> {
         return !finished;
       },
       async () => {
-        const [results] = await Promise.all([
+        const [response] = await Promise.all([
           query.find(findOptions),
           Promise.resolve(previousResults.length > 0 && callback(previousResults)),
         ]);
+        let results: any = response;
+        if (results.results) {
+          results = results.results;
+        }
         if (results.length >= query._limit) {
           if (findOptions.json) {
             query.greaterThan('objectId', (results[results.length - 1] as any).objectId);

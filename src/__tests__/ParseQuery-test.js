@@ -1897,6 +1897,30 @@ describe('ParseQuery', () => {
         expect(result.objectId).toBeDefined();
       });
     });
+
+    it('Returns all objects with count', async () => {
+      const findCountMock = jest.fn();
+      findCountMock.mockReturnValueOnce(
+        Promise.resolve({
+          results: [{ objectId: 'I92', size: 'medium', name: 'Product 92' }],
+          count: 1,
+        })
+      );
+      CoreManager.setQueryController({
+        aggregate() {},
+        find: findCountMock,
+      });
+      const q = new ParseQuery('Item');
+      q.withCount();
+      const { results, count } = await q.findAll();
+      expect(results.length).toEqual(1);
+      expect(count).toEqual(1);
+      expect(findCountMock).toHaveBeenCalledTimes(1);
+      CoreManager.setQueryController({
+        aggregate() {},
+        find: findMock,
+      });
+    });
   });
 
   it('can iterate over results with each()', done => {

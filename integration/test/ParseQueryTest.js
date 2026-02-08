@@ -53,7 +53,13 @@ describe('Parse Query', () => {
     await object.save();
 
     const query = new Parse.Query(TestObject);
-    const results = await query.find({ json: true });
+    let results = await query.find({ json: true });
+    assert.strictEqual(results[0] instanceof Parse.Object, false);
+    assert.strictEqual(results[0].foo, 'bar');
+    assert.strictEqual(results[0].className, 'TestObject');
+    assert.strictEqual(results[0].objectId, object.id);
+
+    results = await query.findAll({ json: true });
     assert.strictEqual(results[0] instanceof Parse.Object, false);
     assert.strictEqual(results[0].foo, 'bar');
     assert.strictEqual(results[0].className, 'TestObject');
@@ -95,6 +101,25 @@ describe('Parse Query', () => {
 
     assert(typeof count === 'number');
     assert.equal(results.length, 4);
+    assert.equal(count, 4);
+    for (let i = 0; i < 4; i++) {
+      assert.equal(results[i].className, 'TestObject');
+    }
+  });
+
+  it('can do findAll query with count', async () => {
+    const items = [];
+    for (let i = 0; i < 4; i++) {
+      items.push(new TestObject({ countMe: true }));
+    }
+    await Parse.Object.saveAll(items);
+
+    const query = new Parse.Query(TestObject);
+    query.withCount(true);
+    const { results, count } = await query.findAll();
+
+    assert.equal(results.length, 4);
+    assert(typeof count === 'number');
     assert.equal(count, 4);
     for (let i = 0; i < 4; i++) {
       assert.equal(results[i].className, 'TestObject');
@@ -2389,6 +2414,18 @@ describe('Parse Query', () => {
       indexName = plan.queryPlan.inputStage.inputStage.indexName;
     }
     assert.equal(indexName, '_id_');
+  });
+
+  it('can query with explain false', async () => {
+    const obj1 = new TestObject({ number: 1 });
+    const obj2 = new TestObject({ number: 2 });
+    const obj3 = new TestObject({ number: 3 });
+    await Parse.Object.saveAll([obj1, obj2, obj3]);
+
+    const query = new Parse.Query(TestObject);
+    query.explain(false);
+    const results = await query.find();
+    expect(results.length).toBe(3);
   });
 
   it('can query with select on null field', async () => {

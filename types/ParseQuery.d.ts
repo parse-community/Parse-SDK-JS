@@ -225,7 +225,10 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that is resolved with the results when
      * the query completes.
      */
-    find(options?: QueryOptions): Promise<T[]>;
+    find(options?: QueryOptions): Promise<T[] | {
+        results: T[];
+        count: number;
+    }>;
     /**
      * Retrieves a complete list of ParseObjects that satisfy this query.
      * Using `eachBatch` under the hood to fetch all the valid objects.
@@ -241,7 +244,10 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that is resolved with the results when
      * the query completes.
      */
-    findAll(options?: BatchOptions): Promise<T[]>;
+    findAll(options?: BatchOptions): Promise<T[] | {
+        results: T[];
+        count: number;
+    }>;
     /**
      * Counts the number of objects that match this query.
      *

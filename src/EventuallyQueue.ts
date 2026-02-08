@@ -346,7 +346,7 @@ const EventuallyQueue = {
       const { sessionToken } = queueObject.serverOptions;
       const query = new ParseQuery(ObjectType);
       query.equalTo('hash', queueObject.hash);
-      const results = await query.find({ sessionToken });
+      const results: any = await query.find({ sessionToken });
       if (results.length > 0) {
         return EventuallyQueue.sendQueueCallback(results[0], queueObject);
       }
