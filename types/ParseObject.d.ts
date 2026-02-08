@@ -1113,6 +1113,9 @@ export interface ObjectStatic<T extends ParseObject = ParseObject> {
 }
 export interface ObjectConstructor extends ObjectStatic {
     new <T extends Attributes>(className: string, attributes: T, options?: any): ParseObject<T>;
-    new (className?: string, attributes?: Attributes, options?: any): ParseObject;
+    new (className?: string | {
+        className: string;
+        [attr: string]: any;
+    }, attributes?: Attributes, options?: any): ParseObject;
 }
 export default ParseObject;

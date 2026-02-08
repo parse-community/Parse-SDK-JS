@@ -217,7 +217,7 @@ class ParseObject<T extends Attributes = Attributes> {
     if (CoreManager.get('NODE_LOGGING')) {
       this[Symbol.for('nodejs.util.inspect.custom')] = function () {
         return `ParseObject: className: ${this.className}, id: ${this.id
-        }\nAttributes: ${JSON.stringify(this.attributes, null, 2)}`;
+          }\nAttributes: ${JSON.stringify(this.attributes, null, 2)}`;
       };
     }
   }
@@ -2714,7 +2714,7 @@ export interface ObjectStatic<T extends ParseObject = ParseObject> {
 
 export interface ObjectConstructor extends ObjectStatic {
   new <T extends Attributes>(className: string, attributes: T, options?: any): ParseObject<T>;
-  new(className?: string, attributes?: Attributes, options?: any): ParseObject;
+  new (className?: string | { className: string; [attr: string]: any }, attributes?: Attributes, options?: any): ParseObject;
 }
 
 export default ParseObject;
