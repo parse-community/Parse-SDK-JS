@@ -3,7 +3,7 @@ import ParseObject from './ParseObject';
 import type LiveQuerySubscription from './LiveQuerySubscription';
 import type { FullOptions } from './RESTController';
 import type { Pointer } from './ParseObject';
-type BatchOptions = FullOptions & {
+export type BatchOptions = FullOptions & {
     batchSize?: number;
     useMasterKey?: boolean;
     useMaintenanceKey?: boolean;
@@ -20,7 +20,7 @@ export interface QueryOptions {
 }
 /** Alias for QueryOptions, used for find operations */
 export type FindOptions = QueryOptions;
-interface FullTextQueryOptions {
+export interface FullTextOptions {
     language?: string;
     caseSensitive?: boolean;
     diacriticSensitive?: boolean;
@@ -627,7 +627,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param {boolean} options.diacriticSensitive A boolean flag to enable or disable diacritic sensitive search.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    fullText<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: string, options?: FullTextQueryOptions): this;
+    fullText<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: string, options?: FullTextOptions): this;
     /**
      * Method to sort the full text search by text score
      *

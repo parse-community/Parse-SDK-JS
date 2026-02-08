@@ -38,6 +38,25 @@ export interface DestroyOptions {
     useMasterKey?: boolean;
     sessionToken?: string;
     context?: AttributeMap;
+    /** Wait for the server to confirm before resolving */
+    wait?: boolean;
+}
+/** Options for destroyAll batch operation - matches old namespace Object.DestroyAllOptions */
+export interface DestroyAllOptions {
+    batchSize?: number;
+    useMasterKey?: boolean;
+    sessionToken?: string;
+}
+/** Options for saveAll batch operation - matches old namespace Object.SaveAllOptions */
+export interface SaveAllOptions {
+    batchSize?: number;
+    useMasterKey?: boolean;
+    sessionToken?: string;
+}
+/** Options for fetchAll batch operation - matches old namespace Object.FetchAllOptions */
+export interface FetchAllOptions {
+    useMasterKey?: boolean;
+    sessionToken?: string;
 }
 export type AttributeKey<T> = Extract<keyof T, string>;
 export type Attributes = Record<string, any>;
@@ -57,11 +76,11 @@ interface CommonAttributes {
 type AtomicKey<T> = {
     [K in keyof T]: NonNullable<T[K]> extends any[] ? K : never;
 };
-type Encode<T> = T extends ParseObject ? ReturnType<T['toJSON']> | Pointer : T extends ParseACL | ParseGeoPoint | ParsePolygon | ParseRelation | ParseFile ? ReturnType<T['toJSON']> : T extends Date ? {
+export type Encode<T> = T extends ParseObject ? ReturnType<T['toJSON']> | Pointer : T extends ParseACL | ParseGeoPoint | ParsePolygon | ParseRelation | ParseFile ? ReturnType<T['toJSON']> : T extends Date ? {
     __type: 'Date';
     iso: string;
 } : T extends RegExp ? string : T extends (infer R)[] ? Encode<R>[] : T extends object ? ToJSON<T> : T;
-type ToJSON<T> = {
+export type ToJSON<T> = {
     [K in keyof T]: Encode<T[K]>;
 };
 /**
@@ -711,7 +730,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @static
      * @returns {Parse.Object[]}
      */
-    static fetchAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
+    static fetchAll<T extends ParseObject>(list: T[], options?: FetchAllOptions): Promise<T[]>;
     /**
      * Fetches the given list of Parse.Object.
      *
@@ -800,7 +819,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @static
      * @returns {Parse.Object[]}
      */
-    static fetchAllIfNeeded<T extends ParseObject>(list: T[], options?: FetchOptions): Promise<T[]>;
+    static fetchAllIfNeeded<T extends ParseObject>(list: T[], options?: FetchAllOptions): Promise<T[]>;
     static handleIncludeOptions(options: {
         include?: string | string[];
     }): any[];
@@ -859,7 +878,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @returns {Promise} A promise that is fulfilled when the destroyAll
      * completes.
      */
-    static destroyAll(list: ParseObject[], options?: SaveOptions): Promise<ParseObject<Attributes> | ParseObject<Attributes>[]>;
+    static destroyAll(list: ParseObject[], options?: DestroyAllOptions): Promise<ParseObject<Attributes> | ParseObject<Attributes>[]>;
     /**
      * Saves the given list of Parse.Object.
      * If any error is encountered, stops and calls the error handler.
@@ -889,7 +908,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @static
      * @returns {Parse.Object[]}
      */
-    static saveAll<T extends ParseObject[]>(list: T, options?: SaveOptions): Promise<T>;
+    static saveAll<T extends ParseObject[]>(list: T, options?: SaveAllOptions): Promise<T>;
     /**
      * Creates a reference to a subclass of Parse.Object with the given id. This
      * does not exist on Parse.Object, only on subclasses.

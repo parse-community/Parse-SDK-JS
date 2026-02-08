@@ -2402,8 +2402,11 @@ async function test_type_regressions() {
     context: { foo: 'bar' },
   };
 
-  // Namespace-scoped option types
-  // Parse.Object options
+  // =============================================
+  // Namespace-scoped option types (Parse.Object.*, Parse.Query.*, Parse.Schema.*)
+  // =============================================
+
+  // Parse.Object namespace
   const destroyOptions: Parse.Object.DestroyOptions = {
     useMasterKey: true,
     sessionToken: 'token',
@@ -2411,67 +2414,443 @@ async function test_type_regressions() {
 
   const objectFetchOptions: Parse.Object.FetchOptions = {
     useMasterKey: true,
-    sessionToken: 'token',
     include: ['relation1', 'relation2'],
   };
 
   const saveOptions: Parse.Object.SaveOptions = {
     useMasterKey: true,
     cascadeSave: false,
-    context: { key: 'value' },
   };
 
   const setOptions: Parse.Object.SetOptions = {
     ignoreValidation: true,
-    unset: false,
   };
 
-  // Parse.Query options
+  const destroyAllOptions: Parse.Object.DestroyAllOptions = {
+    batchSize: 100,
+    useMasterKey: true,
+  };
+
+  const saveAllOptions: Parse.Object.SaveAllOptions = {
+    batchSize: 50,
+    useMasterKey: true,
+  };
+
+  const fetchAllOptions: Parse.Object.FetchAllOptions = {
+    useMasterKey: true,
+    sessionToken: 'token',
+  };
+
+  // Parse.Query namespace
   const findOptions: Parse.Query.FindOptions = {
+    useMasterKey: true,
+    sessionToken: 'token',
+  };
+
+  // Parse.Schema namespace
+  const schemaType: Parse.Schema.TYPE = 'String';
+  const schemaTypeNumber: Parse.Schema.TYPE = 'Number';
+  const schemaTypePointer: Parse.Schema.TYPE = 'Pointer';
+  const schemaTypeRelation: Parse.Schema.TYPE = 'Relation';
+
+  // Push types
+  const pushData: Parse.PushData = {
+    channels: ['news'],
+    data: { alert: 'Hello' },
+  };
+
+  const sendOptions: Parse.SendOptions = {
+    useMasterKey: true,
+  };
+}
+
+// =============================================
+// COMPREHENSIVE TYPE EXPORT TESTS
+// Tests for all types restored from old-types.d.ts
+// =============================================
+
+function test_restored_types_parseobject_namespace() {
+  // =============================================
+  // Parse.Object.* namespace types
+  // =============================================
+
+  // Parse.Object.DestroyOptions
+  const destroyOpts1: Parse.Object.DestroyOptions = {};
+  const destroyOpts2: Parse.Object.DestroyOptions = {
+    useMasterKey: true,
+    sessionToken: 'session-token',
+  };
+
+  // Parse.Object.DestroyAllOptions
+  const destroyAllOpts1: Parse.Object.DestroyAllOptions = {};
+  const destroyAllOpts2: Parse.Object.DestroyAllOptions = {
+    batchSize: 100,
+    useMasterKey: true,
+    sessionToken: 'session-token',
+  };
+
+  // Parse.Object.FetchOptions
+  const fetchOpts1: Parse.Object.FetchOptions = {};
+  const fetchOpts2: Parse.Object.FetchOptions = {
+    useMasterKey: true,
+    sessionToken: 'session-token',
+    include: ['pointer1', 'pointer2'],
+  };
+
+  // Parse.Object.FetchAllOptions
+  const fetchAllOpts1: Parse.Object.FetchAllOptions = {};
+  const fetchAllOpts2: Parse.Object.FetchAllOptions = {
+    useMasterKey: true,
+    sessionToken: 'session-token',
+  };
+
+  // Parse.Object.SaveOptions
+  const saveOpts1: Parse.Object.SaveOptions = {};
+  const saveOpts2: Parse.Object.SaveOptions = {
+    useMasterKey: true,
+    sessionToken: 'session-token',
+    cascadeSave: false,
+    context: { key: 'value' },
+  };
+
+  // Parse.Object.SaveAllOptions
+  const saveAllOpts1: Parse.Object.SaveAllOptions = {};
+  const saveAllOpts2: Parse.Object.SaveAllOptions = {
+    batchSize: 50,
+    useMasterKey: true,
+    sessionToken: 'session-token',
+  };
+
+  // Parse.Object.SetOptions
+  const setOpts1: Parse.Object.SetOptions = {};
+  const setOpts2: Parse.Object.SetOptions = {
+    ignoreValidation: true,
+  };
+
+  // Parse.Object.Encode<T> - utility type for encoding ParseObject to JSON
+  type TestEncodeString = Parse.Object.Encode<string>; // string
+  type TestEncodeNumber = Parse.Object.Encode<number>; // number
+  type TestEncodeDate = Parse.Object.Encode<Date>; // { __type: 'Date'; iso: string }
+  type TestEncodeObject = Parse.Object.Encode<Parse.Object>; // ReturnType<toJSON> | Pointer
+
+  // Parse.Object.ToJSON<T> - utility type for converting object properties
+  type TestToJSON = Parse.Object.ToJSON<{ name: string; count: number }>;
+}
+
+function test_restored_types_parsequery_namespace() {
+  // =============================================
+  // Parse.Query.* namespace types
+  // =============================================
+
+  // Parse.Query.QueryOptions - base query options
+  const queryOpts1: Parse.Query.QueryOptions = {};
+  const queryOpts2: Parse.Query.QueryOptions = {
+    useMasterKey: true,
+    sessionToken: 'session-token',
+    context: { key: 'value' },
+    json: true,
+  };
+
+  // Parse.Query.FindOptions - alias for QueryOptions
+  const findOpts1: Parse.Query.FindOptions = {};
+  const findOpts2: Parse.Query.FindOptions = {
+    useMasterKey: true,
+    sessionToken: 'session-token',
+    context: { key: 'value' },
+    json: false,
+  };
+
+  // Parse.Query.BatchOptions - for batch operations like each(), eachBatch()
+  const batchOpts1: Parse.Query.BatchOptions = {};
+  const batchOpts2: Parse.Query.BatchOptions = {
+    batchSize: 100,
+    useMasterKey: true,
+    sessionToken: 'session-token',
+    context: { key: 'value' },
+    json: true,
+  };
+
+  // Parse.Query.FullTextOptions - for fullText() query method
+  const fullTextOpts1: Parse.Query.FullTextOptions = {};
+  const fullTextOpts2: Parse.Query.FullTextOptions = {
+    language: 'en',
+    caseSensitive: true,
+    diacriticSensitive: false,
+  };
+}
+
+function test_restored_types_parseschema_namespace() {
+  // =============================================
+  // Parse.Schema.* namespace types
+  // =============================================
+
+  // Parse.Schema.TYPE - all valid schema field types
+  const typeString: Parse.Schema.TYPE = 'String';
+  const typeNumber: Parse.Schema.TYPE = 'Number';
+  const typeBytes: Parse.Schema.TYPE = 'Bytes';
+  const typeBoolean: Parse.Schema.TYPE = 'Boolean';
+  const typeDate: Parse.Schema.TYPE = 'Date';
+  const typeFile: Parse.Schema.TYPE = 'File';
+  const typeGeoPoint: Parse.Schema.TYPE = 'GeoPoint';
+  const typePolygon: Parse.Schema.TYPE = 'Polygon';
+  const typeArray: Parse.Schema.TYPE = 'Array';
+  const typeObject: Parse.Schema.TYPE = 'Object';
+  const typePointer: Parse.Schema.TYPE = 'Pointer';
+  const typeRelation: Parse.Schema.TYPE = 'Relation';
+}
+
+function test_restored_types_direct_exports() {
+  // =============================================
+  // Direct Parse.* exports (top-level)
+  // These should be accessible directly from Parse namespace
+  // =============================================
+
+  // Parse.DestroyOptions (same as Parse.Object.DestroyOptions)
+  const directDestroyOpts: Parse.DestroyOptions = {
+    useMasterKey: true,
+    sessionToken: 'token',
+  };
+
+  // Parse.FetchOptions (same as Parse.Object.FetchOptions)
+  const directFetchOpts: Parse.FetchOptions = {
+    useMasterKey: true,
+    include: ['relation'],
+  };
+
+  // Parse.SaveOptions (same as Parse.Object.SaveOptions)
+  const directSaveOpts: Parse.SaveOptions = {
+    useMasterKey: true,
+    cascadeSave: true,
+    context: { key: 'value' },
+  };
+
+  // Parse.SetOptions (same as Parse.Object.SetOptions)
+  const directSetOpts: Parse.SetOptions = {
+    ignoreValidation: false,
+  };
+
+  // Parse.DestroyAllOptions
+  const directDestroyAllOpts: Parse.DestroyAllOptions = {
+    batchSize: 100,
+    useMasterKey: true,
+  };
+
+  // Parse.SaveAllOptions
+  const directSaveAllOpts: Parse.SaveAllOptions = {
+    batchSize: 50,
+    sessionToken: 'token',
+  };
+
+  // Parse.FetchAllOptions
+  const directFetchAllOpts: Parse.FetchAllOptions = {
+    useMasterKey: true,
+  };
+
+  // Parse.QueryOptions (same as Parse.Query.QueryOptions)
+  const directQueryOpts: Parse.QueryOptions = {
     useMasterKey: true,
     sessionToken: 'token',
     json: true,
   };
 
-  const firstOptions: Parse.Query.FirstOptions = {
+  // Parse.FindOptions (same as Parse.Query.FindOptions)
+  const directFindOpts: Parse.FindOptions = {
+    useMasterKey: true,
+    context: { key: 'value' },
+  };
+
+  // Parse.BatchOptions (same as Parse.Query.BatchOptions)
+  const directBatchOpts: Parse.BatchOptions = {
+    batchSize: 100,
     useMasterKey: true,
     json: false,
   };
 
-  const getOptions: Parse.Query.GetOptions = {
-    sessionToken: 'token',
-  };
-
-  const countOptions: Parse.Query.CountOptions = {
-    useMasterKey: true,
-  };
-
-  const eachOptions: Parse.Query.EachOptions = {
-    sessionToken: 'token',
-  };
-
-  const batchOptions: Parse.Query.BatchOptions = {
-    batchSize: 100,
-    useMasterKey: true,
-  };
-
-  const fullTextOptions: Parse.Query.FullTextOptions = {
+  // Parse.FullTextOptions (same as Parse.Query.FullTextOptions)
+  const directFullTextOpts: Parse.FullTextOptions = {
     language: 'en',
     caseSensitive: false,
     diacriticSensitive: true,
   };
 
-  const aggregationOptions: Parse.Query.AggregationOptions = {
-    group: { objectId: '$category' },
-    match: { status: 'active' },
-    limit: 100,
-    sort: { createdAt: -1 },
+  // Parse.TYPE (same as Parse.Schema.TYPE)
+  const directType: Parse.TYPE = 'String';
+
+  // Parse.Pointer - object pointer type
+  const pointer: Parse.Pointer = {
+    __type: 'Pointer',
+    className: 'GameScore',
+    objectId: 'abc123',
   };
 
-  // Parse.Schema.TYPE
-  const schemaType: Parse.Schema.TYPE = 'String';
-  const schemaTypeNumber: Parse.Schema.TYPE = 'Number';
-  const schemaTypePointer: Parse.Schema.TYPE = 'Pointer';
-  const schemaTypeRelation: Parse.Schema.TYPE = 'Relation';
+  // Parse.Attributes - base attributes type
+  const attrs: Parse.Attributes = {
+    score: 100,
+    playerName: 'John',
+  };
+
+  // Parse.BaseAttributes - standard object attributes
+  const baseAttrs: Parse.BaseAttributes = {
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    objectId: 'abc123',
+  };
+
+  // Parse.JSONBaseAttributes - JSON representation of base attributes
+  const jsonBaseAttrs: Parse.JSONBaseAttributes = {
+    createdAt: '2023-01-01T00:00:00.000Z',
+    updatedAt: '2023-01-01T00:00:00.000Z',
+    objectId: 'abc123',
+  };
+
+  // Parse.Encode<T> - utility type
+  type DirectEncode = Parse.Encode<Date>;
+
+  // Parse.ToJSON<T> - utility type
+  type DirectToJSON = Parse.ToJSON<{ name: string }>;
+
+  // Parse.WhereClause - query where clause type
+  const whereClause: Parse.WhereClause = {
+    score: { $gt: 100 },
+    playerName: 'John',
+  };
+
+  // Parse.QueryJSON - serialized query representation
+  const queryJson: Parse.QueryJSON = {
+    where: { score: { $gt: 100 } },
+    limit: 10,
+    skip: 0,
+    order: 'score',
+    include: 'player',
+    keys: 'score,playerName',
+  };
+
+  // Parse.RestSchema - schema REST representation
+  const restSchema: Parse.RestSchema = {
+    className: 'GameScore',
+    fields: {
+      objectId: { type: 'String' },
+      createdAt: { type: 'Date' },
+      updatedAt: { type: 'Date' },
+      ACL: { type: 'ACL' },
+      score: { type: 'Number' },
+    },
+    classLevelPermissions: {
+      find: { '*': true },
+      get: { '*': true },
+      create: { '*': true },
+      update: { '*': true },
+      delete: { '*': true },
+    },
+  };
+
+  // Parse.FullOptions - full request options
+  const fullOpts: Parse.FullOptions = {
+    useMasterKey: true,
+    sessionToken: 'token',
+    installationId: 'install-id',
+  };
+
+  // Parse.RequestOptions - request options
+  const requestOpts: Parse.RequestOptions = {
+    useMasterKey: true,
+    sessionToken: 'token',
+    installationId: 'install-id',
+    batchSize: 50,
+    include: ['relation'],
+  };
+
+  // Parse.AuthProvider - authentication provider interface
+  const authProvider: Parse.AuthProvider = {
+    authenticate: () => { },
+    getAuthType: () => 'custom',
+    restoreAuthentication: () => true,
+    deauthenticate: () => { },
+  };
+
+  // Parse.AuthData - authentication data
+  const authData: Parse.AuthData = {
+    id: 'user-id',
+    access_token: 'token',
+  };
+
+  // Parse.SignUpOptions - user signup options
+  const signUpOpts: Parse.SignUpOptions = {
+    useMasterKey: true,
+    installationId: 'install-id',
+  };
+
+  // Parse.PushData - push notification data
+  const pushData: Parse.PushData = {
+    channels: ['news', 'updates'],
+    data: { alert: 'Hello World!' },
+  };
+
+  // Parse.SendOptions - push send options
+  const sendOpts: Parse.SendOptions = {
+    useMasterKey: true,
+  };
+}
+
+async function test_restored_types_usage_in_methods() {
+  // =============================================
+  // Verify types work correctly with actual Parse methods
+  // =============================================
+
+  const obj = new Parse.Object('TestClass');
+  const query = new Parse.Query('TestClass');
+
+  // save() accepts SaveOptions
+  const saveOpts: Parse.SaveOptions = { useMasterKey: true, cascadeSave: false };
+  await obj.save(null, saveOpts);
+
+  // fetch() accepts FetchOptions
+  const fetchOpts: Parse.FetchOptions = { useMasterKey: true, include: ['relation'] };
+  await obj.fetch(fetchOpts);
+
+  // destroy() accepts DestroyOptions
+  const destroyOpts: Parse.DestroyOptions = { useMasterKey: true };
+  await obj.destroy(destroyOpts);
+
+  // set() accepts SetOptions
+  const setOpts: Parse.SetOptions = { ignoreValidation: true };
+  obj.set('key', 'value', setOpts);
+
+  // Parse.Object.saveAll accepts SaveAllOptions
+  const saveAllOpts: Parse.SaveAllOptions = { batchSize: 50, useMasterKey: true };
+  await Parse.Object.saveAll([obj], saveAllOpts);
+
+  // Parse.Object.destroyAll accepts DestroyAllOptions
+  const destroyAllOpts: Parse.DestroyAllOptions = { batchSize: 100, useMasterKey: true };
+  await Parse.Object.destroyAll([obj], destroyAllOpts);
+
+  // Parse.Object.fetchAll accepts FetchAllOptions
+  const fetchAllOpts: Parse.FetchAllOptions = { useMasterKey: true };
+  await Parse.Object.fetchAll([obj], fetchAllOpts);
+
+  // query.find() accepts FindOptions/QueryOptions
+  const findOpts: Parse.FindOptions = { useMasterKey: true, json: true };
+  await query.find(findOpts);
+
+  // query.first() accepts QueryOptions
+  const queryOpts: Parse.QueryOptions = { useMasterKey: true };
+  await query.first(queryOpts);
+
+  // query.get() accepts QueryOptions
+  await query.get('objectId', queryOpts);
+
+  // query.count() accepts QueryOptions
+  await query.count(queryOpts);
+
+  // query.each() accepts BatchOptions
+  const batchOpts: Parse.BatchOptions = { batchSize: 100, useMasterKey: true };
+  await query.each(() => { }, batchOpts);
+
+  // query.eachBatch() accepts BatchOptions
+  await query.eachBatch(() => { }, batchOpts);
+
+  // query.fullText() accepts FullTextOptions
+  const fullTextOpts: Parse.FullTextOptions = { language: 'en', caseSensitive: false };
+  query.fullText('field', 'search term', fullTextOpts);
 }
 

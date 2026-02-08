@@ -11,7 +11,7 @@ import type LiveQuerySubscription from './LiveQuerySubscription';
 import type { RequestOptions, FullOptions } from './RESTController';
 import type { Pointer } from './ParseObject';
 
-type BatchOptions = FullOptions & {
+export type BatchOptions = FullOptions & {
   batchSize?: number;
   useMasterKey?: boolean;
   useMaintenanceKey?: boolean;
@@ -32,7 +32,7 @@ export interface QueryOptions {
 /** Alias for QueryOptions, used for find operations */
 export type FindOptions = QueryOptions;
 
-interface FullTextQueryOptions {
+export interface FullTextOptions {
   language?: string;
   caseSensitive?: boolean;
   diacriticSensitive?: boolean;
@@ -1524,7 +1524,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
   fullText<K extends keyof T['attributes'] | keyof BaseAttributes>(
     key: K,
     value: string,
-    options?: FullTextQueryOptions
+    options?: FullTextOptions
   ): this {
     options = options || {};
 

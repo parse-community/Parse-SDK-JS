@@ -68,6 +68,28 @@ export interface DestroyOptions {
   useMasterKey?: boolean;
   sessionToken?: string;
   context?: AttributeMap;
+  /** Wait for the server to confirm before resolving */
+  wait?: boolean;
+}
+
+/** Options for destroyAll batch operation - matches old namespace Object.DestroyAllOptions */
+export interface DestroyAllOptions {
+  batchSize?: number;
+  useMasterKey?: boolean;
+  sessionToken?: string;
+}
+
+/** Options for saveAll batch operation - matches old namespace Object.SaveAllOptions */
+export interface SaveAllOptions {
+  batchSize?: number;
+  useMasterKey?: boolean;
+  sessionToken?: string;
+}
+
+/** Options for fetchAll batch operation - matches old namespace Object.FetchAllOptions */
+export interface FetchAllOptions {
+  useMasterKey?: boolean;
+  sessionToken?: string;
 }
 
 export type AttributeKey<T> = Extract<keyof T, string>;
@@ -94,7 +116,7 @@ type AtomicKey<T> = {
   [K in keyof T]: NonNullable<T[K]> extends any[] ? K : never;
 };
 
-type Encode<T> = T extends ParseObject
+export type Encode<T> = T extends ParseObject
   ? ReturnType<T['toJSON']> | Pointer
   : T extends ParseACL | ParseGeoPoint | ParsePolygon | ParseRelation | ParseFile
   ? ReturnType<T['toJSON']>
@@ -108,7 +130,7 @@ type Encode<T> = T extends ParseObject
   ? ToJSON<T>
   : T;
 
-type ToJSON<T> = {
+export type ToJSON<T> = {
   [K in keyof T]: Encode<T[K]>;
 };
 
@@ -1648,7 +1670,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @static
    * @returns {Parse.Object[]}
    */
-  static fetchAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]> {
+  static fetchAll<T extends ParseObject>(list: T[], options?: FetchAllOptions): Promise<T[]> {
     const fetchOptions = ParseObject._getRequestOptions(options);
     return CoreManager.getObjectController().fetch(list, true, fetchOptions) as Promise<T[]>;
   }
@@ -1759,7 +1781,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @static
    * @returns {Parse.Object[]}
    */
-  static fetchAllIfNeeded<T extends ParseObject>(list: T[], options?: FetchOptions): Promise<T[]> {
+  static fetchAllIfNeeded<T extends ParseObject>(list: T[], options?: FetchAllOptions): Promise<T[]> {
     const fetchOptions = ParseObject._getRequestOptions(options);
     return CoreManager.getObjectController().fetch(list, false, fetchOptions) as Promise<T[]>;
   }
@@ -1835,7 +1857,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the destroyAll
    * completes.
    */
-  static destroyAll(list: ParseObject[], options?: SaveOptions) {
+  static destroyAll(list: ParseObject[], options?: DestroyAllOptions) {
     const destroyOptions = ParseObject._getRequestOptions(options);
     return CoreManager.getObjectController().destroy(list, destroyOptions);
   }
@@ -1869,7 +1891,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @static
    * @returns {Parse.Object[]}
    */
-  static saveAll<T extends ParseObject[]>(list: T, options?: SaveOptions): Promise<T> {
+  static saveAll<T extends ParseObject[]>(list: T, options?: SaveAllOptions): Promise<T> {
     const saveOptions = ParseObject._getRequestOptions(options);
     return CoreManager.getObjectController().save(list, saveOptions) as any;
   }

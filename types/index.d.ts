@@ -35,10 +35,11 @@ import User from './ParseUser';
 import LiveQuerySubscription from './LiveQuerySubscription';
 
 export type { AuthProvider, AuthData, SignUpOptions } from './ParseUser';
-export type { Pointer, Attributes, BaseAttributes, JSONBaseAttributes, ObjectStatic, FetchOptions as ObjectFetchOptions, SaveOptions as ObjectSaveOptions, SetOptions as ObjectSetOptions, DestroyOptions as ObjectDestroyOptions } from './ParseObject';
+export type { Pointer, Attributes, BaseAttributes, JSONBaseAttributes, ObjectStatic, FetchOptions, SaveOptions, SetOptions, DestroyOptions, DestroyAllOptions, SaveAllOptions, FetchAllOptions, Encode, ToJSON } from './ParseObject';
+export type { PushData, SendOptions } from './Push';
 export type { FullOptions, RequestOptions } from './RESTController';
 export type { RestSchema, TYPE } from './ParseSchema';
-export type { FindOptions, QueryOptions, QueryJSON, WhereClause } from './ParseQuery';
+export type { FindOptions, QueryOptions, QueryJSON, WhereClause, BatchOptions, FullTextOptions } from './ParseQuery';
 export { LiveQuerySubscription };
 export {
   ACL,
@@ -70,125 +71,30 @@ export {
   Hooks,
 };
 
-// Namespace-scoped option types for backwards compatibility
-// These augment the class namespaces with additional types
+// ============================================================================
+// Namespace re-exports for backward compatibility
+// These enable Parse.Object.FetchOptions, Parse.Query.FindOptions etc.
+// ============================================================================
+
 export namespace Object {
-  /** Options for destroying objects */
-  export interface DestroyOptions {
-    useMasterKey?: boolean;
-    sessionToken?: string;
-    context?: Record<string, unknown>;
-  }
-  /** Options for fetching objects */
-  export interface FetchOptions {
-    useMasterKey?: boolean;
-    sessionToken?: string;
-    include?: string | string[];
-    context?: Record<string, unknown>;
-  }
-  /** Options for saving objects */
-  export interface SaveOptions {
-    useMasterKey?: boolean;
-    sessionToken?: string;
-    cascadeSave?: boolean;
-    context?: Record<string, unknown>;
-  }
-  /** Options for setting attributes */
-  export interface SetOptions {
-    ignoreValidation?: boolean;
-    unset?: boolean;
-  }
+  export type DestroyOptions = import('./ParseObject').DestroyOptions;
+  export type DestroyAllOptions = import('./ParseObject').DestroyAllOptions;
+  export type FetchOptions = import('./ParseObject').FetchOptions;
+  export type FetchAllOptions = import('./ParseObject').FetchAllOptions;
+  export type SaveOptions = import('./ParseObject').SaveOptions;
+  export type SaveAllOptions = import('./ParseObject').SaveAllOptions;
+  export type SetOptions = import('./ParseObject').SetOptions;
+  export type Encode<T> = import('./ParseObject').Encode<T>;
+  export type ToJSON<T> = import('./ParseObject').ToJSON<T>;
 }
 
 export namespace Query {
-  /** Options for find operations */
-  export interface FindOptions {
-    useMasterKey?: boolean;
-    sessionToken?: string;
-    context?: Record<string, unknown>;
-    json?: boolean;
-  }
-  /** Options for first operations */
-  export interface FirstOptions {
-    useMasterKey?: boolean;
-    sessionToken?: string;
-    context?: Record<string, unknown>;
-    json?: boolean;
-  }
-  /** Options for get operations */
-  export interface GetOptions {
-    useMasterKey?: boolean;
-    sessionToken?: string;
-    context?: Record<string, unknown>;
-    json?: boolean;
-  }
-  /** Options for count operations */
-  export interface CountOptions {
-    useMasterKey?: boolean;
-    sessionToken?: string;
-  }
-  /** Options for each operations */
-  export interface EachOptions {
-    useMasterKey?: boolean;
-    sessionToken?: string;
-  }
-  /** Options for batch operations */
-  export interface BatchOptions {
-    useMasterKey?: boolean;
-    useMaintenanceKey?: boolean;
-    sessionToken?: string;
-    batchSize?: number;
-    context?: Record<string, unknown>;
-    json?: boolean;
-  }
-  /** Options for full text search */
-  export interface FullTextOptions {
-    language?: string;
-    caseSensitive?: boolean;
-    diacriticSensitive?: boolean;
-  }
-  /** Options for aggregation queries */
-  export interface AggregationOptions {
-    group?: (Record<string, unknown> & { objectId?: string });
-    match?: Record<string, unknown>;
-    project?: Record<string, unknown>;
-    limit?: number;
-    skip?: number;
-    sort?: Record<string, 1 | -1>;
-    sample?: { size: number };
-    count?: string;
-    lookup?: {
-      from: string;
-      localField: string;
-      foreignField: string;
-      as: string;
-    } | {
-      from: string;
-      let?: Record<string, unknown>;
-      pipeline: Record<string, unknown>;
-      as: string;
-    };
-    graphLookup?: {
-      from: string;
-      startWith?: string;
-      connectFromField: string;
-      connectToField: string;
-      as: string;
-      maxDepth?: number;
-      depthField?: string;
-      restrictSearchWithMatch?: Record<string, unknown>;
-    };
-    facet?: Record<string, Array<Record<string, unknown>>>;
-    unwind?: {
-      path: string;
-      includeArrayIndex?: string;
-      preserveNullAndEmptyArrays?: boolean;
-    } | string;
-  }
+  export type FindOptions = import('./ParseQuery').FindOptions;
+  export type QueryOptions = import('./ParseQuery').QueryOptions;
+  export type BatchOptions = import('./ParseQuery').BatchOptions;
+  export type FullTextOptions = import('./ParseQuery').FullTextOptions;
 }
 
 export namespace Schema {
-  /** Field type for Parse Schema */
-  export type TYPE = 'String' | 'Number' | 'Bytes' | 'Boolean' | 'Date' | 'File' | 'GeoPoint' | 'Polygon' | 'Array' | 'Object' | 'Pointer' | 'Relation';
+  export type TYPE = import('./ParseSchema').TYPE;
 }
-
