@@ -2,7 +2,7 @@ import ParseGeoPoint from './ParseGeoPoint';
 import ParseObject from './ParseObject';
 import type LiveQuerySubscription from './LiveQuerySubscription';
 import type { FullOptions } from './RESTController';
-import type { Pointer } from './ParseObject';
+import type { Pointer, BaseAttributes } from './ParseObject';
 export type WhereClause = Record<string, any>;
 export interface QueryOptions {
     useMasterKey?: boolean;
@@ -96,11 +96,6 @@ export interface QueryJSON {
     includeReadPreference?: string;
     subqueryReadPreference?: string;
     comment?: string;
-}
-interface BaseAttributes {
-    createdAt: Date;
-    objectId: string;
-    updatedAt: Date;
 }
 /**
  * Creates a new parse Parse.Query for the given Parse.Object subclass.

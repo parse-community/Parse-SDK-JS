@@ -9,9 +9,7 @@ import { DEFAULT_PIN } from './LocalDatastoreUtils';
 
 import type LiveQuerySubscription from './LiveQuerySubscription';
 import type { RequestOptions, FullOptions } from './RESTController';
-import type { Pointer } from './ParseObject';
-
-
+import type { Pointer, BaseAttributes } from './ParseObject';
 
 export type WhereClause = Record<string, any>;
 
@@ -118,11 +116,6 @@ export interface QueryJSON {
   comment?: string;
 }
 
-interface BaseAttributes {
-  createdAt: Date;
-  objectId: string;
-  updatedAt: Date;
-}
 
 /**
  * Converts a string into a regex that matches it.
