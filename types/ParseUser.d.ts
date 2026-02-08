@@ -10,6 +10,10 @@ export interface AuthProvider {
     getAuthType(): string;
     deauthenticate?(): void;
 }
+export interface SignUpOptions {
+    useMasterKey?: boolean;
+    installationId?: string;
+}
 /**
  * <p>A Parse.User object is a local representation of a user persisted to the
  * Parse cloud. This class is a subclass of a Parse.Object, and retains the
@@ -194,7 +198,7 @@ declare class ParseUser<T extends Attributes = Attributes> extends ParseObject<T
      * @returns {Promise} A promise that is fulfilled when the signup
      *     finishes.
      */
-    signUp(attrs?: Attributes | null, options?: FullOptions & {
+    signUp(attrs?: Attributes | null, options?: SignUpOptions & {
         context?: Attributes;
     }): Promise<ParseUser>;
     /**

@@ -90,8 +90,8 @@ async function test_query() {
     diacriticSensitive: true,
   });
   query.greaterThan('playerAge', 18);
-  await query.eachBatch(objs => {}, { batchSize: 10 });
-  await query.each(score => {});
+  await query.eachBatch(objs => { }, { batchSize: 10 });
+  await query.each(score => { });
   query.hint('_id_');
   query.explain(true);
   query.limit(10);
@@ -366,7 +366,7 @@ function test_relation() {
     .relation<Game>('games')
     .query()
     .find()
-    .then((g: Game[]) => {})
+    .then((g: Game[]) => { })
     .catch(error => error);
   new Parse.User().relation('games').add(game1);
   new Parse.User().relation('games').add([game1, game2]);
@@ -438,7 +438,7 @@ async function test_user_acl_roles() {
   game.setACL(new Parse.ACL(Parse.User.current()));
   game
     .save()
-    .then((game: Game) => {})
+    .then((game: Game) => { })
     .catch(error => error);
   await game.save(null, { useMasterKey: true });
   game
@@ -782,26 +782,26 @@ async function test_cloud_functions() {
   void Parse.Cloud.getJobsData().then(v => v);
 
   // @ts-expect-error - define should not exist on browser Parse.Cloud
-  Parse.Cloud.define('test', () => {});
+  Parse.Cloud.define('test', () => { });
   // @ts-expect-error - beforeSave should not exist on browser Parse.Cloud
-  Parse.Cloud.beforeSave('Test', () => {});
+  Parse.Cloud.beforeSave('Test', () => { });
   // @ts-expect-error - job should not exist on browser Parse.Cloud
-  Parse.Cloud.job('test', () => {});
+  Parse.Cloud.job('test', () => { });
   // @ts-expect-error - httpRequest should not exist on browser Parse.Cloud
   void Parse.Cloud.httpRequest({ url: '' });
   // @ts-expect-error - beforeConnect should not exist on browser Parse.Cloud
-  Parse.Cloud.beforeConnect(() => {});
+  Parse.Cloud.beforeConnect(() => { });
   // @ts-expect-error - beforeSubscribe should not exist on browser Parse.Cloud
-  Parse.Cloud.beforeSubscribe('Test', () => {});
+  Parse.Cloud.beforeSubscribe('Test', () => { });
   // @ts-expect-error - afterLiveQueryEvent should not exist on browser Parse.Cloud
-  Parse.Cloud.afterLiveQueryEvent('Test', () => {});
+  Parse.Cloud.afterLiveQueryEvent('Test', () => { });
   // @ts-expect-error - beforePasswordResetRequest should not exist on browser Parse.Cloud
-  Parse.Cloud.beforePasswordResetRequest(() => {});
+  Parse.Cloud.beforePasswordResetRequest(() => { });
   // @ts-expect-error - sendEmail should not exist on browser Parse.Cloud
   void Parse.Cloud.sendEmail({ to: '' });
 }
 
-class PlaceObject extends Parse.Object {}
+class PlaceObject extends Parse.Object { }
 
 function test_geo_points() {
   let point = new Parse.GeoPoint();
@@ -835,7 +835,7 @@ function test_geo_points() {
 
   const query3 = new Parse.Query('PlaceObject')
     .find()
-    .then((o: Parse.Object[]) => {})
+    .then((o: Parse.Object[]) => { })
     .catch(error => error);
 }
 
@@ -1126,7 +1126,7 @@ async function test_schema(
       relationField: Parse.Relation;
       pointerField: Parse.Pointer | Parse.Object;
     }
-    class TestObject extends Parse.Object<iTestAttributes> {}
+    class TestObject extends Parse.Object<iTestAttributes> { }
 
     const schema = new Parse.Schema<TestObject>('TestObject');
     schema.addArray('arrField');
@@ -1853,7 +1853,7 @@ function testQuery() {
       attribute2: number;
       attribute3: AnotherSubClass;
       attribute4: string[];
-    }> {}
+    }> { }
     const query = new Parse.Query(MySubClass);
 
     // $ExpectType ParseQuery<MySubClass>
@@ -2262,10 +2262,10 @@ function testUser() {
 
   async function testAuthenticationProvider() {
     const authProvider: Parse.AuthProvider = {
-      authenticate: () => {},
+      authenticate: () => { },
       getAuthType: () => 'customAuthorizationProvider',
       restoreAuthentication: () => false,
-      deauthenticate: () => {},
+      deauthenticate: () => { },
     };
     const authData: Parse.AuthData = {
       id: 'some-user-authentication-id',
@@ -2337,9 +2337,9 @@ function testEventuallyQueue() {
 
 function LiveQueryEvents() {
   function testLiveQueryEvents() {
-    Parse.LiveQuery.on('open', () => {});
-    Parse.LiveQuery.on('close', () => {});
-    Parse.LiveQuery.on('error', (error: any) => {});
+    Parse.LiveQuery.on('open', () => { });
+    Parse.LiveQuery.on('close', () => { });
+    Parse.LiveQuery.on('error', (error: any) => { });
   }
 }
 
@@ -2362,5 +2362,116 @@ function testInitialize() {
 
   // Node - 1 param (should also work since javaScriptKey is optional in node)
   ParseNode.initialize('appId');
+}
+async function test_type_regressions() {
+  // Base type exports
+  const attributes: Parse.Attributes = { foo: 'bar' };
+  const baseAttributes: Parse.BaseAttributes = {
+    objectId: '123',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+  const jsonBaseAttributes: Parse.JSONBaseAttributes = {
+    objectId: '123',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  const subscription: Parse.LiveQuerySubscription = await new Parse.Query('Test').subscribe();
+
+  const fullOptions: Parse.FullOptions = {
+    useMasterKey: true,
+    sessionToken: 'token',
+  };
+
+  const signUpOptions: Parse.SignUpOptions = {
+    useMasterKey: true,
+    installationId: 'install-123',
+  };
+
+  const objectStatic: Parse.ObjectStatic = Parse.Object;
+
+  const restSchema: Parse.RestSchema = {
+    className: 'Test',
+    fields: {},
+    classLevelPermissions: {},
+  };
+
+  const cloudRunOptions: Parse.Cloud.RunOptions = {
+    useMasterKey: true,
+    context: { foo: 'bar' },
+  };
+
+  // Namespace-scoped option types
+  // Parse.Object options
+  const destroyOptions: Parse.Object.DestroyOptions = {
+    useMasterKey: true,
+    sessionToken: 'token',
+  };
+
+  const objectFetchOptions: Parse.Object.FetchOptions = {
+    useMasterKey: true,
+    sessionToken: 'token',
+    include: ['relation1', 'relation2'],
+  };
+
+  const saveOptions: Parse.Object.SaveOptions = {
+    useMasterKey: true,
+    cascadeSave: false,
+    context: { key: 'value' },
+  };
+
+  const setOptions: Parse.Object.SetOptions = {
+    ignoreValidation: true,
+    unset: false,
+  };
+
+  // Parse.Query options
+  const findOptions: Parse.Query.FindOptions = {
+    useMasterKey: true,
+    sessionToken: 'token',
+    json: true,
+  };
+
+  const firstOptions: Parse.Query.FirstOptions = {
+    useMasterKey: true,
+    json: false,
+  };
+
+  const getOptions: Parse.Query.GetOptions = {
+    sessionToken: 'token',
+  };
+
+  const countOptions: Parse.Query.CountOptions = {
+    useMasterKey: true,
+  };
+
+  const eachOptions: Parse.Query.EachOptions = {
+    sessionToken: 'token',
+  };
+
+  const batchOptions: Parse.Query.BatchOptions = {
+    batchSize: 100,
+    useMasterKey: true,
+  };
+
+  const fullTextOptions: Parse.Query.FullTextOptions = {
+    language: 'en',
+    caseSensitive: false,
+    diacriticSensitive: true,
+  };
+
+  const aggregationOptions: Parse.Query.AggregationOptions = {
+    group: { objectId: '$category' },
+    match: { status: 'active' },
+    limit: 100,
+    sort: { createdAt: -1 },
+  };
+
+  // Parse.Schema.TYPE
+  const schemaType: Parse.Schema.TYPE = 'String';
+  const schemaTypeNumber: Parse.Schema.TYPE = 'Number';
+  const schemaTypePointer: Parse.Schema.TYPE = 'Pointer';
+  const schemaTypeRelation: Parse.Schema.TYPE = 'Relation';
 }
 

@@ -24,7 +24,7 @@ export type SaveOptions = FullOptions & {
     batchSize?: number;
     transaction?: boolean;
 };
-interface FetchOptions {
+export interface FetchOptions {
     useMasterKey?: boolean;
     sessionToken?: string;
     include?: string | string[];
@@ -34,12 +34,22 @@ export interface SetOptions {
     ignoreValidation?: boolean;
     unset?: boolean;
 }
+export interface DestroyOptions {
+    useMasterKey?: boolean;
+    sessionToken?: string;
+    context?: AttributeMap;
+}
 export type AttributeKey<T> = Extract<keyof T, string>;
 export type Attributes = Record<string, any>;
-interface JSONBaseAttributes {
+export interface JSONBaseAttributes {
     objectId: string;
     createdAt: string;
     updatedAt: string;
+}
+export interface BaseAttributes {
+    objectId: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 interface CommonAttributes {
     ACL: ParseACL;
@@ -594,7 +604,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @returns {Promise} A promise that is fulfilled when the destroy
      *     completes.
      */
-    destroy(options?: RequestOptions): Promise<ParseObject | undefined>;
+    destroy(options?: DestroyOptions): Promise<ParseObject | undefined>;
     /**
      * Asynchronously stores the object and every object it points to in the local datastore,
      * recursively, using a default pin name: _default.
@@ -1066,5 +1076,29 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @static
      */
     static unPinAllObjectsWithName(name: string): Promise<void>;
+}
+export interface ObjectStatic<T extends ParseObject = ParseObject> {
+    new (className: string, attributes?: Attributes, options?: any): T;
+    new (attributes?: Attributes, options?: any): T;
+    extend(className: string, protoProps?: any, classProps?: any): any;
+    enableSingleInstance(): void;
+    disableSingleInstance(): void;
+    enableLocaldatastore(): void;
+    isLocalDatastoreEnabled(): boolean;
+    disableLocaldatastore(): void;
+    unpinAllObjects(): Promise<void>;
+    unpinAllObjectsWithName(name: string): Promise<void>;
+    fetchAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
+    fetchAllWithInclude<T extends ParseObject>(list: T[], include: string | string[], options?: RequestOptions): Promise<T[]>;
+    fetchAllIfNeeded<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
+    destroyAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
+    saveAll<T extends ParseObject>(list: T[], options?: SaveOptions): Promise<T[]>;
+    fetchAllFromLocalDatastore<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
+    unpinAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<void>;
+    pinAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<void>;
+    pinAllWithName<T extends ParseObject>(name: string, list: T[], options?: RequestOptions): Promise<void>;
+    fromJSON(json: any, override?: boolean): T;
+    registerSubclass(className: string, constructor: any): void;
+    createWithoutData(className: string, id: string): T;
 }
 export default ParseObject;

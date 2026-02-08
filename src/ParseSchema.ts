@@ -10,7 +10,7 @@ import type { Pointer } from './ParseObject';
 
 type Bytes = string;
 
-type TYPE =
+export type TYPE =
   | 'String'
   | 'Number'
   | 'Bytes'
@@ -33,18 +33,18 @@ type AttrType<T extends ParseObject, V> = Extract<
 
 interface FieldOptions<
   T extends
-    | string
-    | number
-    | boolean
-    | Bytes
-    | Date
-    | ParseFile
-    | ParseGeoPoint
-    | ParsePolygon
-    | any[]
-    | object
-    | Pointer
-    | ParseRelation = any,
+  | string
+  | number
+  | boolean
+  | Bytes
+  | Date
+  | ParseFile
+  | ParseGeoPoint
+  | ParsePolygon
+  | any[]
+  | object
+  | Pointer
+  | ParseRelation = any,
 > {
   required?: boolean | undefined;
   defaultValue?: T | undefined;
@@ -72,7 +72,7 @@ interface CLP {
   protectedFields?: Record<string, string[]>;
 }
 
-interface RestSchema {
+export interface RestSchema {
   className: string;
   fields: Record<
     string,

@@ -52,7 +52,7 @@ export type SaveOptions = FullOptions & {
   transaction?: boolean;
 };
 
-interface FetchOptions {
+export interface FetchOptions {
   useMasterKey?: boolean;
   sessionToken?: string;
   include?: string | string[];
@@ -64,14 +64,26 @@ export interface SetOptions {
   unset?: boolean;
 }
 
+export interface DestroyOptions {
+  useMasterKey?: boolean;
+  sessionToken?: string;
+  context?: AttributeMap;
+}
+
 export type AttributeKey<T> = Extract<keyof T, string>;
 
 export type Attributes = Record<string, any>;
 
-interface JSONBaseAttributes {
+export interface JSONBaseAttributes {
   objectId: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface BaseAttributes {
+  objectId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface CommonAttributes {
@@ -85,16 +97,16 @@ type AtomicKey<T> = {
 type Encode<T> = T extends ParseObject
   ? ReturnType<T['toJSON']> | Pointer
   : T extends ParseACL | ParseGeoPoint | ParsePolygon | ParseRelation | ParseFile
-    ? ReturnType<T['toJSON']>
-    : T extends Date
-      ? { __type: 'Date'; iso: string }
-      : T extends RegExp
-        ? string
-        : T extends (infer R)[]
-          ? Encode<R>[]
-          : T extends object
-            ? ToJSON<T>
-            : T;
+  ? ReturnType<T['toJSON']>
+  : T extends Date
+  ? { __type: 'Date'; iso: string }
+  : T extends RegExp
+  ? string
+  : T extends (infer R)[]
+  ? Encode<R>[]
+  : T extends object
+  ? ToJSON<T>
+  : T;
 
 type ToJSON<T> = {
   [K in keyof T]: Encode<T[K]>;
@@ -151,7 +163,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @param {boolean} [options.ignoreValidation] Set to `true` ignore any attribute validation errors.
    */
   constructor(
-    className?: string | { className: string; [attr: string]: any },
+    className?: string | { className: string;[attr: string]: any },
     attributes?: T,
     options?: SetOptions
   ) {
@@ -188,9 +200,8 @@ class ParseObject<T extends Attributes = Attributes> {
     }
     if (CoreManager.get('NODE_LOGGING')) {
       this[Symbol.for('nodejs.util.inspect.custom')] = function () {
-        return `ParseObject: className: ${this.className}, id: ${
-          this.id
-        }\nAttributes: ${JSON.stringify(this.attributes, null, 2)}`;
+        return `ParseObject: className: ${this.className}, id: ${this.id
+          }\nAttributes: ${JSON.stringify(this.attributes, null, 2)}`;
       };
     }
   }
@@ -1481,7 +1492,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the destroy
    *     completes.
    */
-  destroy(options?: RequestOptions): Promise<ParseObject | undefined> {
+  destroy(options?: DestroyOptions): Promise<ParseObject | undefined> {
     if (!this.id) {
       return Promise.resolve(undefined);
     }
@@ -1948,7 +1959,7 @@ class ParseObject<T extends Attributes = Attributes> {
     if (typeof constructor !== 'function') {
       throw new TypeError(
         'You must register the subclass constructor. ' +
-          'Did you attempt to register an instance of the subclass?'
+        'Did you attempt to register an instance of the subclass?'
       );
     }
     classMap[className] = constructor;
@@ -2656,5 +2667,38 @@ const DefaultController = {
 
 CoreManager.setParseObject(ParseObject);
 CoreManager.setObjectController(DefaultController);
+
+export interface ObjectStatic<T extends ParseObject = ParseObject> {
+  new(className: string, attributes?: Attributes, options?: any): T;
+  new(attributes?: Attributes, options?: any): T;
+  extend(className: string, protoProps?: any, classProps?: any): any;
+  enableSingleInstance(): void;
+  disableSingleInstance(): void;
+  enableLocaldatastore(): void;
+  isLocalDatastoreEnabled(): boolean;
+  disableLocaldatastore(): void;
+  unpinAllObjects(): Promise<void>;
+  unpinAllObjectsWithName(name: string): Promise<void>;
+  fetchAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
+  fetchAllWithInclude<T extends ParseObject>(
+    list: T[],
+    include: string | string[],
+    options?: RequestOptions
+  ): Promise<T[]>;
+  fetchAllIfNeeded<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
+  destroyAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
+  saveAll<T extends ParseObject>(list: T[], options?: SaveOptions): Promise<T[]>;
+  fetchAllFromLocalDatastore<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
+  unpinAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<void>;
+  pinAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<void>;
+  pinAllWithName<T extends ParseObject>(
+    name: string,
+    list: T[],
+    options?: RequestOptions
+  ): Promise<void>;
+  fromJSON(json: any, override?: boolean): T;
+  registerSubclass(className: string, constructor: any): void;
+  createWithoutData(className: string, id: string): T;
+}
 
 export default ParseObject;

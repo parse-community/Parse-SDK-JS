@@ -22,12 +22,15 @@ type BatchOptions = FullOptions & {
 
 export type WhereClause = Record<string, any>;
 
-interface QueryOptions {
+export interface QueryOptions {
   useMasterKey?: boolean;
   sessionToken?: string;
   context?: Record<string, any>;
   json?: boolean;
 }
+
+/** Alias for QueryOptions, used for find operations */
+export type FindOptions = QueryOptions;
 
 interface FullTextQueryOptions {
   language?: string;
@@ -305,7 +308,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
     this._extraOptions = {};
     this._xhrRequest = {
       task: null,
-      onchange: () => {},
+      onchange: () => { },
     };
     this._comment = null;
   }
@@ -1153,10 +1156,10 @@ class ParseQuery<T extends ParseObject = ParseObject> {
     value:
       | T['attributes'][K]
       | (T['attributes'][K] extends ParseObject
-          ? Pointer
-          : T['attributes'][K] extends (infer E)[]
-            ? E
-            : never)
+        ? Pointer
+        : T['attributes'][K] extends (infer E)[]
+        ? E
+        : never)
   ): this {
     if (key && typeof key === 'object') {
       Object.entries(key).forEach(([k, val]) => this.equalTo(k, val as any));
@@ -1182,10 +1185,10 @@ class ParseQuery<T extends ParseObject = ParseObject> {
     value:
       | T['attributes'][K]
       | (T['attributes'][K] extends ParseObject
-          ? Pointer
-          : T['attributes'][K] extends (infer E)[]
-            ? E
-            : never)
+        ? Pointer
+        : T['attributes'][K] extends (infer E)[]
+        ? E
+        : never)
   ): this {
     if (key && typeof key === 'object') {
       Object.entries(key).forEach(([k, val]) => this.notEqualTo(k, val as any));
@@ -2133,7 +2136,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
       this._xhrRequest.task._aborted = true;
       this._xhrRequest.task.abort();
       this._xhrRequest.task = null;
-      this._xhrRequest.onchange = () => {};
+      this._xhrRequest.onchange = () => { };
       return this;
     }
     this._xhrRequest.onchange = () => this.cancel();

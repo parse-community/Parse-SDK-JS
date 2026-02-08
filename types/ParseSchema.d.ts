@@ -7,7 +7,7 @@ import type ParseRelation from './ParseRelation';
 import type { PermissionsMap } from './ParseCLP';
 import type { Pointer } from './ParseObject';
 type Bytes = string;
-type TYPE = 'String' | 'Number' | 'Bytes' | 'Boolean' | 'Date' | 'File' | 'GeoPoint' | 'Polygon' | 'Array' | 'Object' | 'Pointer' | 'Relation';
+export type TYPE = 'String' | 'Number' | 'Bytes' | 'Boolean' | 'Date' | 'File' | 'GeoPoint' | 'Polygon' | 'Array' | 'Object' | 'Pointer' | 'Relation';
 type AttrType<T extends ParseObject, V> = Extract<{
     [K in keyof T['attributes']]: T['attributes'][K] extends V ? K : never;
 }[keyof T['attributes']], string>;
@@ -34,7 +34,7 @@ interface CLP {
     writeUserFields?: string[] | undefined;
     protectedFields?: Record<string, string[]>;
 }
-interface RestSchema {
+export interface RestSchema {
     className: string;
     fields: Record<string, {
         type: string;

@@ -12,12 +12,14 @@ type BatchOptions = FullOptions & {
     json?: boolean;
 };
 export type WhereClause = Record<string, any>;
-interface QueryOptions {
+export interface QueryOptions {
     useMasterKey?: boolean;
     sessionToken?: string;
     context?: Record<string, any>;
     json?: boolean;
 }
+/** Alias for QueryOptions, used for find operations */
+export type FindOptions = QueryOptions;
 interface FullTextQueryOptions {
     language?: string;
     caseSensitive?: boolean;
