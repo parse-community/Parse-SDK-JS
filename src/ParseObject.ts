@@ -53,7 +53,10 @@ export interface SaveOptions extends FullOptions {
   transaction?: boolean;
 }
 
-export interface FetchOptions extends RequestOptions {
+export interface FetchOptions {
+  useMasterKey?: boolean;
+  sessionToken?: string;
+  include?: string | string[];
   context?: AttributeMap;
 }
 
@@ -1866,9 +1869,9 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the destroyAll
    * completes.
    */
-  static destroyAll(list: ParseObject[], options?: DestroyAllOptions) {
+  static destroyAll<T extends ParseObject>(list: T[], options?: DestroyAllOptions): Promise<T[]> {
     const destroyOptions = ParseObject._getRequestOptions(options);
-    return CoreManager.getObjectController().destroy(list, destroyOptions);
+    return CoreManager.getObjectController().destroy(list, destroyOptions) as Promise<T[]>;
   }
 
   /**
@@ -2701,25 +2704,25 @@ CoreManager.setObjectController(DefaultController);
 
 export interface ObjectStatic<T extends ParseObject = ParseObject> {
   createWithoutData(id: string): T;
-  destroyAll<T extends ParseObject>(list: T[], options?: DestroyAllOptions): Promise<T[]>;
+  destroyAll<U extends ParseObject>(list: U[], options?: DestroyAllOptions): Promise<U[]>;
   extend(className: string | { className: string }, protoProps?: any, classProps?: any): any;
-  fetchAll<T extends ParseObject>(list: T[], options: FetchAllOptions): Promise<T[]>;
-  fetchAllIfNeeded<T extends ParseObject>(list: T[], options?: FetchAllOptions): Promise<T[]>;
-  fetchAllIfNeededWithInclude<T extends ParseObject>(
-    list: T[],
-    keys: keyof T["attributes"] | Array<keyof T["attributes"]>,
+  fetchAll<U extends ParseObject>(list: U[], options?: FetchAllOptions): Promise<U[]>;
+  fetchAllIfNeeded<U extends ParseObject>(list: U[], options?: FetchAllOptions): Promise<U[]>;
+  fetchAllIfNeededWithInclude<U extends ParseObject>(
+    list: U[],
+    keys: keyof U["attributes"] | Array<keyof U["attributes"]>,
     options?: RequestOptions,
-  ): Promise<T[]>;
-  fetchAllWithInclude<T extends ParseObject>(
-    list: T[],
-    keys: keyof T["attributes"] | Array<keyof T["attributes"]>,
+  ): Promise<U[]>;
+  fetchAllWithInclude<U extends ParseObject>(
+    list: U[],
+    keys: keyof U["attributes"] | Array<keyof U["attributes"]>,
     options?: RequestOptions,
-  ): Promise<T[]>;
+  ): Promise<U[]>;
   fromJSON(json: any, override?: boolean): T;
   pinAll(objects: ParseObject[]): Promise<void>;
   pinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
   registerSubclass(className: string, clazz: new (options?: any) => T): void;
-  saveAll<T extends readonly ParseObject[]>(list: T, options?: SaveAllOptions): Promise<T>;
+  saveAll<U extends ParseObject[]>(list: U, options?: SaveAllOptions): Promise<U>;
   unPinAll(objects: ParseObject[]): Promise<void>;
   unPinAllObjects(): Promise<void>;
   unPinAllObjectsWithName(name: string): Promise<void>;

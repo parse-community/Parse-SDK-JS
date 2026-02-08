@@ -2419,11 +2419,17 @@ async function test_type_exports() {
   const cloudRunOpts: Parse.Cloud.RunOptions = { useMasterKey: true, context: {} };
   const subscription: Parse.LiveQuerySubscription = await new Parse.Query('Test').subscribe();
 
-  // ObjectStatic with generics
-  const objectStatic: Parse.ObjectStatic = Parse.Object;
+  class MyClass extends Parse.Object {
+    constructor() {
+      super('MyClass');
+    }
+  }
+  // ObjectStatic with generic subclasses
+  const objectStatic: Parse.ObjectStatic = MyClass;
   function doCreateWithoutData<T extends Parse.Object>(clz: Parse.ObjectStatic<T>, id: string): T {
     return clz.createWithoutData(id);
   }
+  const myClsObj = doCreateWithoutData(MyClass, '1');
 
   // Verify types work with actual methods
   const obj = new Parse.Object('Test');
