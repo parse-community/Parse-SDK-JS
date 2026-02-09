@@ -56,7 +56,6 @@ export interface QueryJSON {
   comment?: string;
 }
 
-
 /**
  * Converts a string into a regex that matches it.
  * Surrounding with \Q .. \E does this, we just need to escape any \E's in
@@ -1179,10 +1178,10 @@ class ParseQuery<T extends ParseObject = ParseObject> {
     value:
       | T['attributes'][K]
       | (T['attributes'][K] extends ParseObject
-        ? Pointer
-        : T['attributes'][K] extends (infer E)[]
-        ? E
-        : never)
+          ? Pointer
+          : T['attributes'][K] extends (infer E)[]
+            ? E
+            : never)
   ): this {
     if (key && typeof key === 'object') {
       Object.entries(key).forEach(([k, val]) => this.notEqualTo(k, val as any));
