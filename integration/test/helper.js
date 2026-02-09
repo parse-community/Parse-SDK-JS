@@ -12,6 +12,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const dns = require('dns');
 const MockEmailAdapterWithOptions = require('./support/MockEmailAdapterWithOptions');
+const MockPushAdapter = require('./support/MockPushAdapter');
 
 // Ensure localhost resolves to ipv4 address first on node v17+
 if (dns.setDefaultResultOrder) {
@@ -68,10 +69,7 @@ const defaultConfiguration = {
   verbose: false,
   silent: true,
   push: {
-    android: {
-      senderId: 'yolo',
-      apiKey: 'yolo',
-    },
+    adapter: MockPushAdapter,
   },
   idempotencyOptions: {
     paths: ['functions/CloudFunctionIdempotency', 'jobs/CloudJob1', 'jobs/CloudJobParamsInMessage', 'classes/IdempotentTest'],
@@ -85,7 +83,10 @@ const defaultConfiguration = {
   revokeSessionOnPasswordReset: false,
   allowCustomObjectId: false,
   allowClientClassCreation: true,
-  encodeParseObjectInCloudFunction: true,
+  enableInsecureAuthAdapters: true,
+  databaseOptions: {
+    allowPublicExplain: true,
+  },
   emailAdapter: MockEmailAdapterWithOptions({
     fromAddress: 'parse@example.com',
     apiKey: 'k',
