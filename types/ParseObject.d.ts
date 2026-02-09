@@ -1099,8 +1099,8 @@ export interface ObjectStatic<T extends ParseObject = ParseObject> {
     }, protoProps?: any, classProps?: any): any;
     fetchAll<U extends ParseObject>(list: U[], options?: FetchAllOptions): Promise<U[]>;
     fetchAllIfNeeded<U extends ParseObject>(list: U[], options?: FetchAllOptions): Promise<U[]>;
-    fetchAllIfNeededWithInclude<U extends ParseObject>(list: U[], keys: keyof U["attributes"] | (keyof U["attributes"])[], options?: RequestOptions): Promise<U[]>;
-    fetchAllWithInclude<U extends ParseObject>(list: U[], keys: keyof U["attributes"] | (keyof U["attributes"])[], options?: RequestOptions): Promise<U[]>;
+    fetchAllIfNeededWithInclude<U extends ParseObject>(list: U[], keys: keyof U['attributes'] | (keyof U['attributes'])[], options?: RequestOptions): Promise<U[]>;
+    fetchAllWithInclude<U extends ParseObject>(list: U[], keys: keyof U['attributes'] | (keyof U['attributes'])[], options?: RequestOptions): Promise<U[]>;
     fromJSON(json: any, override?: boolean, dirty?: boolean): T;
     pinAll(objects: ParseObject[]): Promise<void>;
     pinAllWithName(name: string, objects: ParseObject[]): Promise<void>;

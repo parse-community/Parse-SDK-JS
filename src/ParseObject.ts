@@ -113,16 +113,16 @@ type AtomicKey<T> = {
 export type Encode<T> = T extends ParseObject
   ? ReturnType<T['toJSON']> | Pointer
   : T extends ParseACL | ParseGeoPoint | ParsePolygon | ParseRelation | ParseFile
-  ? ReturnType<T['toJSON']>
-  : T extends Date
-  ? { __type: 'Date'; iso: string }
-  : T extends RegExp
-  ? string
-  : T extends (infer R)[]
-  ? Encode<R>[]
-  : T extends object
-  ? ToJSON<T>
-  : T;
+    ? ReturnType<T['toJSON']>
+    : T extends Date
+      ? { __type: 'Date'; iso: string }
+      : T extends RegExp
+        ? string
+        : T extends (infer R)[]
+          ? Encode<R>[]
+          : T extends object
+            ? ToJSON<T>
+            : T;
 
 export type ToJSON<T> = {
   [K in keyof T]: Encode<T[K]>;
@@ -179,7 +179,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @param {boolean} [options.ignoreValidation] Set to `true` ignore any attribute validation errors.
    */
   constructor(
-    className?: string | { className: string;[attr: string]: any },
+    className?: string | { className: string; [attr: string]: any },
     attributes?: T,
     options?: SetOptions
   ) {
@@ -216,7 +216,8 @@ class ParseObject<T extends Attributes = Attributes> {
     }
     if (CoreManager.get('NODE_LOGGING')) {
       this[Symbol.for('nodejs.util.inspect.custom')] = function () {
-        return `ParseObject: className: ${this.className}, id: ${this.id
+        return `ParseObject: className: ${this.className}, id: ${
+          this.id
         }\nAttributes: ${JSON.stringify(this.attributes, null, 2)}`;
       };
     }
@@ -1775,7 +1776,10 @@ class ParseObject<T extends Attributes = Attributes> {
    * @static
    * @returns {Parse.Object[]}
    */
-  static fetchAllIfNeeded<T extends ParseObject>(list: T[], options?: FetchAllOptions): Promise<T[]> {
+  static fetchAllIfNeeded<T extends ParseObject>(
+    list: T[],
+    options?: FetchAllOptions
+  ): Promise<T[]> {
     const fetchOptions = ParseObject._getRequestOptions(options);
     return CoreManager.getObjectController().fetch(list, false, fetchOptions) as Promise<T[]>;
   }
@@ -1975,7 +1979,7 @@ class ParseObject<T extends Attributes = Attributes> {
     if (typeof constructor !== 'function') {
       throw new TypeError(
         'You must register the subclass constructor. ' +
-        'Did you attempt to register an instance of the subclass?'
+          'Did you attempt to register an instance of the subclass?'
       );
     }
     classMap[className] = constructor;
@@ -2685,7 +2689,7 @@ CoreManager.setParseObject(ParseObject);
 CoreManager.setObjectController(DefaultController);
 
 export interface ObjectStatic<T extends ParseObject = ParseObject> {
-  new(...args: any[]): T;
+  new (...args: any[]): T;
   createWithoutData(id: string): T;
   destroyAll<U extends ParseObject>(list: U[], options?: DestroyAllOptions): Promise<U[]>;
   extend(className: string | { className: string }, protoProps?: any, classProps?: any): any;
@@ -2693,13 +2697,13 @@ export interface ObjectStatic<T extends ParseObject = ParseObject> {
   fetchAllIfNeeded<U extends ParseObject>(list: U[], options?: FetchAllOptions): Promise<U[]>;
   fetchAllIfNeededWithInclude<U extends ParseObject>(
     list: U[],
-    keys: keyof U["attributes"] | (keyof U["attributes"])[],
-    options?: RequestOptions,
+    keys: keyof U['attributes'] | (keyof U['attributes'])[],
+    options?: RequestOptions
   ): Promise<U[]>;
   fetchAllWithInclude<U extends ParseObject>(
     list: U[],
-    keys: keyof U["attributes"] | (keyof U["attributes"])[],
-    options?: RequestOptions,
+    keys: keyof U['attributes'] | (keyof U['attributes'])[],
+    options?: RequestOptions
   ): Promise<U[]>;
   fromJSON(json: any, override?: boolean, dirty?: boolean): T;
   pinAll(objects: ParseObject[]): Promise<void>;
@@ -2714,7 +2718,11 @@ export interface ObjectStatic<T extends ParseObject = ParseObject> {
 
 export interface ObjectConstructor extends ObjectStatic {
   new <T extends Attributes>(className: string, attributes: T, options?: any): ParseObject<T>;
-  new (className?: string | { className: string; [attr: string]: any }, attributes?: Attributes, options?: any): ParseObject;
+  new (
+    className?: string | { className: string; [attr: string]: any },
+    attributes?: Attributes,
+    options?: any
+  ): ParseObject;
 }
 
 export default ParseObject;
