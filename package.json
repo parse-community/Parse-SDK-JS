@@ -99,7 +99,7 @@
     "cross-env": "10.1.0",
     "eslint": "9.39.2",
     "eslint-plugin-expect-type": "0.6.2",
-    "eslint-plugin-jsdoc": "62.5.2",
+    "eslint-plugin-jsdoc": "62.5.4",
     "express": "5.2.1",
     "gulp": "5.0.1",
     "gulp-babel": "8.0.0",
