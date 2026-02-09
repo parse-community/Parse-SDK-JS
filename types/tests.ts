@@ -42,6 +42,14 @@ async function test_object() {
   // Create a new instance of that class.
   const gameScore = new GameScore();
 
+  // Expect that `createWithoutData` returns the types for the same classes (not generic ParseObjects)
+  // $ExpectType Game
+  Game.createWithoutData('someid');
+  // $ExpectType GameScore
+  GameScore.createWithoutData('scoreid');
+  // $ExpectType ParseUser<Attributes>
+  Parse.User.createWithoutData('someuser');
+
   gameScore.set('score', 1337);
   gameScore.set('playerName', 'Sean Plott');
   gameScore.set('cheatMode', false);
@@ -217,6 +225,18 @@ async function test_query() {
   await query.distinct('name');
 
   const testQuery = Parse.Query.or(query, query);
+
+  // Test that query can do `or`/`and` joins while preserving class types
+  // This was the behaviour with the old DefinitelyTyped typings.
+  class MyClass extends Parse.Object<{ a: number }> {};
+  const q1 = new Parse.Query(MyClass).equalTo('a', 2);
+  const q2 = new Parse.Query(MyClass).equalTo('a', 3);
+  // $ExpectType ParseQuery<MyClass>
+  const orQ = Parse.Query.or(q1, q2);
+  // $ExpectType ParseQuery<MyClass>
+  const andQ = Parse.Query.and(q1, q2);
+  // $ExpectType ParseQuery<MyClass>
+  const norQ = Parse.Query.nor(q1, q2);
 }
 
 function test_query_exclude() {
@@ -611,6 +631,21 @@ async function test_cloud_functions() {
     if (!request.context) {
       throw new Error('Request context should be defined');
     }
+  });
+
+  ParseNode.Cloud.beforeSave('MyCustomClass', (request): void => {
+    request.object;
+  });
+
+  // Tests to allow for Parse.Object subclasses with non-optional constructor params.
+  class ArgObject extends Parse.Object<{ a: string }> {
+    constructor(arg: { a: string }) {
+      super('ArgObject', arg);
+    }
+  }
+  ParseNode.Cloud.beforeSave(ArgObject, request => {
+    // $ExpectType ArgObject
+    request.object;
   });
 
   ParseNode.Cloud.beforeFind('MyCustomClass', request => {
@@ -2363,4 +2398,3 @@ function testInitialize() {
   // Node - 1 param (should also work since javaScriptKey is optional in node)
   ParseNode.initialize('appId');
 }
-

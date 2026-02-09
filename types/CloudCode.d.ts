@@ -2,6 +2,7 @@ import type ParseObject from './ParseObject';
 import type ParseUser from './ParseUser';
 import type ParseFile from './ParseFile';
 import type ParseQuery from './ParseQuery';
+type ParseObjectConstructor<T extends ParseObject = ParseObject> = new (...args: any[]) => T;
 /**
  * @typedef Parse.Cloud.FunctionRequest
  * @property {string} installationId If set, the installationId triggering the request.
@@ -259,7 +260,7 @@ export declare function job(name: string, handler: (request: JobRequest) => any)
  * @param handler The function to run before a save.
  * @param validator An optional function to validate the request
  */
-export declare function beforeSave<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: BeforeSaveRequest<T>) => T | undefined | Promise<T | undefined>, validator?: ValidatorObject | ((request: BeforeSaveRequest<T>) => any)): void;
+export declare function beforeSave<T extends ParseObject = ParseObject>(className: string | ParseObjectConstructor<T>, handler: (request: BeforeSaveRequest<T>) => void | T | undefined | Promise<void | T | undefined>, validator?: ValidatorObject | ((request: BeforeSaveRequest<T>) => any)): void;
 /**
  * Registers an after save function.
  *
@@ -282,7 +283,7 @@ export declare function beforeSave<T extends ParseObject = ParseObject>(classNam
  * @param handler The function to run after a save.
  * @param validator An optional function to validate the request
  */
-export declare function afterSave<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: AfterSaveRequest<T>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: AfterSaveRequest<T>) => any)): void;
+export declare function afterSave<T extends ParseObject = ParseObject>(className: string | ParseObjectConstructor<T>, handler: (request: AfterSaveRequest<T>) => void | Promise<void> | undefined, validator?: ValidatorObject | ((request: AfterSaveRequest<T>) => any)): void;
 /**
  * Registers a before delete function.
  *
@@ -305,7 +306,7 @@ export declare function afterSave<T extends ParseObject = ParseObject>(className
  * @param handler The function to run before a delete.
  * @param validator An optional function to validate the request
  */
-export declare function beforeDelete<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: BeforeDeleteRequest<T>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: BeforeDeleteRequest<T>) => any)): void;
+export declare function beforeDelete<T extends ParseObject = ParseObject>(className: string | ParseObjectConstructor<T>, handler: (request: BeforeDeleteRequest<T>) => void | Promise<void> | undefined, validator?: ValidatorObject | ((request: BeforeDeleteRequest<T>) => any)): void;
 /**
  * Registers an after delete function.
  *
@@ -328,7 +329,7 @@ export declare function beforeDelete<T extends ParseObject = ParseObject>(classN
  * @param handler The function to run after a delete.
  * @param validator An optional function to validate the request
  */
-export declare function afterDelete<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: AfterDeleteRequest<T>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: AfterDeleteRequest<T>) => any)): void;
+export declare function afterDelete<T extends ParseObject = ParseObject>(className: string | ParseObjectConstructor<T>, handler: (request: AfterDeleteRequest<T>) => void | Promise<void> | undefined, validator?: ValidatorObject | ((request: AfterDeleteRequest<T>) => any)): void;
 /**
  * Registers a before find function.
  *
@@ -338,7 +339,7 @@ export declare function afterDelete<T extends ParseObject = ParseObject>(classNa
  * @param handler The function to run before a find.
  * @param validator An optional function to validate the request
  */
-export declare function beforeFind<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: BeforeFindRequest<T>) => ParseQuery<T> | undefined | Promise<ParseQuery<T> | undefined>, validator?: ValidatorObject | ((request: BeforeFindRequest<T>) => any)): void;
+export declare function beforeFind<T extends ParseObject = ParseObject>(className: string | ParseObjectConstructor<T>, handler: (request: BeforeFindRequest<T>) => void | ParseQuery<T> | undefined | Promise<void | ParseQuery<T> | undefined>, validator?: ValidatorObject | ((request: BeforeFindRequest<T>) => any)): void;
 /**
  * Registers an after find function.
  *
@@ -348,7 +349,7 @@ export declare function beforeFind<T extends ParseObject = ParseObject>(classNam
  * @param handler The function to run after a find.
  * @param validator An optional function to validate the request
  */
-export declare function afterFind<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: AfterFindRequest<T>) => T[] | undefined | Promise<T[] | undefined>, validator?: ValidatorObject | ((request: AfterFindRequest<T>) => any)): void;
+export declare function afterFind<T extends ParseObject = ParseObject>(className: string | ParseObjectConstructor<T>, handler: (request: AfterFindRequest<T>) => void | T[] | undefined | Promise<void | T[] | undefined>, validator?: ValidatorObject | ((request: AfterFindRequest<T>) => any)): void;
 /**
  * Registers a before login function.
  *
@@ -357,7 +358,7 @@ export declare function afterFind<T extends ParseObject = ParseObject>(className
  * @param handler The function to run before a login.
  * @param validator An optional function to validate the request
  */
-export declare function beforeLogin(handler: (request: TriggerRequest<ParseUser>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: TriggerRequest<ParseUser>) => any)): void;
+export declare function beforeLogin(handler: (request: TriggerRequest<ParseUser>) => void | Promise<void> | undefined, validator?: ValidatorObject | ((request: TriggerRequest<ParseUser>) => any)): void;
 /**
  * Registers an after login function.
  *
@@ -365,7 +366,7 @@ export declare function beforeLogin(handler: (request: TriggerRequest<ParseUser>
  *
  * @param handler The function to run after a login.
  */
-export declare function afterLogin(handler: (request: TriggerRequest<ParseUser>) => Promise<void> | undefined): void;
+export declare function afterLogin(handler: (request: TriggerRequest<ParseUser>) => void | Promise<void> | undefined): void;
 /**
  * Registers an after logout function.
  *
@@ -373,7 +374,7 @@ export declare function afterLogin(handler: (request: TriggerRequest<ParseUser>)
  *
  * @param handler The function to run after a logout.
  */
-export declare function afterLogout(handler: (request: TriggerRequest) => Promise<void> | undefined): void;
+export declare function afterLogout(handler: (request: TriggerRequest) => void | Promise<void> | undefined): void;
 /**
  * Registers a before password reset request function.
  *
@@ -382,7 +383,7 @@ export declare function afterLogout(handler: (request: TriggerRequest) => Promis
  * @param handler The function to run before a password reset request.
  * @param validator An optional function to validate the request
  */
-export declare function beforePasswordResetRequest(handler: (request: TriggerRequest<ParseUser>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: TriggerRequest<ParseUser>) => any)): void;
+export declare function beforePasswordResetRequest(handler: (request: TriggerRequest<ParseUser>) => void | Promise<void> | undefined, validator?: ValidatorObject | ((request: TriggerRequest<ParseUser>) => any)): void;
 /**
  * Registers a before save file function.
  *
@@ -399,7 +400,7 @@ export declare function beforePasswordResetRequest(handler: (request: TriggerReq
  *
  * @param handler The function to run before a file saves.
  */
-export declare function beforeSaveFile(handler: (request: FileTriggerRequest) => ParseFile | undefined | Promise<ParseFile | undefined>): void;
+export declare function beforeSaveFile(handler: (request: FileTriggerRequest) => void | ParseFile | undefined | Promise<void | ParseFile | undefined>): void;
 /**
  * Registers an after save file function.
  *
@@ -416,7 +417,7 @@ export declare function beforeSaveFile(handler: (request: FileTriggerRequest) =>
  *
  * @param handler The function to run after a file saves.
  */
-export declare function afterSaveFile(handler: (request: FileTriggerRequest) => Promise<void> | undefined): void;
+export declare function afterSaveFile(handler: (request: FileTriggerRequest) => void | Promise<void> | undefined): void;
 /**
  * Registers a before delete file function.
  *
@@ -424,7 +425,7 @@ export declare function afterSaveFile(handler: (request: FileTriggerRequest) => 
  *
  * @param handler The function to run before a file is deleted.
  */
-export declare function beforeDeleteFile(handler: (request: FileTriggerRequest) => Promise<void> | undefined): void;
+export declare function beforeDeleteFile(handler: (request: FileTriggerRequest) => void | Promise<void> | undefined): void;
 /**
  * Registers an after delete file function.
  *
@@ -432,7 +433,7 @@ export declare function beforeDeleteFile(handler: (request: FileTriggerRequest) 
  *
  * @param handler The function to run after a file is deleted.
  */
-export declare function afterDeleteFile(handler: (request: FileTriggerRequest) => Promise<void> | undefined): void;
+export declare function afterDeleteFile(handler: (request: FileTriggerRequest) => void | Promise<void> | undefined): void;
 /**
  * Registers a before connect function for LiveQuery.
  *
@@ -449,7 +450,7 @@ export declare function afterDeleteFile(handler: (request: FileTriggerRequest) =
  * @param handler The function to run before a LiveQuery connection is made.
  * @param validator An optional function to validate the request
  */
-export declare function beforeConnect(handler: (request: ConnectTriggerRequest) => Promise<void> | undefined, validator?: ValidatorObject | ((request: ConnectTriggerRequest) => any)): void;
+export declare function beforeConnect(handler: (request: ConnectTriggerRequest) => void | Promise<void> | undefined, validator?: ValidatorObject | ((request: ConnectTriggerRequest) => any)): void;
 /**
  * Registers a before subscribe function for LiveQuery.
  *
@@ -469,7 +470,7 @@ export declare function beforeConnect(handler: (request: ConnectTriggerRequest) 
  * @param handler The function to run before a subscription.
  * @param validator An optional function to validate the request
  */
-export declare function beforeSubscribe<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: TriggerRequest<T>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: TriggerRequest<T>) => any)): void;
+export declare function beforeSubscribe<T extends ParseObject = ParseObject>(className: string | ParseObjectConstructor<T>, handler: (request: TriggerRequest<T>) => void | Promise<void> | undefined, validator?: ValidatorObject | ((request: TriggerRequest<T>) => any)): void;
 /**
  * Registers an after live query event function.
  *
@@ -479,7 +480,7 @@ export declare function beforeSubscribe<T extends ParseObject = ParseObject>(cla
  * @param handler The function to run after a live query event.
  * @param validator An optional function to validate the request
  */
-export declare function afterLiveQueryEvent<T extends ParseObject = ParseObject>(className: string | (new () => T), handler: (request: LiveQueryEventTrigger<T>) => Promise<void> | undefined, validator?: ValidatorObject | ((request: LiveQueryEventTrigger<T>) => any)): void;
+export declare function afterLiveQueryEvent<T extends ParseObject = ParseObject>(className: string | ParseObjectConstructor<T>, handler: (request: LiveQueryEventTrigger<T>) => void | Promise<void> | undefined, validator?: ValidatorObject | ((request: LiveQueryEventTrigger<T>) => any)): void;
 /**
  * Sends an email.
  *
@@ -521,3 +522,4 @@ export declare function sendEmail(data: {
  * @returns A promise that will be resolved with a {@link HTTPResponse} object when the request completes.
  */
 export declare function httpRequest(options: HTTPOptions): Promise<HTTPResponse>;
+export {};

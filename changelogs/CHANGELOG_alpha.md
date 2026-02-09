@@ -1,3 +1,24 @@
+## [8.1.1-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.1-alpha.2...8.1.1-alpha.3) (2026-02-07)
+
+
+### Bug Fixes
+
+* Cloud trigger type errors for void returns and subclass constructors ([#2904](https://github.com/parse-community/Parse-SDK-JS/issues/2904)) ([de9f56d](https://github.com/parse-community/Parse-SDK-JS/commit/de9f56d77cca9d86c7035136834673cc0d1dfb17))
+
+## [8.1.1-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.1-alpha.1...8.1.1-alpha.2) (2026-02-07)
+
+
+### Bug Fixes
+
+* `Parse.Object.createWithoutData` doesn't preserve object subclass ([#2907](https://github.com/parse-community/Parse-SDK-JS/issues/2907)) ([01dc94d](https://github.com/parse-community/Parse-SDK-JS/commit/01dc94d6647d2711d3a865c20935604b24083ed1))
+
+## [8.1.1-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.0...8.1.1-alpha.1) (2026-02-07)
+
+
+### Bug Fixes
+
+* `Parse.Query.and/or/nor` loosing custom class types ([#2903](https://github.com/parse-community/Parse-SDK-JS/issues/2903)) ([89fdb07](https://github.com/parse-community/Parse-SDK-JS/commit/89fdb076580f3a9f2fb0106270a6879526eaaacf))
+
 # [8.1.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.0.4-alpha.1...8.1.0-alpha.1) (2026-02-05)
 
 
