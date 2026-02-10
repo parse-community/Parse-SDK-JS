@@ -1,3 +1,10 @@
+## [8.1.1-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.1-alpha.3...8.1.1-alpha.4) (2026-02-09)
+
+
+### Bug Fixes
+
+* Missing or incorrect type exports ([#2909](https://github.com/parse-community/Parse-SDK-JS/issues/2909)) ([3caa4ec](https://github.com/parse-community/Parse-SDK-JS/commit/3caa4ec995e0cc02082e55e9873e12b3bc10393f))
+
 ## [8.1.1-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.1-alpha.2...8.1.1-alpha.3) (2026-02-07)
 
 

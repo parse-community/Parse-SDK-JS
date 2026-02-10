@@ -8,28 +8,30 @@ import OfflineQuery from './OfflineQuery';
 import { DEFAULT_PIN } from './LocalDatastoreUtils';
 
 import type LiveQuerySubscription from './LiveQuerySubscription';
-import type { RequestOptions, FullOptions } from './RESTController';
-import type { Pointer } from './ParseObject';
+import type { RequestOptions, BaseRequestOptions } from './RESTController';
+import type { Pointer, BaseAttributes } from './ParseObject';
 
-type BatchOptions = FullOptions & {
+export interface BatchOptions extends BaseRequestOptions {
   batchSize?: number;
-  useMasterKey?: boolean;
-  useMaintenanceKey?: boolean;
-  sessionToken?: string;
-  context?: Record<string, any>;
-  json?: boolean;
-};
-
-export type WhereClause = Record<string, any>;
-
-interface QueryOptions {
-  useMasterKey?: boolean;
-  sessionToken?: string;
-  context?: Record<string, any>;
   json?: boolean;
 }
 
-interface FullTextQueryOptions {
+export type WhereClause = Record<string, any>;
+
+export interface QueryOptions extends BaseRequestOptions {
+  json?: boolean;
+}
+
+export type FindOptions = QueryOptions;
+
+/** CountOptions - no json since count() returns a number, not objects */
+export type CountOptions = BaseRequestOptions;
+
+export type GetOptions = QueryOptions;
+
+export type FirstOptions = QueryOptions;
+
+export interface FullTextOptions {
   language?: string;
   caseSensitive?: boolean;
   diacriticSensitive?: boolean;
@@ -52,12 +54,6 @@ export interface QueryJSON {
   includeReadPreference?: string;
   subqueryReadPreference?: string;
   comment?: string;
-}
-
-interface BaseAttributes {
-  createdAt: Date;
-  objectId: string;
-  updatedAt: Date;
 }
 
 /**
@@ -646,7 +642,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @returns {Promise} A promise that is resolved with the result when
    * the query completes.
    */
-  get(objectId: string, options?: QueryOptions): Promise<T> {
+  get(objectId: string, options?: GetOptions): Promise<T> {
     this.equalTo('objectId', objectId as any);
 
     const firstOptions = ParseObject._getRequestOptions(options);
@@ -675,7 +671,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @returns {Promise} A promise that is resolved with the results when
    * the query completes.
    */
-  find(options?: QueryOptions): Promise<T[]> {
+  find(options?: FindOptions): Promise<T[]> {
     const findOptions = ParseObject._getRequestOptions(options);
     this._setRequestTask(findOptions);
 
@@ -759,7 +755,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @returns {Promise} A promise that is resolved with the count when
    * the query completes.
    */
-  count(options?: { useMasterKey?: boolean; sessionToken?: string }): Promise<number> {
+  count(options?: CountOptions): Promise<number> {
     options = options || {};
 
     const findOptions = ParseObject._getRequestOptions(options);
@@ -843,7 +839,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * @returns {Promise} A promise that is resolved with the object when
    * the query completes.
    */
-  first(options: QueryOptions = {}): Promise<T | undefined> {
+  first(options: FirstOptions = {}): Promise<T | undefined> {
     const findOptions = ParseObject._getRequestOptions(options);
     this._setRequestTask(findOptions);
 
@@ -1521,7 +1517,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
   fullText<K extends keyof T['attributes'] | keyof BaseAttributes>(
     key: K,
     value: string,
-    options?: FullTextQueryOptions
+    options?: FullTextOptions
   ): this {
     options = options || {};
 

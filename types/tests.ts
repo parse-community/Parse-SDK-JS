@@ -2394,6 +2394,7 @@ function testEventuallyQueue() {
   }
 }
 
+// TODO: Add missing LiveQuery types (LiveQuerySubscription, etc.)
 function LiveQueryEvents() {
   function testLiveQueryEvents() {
     Parse.LiveQuery.on('open', () => {});
@@ -2421,4 +2422,90 @@ function testInitialize() {
 
   // Node - 1 param (should also work since javaScriptKey is optional in node)
   ParseNode.initialize('appId');
+}
+// Test Parse.* and namespace type exports
+async function test_type_exports() {
+  // Parse.Object.* namespace
+  const objDestroyOpts: Parse.Object.DestroyOptions = { useMasterKey: true, sessionToken: 'token' };
+  const objDestroyAllOpts: Parse.Object.DestroyAllOptions = { batchSize: 100, useMasterKey: true };
+  const objFetchOpts: Parse.Object.FetchOptions = { useMasterKey: true, include: ['rel'] };
+  const objFetchAllOpts: Parse.Object.FetchAllOptions = { useMasterKey: true };
+  const objSaveOpts: Parse.Object.SaveOptions = { useMasterKey: true, cascadeSave: false, context: {} };
+  const objSaveAllOpts: Parse.Object.SaveAllOptions = { batchSize: 50, useMasterKey: true };
+  const objSetOpts: Parse.Object.SetOptions = { ignoreValidation: true };
+  type ObjEncode = Parse.Object.Encode<Date>;
+  type ObjToJSON = Parse.Object.ToJSON<{ name: string }>;
+
+  // Parse.Query.* namespace
+  const queryOpts: Parse.Query.QueryOptions = { useMasterKey: true, sessionToken: 'token', json: true };
+  const queryFindOpts: Parse.Query.FindOptions = { useMasterKey: true, context: {} };
+  const queryBatchOpts: Parse.Query.BatchOptions = { batchSize: 100, useMasterKey: true };
+  const queryFullTextOpts: Parse.Query.FullTextOptions = { language: 'en', caseSensitive: false };
+
+  // Parse.Schema.* namespace
+  const schemaTypes: Parse.Schema.TYPE[] = ['String', 'Number', 'Boolean', 'Date', 'File', 'GeoPoint', 'Polygon', 'Array', 'Object', 'Pointer', 'Relation', 'Bytes'];
+
+  // Direct Parse.* exports
+  const destroyOpts: Parse.DestroyOptions = { useMasterKey: true };
+  const fetchOpts: Parse.FetchOptions = { useMasterKey: true, include: ['rel'] };
+  const saveOpts: Parse.SaveOptions = { useMasterKey: true, cascadeSave: true };
+  const setOpts: Parse.SetOptions = { ignoreValidation: false };
+  const destroyAllOpts: Parse.DestroyAllOptions = { batchSize: 100 };
+  const saveAllOpts: Parse.SaveAllOptions = { batchSize: 50 };
+  const fetchAllOpts: Parse.FetchAllOptions = { useMasterKey: true };
+  const findOpts: Parse.FindOptions = { useMasterKey: true, json: true };
+  const batchOpts: Parse.BatchOptions = { batchSize: 100 };
+  const fullTextOpts: Parse.FullTextOptions = { language: 'en' };
+  const typeVal: Parse.TYPE = 'String';
+  type DirectEncode = Parse.Encode<Date>;
+  type DirectToJSON = Parse.ToJSON<{ x: number }>;
+
+  // Core types
+  const pointer: Parse.Pointer = { __type: 'Pointer', className: 'Test', objectId: 'abc' };
+  const attrs: Parse.Attributes = { score: 100 };
+  const baseAttrs: Parse.BaseAttributes = { createdAt: new Date(), updatedAt: new Date(), objectId: 'abc' };
+  const jsonBaseAttrs: Parse.JSONBaseAttributes = { createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z', objectId: 'abc' };
+  const whereClause: Parse.WhereClause = { score: { $gt: 100 } };
+  const queryJson: Parse.QueryJSON = { where: {}, limit: 10 };
+  const fullOpts: Parse.FullOptions = { useMasterKey: true };
+  const reqOpts: Parse.RequestOptions = { useMasterKey: true, batchSize: 50 };
+  const authProvider: Parse.AuthProvider = { authenticate: () => {}, getAuthType: () => 'custom', restoreAuthentication: () => true };
+  const authData: Parse.AuthData = { id: 'user-id' };
+  const signUpOpts: Parse.SignUpOptions = { useMasterKey: true };
+  const restSchema: Parse.RestSchema = { className: 'Test', fields: {}, classLevelPermissions: {} };
+  const pushData: Parse.PushData = { channels: ['news'], data: { alert: 'Hello' } };
+  const sendOpts: Parse.SendOptions = { useMasterKey: true };
+  const cloudRunOpts: Parse.Cloud.RunOptions = { useMasterKey: true, context: {} };
+  const subscription: Parse.LiveQuerySubscription = await new Parse.Query('Test').subscribe();
+
+  class MyClass extends Parse.Object {
+    constructor() {
+      super('MyClass');
+    }
+  }
+  // ObjectStatic with generic subclasses
+  const objectStatic: Parse.ObjectStatic = MyClass;
+  function doCreateWithoutData<T extends Parse.Object>(clz: Parse.ObjectStatic<T>, id: string): T {
+    return clz.createWithoutData(id);
+  }
+  // $ExpectType MyClass
+  const myClsObj = doCreateWithoutData(MyClass, '1');
+
+  // Verify types work with actual methods
+  const obj = new Parse.Object('Test');
+  const query = new Parse.Query('Test');
+
+  await obj.save(null, saveOpts);
+  await obj.fetch(fetchOpts);
+  await obj.destroy(destroyOpts);
+  obj.set('key', 'value', setOpts);
+  await Parse.Object.saveAll([obj], saveAllOpts);
+  await Parse.Object.destroyAll([obj], destroyAllOpts);
+  await Parse.Object.fetchAll([obj], fetchAllOpts);
+  await query.find(findOpts);
+  await query.first(findOpts);
+  await query.count(findOpts);
+  await query.each(() => {}, batchOpts);
+  await query.eachBatch(() => {}, batchOpts);
+  query.fullText('field', 'term', fullTextOpts);
 }
