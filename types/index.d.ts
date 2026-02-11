@@ -5,6 +5,7 @@ export default parse;
 
 // All exports beyond this point will be included in the Parse namespace
 export as namespace Parse;
+export let serverURL: import('./Parse').Parse['serverURL'];
 import ACL from './ParseACL';
 import * as Analytics from './Analytics';
 import AnonymousUtils from './AnonymousUtils';
