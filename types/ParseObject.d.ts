@@ -4,7 +4,7 @@ import ParseFile from './ParseFile';
 import { Op } from './ParseOp';
 import ParseRelation from './ParseRelation';
 import type { AttributeMap, OpsMap } from './ObjectStateMutations';
-import type { RequestOptions, FullOptions } from './RESTController';
+import type { RequestOptions, FullOptions, BaseRequestOptions } from './RESTController';
 import type ParseGeoPoint from './ParseGeoPoint';
 import type ParsePolygon from './ParsePolygon';
 export interface Pointer {
@@ -18,28 +18,51 @@ interface SaveParams {
     path: string;
     body: AttributeMap;
 }
-export type SaveOptions = FullOptions & {
+export interface SaveOptions extends BaseRequestOptions {
+    /** If `false`, nested objects will not be saved (default is `true`). */
     cascadeSave?: boolean;
-    context?: AttributeMap;
     batchSize?: number;
     transaction?: boolean;
-};
-interface FetchOptions {
-    useMasterKey?: boolean;
-    sessionToken?: string;
+}
+export interface FetchOptions extends BaseRequestOptions {
     include?: string | string[];
-    context?: AttributeMap;
 }
 export interface SetOptions {
     ignoreValidation?: boolean;
     unset?: boolean;
 }
+export type DestroyOptions = BaseRequestOptions;
+/** Options for destroyAll batch operation */
+export interface DestroyAllOptions extends BaseRequestOptions {
+    /** batchSize: How many objects to yield in each batch (default: 20) */
+    batchSize?: number;
+    /** Set to true to enable transactions */
+    transaction?: boolean;
+}
+/** Options for saveAll batch operation */
+export interface SaveAllOptions extends BaseRequestOptions {
+    /** batchSize: How many objects to yield in each batch (default: 20) */
+    batchSize?: number;
+    /** If `false`, nested objects will not be saved (default is `true`). */
+    cascadeSave?: boolean;
+    /** Set to true to enable transactions */
+    transaction?: boolean;
+}
+/** Options for fetchAll batch operation */
+export interface FetchAllOptions extends BaseRequestOptions {
+    include?: string | string[];
+}
 export type AttributeKey<T> = Extract<keyof T, string>;
 export type Attributes = Record<string, any>;
-interface JSONBaseAttributes {
+export interface JSONBaseAttributes {
     objectId: string;
     createdAt: string;
     updatedAt: string;
+}
+export interface BaseAttributes {
+    objectId: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 interface CommonAttributes {
     ACL: ParseACL;
@@ -47,11 +70,11 @@ interface CommonAttributes {
 type AtomicKey<T> = {
     [K in keyof T]: NonNullable<T[K]> extends any[] ? K : never;
 };
-type Encode<T> = T extends ParseObject ? ReturnType<T['toJSON']> | Pointer : T extends ParseACL | ParseGeoPoint | ParsePolygon | ParseRelation | ParseFile ? ReturnType<T['toJSON']> : T extends Date ? {
+export type Encode<T> = T extends ParseObject ? ReturnType<T['toJSON']> | Pointer : T extends ParseACL | ParseGeoPoint | ParsePolygon | ParseRelation | ParseFile ? ReturnType<T['toJSON']> : T extends Date ? {
     __type: 'Date';
     iso: string;
 } : T extends RegExp ? string : T extends (infer R)[] ? Encode<R>[] : T extends object ? ToJSON<T> : T;
-type ToJSON<T> = {
+export type ToJSON<T> = {
     [K in keyof T]: Encode<T[K]>;
 };
 /**
@@ -594,7 +617,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @returns {Promise} A promise that is fulfilled when the destroy
      *     completes.
      */
-    destroy(options?: RequestOptions): Promise<ParseObject | undefined>;
+    destroy(options?: DestroyOptions): Promise<ParseObject | undefined>;
     /**
      * Asynchronously stores the object and every object it points to in the local datastore,
      * recursively, using a default pin name: _default.
@@ -701,7 +724,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @static
      * @returns {Parse.Object[]}
      */
-    static fetchAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]>;
+    static fetchAll<T extends ParseObject>(list: T[], options?: FetchAllOptions): Promise<T[]>;
     /**
      * Fetches the given list of Parse.Object.
      *
@@ -790,7 +813,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @static
      * @returns {Parse.Object[]}
      */
-    static fetchAllIfNeeded<T extends ParseObject>(list: T[], options?: FetchOptions): Promise<T[]>;
+    static fetchAllIfNeeded<T extends ParseObject>(list: T[], options?: FetchAllOptions): Promise<T[]>;
     static handleIncludeOptions(options: {
         include?: string | string[];
     }): any[];
@@ -849,7 +872,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @returns {Promise} A promise that is fulfilled when the destroyAll
      * completes.
      */
-    static destroyAll(list: ParseObject[], options?: SaveOptions): Promise<ParseObject<Attributes> | ParseObject<Attributes>[]>;
+    static destroyAll<T extends ParseObject>(list: T[], options?: DestroyAllOptions): Promise<T[]>;
     /**
      * Saves the given list of Parse.Object.
      * If any error is encountered, stops and calls the error handler.
@@ -879,7 +902,7 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @static
      * @returns {Parse.Object[]}
      */
-    static saveAll<T extends ParseObject[]>(list: T, options?: SaveOptions): Promise<T>;
+    static saveAll<T extends ParseObject[]>(list: T, options?: SaveAllOptions): Promise<T>;
     /**
      * Creates a reference to a subclass of Parse.Object with the given id. This
      * does not exist on Parse.Object, only on subclasses.
@@ -1066,5 +1089,33 @@ declare class ParseObject<T extends Attributes = Attributes> {
      * @static
      */
     static unPinAllObjectsWithName(name: string): Promise<void>;
+}
+export interface ObjectStatic<T extends ParseObject = ParseObject> {
+    new (...args: any[]): T;
+    createWithoutData(id: string): T;
+    destroyAll<U extends ParseObject>(list: U[], options?: DestroyAllOptions): Promise<U[]>;
+    extend(className: string | {
+        className: string;
+    }, protoProps?: any, classProps?: any): any;
+    fetchAll<U extends ParseObject>(list: U[], options?: FetchAllOptions): Promise<U[]>;
+    fetchAllIfNeeded<U extends ParseObject>(list: U[], options?: FetchAllOptions): Promise<U[]>;
+    fetchAllIfNeededWithInclude<U extends ParseObject>(list: U[], keys: keyof U['attributes'] | (keyof U['attributes'])[], options?: RequestOptions): Promise<U[]>;
+    fetchAllWithInclude<U extends ParseObject>(list: U[], keys: keyof U['attributes'] | (keyof U['attributes'])[], options?: RequestOptions): Promise<U[]>;
+    fromJSON(json: any, override?: boolean, dirty?: boolean): T;
+    pinAll(objects: ParseObject[]): Promise<void>;
+    pinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
+    registerSubclass(className: string, clazz: new (options?: any) => T): void;
+    saveAll<U extends ParseObject[]>(list: U, options?: SaveAllOptions): Promise<U>;
+    unPinAll(objects: ParseObject[]): Promise<void>;
+    unPinAllObjects(): Promise<void>;
+    unPinAllObjectsWithName(name: string): Promise<void>;
+    unPinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
+}
+export interface ObjectConstructor extends ObjectStatic {
+    new <T extends Attributes>(className: string, attributes: T, options?: any): ParseObject<T>;
+    new (className?: string | {
+        className: string;
+        [attr: string]: any;
+    }, attributes?: Attributes, options?: any): ParseObject;
 }
 export default ParseObject;

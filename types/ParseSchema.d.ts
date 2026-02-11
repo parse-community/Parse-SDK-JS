@@ -7,22 +7,24 @@ import type ParseRelation from './ParseRelation';
 import type { PermissionsMap } from './ParseCLP';
 import type { Pointer } from './ParseObject';
 type Bytes = string;
-type TYPE = 'String' | 'Number' | 'Bytes' | 'Boolean' | 'Date' | 'File' | 'GeoPoint' | 'Polygon' | 'Array' | 'Object' | 'Pointer' | 'Relation';
-type AttrType<T extends ParseObject, V> = Extract<{
+export type FieldType = TYPE;
+export type TYPE = 'String' | 'Number' | 'Bytes' | 'Boolean' | 'Date' | 'File' | 'GeoPoint' | 'Polygon' | 'Array' | 'Object' | 'Pointer' | 'Relation';
+export type AttrType<T extends ParseObject, V> = Extract<{
     [K in keyof T['attributes']]: T['attributes'][K] extends V ? K : never;
 }[keyof T['attributes']], string>;
-interface FieldOptions<T extends string | number | boolean | Bytes | Date | ParseFile | ParseGeoPoint | ParsePolygon | any[] | object | Pointer | ParseRelation = any> {
+export type SupportedFieldTypes = string | number | boolean | Bytes | Date | ParseFile | ParseGeoPoint | ParsePolygon | any[] | object | Pointer | ParseRelation;
+export interface FieldOptions<T extends SupportedFieldTypes = any> {
     required?: boolean | undefined;
     defaultValue?: T | undefined;
     targetClass?: string | undefined;
 }
-type Index = Record<string, number | string>;
-interface CLPField {
+export type Index = Record<string, number | string>;
+export interface CLPField {
     '*'?: boolean | undefined;
     requiresAuthentication?: boolean | undefined;
     [userIdOrRoleName: string]: boolean | undefined;
 }
-interface CLP {
+export interface CLP {
     find?: CLPField | undefined;
     get?: CLPField | undefined;
     count?: CLPField | undefined;
@@ -34,7 +36,7 @@ interface CLP {
     writeUserFields?: string[] | undefined;
     protectedFields?: Record<string, string[]>;
 }
-interface RestSchema {
+export interface RestSchema {
     className: string;
     fields: Record<string, {
         type: string;
