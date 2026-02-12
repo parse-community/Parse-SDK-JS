@@ -17,6 +17,11 @@ export interface AuthProvider {
   getAuthType(): string;
   deauthenticate?(): void;
 }
+
+export interface SignUpOptions {
+  useMasterKey?: boolean;
+  installationId?: string;
+}
 const CURRENT_USER_KEY = 'currentUser';
 let canUseCurrentUser = !CoreManager.get('IS_NODE');
 let currentUserCacheMatchesDisk = false;
@@ -437,7 +442,7 @@ class ParseUser<T extends Attributes = Attributes> extends ParseObject<T> {
    */
   signUp(
     attrs?: Attributes | null,
-    options?: FullOptions & { context?: Attributes }
+    options?: SignUpOptions & { context?: Attributes }
   ): Promise<ParseUser> {
     const signupOptions = ParseObject._getRequestOptions(options);
     const controller = CoreManager.getUserController();
@@ -1039,7 +1044,7 @@ const DefaultController = {
     if (Storage.async()) {
       throw new Error(
         'Cannot call currentUser() when using a platform with an async ' +
-          'storage system. Call currentUserAsync() instead.'
+        'storage system. Call currentUserAsync() instead.'
       );
     }
     const path = Storage.generatePath(CURRENT_USER_KEY);
@@ -1112,7 +1117,7 @@ const DefaultController = {
     });
   },
 
-  signUp(user: ParseUser, attrs: Attributes, options?: RequestOptions): Promise<ParseUser> {
+  signUp(user: ParseUser, attrs: Attributes, options?: SignUpOptions): Promise<ParseUser> {
     const username = (attrs && attrs.username) || user.get('username');
     const password = (attrs && attrs.password) || user.get('password');
 

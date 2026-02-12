@@ -1,3 +1,24 @@
+## [8.1.1-alpha.6](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.1-alpha.5...8.1.1-alpha.6) (2026-02-11)
+
+
+### Bug Fixes
+
+* `Parse.serverURL` not accessible via global `Parse` scope ([#2917](https://github.com/parse-community/Parse-SDK-JS/issues/2917)) ([4e78681](https://github.com/parse-community/Parse-SDK-JS/commit/4e78681881320a0b8ec383955b47d693cb8add9c))
+
+## [8.1.1-alpha.5](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.1-alpha.4...8.1.1-alpha.5) (2026-02-11)
+
+
+### Bug Fixes
+
+* Type error in `Parse.Query.equalTo` when matching optional array ([#2901](https://github.com/parse-community/Parse-SDK-JS/issues/2901)) ([8c96da9](https://github.com/parse-community/Parse-SDK-JS/commit/8c96da9d507dfd61c907f88861e5233807e7ba36))
+
+## [8.1.1-alpha.4](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.1-alpha.3...8.1.1-alpha.4) (2026-02-09)
+
+
+### Bug Fixes
+
+* Missing or incorrect type exports ([#2909](https://github.com/parse-community/Parse-SDK-JS/issues/2909)) ([3caa4ec](https://github.com/parse-community/Parse-SDK-JS/commit/3caa4ec995e0cc02082e55e9873e12b3bc10393f))
+
 ## [8.1.1-alpha.3](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.1-alpha.2...8.1.1-alpha.3) (2026-02-07)
 
 

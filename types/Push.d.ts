@@ -10,6 +10,8 @@ export interface PushData {
     data?: any;
     channels?: string[];
 }
+/** Options for Push.send operation */
+export type SendOptions = FullOptions;
 /**
  * Contains functions to deal with Push in Parse.
  *
