@@ -734,7 +734,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    ascending<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
+    ascending<K extends keyof T['attributes'] | keyof BaseAttributes | '$score'>(...keys: (K | K[])[]): this;
     /**
      * Sorts the results in ascending order by the given key,
      * but can also add secondary sort descriptors without overwriting _order.
@@ -820,7 +820,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    select<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
+    select<K extends keyof T['attributes'] | keyof BaseAttributes | '$score'>(...keys: (K | K[])[]): this;
     /**
      * Restricts the fields of the returned Parse.Objects to all keys except the
      * provided keys. Exclude takes precedence over select and include.

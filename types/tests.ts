@@ -1927,6 +1927,8 @@ function testQuery() {
     query.ascending('updatedAt');
     // $ExpectType ParseQuery<MySubClass>
     query.ascending('objectId');
+    // $ExpectType ParseQuery<MySubClass> ($score only used for full text queries)
+    query.ascending('$score');
 
     // $ExpectType ParseQuery<MySubClass>
     query.containedBy('attribute1', ['a', 'b', 'c']);
@@ -2156,6 +2158,8 @@ function testQuery() {
     query.select('attribute1', 'attribute2');
     // $ExpectType ParseQuery<MySubClass>
     query.select(['attribute1', 'attribute2']);
+    // $ExpectType ParseQuery<MySubClass> ($score; only used for full text search ranking)
+    query.select('$score');
     // $ExpectError
     query.select('attribute1', 'nonexistentProp');
 
