@@ -618,6 +618,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
     fullText<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: string, options?: FullTextOptions): this;
     /**
      * Method to sort the full text search by text score
+     * `$score` is a special key used only for full text search ranking.
      *
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
@@ -729,7 +730,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
     polygonContains<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, point: ParseGeoPoint): this;
     /**
      * Sorts the results in ascending order by the given key.
-     *
+     * `$score` is a special key used only for full text search ranking.
      * @param {(string|string[])} keys The key to order by, which is a
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
@@ -816,6 +817,8 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * configured auth providers is returned. Auth data of providers that are no
      * longer configured is not included. To return all auth data regardless of
      * the provider configuration, do not select `authData`.
+     *
+     * `$score` is a special key used only for full text search ranking.
      *
      * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
