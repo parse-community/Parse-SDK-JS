@@ -1895,22 +1895,38 @@ function testQuery() {
 
     // $ExpectType ParseQuery<MySubClass>
     query.addAscending(['attribute1', 'attribute2', 'updatedAt']);
-
     // $ExpectType ParseQuery<MySubClass>
     query.addAscending('attribute1', 'attribute2', 'updatedAt');
-
     // $ExpectError
     query.addAscending(['attribute1', 'unexistenProp']);
+    // $ExpectType ParseQuery<MySubClass>
+    query.addAscending('createdAt');
+    // $ExpectType ParseQuery<MySubClass>
+    query.addAscending('updatedAt');
+    // $ExpectType ParseQuery<MySubClass>
+    query.addAscending('objectId');
 
     // $ExpectType ParseQuery<MySubClass>
     query.addDescending(['attribute1', 'attribute2', 'createdAt']);
     // $ExpectError
     query.addDescending(['attribute1', 'unexistenProp']);
+    // $ExpectType ParseQuery<MySubClass>
+    query.addDescending('createdAt');
+    // $ExpectType ParseQuery<MySubClass>
+    query.addDescending('updatedAt');
+    // $ExpectType ParseQuery<MySubClass>
+    query.addDescending('objectId');
 
     // $ExpectType ParseQuery<MySubClass>
     query.ascending(['attribute1', 'attribute2', 'objectId']);
     // $ExpectError
     query.ascending(['attribute1', 'nonexistentProp']);
+    // $ExpectType ParseQuery<MySubClass>
+    query.ascending('createdAt');
+    // $ExpectType ParseQuery<MySubClass>
+    query.ascending('updatedAt');
+    // $ExpectType ParseQuery<MySubClass>
+    query.ascending('objectId');
 
     // $ExpectType ParseQuery<MySubClass>
     query.containedBy('attribute1', ['a', 'b', 'c']);
@@ -1953,6 +1969,12 @@ function testQuery() {
     query.descending(['attribute1', 'attribute2', 'objectId']);
     // $ExpectError
     query.descending(['attribute1', 'nonexistentProp']);
+    // $ExpectType ParseQuery<MySubClass>
+    query.descending('createdAt');
+    // $ExpectType ParseQuery<MySubClass>
+    query.descending('updatedAt');
+    // $ExpectType ParseQuery<MySubClass>
+    query.descending('objectId');
 
     // $ExpectType ParseQuery<MySubClass>
     query.doesNotExist('attribute1');

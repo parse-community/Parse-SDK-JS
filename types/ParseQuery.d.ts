@@ -734,7 +734,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    ascending(...keys: string[]): this;
+    ascending<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
     /**
      * Sorts the results in ascending order by the given key,
      * but can also add secondary sort descriptors without overwriting _order.
@@ -743,7 +743,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    addAscending(...keys: string[]): this;
+    addAscending<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
     /**
      * Sorts the results in descending order by the given key.
      *
@@ -751,7 +751,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    descending(...keys: string[]): this;
+    descending<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
     /**
      * Sorts the results in descending order by the given key,
      * but can also add secondary sort descriptors without overwriting _order.
@@ -760,7 +760,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * string of comma separated values, or an Array of keys, or multiple keys.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    addDescending(...keys: string[]): this;
+    addDescending<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this;
     /**
      * Sets the number of results to skip before returning any results.
      * This is useful for pagination.
