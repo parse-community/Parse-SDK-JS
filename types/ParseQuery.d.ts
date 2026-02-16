@@ -812,6 +812,11 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * provided keys.  If this is called multiple times, then all of the keys
      * specified in each of the calls will be included.
      *
+     * When selecting `authData` on `Parse.User`, only auth data of currently
+     * configured auth providers is returned. Auth data of providers that are no
+     * longer configured is not included. To return all auth data regardless of
+     * the provider configuration, do not select `authData`.
+     *
      * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
