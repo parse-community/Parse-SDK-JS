@@ -442,6 +442,7 @@ describe('ParseFile', () => {
       expect(file._source.format).toBe('stream');
       expect(file._source.stream).toBe(stream);
       expect(file._source.type).toBe('application/octet-stream');
+      expect(file._data).toBeUndefined();
     } finally {
       globalThis.ReadableStream = origReadableStream;
     }
