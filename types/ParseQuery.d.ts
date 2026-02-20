@@ -1,24 +1,22 @@
 import ParseGeoPoint from './ParseGeoPoint';
 import ParseObject from './ParseObject';
 import type LiveQuerySubscription from './LiveQuerySubscription';
-import type { FullOptions } from './RESTController';
-import type { Pointer } from './ParseObject';
-type BatchOptions = FullOptions & {
+import type { BaseRequestOptions } from './RESTController';
+import type { Pointer, BaseAttributes } from './ParseObject';
+export interface BatchOptions extends BaseRequestOptions {
     batchSize?: number;
-    useMasterKey?: boolean;
-    useMaintenanceKey?: boolean;
-    sessionToken?: string;
-    context?: Record<string, any>;
-    json?: boolean;
-};
-export type WhereClause = Record<string, any>;
-interface QueryOptions {
-    useMasterKey?: boolean;
-    sessionToken?: string;
-    context?: Record<string, any>;
     json?: boolean;
 }
-interface FullTextQueryOptions {
+export type WhereClause = Record<string, any>;
+export interface QueryOptions extends BaseRequestOptions {
+    json?: boolean;
+}
+export type FindOptions = QueryOptions;
+/** CountOptions - no json since count() returns a number, not objects */
+export type CountOptions = BaseRequestOptions;
+export type GetOptions = QueryOptions;
+export type FirstOptions = QueryOptions;
+export interface FullTextOptions {
     language?: string;
     caseSensitive?: boolean;
     diacriticSensitive?: boolean;
@@ -40,11 +38,6 @@ export interface QueryJSON {
     includeReadPreference?: string;
     subqueryReadPreference?: string;
     comment?: string;
-}
-interface BaseAttributes {
-    createdAt: Date;
-    objectId: string;
-    updatedAt: Date;
 }
 /**
  * Creates a new parse Parse.Query for the given Parse.Object subclass.
@@ -209,7 +202,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that is resolved with the result when
      * the query completes.
      */
-    get(objectId: string, options?: QueryOptions): Promise<T>;
+    get(objectId: string, options?: GetOptions): Promise<T>;
     /**
      * Retrieves a list of ParseObjects that satisfy this query.
      *
@@ -225,7 +218,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that is resolved with the results when
      * the query completes.
      */
-    find(options?: QueryOptions): Promise<T[]>;
+    find(options?: FindOptions): Promise<T[]>;
     /**
      * Retrieves a complete list of ParseObjects that satisfy this query.
      * Using `eachBatch` under the hood to fetch all the valid objects.
@@ -257,10 +250,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that is resolved with the count when
      * the query completes.
      */
-    count(options?: {
-        useMasterKey?: boolean;
-        sessionToken?: string;
-    }): Promise<number>;
+    count(options?: CountOptions): Promise<number>;
     /**
      * Executes a distinct query and returns unique values
      *
@@ -291,7 +281,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @returns {Promise} A promise that is resolved with the object when
      * the query completes.
      */
-    first(options?: QueryOptions): Promise<T | undefined>;
+    first(options?: FirstOptions): Promise<T | undefined>;
     /**
      * Iterates over objects matching a query, calling a callback for each batch.
      * If the callback returns a promise, the iteration will not continue until
@@ -427,7 +417,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param value The value that the Parse.Object must contain.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    equalTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (T['attributes'][K] extends ParseObject ? Pointer : T['attributes'][K] extends (infer E)[] ? E : never)): this;
+    equalTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (NonNullable<T['attributes'][K]> extends ParseObject ? Pointer : NonNullable<T['attributes'][K]> extends (infer E)[] ? E : never)): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be not equal to the provided value.
@@ -436,7 +426,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param value The value that must not be equalled.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    notEqualTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (T['attributes'][K] extends ParseObject ? Pointer : T['attributes'][K] extends (infer E)[] ? E : never)): this;
+    notEqualTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (NonNullable<T['attributes'][K]> extends ParseObject ? Pointer : NonNullable<T['attributes'][K]> extends (infer E)[] ? E : never)): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be less than the provided value.
@@ -625,7 +615,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @param {boolean} options.diacriticSensitive A boolean flag to enable or disable diacritic sensitive search.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    fullText<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: string, options?: FullTextQueryOptions): this;
+    fullText<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: string, options?: FullTextOptions): this;
     /**
      * Method to sort the full text search by text score
      *
@@ -822,6 +812,11 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * provided keys.  If this is called multiple times, then all of the keys
      * specified in each of the calls will be included.
      *
+     * When selecting `authData` on `Parse.User`, only auth data of currently
+     * configured auth providers is returned. Auth data of providers that are no
+     * longer configured is not included. To return all auth data regardless of
+     * the provider configuration, do not select `authData`.
+     *
      * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
@@ -874,7 +869,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @static
      * @returns {Parse.Query} The query that is the OR of the passed in queries.
      */
-    static or(...queries: ParseQuery[]): ParseQuery;
+    static or<T extends ParseObject>(...queries: ParseQuery<T>[]): ParseQuery<T>;
     /**
      * Constructs a Parse.Query that is the AND of the passed in queries.  For
      * example:
@@ -887,7 +882,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @static
      * @returns {Parse.Query} The query that is the AND of the passed in queries.
      */
-    static and(...queries: ParseQuery[]): ParseQuery;
+    static and<T extends ParseObject>(...queries: ParseQuery<T>[]): ParseQuery<T>;
     /**
      * Constructs a Parse.Query that is the NOR of the passed in queries.  For
      * example:
@@ -900,7 +895,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * @static
      * @returns {Parse.Query} The query that is the NOR of the passed in queries.
      */
-    static nor(...queries: ParseQuery[]): ParseQuery;
+    static nor<T extends ParseObject>(...queries: ParseQuery<T>[]): ParseQuery<T>;
     /**
      * Change the source of this query to the server.
      *

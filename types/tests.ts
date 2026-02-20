@@ -42,6 +42,14 @@ async function test_object() {
   // Create a new instance of that class.
   const gameScore = new GameScore();
 
+  // Expect that `createWithoutData` returns the types for the same classes (not generic ParseObjects)
+  // $ExpectType Game
+  Game.createWithoutData('someid');
+  // $ExpectType GameScore
+  GameScore.createWithoutData('scoreid');
+  // $ExpectType ParseUser<Attributes>
+  Parse.User.createWithoutData('someuser');
+
   gameScore.set('score', 1337);
   gameScore.set('playerName', 'Sean Plott');
   gameScore.set('cheatMode', false);
@@ -217,6 +225,18 @@ async function test_query() {
   await query.distinct('name');
 
   const testQuery = Parse.Query.or(query, query);
+
+  // Test that query can do `or`/`and` joins while preserving class types
+  // This was the behaviour with the old DefinitelyTyped typings.
+  class MyClass extends Parse.Object<{ a: number }> {};
+  const q1 = new Parse.Query(MyClass).equalTo('a', 2);
+  const q2 = new Parse.Query(MyClass).equalTo('a', 3);
+  // $ExpectType ParseQuery<MyClass>
+  const orQ = Parse.Query.or(q1, q2);
+  // $ExpectType ParseQuery<MyClass>
+  const andQ = Parse.Query.and(q1, q2);
+  // $ExpectType ParseQuery<MyClass>
+  const norQ = Parse.Query.nor(q1, q2);
 }
 
 function test_query_exclude() {
@@ -549,170 +569,271 @@ async function test_facebook_util() {
 async function test_cloud_functions() {
   // $ExpectType any
   await Parse.Cloud.run('SomeFunction');
+
   // $ExpectType any
   await Parse.Cloud.run('SomeFunction', { something: 'whatever' });
+
   // $ExpectType any
   await Parse.Cloud.run('SomeFunction', null, { useMasterKey: true });
-  // ExpectType boolean
+
+  // $ExpectType boolean
   await Parse.Cloud.run<() => boolean>('SomeFunction');
+
   // $ExpectType boolean
   await Parse.Cloud.run<() => boolean>('SomeFunction', null);
+
   // $ExpectType boolean
   await Parse.Cloud.run<() => boolean>('SomeFunction', null, { useMasterKey: true });
+
   // $ExpectType number
-  await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction', {
-    paramA: 'hello',
-  });
-  // $ExpectError
+  await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction', { paramA: 'hello' });
+
+  // @ts-expect-error - params are required
   await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction');
-  await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction', {
-    // $ExpectError
-    paramZ: 'hello',
-  });
-  // $ExpectError
-  await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction', null, {
-    useMasterKey: true,
-  });
-  // $ExpectError
+
+  // @ts-expect-error - wrong param name
+  await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction', { paramZ: 'hello' });
+
+  // @ts-expect-error - params are required, null not allowed
+  await Parse.Cloud.run<(params: { paramA: string }) => number>('SomeFunction', null, { useMasterKey: true });
+
+  // @ts-expect-error - params must be object not string
   await Parse.Cloud.run<(params: string) => any>('SomeFunction', 'hello');
-  // Parse.Cloud.afterDelete('MyCustomClass', (request: Parse.Cloud.AfterDeleteRequest) => {
-  //   // result
-  // });
-  // Parse.Cloud.afterSave('MyCustomClass', (request: Parse.Cloud.AfterSaveRequest) => {
-  //   if (!request.context) {
-  //     throw new Error('Request context should be defined');
-  //   }
-  //   // result
-  // });
-  // Parse.Cloud.beforeDelete('MyCustomClass', (request: Parse.Cloud.BeforeDeleteRequest) => {
-  //   // result
-  // });
-  // Parse.Cloud.beforeDelete('MyCustomClass', async (request: Parse.Cloud.BeforeDeleteRequest) => {
-  //   // result
-  // });
-  // interface BeforeSaveObject {
-  //   immutable: boolean;
-  // }
-  // Parse.Cloud.beforeSave('MyCustomClass', request => {
-  //   if (request.object.isNew()) {
-  //     if (!request.object.has('immutable')) throw new Error('Field immutable is required');
-  //   } else {
-  //     const original = request.original;
-  //     if (original == null) {
-  //       // When the object is not new, request.original must be defined
-  //       throw new Error('Original must me defined for an existing object');
-  //     }
-  //     if (original.get('immutable') !== request.object.get('immutable')) {
-  //       throw new Error('This field cannot be changed');
-  //     }
-  //   }
-  //   if (!request.context) {
-  //     throw new Error('Request context should be defined');
-  //   }
-  // });
-  // Parse.Cloud.beforeFind('MyCustomClass', (request: Parse.Cloud.BeforeFindRequest) => {
-  //   const query = request.query; // the Parse.Query
-  //   const user = request.user; // the user
-  //   const isMaster = request.master; // if the query is run with masterKey
-  //   const isCount = request.count; // if the query is a count operation (available on parse-server 2.4.0 or up)
-  //   const isGet = request.isGet; // if the query is a get operation
-  //   // All possible read preferences
-  //   request.readPreference = Parse.Cloud.ReadPreferenceOption.Primary;
-  //   request.readPreference = Parse.Cloud.ReadPreferenceOption.PrimaryPreferred;
-  //   request.readPreference = Parse.Cloud.ReadPreferenceOption.Secondary;
-  //   request.readPreference = Parse.Cloud.ReadPreferenceOption.SecondaryPreferred;
-  //   request.readPreference = Parse.Cloud.ReadPreferenceOption.Nearest;
-  // });
-  // Parse.Cloud.beforeFind('MyCustomClass', (request: Parse.Cloud.BeforeFindRequest) => {
-  //   const query = request.query; // the Parse.Query
-  //   return new Parse.Query('QueryMe!');
-  // });
-  // Parse.Cloud.beforeFind('MyCustomClass', (request: Parse.Cloud.BeforeFindRequest) => {
-  //   const query = request.query; // the Parse.Query
-  //   return new Parse.Query('QueryMe, IN THE FUTURE!');
-  // });
-  // Parse.Cloud.afterFind('MyCustomClass', (request: Parse.Cloud.AfterFindRequest) => {
-  //   return new Parse.Object('MyCustomClass');
-  // });
-  // Parse.Cloud.beforeLogin((request: Parse.Cloud.TriggerRequest) => {
-  //   return Promise.resolve();
-  // });
-  // Parse.Cloud.afterLogin((request: Parse.Cloud.TriggerRequest) => {
-  //   return Promise.resolve();
-  // });
-  // Parse.Cloud.afterLogout((request: Parse.Cloud.TriggerRequest) => {
-  //   return Promise.resolve();
-  // });
-  // Parse.Cloud.beforeSaveFile((request: Parse.Cloud.FileTriggerRequest) => {
-  //   return Promise.resolve(new Parse.File('myFile.txt', { base64: '' }));
-  // });
-  // Parse.Cloud.beforeSaveFile((request: Parse.Cloud.FileTriggerRequest) => {});
-  // Parse.Cloud.beforeDeleteFile((request: Parse.Cloud.FileTriggerRequest) => {});
-  // Parse.Cloud.afterDeleteFile((request: Parse.Cloud.FileTriggerRequest) => {});
-  // Parse.Cloud.define('AFunc', (request: Parse.Cloud.FunctionRequest) => {
-  //   return 'Some result';
-  // });
-  // Parse.Cloud.define(
-  //   'AFunc',
-  //   (request: Parse.Cloud.FunctionRequest) => {
-  //     return 'Some result';
-  //   },
-  //   {
-  //     requireUser: true,
-  //     requireMaster: true,
-  //     validateMasterKey: true,
-  //     skipWithMasterKey: true,
-  //     requireAnyUserRoles: ['a'],
-  //     requireAllUserRoles: ['a'],
-  //     fields: {
-  //       name: {
-  //         type: String,
-  //         constant: true,
-  //         default: true,
-  //         options: [],
-  //         error: 'invalid field.',
-  //       },
-  //     },
-  //     requireUserKeys: {
-  //       name: {
-  //         type: String,
-  //         constant: true,
-  //         default: true,
-  //         options: [],
-  //         error: 'invalid field.',
-  //       },
-  //     },
-  //   }
-  // );
-  // Parse.Cloud.define('AFunc', request => {
-  //   // $ExpectType Params
-  //   request.params;
-  //   // $ExpectType any
-  //   request.params.anything;
-  // });
-  // Parse.Cloud.define<() => void>('AFunc', request => {
-  //   // $ExpectType {}
-  //   request.params;
-  // });
-  // Parse.Cloud.define<(params: { something: string }) => number>('AFunc', request => {
-  //   // $ExpectType { something: string; }
-  //   request.params;
-  //   // $ExpectError
-  //   request.params.somethingElse;
-  //   return 123;
-  // });
-  // // $ExpectError
-  // Parse.Cloud.define('AFunc');
-  // // $ExpectError
-  // Parse.Cloud.define<() => string>('AFunc', () => 123);
-  // // $ExpectError
-  // Parse.Cloud.define<(params: string) => number>('AFunc', () => 123);
-  // Parse.Cloud.job('AJob', (request: Parse.Cloud.JobRequest) => {
-  //   request.message('Message to associate with this job run');
-  // });
-  await Parse.Cloud.startJob('AJob', {}).then(v => v);
-  await Parse.Cloud.getJobStatus('AJob').then(v => v);
-  await Parse.Cloud.getJobsData().then(v => v);
+
+  ParseNode.Cloud.afterDelete('MyCustomClass', request => {
+    request.object;
+    request.user;
+  });
+
+  ParseNode.Cloud.afterSave('MyCustomClass', request => {
+    if (!request.context) {
+      throw new Error('Request context should be defined');
+    }
+    request.object;
+  });
+
+  ParseNode.Cloud.beforeDelete('MyCustomClass', request => {
+    request.object;
+  });
+
+  ParseNode.Cloud.beforeSave('MyCustomClass', request => {
+    if (request.object.isNew()) {
+      if (!request.object.has('immutable')) throw new Error('Field immutable is required');
+    } else {
+      const original = request.original;
+      if (original == null) {
+        throw new Error('Original must be defined for an existing object');
+      }
+      if (original.get('immutable') !== request.object.get('immutable')) {
+        throw new Error('This field cannot be changed');
+      }
+    }
+    if (!request.context) {
+      throw new Error('Request context should be defined');
+    }
+  });
+
+  ParseNode.Cloud.beforeSave('MyCustomClass', (request): void => {
+    request.object;
+  });
+
+  // Tests to allow for Parse.Object subclasses with non-optional constructor params.
+  class ArgObject extends Parse.Object<{ a: string }> {
+    constructor(arg: { a: string }) {
+      super('ArgObject', arg);
+    }
+  }
+  ParseNode.Cloud.beforeSave(ArgObject, request => {
+    // $ExpectType ArgObject
+    request.object;
+  });
+
+  ParseNode.Cloud.beforeFind('MyCustomClass', request => {
+    request.query;
+    request.user;
+    request.master;
+    request.count;
+    request.isGet;
+
+    request.readPreference = ParseNode.Cloud.ReadPreferenceOption.Primary;
+    request.readPreference = ParseNode.Cloud.ReadPreferenceOption.PrimaryPreferred;
+    request.readPreference = ParseNode.Cloud.ReadPreferenceOption.Secondary;
+    request.readPreference = ParseNode.Cloud.ReadPreferenceOption.SecondaryPreferred;
+    request.readPreference = ParseNode.Cloud.ReadPreferenceOption.Nearest;
+  });
+
+  ParseNode.Cloud.beforeFind('MyCustomClass', request => {
+    request.query;
+    return new Parse.Query('QueryMe!');
+  });
+
+  ParseNode.Cloud.afterFind('MyCustomClass', request => {
+    request.results;
+    return request.results;
+  });
+
+  ParseNode.Cloud.beforeLogin(request => {
+    request.object;
+    request.user;
+  });
+
+  ParseNode.Cloud.afterLogin(request => {
+    request.object;
+  });
+
+  ParseNode.Cloud.afterLogout(request => {
+    request.object;
+  });
+
+  ParseNode.Cloud.beforeSaveFile(request => {
+    request.file;
+    request.fileSize;
+    return new Parse.File('myFile.txt', { base64: '' });
+  });
+
+  ParseNode.Cloud.beforeSaveFile(request => {
+    request.file;
+  });
+
+  ParseNode.Cloud.beforeDeleteFile(request => {
+    request.file;
+  });
+
+  ParseNode.Cloud.afterDeleteFile(request => {
+    request.file;
+  });
+
+  ParseNode.Cloud.beforeConnect(request => {
+    request.user;
+    request.installationId;
+    request.useMasterKey;
+    request.clients;
+    request.subscriptions;
+    request.sessionToken;
+  });
+
+  ParseNode.Cloud.beforeSubscribe('MyCustomClass', request => {
+    request.object;
+    request.user;
+    request.original;
+    request.installationId;
+  });
+
+  ParseNode.Cloud.afterLiveQueryEvent('MyCustomClass', request => {
+    request.event;
+    request.object;
+    request.original;
+    request.user;
+    request.sendEvent;
+    request.clients;
+    request.subscriptions;
+    request.sessionToken;
+  });
+
+  ParseNode.Cloud.beforePasswordResetRequest(request => {
+    request.object;
+    request.user;
+    request.master;
+    request.ip;
+    request.headers;
+  });
+
+  void ParseNode.Cloud.httpRequest({
+    url: 'https://example.com',
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: { key: 'value' },
+    followRedirects: true,
+  }).then(response => {
+    response.status;
+    response.data;
+    response.text;
+    response.headers;
+    response.buffer;
+    response.cookies;
+  });
+
+  void ParseNode.Cloud.sendEmail({
+    to: 'test@example.com',
+    from: 'sender@example.com',
+    subject: 'Test Subject',
+    text: 'Plain text content',
+    html: '<p>HTML content</p>',
+  });
+
+  ParseNode.Cloud.define('AFunc', request => {
+    request.params;
+    return 'Some result';
+  });
+
+  ParseNode.Cloud.define(
+    'AFunc',
+    request => {
+      request.params;
+      return 'Some result';
+    },
+    {
+      requireUser: true,
+      requireMaster: true,
+      validateMasterKey: true,
+      skipWithMasterKey: true,
+      requireAnyUserRoles: ['a'],
+      requireAllUserRoles: ['a'],
+      fields: {
+        name: {
+          type: String,
+          constant: true,
+          default: true,
+          options: [],
+          error: 'invalid field.',
+        },
+      },
+      requireUserKeys: {
+        name: {
+          type: String,
+          constant: true,
+          default: true,
+          options: [],
+          error: 'invalid field.',
+        },
+      },
+    },
+  );
+
+  ParseNode.Cloud.define('AFunc', request => {
+    request.params;
+    request.params.anything;
+  });
+
+  ParseNode.Cloud.job('AJob', request => {
+    request.params;
+    request.message('Message to associate with this job run');
+  });
+
+  void Parse.Cloud.startJob('AJob', {}).then(v => v);
+
+  void Parse.Cloud.getJobStatus('AJob').then(v => v);
+
+  void Parse.Cloud.getJobsData().then(v => v);
+
+  // @ts-expect-error - define should not exist on browser Parse.Cloud
+  Parse.Cloud.define('test', () => {});
+  // @ts-expect-error - beforeSave should not exist on browser Parse.Cloud
+  Parse.Cloud.beforeSave('Test', () => {});
+  // @ts-expect-error - job should not exist on browser Parse.Cloud
+  Parse.Cloud.job('test', () => {});
+  // @ts-expect-error - httpRequest should not exist on browser Parse.Cloud
+  void Parse.Cloud.httpRequest({ url: '' });
+  // @ts-expect-error - beforeConnect should not exist on browser Parse.Cloud
+  Parse.Cloud.beforeConnect(() => {});
+  // @ts-expect-error - beforeSubscribe should not exist on browser Parse.Cloud
+  Parse.Cloud.beforeSubscribe('Test', () => {});
+  // @ts-expect-error - afterLiveQueryEvent should not exist on browser Parse.Cloud
+  Parse.Cloud.afterLiveQueryEvent('Test', () => {});
+  // @ts-expect-error - beforePasswordResetRequest should not exist on browser Parse.Cloud
+  Parse.Cloud.beforePasswordResetRequest(() => {});
+  // @ts-expect-error - sendEmail should not exist on browser Parse.Cloud
+  void Parse.Cloud.sendEmail({ to: '' });
 }
 
 class PlaceObject extends Parse.Object {}
@@ -904,6 +1025,7 @@ async function test_cancel_query() {
   query.cancel();
 }
 
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents -- object is intentionally included for testing Exclude<FieldType, object>. */
 type FieldType =
   | string
   | number
@@ -916,6 +1038,7 @@ type FieldType =
   | Parse.Pointer
   | Parse.Polygon
   | Parse.Relation;
+/* eslint-enable @typescript-eslint/no-redundant-type-constituents */
 async function test_schema(
   anyField: FieldType,
   notString: Exclude<FieldType, string>,
@@ -1765,6 +1888,8 @@ function testQuery() {
       attribute2: number;
       attribute3: AnotherSubClass;
       attribute4: string[];
+      attribute5?: AnotherSubClass[];
+      attribute6?: string[];
     }> {}
     const query = new Parse.Query(MySubClass);
 
@@ -1874,6 +1999,22 @@ function testQuery() {
     // $ExpectType ParseQuery<MySubClass>
     query.equalTo('attribute4', ['a_string_value']);
 
+    
+    // Optional object[] (e.g. prop?: ClassName[] ): allow matching a single element (array contains object), and allow matching the full array
+    // $ExpectType ParseQuery<MySubClass>
+    query.equalTo('attribute5', new AnotherSubClass());
+    // $ExpectType ParseQuery<MySubClass>
+    query.equalTo('attribute5', [new AnotherSubClass()]);
+    // Since there is no `$ExpectNotError` thing, this line is instead used to at least prove that there is no regression for type safety for `Array of object` fields
+    // $ExpectError
+    query.equalTo('attribute5', new MySubClass());
+
+    // Optional string[] (e.g. prop?: string[] ): allow matching a single element (array contains string), and allow matching the full array
+    // $ExpectType ParseQuery<MySubClass>
+    query.equalTo('attribute6', 'a_string_value');
+    // $ExpectType ParseQuery<MySubClass>
+    query.equalTo('attribute6', ['a_string_value']);
+
     // $ExpectType ParseQuery<MySubClass>
     query.notEqualTo('attribute4', 'a_string_value');
     // $ExpectType ParseQuery<MySubClass>
@@ -1887,6 +2028,12 @@ function testQuery() {
     query.equalTo('attribute4', [5]);
     // $ExpectError
     query.notEqualTo('attribute4', [5]);
+
+    // Optional string[]: reject invalid element types
+    // $ExpectError
+    query.equalTo('attribute6', 5);
+    // $ExpectError
+    query.notEqualTo('attribute6', 5);
 
     // $ExpectType ParseQuery<MySubClass>
     query.exists('attribute1');
@@ -2247,10 +2394,118 @@ function testEventuallyQueue() {
   }
 }
 
+// TODO: Add missing LiveQuery types (LiveQuerySubscription, etc.)
 function LiveQueryEvents() {
   function testLiveQueryEvents() {
     Parse.LiveQuery.on('open', () => {});
     Parse.LiveQuery.on('close', () => {});
     Parse.LiveQuery.on('error', (error: any) => {});
   }
+}
+
+function testInitialize() {
+  // Browser - 2 params (strict)
+  Parse.initialize('appId', 'jsKey');
+
+  // Browser - should error when trying to pass masterKey
+  // @ts-expect-error - Browser build should not accept masterKey
+  Parse.initialize('appId', 'jsKey', 'masterKey');
+
+  // Node - permissive 4 params (should work)
+  ParseNode.initialize('appId', 'jsKey', 'masterKey', 'maintenanceKey');
+
+  // Node - 3 params (should also work)
+  ParseNode.initialize('appId', 'jsKey', 'masterKey');
+
+  // Node - 2 params (should also work)
+  ParseNode.initialize('appId', 'jsKey');
+
+  // Node - 1 param (should also work since javaScriptKey is optional in node)
+  ParseNode.initialize('appId');
+}
+// Test Parse.* and namespace type exports
+async function test_type_exports() {
+  // Parse.Object.* namespace
+  const objDestroyOpts: Parse.Object.DestroyOptions = { useMasterKey: true, sessionToken: 'token' };
+  const objDestroyAllOpts: Parse.Object.DestroyAllOptions = { batchSize: 100, useMasterKey: true };
+  const objFetchOpts: Parse.Object.FetchOptions = { useMasterKey: true, include: ['rel'] };
+  const objFetchAllOpts: Parse.Object.FetchAllOptions = { useMasterKey: true };
+  const objSaveOpts: Parse.Object.SaveOptions = { useMasterKey: true, cascadeSave: false, context: {} };
+  const objSaveAllOpts: Parse.Object.SaveAllOptions = { batchSize: 50, useMasterKey: true };
+  const objSetOpts: Parse.Object.SetOptions = { ignoreValidation: true };
+  type ObjEncode = Parse.Object.Encode<Date>;
+  type ObjToJSON = Parse.Object.ToJSON<{ name: string }>;
+
+  // Parse.Query.* namespace
+  const queryOpts: Parse.Query.QueryOptions = { useMasterKey: true, sessionToken: 'token', json: true };
+  const queryFindOpts: Parse.Query.FindOptions = { useMasterKey: true, context: {} };
+  const queryBatchOpts: Parse.Query.BatchOptions = { batchSize: 100, useMasterKey: true };
+  const queryFullTextOpts: Parse.Query.FullTextOptions = { language: 'en', caseSensitive: false };
+
+  // Parse.Schema.* namespace
+  const schemaTypes: Parse.Schema.TYPE[] = ['String', 'Number', 'Boolean', 'Date', 'File', 'GeoPoint', 'Polygon', 'Array', 'Object', 'Pointer', 'Relation', 'Bytes'];
+
+  // Direct Parse.* exports
+  const destroyOpts: Parse.DestroyOptions = { useMasterKey: true };
+  const fetchOpts: Parse.FetchOptions = { useMasterKey: true, include: ['rel'] };
+  const saveOpts: Parse.SaveOptions = { useMasterKey: true, cascadeSave: true };
+  const setOpts: Parse.SetOptions = { ignoreValidation: false };
+  const destroyAllOpts: Parse.DestroyAllOptions = { batchSize: 100 };
+  const saveAllOpts: Parse.SaveAllOptions = { batchSize: 50 };
+  const fetchAllOpts: Parse.FetchAllOptions = { useMasterKey: true };
+  const findOpts: Parse.FindOptions = { useMasterKey: true, json: true };
+  const batchOpts: Parse.BatchOptions = { batchSize: 100 };
+  const fullTextOpts: Parse.FullTextOptions = { language: 'en' };
+  const typeVal: Parse.TYPE = 'String';
+  type DirectEncode = Parse.Encode<Date>;
+  type DirectToJSON = Parse.ToJSON<{ x: number }>;
+
+  // Core types
+  const pointer: Parse.Pointer = { __type: 'Pointer', className: 'Test', objectId: 'abc' };
+  const attrs: Parse.Attributes = { score: 100 };
+  const baseAttrs: Parse.BaseAttributes = { createdAt: new Date(), updatedAt: new Date(), objectId: 'abc' };
+  const jsonBaseAttrs: Parse.JSONBaseAttributes = { createdAt: '2023-01-01T00:00:00Z', updatedAt: '2023-01-01T00:00:00Z', objectId: 'abc' };
+  const whereClause: Parse.WhereClause = { score: { $gt: 100 } };
+  const queryJson: Parse.QueryJSON = { where: {}, limit: 10 };
+  const fullOpts: Parse.FullOptions = { useMasterKey: true };
+  const reqOpts: Parse.RequestOptions = { useMasterKey: true, batchSize: 50 };
+  const authProvider: Parse.AuthProvider = { authenticate: () => {}, getAuthType: () => 'custom', restoreAuthentication: () => true };
+  const authData: Parse.AuthData = { id: 'user-id' };
+  const signUpOpts: Parse.SignUpOptions = { useMasterKey: true };
+  const restSchema: Parse.RestSchema = { className: 'Test', fields: {}, classLevelPermissions: {} };
+  const pushData: Parse.PushData = { channels: ['news'], data: { alert: 'Hello' } };
+  const sendOpts: Parse.SendOptions = { useMasterKey: true };
+  const cloudRunOpts: Parse.Cloud.RunOptions = { useMasterKey: true, context: {} };
+  const subscription: Parse.LiveQuerySubscription = await new Parse.Query('Test').subscribe();
+
+  class MyClass extends Parse.Object {
+    constructor() {
+      super('MyClass');
+    }
+  }
+  // ObjectStatic with generic subclasses
+  const objectStatic: Parse.ObjectStatic = MyClass;
+  function doCreateWithoutData<T extends Parse.Object>(clz: Parse.ObjectStatic<T>, id: string): T {
+    return clz.createWithoutData(id);
+  }
+  // $ExpectType MyClass
+  const myClsObj = doCreateWithoutData(MyClass, '1');
+
+  // Verify types work with actual methods
+  const obj = new Parse.Object('Test');
+  const query = new Parse.Query('Test');
+
+  await obj.save(null, saveOpts);
+  await obj.fetch(fetchOpts);
+  await obj.destroy(destroyOpts);
+  obj.set('key', 'value', setOpts);
+  await Parse.Object.saveAll([obj], saveAllOpts);
+  await Parse.Object.destroyAll([obj], destroyAllOpts);
+  await Parse.Object.fetchAll([obj], fetchAllOpts);
+  await query.find(findOpts);
+  await query.first(findOpts);
+  await query.count(findOpts);
+  await query.each(() => {}, batchOpts);
+  await query.eachBatch(() => {}, batchOpts);
+  query.fullText('field', 'term', fullTextOpts);
 }

@@ -15,8 +15,6 @@ jest.dontMock('../TaskQueue');
 jest.dontMock('../unique');
 jest.dontMock('../UniqueInstanceStateController');
 
-jest.dontMock('./test_helpers/mockXHR');
-
 const mockUser = function (token) {
   this.token = token;
 };

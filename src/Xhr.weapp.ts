@@ -1,111 +1,63 @@
-class XhrWeapp {
-  UNSENT: number;
-  OPENED: number;
-  HEADERS_RECEIVED: number;
-  LOADING: number;
-  DONE: number;
-  header: any;
-  readyState: any;
-  status: number;
-  response: string | undefined;
-  responseType: string;
-  responseText: string;
-  responseHeader: any;
-  method: string;
-  url: string;
-  onabort: () => void;
-  onprogress: () => void;
-  onerror: () => void;
-  onreadystatechange: () => void;
-  requestTask: any;
+/* istanbul ignore file */
 
-  constructor() {
-    this.UNSENT = 0;
-    this.OPENED = 1;
-    this.HEADERS_RECEIVED = 2;
-    this.LOADING = 3;
-    this.DONE = 4;
+// @ts-ignore
+function parseResponse(res: wx.RequestSuccessCallbackResult) {
+  let headers = res.header || {};
+  headers = Object.keys(headers).reduce((map, key) => {
+    map[key.toLowerCase()] = headers[key];
+    return map;
+  }, {});
 
-    this.header = {};
-    this.readyState = this.DONE;
-    this.status = 0;
-    this.response = '';
-    this.responseType = '';
-    this.responseText = '';
-    this.responseHeader = {};
-    this.method = '';
-    this.url = '';
-    this.onabort = () => {};
-    this.onprogress = () => {};
-    this.onerror = () => {};
-    this.onreadystatechange = () => {};
-    this.requestTask = null;
-  }
-
-  getAllResponseHeaders() {
-    let header = '';
-    for (const key in this.responseHeader) {
-      header += key + ':' + this.getResponseHeader(key) + '\r\n';
-    }
-    return header;
-  }
-
-  getResponseHeader(key) {
-    return this.responseHeader[key];
-  }
-
-  setRequestHeader(key, value) {
-    this.header[key] = value;
-  }
-
-  open(method, url) {
-    this.method = method;
-    this.url = url;
-  }
-
-  abort() {
-    if (!this.requestTask) {
-      return;
-    }
-    this.requestTask.abort();
-    this.status = 0;
-    this.response = undefined;
-    this.onabort();
-    this.onreadystatechange();
-  }
-
-  send(data) {
-    // @ts-ignore
-    this.requestTask = wx.request({
-      url: this.url,
-      method: this.method,
-      data: data,
-      header: this.header,
-      responseType: this.responseType,
-      success: res => {
-        this.status = res.statusCode;
-        this.response = res.data;
-        this.responseHeader = res.header;
-        this.responseText = JSON.stringify(res.data);
-        this.requestTask = null;
-        this.onreadystatechange();
+  return {
+    status: res.statusCode,
+    json: () => {
+      if (typeof res.data === 'object') {
+        return Promise.resolve(res.data);
+      }
+      let json = {};
+      try {
+        json = JSON.parse(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+      return Promise.resolve(json);
+    },
+    headers: {
+      keys: () => Object.keys(headers),
+      get: (n: string) => headers[n.toLowerCase()],
+      has: (n: string) => n.toLowerCase() in headers,
+      entries: () => {
+        const all = [];
+        for (const key in headers) {
+          if (headers[key]) {
+            all.push([key, headers[key]]);
+          }
+        }
+        return all;
       },
-      fail: err => {
-        this.requestTask = null;
-        // @ts-ignore
-        this.onerror(err);
-      },
-    });
-    this.requestTask.onProgressUpdate(res => {
-      const event = {
-        lengthComputable: res.totalBytesExpectedToWrite !== 0,
-        loaded: res.totalBytesWritten,
-        total: res.totalBytesExpectedToWrite,
-      };
-      // @ts-ignore
-      this.onprogress(event);
-    });
-  }
+    },
+  };
 }
 
-export default XhrWeapp;
+export function polyfillFetch() {
+  const typedGlobal = global as any;
+  if (typeof typedGlobal.fetch !== 'function') {
+    typedGlobal.fetch = (url: string, options: any) => {
+      const TEXT_FILE_EXTS = /\.(txt|json|html|txt|csv)/;
+      const dataType = url.match(TEXT_FILE_EXTS) ? 'text' : 'arraybuffer';
+      return new Promise((resolve, reject) => {
+        // @ts-ignore
+        wx.request({
+          url,
+          method: options.method || 'GET',
+          data: options.body,
+          header: options.headers,
+          dataType,
+          responseType: dataType,
+          success: response => resolve(parseResponse(response)),
+          fail: error => reject(error),
+        });
+      });
+    };
+  }
+}

@@ -3,7 +3,16 @@ import uuidv4 from './uuid';
 import CoreManager from './CoreManager';
 import ParseError from './ParseError';
 import { resolvingPromise } from './promiseUtils';
-import XhrWeapp from './Xhr.weapp';
+import { polyfillFetch } from './Xhr.weapp';
+
+/** Base options for all Parse requests that go through _getRequestOptions */
+export interface BaseRequestOptions {
+  useMasterKey?: boolean;
+  useMaintenanceKey?: boolean;
+  sessionToken?: string;
+  installationId?: string;
+  context?: Record<string, unknown>;
+}
 
 export interface RequestOptions {
   useMasterKey?: boolean;
@@ -44,21 +53,24 @@ interface PayloadType {
   _SessionToken?: string;
 }
 
-let XHR: any = null;
-if (typeof XMLHttpRequest !== 'undefined') {
-  XHR = XMLHttpRequest;
-}
-if (process.env.PARSE_BUILD === 'node') {
-  XHR = require('xmlhttprequest').XMLHttpRequest;
-}
 if (process.env.PARSE_BUILD === 'weapp') {
-  XHR = XhrWeapp;
+  polyfillFetch();
 }
 
 let useXDomainRequest = false;
 // @ts-ignore
 if (typeof XDomainRequest !== 'undefined' && !('withCredentials' in new XMLHttpRequest())) {
   useXDomainRequest = true;
+}
+
+function getPath(base: string, pathname: string) {
+  if (base.endsWith('/')) {
+    base = base.slice(0, -1);
+  }
+  if (!pathname.startsWith('/')) {
+    pathname = '/' + pathname;
+  }
+  return base + pathname;
 }
 
 function ajaxIE9(method: string, url: string, data: any, _headers?: any, options?: FullOptions) {
@@ -102,70 +114,21 @@ function ajaxIE9(method: string, url: string, data: any, _headers?: any, options
 }
 
 const RESTController = {
-  ajax(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
+  async ajax(method: string, url: string, data: any, headers?: any, options?: FullOptions) {
     if (useXDomainRequest) {
       return ajaxIE9(method, url, data, headers, options);
+    }
+    if (typeof fetch !== 'function') {
+      throw new Error('Cannot make a request: Fetch API not found.');
     }
     const promise = resolvingPromise();
     const isIdempotent = CoreManager.get('IDEMPOTENCY') && ['POST', 'PUT'].includes(method);
     const requestId = isIdempotent ? uuidv4() : '';
     let attempts = 0;
 
-    const dispatch = function () {
-      if (XHR == null) {
-        throw new Error('Cannot make a request: No definition of XMLHttpRequest was found.');
-      }
-      let handled = false;
-
-      const xhr = new XHR();
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState !== 4 || handled || xhr._aborted) {
-          return;
-        }
-        handled = true;
-
-        if (xhr.status >= 200 && xhr.status < 300) {
-          let response;
-          try {
-            response = JSON.parse(xhr.responseText);
-            const availableHeaders =
-              typeof xhr.getAllResponseHeaders === 'function' ? xhr.getAllResponseHeaders() : '';
-            headers = {};
-            if (
-              typeof xhr.getResponseHeader === 'function' &&
-              availableHeaders?.indexOf('access-control-expose-headers') >= 0
-            ) {
-              const responseHeaders = xhr
-                .getResponseHeader('access-control-expose-headers')
-                .split(', ');
-              responseHeaders.forEach(header => {
-                if (availableHeaders.indexOf(header.toLowerCase()) >= 0) {
-                  headers[header] = xhr.getResponseHeader(header.toLowerCase());
-                }
-              });
-            }
-          } catch (e) {
-            promise.reject(e.toString());
-          }
-          if (response) {
-            promise.resolve({ response, headers, status: xhr.status, xhr });
-          }
-        } else if (xhr.status >= 500 || xhr.status === 0) {
-          // retry on 5XX or node-xmlhttprequest error
-          if (++attempts < CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
-            // Exponentially-growing random delay
-            const delay = Math.round(Math.random() * 125 * Math.pow(2, attempts));
-            setTimeout(dispatch, delay);
-          } else if (xhr.status === 0) {
-            promise.reject('Unable to connect to the Parse API');
-          } else {
-            // After the retry limit is reached, fail
-            promise.reject(xhr);
-          }
-        } else {
-          promise.reject(xhr);
-        }
-      };
+    const dispatch = async function () {
+      const controller = new AbortController();
+      const { signal } = controller;
 
       headers = headers || {};
       if (typeof headers['Content-Type'] !== 'string') {
@@ -178,52 +141,107 @@ const RESTController = {
       if (isIdempotent) {
         headers['X-Parse-Request-Id'] = requestId;
       }
-      if (CoreManager.get('SERVER_AUTH_TYPE') && CoreManager.get('SERVER_AUTH_TOKEN')) {
-        headers['Authorization'] =
-          CoreManager.get('SERVER_AUTH_TYPE') + ' ' + CoreManager.get('SERVER_AUTH_TOKEN');
-      }
       const customHeaders = CoreManager.get('REQUEST_HEADERS');
       for (const key in customHeaders) {
         headers[key] = customHeaders[key];
       }
-
-      if (options && typeof options.progress === 'function') {
-        const handleProgress = function (type, event) {
-          if (event.lengthComputable) {
-            options.progress(event.loaded / event.total, event.loaded, event.total, { type });
-          } else {
-            options.progress(null, null, null, { type });
-          }
-        };
-
-        xhr.onprogress = event => {
-          handleProgress('download', event);
-        };
-
-        if (xhr.upload) {
-          xhr.upload.onprogress = event => {
-            handleProgress('upload', event);
-          };
-        }
-      }
-
-      xhr.open(method, url, true);
-
-      for (const h in headers) {
-        xhr.setRequestHeader(h, headers[h]);
-      }
-      xhr.onabort = function () {
-        promise.resolve({
-          response: { results: [] },
-          status: 0,
-          xhr,
-        });
-      };
-      xhr.send(data);
       // @ts-ignore
       if (options && typeof options.requestTask === 'function') {
         // @ts-ignore
-        options.requestTask(xhr);
+        options.requestTask(controller);
+      }
+      try {
+        const fetchOptions: any = {
+          method,
+          headers,
+          signal,
+          redirect: 'manual',
+        };
+        if (data) {
+          fetchOptions.body = data;
+          if (typeof ReadableStream !== 'undefined' && data instanceof ReadableStream) {
+            fetchOptions.duplex = 'half';
+          }
+        }
+        const response = await fetch(url, fetchOptions);
+        const { status } = response;
+        if (status >= 200 && status < 300) {
+          let result;
+          const responseHeaders = {};
+          const availableHeaders = response.headers.get('access-control-expose-headers') || '';
+          availableHeaders.split(', ').forEach((header: string) => {
+            if (header && response.headers.has(header)) {
+              responseHeaders[header] = response.headers.get(header);
+            }
+          });
+          if (options && typeof options.progress === 'function' && response.body) {
+            const reader = response.body.getReader();
+            const length = +response.headers.get('Content-Length') || 0;
+            if (length === 0) {
+              options.progress(null, null, null);
+              result = await response.json();
+            } else {
+              let recieved = 0;
+              const chunks = [];
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                  break;
+                }
+                chunks.push(value);
+                recieved += value?.length || 0;
+                options.progress(recieved / length, recieved, length);
+              }
+              const body = new Uint8Array(recieved);
+              let offset = 0;
+              for (const chunk of chunks) {
+                body.set(chunk, offset);
+                offset += chunk.length;
+              }
+              const jsonString = new TextDecoder().decode(body);
+              result = JSON.parse(jsonString);
+            }
+          } else {
+            result = await response.json();
+          }
+          promise.resolve({ status, response: result, headers: responseHeaders });
+        } else if (status >= 400 && status < 500) {
+          const error = await response.json();
+          promise.reject(error);
+        } else if ([301, 302, 303, 307, 308].includes(status)) {
+          const location = response.headers.get('location');
+          promise.resolve({
+            status,
+            location,
+            method: status === 303 ? 'GET' : method,
+            dropBody: status === 303,
+          });
+        } else if (status >= 500 || status === 0) {
+          // retry on 5XX or library error
+          // ReadableStream bodies cannot be retried because they are consumed by the first fetch
+          const isStream = typeof ReadableStream !== 'undefined' && data instanceof ReadableStream;
+          if (!isStream && ++attempts < CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
+            // Exponentially-growing random delay
+            const delay = Math.round(Math.random() * 125 * Math.pow(2, attempts));
+            setTimeout(dispatch, delay);
+          } else if (status === 0) {
+            promise.reject('Unable to connect to the Parse API');
+          } else {
+            // After the retry limit is reached, fail
+            const error = await response.json();
+            promise.reject(error);
+          }
+        } else {
+          promise.reject(response);
+        }
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          promise.resolve({ response: { results: [] }, status: 0 });
+        } else if (error.cause?.code === 'ECONNREFUSED') {
+          promise.reject('Unable to connect to the Parse API');
+        } else {
+          promise.reject(error);
+        }
       }
     };
     dispatch();
@@ -233,12 +251,7 @@ const RESTController = {
 
   request(method: string, path: string, data: any, options?: RequestOptions) {
     options = options || {};
-    let url = CoreManager.get('SERVER_URL');
-    if (url[url.length - 1] !== '/') {
-      url += '/';
-    }
-    url += path;
-
+    const url = getPath(CoreManager.get('SERVER_URL'), path);
     const payload: Partial<PayloadType> = {};
     if (data && typeof data === 'object') {
       for (const k in data) {
@@ -314,50 +327,48 @@ const RESTController = {
         }
 
         const payloadString = JSON.stringify(payload);
-        return RESTController.ajax(method, url, payloadString, {}, options).then(
-          ({ response, status, headers, xhr }) => {
-            if (options.returnStatus) {
-              return { ...response, _status: status, _headers: headers, _xhr: xhr };
-            } else {
-              return response;
+        return RESTController.ajax(method, url, payloadString, {}, options).then(async (result) => {
+          if (result.location) {
+            let newURL = getPath(result.location, path);
+            let newMethod = result.method;
+            let newBody = result.dropBody ? undefined : payloadString;
+
+            // Follow up to 5 redirects to avoid loops
+            for (let i = 0; i < 5; i += 1) {
+              const r = await RESTController.ajax(newMethod, newURL, newBody, {}, options);
+              if (!r.location) {
+                result = r;
+                break;
+              }
+              newURL = getPath(r.location, path);
+              newMethod = r.method;
+              newBody = r.dropBody ? undefined : payloadString;
             }
           }
-        );
+          const { response, status, headers } = result;
+          if (options.returnStatus) {
+            return { ...response, _status: status, _headers: headers };
+          } else {
+            return response;
+          }
+        });
       })
       .catch(RESTController.handleError);
   },
 
-  handleError(response: any) {
+  handleError(errorJSON: any) {
     // Transform the error into an instance of ParseError by trying to parse
     // the error string as JSON
     let error;
-    if (response && response.responseText) {
-      try {
-        const errorJSON = JSON.parse(response.responseText);
-        error = new ParseError(errorJSON.code, errorJSON.error || errorJSON.message);
-      } catch (_) {
-        // If we fail to parse the error text, that's okay.
-        error = new ParseError(
-          ParseError.INVALID_JSON,
-          'Received an error with invalid JSON from Parse: ' + response.responseText
-        );
-      }
+    if (errorJSON.code || errorJSON.error || errorJSON.message) {
+      error = new ParseError(errorJSON.code, errorJSON.error || errorJSON.message);
     } else {
-      const message = response.message ? response.message : response;
       error = new ParseError(
         ParseError.CONNECTION_FAILED,
-        'XMLHttpRequest failed: ' + JSON.stringify(message)
+        'XMLHttpRequest failed: ' + JSON.stringify(errorJSON)
       );
     }
     return Promise.reject(error);
-  },
-
-  _setXHR(xhr: any) {
-    XHR = xhr;
-  },
-
-  _getXHR() {
-    return XHR;
   },
 };
 

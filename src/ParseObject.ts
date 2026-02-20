@@ -28,7 +28,7 @@ import * as UniqueInstanceStateController from './UniqueInstanceStateController'
 import unsavedChildren from './unsavedChildren';
 
 import type { AttributeMap, OpsMap } from './ObjectStateMutations';
-import type { RequestOptions, FullOptions } from './RESTController';
+import type { RequestOptions, FullOptions, BaseRequestOptions } from './RESTController';
 import type ParseGeoPoint from './ParseGeoPoint';
 import type ParsePolygon from './ParsePolygon';
 
@@ -45,18 +45,15 @@ interface SaveParams {
   body: AttributeMap;
 }
 
-export type SaveOptions = FullOptions & {
+export interface SaveOptions extends BaseRequestOptions {
+  /** If `false`, nested objects will not be saved (default is `true`). */
   cascadeSave?: boolean;
-  context?: AttributeMap;
   batchSize?: number;
   transaction?: boolean;
-};
+}
 
-interface FetchOptions {
-  useMasterKey?: boolean;
-  sessionToken?: string;
+export interface FetchOptions extends BaseRequestOptions {
   include?: string | string[];
-  context?: AttributeMap;
 }
 
 export interface SetOptions {
@@ -64,14 +61,45 @@ export interface SetOptions {
   unset?: boolean;
 }
 
+export type DestroyOptions = BaseRequestOptions;
+
+/** Options for destroyAll batch operation */
+export interface DestroyAllOptions extends BaseRequestOptions {
+  /** batchSize: How many objects to yield in each batch (default: 20) */
+  batchSize?: number;
+  /** Set to true to enable transactions */
+  transaction?: boolean;
+}
+
+/** Options for saveAll batch operation */
+export interface SaveAllOptions extends BaseRequestOptions {
+  /** batchSize: How many objects to yield in each batch (default: 20) */
+  batchSize?: number;
+  /** If `false`, nested objects will not be saved (default is `true`). */
+  cascadeSave?: boolean;
+  /** Set to true to enable transactions */
+  transaction?: boolean;
+}
+
+/** Options for fetchAll batch operation */
+export interface FetchAllOptions extends BaseRequestOptions {
+  include?: string | string[];
+}
+
 export type AttributeKey<T> = Extract<keyof T, string>;
 
 export type Attributes = Record<string, any>;
 
-interface JSONBaseAttributes {
+export interface JSONBaseAttributes {
   objectId: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface BaseAttributes {
+  objectId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface CommonAttributes {
@@ -82,7 +110,7 @@ type AtomicKey<T> = {
   [K in keyof T]: NonNullable<T[K]> extends any[] ? K : never;
 };
 
-type Encode<T> = T extends ParseObject
+export type Encode<T> = T extends ParseObject
   ? ReturnType<T['toJSON']> | Pointer
   : T extends ParseACL | ParseGeoPoint | ParsePolygon | ParseRelation | ParseFile
     ? ReturnType<T['toJSON']>
@@ -96,13 +124,13 @@ type Encode<T> = T extends ParseObject
             ? ToJSON<T>
             : T;
 
-type ToJSON<T> = {
+export type ToJSON<T> = {
   [K in keyof T]: Encode<T[K]>;
 };
 
 // Mapping of class names to constructors, so we can populate objects from the
 // server with appropriate subclasses of ParseObject
-const classMap: AttributeMap = {};
+const classMap: AttributeMap = Object.create(null);
 
 // Global counter for generating unique Ids for non-single-instance objects
 let objectCount = 0;
@@ -185,6 +213,13 @@ class ParseObject<T extends Attributes = Attributes> {
       } catch (_) {
         throw new Error("Can't create an invalid Parse Object");
       }
+    }
+    if (CoreManager.get('NODE_LOGGING')) {
+      this[Symbol.for('nodejs.util.inspect.custom')] = function () {
+        return `ParseObject: className: ${this.className}, id: ${
+          this.id
+        }\nAttributes: ${JSON.stringify(this.attributes, null, 2)}`;
+      };
     }
   }
 
@@ -507,6 +542,9 @@ class ParseObject<T extends Attributes = Attributes> {
 
   static _getRequestOptions(options: RequestOptions & FullOptions & { json?: boolean } = {}) {
     const requestOptions: RequestOptions & FullOptions & { json?: boolean } = {};
+    if (Object.prototype.toString.call(options) !== '[object Object]') {
+      throw new Error('request options must be of type Object');
+    }
     const { hasOwn } = Object;
     if (hasOwn(options, 'useMasterKey')) {
       requestOptions.useMasterKey = !!options.useMasterKey;
@@ -1240,7 +1278,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the fetch
    *     completes.
    */
-  fetch(options: FetchOptions): Promise<this> {
+  fetch(options?: FetchOptions): Promise<this> {
     const fetchOptions = ParseObject._getRequestOptions(options);
     const controller = CoreManager.getObjectController();
     return controller.fetch(this, true, fetchOptions) as Promise<this>;
@@ -1471,7 +1509,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the destroy
    *     completes.
    */
-  destroy(options?: RequestOptions): Promise<ParseObject | undefined> {
+  destroy(options?: DestroyOptions): Promise<ParseObject | undefined> {
     if (!this.id) {
       return Promise.resolve(undefined);
     }
@@ -1627,7 +1665,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @static
    * @returns {Parse.Object[]}
    */
-  static fetchAll<T extends ParseObject>(list: T[], options?: RequestOptions): Promise<T[]> {
+  static fetchAll<T extends ParseObject>(list: T[], options?: FetchAllOptions): Promise<T[]> {
     const fetchOptions = ParseObject._getRequestOptions(options);
     return CoreManager.getObjectController().fetch(list, true, fetchOptions) as Promise<T[]>;
   }
@@ -1738,7 +1776,10 @@ class ParseObject<T extends Attributes = Attributes> {
    * @static
    * @returns {Parse.Object[]}
    */
-  static fetchAllIfNeeded<T extends ParseObject>(list: T[], options?: FetchOptions): Promise<T[]> {
+  static fetchAllIfNeeded<T extends ParseObject>(
+    list: T[],
+    options?: FetchAllOptions
+  ): Promise<T[]> {
     const fetchOptions = ParseObject._getRequestOptions(options);
     return CoreManager.getObjectController().fetch(list, false, fetchOptions) as Promise<T[]>;
   }
@@ -1814,9 +1855,9 @@ class ParseObject<T extends Attributes = Attributes> {
    * @returns {Promise} A promise that is fulfilled when the destroyAll
    * completes.
    */
-  static destroyAll(list: ParseObject[], options?: SaveOptions) {
+  static destroyAll<T extends ParseObject>(list: T[], options?: DestroyAllOptions): Promise<T[]> {
     const destroyOptions = ParseObject._getRequestOptions(options);
-    return CoreManager.getObjectController().destroy(list, destroyOptions);
+    return CoreManager.getObjectController().destroy(list, destroyOptions) as Promise<T[]>;
   }
 
   /**
@@ -1848,7 +1889,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @static
    * @returns {Parse.Object[]}
    */
-  static saveAll<T extends ParseObject[]>(list: T, options?: SaveOptions): Promise<T> {
+  static saveAll<T extends ParseObject[]>(list: T, options?: SaveAllOptions): Promise<T> {
     const saveOptions = ParseObject._getRequestOptions(options);
     return CoreManager.getObjectController().save(list, saveOptions) as any;
   }
@@ -1867,7 +1908,7 @@ class ParseObject<T extends Attributes = Attributes> {
    * @static
    * @returns {Parse.Object} A Parse.Object reference.
    */
-  static createWithoutData(id: string): ParseObject {
+  static createWithoutData<T extends ParseObject>(this: new (...args: any[]) => T, id: string): T {
     const obj = new this();
     obj.id = id;
     return obj;
@@ -2552,7 +2593,6 @@ const DefaultController = {
                     const status = responses[index]._status;
                     delete responses[index]._status;
                     delete responses[index]._headers;
-                    delete responses[index]._xhr;
                     mapIdForPin[objectId] = obj._localId;
                     obj._handleSaveResponse(responses[index].success, status);
                   } else {
@@ -2620,7 +2660,6 @@ const DefaultController = {
             const status = response._status;
             delete response._status;
             delete response._headers;
-            delete response._xhr;
             targetCopy._handleSaveResponse(response, status);
           },
           error => {
@@ -2648,5 +2687,42 @@ const DefaultController = {
 
 CoreManager.setParseObject(ParseObject);
 CoreManager.setObjectController(DefaultController);
+
+export interface ObjectStatic<T extends ParseObject = ParseObject> {
+  new (...args: any[]): T;
+  createWithoutData(id: string): T;
+  destroyAll<U extends ParseObject>(list: U[], options?: DestroyAllOptions): Promise<U[]>;
+  extend(className: string | { className: string }, protoProps?: any, classProps?: any): any;
+  fetchAll<U extends ParseObject>(list: U[], options?: FetchAllOptions): Promise<U[]>;
+  fetchAllIfNeeded<U extends ParseObject>(list: U[], options?: FetchAllOptions): Promise<U[]>;
+  fetchAllIfNeededWithInclude<U extends ParseObject>(
+    list: U[],
+    keys: keyof U['attributes'] | (keyof U['attributes'])[],
+    options?: RequestOptions
+  ): Promise<U[]>;
+  fetchAllWithInclude<U extends ParseObject>(
+    list: U[],
+    keys: keyof U['attributes'] | (keyof U['attributes'])[],
+    options?: RequestOptions
+  ): Promise<U[]>;
+  fromJSON(json: any, override?: boolean, dirty?: boolean): T;
+  pinAll(objects: ParseObject[]): Promise<void>;
+  pinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
+  registerSubclass(className: string, clazz: new (options?: any) => T): void;
+  saveAll<U extends ParseObject[]>(list: U, options?: SaveAllOptions): Promise<U>;
+  unPinAll(objects: ParseObject[]): Promise<void>;
+  unPinAllObjects(): Promise<void>;
+  unPinAllObjectsWithName(name: string): Promise<void>;
+  unPinAllWithName(name: string, objects: ParseObject[]): Promise<void>;
+}
+
+export interface ObjectConstructor extends ObjectStatic {
+  new <T extends Attributes>(className: string, attributes: T, options?: any): ParseObject<T>;
+  new (
+    className?: string | { className: string; [attr: string]: any },
+    attributes?: Attributes,
+    options?: any
+  ): ParseObject;
+}
 
 export default ParseObject;

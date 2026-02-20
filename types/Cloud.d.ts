@@ -1,5 +1,6 @@
 import ParseObject from './ParseObject';
-import type { RequestOptions } from './RESTController';
+import type { BaseRequestOptions } from './RESTController';
+export type RunOptions = BaseRequestOptions;
 /**
  * Contains functions for calling and declaring
  * <a href="/docs/cloud_code_guide#functions">cloud functions</a>.
@@ -30,10 +31,10 @@ import type { RequestOptions } from './RESTController';
  * @returns {Promise} A promise that will be resolved with the result
  * of the function.
  */
-export declare function run<T extends () => any>(name: string, data?: null, options?: RequestOptions): Promise<ReturnType<T>>;
+export declare function run<T extends () => any>(name: string, data?: null, options?: RunOptions): Promise<ReturnType<T>>;
 export declare function run<T extends (param: {
     [P in keyof Parameters<T>[0]]: Parameters<T>[0][P];
-}) => any>(name: string, data: Parameters<T>[0], options?: RequestOptions): Promise<ReturnType<T>>;
+}) => any>(name: string, data: Parameters<T>[0], options?: RunOptions): Promise<ReturnType<T>>;
 /**
  * Gets data for the current set of cloud jobs.
  *

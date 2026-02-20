@@ -54,8 +54,8 @@ const ParseError = require('../ParseError').default;
 const ParseObject = require('../ParseObject').default;
 const RESTController = require('../RESTController').default;
 const Storage = require('../Storage').default;
-const mockXHR = require('./test_helpers/mockXHR');
 const flushPromises = require('./test_helpers/flushPromises');
+const mockFetch = require('./test_helpers/mockFetch');
 
 CoreManager.setInstallationController({
   currentInstallationId() {
@@ -409,7 +409,7 @@ describe('EventuallyQueue', () => {
 
   it('can poll server', async () => {
     jest.spyOn(EventuallyQueue, 'sendQueue').mockImplementationOnce(() => {});
-    RESTController._setXHR(mockXHR([{ status: 200, response: { status: 'ok' } }]));
+    mockFetch([{ status: 200, response: { status: 'ok' } }]);
     EventuallyQueue.poll();
     expect(EventuallyQueue.isPolling()).toBe(true);
     jest.runOnlyPendingTimers();
@@ -422,9 +422,7 @@ describe('EventuallyQueue', () => {
   it('can continue polling with connection error', async () => {
     const retry = CoreManager.get('REQUEST_ATTEMPT_LIMIT');
     CoreManager.set('REQUEST_ATTEMPT_LIMIT', 1);
-    RESTController._setXHR(
-      mockXHR([{ status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }])
-    );
+    mockFetch([{ status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }, { status: 0 }]);
     EventuallyQueue.poll();
     expect(EventuallyQueue.isPolling()).toBe(true);
     jest.runOnlyPendingTimers();

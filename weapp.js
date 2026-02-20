@@ -1,1 +1,1 @@
-module.exports = require('./lib/weapp/Parse.js');
+module.exports = require('./lib/weapp/Parse.js').default;

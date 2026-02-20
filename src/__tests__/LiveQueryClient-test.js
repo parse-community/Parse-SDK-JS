@@ -1,3 +1,4 @@
+jest.dontMock('../LiveQuerySubscription');
 jest.dontMock('../LiveQueryClient');
 jest.dontMock('../arrayContainsObject');
 jest.dontMock('../canBeSerialized');
@@ -23,7 +24,6 @@ jest.dontMock('../UniqueInstanceStateController');
 jest.dontMock('../unsavedChildren');
 jest.dontMock('../ParseACL');
 jest.dontMock('../ParseQuery');
-jest.dontMock('../LiveQuerySubscription');
 jest.dontMock('../LocalDatastore');
 jest.dontMock('../WebSocketController');
 
@@ -38,6 +38,7 @@ jest.setMock('../LocalDatastore', mockLocalDatastore);
 const CoreManager = require('../CoreManager').default;
 const EventEmitter = require('../EventEmitter').default;
 const LiveQueryClient = require('../LiveQueryClient').default;
+const LiveQuerySubscription = require('../LiveQuerySubscription').default;
 const ParseObject = require('../ParseObject').default;
 const ParseQuery = require('../ParseQuery').default;
 const WebSocketController = require('../WebSocketController').default;
@@ -1090,5 +1091,137 @@ describe('LiveQueryClient', () => {
     });
     const subscription = liveQueryClient.subscribe();
     expect(subscription).toBe(undefined);
+  });
+
+  it('can handle WebSocket result response message', () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken',
+    });
+    // Add mock subscription
+    const subscription = new events.EventEmitter();
+    liveQueryClient.subscriptions.set(1, subscription);
+    const object1 = new ParseObject('Test');
+    object1.set('key', 'value1');
+    const object2 = new ParseObject('Test');
+    object2.set('key', 'value2');
+    const data = {
+      op: 'result',
+      clientId: 1,
+      requestId: 1,
+      results: [object1._toFullJSON(), object2._toFullJSON()],
+    };
+    const event = {
+      data: JSON.stringify(data),
+    };
+    // Register checked in advance
+    let isChecked = false;
+    subscription.on('result', function (objects) {
+      isChecked = true;
+      expect(objects.length).toBe(2);
+      expect(objects[0].get('key')).toEqual('value1');
+      expect(objects[1].get('key')).toEqual('value2');
+    });
+
+    liveQueryClient._handleWebSocketMessage(event);
+
+    expect(isChecked).toBe(true);
+  });
+
+  it('can handle WebSocket result response message with missing className', () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken',
+    });
+    // Add mock subscription with query
+    const subscription = new events.EventEmitter();
+    const query = new ParseQuery('TestClass');
+    subscription.query = query;
+    liveQueryClient.subscriptions.set(1, subscription);
+
+    // Create results without className property
+    const data = {
+      op: 'result',
+      clientId: 1,
+      requestId: 1,
+      results: [
+        { objectId: 'obj1', key: 'value1' },
+        { objectId: 'obj2', key: 'value2' },
+      ],
+    };
+    const event = {
+      data: JSON.stringify(data),
+    };
+
+    // Register checked in advance
+    let isChecked = false;
+    subscription.on('result', function (objects) {
+      isChecked = true;
+      expect(objects.length).toBe(2);
+      expect(objects[0].className).toEqual('TestClass');
+      expect(objects[1].className).toEqual('TestClass');
+    });
+
+    liveQueryClient._handleWebSocketMessage(event);
+
+    expect(isChecked).toBe(true);
+  });
+
+  it('LiveQuerySubscription class has find method', () => {
+    expect(typeof LiveQuerySubscription.prototype.find).toBe('function');
+  });
+
+  it('subscription has find method', () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken',
+    });
+    const query = new ParseQuery('Test');
+    query.equalTo('key', 'value');
+
+    const subscription = liveQueryClient.subscribe(query);
+
+    expect(subscription).toBeInstanceOf(LiveQuerySubscription);
+    expect(typeof subscription.find).toBe('function');
+  });
+
+  it('can send query message via subscription', async () => {
+    const liveQueryClient = new LiveQueryClient({
+      applicationId: 'applicationId',
+      serverURL: 'ws://test',
+      javascriptKey: 'javascriptKey',
+      masterKey: 'masterKey',
+      sessionToken: 'sessionToken',
+    });
+    liveQueryClient.socket = {
+      send: jest.fn(),
+    };
+    const query = new ParseQuery('Test');
+    query.equalTo('key', 'value');
+
+    const subscription = liveQueryClient.subscribe(query);
+    liveQueryClient.connectPromise.resolve();
+    await liveQueryClient.connectPromise;
+
+    subscription.find();
+
+    // Need to wait for the sendMessage promise to resolve
+    await Promise.resolve();
+
+    const messageStr = liveQueryClient.socket.send.mock.calls[1][0];
+    const message = JSON.parse(messageStr);
+    expect(message).toEqual({
+      op: 'query',
+      requestId: 1,
+    });
   });
 });

@@ -4,7 +4,9 @@ import encode from './encode';
 import ParseError from './ParseError';
 import ParseQuery from './ParseQuery';
 import ParseObject from './ParseObject';
-import type { RequestOptions } from './RESTController';
+import type { RequestOptions, BaseRequestOptions } from './RESTController';
+
+export type RunOptions = BaseRequestOptions;
 
 /**
  * Contains functions for calling and declaring
@@ -40,12 +42,12 @@ import type { RequestOptions } from './RESTController';
 export function run<T extends () => any>(
   name: string,
   data?: null,
-  options?: RequestOptions
+  options?: RunOptions
 ): Promise<ReturnType<T>>;
 export function run<
   T extends (param: { [P in keyof Parameters<T>[0]]: Parameters<T>[0][P] }) => any,
->(name: string, data: Parameters<T>[0], options?: RequestOptions): Promise<ReturnType<T>>;
-export function run(name: string, data?: any, options?: RequestOptions): Promise<any> {
+>(name: string, data: Parameters<T>[0], options?: RunOptions): Promise<ReturnType<T>>;
+export function run(name: string, data?: any, options?: RunOptions): Promise<any> {
   if (typeof name !== 'string' || name.length === 0) {
     throw new TypeError('Cloud function name must be a string.');
   }

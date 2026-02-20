@@ -1,3 +1,11 @@
+/** Base options for all Parse requests that go through _getRequestOptions */
+export interface BaseRequestOptions {
+    useMasterKey?: boolean;
+    useMaintenanceKey?: boolean;
+    sessionToken?: string;
+    installationId?: string;
+    context?: Record<string, unknown>;
+}
 export interface RequestOptions {
     useMasterKey?: boolean;
     useMaintenanceKey?: boolean;
@@ -23,13 +31,8 @@ export interface FullOptions {
     usePost?: boolean;
 }
 declare const RESTController: {
-    ajax(method: string, url: string, data: any, headers?: any, options?: FullOptions): (Promise<any> & {
-        resolve: (res: any) => void;
-        reject: (err: any) => void;
-    }) | Promise<unknown>;
+    ajax(method: string, url: string, data: any, headers?: any, options?: FullOptions): Promise<any>;
     request(method: string, path: string, data: any, options?: RequestOptions): Promise<any>;
-    handleError(response: any): Promise<never>;
-    _setXHR(xhr: any): void;
-    _getXHR(): any;
+    handleError(errorJSON: any): Promise<never>;
 };
 export default RESTController;

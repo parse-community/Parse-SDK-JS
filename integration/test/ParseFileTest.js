@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('assert');
+const { Readable } = require('stream');
 const Parse = require('../../node');
 
 describe('Parse.File', () => {
@@ -41,6 +42,29 @@ describe('Parse.File', () => {
       assert.equal(file.url(), undefined);
     });
     file.cancel();
+  });
+
+  it('can get file upload / download progress', async () => {
+    const file = new Parse.File('parse-js-test-file', [61, 170, 236, 120]);
+    let progress = 0;
+    await file.save({
+      progress: (value, loaded, total) => {
+        progress = value;
+        expect(loaded).toBeDefined();
+        expect(total).toBeDefined();
+      },
+    });
+    expect(progress).toBe(1);
+    progress = 0;
+    file._data = null;
+    await file.getData({
+      progress: (value, loaded, total) => {
+        progress = value;
+        expect(loaded).toBeDefined();
+        expect(total).toBeDefined();
+      },
+    });
+    expect(progress).toBe(1);
   });
 
   it('can not get data from unsaved file', async () => {
@@ -119,6 +143,69 @@ describe('Parse.File', () => {
     } catch (e) {
       assert.equal(e.code, Parse.Error.FILE_DELETE_ERROR);
     }
+  });
+
+  it('can save file from Buffer', async () => {
+    const data = Buffer.from([61, 170, 236, 120]);
+    const file = new Parse.File('buffer-file.bin', data);
+    await file.save();
+
+    assert(file.url());
+    assert(file.name());
+
+    const object = new Parse.Object('TestObject');
+    object.set('file', file);
+    await object.save();
+
+    const query = new Parse.Query('TestObject');
+    const result = await query.get(object.id);
+    assert.equal(result.get('file').name(), file.name());
+    assert.equal(result.get('file').url(), file.url());
+
+    const retrieved = await file.getData();
+    assert.equal(retrieved, data.toString('base64'));
+  });
+
+  it('can save file from Buffer with content type', async () => {
+    const data = Buffer.from('hello world');
+    const file = new Parse.File('hello.txt', data, 'text/plain');
+    await file.save();
+
+    assert(file.url());
+    const retrieved = await file.getData();
+    assert.equal(Buffer.from(retrieved, 'base64').toString(), 'hello world');
+  });
+
+  it('can save file from Readable stream', async () => {
+    const data = Buffer.from([61, 170, 236, 120]);
+    const stream = Readable.from(data);
+    const file = new Parse.File('stream-file.bin', stream);
+    await file.save();
+
+    assert(file.url());
+    assert(file.name());
+
+    const object = new Parse.Object('TestObject');
+    object.set('file', file);
+    await object.save();
+
+    const query = new Parse.Query('TestObject');
+    const result = await query.get(object.id);
+    assert.equal(result.get('file').name(), file.name());
+    assert.equal(result.get('file').url(), file.url());
+
+    const retrieved = await file.getData();
+    assert.equal(retrieved, data.toString('base64'));
+  });
+
+  it('can save file from Readable stream with content type', async () => {
+    const stream = Readable.from(Buffer.from('hello world'));
+    const file = new Parse.File('hello.txt', stream, 'text/plain');
+    await file.save();
+
+    assert(file.url());
+    const retrieved = await file.getData();
+    assert.equal(Buffer.from(retrieved, 'base64').toString(), 'hello world');
   });
 
   it('can save file to localDatastore', async () => {

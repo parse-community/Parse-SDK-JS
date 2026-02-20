@@ -1,3 +1,115 @@
+# [8.1.0](https://github.com/parse-community/Parse-SDK-JS/compare/8.0.3...8.1.0) (2026-02-05)
+
+
+### Bug Fixes
+
+* `ws` package causes React-Native build failure ([#2857](https://github.com/parse-community/Parse-SDK-JS/issues/2857)) ([2b0b76b](https://github.com/parse-community/Parse-SDK-JS/commit/2b0b76b3d6fbd6ae236d3db6b92f4fbc2c98871f))
+
+### Features
+
+* Add `LiveQuerySubscription.find()` to execute a query based on a LiveQuery subscription ([#2735](https://github.com/parse-community/Parse-SDK-JS/issues/2735)) ([82b40da](https://github.com/parse-community/Parse-SDK-JS/commit/82b40da2096eeab7b0994eb6af51774e5a992b4e))
+
+## [8.0.3](https://github.com/parse-community/Parse-SDK-JS/compare/8.0.2...8.0.3) (2026-01-27)
+
+
+### Bug Fixes
+
+* Missing Node.js type signature for `Parse.initialize` with `masterKey`, `maintenanceKey` ([#2884](https://github.com/parse-community/Parse-SDK-JS/issues/2884)) ([ce8c907](https://github.com/parse-community/Parse-SDK-JS/commit/ce8c907d7f83c22a3c3bb13205f952e7ef37eca8))
+
+## [8.0.2](https://github.com/parse-community/Parse-SDK-JS/compare/8.0.1...8.0.2) (2026-01-25)
+
+
+### Bug Fixes
+
+* Add server-side Cloud Code types for parse/node ([#2855](https://github.com/parse-community/Parse-SDK-JS/issues/2855)) ([98626b6](https://github.com/parse-community/Parse-SDK-JS/commit/98626b6003d2576825d149bfd505a5af66406c2c))
+* Missing export fields cause module resolution errors when used as Parse Server dependency ([#2882](https://github.com/parse-community/Parse-SDK-JS/issues/2882)) ([85877dc](https://github.com/parse-community/Parse-SDK-JS/commit/85877dc78980e31791e45e834e5f3e4f65f280d3))
+
+## [8.0.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.0.0...8.0.1) (2026-01-15)
+
+
+### Bug Fixes
+
+* TypeScript type resolution errors for `parse/node` and `parse/react-native` subpaths ([#2849](https://github.com/parse-community/Parse-SDK-JS/issues/2849)) ([de684e5](https://github.com/parse-community/Parse-SDK-JS/commit/de684e5f84ea2cfce0cce13d995cea3134b119ac))
+
+# [8.0.0](https://github.com/parse-community/Parse-SDK-JS/compare/7.1.2...8.0.0) (2025-12-12)
+
+
+### Bug Fixes
+
+* Security upgrade jws ([#2822](https://github.com/parse-community/Parse-SDK-JS/issues/2822)) ([7d38c06](https://github.com/parse-community/Parse-SDK-JS/commit/7d38c068a275cfde3bbde9a8a0572bb41c78667f))
+
+### Code Refactoring
+
+* Bump vite from 6.4.1 to 7.2.4 ([#2829](https://github.com/parse-community/Parse-SDK-JS/issues/2829)) ([edec316](https://github.com/parse-community/Parse-SDK-JS/commit/edec3168905ff4c52696029743aac2fa82df412a))
+
+
+### BREAKING CHANGES
+
+* This release increases the minimum required Node versions to `20.19.0`, `22.12.0`, and removes support for Node `18.x`, `19.x`. ([edec316](edec316))
+
+## [7.1.2](https://github.com/parse-community/Parse-SDK-JS/compare/7.1.1...7.1.2) (2025-12-01)
+
+
+### Bug Fixes
+
+* Missing dependencies in transpiled browser code ([#2812](https://github.com/parse-community/Parse-SDK-JS/issues/2812)) ([c7359bb](https://github.com/parse-community/Parse-SDK-JS/commit/c7359bbfcd40000a4a8df0626ee5237437270b44))
+
+## [7.1.1](https://github.com/parse-community/Parse-SDK-JS/compare/7.1.0...7.1.1) (2025-12-01)
+
+
+### Performance Improvements
+
+* Replace `uuid` dependency with native `crypto.randomUUID()` API ([#2810](https://github.com/parse-community/Parse-SDK-JS/issues/2810)) ([e06b8a7](https://github.com/parse-community/Parse-SDK-JS/commit/e06b8a728de36e14de92233366a324a01f38266c))
+
+# [7.1.0](https://github.com/parse-community/Parse-SDK-JS/compare/7.0.2...7.1.0) (2025-12-01)
+
+
+### Features
+
+* Add Node 24 support ([#2808](https://github.com/parse-community/Parse-SDK-JS/issues/2808)) ([2794b73](https://github.com/parse-community/Parse-SDK-JS/commit/2794b73929c6d8b4876ed7a83eeda4e3d041b118))
+
+## [7.0.2](https://github.com/parse-community/Parse-SDK-JS/compare/7.0.1...7.0.2) (2025-10-25)
+
+
+### Bug Fixes
+
+* `Parse.Query` throws error when no response header ([#2754](https://github.com/parse-community/Parse-SDK-JS/issues/2754)) ([492de3e](https://github.com/parse-community/Parse-SDK-JS/commit/492de3e2da705bf1845e1ef68181689fd3a378a5))
+
+## [7.0.1](https://github.com/parse-community/Parse-SDK-JS/compare/7.0.0...7.0.1) (2025-10-15)
+
+
+### Bug Fixes
+
+* Returned error for 5xx server response has incorrect format ([#2755](https://github.com/parse-community/Parse-SDK-JS/issues/2755)) ([16a34d9](https://github.com/parse-community/Parse-SDK-JS/commit/16a34d9adaa83c8b019e1d02b695f099383915c6))
+
+# [7.0.0](https://github.com/parse-community/Parse-SDK-JS/compare/6.1.1...7.0.0) (2025-10-14)
+
+
+### Bug Fixes
+
+*  Prototype Pollution vulnerability in `SingleInstanceStateController`; fixes security vulnerability [GHSA-9g8m-v378-pcg3](https://github.com/advisories/GHSA-9g8m-v378-pcg3) ([#2745](https://github.com/parse-community/Parse-SDK-JS/issues/2745)) ([9e7c1ba](https://github.com/parse-community/Parse-SDK-JS/commit/9e7c1bad472b1ed2463cbac567b8ec752ae5b4c9))
+* HTTP status code 3XX redirection for Parse Server URL not handled properly ([#2608](https://github.com/parse-community/Parse-SDK-JS/issues/2608)) ([58e7f58](https://github.com/parse-community/Parse-SDK-JS/commit/58e7f585dead19899239bdba13b7f2386ea1090c))
+* Incorrect type in `ParseObject.fetch` parameter `options` ([#2726](https://github.com/parse-community/Parse-SDK-JS/issues/2726)) ([dc78419](https://github.com/parse-community/Parse-SDK-JS/commit/dc78419893cb58c65a899769bf60ff2455b25425))
+* Missing error message when returning an internal server error ([#2543](https://github.com/parse-community/Parse-SDK-JS/issues/2543)) ([f91f3f1](https://github.com/parse-community/Parse-SDK-JS/commit/f91f3f10f645acf22d6e54379ad21a1701b5ccba))
+* Prototype pollution in `Parse.Object` and internal APIs; fixes security vulnerability [GHSA-9f2h-7v79-mxw](https://github.com/parse-community/Parse-SDK-JS/security/advisories/GHSA-9f2h-7v79-mxw3) ([#2749](https://github.com/parse-community/Parse-SDK-JS/issues/2749)) ([0097398](https://github.com/parse-community/Parse-SDK-JS/commit/00973987f361368659c0c4dbf669f3897520b132))
+* Unhandled exception when calling `Parse.Cloud.run` with option value `null` ([#2622](https://github.com/parse-community/Parse-SDK-JS/issues/2622)) ([#2623](https://github.com/parse-community/Parse-SDK-JS/issues/2623)) ([2818ed9](https://github.com/parse-community/Parse-SDK-JS/commit/2818ed9b58d1992b0f1441d5a4d301687a763302))
+
+### Features
+
+* Add `Parse.File` upload and download progress in browser and Node environments ([#2503](https://github.com/parse-community/Parse-SDK-JS/issues/2503)) ([d3ca465](https://github.com/parse-community/Parse-SDK-JS/commit/d3ca465ccb5f226a1dd3f8f8e6cd934b957a21ab))
+* Add `Uint8Array` support for `Parse.File` data ([#2548](https://github.com/parse-community/Parse-SDK-JS/issues/2548)) ([6f6bb66](https://github.com/parse-community/Parse-SDK-JS/commit/6f6bb660204f3b102f8e4167297327bf12e2e2be))
+* Add option `Parse.nodeLogging` to fully log `Parse.Object` in Node.js environments ([#1594](https://github.com/parse-community/Parse-SDK-JS/issues/1594)) ([de9d057](https://github.com/parse-community/Parse-SDK-JS/commit/de9d057a7f67a694564d740b7446a46e19ff73e2))
+* Remove `Parse.serverAuthType`, `Parse.serverAuthToken` infavor of CoreManager `REQUEST_HEADERS` config ([#2639](https://github.com/parse-community/Parse-SDK-JS/issues/2639)) ([ddc66a1](https://github.com/parse-community/Parse-SDK-JS/commit/ddc66a1a97f582f020ef399945d8cd401b0e96a2))
+
+### Performance Improvements
+
+* Optimize bundle packaging with Vite ([#2553](https://github.com/parse-community/Parse-SDK-JS/issues/2553)) ([a4b19e5](https://github.com/parse-community/Parse-SDK-JS/commit/a4b19e532ce97fd61632335ca5b8158f756d6fe6))
+
+
+### BREAKING CHANGES
+
+* The methods `Parse.serverAuthType()` and `Parse.serverAuthToken()` have been removed; use the CoreManager `REQUEST_HEADER` config to set authorization headers instead. ([ddc66a1](ddc66a1))
+
 ## [6.1.1](https://github.com/parse-community/Parse-SDK-JS/compare/6.1.0...6.1.1) (2025-04-04)
 
 

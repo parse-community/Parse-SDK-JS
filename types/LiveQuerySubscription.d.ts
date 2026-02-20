@@ -89,15 +89,21 @@ declare class LiveQuerySubscription {
     subscribePromise: any;
     unsubscribePromise: any;
     subscribed: boolean;
+    client: any;
     emitter: EventEmitter;
     on: EventEmitter['on'];
     emit: EventEmitter['emit'];
-    constructor(id: string | number, query: ParseQuery, sessionToken?: string);
+    constructor(id: string | number, query: ParseQuery, sessionToken?: string, client?: any);
     /**
      * Close the subscription
      *
      * @returns {Promise}
      */
     unsubscribe(): Promise<void>;
+    /**
+     * Execute a query on this subscription.
+     * The results will be delivered via the 'result' event.
+     */
+    find(): void;
 }
 export default LiveQuerySubscription;

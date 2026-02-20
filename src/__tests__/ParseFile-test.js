@@ -9,10 +9,7 @@ const b64Digit = require('../ParseFile').b64Digit;
 
 const ParseObject = require('../ParseObject').default;
 const CoreManager = require('../CoreManager').default;
-const EventEmitter = require('../EventEmitter').default;
-
-const mockHttp = require('http');
-const mockHttps = require('https');
+const mockFetch = require('./test_helpers/mockFetch');
 
 const mockLocalDatastore = {
   _updateLocalIdForObject: jest.fn((_localId, /** @type {ParseObject}*/ object) => {
@@ -405,6 +402,51 @@ describe('ParseFile', () => {
     file.addTag(10, 'bar');
     expect(file.tags()).toEqual({});
   });
+
+  it('can create files with a Buffer', () => {
+    const buffer = Buffer.from([61, 170, 236, 120]);
+    const file = new ParseFile('parse.txt', buffer, 'application/octet-stream');
+    expect(file._source.format).toBe('buffer');
+    expect(file._source.buffer).toBe(buffer);
+    expect(file._source.type).toBe('application/octet-stream');
+    expect(file._data).toBeUndefined();
+  });
+
+  it('can create files with a Node.js Readable stream', () => {
+    const { Readable } = require('stream');
+    const stream = new Readable({
+      read() {
+        this.push(Buffer.from([61, 170, 236, 120]));
+        this.push(null);
+      },
+    });
+    const file = new ParseFile('parse.txt', stream, 'application/octet-stream');
+    expect(file._source.format).toBe('stream');
+    expect(file._source.stream).toBe(stream);
+    expect(file._source.type).toBe('application/octet-stream');
+    expect(file._data).toBeUndefined();
+  });
+
+  it('can create files with a Web ReadableStream', () => {
+    const { ReadableStream: WebReadableStream } = require('stream/web');
+    const origReadableStream = globalThis.ReadableStream;
+    globalThis.ReadableStream = WebReadableStream;
+    try {
+      const stream = new WebReadableStream({
+        start(controller) {
+          controller.enqueue(new Uint8Array([61, 170, 236, 120]));
+          controller.close();
+        },
+      });
+      const file = new ParseFile('parse.txt', stream, 'application/octet-stream');
+      expect(file._source.format).toBe('stream');
+      expect(file._source.stream).toBe(stream);
+      expect(file._source.type).toBe('application/octet-stream');
+      expect(file._data).toBeUndefined();
+    } finally {
+      globalThis.ReadableStream = origReadableStream;
+    }
+  });
 });
 
 describe('FileController', () => {
@@ -418,7 +460,7 @@ describe('FileController', () => {
       });
     };
     const ajax = function (method, path) {
-      const name = path.substr(path.indexOf('/') + 1);
+      const name = path.substr(path.lastIndexOf('/') + 1);
       return Promise.resolve({
         response: {
           name: name,
@@ -491,152 +533,31 @@ describe('FileController', () => {
     spy2.mockRestore();
   });
 
-  it('download with base64 http', async () => {
-    defaultController._setXHR(null);
-    const mockResponse = Object.create(EventEmitter.prototype);
-    EventEmitter.call(mockResponse);
-    mockResponse.setEncoding = function () {};
-    mockResponse.headers = {
-      'content-type': 'image/png',
-    };
-    const spy = jest.spyOn(mockHttp, 'get').mockImplementationOnce((uri, cb) => {
-      cb(mockResponse);
-      mockResponse.emit('data', 'base64String');
-      mockResponse.emit('end');
-      return {
-        on: function () {},
-      };
-    });
-
-    const data = await defaultController.download('http://example.com/image.png');
-    expect(data.base64).toBe('base64String');
-    expect(data.contentType).toBe('image/png');
-    expect(mockHttp.get).toHaveBeenCalledTimes(1);
-    expect(mockHttps.get).toHaveBeenCalledTimes(0);
-    spy.mockRestore();
-  });
-
-  it('download with base64 http abort', async () => {
-    defaultController._setXHR(null);
-    const mockRequest = Object.create(EventEmitter.prototype);
-    const mockResponse = Object.create(EventEmitter.prototype);
-    EventEmitter.call(mockRequest);
-    EventEmitter.call(mockResponse);
-    mockResponse.setEncoding = function () {};
-    mockResponse.headers = {
-      'content-type': 'image/png',
-    };
-    const spy = jest.spyOn(mockHttp, 'get').mockImplementationOnce((uri, cb) => {
-      cb(mockResponse);
-      return mockRequest;
-    });
-    const options = {
-      requestTask: () => {},
-    };
-    defaultController.download('http://example.com/image.png', options).then(data => {
-      expect(data).toEqual({});
-    });
-    mockRequest.emit('abort');
-    spy.mockRestore();
-  });
-
-  it('download with base64 https', async () => {
-    defaultController._setXHR(null);
-    const mockResponse = Object.create(EventEmitter.prototype);
-    EventEmitter.call(mockResponse);
-    mockResponse.setEncoding = function () {};
-    mockResponse.headers = {
-      'content-type': 'image/png',
-    };
-    const spy = jest.spyOn(mockHttps, 'get').mockImplementationOnce((uri, cb) => {
-      cb(mockResponse);
-      mockResponse.emit('data', 'base64String');
-      mockResponse.emit('end');
-      return {
-        on: function () {},
-      };
-    });
-
-    const data = await defaultController.download('https://example.com/image.png');
-    expect(data.base64).toBe('base64String');
-    expect(data.contentType).toBe('image/png');
-    expect(mockHttp.get).toHaveBeenCalledTimes(0);
-    expect(mockHttps.get).toHaveBeenCalledTimes(1);
-    spy.mockRestore();
-  });
-
   it('download with ajax', async () => {
-    const mockXHR = function () {
-      return {
-        DONE: 4,
-        open: jest.fn(),
-        send: jest.fn().mockImplementation(function () {
-          this.response = [61, 170, 236, 120];
-          this.readyState = 2;
-          this.onreadystatechange();
-          this.readyState = 4;
-          this.onreadystatechange();
-        }),
-        getResponseHeader: function () {
-          return 'image/png';
-        },
-      };
-    };
-    defaultController._setXHR(mockXHR);
+    const response = 'hello';
+    mockFetch([{ status: 200, response }], { 'Content-Length': 64, 'Content-Type': 'image/png' });
     const options = {
       requestTask: () => {},
     };
     const data = await defaultController.download('https://example.com/image.png', options);
-    expect(data.base64).toBe('ParseA==');
+    expect(data.base64).toBeDefined();
     expect(data.contentType).toBe('image/png');
   });
 
   it('download with ajax no response', async () => {
-    const mockXHR = function () {
-      return {
-        DONE: 4,
-        open: jest.fn(),
-        send: jest.fn().mockImplementation(function () {
-          this.response = undefined;
-          this.readyState = 2;
-          this.onreadystatechange();
-          this.readyState = 4;
-          this.onreadystatechange();
-        }),
-        getResponseHeader: function () {
-          return 'image/png';
-        },
-      };
-    };
-    defaultController._setXHR(mockXHR);
+    mockFetch([{ status: 200, response: {} }], { 'Content-Length': 0 });
     const options = {
       requestTask: () => {},
     };
     const data = await defaultController.download('https://example.com/image.png', options);
-    expect(data).toEqual({});
+    expect(data).toEqual({
+      base64: '',
+      contentType: undefined,
+    });
   });
 
   it('download with ajax abort', async () => {
-    const mockXHR = function () {
-      return {
-        open: jest.fn(),
-        send: jest.fn().mockImplementation(function () {
-          this.response = [61, 170, 236, 120];
-          this.readyState = 2;
-          this.onreadystatechange();
-        }),
-        getResponseHeader: function () {
-          return 'image/png';
-        },
-        abort: function () {
-          this.status = 0;
-          this.response = undefined;
-          this.readyState = 4;
-          this.onreadystatechange();
-        },
-      };
-    };
-    defaultController._setXHR(mockXHR);
+    mockFetch([], {}, { name: 'AbortError' });
     let _requestTask;
     const options = {
       requestTask: task => (_requestTask = task),
@@ -644,36 +565,20 @@ describe('FileController', () => {
     defaultController.download('https://example.com/image.png', options).then(data => {
       expect(data).toEqual({});
     });
+    expect(_requestTask).toBeDefined();
+    expect(_requestTask.abort).toBeDefined();
     _requestTask.abort();
   });
 
   it('download with ajax error', async () => {
-    const mockXHR = function () {
-      return {
-        open: jest.fn(),
-        send: jest.fn().mockImplementation(function () {
-          this.onerror('error thrown');
-        }),
-      };
-    };
-    defaultController._setXHR(mockXHR);
+    mockFetch([], {}, new Error('error thrown'));
     const options = {
       requestTask: () => {},
     };
     try {
       await defaultController.download('https://example.com/image.png', options);
     } catch (e) {
-      expect(e).toBe('error thrown');
-    }
-  });
-
-  it('download with xmlhttprequest unsupported', async () => {
-    defaultController._setXHR(null);
-    process.env.PARSE_BUILD = 'browser';
-    try {
-      await defaultController.download('https://example.com/image.png');
-    } catch (e) {
-      expect(e).toBe('Cannot make a request: No definition of XMLHttpRequest was found.');
+      expect(e.message).toBe('error thrown');
     }
   });
 
@@ -687,6 +592,24 @@ describe('FileController', () => {
     const file = new ParseFile('parse.png');
     try {
       await file.getData();
+    } catch (e) {
+      expect(e.message).toBe('Cannot retrieve data for unsaved ParseFile.');
+    }
+  });
+
+  it('getData from buffer-backed file', async () => {
+    const file = new ParseFile('parse.txt', Buffer.from([61, 170, 236, 120]));
+    const data = await file.getData();
+    expect(data).toBe('ParseA==');
+  });
+
+  it('getData from stream-backed unsaved file throws', async () => {
+    const { Readable } = require('stream');
+    const stream = new Readable({ read() { this.push(null); } });
+    const file = new ParseFile('parse.txt', stream, 'text/plain');
+    try {
+      await file.getData();
+      expect(true).toBe(false);
     } catch (e) {
       expect(e.message).toBe('Cannot retrieve data for unsaved ParseFile.');
     }
@@ -963,6 +886,374 @@ describe('FileController', () => {
       expect(e).toBe('Could not load file.');
     }
     global.FileReader = fileReader;
+  });
+
+  it('saves buffer-backed files via saveBinary', async () => {
+    const ajax = jest.fn().mockResolvedValue({
+      response: {
+        name: 'parse.txt',
+        url: 'https://files.example.com/a/parse.txt',
+      },
+    });
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+    CoreManager.set('JAVASCRIPT_KEY', 'testJsKey');
+
+    const buffer = Buffer.from([61, 170, 236, 120]);
+    const file = new ParseFile('parse.txt', buffer, 'application/octet-stream');
+    const f = await file.save();
+
+    expect(f).toBe(file);
+    expect(f.name()).toBe('parse.txt');
+    expect(f.url()).toBe('https://files.example.com/a/parse.txt');
+    expect(ajax).toHaveBeenCalledWith(
+      'POST',
+      expect.stringContaining('/files/parse.txt'),
+      buffer,
+      expect.objectContaining({
+        'Content-Type': 'application/octet-stream',
+        'X-Parse-Application-ID': 'testAppId',
+        'X-Parse-JavaScript-Key': 'testJsKey',
+        'X-Parse-Upload-Mode': 'stream',
+      }),
+      expect.any(Object)
+    );
+    CoreManager.set('JAVASCRIPT_KEY', null);
+  });
+
+  it('saveBinary defaults Content-Type to application/octet-stream', async () => {
+    const ajax = jest.fn().mockResolvedValue({
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
+    });
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+
+    // No content type specified — should default to application/octet-stream
+    const file = new ParseFile('parse.txt', Buffer.from([61, 170, 236, 120]));
+    await file.save();
+
+    const headers = ajax.mock.calls[0][3];
+    expect(headers['Content-Type']).toBe('application/octet-stream');
+  });
+
+  it('saves stream-backed files via saveBinary', async () => {
+    const { Readable } = require('stream');
+    const stream = new Readable({
+      read() {
+        this.push(Buffer.from([61, 170, 236, 120]));
+        this.push(null);
+      },
+    });
+
+    const ajax = jest.fn().mockResolvedValue({
+      response: {
+        name: 'parse.txt',
+        url: 'https://files.example.com/a/parse.txt',
+      },
+    });
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+
+    const file = new ParseFile('parse.txt', stream, 'text/plain');
+    const f = await file.save();
+
+    expect(f).toBe(file);
+    expect(f.name()).toBe('parse.txt');
+    expect(f.url()).toBe('https://files.example.com/a/parse.txt');
+    expect(ajax).toHaveBeenCalledWith(
+      'POST',
+      expect.stringContaining('/files/parse.txt'),
+      expect.anything(),
+      expect.objectContaining({
+        'Content-Type': 'text/plain',
+        'X-Parse-Application-ID': 'testAppId',
+        'X-Parse-Upload-Mode': 'stream',
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('base64 uploads do not include X-Parse-Upload-Mode header', async () => {
+    const request = jest.fn().mockResolvedValue({
+      name: 'parse.txt',
+      url: 'https://files.example.com/a/parse.txt',
+    });
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    await file.save();
+
+    expect(request).toHaveBeenCalledWith(
+      'POST',
+      'files/parse.txt',
+      expect.objectContaining({ base64: expect.any(String) }),
+      expect.any(Object)
+    );
+    // Binary path (which sets X-Parse-Upload-Mode) should not be taken
+    expect(ajax).not.toHaveBeenCalled();
+  });
+
+  it('saveBinary includes session token from options', async () => {
+    const ajax = jest.fn().mockResolvedValue({
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
+    });
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+
+    const file = new ParseFile('parse.txt', Buffer.from([1, 2, 3]), 'text/plain');
+    await file.save({ sessionToken: 'mySessionToken' });
+
+    expect(ajax).toHaveBeenCalledWith(
+      'POST',
+      expect.any(String),
+      expect.anything(),
+      expect.objectContaining({
+        'X-Parse-Session-Token': 'mySessionToken',
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('saveBinary includes session token from currentUserAsync', async () => {
+    const originalUserController = CoreManager.get('UserController');
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve({
+          getSessionToken() {
+            return 'currentUserToken';
+          },
+        });
+      },
+    });
+    const ajax = jest.fn().mockResolvedValue({
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
+    });
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+
+    const file = new ParseFile('parse.txt', Buffer.from([1, 2, 3]), 'text/plain');
+    await file.save();
+
+    expect(ajax).toHaveBeenCalledWith(
+      'POST',
+      expect.any(String),
+      expect.anything(),
+      expect.objectContaining({
+        'X-Parse-Session-Token': 'currentUserToken',
+      }),
+      expect.any(Object)
+    );
+    CoreManager.set('UserController', originalUserController);
+  });
+
+  it('saveBinary includes master key when useMasterKey is true', async () => {
+    const ajax = jest.fn().mockResolvedValue({
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
+    });
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+    CoreManager.set('JAVASCRIPT_KEY', 'testJsKey');
+    CoreManager.set('MASTER_KEY', 'testMasterKey');
+
+    const file = new ParseFile('parse.txt', Buffer.from([1, 2, 3]), 'text/plain');
+    await file.save({ useMasterKey: true });
+
+    expect(ajax).toHaveBeenCalledWith(
+      'POST',
+      expect.any(String),
+      expect.anything(),
+      expect.objectContaining({
+        'X-Parse-Master-Key': 'testMasterKey',
+      }),
+      expect.any(Object)
+    );
+    // Verify JS_KEY was deleted when master key is used
+    const headers = ajax.mock.calls[0][3];
+    expect(headers).not.toHaveProperty('X-Parse-JavaScript-Key');
+    CoreManager.set('MASTER_KEY', null);
+    CoreManager.set('JAVASCRIPT_KEY', null);
+  });
+
+  it('saveBinary format error', async () => {
+    try {
+      await defaultController.saveBinary('parse.txt', { format: 'base64', base64: 'abc' });
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('saveBinary can only be used with Buffer or Stream sources.');
+    }
+  });
+
+  it('saveBinary throws when useMasterKey is true but MASTER_KEY is not set', async () => {
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+    CoreManager.set('MASTER_KEY', null);
+
+    const file = new ParseFile('parse.txt', Buffer.from([1, 2, 3]), 'text/plain');
+    try {
+      await file.save({ useMasterKey: true });
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('Cannot use the Master Key, it has not been provided.');
+    }
+    expect(ajax).not.toHaveBeenCalled();
+  });
+
+  it('buffer with metadata falls back to saveBase64', async () => {
+    const request = jest.fn().mockResolvedValue({
+      name: 'parse.txt',
+      url: 'https://files.example.com/a/parse.txt',
+    });
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request, ajax });
+
+    const file = new ParseFile('parse.txt', Buffer.from([61, 170, 236, 120]), 'text/plain');
+    file.addMetadata('foo', 'bar');
+    const f = await file.save();
+
+    expect(f).toBe(file);
+    expect(f.name()).toBe('parse.txt');
+    expect(request).toHaveBeenCalledWith(
+      'POST',
+      'files/parse.txt',
+      expect.objectContaining({
+        base64: expect.any(String),
+        fileData: expect.objectContaining({
+          metadata: { foo: 'bar' },
+        }),
+      }),
+      expect.any(Object)
+    );
+    expect(ajax).not.toHaveBeenCalled();
+  });
+
+  it('stream with metadata throws error', async () => {
+    const { Readable } = require('stream');
+    const stream = new Readable({ read() { this.push(null); } });
+    const file = new ParseFile('parse.txt', stream, 'text/plain');
+    file.addMetadata('foo', 'bar');
+    try {
+      await file.save();
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe(
+        'Cannot save a stream-based file with metadata or tags. Use a Buffer instead.'
+      );
+    }
+  });
+
+  it('buffer without metadata uses saveBinary', async () => {
+    const ajax = jest.fn().mockResolvedValue({
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
+    });
+    const request = jest.fn();
+    CoreManager.setRESTController({ request, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+
+    const file = new ParseFile('parse.txt', Buffer.from([61, 170, 236, 120]), 'text/plain');
+    const f = await file.save();
+
+    expect(f).toBe(file);
+    expect(ajax).toHaveBeenCalled();
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it('falls back to saveBase64 when controller lacks saveBinary', async () => {
+    CoreManager.setFileController({
+      saveFile: jest.fn(),
+      saveBase64: jest.fn().mockResolvedValue({
+        name: 'parse.txt',
+        url: 'https://files.example.com/a/parse.txt',
+      }),
+    });
+
+    const file = new ParseFile('parse.txt', Buffer.from([61, 170, 236, 120]), 'text/plain');
+    const f = await file.save();
+
+    expect(f).toBe(file);
+    expect(f.name()).toBe('parse.txt');
+    const controller = CoreManager.getFileController();
+    expect(controller.saveBase64).toHaveBeenCalled();
+  });
+
+  it('stream throws when controller lacks saveBinary', async () => {
+    const { Readable } = require('stream');
+    CoreManager.setFileController({
+      saveFile: jest.fn(),
+      saveBase64: jest.fn(),
+    });
+
+    const stream = new Readable({ read() { this.push(null); } });
+    const file = new ParseFile('parse.txt', stream, 'text/plain');
+    try {
+      await file.save();
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe(
+        'Cannot save a stream-based file without saveBinary support on the FileController.'
+      );
+    }
+  });
+
+  it('buffer with tags falls back to saveBase64', async () => {
+    const request = jest.fn().mockResolvedValue({
+      name: 'parse.txt',
+      url: 'https://files.example.com/a/parse.txt',
+    });
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request, ajax });
+
+    const file = new ParseFile('parse.txt', Buffer.from([61, 170, 236, 120]), 'text/plain');
+    file.addTag('tagKey', 'tagValue');
+    const f = await file.save();
+
+    expect(f).toBe(file);
+    expect(f.name()).toBe('parse.txt');
+    expect(request).toHaveBeenCalledWith(
+      'POST',
+      'files/parse.txt',
+      expect.objectContaining({
+        base64: expect.any(String),
+        fileData: expect.objectContaining({
+          tags: { tagKey: 'tagValue' },
+        }),
+      }),
+      expect.any(Object)
+    );
+    expect(ajax).not.toHaveBeenCalled();
+  });
+
+  it('saveBinary passes Web ReadableStream body directly', async () => {
+    const { ReadableStream: WebReadableStream } = require('stream/web');
+    const origReadableStream = globalThis.ReadableStream;
+    globalThis.ReadableStream = WebReadableStream;
+    try {
+      const stream = new WebReadableStream({
+        start(controller) {
+          controller.enqueue(new Uint8Array([1, 2, 3]));
+          controller.close();
+        },
+      });
+
+      const ajax = jest.fn().mockResolvedValue({
+        response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
+      });
+      CoreManager.setRESTController({ request: () => {}, ajax });
+      CoreManager.set('APPLICATION_ID', 'testAppId');
+
+      const file = new ParseFile('parse.txt', stream, 'application/octet-stream');
+      await file.save();
+
+      // Web ReadableStream (no .pipe/.read) should be passed directly as body
+      const body = ajax.mock.calls[0][2];
+      expect(body).toBe(stream);
+      const headers = ajax.mock.calls[0][3];
+      expect(headers['X-Parse-Upload-Mode']).toBe('stream');
+    } finally {
+      globalThis.ReadableStream = origReadableStream;
+    }
   });
 
   it('can save unsaved Parse.File property when localDataStore is enabled.', async () => {

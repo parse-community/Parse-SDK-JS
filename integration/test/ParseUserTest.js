@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const Parse = require('../../node');
-const { v4: uuidv4 } = require('uuid');
+const uuidv4 = require('../../lib/node/uuid').default;
 const { twitterAuthData } = require('./helper');
 
 class CustomUser extends Parse.User {

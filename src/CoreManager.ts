@@ -40,6 +40,11 @@ export interface FileController {
     source: FileSource,
     options?: FileSaveOptions
   ) => Promise<{ name: string; url: string }>;
+  saveBinary?: (
+    name: string,
+    source: FileSource,
+    options?: FileSaveOptions
+  ) => Promise<{ name: string; url: string }>;
   download: (uri: string, options?: any) => Promise<{ base64?: string; contentType?: string }>;
   deleteFile: (name: string, options?: { useMasterKey?: boolean }) => Promise<void>;
 }
@@ -339,11 +344,9 @@ const config: Config & Record<string, any> = {
   REQUEST_BATCH_SIZE: 20,
   REQUEST_HEADERS: {},
   SERVER_URL: 'https://api.parse.com/1',
-  SERVER_AUTH_TYPE: null,
-  SERVER_AUTH_TOKEN: null,
   LIVEQUERY_SERVER_URL: null,
   ENCRYPTED_KEY: null,
-  VERSION: 'js' + require('../package.json').version,
+  VERSION: 'js' + process.env.npm_package_version,
   APPLICATION_ID: null,
   JAVASCRIPT_KEY: null,
   MAINTENANCE_KEY: null,
@@ -355,6 +358,7 @@ const config: Config & Record<string, any> = {
   IDEMPOTENCY: false,
   ALLOW_CUSTOM_OBJECT_ID: false,
   PARSE_ERRORS: [],
+  NODE_LOGGING: false,
 };
 
 function requireMethods(name: string, methods: string[], controller: any) {

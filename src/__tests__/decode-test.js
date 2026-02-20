@@ -1,5 +1,6 @@
 jest.dontMock('../decode');
 jest.dontMock('../CoreManager');
+jest.dontMock('../isDangerousKey');
 jest.dontMock('../ParseFile');
 jest.dontMock('../ParseGeoPoint');
 jest.dontMock('../ParseObject');
@@ -118,6 +119,194 @@ describe('decode', () => {
       empty: null,
       when: new Date(Date.UTC(2015, 3)),
       count: 15,
+    });
+  });
+
+  describe('Prototype Pollution Protection', () => {
+    beforeEach(() => {
+      // Clear any pollution before each test
+      delete Object.prototype.polluted;
+      delete Object.prototype.malicious;
+      delete Object.prototype.exploit;
+    });
+
+    afterEach(() => {
+      // Clean up after tests
+      delete Object.prototype.polluted;
+      delete Object.prototype.malicious;
+      delete Object.prototype.exploit;
+    });
+
+    it('should not pollute Object.prototype when decoding object with __proto__ key', () => {
+      const testObj = {};
+      const maliciousInput = {
+        normalKey: 'value',
+        __proto__: { polluted: 'yes' },
+      };
+
+      const result = decode(maliciousInput);
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect(Object.prototype.polluted).toBeUndefined();
+
+      // Verify result only has own property
+      expect(Object.prototype.hasOwnProperty.call(result, '__proto__')).toBe(false);
+      expect(result.normalKey).toBe('value');
+    });
+
+    it('should not pollute Object.prototype when decoding object with constructor key', () => {
+      const testObj = {};
+      const maliciousInput = {
+        normalKey: 'value',
+        constructor: { polluted: 'yes' },
+      };
+
+      const result = decode(maliciousInput);
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect(Object.prototype.polluted).toBeUndefined();
+
+      // Verify result doesn't contain constructor from prototype chain
+      expect(result.normalKey).toBe('value');
+    });
+
+    it('should not pollute Object.prototype when decoding object with prototype key', () => {
+      const testObj = {};
+      const maliciousInput = {
+        normalKey: 'value',
+        prototype: { polluted: 'yes' },
+      };
+
+      const result = decode(maliciousInput);
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect(Object.prototype.polluted).toBeUndefined();
+
+      // Verify result contains only own properties
+      expect(result.normalKey).toBe('value');
+    });
+
+    it('should not pollute Object.prototype when decoding nested objects with dangerous keys', () => {
+      const testObj = {};
+      const maliciousInput = {
+        nested: {
+          __proto__: { polluted: 'nested' },
+          data: 'value',
+        },
+        normal: 'key',
+      };
+
+      const result = decode(maliciousInput);
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect(Object.prototype.polluted).toBeUndefined();
+
+      // Verify result structure
+      expect(result.normal).toBe('key');
+      expect(result.nested).toBeDefined();
+      expect(result.nested.data).toBe('value');
+      expect(Object.prototype.hasOwnProperty.call(result.nested, '__proto__')).toBe(false);
+    });
+
+    it('should not pollute Object.prototype when decoding arrays with objects containing dangerous keys', () => {
+      const testObj = {};
+      const maliciousInput = [
+        { __proto__: { polluted: 'array1' } },
+        { constructor: { malicious: 'array2' } },
+        { normalKey: 'value' },
+      ];
+
+      const result = decode(maliciousInput);
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect(testObj.malicious).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect({}.malicious).toBeUndefined();
+      expect(Object.prototype.polluted).toBeUndefined();
+      expect(Object.prototype.malicious).toBeUndefined();
+
+      // Verify result array
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBe(3);
+      expect(result[2].normalKey).toBe('value');
+    });
+
+    it('should only decode own properties, not inherited ones', () => {
+      const parent = { inherited: 'parent' };
+      const child = Object.create(parent);
+      child.own = 'child';
+
+      const result = decode(child);
+
+      // Should only include own property
+      expect(result.own).toBe('child');
+      expect(result.inherited).toBeUndefined();
+    });
+
+    it('should not decode properties from prototype chain', () => {
+      Object.prototype.exploit = 'malicious';
+      const obj = { normalKey: 'value' };
+
+      const result = decode(obj);
+
+      // Should not include prototype property
+      expect(result.normalKey).toBe('value');
+      expect(Object.prototype.hasOwnProperty.call(result, 'exploit')).toBe(false);
+
+      delete Object.prototype.exploit;
+    });
+
+    it('should not pollute Object.prototype when decoding Parse type with dangerous className', () => {
+      const testObj = {};
+      const maliciousInput = {
+        __type: 'Pointer',
+        className: '__proto__',
+        objectId: 'test123',
+      };
+
+      // This should be handled by ParseObject.fromJSON
+      decode(maliciousInput);
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect(Object.prototype.polluted).toBeUndefined();
+    });
+
+    it('should not pollute Object.prototype when decoding deeply nested dangerous keys', () => {
+      const testObj = {};
+      const maliciousInput = {
+        level1: {
+          level2: {
+            level3: {
+              __proto__: { polluted: 'deep' },
+              normalData: 'value',
+            },
+          },
+        },
+      };
+
+      const result = decode(maliciousInput);
+
+      // Verify Object.prototype was not polluted
+      expect(testObj.polluted).toBeUndefined();
+      expect({}.polluted).toBeUndefined();
+      expect(Object.prototype.polluted).toBeUndefined();
+
+      // Verify result structure is preserved (without dangerous keys)
+      expect(result.level1.level2.level3.normalData).toBe('value');
+      expect(Object.prototype.hasOwnProperty.call(result.level1.level2.level3, '__proto__')).toBe(
+        false
+      );
     });
   });
 });
