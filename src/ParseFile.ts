@@ -640,7 +640,7 @@ const DefaultController = {
     if (url[url.length - 1] !== '/') {
       url += '/';
     }
-    url += 'files/' + name;
+    url += 'files/' + encodeURIComponent(name);
 
     return CoreManager.getRESTController()
       .ajax('POST', url, body, headers, options)
