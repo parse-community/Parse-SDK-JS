@@ -892,7 +892,7 @@ describe('FileController', () => {
     const ajax = jest.fn().mockResolvedValue({
       response: {
         name: 'parse.txt',
-        url: 'https://files.parsetfss.com/a/parse.txt',
+        url: 'https://files.example.com/a/parse.txt',
       },
     });
     CoreManager.setRESTController({ request: () => {}, ajax });
@@ -905,7 +905,7 @@ describe('FileController', () => {
 
     expect(f).toBe(file);
     expect(f.name()).toBe('parse.txt');
-    expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
+    expect(f.url()).toBe('https://files.example.com/a/parse.txt');
     expect(ajax).toHaveBeenCalledWith(
       'POST',
       expect.stringContaining('/files/parse.txt'),
@@ -922,7 +922,7 @@ describe('FileController', () => {
 
   it('saveBinary defaults Content-Type to application/octet-stream', async () => {
     const ajax = jest.fn().mockResolvedValue({
-      response: { name: 'parse.txt', url: 'https://files.parsetfss.com/a/parse.txt' },
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
     });
     CoreManager.setRESTController({ request: () => {}, ajax });
     CoreManager.set('APPLICATION_ID', 'testAppId');
@@ -947,7 +947,7 @@ describe('FileController', () => {
     const ajax = jest.fn().mockResolvedValue({
       response: {
         name: 'parse.txt',
-        url: 'https://files.parsetfss.com/a/parse.txt',
+        url: 'https://files.example.com/a/parse.txt',
       },
     });
     CoreManager.setRESTController({ request: () => {}, ajax });
@@ -958,7 +958,7 @@ describe('FileController', () => {
 
     expect(f).toBe(file);
     expect(f.name()).toBe('parse.txt');
-    expect(f.url()).toBe('https://files.parsetfss.com/a/parse.txt');
+    expect(f.url()).toBe('https://files.example.com/a/parse.txt');
     expect(ajax).toHaveBeenCalledWith(
       'POST',
       expect.stringContaining('/files/parse.txt'),
@@ -973,7 +973,7 @@ describe('FileController', () => {
 
   it('saveBinary includes session token from options', async () => {
     const ajax = jest.fn().mockResolvedValue({
-      response: { name: 'parse.txt', url: 'https://files.parsetfss.com/a/parse.txt' },
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
     });
     CoreManager.setRESTController({ request: () => {}, ajax });
     CoreManager.set('APPLICATION_ID', 'testAppId');
@@ -1003,7 +1003,7 @@ describe('FileController', () => {
       },
     });
     const ajax = jest.fn().mockResolvedValue({
-      response: { name: 'parse.txt', url: 'https://files.parsetfss.com/a/parse.txt' },
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
     });
     CoreManager.setRESTController({ request: () => {}, ajax });
     CoreManager.set('APPLICATION_ID', 'testAppId');
@@ -1024,7 +1024,7 @@ describe('FileController', () => {
 
   it('saveBinary includes master key when useMasterKey is true', async () => {
     const ajax = jest.fn().mockResolvedValue({
-      response: { name: 'parse.txt', url: 'https://files.parsetfss.com/a/parse.txt' },
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
     });
     CoreManager.setRESTController({ request: () => {}, ajax });
     CoreManager.set('APPLICATION_ID', 'testAppId');
@@ -1078,7 +1078,7 @@ describe('FileController', () => {
   it('buffer with metadata falls back to saveBase64', async () => {
     const request = jest.fn().mockResolvedValue({
       name: 'parse.txt',
-      url: 'https://files.parsetfss.com/a/parse.txt',
+      url: 'https://files.example.com/a/parse.txt',
     });
     const ajax = jest.fn();
     CoreManager.setRESTController({ request, ajax });
@@ -1120,7 +1120,7 @@ describe('FileController', () => {
 
   it('buffer without metadata uses saveBinary', async () => {
     const ajax = jest.fn().mockResolvedValue({
-      response: { name: 'parse.txt', url: 'https://files.parsetfss.com/a/parse.txt' },
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
     });
     const request = jest.fn();
     CoreManager.setRESTController({ request, ajax });
@@ -1139,7 +1139,7 @@ describe('FileController', () => {
       saveFile: jest.fn(),
       saveBase64: jest.fn().mockResolvedValue({
         name: 'parse.txt',
-        url: 'https://files.parsetfss.com/a/parse.txt',
+        url: 'https://files.example.com/a/parse.txt',
       }),
     });
 
@@ -1174,7 +1174,7 @@ describe('FileController', () => {
   it('buffer with tags falls back to saveBase64', async () => {
     const request = jest.fn().mockResolvedValue({
       name: 'parse.txt',
-      url: 'https://files.parsetfss.com/a/parse.txt',
+      url: 'https://files.example.com/a/parse.txt',
     });
     const ajax = jest.fn();
     CoreManager.setRESTController({ request, ajax });
