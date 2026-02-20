@@ -60,7 +60,7 @@ declare class ParseFile {
      *     5. a Node.js Buffer (binary upload, no base64 overhead).
      *     6. a Node.js Readable stream or Web ReadableStream (streaming binary upload).
      *
-     *     In Node.js, formats 1, 5, and 6 use binary upload by default, sending
+     *     In Node.js, formats 5 and 6 use binary upload by default, sending
      *     the raw data directly instead of base64-encoding it. This significantly
      *     reduces memory usage for large files.
      *        For example:
@@ -139,8 +139,8 @@ declare class ParseFile {
     /**
      * Saves the file to the Parse cloud.
      *
-     * In Node.js, files created with Buffer, ReadableStream, or byte arrays are
-     * uploaded as raw binary data, avoiding base64 encoding overhead. If metadata
+     * In Node.js, files created with Buffer or ReadableStream are uploaded as
+     * raw binary data, avoiding base64 encoding overhead. If metadata
      * or tags are set on a Buffer-backed file, the upload falls back to base64
      * JSON encoding (since the binary endpoint does not support metadata).
      * Stream-backed files with metadata or tags will throw an error.

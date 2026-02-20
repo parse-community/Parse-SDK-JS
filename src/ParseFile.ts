@@ -138,24 +138,12 @@ class ParseFile {
           type: specifiedType,
         };
       } else if (Array.isArray(data) || data instanceof Uint8Array) {
-        if (typeof Buffer !== 'undefined') {
-          const buffer =
-            data instanceof Uint8Array
-              ? Buffer.from(data.buffer, data.byteOffset, data.byteLength)
-              : Buffer.from(data);
-          this._source = {
-            format: 'buffer',
-            buffer,
-            type: specifiedType,
-          };
-        } else {
-          this._data = ParseFile.encodeBase64(data);
-          this._source = {
-            format: 'base64',
-            base64: this._data,
-            type: specifiedType,
-          };
-        }
+        this._data = ParseFile.encodeBase64(data);
+        this._source = {
+          format: 'base64',
+          base64: this._data,
+          type: specifiedType,
+        };
       } else if (typeof Blob !== 'undefined' && data instanceof Blob) {
         this._source = {
           format: 'file',
@@ -276,8 +264,8 @@ class ParseFile {
   /**
    * Saves the file to the Parse cloud.
    *
-   * In Node.js, files created with Buffer, ReadableStream, or byte arrays are
-   * uploaded as raw binary data, avoiding base64 encoding overhead. If metadata
+   * In Node.js, files created with Buffer or ReadableStream are uploaded as
+   * raw binary data, avoiding base64 encoding overhead. If metadata
    * or tags are set on a Buffer-backed file, the upload falls back to base64
    * JSON encoding (since the binary endpoint does not support metadata).
    * Stream-backed files with metadata or tags will throw an error.
