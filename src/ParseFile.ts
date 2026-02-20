@@ -3,6 +3,11 @@ import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
 import ParseError from './ParseError';
 
+let NodeReadable: any;
+if (process.env.PARSE_BUILD === 'node') {
+  NodeReadable = require('stream').Readable;
+}
+
 interface Base64 {
   base64: string;
 }
@@ -622,9 +627,8 @@ const DefaultController = {
     } else if (source.format === 'stream') {
       const stream = source.stream;
       if (typeof stream.pipe === 'function' && typeof stream.read === 'function') {
-        const { Readable } = require('stream');
-        if (typeof Readable.toWeb === 'function') {
-          body = Readable.toWeb(stream);
+        if (NodeReadable && typeof NodeReadable.toWeb === 'function') {
+          body = NodeReadable.toWeb(stream);
         } else {
           throw new Error(
             'Streaming file uploads require Node.js >= 17.0.0. ' +
