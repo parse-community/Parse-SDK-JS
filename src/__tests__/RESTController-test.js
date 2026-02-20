@@ -532,4 +532,31 @@ describe('RESTController', () => {
     // Clean up the custom SERVER_URL
     CoreManager.set('SERVER_URL', 'https://api.parse.com/1');
   });
+
+  it('sets duplex half when body is a ReadableStream', async () => {
+    mockFetch([{ status: 200, response: { name: 'file.txt', url: 'https://example.com/file.txt' } }]);
+    const { ReadableStream: WebReadableStream } = require('stream/web');
+    const origReadableStream = globalThis.ReadableStream;
+    globalThis.ReadableStream = WebReadableStream;
+    try {
+      const stream = new WebReadableStream({
+        start(controller) {
+          controller.enqueue(new Uint8Array([1, 2, 3]));
+          controller.close();
+        },
+      });
+      await RESTController.ajax('POST', 'https://example.com/files/file.txt', stream, {
+        'Content-Type': 'application/octet-stream',
+      });
+      expect(fetch.mock.calls[0][1].duplex).toBe('half');
+    } finally {
+      globalThis.ReadableStream = origReadableStream;
+    }
+  });
+
+  it('does not set duplex when body is not a ReadableStream', async () => {
+    mockFetch([{ status: 200, response: { success: true } }]);
+    await RESTController.ajax('POST', 'users', { key: 'value' });
+    expect(fetch.mock.calls[0][1].duplex).toBeUndefined();
+  });
 });
