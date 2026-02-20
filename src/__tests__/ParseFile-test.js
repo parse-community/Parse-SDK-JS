@@ -1027,6 +1027,7 @@ describe('FileController', () => {
     });
     CoreManager.setRESTController({ request: () => {}, ajax });
     CoreManager.set('APPLICATION_ID', 'testAppId');
+    CoreManager.set('JAVASCRIPT_KEY', 'testJsKey');
     CoreManager.set('MASTER_KEY', 'testMasterKey');
 
     const file = new ParseFile('parse.txt', Buffer.from([1, 2, 3]), 'text/plain');
@@ -1045,6 +1046,7 @@ describe('FileController', () => {
     const headers = ajax.mock.calls[0][3];
     expect(headers).not.toHaveProperty('X-Parse-JavaScript-Key');
     CoreManager.set('MASTER_KEY', null);
+    CoreManager.set('JAVASCRIPT_KEY', null);
   });
 
   it('saveBinary format error', async () => {
