@@ -150,18 +150,21 @@ describe('ParseFile', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('');
+    expect(file._data).toBe('ParseA==');
   });
 
   it('can create files with  Uint8Arrays', () => {
     const file = new ParseFile('parse.txt', new Uint8Array([61, 170, 236, 120]));
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('');
+    expect(file._data).toBe('ParseA==');
   });
 
   it('can create files with all types of characters', () => {
     const file = new ParseFile('parse.txt', [11, 239, 191, 215, 80, 52]);
     expect(file._source.base64).toBe('C++/11A0');
     expect(file._source.type).toBe('');
+    expect(file._data).toBe('C++/11A0');
   });
 
   it('can create an empty file', () => {
@@ -359,6 +362,7 @@ describe('ParseFile', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120], '', metadata, tags);
     expect(file._source.base64).toBe('ParseA==');
     expect(file._source.type).toBe('');
+    expect(file._data).toBe('ParseA==');
     expect(file.metadata()).toBe(metadata);
     expect(file.tags()).toBe(tags);
   });
