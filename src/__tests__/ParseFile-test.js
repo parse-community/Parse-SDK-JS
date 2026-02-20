@@ -978,7 +978,8 @@ describe('FileController', () => {
       name: 'parse.txt',
       url: 'https://files.example.com/a/parse.txt',
     });
-    CoreManager.setRESTController({ request, ajax: () => {} });
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request, ajax });
     CoreManager.set('APPLICATION_ID', 'testAppId');
 
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
@@ -990,9 +991,8 @@ describe('FileController', () => {
       expect.objectContaining({ base64: expect.any(String) }),
       expect.any(Object)
     );
-    // Verify request() was called — not ajax() with binary headers
-    const payload = request.mock.calls[0][2];
-    expect(payload['X-Parse-Upload-Mode']).toBeUndefined();
+    // Binary path (which sets X-Parse-Upload-Mode) should not be taken
+    expect(ajax).not.toHaveBeenCalled();
   });
 
   it('saveBinary includes session token from options', async () => {
