@@ -159,6 +159,9 @@ const RESTController = {
         };
         if (data) {
           fetchOptions.body = data;
+          if (typeof ReadableStream !== 'undefined' && data instanceof ReadableStream) {
+            fetchOptions.duplex = 'half';
+          }
         }
         const response = await fetch(url, fetchOptions);
         const { status } = response;
