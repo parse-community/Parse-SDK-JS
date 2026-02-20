@@ -402,6 +402,51 @@ describe('ParseFile', () => {
     file.addTag(10, 'bar');
     expect(file.tags()).toEqual({});
   });
+
+  it('can create files with a Buffer', () => {
+    const buffer = Buffer.from([61, 170, 236, 120]);
+    const file = new ParseFile('parse.txt', buffer, 'application/octet-stream');
+    expect(file._source.format).toBe('buffer');
+    expect(file._source.buffer).toBe(buffer);
+    expect(file._source.type).toBe('application/octet-stream');
+    expect(file._data).toBeUndefined();
+  });
+
+  it('can create files with a Node.js Readable stream', () => {
+    const { Readable } = require('stream');
+    const stream = new Readable({
+      read() {
+        this.push(Buffer.from([61, 170, 236, 120]));
+        this.push(null);
+      },
+    });
+    const file = new ParseFile('parse.txt', stream, 'application/octet-stream');
+    expect(file._source.format).toBe('stream');
+    expect(file._source.stream).toBe(stream);
+    expect(file._source.type).toBe('application/octet-stream');
+    expect(file._data).toBeUndefined();
+  });
+
+  it('can create files with a Web ReadableStream', () => {
+    const { ReadableStream: WebReadableStream } = require('stream/web');
+    const origReadableStream = globalThis.ReadableStream;
+    globalThis.ReadableStream = WebReadableStream;
+    try {
+      const stream = new WebReadableStream({
+        start(controller) {
+          controller.enqueue(new Uint8Array([61, 170, 236, 120]));
+          controller.close();
+        },
+      });
+      const file = new ParseFile('parse.txt', stream, 'application/octet-stream');
+      expect(file._source.format).toBe('stream');
+      expect(file._source.stream).toBe(stream);
+      expect(file._source.type).toBe('application/octet-stream');
+      expect(file._data).toBeUndefined();
+    } finally {
+      globalThis.ReadableStream = origReadableStream;
+    }
+  });
 });
 
 describe('FileController', () => {
@@ -415,7 +460,7 @@ describe('FileController', () => {
       });
     };
     const ajax = function (method, path) {
-      const name = path.substr(path.indexOf('/') + 1);
+      const name = path.substr(path.lastIndexOf('/') + 1);
       return Promise.resolve({
         response: {
           name: name,
@@ -547,6 +592,24 @@ describe('FileController', () => {
     const file = new ParseFile('parse.png');
     try {
       await file.getData();
+    } catch (e) {
+      expect(e.message).toBe('Cannot retrieve data for unsaved ParseFile.');
+    }
+  });
+
+  it('getData from buffer-backed file', async () => {
+    const file = new ParseFile('parse.txt', Buffer.from([61, 170, 236, 120]));
+    const data = await file.getData();
+    expect(data).toBe('ParseA==');
+  });
+
+  it('getData from stream-backed unsaved file throws', async () => {
+    const { Readable } = require('stream');
+    const stream = new Readable({ read() { this.push(null); } });
+    const file = new ParseFile('parse.txt', stream, 'text/plain');
+    try {
+      await file.getData();
+      expect(true).toBe(false);
     } catch (e) {
       expect(e.message).toBe('Cannot retrieve data for unsaved ParseFile.');
     }
@@ -823,6 +886,348 @@ describe('FileController', () => {
       expect(e).toBe('Could not load file.');
     }
     global.FileReader = fileReader;
+  });
+
+  it('saves buffer-backed files via saveBinary', async () => {
+    const ajax = jest.fn().mockResolvedValue({
+      response: {
+        name: 'parse.txt',
+        url: 'https://files.example.com/a/parse.txt',
+      },
+    });
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+    CoreManager.set('JAVASCRIPT_KEY', 'testJsKey');
+
+    const buffer = Buffer.from([61, 170, 236, 120]);
+    const file = new ParseFile('parse.txt', buffer, 'application/octet-stream');
+    const f = await file.save();
+
+    expect(f).toBe(file);
+    expect(f.name()).toBe('parse.txt');
+    expect(f.url()).toBe('https://files.example.com/a/parse.txt');
+    expect(ajax).toHaveBeenCalledWith(
+      'POST',
+      expect.stringContaining('/files/parse.txt'),
+      buffer,
+      expect.objectContaining({
+        'Content-Type': 'application/octet-stream',
+        'X-Parse-Application-ID': 'testAppId',
+        'X-Parse-JavaScript-Key': 'testJsKey',
+      }),
+      expect.any(Object)
+    );
+    CoreManager.set('JAVASCRIPT_KEY', null);
+  });
+
+  it('saveBinary defaults Content-Type to application/octet-stream', async () => {
+    const ajax = jest.fn().mockResolvedValue({
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
+    });
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+
+    // No content type specified — should default to application/octet-stream
+    const file = new ParseFile('parse.txt', Buffer.from([61, 170, 236, 120]));
+    await file.save();
+
+    const headers = ajax.mock.calls[0][3];
+    expect(headers['Content-Type']).toBe('application/octet-stream');
+  });
+
+  it('saves stream-backed files via saveBinary', async () => {
+    const { Readable } = require('stream');
+    const stream = new Readable({
+      read() {
+        this.push(Buffer.from([61, 170, 236, 120]));
+        this.push(null);
+      },
+    });
+
+    const ajax = jest.fn().mockResolvedValue({
+      response: {
+        name: 'parse.txt',
+        url: 'https://files.example.com/a/parse.txt',
+      },
+    });
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+
+    const file = new ParseFile('parse.txt', stream, 'text/plain');
+    const f = await file.save();
+
+    expect(f).toBe(file);
+    expect(f.name()).toBe('parse.txt');
+    expect(f.url()).toBe('https://files.example.com/a/parse.txt');
+    expect(ajax).toHaveBeenCalledWith(
+      'POST',
+      expect.stringContaining('/files/parse.txt'),
+      expect.anything(),
+      expect.objectContaining({
+        'Content-Type': 'text/plain',
+        'X-Parse-Application-ID': 'testAppId',
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('saveBinary includes session token from options', async () => {
+    const ajax = jest.fn().mockResolvedValue({
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
+    });
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+
+    const file = new ParseFile('parse.txt', Buffer.from([1, 2, 3]), 'text/plain');
+    await file.save({ sessionToken: 'mySessionToken' });
+
+    expect(ajax).toHaveBeenCalledWith(
+      'POST',
+      expect.any(String),
+      expect.anything(),
+      expect.objectContaining({
+        'X-Parse-Session-Token': 'mySessionToken',
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('saveBinary includes session token from currentUserAsync', async () => {
+    const originalUserController = CoreManager.get('UserController');
+    CoreManager.set('UserController', {
+      currentUserAsync() {
+        return Promise.resolve({
+          getSessionToken() {
+            return 'currentUserToken';
+          },
+        });
+      },
+    });
+    const ajax = jest.fn().mockResolvedValue({
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
+    });
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+
+    const file = new ParseFile('parse.txt', Buffer.from([1, 2, 3]), 'text/plain');
+    await file.save();
+
+    expect(ajax).toHaveBeenCalledWith(
+      'POST',
+      expect.any(String),
+      expect.anything(),
+      expect.objectContaining({
+        'X-Parse-Session-Token': 'currentUserToken',
+      }),
+      expect.any(Object)
+    );
+    CoreManager.set('UserController', originalUserController);
+  });
+
+  it('saveBinary includes master key when useMasterKey is true', async () => {
+    const ajax = jest.fn().mockResolvedValue({
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
+    });
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+    CoreManager.set('JAVASCRIPT_KEY', 'testJsKey');
+    CoreManager.set('MASTER_KEY', 'testMasterKey');
+
+    const file = new ParseFile('parse.txt', Buffer.from([1, 2, 3]), 'text/plain');
+    await file.save({ useMasterKey: true });
+
+    expect(ajax).toHaveBeenCalledWith(
+      'POST',
+      expect.any(String),
+      expect.anything(),
+      expect.objectContaining({
+        'X-Parse-Master-Key': 'testMasterKey',
+      }),
+      expect.any(Object)
+    );
+    // Verify JS_KEY was deleted when master key is used
+    const headers = ajax.mock.calls[0][3];
+    expect(headers).not.toHaveProperty('X-Parse-JavaScript-Key');
+    CoreManager.set('MASTER_KEY', null);
+    CoreManager.set('JAVASCRIPT_KEY', null);
+  });
+
+  it('saveBinary format error', async () => {
+    try {
+      await defaultController.saveBinary('parse.txt', { format: 'base64', base64: 'abc' });
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('saveBinary can only be used with Buffer or Stream sources.');
+    }
+  });
+
+  it('saveBinary throws when useMasterKey is true but MASTER_KEY is not set', async () => {
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request: () => {}, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+    CoreManager.set('MASTER_KEY', null);
+
+    const file = new ParseFile('parse.txt', Buffer.from([1, 2, 3]), 'text/plain');
+    try {
+      await file.save({ useMasterKey: true });
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe('Cannot use the Master Key, it has not been provided.');
+    }
+    expect(ajax).not.toHaveBeenCalled();
+  });
+
+  it('buffer with metadata falls back to saveBase64', async () => {
+    const request = jest.fn().mockResolvedValue({
+      name: 'parse.txt',
+      url: 'https://files.example.com/a/parse.txt',
+    });
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request, ajax });
+
+    const file = new ParseFile('parse.txt', Buffer.from([61, 170, 236, 120]), 'text/plain');
+    file.addMetadata('foo', 'bar');
+    const f = await file.save();
+
+    expect(f).toBe(file);
+    expect(f.name()).toBe('parse.txt');
+    expect(request).toHaveBeenCalledWith(
+      'POST',
+      'files/parse.txt',
+      expect.objectContaining({
+        base64: expect.any(String),
+        fileData: expect.objectContaining({
+          metadata: { foo: 'bar' },
+        }),
+      }),
+      expect.any(Object)
+    );
+    expect(ajax).not.toHaveBeenCalled();
+  });
+
+  it('stream with metadata throws error', async () => {
+    const { Readable } = require('stream');
+    const stream = new Readable({ read() { this.push(null); } });
+    const file = new ParseFile('parse.txt', stream, 'text/plain');
+    file.addMetadata('foo', 'bar');
+    try {
+      await file.save();
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe(
+        'Cannot save a stream-based file with metadata or tags. Use a Buffer instead.'
+      );
+    }
+  });
+
+  it('buffer without metadata uses saveBinary', async () => {
+    const ajax = jest.fn().mockResolvedValue({
+      response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
+    });
+    const request = jest.fn();
+    CoreManager.setRESTController({ request, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+
+    const file = new ParseFile('parse.txt', Buffer.from([61, 170, 236, 120]), 'text/plain');
+    const f = await file.save();
+
+    expect(f).toBe(file);
+    expect(ajax).toHaveBeenCalled();
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it('falls back to saveBase64 when controller lacks saveBinary', async () => {
+    CoreManager.setFileController({
+      saveFile: jest.fn(),
+      saveBase64: jest.fn().mockResolvedValue({
+        name: 'parse.txt',
+        url: 'https://files.example.com/a/parse.txt',
+      }),
+    });
+
+    const file = new ParseFile('parse.txt', Buffer.from([61, 170, 236, 120]), 'text/plain');
+    const f = await file.save();
+
+    expect(f).toBe(file);
+    expect(f.name()).toBe('parse.txt');
+    const controller = CoreManager.getFileController();
+    expect(controller.saveBase64).toHaveBeenCalled();
+  });
+
+  it('stream throws when controller lacks saveBinary', async () => {
+    const { Readable } = require('stream');
+    CoreManager.setFileController({
+      saveFile: jest.fn(),
+      saveBase64: jest.fn(),
+    });
+
+    const stream = new Readable({ read() { this.push(null); } });
+    const file = new ParseFile('parse.txt', stream, 'text/plain');
+    try {
+      await file.save();
+      expect(true).toBe(false);
+    } catch (e) {
+      expect(e.message).toBe(
+        'Cannot save a stream-based file without saveBinary support on the FileController.'
+      );
+    }
+  });
+
+  it('buffer with tags falls back to saveBase64', async () => {
+    const request = jest.fn().mockResolvedValue({
+      name: 'parse.txt',
+      url: 'https://files.example.com/a/parse.txt',
+    });
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request, ajax });
+
+    const file = new ParseFile('parse.txt', Buffer.from([61, 170, 236, 120]), 'text/plain');
+    file.addTag('tagKey', 'tagValue');
+    const f = await file.save();
+
+    expect(f).toBe(file);
+    expect(f.name()).toBe('parse.txt');
+    expect(request).toHaveBeenCalledWith(
+      'POST',
+      'files/parse.txt',
+      expect.objectContaining({
+        base64: expect.any(String),
+        fileData: expect.objectContaining({
+          tags: { tagKey: 'tagValue' },
+        }),
+      }),
+      expect.any(Object)
+    );
+    expect(ajax).not.toHaveBeenCalled();
+  });
+
+  it('saveBinary passes Web ReadableStream body directly', async () => {
+    const { ReadableStream: WebReadableStream } = require('stream/web');
+    const origReadableStream = globalThis.ReadableStream;
+    globalThis.ReadableStream = WebReadableStream;
+    try {
+      const stream = new WebReadableStream({
+        start(controller) {
+          controller.enqueue(new Uint8Array([1, 2, 3]));
+          controller.close();
+        },
+      });
+
+      const ajax = jest.fn().mockResolvedValue({
+        response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
+      });
+      CoreManager.setRESTController({ request: () => {}, ajax });
+      CoreManager.set('APPLICATION_ID', 'testAppId');
+
+      const file = new ParseFile('parse.txt', stream, 'application/octet-stream');
+      await file.save();
+
+      // Web ReadableStream (no .pipe/.read) should be passed directly as body
+      const body = ajax.mock.calls[0][2];
+      expect(body).toBe(stream);
+    } finally {
+      globalThis.ReadableStream = origReadableStream;
+    }
   });
 
   it('can save unsaved Parse.File property when localDataStore is enabled.', async () => {

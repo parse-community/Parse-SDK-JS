@@ -3,6 +3,11 @@ import CoreManager from './CoreManager';
 import type { FullOptions } from './RESTController';
 import ParseError from './ParseError';
 
+let NodeReadable: any;
+if (process.env.PARSE_BUILD === 'node') {
+  NodeReadable = require('stream').Readable;
+}
+
 interface Base64 {
   base64: string;
 }
@@ -28,6 +33,16 @@ export type FileSource =
   | {
       format: 'uri';
       uri: string;
+      type: string | undefined;
+    }
+  | {
+      format: 'buffer';
+      buffer: any;
+      type: string | undefined;
+    }
+  | {
+      format: 'stream';
+      stream: any;
       type: string | undefined;
     };
 
@@ -75,8 +90,13 @@ class ParseFile {
    *     1. an Array of byte value Numbers or Uint8Array.
    *     2. an Object like { base64: "..." } with a base64-encoded String.
    *     3. an Object like { uri: "..." } with a uri String.
-   *     4. a File object selected with a file upload control. (3) only works
-   *        in Firefox 3.6+, Safari 6.0.2+, Chrome 7+, and IE 10+.
+   *     4. a File object selected with a file upload control.
+   *     5. (Node.js only) a Buffer. Uploaded as raw binary data instead of
+   *        base64-encoding, reducing memory usage. Falls back to base64
+   *        JSON encoding if metadata or tags are set.
+   *     6. (Node.js only) a Readable stream, or a Web ReadableStream.
+   *        Streamed as raw binary data directly into the upload request.
+   *        Throws if metadata or tags are set.
    *        For example:
    * <pre>
    * var fileUploadControl = $("#profilePhotoFileUpload")[0];
@@ -104,7 +124,30 @@ class ParseFile {
     this._tags = tags || {};
 
     if (data !== undefined) {
-      if (Array.isArray(data) || data instanceof Uint8Array) {
+      if (typeof Buffer !== 'undefined' && Buffer.isBuffer(data)) {
+        this._source = {
+          format: 'buffer',
+          buffer: data,
+          type: specifiedType,
+        };
+      } else if (
+        data !== null &&
+        typeof data === 'object' &&
+        typeof (data as any).pipe === 'function' &&
+        typeof (data as any).read === 'function'
+      ) {
+        this._source = {
+          format: 'stream',
+          stream: data,
+          type: specifiedType,
+        };
+      } else if (typeof ReadableStream !== 'undefined' && data instanceof ReadableStream) {
+        this._source = {
+          format: 'stream',
+          stream: data,
+          type: specifiedType,
+        };
+      } else if (Array.isArray(data) || data instanceof Uint8Array) {
         this._data = ParseFile.encodeBase64(data);
         this._source = {
           format: 'base64',
@@ -163,6 +206,10 @@ class ParseFile {
   async getData(options?: { progress?: () => void }): Promise<string> {
     options = options || {};
     if (this._data) {
+      return this._data;
+    }
+    if (this._source?.format === 'buffer') {
+      this._data = this._source.buffer.toString('base64');
       return this._data;
     }
     if (!this._url) {
@@ -227,6 +274,12 @@ class ParseFile {
   /**
    * Saves the file to the Parse cloud.
    *
+   * In Node.js, files created with Buffer or ReadableStream are uploaded as
+   * raw binary data, avoiding base64 encoding overhead. If metadata
+   * or tags are set on a Buffer-backed file, the upload falls back to base64
+   * JSON encoding (since the binary endpoint does not support metadata).
+   * Stream-backed files with metadata or tags will throw an error.
+   *
    * @param {object} options
    * Valid options are:<ul>
    *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
@@ -255,7 +308,50 @@ class ParseFile {
 
     const controller = CoreManager.getFileController();
     if (!this._previousSave) {
-      if (this._source.format === 'file') {
+      if (this._source.format === 'buffer' || this._source.format === 'stream') {
+        const hasMetadataOrTags =
+          (this._metadata && Object.keys(this._metadata).length > 0) ||
+          (this._tags && Object.keys(this._tags).length > 0);
+
+        if (this._source.format === 'stream' && hasMetadataOrTags) {
+          throw new Error(
+            'Cannot save a stream-based file with metadata or tags. Use a Buffer instead.'
+          );
+        }
+        if (this._source.format === 'stream' && !controller.saveBinary) {
+          throw new Error(
+            'Cannot save a stream-based file without saveBinary support on the FileController.'
+          );
+        }
+
+        if (!hasMetadataOrTags && controller.saveBinary) {
+          // Binary upload via ajax
+          this._previousSave = controller
+            .saveBinary(this._name, this._source, options)
+            .then(res => {
+              this._name = res.name;
+              this._url = res.url;
+              this._data = null;
+              this._requestTask = null;
+              return this;
+            });
+        } else if (this._source.format === 'buffer') {
+          // Buffer: fall back to base64 JSON encoding (metadata/tags or no saveBinary)
+          const base64Source = {
+            format: 'base64' as const,
+            base64: this._source.buffer.toString('base64'),
+            type: this._source.type,
+          };
+          this._previousSave = controller
+            .saveBase64(this._name, base64Source, options)
+            .then(res => {
+              this._name = res.name;
+              this._url = res.url;
+              this._requestTask = null;
+              return this;
+            });
+        }
+      } else if (this._source.format === 'file') {
         this._previousSave = controller.saveFile(this._name, this._source, options).then(res => {
           this._name = res.name;
           this._url = res.url;
@@ -483,6 +579,74 @@ const DefaultController = {
     }
     const path = 'files/' + name;
     return CoreManager.getRESTController().request('POST', path, data, options);
+  },
+
+  saveBinary: async function (
+    name: string,
+    source: FileSource,
+    options: FileSaveOptions = {}
+  ) {
+    if (source.format !== 'buffer' && source.format !== 'stream') {
+      throw new Error('saveBinary can only be used with Buffer or Stream sources.');
+    }
+
+    const headers: Record<string, string> = {
+      'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
+    };
+    headers['Content-Type'] = (source.type || 'application/octet-stream').replace(/[\r\n]/g, '');
+    const jsKey = CoreManager.get('JAVASCRIPT_KEY');
+    if (jsKey) {
+      headers['X-Parse-JavaScript-Key'] = jsKey;
+    }
+    let useMasterKey = options.useMasterKey;
+    if (typeof useMasterKey === 'undefined') {
+      useMasterKey = CoreManager.get('USE_MASTER_KEY');
+    }
+    if (useMasterKey) {
+      if (CoreManager.get('MASTER_KEY')) {
+        delete headers['X-Parse-JavaScript-Key'];
+        headers['X-Parse-Master-Key'] = CoreManager.get('MASTER_KEY');
+      } else {
+        throw new Error('Cannot use the Master Key, it has not been provided.');
+      }
+    }
+
+    if (options.sessionToken) {
+      headers['X-Parse-Session-Token'] = options.sessionToken;
+    } else {
+      const userController = CoreManager.getUserController();
+      if (userController) {
+        const user = await userController.currentUserAsync();
+        if (user) {
+          const token = user.getSessionToken();
+          if (token) {
+            headers['X-Parse-Session-Token'] = token;
+          }
+        }
+      }
+    }
+
+    let body: any;
+    if (source.format === 'buffer') {
+      body = source.buffer;
+    } else if (source.format === 'stream') {
+      const stream = source.stream;
+      if (typeof stream.pipe === 'function' && typeof stream.read === 'function') {
+        body = NodeReadable.toWeb(stream);
+      } else {
+        body = stream;
+      }
+    }
+
+    let url = CoreManager.get('SERVER_URL');
+    if (url[url.length - 1] !== '/') {
+      url += '/';
+    }
+    url += 'files/' + encodeURIComponent(name);
+
+    return CoreManager.getRESTController()
+      .ajax('POST', url, body, headers, options)
+      .then(({ response }) => response);
   },
 
   download: async function (uri, options) {

@@ -22,6 +22,14 @@ export type FileSource = {
     format: 'uri';
     uri: string;
     type: string | undefined;
+} | {
+    format: 'buffer';
+    buffer: any;
+    type: string | undefined;
+} | {
+    format: 'stream';
+    stream: any;
+    type: string | undefined;
 };
 export declare function b64Digit(number: number): string;
 /**
@@ -48,8 +56,13 @@ declare class ParseFile {
      *     1. an Array of byte value Numbers or Uint8Array.
      *     2. an Object like { base64: "..." } with a base64-encoded String.
      *     3. an Object like { uri: "..." } with a uri String.
-     *     4. a File object selected with a file upload control. (3) only works
-     *        in Firefox 3.6+, Safari 6.0.2+, Chrome 7+, and IE 10+.
+     *     4. a File object selected with a file upload control.
+     *     5. (Node.js only) a Buffer. Uploaded as raw binary data instead of
+     *        base64-encoding, reducing memory usage. Falls back to base64
+     *        JSON encoding if metadata or tags are set.
+     *     6. (Node.js only) a Readable stream, or a Web ReadableStream.
+     *        Streamed as raw binary data directly into the upload request.
+     *        Throws if metadata or tags are set.
      *        For example:
      * <pre>
      * var fileUploadControl = $("#profilePhotoFileUpload")[0];
@@ -125,6 +138,12 @@ declare class ParseFile {
     tags(): Record<string, any>;
     /**
      * Saves the file to the Parse cloud.
+     *
+     * In Node.js, files created with Buffer or ReadableStream are uploaded as
+     * raw binary data, avoiding base64 encoding overhead. If metadata
+     * or tags are set on a Buffer-backed file, the upload falls back to base64
+     * JSON encoding (since the binary endpoint does not support metadata).
+     * Stream-backed files with metadata or tags will throw an error.
      *
      * @param {object} options
      * Valid options are:<ul>
