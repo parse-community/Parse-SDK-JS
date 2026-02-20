@@ -592,6 +592,7 @@ const DefaultController = {
 
     const headers: Record<string, string> = {
       'X-Parse-Application-ID': CoreManager.get('APPLICATION_ID'),
+      'X-Parse-Upload-Mode': 'stream',
     };
     headers['Content-Type'] = (source.type || 'application/octet-stream').replace(/[\r\n]/g, '');
     const jsKey = CoreManager.get('JAVASCRIPT_KEY');

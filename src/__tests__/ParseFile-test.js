@@ -914,6 +914,7 @@ describe('FileController', () => {
         'Content-Type': 'application/octet-stream',
         'X-Parse-Application-ID': 'testAppId',
         'X-Parse-JavaScript-Key': 'testJsKey',
+        'X-Parse-Upload-Mode': 'stream',
       }),
       expect.any(Object)
     );
@@ -966,9 +967,32 @@ describe('FileController', () => {
       expect.objectContaining({
         'Content-Type': 'text/plain',
         'X-Parse-Application-ID': 'testAppId',
+        'X-Parse-Upload-Mode': 'stream',
       }),
       expect.any(Object)
     );
+  });
+
+  it('base64 uploads do not include X-Parse-Upload-Mode header', async () => {
+    const request = jest.fn().mockResolvedValue({
+      name: 'parse.txt',
+      url: 'https://files.example.com/a/parse.txt',
+    });
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    await file.save();
+
+    expect(request).toHaveBeenCalledWith(
+      'POST',
+      'files/parse.txt',
+      expect.objectContaining({ base64: expect.any(String) }),
+      expect.any(Object)
+    );
+    // Binary path (which sets X-Parse-Upload-Mode) should not be taken
+    expect(ajax).not.toHaveBeenCalled();
   });
 
   it('saveBinary includes session token from options', async () => {
@@ -1225,6 +1249,8 @@ describe('FileController', () => {
       // Web ReadableStream (no .pipe/.read) should be passed directly as body
       const body = ajax.mock.calls[0][2];
       expect(body).toBe(stream);
+      const headers = ajax.mock.calls[0][3];
+      expect(headers['X-Parse-Upload-Mode']).toBe('stream');
     } finally {
       globalThis.ReadableStream = origReadableStream;
     }
