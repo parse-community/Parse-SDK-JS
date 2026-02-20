@@ -38,6 +38,10 @@ export interface FileController {
         name: string;
         url: string;
     }>;
+    saveBinary?: (name: string, source: FileSource, options?: FileSaveOptions) => Promise<{
+        name: string;
+        url: string;
+    }>;
     download: (uri: string, options?: any) => Promise<{
         base64?: string;
         contentType?: string;

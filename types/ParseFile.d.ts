@@ -57,12 +57,12 @@ declare class ParseFile {
      *     2. an Object like { base64: "..." } with a base64-encoded String.
      *     3. an Object like { uri: "..." } with a uri String.
      *     4. a File object selected with a file upload control.
-     *     5. a Node.js Buffer (binary upload, no base64 overhead).
-     *     6. a Node.js Readable stream or Web ReadableStream (streaming binary upload).
-     *
-     *     In Node.js, formats 5 and 6 use binary upload by default, sending
-     *     the raw data directly instead of base64-encoding it. This significantly
-     *     reduces memory usage for large files.
+     *     5. (Node.js only) a Buffer. Uploaded as raw binary data instead of
+     *        base64-encoding, reducing memory usage. Falls back to base64
+     *        JSON encoding if metadata or tags are set.
+     *     6. (Node.js only) a Readable stream, or a Web ReadableStream.
+     *        Streamed as raw binary data directly into the upload request.
+     *        Throws if metadata or tags are set.
      *        For example:
      * <pre>
      * var fileUploadControl = $("#profilePhotoFileUpload")[0];

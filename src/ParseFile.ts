@@ -90,8 +90,13 @@ class ParseFile {
    *     1. an Array of byte value Numbers or Uint8Array.
    *     2. an Object like { base64: "..." } with a base64-encoded String.
    *     3. an Object like { uri: "..." } with a uri String.
-   *     4. a File object selected with a file upload control. (3) only works
-   *        in Firefox 3.6+, Safari 6.0.2+, Chrome 7+, and IE 10+.
+   *     4. a File object selected with a file upload control.
+   *     5. (Node.js only) a Buffer. Uploaded as raw binary data instead of
+   *        base64-encoding, reducing memory usage. Falls back to base64
+   *        JSON encoding if metadata or tags are set.
+   *     6. (Node.js only) a Readable stream, or a Web ReadableStream.
+   *        Streamed as raw binary data directly into the upload request.
+   *        Throws if metadata or tags are set.
    *        For example:
    * <pre>
    * var fileUploadControl = $("#profilePhotoFileUpload")[0];
