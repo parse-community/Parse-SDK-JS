@@ -1199,6 +1199,35 @@ describe('FileController', () => {
     expect(ajax).not.toHaveBeenCalled();
   });
 
+  it('saveBinary passes Web ReadableStream body directly', async () => {
+    const { ReadableStream: WebReadableStream } = require('stream/web');
+    const origReadableStream = globalThis.ReadableStream;
+    globalThis.ReadableStream = WebReadableStream;
+    try {
+      const stream = new WebReadableStream({
+        start(controller) {
+          controller.enqueue(new Uint8Array([1, 2, 3]));
+          controller.close();
+        },
+      });
+
+      const ajax = jest.fn().mockResolvedValue({
+        response: { name: 'parse.txt', url: 'https://files.example.com/a/parse.txt' },
+      });
+      CoreManager.setRESTController({ request: () => {}, ajax });
+      CoreManager.set('APPLICATION_ID', 'testAppId');
+
+      const file = new ParseFile('parse.txt', stream, 'application/octet-stream');
+      await file.save();
+
+      // Web ReadableStream (no .pipe/.read) should be passed directly as body
+      const body = ajax.mock.calls[0][2];
+      expect(body).toBe(stream);
+    } finally {
+      globalThis.ReadableStream = origReadableStream;
+    }
+  });
+
   it('can save unsaved Parse.File property when localDataStore is enabled.', async () => {
     mockLocalDatastore.isEnabled = true;
     const obj = new ParseObject('Item');

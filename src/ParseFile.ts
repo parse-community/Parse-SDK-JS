@@ -632,14 +632,7 @@ const DefaultController = {
     } else if (source.format === 'stream') {
       const stream = source.stream;
       if (typeof stream.pipe === 'function' && typeof stream.read === 'function') {
-        if (NodeReadable && typeof NodeReadable.toWeb === 'function') {
-          body = NodeReadable.toWeb(stream);
-        } else {
-          throw new Error(
-            'Streaming file uploads require Node.js >= 17.0.0. ' +
-              'Use a Buffer instead, or upgrade your Node.js version.'
-          );
-        }
+        body = NodeReadable.toWeb(stream);
       } else {
         body = stream;
       }
