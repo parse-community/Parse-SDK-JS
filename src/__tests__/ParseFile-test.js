@@ -993,6 +993,7 @@ describe('FileController', () => {
   });
 
   it('saveBinary includes session token from currentUserAsync', async () => {
+    const originalUserController = CoreManager.get('UserController');
     CoreManager.set('UserController', {
       currentUserAsync() {
         return Promise.resolve({
@@ -1020,6 +1021,7 @@ describe('FileController', () => {
       }),
       expect.any(Object)
     );
+    CoreManager.set('UserController', originalUserController);
   });
 
   it('saveBinary includes master key when useMasterKey is true', async () => {
