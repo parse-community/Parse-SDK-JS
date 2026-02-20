@@ -1,3 +1,10 @@
+# [8.2.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/8.2.0-alpha.1...8.2.0-alpha.2) (2026-02-20)
+
+
+### Features
+
+* Add request header `X-Parse-Upload-Mode` to identify file upload as binary data via `Buffer`, `Readable`, `ReadableStream` ([#2927](https://github.com/parse-community/Parse-SDK-JS/issues/2927)) ([a66bb06](https://github.com/parse-community/Parse-SDK-JS/commit/a66bb06116f5d4f944372feafef8d630de1fae77))
+
 # [8.2.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.1-alpha.6...8.2.0-alpha.1) (2026-02-20)
 
 
