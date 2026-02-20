@@ -917,6 +917,7 @@ describe('FileController', () => {
       }),
       expect.any(Object)
     );
+    CoreManager.set('JAVASCRIPT_KEY', null);
   });
 
   it('saveBinary defaults Content-Type to application/octet-stream', async () => {
