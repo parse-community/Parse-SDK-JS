@@ -18,6 +18,7 @@ type FileData = number[] | Base64 | Blob | Uri;
 export type FileSaveOptions = FullOptions & {
   metadata?: Record<string, any>;
   tags?: Record<string, any>;
+  directory?: string;
 };
 export type FileSource =
   | {
@@ -80,6 +81,7 @@ class ParseFile {
   _requestTask?: any;
   _metadata?: Record<string, any>;
   _tags?: Record<string, any>;
+  _directory?: string;
 
   /**
    * @param name {String} The file's name. This will be prefixed by a unique
@@ -272,6 +274,15 @@ class ParseFile {
   }
 
   /**
+   * Gets the directory of the file.
+   *
+   * @returns {string | undefined}
+   */
+  directory(): string | undefined {
+    return this._directory;
+  }
+
+  /**
    * Saves the file to the Parse cloud.
    *
    * In Node.js, files created with Buffer or ReadableStream are uploaded as
@@ -305,6 +316,7 @@ class ParseFile {
     options.requestTask = task => (this._requestTask = task);
     options.metadata = this._metadata;
     options.tags = this._tags;
+    options.directory = this._directory;
 
     const controller = CoreManager.getFileController();
     if (!this._previousSave) {
@@ -504,6 +516,18 @@ class ParseFile {
     }
   }
 
+  /**
+   * Sets the directory where the file will be stored.
+   * Requires the Master Key when saving.
+   *
+   * @param {string} directory the directory path
+   */
+  setDirectory(directory: string) {
+    if (typeof directory === 'string') {
+      this._directory = directory;
+    }
+  }
+
   static fromJSON(obj): ParseFile {
     if (obj.__type !== 'File') {
       throw new TypeError('JSON object does not represent a ParseFile');
@@ -570,10 +594,12 @@ const DefaultController = {
       fileData: {
         metadata: { ...options.metadata },
         tags: { ...options.tags },
+        ...(options.directory ? { directory: options.directory } : {}),
       },
     };
     delete options.metadata;
     delete options.tags;
+    delete options.directory;
     if (source.type) {
       data._ContentType = source.type;
     }
