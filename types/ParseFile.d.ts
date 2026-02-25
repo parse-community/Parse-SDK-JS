@@ -9,6 +9,7 @@ type FileData = number[] | Base64 | Blob | Uri;
 export type FileSaveOptions = FullOptions & {
     metadata?: Record<string, any>;
     tags?: Record<string, any>;
+    directory?: string;
 };
 export type FileSource = {
     format: 'file';
@@ -47,6 +48,7 @@ declare class ParseFile {
     _requestTask?: any;
     _metadata?: Record<string, any>;
     _tags?: Record<string, any>;
+    _directory?: string;
     /**
      * @param name {String} The file's name. This will be prefixed by a unique
      *     value once the file has finished saving. The file name must begin with
@@ -137,6 +139,12 @@ declare class ParseFile {
      */
     tags(): Record<string, any>;
     /**
+     * Gets the directory of the file.
+     *
+     * @returns {string | undefined}
+     */
+    directory(): string | undefined;
+    /**
      * Saves the file to the Parse cloud.
      *
      * In Node.js, files created with Buffer or ReadableStream are uploaded as
@@ -216,6 +224,13 @@ declare class ParseFile {
      * @param {*} value tag
      */
     addTag(key: string, value: string): void;
+    /**
+     * Sets the directory where the file will be stored.
+     * Requires the Master Key when saving.
+     *
+     * @param {string} directory the directory path
+     */
+    setDirectory(directory: string): void;
     static fromJSON(obj: any): ParseFile;
     static encodeBase64(bytes: number[] | Uint8Array): string;
 }
