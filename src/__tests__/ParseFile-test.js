@@ -351,6 +351,33 @@ describe('ParseFile', () => {
       {
         metadata: { foo: 'bar' },
         tags: { bar: 'foo' },
+        directory: undefined,
+        requestTask: expect.any(Function),
+      }
+    );
+  });
+
+  it('should save file with directory option', async () => {
+    const fileController = {
+      saveFile: jest.fn().mockResolvedValue({}),
+      saveBase64: () => {},
+      download: () => {},
+    };
+    CoreManager.setFileController(fileController);
+    const file = new ParseFile('donald_duck.txt', new File(['Parse'], 'donald_duck.txt'));
+    file.setDirectory('user-uploads/avatars');
+    await file.save();
+    expect(fileController.saveFile).toHaveBeenCalledWith(
+      'donald_duck.txt',
+      {
+        file: expect.any(File),
+        format: 'file',
+        type: '',
+      },
+      {
+        metadata: {},
+        tags: {},
+        directory: 'user-uploads/avatars',
         requestTask: expect.any(Function),
       }
     );
@@ -401,6 +428,29 @@ describe('ParseFile', () => {
     const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
     file.addTag(10, 'bar');
     expect(file.tags()).toEqual({});
+  });
+
+  it('should set directory', () => {
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file.setDirectory('user-uploads/avatars');
+    expect(file.directory()).toBe('user-uploads/avatars');
+  });
+
+  it('should not set directory if value is not a string', () => {
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file.setDirectory(123);
+    expect(file.directory()).toBeUndefined();
+  });
+
+  it('should not set directory if value is an empty string', () => {
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    file.setDirectory('');
+    expect(file.directory()).toBeUndefined();
+  });
+
+  it('should return undefined directory by default', () => {
+    const file = new ParseFile('parse.txt', [61, 170, 236, 120]);
+    expect(file.directory()).toBeUndefined();
   });
 
   it('can create files with a Buffer', () => {
@@ -755,6 +805,68 @@ describe('FileController', () => {
           tags: {
             bar: 'foo',
           },
+        },
+      },
+      { requestTask: expect.any(Function) }
+    );
+  });
+
+  it('should include directory in fileData payload when saving', async () => {
+    const request = jest.fn((method, path) => {
+      const name = path.substr(path.indexOf('/') + 1);
+      return Promise.resolve({
+        name: name,
+        url: 'https://files.example.com/a/' + name,
+      });
+    });
+    const ajax = function () {
+      return Promise.resolve({ response: {} });
+    };
+    CoreManager.setRESTController({ request, ajax });
+
+    const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
+    file.setDirectory('user-uploads/avatars');
+    await file.save();
+    expect(request).toHaveBeenCalledWith(
+      'POST',
+      'files/parse.txt',
+      {
+        base64: 'ParseA==',
+        _ContentType: 'text/plain',
+        fileData: {
+          metadata: {},
+          tags: {},
+          directory: 'user-uploads/avatars',
+        },
+      },
+      { requestTask: expect.any(Function) }
+    );
+  });
+
+  it('should not include directory in fileData payload when not set', async () => {
+    const request = jest.fn((method, path) => {
+      const name = path.substr(path.indexOf('/') + 1);
+      return Promise.resolve({
+        name: name,
+        url: 'https://files.example.com/a/' + name,
+      });
+    });
+    const ajax = function () {
+      return Promise.resolve({ response: {} });
+    };
+    CoreManager.setRESTController({ request, ajax });
+
+    const file = new ParseFile('parse.txt', { base64: 'ParseA==' });
+    await file.save();
+    expect(request).toHaveBeenCalledWith(
+      'POST',
+      'files/parse.txt',
+      {
+        base64: 'ParseA==',
+        _ContentType: 'text/plain',
+        fileData: {
+          metadata: {},
+          tags: {},
         },
       },
       { requestTask: expect.any(Function) }
@@ -1139,7 +1251,7 @@ describe('FileController', () => {
       expect(true).toBe(false);
     } catch (e) {
       expect(e.message).toBe(
-        'Cannot save a stream-based file with metadata or tags. Use a Buffer instead.'
+        'Cannot save a stream-based file with metadata, tags, or directory. Use a Buffer instead.'
       );
     }
   });
@@ -1158,6 +1270,29 @@ describe('FileController', () => {
     expect(f).toBe(file);
     expect(ajax).toHaveBeenCalled();
     expect(request).not.toHaveBeenCalled();
+  });
+
+  it('buffer with directory falls back to saveBase64', async () => {
+    const request = jest.fn().mockResolvedValue({
+      name: 'parse.txt',
+      url: 'https://files.example.com/a/parse.txt',
+    });
+    const ajax = jest.fn();
+    CoreManager.setRESTController({ request, ajax });
+
+    const file = new ParseFile('parse.txt', Buffer.from([61, 170, 236, 120]), 'text/plain');
+    file.setDirectory('user-uploads/avatars');
+    await file.save();
+
+    expect(ajax).not.toHaveBeenCalled();
+    expect(request).toHaveBeenCalledWith(
+      'POST',
+      'files/parse.txt',
+      expect.objectContaining({
+        fileData: expect.objectContaining({ directory: 'user-uploads/avatars' }),
+      }),
+      expect.any(Object)
+    );
   });
 
   it('falls back to saveBase64 when controller lacks saveBinary', async () => {
