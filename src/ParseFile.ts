@@ -321,13 +321,14 @@ class ParseFile {
     const controller = CoreManager.getFileController();
     if (!this._previousSave) {
       if (this._source.format === 'buffer' || this._source.format === 'stream') {
-        const hasMetadataOrTags =
+        const hasFileData =
           (this._metadata && Object.keys(this._metadata).length > 0) ||
-          (this._tags && Object.keys(this._tags).length > 0);
+          (this._tags && Object.keys(this._tags).length > 0) ||
+          !!this._directory;
 
-        if (this._source.format === 'stream' && hasMetadataOrTags) {
+        if (this._source.format === 'stream' && hasFileData) {
           throw new Error(
-            'Cannot save a stream-based file with metadata or tags. Use a Buffer instead.'
+            'Cannot save a stream-based file with metadata, tags, or directory. Use a Buffer instead.'
           );
         }
         if (this._source.format === 'stream' && !controller.saveBinary) {
@@ -336,7 +337,7 @@ class ParseFile {
           );
         }
 
-        if (!hasMetadataOrTags && controller.saveBinary) {
+        if (!hasFileData && controller.saveBinary) {
           // Binary upload via ajax
           this._previousSave = controller
             .saveBinary(this._name, this._source, options)
@@ -523,7 +524,7 @@ class ParseFile {
    * @param {string} directory the directory path
    */
   setDirectory(directory: string) {
-    if (typeof directory === 'string') {
+    if (typeof directory === 'string' && directory.length > 0) {
       this._directory = directory;
     }
   }
