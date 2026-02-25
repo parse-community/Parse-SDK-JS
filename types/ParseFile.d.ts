@@ -140,6 +140,7 @@ declare class ParseFile {
     tags(): Record<string, any>;
     /**
      * Gets the directory of the file.
+     * Requires Parse Server >= 9.4.0.
      *
      * @returns {string | undefined}
      */
@@ -227,6 +228,7 @@ declare class ParseFile {
     /**
      * Sets the directory where the file will be stored.
      * Requires the Master Key when saving.
+     * Requires Parse Server >= 9.4.0.
      *
      * @param {string} directory the directory path
      */
