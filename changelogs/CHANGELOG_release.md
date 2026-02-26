@@ -1,3 +1,10 @@
+# [8.3.0](https://github.com/parse-community/Parse-SDK-JS/compare/8.2.0...8.3.0) (2026-02-25)
+
+
+### Features
+
+* Add support for `Parse.File.setDirectory()` with master key to save file in directory ([#2929](https://github.com/parse-community/Parse-SDK-JS/issues/2929)) ([1923db0](https://github.com/parse-community/Parse-SDK-JS/commit/1923db0a4cb08394266137f99f7183218c3e3ebd))
+
 # [8.2.0](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.0...8.2.0) (2026-02-20)
 
 
