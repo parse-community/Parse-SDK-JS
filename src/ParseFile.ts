@@ -648,7 +648,7 @@ const DefaultController = {
       headers['X-Parse-File-Tags'] = JSON.stringify(options.tags);
     }
     if (options.maxUploadSize) {
-      headers['X-Parse-File-Max-Upload-Size'] = options.maxUploadSize;
+      headers['X-Parse-File-Max-Upload-Size'] = options.maxUploadSize.replace(/[\r\n]/g, '');
     }
     const jsKey = CoreManager.get('JAVASCRIPT_KEY');
     if (jsKey) {
