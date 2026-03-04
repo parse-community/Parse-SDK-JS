@@ -19,6 +19,7 @@ export type FileSaveOptions = FullOptions & {
   metadata?: Record<string, any>;
   tags?: Record<string, any>;
   directory?: string;
+  maxUploadSize?: string;
 };
 export type FileSource =
   | {
@@ -333,7 +334,7 @@ class ParseFile {
           (this._tags && Object.keys(this._tags).length > 0) ||
           !!this._directory;
 
-        if (controller.saveBinary && (this._source.format === 'stream' || !hasFileData)) {
+        if (controller.saveBinary && (this._source.format === 'stream' || !hasFileData || options.maxUploadSize)) {
           // Binary upload via ajax (file data sent via headers for streams)
           this._previousSave = controller
             .saveBinary(this._name, this._source, options)
@@ -631,6 +632,9 @@ const DefaultController = {
     }
     if (options.tags && Object.keys(options.tags).length > 0) {
       headers['X-Parse-File-Tags'] = JSON.stringify(options.tags);
+    }
+    if (options.maxUploadSize) {
+      headers['X-Parse-File-Max-Upload-Size'] = options.maxUploadSize;
     }
     const jsKey = CoreManager.get('JAVASCRIPT_KEY');
     if (jsKey) {

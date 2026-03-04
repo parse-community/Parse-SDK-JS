@@ -10,6 +10,7 @@ export type FileSaveOptions = FullOptions & {
     metadata?: Record<string, any>;
     tags?: Record<string, any>;
     directory?: string;
+    maxUploadSize?: string;
 };
 export type FileSource = {
     format: 'file';
