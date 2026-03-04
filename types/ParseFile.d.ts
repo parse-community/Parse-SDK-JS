@@ -10,6 +10,17 @@ export type FileSaveOptions = FullOptions & {
     metadata?: Record<string, any>;
     tags?: Record<string, any>;
     directory?: string;
+    /**
+     * Overrides the server's `maxUploadSize` for this file upload. Requires the
+     * master key (`useMasterKey: true`). The value uses the same format as the
+     * server option (e.g. `'50mb'`, `'1gb'`).
+     *
+     * Only supported for Buffer and Stream source types. Files created from
+     * base64 strings, number arrays, Blobs, or URIs do not support this option.
+     *
+     * Requires Parse Server >= 9.5.0.
+     */
+    maxUploadSize?: string;
 };
 export type FileSource = {
     format: 'file';
@@ -171,6 +182,10 @@ declare class ParseFile {
      *   }
      * });
      * </pre>
+     *   <li>maxUploadSize: Overrides the server's maxUploadSize for this upload.
+     *     Requires the master key. Only supported for Buffer and Stream source
+     *     types; files created from base64 strings, number arrays, Blobs, or URIs
+     *     do not support this option. Requires Parse Server >= 9.5.0.
      * </ul>
      * @returns {Promise | undefined} Promise that is resolved when the save finishes.
      */

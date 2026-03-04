@@ -1,3 +1,10 @@
+# [8.5.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.4.0...8.5.0-alpha.1) (2026-03-04)
+
+
+### Features
+
+* Add `Parse.File` option `maxUploadSize` to override the Parse Server option `maxUploadSize` per file upload ([#2940](https://github.com/parse-community/Parse-SDK-JS/issues/2940)) ([80cab9b](https://github.com/parse-community/Parse-SDK-JS/commit/80cab9b16cf826fa1414bff5f04dbfb7ff18c4d3))
+
 # [8.4.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.3.0...8.4.0-alpha.1) (2026-03-04)
 
 
