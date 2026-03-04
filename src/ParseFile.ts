@@ -623,10 +623,10 @@ const DefaultController = {
       headers['X-Parse-File-Directory'] = options.directory.replace(/[\r\n]/g, '');
     }
     if (options.metadata && Object.keys(options.metadata).length > 0) {
-      headers['X-Parse-File-Metadata'] = JSON.stringify(options.metadata).replace(/[\r\n]/g, '');
+      headers['X-Parse-File-Metadata'] = JSON.stringify(options.metadata);
     }
     if (options.tags && Object.keys(options.tags).length > 0) {
-      headers['X-Parse-File-Tags'] = JSON.stringify(options.tags).replace(/[\r\n]/g, '');
+      headers['X-Parse-File-Tags'] = JSON.stringify(options.tags);
     }
     const jsKey = CoreManager.get('JAVASCRIPT_KEY');
     if (jsKey) {
