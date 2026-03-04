@@ -464,7 +464,8 @@ class ParseFile {
   }
 
   /**
-   * Sets metadata to be saved with file object. Overwrites existing metadata
+   * Sets metadata to be saved with file object. Overwrites existing metadata.
+   * When used with a stream-based file, requires Parse Server >= 9.5.0.
    *
    * @param {object} metadata Key value pairs to be stored with file object
    */
@@ -478,6 +479,7 @@ class ParseFile {
 
   /**
    * Sets metadata to be saved with file object. Adds to existing metadata.
+   * When used with a stream-based file, requires Parse Server >= 9.5.0.
    *
    * @param {string} key key to store the metadata
    * @param {*} value metadata
@@ -489,7 +491,8 @@ class ParseFile {
   }
 
   /**
-   * Sets tags to be saved with file object. Overwrites existing tags
+   * Sets tags to be saved with file object. Overwrites existing tags.
+   * When used with a stream-based file, requires Parse Server >= 9.5.0.
    *
    * @param {object} tags Key value pairs to be stored with file object
    */
@@ -503,6 +506,7 @@ class ParseFile {
 
   /**
    * Sets tags to be saved with file object. Adds to existing tags.
+   * When used with a stream-based file, requires Parse Server >= 9.5.0.
    *
    * @param {string} key key to store tags
    * @param {*} value tag
@@ -516,7 +520,7 @@ class ParseFile {
   /**
    * Sets the directory where the file will be stored.
    * Requires the Master Key when saving.
-   * Requires Parse Server >= 9.4.0.
+   * Requires Parse Server >= 9.4.0; when used with a stream-based file, requires Parse Server >= 9.5.0.
    *
    * @param {string} directory the directory path
    */
