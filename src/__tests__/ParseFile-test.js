@@ -1241,19 +1241,30 @@ describe('FileController', () => {
     expect(ajax).not.toHaveBeenCalled();
   });
 
-  it('stream with metadata throws error', async () => {
+  it('stream with file data uses saveBinary with headers', async () => {
+    const ajax = jest.fn().mockResolvedValue({
+      response: { name: 'mydir/parse.txt', url: 'https://files.example.com/a/mydir/parse.txt' },
+    });
+    const request = jest.fn();
+    CoreManager.setRESTController({ request, ajax });
+    CoreManager.set('APPLICATION_ID', 'testAppId');
+    CoreManager.set('MASTER_KEY', 'testMasterKey');
+
     const { Readable } = require('stream');
-    const stream = new Readable({ read() { this.push(null); } });
+    const stream = new Readable({ read() { this.push('hello'); this.push(null); } });
     const file = new ParseFile('parse.txt', stream, 'text/plain');
-    file.addMetadata('foo', 'bar');
-    try {
-      await file.save();
-      expect(true).toBe(false);
-    } catch (e) {
-      expect(e.message).toBe(
-        'Cannot save a stream-based file with metadata, tags, or directory. Use a Buffer instead.'
-      );
-    }
+    file.setDirectory('mydir');
+    file.addMetadata('key1', 'value1');
+    file.addTag('tag1', 'tagValue1');
+    const f = await file.save({ useMasterKey: true });
+
+    expect(f).toBe(file);
+    expect(ajax).toHaveBeenCalled();
+    const [, , , headers] = ajax.mock.calls[0];
+    expect(headers['X-Parse-File-Directory']).toBe('mydir');
+    expect(headers['X-Parse-File-Metadata']).toBe('{"key1":"value1"}');
+    expect(headers['X-Parse-File-Tags']).toBe('{"tag1":"tagValue1"}');
+    expect(request).not.toHaveBeenCalled();
   });
 
   it('buffer without metadata uses saveBinary', async () => {

@@ -322,24 +322,19 @@ class ParseFile {
     const controller = CoreManager.getFileController();
     if (!this._previousSave) {
       if (this._source.format === 'buffer' || this._source.format === 'stream') {
-        const hasFileData =
-          (this._metadata && Object.keys(this._metadata).length > 0) ||
-          (this._tags && Object.keys(this._tags).length > 0) ||
-          !!this._directory;
-
-        if (this._source.format === 'stream' && hasFileData) {
-          throw new Error(
-            'Cannot save a stream-based file with metadata, tags, or directory. Use a Buffer instead.'
-          );
-        }
         if (this._source.format === 'stream' && !controller.saveBinary) {
           throw new Error(
             'Cannot save a stream-based file without saveBinary support on the FileController.'
           );
         }
 
-        if (!hasFileData && controller.saveBinary) {
-          // Binary upload via ajax
+        const hasFileData =
+          (this._metadata && Object.keys(this._metadata).length > 0) ||
+          (this._tags && Object.keys(this._tags).length > 0) ||
+          !!this._directory;
+
+        if (controller.saveBinary && (this._source.format === 'stream' || !hasFileData)) {
+          // Binary upload via ajax (file data sent via headers for streams)
           this._previousSave = controller
             .saveBinary(this._name, this._source, options)
             .then(res => {
@@ -624,6 +619,15 @@ const DefaultController = {
       'X-Parse-Upload-Mode': 'stream',
     };
     headers['Content-Type'] = (source.type || 'application/octet-stream').replace(/[\r\n]/g, '');
+    if (options.directory) {
+      headers['X-Parse-File-Directory'] = options.directory.replace(/[\r\n]/g, '');
+    }
+    if (options.metadata && Object.keys(options.metadata).length > 0) {
+      headers['X-Parse-File-Metadata'] = JSON.stringify(options.metadata).replace(/[\r\n]/g, '');
+    }
+    if (options.tags && Object.keys(options.tags).length > 0) {
+      headers['X-Parse-File-Tags'] = JSON.stringify(options.tags).replace(/[\r\n]/g, '');
+    }
     const jsKey = CoreManager.get('JAVASCRIPT_KEY');
     if (jsKey) {
       headers['X-Parse-JavaScript-Key'] = jsKey;
