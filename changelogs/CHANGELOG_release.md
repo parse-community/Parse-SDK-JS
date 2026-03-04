@@ -1,3 +1,10 @@
+# [8.4.0](https://github.com/parse-community/Parse-SDK-JS/compare/8.3.0...8.4.0) (2026-03-04)
+
+
+### Features
+
+* Add support for `Parse.File.setDirectory`, `setMetadata`, `setTags` with stream-based file upload ([#2937](https://github.com/parse-community/Parse-SDK-JS/issues/2937)) ([18ded83](https://github.com/parse-community/Parse-SDK-JS/commit/18ded83e69692e67ca0aeec86f62ec24e7e4407e))
+
 # [8.3.0](https://github.com/parse-community/Parse-SDK-JS/compare/8.2.0...8.3.0) (2026-02-25)
 
 
