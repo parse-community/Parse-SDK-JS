@@ -98,7 +98,7 @@ class ParseFile {
    *        JSON encoding if metadata or tags are set.
    *     6. (Node.js only) a Readable stream, or a Web ReadableStream.
    *        Streamed as raw binary data directly into the upload request.
-   *        Throws if metadata or tags are set.
+   *        Supports metadata, tags, and directory when Parse Server >= 9.5.0.
    *        For example:
    * <pre>
    * var fileUploadControl = $("#profilePhotoFileUpload")[0];
@@ -289,8 +289,8 @@ class ParseFile {
    * In Node.js, files created with Buffer or ReadableStream are uploaded as
    * raw binary data, avoiding base64 encoding overhead. If metadata
    * or tags are set on a Buffer-backed file, the upload falls back to base64
-   * JSON encoding (since the binary endpoint does not support metadata).
-   * Stream-backed files with metadata or tags will throw an error.
+   * JSON encoding. Stream-backed files support metadata, tags, and directory
+   * when Parse Server >= 9.5.0.
    *
    * @param {object} options
    * Valid options are:<ul>
