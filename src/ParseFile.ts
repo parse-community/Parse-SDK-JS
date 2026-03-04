@@ -98,7 +98,7 @@ class ParseFile {
    *        JSON encoding if metadata or tags are set.
    *     6. (Node.js only) a Readable stream, or a Web ReadableStream.
    *        Streamed as raw binary data directly into the upload request.
-   *        Throws if metadata or tags are set.
+   *        Supports metadata, tags, and directory when Parse Server >= 9.5.0.
    *        For example:
    * <pre>
    * var fileUploadControl = $("#profilePhotoFileUpload")[0];
@@ -289,8 +289,8 @@ class ParseFile {
    * In Node.js, files created with Buffer or ReadableStream are uploaded as
    * raw binary data, avoiding base64 encoding overhead. If metadata
    * or tags are set on a Buffer-backed file, the upload falls back to base64
-   * JSON encoding (since the binary endpoint does not support metadata).
-   * Stream-backed files with metadata or tags will throw an error.
+   * JSON encoding. Stream-backed files support metadata, tags, and directory
+   * when Parse Server >= 9.5.0.
    *
    * @param {object} options
    * Valid options are:<ul>
@@ -322,24 +322,19 @@ class ParseFile {
     const controller = CoreManager.getFileController();
     if (!this._previousSave) {
       if (this._source.format === 'buffer' || this._source.format === 'stream') {
-        const hasFileData =
-          (this._metadata && Object.keys(this._metadata).length > 0) ||
-          (this._tags && Object.keys(this._tags).length > 0) ||
-          !!this._directory;
-
-        if (this._source.format === 'stream' && hasFileData) {
-          throw new Error(
-            'Cannot save a stream-based file with metadata, tags, or directory. Use a Buffer instead.'
-          );
-        }
         if (this._source.format === 'stream' && !controller.saveBinary) {
           throw new Error(
             'Cannot save a stream-based file without saveBinary support on the FileController.'
           );
         }
 
-        if (!hasFileData && controller.saveBinary) {
-          // Binary upload via ajax
+        const hasFileData =
+          (this._metadata && Object.keys(this._metadata).length > 0) ||
+          (this._tags && Object.keys(this._tags).length > 0) ||
+          !!this._directory;
+
+        if (controller.saveBinary && (this._source.format === 'stream' || !hasFileData)) {
+          // Binary upload via ajax (file data sent via headers for streams)
           this._previousSave = controller
             .saveBinary(this._name, this._source, options)
             .then(res => {
@@ -469,7 +464,8 @@ class ParseFile {
   }
 
   /**
-   * Sets metadata to be saved with file object. Overwrites existing metadata
+   * Sets metadata to be saved with file object. Overwrites existing metadata.
+   * When used with a stream-based file, requires Parse Server >= 9.5.0.
    *
    * @param {object} metadata Key value pairs to be stored with file object
    */
@@ -483,6 +479,7 @@ class ParseFile {
 
   /**
    * Sets metadata to be saved with file object. Adds to existing metadata.
+   * When used with a stream-based file, requires Parse Server >= 9.5.0.
    *
    * @param {string} key key to store the metadata
    * @param {*} value metadata
@@ -494,7 +491,8 @@ class ParseFile {
   }
 
   /**
-   * Sets tags to be saved with file object. Overwrites existing tags
+   * Sets tags to be saved with file object. Overwrites existing tags.
+   * When used with a stream-based file, requires Parse Server >= 9.5.0.
    *
    * @param {object} tags Key value pairs to be stored with file object
    */
@@ -508,6 +506,7 @@ class ParseFile {
 
   /**
    * Sets tags to be saved with file object. Adds to existing tags.
+   * When used with a stream-based file, requires Parse Server >= 9.5.0.
    *
    * @param {string} key key to store tags
    * @param {*} value tag
@@ -521,7 +520,7 @@ class ParseFile {
   /**
    * Sets the directory where the file will be stored.
    * Requires the Master Key when saving.
-   * Requires Parse Server >= 9.4.0.
+   * Requires Parse Server >= 9.4.0; when used with a stream-based file, requires Parse Server >= 9.5.0.
    *
    * @param {string} directory the directory path
    */
@@ -624,6 +623,15 @@ const DefaultController = {
       'X-Parse-Upload-Mode': 'stream',
     };
     headers['Content-Type'] = (source.type || 'application/octet-stream').replace(/[\r\n]/g, '');
+    if (options.directory) {
+      headers['X-Parse-File-Directory'] = options.directory.replace(/[\r\n]/g, '');
+    }
+    if (options.metadata && Object.keys(options.metadata).length > 0) {
+      headers['X-Parse-File-Metadata'] = JSON.stringify(options.metadata);
+    }
+    if (options.tags && Object.keys(options.tags).length > 0) {
+      headers['X-Parse-File-Tags'] = JSON.stringify(options.tags);
+    }
     const jsKey = CoreManager.get('JAVASCRIPT_KEY');
     if (jsKey) {
       headers['X-Parse-JavaScript-Key'] = jsKey;

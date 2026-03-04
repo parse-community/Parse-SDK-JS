@@ -64,7 +64,7 @@ declare class ParseFile {
      *        JSON encoding if metadata or tags are set.
      *     6. (Node.js only) a Readable stream, or a Web ReadableStream.
      *        Streamed as raw binary data directly into the upload request.
-     *        Throws if metadata or tags are set.
+     *        Supports metadata, tags, and directory when Parse Server >= 9.5.0.
      *        For example:
      * <pre>
      * var fileUploadControl = $("#profilePhotoFileUpload")[0];
@@ -151,8 +151,8 @@ declare class ParseFile {
      * In Node.js, files created with Buffer or ReadableStream are uploaded as
      * raw binary data, avoiding base64 encoding overhead. If metadata
      * or tags are set on a Buffer-backed file, the upload falls back to base64
-     * JSON encoding (since the binary endpoint does not support metadata).
-     * Stream-backed files with metadata or tags will throw an error.
+     * JSON encoding. Stream-backed files support metadata, tags, and directory
+     * when Parse Server >= 9.5.0.
      *
      * @param {object} options
      * Valid options are:<ul>
@@ -200,26 +200,30 @@ declare class ParseFile {
     };
     equals(other: any): boolean;
     /**
-     * Sets metadata to be saved with file object. Overwrites existing metadata
+     * Sets metadata to be saved with file object. Overwrites existing metadata.
+     * When used with a stream-based file, requires Parse Server >= 9.5.0.
      *
      * @param {object} metadata Key value pairs to be stored with file object
      */
     setMetadata(metadata: Record<string, any>): void;
     /**
      * Sets metadata to be saved with file object. Adds to existing metadata.
+     * When used with a stream-based file, requires Parse Server >= 9.5.0.
      *
      * @param {string} key key to store the metadata
      * @param {*} value metadata
      */
     addMetadata(key: string, value: any): void;
     /**
-     * Sets tags to be saved with file object. Overwrites existing tags
+     * Sets tags to be saved with file object. Overwrites existing tags.
+     * When used with a stream-based file, requires Parse Server >= 9.5.0.
      *
      * @param {object} tags Key value pairs to be stored with file object
      */
     setTags(tags: Record<string, any>): void;
     /**
      * Sets tags to be saved with file object. Adds to existing tags.
+     * When used with a stream-based file, requires Parse Server >= 9.5.0.
      *
      * @param {string} key key to store tags
      * @param {*} value tag
@@ -228,7 +232,7 @@ declare class ParseFile {
     /**
      * Sets the directory where the file will be stored.
      * Requires the Master Key when saving.
-     * Requires Parse Server >= 9.4.0.
+     * Requires Parse Server >= 9.4.0; when used with a stream-based file, requires Parse Server >= 9.5.0.
      *
      * @param {string} directory the directory path
      */
