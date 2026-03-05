@@ -226,16 +226,34 @@ export function commitServerChanges(
       continue;
     }
     const val = changes[attr];
+    // Set the change value to server data using nested path
     nestedSet(serverData, attr, val);
+    
+    // Initialize cache value and cache key
+    let cacheVal = val,
+        cacheKey = attr
+    
+    // Handle nested attributes (dot notation)
+    if (attr.indexOf('.') >= 0) {
+      // Split attribute path and use first key for caching
+      const [firstKey, ..._rest] = attr.split('.')
+      cacheKey = firstKey
+      // Get the actual value from server data using first key
+      cacheVal = serverData[firstKey]
+    }
+    
+    // Check if cache value should be serialized and stored
+    // Only serialize plain objects, not Parse instances
     if (
-      val &&
-      typeof val === 'object' &&
-      !(val instanceof ParseObject) &&
-      !(val instanceof ParseFile) &&
-      !(val instanceof ParseRelation)
+      cacheVal && // Value exists
+      typeof cacheVal === 'object' && // Is an object
+      !(cacheVal instanceof ParseObject) &&
+      !(cacheVal instanceof ParseFile) &&
+      !(cacheVal instanceof ParseRelation)
     ) {
-      const json = encode(val, false, true);
-      objectCache[attr] = JSON.stringify(json);
+      const json = encode(cacheVal, false, true)
+      // Store serialized JSON string in object cache
+      objectCache[cacheKey] = JSON.stringify(json)
     }
   }
 }
