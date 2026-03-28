@@ -996,7 +996,7 @@ describe('Parse User', () => {
       getAuthData() {
         return {
           authData: {
-            id: 1234,
+            id: '1234',
           },
         };
       },
@@ -1047,13 +1047,9 @@ describe('Parse User', () => {
   });
 
   it('can link with twitter', async () => {
-    const twitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default;
-    spyOn(twitterAdapter, 'beforeFind').and.callFake(() => {
-      return Promise.resolve();
-    });
-
     const server = await reconfigureServer();
     const twitter = server.config.auth.twitter;
+    spyOn(twitter, 'beforeFind').and.callFake(() => Promise.resolve());
     const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
 
     Parse.User.enableUnsafeCurrentUser();
@@ -1072,13 +1068,9 @@ describe('Parse User', () => {
   });
 
   it('can link with twitter and facebook', async () => {
-    const twitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default;
-    spyOn(twitterAdapter, 'beforeFind').and.callFake(() => {
-      return Promise.resolve();
-    });
-
     const server = await reconfigureServer();
     const twitter = server.config.auth.twitter;
+    spyOn(twitter, 'beforeFind').and.callFake(() => Promise.resolve());
     const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
 
     Parse.User.enableUnsafeCurrentUser();
