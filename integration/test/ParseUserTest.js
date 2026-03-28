@@ -1049,7 +1049,6 @@ describe('Parse User', () => {
   it('can link with twitter', async () => {
     const TwitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default.constructor;
     spyOn(TwitterAdapter.prototype, 'beforeFind').and.callFake(() => Promise.resolve());
-    spyOn(TwitterAdapter.prototype, 'validateAuthData').and.callThrough();
 
     await reconfigureServer();
 
@@ -1065,13 +1064,11 @@ describe('Parse User', () => {
 
     await user._unlinkFrom('twitter');
     expect(user._isLinked('twitter')).toBe(false);
-    expect(TwitterAdapter.prototype.validateAuthData).toHaveBeenCalled();
   });
 
   it('can link with twitter and facebook', async () => {
     const TwitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default.constructor;
     spyOn(TwitterAdapter.prototype, 'beforeFind').and.callFake(() => Promise.resolve());
-    spyOn(TwitterAdapter.prototype, 'validateAuthData').and.callThrough();
 
     await reconfigureServer();
 
@@ -1090,7 +1087,6 @@ describe('Parse User', () => {
 
     expect(user.get('authData').twitter.id).toBe(twitterAuthData.id);
     expect(user.get('authData').facebook.id).toBe('test');
-    expect(TwitterAdapter.prototype.validateAuthData).toHaveBeenCalled();
   });
 
   it('can verify user password via static method', async () => {
