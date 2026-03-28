@@ -77,27 +77,43 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: Node 20
+          - name: Node 20, Parse Server 8
             NODE_VERSION: 20.19.0
-          - name: Node 22
+            PARSE_SERVER_VERSION: 8
+          - name: Node 22, Parse Server 8
             NODE_VERSION: 22.12.0
-          - name: Node 24
+            PARSE_SERVER_VERSION: 8
+          - name: Node 24, Parse Server 8
             NODE_VERSION: 24.1.0
+            PARSE_SERVER_VERSION: 8
+          - name: Node 20, Parse Server 9
+            NODE_VERSION: 20.19.0
+            PARSE_SERVER_VERSION: 9
+          - name: Node 22, Parse Server 9
+            NODE_VERSION: 22.12.0
+            PARSE_SERVER_VERSION: 9
+          - name: Node 24, Parse Server 9
+            NODE_VERSION: 24.1.0
+            PARSE_SERVER_VERSION: 9
       fail-fast: false
+    name: Build - ${{ matrix.name }}
     steps:
     - name: Fix usage of insecure GitHub protocol
       run: sudo git config --system url."https://github".insteadOf "git://github"
     - uses: actions/checkout@v4
-    - name: Use Node.js
+    - name: Use Node.js ${{ matrix.NODE_VERSION }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.NODE_VERSION }}
         cache: npm
-    - run: npm ci
-    # Run unit tests
-    - run: npm test -- --maxWorkers=4 
-    # Run integration tests
-    - run: npm run test:mongodb
+    - name: Install Parse Server ${{ matrix.PARSE_SERVER_VERSION }}
+      run: npm i -DE parse-server@${{ matrix.PARSE_SERVER_VERSION }}
+    - name: Install dependencies
+      run: npm ci
+    - name: Run unit tests
+      run: npm test -- --maxWorkers=4 
+    - name: Run integration tests
+      run: npm run test:mongodb
       env:
         CI: true
     - name: Upload code coverage
@@ -106,6 +122,8 @@ jobs:
         # Set to `true` once codecov token bug is fixed; https://github.com/parse-community/parse-server/issues/9129
         fail_ci_if_error: false
         token: ${{ secrets.CODECOV_TOKEN }}
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
