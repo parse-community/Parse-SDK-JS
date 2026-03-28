@@ -1047,10 +1047,11 @@ describe('Parse User', () => {
   });
 
   it('can link with twitter', async () => {
-    const server = await reconfigureServer();
-    const twitter = server.config.auth.twitter;
-    spyOn(twitter, 'beforeFind').and.callFake(() => Promise.resolve());
-    const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
+    const TwitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default.constructor;
+    spyOn(TwitterAdapter.prototype, 'beforeFind').and.callFake(() => Promise.resolve());
+    spyOn(TwitterAdapter.prototype, 'validateAuthData').and.callThrough();
+
+    await reconfigureServer();
 
     Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
@@ -1064,14 +1065,15 @@ describe('Parse User', () => {
 
     await user._unlinkFrom('twitter');
     expect(user._isLinked('twitter')).toBe(false);
-    expect(spy).toHaveBeenCalled();
+    expect(TwitterAdapter.prototype.validateAuthData).toHaveBeenCalled();
   });
 
   it('can link with twitter and facebook', async () => {
-    const server = await reconfigureServer();
-    const twitter = server.config.auth.twitter;
-    spyOn(twitter, 'beforeFind').and.callFake(() => Promise.resolve());
-    const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
+    const TwitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default.constructor;
+    spyOn(TwitterAdapter.prototype, 'beforeFind').and.callFake(() => Promise.resolve());
+    spyOn(TwitterAdapter.prototype, 'validateAuthData').and.callThrough();
+
+    await reconfigureServer();
 
     Parse.User.enableUnsafeCurrentUser();
     Parse.FacebookUtils.init();
@@ -1088,7 +1090,7 @@ describe('Parse User', () => {
 
     expect(user.get('authData').twitter.id).toBe(twitterAuthData.id);
     expect(user.get('authData').facebook.id).toBe('test');
-    expect(spy).toHaveBeenCalled();
+    expect(TwitterAdapter.prototype.validateAuthData).toHaveBeenCalled();
   });
 
   it('can verify user password via static method', async () => {
