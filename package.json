@@ -82,7 +82,7 @@
     "@babel/preset-typescript": "7.27.1",
     "@eslint/js": "9.39.2",
     "@parse/minami": "git+https://github.com/parse-community/minami#main",
-    "@rollup/plugin-terser": "0.4.4",
+    "@rollup/plugin-terser": "1.0.0",
     "@saithodev/semantic-release-backmerge": "4.0.1",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/commit-analyzer": "13.0.1",
