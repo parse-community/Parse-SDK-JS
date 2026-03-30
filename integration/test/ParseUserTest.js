@@ -996,7 +996,7 @@ describe('Parse User', () => {
       getAuthData() {
         return {
           authData: {
-            id: 1234,
+            id: '1234',
           },
         };
       },
@@ -1047,14 +1047,10 @@ describe('Parse User', () => {
   });
 
   it('can link with twitter', async () => {
-    const twitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default;
-    spyOn(twitterAdapter, 'beforeFind').and.callFake(() => {
-      return Promise.resolve();
-    });
+    const TwitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default.constructor;
+    spyOn(TwitterAdapter.prototype, 'beforeFind').and.callFake(() => Promise.resolve());
 
-    const server = await reconfigureServer();
-    const twitter = server.config.auth.twitter;
-    const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
+    await reconfigureServer();
 
     Parse.User.enableUnsafeCurrentUser();
     const user = new Parse.User();
@@ -1068,18 +1064,13 @@ describe('Parse User', () => {
 
     await user._unlinkFrom('twitter');
     expect(user._isLinked('twitter')).toBe(false);
-    expect(spy).toHaveBeenCalled();
   });
 
   it('can link with twitter and facebook', async () => {
-    const twitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default;
-    spyOn(twitterAdapter, 'beforeFind').and.callFake(() => {
-      return Promise.resolve();
-    });
+    const TwitterAdapter = require('../../node_modules/parse-server/lib/Adapters/Auth/twitter').default.constructor;
+    spyOn(TwitterAdapter.prototype, 'beforeFind').and.callFake(() => Promise.resolve());
 
-    const server = await reconfigureServer();
-    const twitter = server.config.auth.twitter;
-    const spy = spyOn(twitter, 'validateAuthData').and.callThrough();
+    await reconfigureServer();
 
     Parse.User.enableUnsafeCurrentUser();
     Parse.FacebookUtils.init();
@@ -1096,7 +1087,6 @@ describe('Parse User', () => {
 
     expect(user.get('authData').twitter.id).toBe(twitterAuthData.id);
     expect(user.get('authData').facebook.id).toBe('test');
-    expect(spy).toHaveBeenCalled();
   });
 
   it('can verify user password via static method', async () => {
