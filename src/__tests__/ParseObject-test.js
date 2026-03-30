@@ -1792,7 +1792,7 @@ describe('ParseObject', () => {
     const child = new ParseObject('Item');
     parent.set('child', child);
     child.set('parent', parent);
-    await expect(parent.save()).rejects.toThrowError(
+    await expect(parent.save()).rejects.toThrow(
       'Cannot create a pointer to an unsaved Object.'
     );
   });
@@ -1803,7 +1803,7 @@ describe('ParseObject', () => {
     const grandchild = new ParseObject('Item');
     parent.set('child', child);
     child.set('child', grandchild);
-    await expect(parent.save()).rejects.toThrowError(
+    await expect(parent.save()).rejects.toThrow(
       'Cannot create a pointer to an unsaved Object.'
     );
   });
@@ -1834,7 +1834,7 @@ describe('ParseObject', () => {
     mockFetch([{ status: 200, response: { count: 10 } }]);
     const p = new ParseObject('Person');
     p.id = '';
-    await expect(p.fetch()).rejects.toThrowError(
+    await expect(p.fetch()).rejects.toThrow(
       new ParseError(ParseError.MISSING_OBJECT_ID, 'Object does not have an ID')
     );
   });
