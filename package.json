@@ -80,7 +80,7 @@
     "@babel/preset-env": "7.29.2",
     "@babel/preset-react": "7.28.5",
     "@babel/preset-typescript": "7.27.1",
-    "@eslint/js": "9.39.2",
+    "@eslint/js": "10.0.1",
     "@parse/minami": "git+https://github.com/parse-community/minami#main",
     "@rollup/plugin-terser": "1.0.0",
     "@saithodev/semantic-release-backmerge": "4.0.1",
@@ -97,9 +97,9 @@
     "codecov": "3.8.3",
     "core-js": "3.48.0",
     "cross-env": "10.1.0",
-    "eslint": "9.39.2",
+    "eslint": "10.1.0",
     "eslint-plugin-expect-type": "0.6.2",
-    "eslint-plugin-jsdoc": "62.5.5",
+    "eslint-plugin-jsdoc": "62.8.1",
     "express": "5.2.1",
     "gulp": "5.0.1",
     "gulp-babel": "8.0.0",
@@ -152,7 +152,7 @@
     "cross-env": "cross-env"
   },
   "engines": {
-    "node": ">=20.19.0 <21 || >=22.12.0 <23 || >=24.1.0 <25"
+    "node": ">=20.19.0 <21 || >=22.13.0 <23 || >=24.1.0 <25"
   },
   "jest": {
     "automock": true,
