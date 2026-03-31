@@ -91,7 +91,7 @@
     "@semantic-release/npm": "13.1.4",
     "@semantic-release/release-notes-generator": "14.1.0",
     "@types/facebook-js-sdk": "3.3.11",
-    "babel-jest": "30.2.0",
+    "babel-jest": "30.3.0",
     "babel-plugin-minify-dead-code-elimination": "0.5.2",
     "babel-plugin-transform-inline-environment-variables": "0.4.4",
     "codecov": "3.8.3",
