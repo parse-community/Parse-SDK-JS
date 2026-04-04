@@ -7,7 +7,8 @@
     "emitDeclarationOnly": true,
     "outDir": "types",
     "noImplicitAny": false,
-    "allowJs": false
+    "allowJs": false,
+    "skipLibCheck": true
   },
   "include": [
     "src/*.ts"
