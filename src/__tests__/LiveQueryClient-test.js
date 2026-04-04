@@ -127,13 +127,13 @@ describe('LiveQueryClient', () => {
     expect(liveQueryClient.state).toEqual('connecting');
     // Verify handlers
     liveQueryClient.socket.onopen({});
-    expect(liveQueryClient._handleWebSocketOpen).toBeCalled();
+    expect(liveQueryClient._handleWebSocketOpen).toHaveBeenCalled();
     liveQueryClient.socket.onmessage({});
-    expect(liveQueryClient._handleWebSocketMessage).toBeCalled();
+    expect(liveQueryClient._handleWebSocketMessage).toHaveBeenCalled();
     liveQueryClient.socket.onclose();
-    expect(liveQueryClient._handleWebSocketClose).toBeCalled();
+    expect(liveQueryClient._handleWebSocketClose).toHaveBeenCalled();
     liveQueryClient.socket.onerror();
-    expect(liveQueryClient._handleWebSocketError).toBeCalled();
+    expect(liveQueryClient._handleWebSocketError).toHaveBeenCalled();
   });
 
   it('can handle WebSocket open message', () => {
@@ -150,7 +150,7 @@ describe('LiveQueryClient', () => {
 
     liveQueryClient._handleWebSocketOpen();
 
-    expect(liveQueryClient.socket.send).toBeCalled();
+    expect(liveQueryClient.socket.send).toHaveBeenCalled();
     const messageStr = liveQueryClient.socket.send.mock.calls[0][0];
     const message = JSON.parse(messageStr);
     expect(message.op).toEqual('connect');
@@ -656,7 +656,7 @@ describe('LiveQueryClient', () => {
     jest.runOnlyPendingTimers();
 
     expect(liveQueryClient.attempts).toEqual(attempts + 1);
-    expect(liveQueryClient.open).toBeCalled();
+    expect(liveQueryClient.open).toHaveBeenCalled();
   });
 
   it('can handle reconnect and clear handler', () => {
@@ -683,7 +683,7 @@ describe('LiveQueryClient', () => {
     jest.runOnlyPendingTimers();
 
     expect(liveQueryClient.attempts).toEqual(attempts + 1);
-    expect(liveQueryClient.open).toBeCalled();
+    expect(liveQueryClient.open).toHaveBeenCalled();
   });
 
   it('can handle WebSocket error message', () => {
@@ -1038,7 +1038,7 @@ describe('LiveQueryClient', () => {
     expect(liveQueryClient.subscriptions.size).toBe(0);
     expect(isChecked).toBe(true);
     expect(isCheckedAgain).toBe(true);
-    expect(liveQueryClient.socket.close).toBeCalled();
+    expect(liveQueryClient.socket.close).toHaveBeenCalled();
     expect(liveQueryClient.state).toBe('disconnected');
   });
 

@@ -363,15 +363,15 @@ describe('ParseUser', () => {
     it('loginWithAdditonal fails with invalid payload', async () => {
       ParseUser.enableUnsafeCurrentUser();
       ParseUser._clearCache();
-      await expect(ParseUser.logInWithAdditionalAuth({}, 'password', {})).rejects.toThrowError(
+      await expect(ParseUser.logInWithAdditionalAuth({}, 'password', {})).rejects.toThrow(
         new ParseError(ParseError.OTHER_CAUSE, 'Username must be a string.')
       );
-      await expect(ParseUser.logInWithAdditionalAuth('username', {}, {})).rejects.toThrowError(
+      await expect(ParseUser.logInWithAdditionalAuth('username', {}, {})).rejects.toThrow(
         new ParseError(ParseError.OTHER_CAUSE, 'Password must be a string.')
       );
       await expect(
         ParseUser.logInWithAdditionalAuth('username', 'password', '')
-      ).rejects.toThrowError(new ParseError(ParseError.OTHER_CAUSE, 'Auth must be an object.'));
+      ).rejects.toThrow(new ParseError(ParseError.OTHER_CAUSE, 'Auth must be an object.'));
     });
   });
 

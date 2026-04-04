@@ -35,7 +35,7 @@ const headers = {
 describe('RESTController', () => {
   it('throws if there is no fetch implementation', async () => {
     global.fetch = undefined;
-    await expect(RESTController.ajax('GET', 'users/me', {})).rejects.toThrowError(
+    await expect(RESTController.ajax('GET', 'users/me', {})).rejects.toThrow(
       'Cannot make a request: Fetch API not found.'
     );
   });
