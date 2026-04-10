@@ -40,6 +40,11 @@ export interface FileController {
     source: FileSource,
     options?: FileSaveOptions
   ) => Promise<{ name: string; url: string }>;
+  saveBinary?: (
+    name: string,
+    source: FileSource,
+    options?: FileSaveOptions
+  ) => Promise<{ name: string; url: string }>;
   download: (uri: string, options?: any) => Promise<{ base64?: string; contentType?: string }>;
   deleteFile: (name: string, options?: { useMasterKey?: boolean }) => Promise<void>;
 }

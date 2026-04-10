@@ -9,6 +9,18 @@ type FileData = number[] | Base64 | Blob | Uri;
 export type FileSaveOptions = FullOptions & {
     metadata?: Record<string, any>;
     tags?: Record<string, any>;
+    directory?: string;
+    /**
+     * Overrides the server's `maxUploadSize` for this file upload. Requires the
+     * master key (`useMasterKey: true`). The value uses the same format as the
+     * server option (e.g. `'50mb'`, `'1gb'`).
+     *
+     * Only supported for Buffer and Stream source types. Files created from
+     * base64 strings, number arrays, Blobs, or URIs do not support this option.
+     *
+     * Requires Parse Server >= 9.5.0.
+     */
+    maxUploadSize?: string;
 };
 export type FileSource = {
     format: 'file';
@@ -21,6 +33,14 @@ export type FileSource = {
 } | {
     format: 'uri';
     uri: string;
+    type: string | undefined;
+} | {
+    format: 'buffer';
+    buffer: any;
+    type: string | undefined;
+} | {
+    format: 'stream';
+    stream: any;
     type: string | undefined;
 };
 export declare function b64Digit(number: number): string;
@@ -39,6 +59,7 @@ declare class ParseFile {
     _requestTask?: any;
     _metadata?: Record<string, any>;
     _tags?: Record<string, any>;
+    _directory?: string;
     /**
      * @param name {String} The file's name. This will be prefixed by a unique
      *     value once the file has finished saving. The file name must begin with
@@ -48,8 +69,13 @@ declare class ParseFile {
      *     1. an Array of byte value Numbers or Uint8Array.
      *     2. an Object like { base64: "..." } with a base64-encoded String.
      *     3. an Object like { uri: "..." } with a uri String.
-     *     4. a File object selected with a file upload control. (3) only works
-     *        in Firefox 3.6+, Safari 6.0.2+, Chrome 7+, and IE 10+.
+     *     4. a File object selected with a file upload control.
+     *     5. (Node.js only) a Buffer. Uploaded as raw binary data instead of
+     *        base64-encoding, reducing memory usage. Falls back to base64
+     *        JSON encoding if metadata or tags are set.
+     *     6. (Node.js only) a Readable stream, or a Web ReadableStream.
+     *        Streamed as raw binary data directly into the upload request.
+     *        Supports metadata, tags, and directory when Parse Server >= 9.5.0.
      *        For example:
      * <pre>
      * var fileUploadControl = $("#profilePhotoFileUpload")[0];
@@ -124,7 +150,20 @@ declare class ParseFile {
      */
     tags(): Record<string, any>;
     /**
+     * Gets the directory of the file.
+     * Requires Parse Server >= 9.4.0.
+     *
+     * @returns {string | undefined}
+     */
+    directory(): string | undefined;
+    /**
      * Saves the file to the Parse cloud.
+     *
+     * In Node.js, files created with Buffer or ReadableStream are uploaded as
+     * raw binary data, avoiding base64 encoding overhead. If metadata
+     * or tags are set on a Buffer-backed file, the upload falls back to base64
+     * JSON encoding. Stream-backed files support metadata, tags, and directory
+     * when Parse Server >= 9.5.0.
      *
      * @param {object} options
      * Valid options are:<ul>
@@ -143,6 +182,10 @@ declare class ParseFile {
      *   }
      * });
      * </pre>
+     *   <li>maxUploadSize: Overrides the server's maxUploadSize for this upload.
+     *     Requires the master key. Only supported for Buffer and Stream source
+     *     types; files created from base64 strings, number arrays, Blobs, or URIs
+     *     do not support this option. Requires Parse Server >= 9.5.0.
      * </ul>
      * @returns {Promise | undefined} Promise that is resolved when the save finishes.
      */
@@ -172,31 +215,43 @@ declare class ParseFile {
     };
     equals(other: any): boolean;
     /**
-     * Sets metadata to be saved with file object. Overwrites existing metadata
+     * Sets metadata to be saved with file object. Overwrites existing metadata.
+     * When used with a stream-based file, requires Parse Server >= 9.5.0.
      *
      * @param {object} metadata Key value pairs to be stored with file object
      */
     setMetadata(metadata: Record<string, any>): void;
     /**
      * Sets metadata to be saved with file object. Adds to existing metadata.
+     * When used with a stream-based file, requires Parse Server >= 9.5.0.
      *
      * @param {string} key key to store the metadata
      * @param {*} value metadata
      */
     addMetadata(key: string, value: any): void;
     /**
-     * Sets tags to be saved with file object. Overwrites existing tags
+     * Sets tags to be saved with file object. Overwrites existing tags.
+     * When used with a stream-based file, requires Parse Server >= 9.5.0.
      *
      * @param {object} tags Key value pairs to be stored with file object
      */
     setTags(tags: Record<string, any>): void;
     /**
      * Sets tags to be saved with file object. Adds to existing tags.
+     * When used with a stream-based file, requires Parse Server >= 9.5.0.
      *
      * @param {string} key key to store tags
      * @param {*} value tag
      */
     addTag(key: string, value: string): void;
+    /**
+     * Sets the directory where the file will be stored.
+     * Requires the Master Key when saving.
+     * Requires Parse Server >= 9.4.0; when used with a stream-based file, requires Parse Server >= 9.5.0.
+     *
+     * @param {string} directory the directory path
+     */
+    setDirectory(directory: string): void;
     static fromJSON(obj: any): ParseFile;
     static encodeBase64(bytes: number[] | Uint8Array): string;
 }

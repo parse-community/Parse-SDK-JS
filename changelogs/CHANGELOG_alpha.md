@@ -1,3 +1,45 @@
+## [8.5.1-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.5.0...8.5.1-alpha.1) (2026-03-14)
+
+
+### Bug Fixes
+
+* Security upgrade undici ([#2947](https://github.com/parse-community/Parse-SDK-JS/issues/2947)) ([025c404](https://github.com/parse-community/Parse-SDK-JS/commit/025c404149815111b201856b2c95c830b0529993))
+
+# [8.5.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.4.0...8.5.0-alpha.1) (2026-03-04)
+
+
+### Features
+
+* Add `Parse.File` option `maxUploadSize` to override the Parse Server option `maxUploadSize` per file upload ([#2940](https://github.com/parse-community/Parse-SDK-JS/issues/2940)) ([80cab9b](https://github.com/parse-community/Parse-SDK-JS/commit/80cab9b16cf826fa1414bff5f04dbfb7ff18c4d3))
+
+# [8.4.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.3.0...8.4.0-alpha.1) (2026-03-04)
+
+
+### Features
+
+* Add support for `Parse.File.setDirectory`, `setMetadata`, `setTags` with stream-based file upload ([#2937](https://github.com/parse-community/Parse-SDK-JS/issues/2937)) ([18ded83](https://github.com/parse-community/Parse-SDK-JS/commit/18ded83e69692e67ca0aeec86f62ec24e7e4407e))
+
+# [8.3.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.2.0...8.3.0-alpha.1) (2026-02-25)
+
+
+### Features
+
+* Add support for `Parse.File.setDirectory()` with master key to save file in directory ([#2929](https://github.com/parse-community/Parse-SDK-JS/issues/2929)) ([1923db0](https://github.com/parse-community/Parse-SDK-JS/commit/1923db0a4cb08394266137f99f7183218c3e3ebd))
+
+# [8.2.0-alpha.2](https://github.com/parse-community/Parse-SDK-JS/compare/8.2.0-alpha.1...8.2.0-alpha.2) (2026-02-20)
+
+
+### Features
+
+* Add request header `X-Parse-Upload-Mode` to identify file upload as binary data via `Buffer`, `Readable`, `ReadableStream` ([#2927](https://github.com/parse-community/Parse-SDK-JS/issues/2927)) ([a66bb06](https://github.com/parse-community/Parse-SDK-JS/commit/a66bb06116f5d4f944372feafef8d630de1fae77))
+
+# [8.2.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.1-alpha.6...8.2.0-alpha.1) (2026-02-20)
+
+
+### Features
+
+* Add support for file upload as binary data via `Buffer`, `Readable`, `ReadableStream` ([#2925](https://github.com/parse-community/Parse-SDK-JS/issues/2925)) ([e42caf6](https://github.com/parse-community/Parse-SDK-JS/commit/e42caf65ff7c5ea16043e7eac6ac92c13638aca3))
+
 ## [8.1.1-alpha.6](https://github.com/parse-community/Parse-SDK-JS/compare/8.1.1-alpha.5...8.1.1-alpha.6) (2026-02-11)
 
 
