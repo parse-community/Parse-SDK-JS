@@ -1781,7 +1781,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * string of comma separated values, or an Array of keys, or multiple keys.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  addAscending<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this {
+  addAscending<K extends keyof T['attributes'] | keyof BaseAttributes | '$score'>(...keys: (K | K[])[]): this {
     if (!this._order) {
       this._order = [];
     }
