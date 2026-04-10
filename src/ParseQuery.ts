@@ -1566,7 +1566,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   sortByTextScore() {
     this.ascending('$score');
-    this.select('$score');
+    this.select(['$score']);
     return this;
   }
 
