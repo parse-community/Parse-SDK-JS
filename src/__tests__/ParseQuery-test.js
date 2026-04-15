@@ -2851,7 +2851,7 @@ describe('ParseQuery', () => {
       });
   });
 
-  it('can pass rawDateValues option to aggregate query', async () => {
+  it('can pass rawValues option to aggregate query', async () => {
     const pipeline = [{ group: { objectId: '$name' } }];
     let capturedParams;
     let capturedOptions;
@@ -2866,10 +2866,10 @@ describe('ParseQuery', () => {
     });
 
     const q = new ParseQuery('Item');
-    await q.aggregate(pipeline, { rawDateValues: true });
+    await q.aggregate(pipeline, { rawValues: true });
 
-    expect(capturedParams.rawDateValues).toBe(true);
-    expect('rawDateValues' in capturedOptions).toBe(false);
+    expect(capturedParams.rawValues).toBe(true);
+    expect('rawValues' in capturedOptions).toBe(false);
     expect(capturedOptions.useMasterKey).toBe(true);
   });
 
@@ -2943,9 +2943,8 @@ describe('ParseQuery', () => {
     const q = new ParseQuery('Item');
     await q.aggregate(pipeline, { useMasterKey: false });
 
-    expect('rawDateValues' in capturedParams).toBe(false);
+    expect('rawValues' in capturedParams).toBe(false);
     expect('rawFieldNames' in capturedParams).toBe(false);
-    expect('rawPointerValues' in capturedParams).toBe(false);
   });
 
   it('aggregate forwards sessionToken via request options', async () => {
@@ -2966,28 +2965,6 @@ describe('ParseQuery', () => {
     expect(capturedOptions.useMasterKey).toBe(false);
   });
 
-  it('can pass rawPointerValues option to aggregate query', async () => {
-    const pipeline = [{ group: { objectId: '$name' } }];
-    let capturedParams;
-    let capturedOptions;
-    CoreManager.setQueryController({
-      find() {},
-      aggregate(className, params, options) {
-        expect(className).toBe('Item');
-        capturedParams = params;
-        capturedOptions = options;
-        return Promise.resolve({ results: [] });
-      },
-    });
-
-    const q = new ParseQuery('Item');
-    await q.aggregate(pipeline, { rawPointerValues: true });
-
-    expect(capturedParams.rawPointerValues).toBe(true);
-    expect('rawPointerValues' in capturedOptions).toBe(false);
-    expect(capturedOptions.useMasterKey).toBe(true);
-  });
-
   it('aggregate forwards raw* options when explicitly false', async () => {
     const pipeline = [{ group: { objectId: '$name' } }];
     let capturedParams;
@@ -3001,14 +2978,12 @@ describe('ParseQuery', () => {
 
     const q = new ParseQuery('Item');
     await q.aggregate(pipeline, {
-      rawDateValues: false,
+      rawValues: false,
       rawFieldNames: false,
-      rawPointerValues: false,
     });
 
-    expect(capturedParams.rawDateValues).toBe(false);
+    expect(capturedParams.rawValues).toBe(false);
     expect(capturedParams.rawFieldNames).toBe(false);
-    expect(capturedParams.rawPointerValues).toBe(false);
   });
 
   it('can cancel query', async () => {

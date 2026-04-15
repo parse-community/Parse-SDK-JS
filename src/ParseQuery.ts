@@ -32,9 +32,8 @@ export type GetOptions = QueryOptions;
 export type FirstOptions = QueryOptions;
 
 export interface AggregateOptions extends QueryOptions {
-  rawDateValues?: boolean;
+  rawValues?: boolean;
   rawFieldNames?: boolean;
-  rawPointerValues?: boolean;
 }
 
 export interface FullTextOptions {
@@ -809,12 +808,16 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    *   <li>sessionToken: A valid session token, used for making a request on
    *       behalf of a specific user.
    *   <li>context: A dictionary that is accessible in Cloud Code triggers.
-   *   <li>rawDateValues: Forwarded to the server to control date-value
-   *       transformation in the pipeline. Requires Parse Server 9.9.0+
-   *   <li>rawFieldNames: Forwarded to the server to control field-name
-   *       transformation in the pipeline. Requires Parse Server 9.9.0+
-   *   <li>rawPointerValues: Forwarded to the server to control pointer-value
-   *       transformation in the pipeline. Requires Parse Server 9.9.0+
+   *   <li>rawValues: When `true`, disables schema-based value transformation
+   *       in the pipeline. Pipeline values are interpreted using MongoDB
+   *       Extended JSON (EJSON), so typed values such as `{ $date: '...' }`,
+   *       `{ $oid: '...' }`, `{ $numberDecimal: '...' }`, etc. are converted
+   *       to their corresponding BSON types by the server. Requires Parse
+   *       Server 9.9.0+
+   *   <li>rawFieldNames: When `true`, disables automatic field-name
+   *       transformation (e.g. `createdAt` → `_created_at`) in the pipeline.
+   *       Users write native MongoDB field names directly. Requires Parse
+   *       Server 9.9.0+
    * </ul>
    * @returns {Promise} A promise that is resolved with the query completes.
    */
@@ -834,14 +837,11 @@ class ParseQuery<T extends ParseObject = ParseObject> {
       explain: this._explain,
       readPreference: this._readPreference,
     };
-    if (options?.rawDateValues !== undefined) {
-      params.rawDateValues = options.rawDateValues;
+    if (options?.rawValues !== undefined) {
+      params.rawValues = options.rawValues;
     }
     if (options?.rawFieldNames !== undefined) {
       params.rawFieldNames = options.rawFieldNames;
-    }
-    if (options?.rawPointerValues !== undefined) {
-      params.rawPointerValues = options.rawPointerValues;
     }
     const aggregateOptions = ParseObject._getRequestOptions(options);
     if (aggregateOptions.useMasterKey === undefined) {
