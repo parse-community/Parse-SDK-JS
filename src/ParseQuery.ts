@@ -34,6 +34,7 @@ export type FirstOptions = QueryOptions;
 export interface AggregateOptions extends QueryOptions {
   rawDateValues?: boolean;
   rawFieldNames?: boolean;
+  rawPointerValues?: boolean;
 }
 
 export interface FullTextOptions {
@@ -812,6 +813,8 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    *       transformation in the pipeline. Requires Parse Server 9.9.0+
    *   <li>rawFieldNames: Forwarded to the server to control field-name
    *       transformation in the pipeline. Requires Parse Server 9.9.0+
+   *   <li>rawPointerValues: Forwarded to the server to control pointer-value
+   *       transformation in the pipeline. Requires Parse Server 9.9.0+
    * </ul>
    * @returns {Promise} A promise that is resolved with the query completes.
    */
@@ -836,6 +839,9 @@ class ParseQuery<T extends ParseObject = ParseObject> {
     }
     if (options?.rawFieldNames !== undefined) {
       params.rawFieldNames = options.rawFieldNames;
+    }
+    if (options?.rawPointerValues !== undefined) {
+      params.rawPointerValues = options.rawPointerValues;
     }
     const aggregateOptions = ParseObject._getRequestOptions(options);
     if (aggregateOptions.useMasterKey === undefined) {
