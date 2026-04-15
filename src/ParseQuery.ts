@@ -809,9 +809,9 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    *       behalf of a specific user.
    *   <li>context: A dictionary that is accessible in Cloud Code triggers.
    *   <li>rawDateValues: Forwarded to the server to control date-value
-   *       transformation in the pipeline.
+   *       transformation in the pipeline. Requires Parse Server 9.9.0+
    *   <li>rawFieldNames: Forwarded to the server to control field-name
-   *       transformation in the pipeline.
+   *       transformation in the pipeline. Requires Parse Server 9.9.0+
    * </ul>
    * @returns {Promise} A promise that is resolved with the query completes.
    */
