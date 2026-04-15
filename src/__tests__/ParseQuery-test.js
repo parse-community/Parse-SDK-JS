@@ -2851,6 +2851,138 @@ describe('ParseQuery', () => {
       });
   });
 
+  it('can pass rawDateValues option to aggregate query', async () => {
+    const pipeline = [{ group: { objectId: '$name' } }];
+    let capturedParams;
+    let capturedOptions;
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        capturedParams = params;
+        capturedOptions = options;
+        return Promise.resolve({ results: [] });
+      },
+    });
+
+    const q = new ParseQuery('Item');
+    await q.aggregate(pipeline, { rawDateValues: true });
+
+    expect(capturedParams.rawDateValues).toBe(true);
+    expect('rawDateValues' in capturedOptions).toBe(false);
+    expect(capturedOptions.useMasterKey).toBe(true);
+  });
+
+  it('can pass rawFieldNames option to aggregate query', async () => {
+    const pipeline = [{ group: { objectId: '$name' } }];
+    let capturedParams;
+    let capturedOptions;
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(className, params, options) {
+        expect(className).toBe('Item');
+        capturedParams = params;
+        capturedOptions = options;
+        return Promise.resolve({ results: [] });
+      },
+    });
+
+    const q = new ParseQuery('Item');
+    await q.aggregate(pipeline, { rawFieldNames: true });
+
+    expect(capturedParams.rawFieldNames).toBe(true);
+    expect('rawFieldNames' in capturedOptions).toBe(false);
+    expect(capturedOptions.useMasterKey).toBe(true);
+  });
+
+  it('aggregate defaults useMasterKey to true when no options provided', async () => {
+    const pipeline = [{ group: { objectId: '$name' } }];
+    let capturedOptions;
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(_className, _params, options) {
+        capturedOptions = options;
+        return Promise.resolve({ results: [] });
+      },
+    });
+
+    const q = new ParseQuery('Item');
+    await q.aggregate(pipeline);
+
+    expect(capturedOptions.useMasterKey).toBe(true);
+  });
+
+  it('aggregate allows useMasterKey to be overridden via options', async () => {
+    const pipeline = [{ group: { objectId: '$name' } }];
+    let capturedOptions;
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(_className, _params, options) {
+        capturedOptions = options;
+        return Promise.resolve({ results: [] });
+      },
+    });
+
+    const q = new ParseQuery('Item');
+    await q.aggregate(pipeline, { useMasterKey: false });
+
+    expect(capturedOptions.useMasterKey).toBe(false);
+  });
+
+  it('aggregate does not leak rawDateValues/rawFieldNames keys into params when unset', async () => {
+    const pipeline = [{ group: { objectId: '$name' } }];
+    let capturedParams;
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(_className, params, _options) {
+        capturedParams = params;
+        return Promise.resolve({ results: [] });
+      },
+    });
+
+    const q = new ParseQuery('Item');
+    await q.aggregate(pipeline, { useMasterKey: false });
+
+    expect('rawDateValues' in capturedParams).toBe(false);
+    expect('rawFieldNames' in capturedParams).toBe(false);
+  });
+
+  it('aggregate forwards sessionToken via request options', async () => {
+    const pipeline = [{ group: { objectId: '$name' } }];
+    let capturedOptions;
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(_className, _params, options) {
+        capturedOptions = options;
+        return Promise.resolve({ results: [] });
+      },
+    });
+
+    const q = new ParseQuery('Item');
+    await q.aggregate(pipeline, { sessionToken: 'r:abc', useMasterKey: false });
+
+    expect(capturedOptions.sessionToken).toBe('r:abc');
+    expect(capturedOptions.useMasterKey).toBe(false);
+  });
+
+  it('aggregate forwards rawDateValues and rawFieldNames when explicitly false', async () => {
+    const pipeline = [{ group: { objectId: '$name' } }];
+    let capturedParams;
+    CoreManager.setQueryController({
+      find() {},
+      aggregate(_className, params, _options) {
+        capturedParams = params;
+        return Promise.resolve({ results: [] });
+      },
+    });
+
+    const q = new ParseQuery('Item');
+    await q.aggregate(pipeline, { rawDateValues: false, rawFieldNames: false });
+
+    expect(capturedParams.rawDateValues).toBe(false);
+    expect(capturedParams.rawFieldNames).toBe(false);
+  });
+
   it('can cancel query', async () => {
     const mockRequestTask = {
       abort: () => {},

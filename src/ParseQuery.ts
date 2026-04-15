@@ -31,6 +31,11 @@ export type GetOptions = QueryOptions;
 
 export type FirstOptions = QueryOptions;
 
+export interface AggregateOptions extends QueryOptions {
+  rawDateValues?: boolean;
+  rawFieldNames?: boolean;
+}
+
 export interface FullTextOptions {
   language?: string;
   caseSensitive?: boolean;
@@ -796,9 +801,21 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * Executes an aggregate query and returns aggregate results
    *
    * @param {(Array|object)} pipeline Array or Object of stages to process query
+   * @param {object} options Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *       be used for this request. Defaults to `true` when not provided, for
+   *       backward compatibility.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   *   <li>context: A dictionary that is accessible in Cloud Code triggers.
+   *   <li>rawDateValues: Forwarded to the server to control date-value
+   *       transformation in the pipeline.
+   *   <li>rawFieldNames: Forwarded to the server to control field-name
+   *       transformation in the pipeline.
+   * </ul>
    * @returns {Promise} A promise that is resolved with the query completes.
    */
-  aggregate(pipeline: any): Promise<any[]> {
+  aggregate(pipeline: any, options?: AggregateOptions): Promise<any[]> {
     if (!Array.isArray(pipeline) && typeof pipeline !== 'object') {
       throw new Error('Invalid pipeline must be Array or Object');
     }
@@ -808,13 +825,22 @@ class ParseQuery<T extends ParseObject = ParseObject> {
       }
       pipeline.unshift({ $match: this._where });
     }
-    const params = {
+    const params: Record<string, any> = {
       pipeline,
       hint: this._hint,
       explain: this._explain,
       readPreference: this._readPreference,
     };
-    const aggregateOptions = { useMasterKey: true };
+    if (options?.rawDateValues !== undefined) {
+      params.rawDateValues = options.rawDateValues;
+    }
+    if (options?.rawFieldNames !== undefined) {
+      params.rawFieldNames = options.rawFieldNames;
+    }
+    const aggregateOptions = ParseObject._getRequestOptions(options);
+    if (aggregateOptions.useMasterKey === undefined) {
+      aggregateOptions.useMasterKey = true;
+    }
     this._setRequestTask(aggregateOptions);
 
     const controller = CoreManager.getQueryController();
