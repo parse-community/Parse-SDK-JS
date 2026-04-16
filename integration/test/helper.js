@@ -58,7 +58,7 @@ const defaultConfiguration = {
       option2: 'world',
     },
     facebook: {
-      appIds: 'test',
+      appIds: ['test'],
     },
     twitter: {
       consumer_key: twitterAuthData.consumer_key,
