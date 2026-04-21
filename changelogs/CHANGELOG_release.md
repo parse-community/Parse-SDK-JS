@@ -1,3 +1,14 @@
+# [8.6.0](https://github.com/parse-community/Parse-SDK-JS/compare/8.5.0...8.6.0) (2026-04-17)
+
+
+### Bug Fixes
+
+* Security upgrade undici ([#2947](https://github.com/parse-community/Parse-SDK-JS/issues/2947)) ([025c404](https://github.com/parse-community/Parse-SDK-JS/commit/025c404149815111b201856b2c95c830b0529993))
+
+### Features
+
+* Add `rawValues` and `rawFieldNames` options to aggregate queries ([#3021](https://github.com/parse-community/Parse-SDK-JS/issues/3021)) ([17ceef1](https://github.com/parse-community/Parse-SDK-JS/commit/17ceef1d15af9d3c38a7404488d95439a261c8b1))
+
 # [8.5.0](https://github.com/parse-community/Parse-SDK-JS/compare/8.4.0...8.5.0) (2026-03-04)
 
 

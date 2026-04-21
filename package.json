@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "8.5.1-alpha.1",
+  "version": "8.6.0",
   "description": "Parse JavaScript SDK",
   "homepage": "https://parseplatform.org",
   "keywords": [
@@ -99,7 +99,7 @@
     "cross-env": "10.1.0",
     "eslint": "10.2.0",
     "eslint-plugin-expect-type": "0.6.2",
-    "eslint-plugin-jsdoc": "62.8.1",
+    "eslint-plugin-jsdoc": "62.9.0",
     "express": "5.2.1",
     "gulp": "5.0.1",
     "gulp-babel": "8.0.0",
@@ -115,12 +115,12 @@
     "madge": "8.0.0",
     "metro-react-native-babel-preset": "0.77.0",
     "mongodb-runner": "6.7.3",
-    "parse-server": "9.7.0",
+    "parse-server": "9.8.0",
     "puppeteer": "24.40.0",
     "regenerator-runtime": "0.14.1",
     "semantic-release": "25.0.3",
-    "typescript-eslint": "8.58.0",
-    "vite": "8.0.5",
+    "typescript-eslint": "8.58.1",
+    "vite": "8.0.8",
     "vite-plugin-commonjs": "0.10.4",
     "vite-plugin-node-polyfills": "0.26.0"
   },

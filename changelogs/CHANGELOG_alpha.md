@@ -1,3 +1,10 @@
+# [8.6.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.5.1-alpha.1...8.6.0-alpha.1) (2026-04-17)
+
+
+### Features
+
+* Add `rawValues` and `rawFieldNames` options to aggregate queries ([#3021](https://github.com/parse-community/Parse-SDK-JS/issues/3021)) ([17ceef1](https://github.com/parse-community/Parse-SDK-JS/commit/17ceef1d15af9d3c38a7404488d95439a261c8b1))
+
 ## [8.5.1-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.5.0...8.5.1-alpha.1) (2026-03-14)
 
 

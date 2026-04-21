@@ -31,6 +31,11 @@ export type GetOptions = QueryOptions;
 
 export type FirstOptions = QueryOptions;
 
+export interface AggregateOptions extends QueryOptions {
+  rawValues?: boolean;
+  rawFieldNames?: boolean;
+}
+
 export interface FullTextOptions {
   language?: string;
   caseSensitive?: boolean;
@@ -796,9 +801,27 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * Executes an aggregate query and returns aggregate results
    *
    * @param {(Array|object)} pipeline Array or Object of stages to process query
+   * @param {object} options Valid options are:<ul>
+   *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+   *       be used for this request. Defaults to `true` when not provided, for
+   *       backward compatibility.
+   *   <li>sessionToken: A valid session token, used for making a request on
+   *       behalf of a specific user.
+   *   <li>context: A dictionary that is accessible in Cloud Code triggers.
+   *   <li>rawValues: When `true`, disables schema-based value transformation
+   *       in the pipeline. Pipeline values are interpreted using MongoDB
+   *       Extended JSON (EJSON), so typed values such as `{ $date: '...' }`,
+   *       `{ $oid: '...' }`, `{ $numberDecimal: '...' }`, etc. are converted
+   *       to their corresponding BSON types by the server. Requires Parse
+   *       Server 9.9.0+
+   *   <li>rawFieldNames: When `true`, disables automatic field-name
+   *       transformation (e.g. `createdAt` → `_created_at`) in the pipeline.
+   *       Users write native MongoDB field names directly. Requires Parse
+   *       Server 9.9.0+
+   * </ul>
    * @returns {Promise} A promise that is resolved with the query completes.
    */
-  aggregate(pipeline: any): Promise<any[]> {
+  aggregate(pipeline: any, options?: AggregateOptions): Promise<any[]> {
     if (!Array.isArray(pipeline) && typeof pipeline !== 'object') {
       throw new Error('Invalid pipeline must be Array or Object');
     }
@@ -808,13 +831,22 @@ class ParseQuery<T extends ParseObject = ParseObject> {
       }
       pipeline.unshift({ $match: this._where });
     }
-    const params = {
+    const params: Record<string, any> = {
       pipeline,
       hint: this._hint,
       explain: this._explain,
       readPreference: this._readPreference,
     };
-    const aggregateOptions = { useMasterKey: true };
+    if (options?.rawValues !== undefined) {
+      params.rawValues = options.rawValues;
+    }
+    if (options?.rawFieldNames !== undefined) {
+      params.rawFieldNames = options.rawFieldNames;
+    }
+    const aggregateOptions = ParseObject._getRequestOptions(options);
+    if (aggregateOptions.useMasterKey === undefined) {
+      aggregateOptions.useMasterKey = true;
+    }
     this._setRequestTask(aggregateOptions);
 
     const controller = CoreManager.getQueryController();

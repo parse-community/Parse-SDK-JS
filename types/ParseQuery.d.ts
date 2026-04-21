@@ -16,6 +16,10 @@ export type FindOptions = QueryOptions;
 export type CountOptions = BaseRequestOptions;
 export type GetOptions = QueryOptions;
 export type FirstOptions = QueryOptions;
+export interface AggregateOptions extends QueryOptions {
+    rawValues?: boolean;
+    rawFieldNames?: boolean;
+}
 export interface FullTextOptions {
     language?: string;
     caseSensitive?: boolean;
@@ -262,9 +266,27 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * Executes an aggregate query and returns aggregate results
      *
      * @param {(Array|object)} pipeline Array or Object of stages to process query
+     * @param {object} options Valid options are:<ul>
+     *   <li>useMasterKey: In Cloud Code and Node only, causes the Master Key to
+     *       be used for this request. Defaults to `true` when not provided, for
+     *       backward compatibility.
+     *   <li>sessionToken: A valid session token, used for making a request on
+     *       behalf of a specific user.
+     *   <li>context: A dictionary that is accessible in Cloud Code triggers.
+     *   <li>rawValues: When `true`, disables schema-based value transformation
+     *       in the pipeline. Pipeline values are interpreted using MongoDB
+     *       Extended JSON (EJSON), so typed values such as `{ $date: '...' }`,
+     *       `{ $oid: '...' }`, `{ $numberDecimal: '...' }`, etc. are converted
+     *       to their corresponding BSON types by the server. Requires Parse
+     *       Server 9.9.0+
+     *   <li>rawFieldNames: When `true`, disables automatic field-name
+     *       transformation (e.g. `createdAt` → `_created_at`) in the pipeline.
+     *       Users write native MongoDB field names directly. Requires Parse
+     *       Server 9.9.0+
+     * </ul>
      * @returns {Promise} A promise that is resolved with the query completes.
      */
-    aggregate(pipeline: any): Promise<any[]>;
+    aggregate(pipeline: any, options?: AggregateOptions): Promise<any[]>;
     /**
      * Retrieves at most one Parse.Object that satisfies this query.
      *
