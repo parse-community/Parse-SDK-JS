@@ -71,7 +71,7 @@
     "crypto-js": "4.2.0",
     "idb-keyval": "6.2.2",
     "react-native-crypto-js": "1.0.0",
-    "ws": "8.20.0"
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@babel/core": "7.29.6",
