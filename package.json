@@ -69,7 +69,7 @@
     "@babel/runtime": "7.29.2",
     "@babel/runtime-corejs3": "7.29.2",
     "crypto-js": "4.2.0",
-    "idb-keyval": "6.2.2",
+    "idb-keyval": "6.3.0",
     "react-native-crypto-js": "1.0.0",
     "ws": "8.21.0"
   },
