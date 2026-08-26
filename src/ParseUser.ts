@@ -817,11 +817,13 @@ class ParseUser<T extends Attributes = Attributes> extends ParseObject<T> {
    * <code>current</code> will return <code>null</code>.
    *
    * @param {object} options
+   * @param {boolean} [options.clearSession] If true, the session token will be
+   *   removed from the user object when the session token is invalid.
    * @static
    * @returns {Promise} A promise that is resolved when the session is
    *   destroyed on the server.
    */
-  static logOut(options?: RequestOptions): Promise<void> {
+  static logOut(options?: RequestOptions & { clearSession?: boolean }): Promise<void> {
     const controller = CoreManager.getUserController();
     return controller.logOut(options);
   }
@@ -1210,10 +1212,17 @@ const DefaultController = {
     });
   },
 
-  logOut(options?: RequestOptions): Promise<void> {
+  logOut(options?: RequestOptions & { clearSession?: boolean }): Promise<void> {
     const RESTController = CoreManager.getRESTController();
+    const promiseCatch = e => {
+      console.log(e, options);
+      if (e.code === ParseError.INVALID_SESSION_TOKEN && options?.clearSession) {
+        return;
+      }
+      throw e;
+    };
     if (options?.sessionToken) {
-      return RESTController.request('POST', 'logout', {}, options);
+      return RESTController.request('POST', 'logout', {}, options).catch(promiseCatch);
     }
     return DefaultController.currentUserAsync().then(currentUser => {
       const path = Storage.generatePath(CURRENT_USER_KEY);
@@ -1221,9 +1230,11 @@ const DefaultController = {
       if (currentUser !== null) {
         const currentSession = currentUser.getSessionToken();
         if (currentSession && isRevocableSession(currentSession)) {
-          promise = promise.then(() => {
-            return RESTController.request('POST', 'logout', {}, { sessionToken: currentSession });
-          });
+          promise = promise
+            .then(() => {
+              return RESTController.request('POST', 'logout', {}, { sessionToken: currentSession });
+            })
+            .catch(promiseCatch);
         }
         currentUser._logOutWithAll();
         currentUser._finishFetch({ sessionToken: undefined });
