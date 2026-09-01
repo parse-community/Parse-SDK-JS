@@ -1,3 +1,10 @@
+## [8.6.1-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.6.0...8.6.1-alpha.1) (2026-07-13)
+
+
+### Bug Fixes
+
+* Bump ws from 8.20.0 to 8.21.0 ([#3068](https://github.com/parse-community/Parse-SDK-JS/issues/3068)) ([1b0fd5d](https://github.com/parse-community/Parse-SDK-JS/commit/1b0fd5dbfaf2a830ffba0a19c407b7a060ff616e))
+
 # [8.6.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.5.1-alpha.1...8.6.0-alpha.1) (2026-04-17)
 
 
