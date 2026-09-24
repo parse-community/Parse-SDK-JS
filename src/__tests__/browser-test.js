@@ -161,4 +161,15 @@ describe('Browser', () => {
     expect(uuid2).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
     expect(uuid1).not.toEqual(uuid2);
   });
+
+  it('throw error if randomUUID is not available', () => {
+    jest.resetModules();
+    const tmp = global.crypto;
+    delete global.crypto;
+    const uuidv4 = require('../uuid').default;
+    expect(() => uuidv4()).toThrow(
+      'crypto.randomUUID is not available in this environment. Use a UUID polyfill or environment-specific implementation (for example, in React Native you can import "react-native-random-uuid").'
+    );
+    global.crypto = tmp;
+  });
 });
