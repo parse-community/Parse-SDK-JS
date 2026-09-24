@@ -790,6 +790,7 @@ describe('LiveQueryClient', () => {
     };
     const query = new ParseQuery('Test');
     query.equalTo('key', 'value');
+    query.include(['key']);
 
     const subscribePromise = liveQueryClient.subscribe(query);
     const clientSub = liveQueryClient.subscriptions.get(1);
@@ -810,6 +811,7 @@ describe('LiveQueryClient', () => {
         where: {
           key: 'value',
         },
+        include: ['key'],
       },
     });
   });
@@ -827,6 +829,7 @@ describe('LiveQueryClient', () => {
     };
     const query = new ParseQuery('Test');
     query.equalTo('key', 'value');
+    query.include(['key']);
 
     const subscribePromise = liveQueryClient.subscribe(query, 'mySessionToken');
     const clientSub = liveQueryClient.subscriptions.get(1);
@@ -849,6 +852,7 @@ describe('LiveQueryClient', () => {
         where: {
           key: 'value',
         },
+        include: ['key'],
       },
     });
   });
@@ -947,6 +951,7 @@ describe('LiveQueryClient', () => {
     query.equalTo('key', 'value');
     query.select(['key']);
     query.watch(['key']);
+    query.include(['key']);
     liveQueryClient.subscribe(query);
     liveQueryClient.connectPromise.resolve();
 
@@ -966,6 +971,7 @@ describe('LiveQueryClient', () => {
         },
         keys: ['key'],
         watch: ['key'],
+        include: ['key'],
       },
     });
   });
@@ -985,6 +991,7 @@ describe('LiveQueryClient', () => {
     query.equalTo('key', 'value');
     query.select(['key']);
     query.watch(['key']);
+    query.include(['key']);
     liveQueryClient.subscribe(query, 'mySessionToken');
     liveQueryClient.connectPromise.resolve();
 
@@ -1005,6 +1012,7 @@ describe('LiveQueryClient', () => {
         },
         keys: ['key'],
         watch: ['key'],
+        include: ['key'],
       },
     });
   });
