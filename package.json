@@ -101,7 +101,7 @@
     "eslint-plugin-jsdoc": "62.9.0",
     "express": "5.2.1",
     "gulp": "5.0.1",
-    "gulp-babel": "8.0.0",
+    "gulp-babel": "8.1.0",
     "jasmine": "6.3.0",
     "jasmine-reporters": "2.5.2",
     "jasmine-spec-reporter": "7.0.0",
