@@ -172,7 +172,7 @@ declare class ParseUser<T extends Attributes = Attributes> extends ParseObject<T
      *
      * @returns {string} the session token, or undefined
      */
-    getSessionToken(): string | null;
+    getSessionToken(): string | undefined;
     /**
      * Checks whether this user is the current user and has been authenticated.
      *
