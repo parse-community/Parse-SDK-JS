@@ -90,7 +90,7 @@
     "@semantic-release/github": "12.0.6",
     "@semantic-release/npm": "13.1.5",
     "@semantic-release/release-notes-generator": "14.1.1",
-    "@types/facebook-js-sdk": "3.3.11",
+    "@types/facebook-js-sdk": "3.3.13",
     "babel-jest": "30.5.2",
     "babel-plugin-minify-dead-code-elimination": "0.5.2",
     "babel-plugin-transform-inline-environment-variables": "0.4.4",
