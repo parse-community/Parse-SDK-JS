@@ -1592,12 +1592,13 @@ class ParseQuery<T extends ParseObject = ParseObject> {
 
   /**
    * Method to sort the full text search by text score
+   * `$score` is a special key used only for full text search ranking.
    *
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
   sortByTextScore() {
     this.ascending('$score');
-    this.select(['$score'] as any);
+    this.select(['$score']);
     return this;
   }
 
@@ -1794,12 +1795,12 @@ class ParseQuery<T extends ParseObject = ParseObject> {
 
   /**
    * Sorts the results in ascending order by the given key.
-   *
+   * `$score` is a special key used only for full text search ranking.
    * @param {(string|string[])} keys The key to order by, which is a
    * string of comma separated values, or an Array of keys, or multiple keys.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  ascending(...keys: string[]): this {
+  ascending<K extends keyof T['attributes'] | keyof BaseAttributes | '$score'>(...keys: (K | K[])[]): this {
     this._order = [];
     return this.addAscending.apply(this, keys);
   }
@@ -1812,7 +1813,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * string of comma separated values, or an Array of keys, or multiple keys.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  addAscending(...keys: string[]): this {
+  addAscending<K extends keyof T['attributes'] | keyof BaseAttributes | '$score'>(...keys: (K | K[])[]): this {
     if (!this._order) {
       this._order = [];
     }
@@ -1833,7 +1834,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * string of comma separated values, or an Array of keys, or multiple keys.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  descending(...keys: string[]): this {
+  descending<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K|K[])[]): this {
     this._order = [];
     return this.addDescending.apply(this, keys);
   }
@@ -1846,7 +1847,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * string of comma separated values, or an Array of keys, or multiple keys.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  addDescending(...keys: string[]): this {
+  addDescending<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this {
     if (!this._order) {
       this._order = [];
     }
@@ -1958,10 +1959,12 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * longer configured is not included. To return all auth data regardless of
    * the provider configuration, do not select `authData`.
    *
+   * `$score` is a special key used only for full text search ranking.
+   *
    * @param {...string|Array<string>} keys The name(s) of the key(s) to include.
    * @returns {Parse.Query} Returns the query, so you can chain this call.
    */
-  select<K extends keyof T['attributes'] | keyof BaseAttributes>(...keys: (K | K[])[]): this {
+  select<K extends keyof T['attributes'] | keyof BaseAttributes | '$score'>(...keys: (K | K[])[]): this {
     if (!this._select) {
       this._select = [];
     }
