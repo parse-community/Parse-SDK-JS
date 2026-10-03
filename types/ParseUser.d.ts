@@ -396,11 +396,15 @@ declare class ParseUser<T extends Attributes = Attributes> extends ParseObject<T
      * <code>current</code> will return <code>null</code>.
      *
      * @param {object} options
+     * @param {boolean} [options.clearSession] If true, the session token will be
+     *   removed from the user object when the session token is invalid.
      * @static
      * @returns {Promise} A promise that is resolved when the session is
      *   destroyed on the server.
      */
-    static logOut(options?: RequestOptions): Promise<void>;
+    static logOut(options?: RequestOptions & {
+        clearSession?: boolean;
+    }): Promise<void>;
     /**
      * Requests a password reset email to be sent to the specified email address
      * associated with the user account. This email allows the user to securely
