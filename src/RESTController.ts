@@ -368,6 +368,9 @@ const RESTController = {
         'XMLHttpRequest failed: ' + JSON.stringify(errorJSON)
       );
     }
+    if (errorJSON?.cause !== undefined) {
+      error.cause = errorJSON.cause;
+    }
     return Promise.reject(error);
   },
 };
