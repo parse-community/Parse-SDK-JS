@@ -115,7 +115,7 @@
     "parse-server": "9.10.1",
     "puppeteer": "24.42.0",
     "regenerator-runtime": "0.14.1",
-    "semantic-release": "25.0.3",
+    "semantic-release": "25.0.9",
     "typescript-eslint": "8.65.0",
     "vite": "8.1.4",
     "vite-plugin-commonjs": "0.10.4",
