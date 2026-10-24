@@ -172,5 +172,10 @@
       "package.json"
     ],
     "testEnvironment": "jsdom"
+  },
+  "overrides": {
+    "@saithodev/semantic-release-backmerge": {
+      "semantic-release": "$semantic-release"
+    }
   }
 }
