@@ -136,13 +136,19 @@ const RESTController = {
       }
     }
 
-    const retryRequest = () => {
+    const retryRequest = (signal: AbortSignal) => {
       // Stream bodies may already have been consumed by the first fetch.
       if (isStream || ++attempts >= CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
         return false;
       }
       const delay = Math.round(Math.random() * 125 * Math.pow(2, attempts));
-      setTimeout(dispatch, delay);
+      setTimeout(() => {
+        if (signal.aborted) {
+          promise.resolve({ response: { results: [] }, status: 0 });
+          return;
+        }
+        dispatch();
+      }, delay);
       return true;
     };
 
@@ -189,7 +195,7 @@ const RESTController = {
         } catch (error) {
           // No response does not mean the server did not apply a write.
           // Only reads and writes with a stable idempotency key can be replayed.
-          if (error.name !== 'AbortError' && (isReadRequest || isIdempotent) && retryRequest()) {
+          if (error.name !== 'AbortError' && (isReadRequest || isIdempotent) && retryRequest(signal)) {
             return;
           }
           throw error;
@@ -248,7 +254,7 @@ const RESTController = {
           });
         } else if (status >= 500 || status === 0) {
           // retry on 5XX or library error
-          if (retryRequest()) {
+          if (retryRequest(signal)) {
             return;
           } else if (status === 0) {
             promise.reject('Unable to connect to the Parse API');

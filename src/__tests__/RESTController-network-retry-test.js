@@ -132,6 +132,25 @@ describe('RESTController rejected fetch retries', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
+  it.each(['network', 'server'])('does not retry after cancellation during %s backoff', async failure => {
+    let retry;
+    let controller;
+    global.setTimeout.mockImplementation(callback => { retry = callback; });
+    global.fetch = failure === 'network'
+      ? jest.fn().mockRejectedValueOnce(new TypeError('fetch failed')).mockResolvedValue(response())
+      : jest.fn().mockResolvedValueOnce(response(503)).mockResolvedValue(response());
+    const pending = RESTController.ajax('GET', 'https://example.com/parse', null, {}, {
+      requestTask: task => { controller = task; },
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(retry).toBeDefined();
+    controller.abort();
+    retry();
+    await expect(pending).resolves.toEqual({ response: { results: [] }, status: 0 });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
   it('does not replay a successful response whose JSON cannot be decoded', async () => {
     const failure = new SyntaxError('Invalid JSON');
     global.fetch = jest.fn().mockResolvedValue({
