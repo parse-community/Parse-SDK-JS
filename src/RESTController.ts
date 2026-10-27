@@ -125,6 +125,26 @@ const RESTController = {
     const isIdempotent = CoreManager.get('IDEMPOTENCY') && ['POST', 'PUT'].includes(method);
     const requestId = isIdempotent ? uuidv4() : '';
     let attempts = 0;
+    const isStream = typeof ReadableStream !== 'undefined' && data instanceof ReadableStream;
+    let isReadRequest = ['GET', 'HEAD'].includes(method);
+    if (method === 'POST' && typeof data === 'string') {
+      try {
+        // Parse requests tunnel their logical method through a JSON body.
+        isReadRequest = JSON.parse(data)?._method === 'GET';
+      } catch (_error) {
+        // A non-JSON body does not establish that a POST is safe to replay.
+      }
+    }
+
+    const retryRequest = () => {
+      // Stream bodies may already have been consumed by the first fetch.
+      if (isStream || ++attempts >= CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
+        return false;
+      }
+      const delay = Math.round(Math.random() * 125 * Math.pow(2, attempts));
+      setTimeout(dispatch, delay);
+      return true;
+    };
 
     const dispatch = async function () {
       const controller = new AbortController();
@@ -163,7 +183,17 @@ const RESTController = {
             fetchOptions.duplex = 'half';
           }
         }
-        const response = await fetch(url, fetchOptions);
+        let response;
+        try {
+          response = await fetch(url, fetchOptions);
+        } catch (error) {
+          // No response does not mean the server did not apply a write.
+          // Only reads and writes with a stable idempotency key can be replayed.
+          if (error.name !== 'AbortError' && (isReadRequest || isIdempotent) && retryRequest()) {
+            return;
+          }
+          throw error;
+        }
         const { status } = response;
         if (status >= 200 && status < 300) {
           let result;
@@ -218,12 +248,8 @@ const RESTController = {
           });
         } else if (status >= 500 || status === 0) {
           // retry on 5XX or library error
-          // ReadableStream bodies cannot be retried because they are consumed by the first fetch
-          const isStream = typeof ReadableStream !== 'undefined' && data instanceof ReadableStream;
-          if (!isStream && ++attempts < CoreManager.get('REQUEST_ATTEMPT_LIMIT')) {
-            // Exponentially-growing random delay
-            const delay = Math.round(Math.random() * 125 * Math.pow(2, attempts));
-            setTimeout(dispatch, delay);
+          if (retryRequest()) {
+            return;
           } else if (status === 0) {
             promise.reject('Unable to connect to the Parse API');
           } else {
