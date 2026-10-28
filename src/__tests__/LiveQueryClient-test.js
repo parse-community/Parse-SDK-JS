@@ -686,6 +686,184 @@ describe('LiveQueryClient', () => {
     expect(liveQueryClient.open).toHaveBeenCalled();
   });
 
+  describe('connection lifecycle', () => {
+    let liveQueryClient;
+    let WebSocketImplementation;
+    let previousWebSocketImplementation;
+
+    beforeEach(() => {
+      jest.clearAllTimers();
+      previousWebSocketImplementation = CoreManager.getWebSocketController();
+      WebSocketImplementation = jest.fn(() => ({
+        send: jest.fn(),
+        close: jest.fn(),
+      }));
+      CoreManager.setWebSocketController(WebSocketImplementation);
+      liveQueryClient = new LiveQueryClient({
+        applicationId: 'applicationId',
+        serverURL: 'ws://test',
+      });
+    });
+
+    afterEach(() => {
+      jest.clearAllTimers();
+      CoreManager.setWebSocketController(previousWebSocketImplementation);
+    });
+
+    it('cancels a pending reconnect when closed', async () => {
+      liveQueryClient.open();
+      const socket = liveQueryClient.socket;
+      socket.onerror(new Error('Connection failed'));
+
+      const closed = liveQueryClient.close();
+      jest.runOnlyPendingTimers();
+
+      expect(WebSocketImplementation).toHaveBeenCalledTimes(1);
+      expect(liveQueryClient.state).toBe('disconnected');
+      expect(liveQueryClient.reconnectHandle).toBeNull();
+      socket.onclose();
+      await closed;
+    });
+
+    it('cancels a pending reconnect when opened manually', () => {
+      liveQueryClient.open();
+      liveQueryClient.socket.onerror(new Error('Connection failed'));
+
+      liveQueryClient.open();
+      jest.runOnlyPendingTimers();
+
+      expect(WebSocketImplementation).toHaveBeenCalledTimes(2);
+      expect(liveQueryClient.reconnectHandle).toBeNull();
+    });
+
+    it('closes the previous connection after a server requests a reconnect', async () => {
+      liveQueryClient.open();
+      const socket = liveQueryClient.socket;
+      socket.onmessage({ data: { op: 'connected', clientId: 1 } });
+      socket.onmessage({
+        data: { op: 'error', error: 'Reconnect required', reconnect: true },
+      });
+
+      jest.runOnlyPendingTimers();
+
+      expect(WebSocketImplementation).toHaveBeenCalledTimes(2);
+      expect(liveQueryClient.socket).not.toBe(socket);
+      expect(socket.close).toHaveBeenCalledTimes(1);
+      expect(liveQueryClient.state).toBe('reconnecting');
+
+      liveQueryClient.socket.onopen();
+      const request = JSON.parse(liveQueryClient.socket.send.mock.calls[0][0]);
+      expect(request.op).toBe('connect');
+      liveQueryClient.socket.onmessage({
+        data: { op: 'connected', clientId: 2 },
+      });
+      await liveQueryClient.connectPromise;
+      expect(liveQueryClient.state).toBe('connected');
+      expect(liveQueryClient.id).toBe(2);
+    });
+
+    it.each(['onopen', 'onmessage', 'onclose', 'onerror'])(
+      'ignores %s from a replaced connection',
+      eventName => {
+        liveQueryClient.open();
+        const socket = liveQueryClient.socket;
+        liveQueryClient.open();
+        const currentSocket = liveQueryClient.socket;
+        const onOpen = jest.fn();
+        const onClose = jest.fn();
+        const onError = jest.fn();
+        liveQueryClient.on('open', onOpen);
+        liveQueryClient.on('close', onClose);
+        liveQueryClient.on('error', onError);
+
+        socket[eventName]({ data: { op: 'connected', clientId: 42 } });
+
+        expect(currentSocket.send).not.toHaveBeenCalled();
+        expect(liveQueryClient.state).toBe('connecting');
+        expect(liveQueryClient.id).toBe(0);
+        expect(onOpen).not.toHaveBeenCalled();
+        expect(onClose).not.toHaveBeenCalled();
+        expect(onError).not.toHaveBeenCalled();
+        expect(liveQueryClient.reconnectHandle).toBeNull();
+      }
+    );
+
+    it.each(['onopen', 'onmessage', 'onerror'])(
+      'ignores %s after an explicit close',
+      async eventName => {
+        liveQueryClient.open();
+        const socket = liveQueryClient.socket;
+        const onOpen = jest.fn();
+        const onError = jest.fn();
+        liveQueryClient.on('open', onOpen);
+        liveQueryClient.on('error', onError);
+        const closed = liveQueryClient.close();
+
+        socket[eventName]({ data: { op: 'connected', clientId: 42 } });
+
+        expect(socket.send).not.toHaveBeenCalled();
+        expect(liveQueryClient.state).toBe('disconnected');
+        expect(onOpen).not.toHaveBeenCalled();
+        expect(onError).not.toHaveBeenCalled();
+        expect(liveQueryClient.reconnectHandle).toBeNull();
+        socket.onclose();
+        await closed;
+      }
+    );
+
+    it('resolves each close with the event from its own connection', async () => {
+      liveQueryClient.open();
+      const firstSocket = liveQueryClient.socket;
+      const firstClosed = liveQueryClient.close();
+      liveQueryClient.open();
+      const secondSocket = liveQueryClient.socket;
+      const secondClosed = liveQueryClient.close();
+      const firstResolve = jest.spyOn(firstSocket.closingPromise, 'resolve');
+      const secondResolve = jest.spyOn(secondSocket.closingPromise, 'resolve');
+      const firstEvent = { code: 1000, reason: 'First connection closed' };
+      const secondEvent = { code: 1000, reason: 'Second connection closed' };
+
+      firstSocket.onclose(firstEvent);
+
+      expect(firstResolve).toHaveBeenCalledWith(firstEvent);
+      expect(secondResolve).not.toHaveBeenCalled();
+      secondSocket.onclose(secondEvent);
+      await expect(firstClosed).resolves.toBe(firstEvent);
+      await expect(secondClosed).resolves.toBe(secondEvent);
+    });
+
+    it('keeps the original close promise when a close listener reopens', async () => {
+      liveQueryClient.open();
+      const socket = liveQueryClient.socket;
+      liveQueryClient.on('close', () => liveQueryClient.open());
+
+      const closed = liveQueryClient.close();
+      const currentSocket = liveQueryClient.socket;
+      const currentResolve = jest.spyOn(currentSocket.closingPromise, 'resolve');
+      const event = { code: 1000 };
+      socket.onclose(event);
+
+      expect(currentResolve).not.toHaveBeenCalled();
+      await expect(closed).resolves.toBe(event);
+      expect(liveQueryClient.state).toBe('connecting');
+    });
+
+    it('ignores a synchronous close event while replacing a connection', () => {
+      liveQueryClient.open();
+      const socket = liveQueryClient.socket;
+      socket.close.mockImplementation(() => socket.onclose());
+      const onClose = jest.fn();
+      liveQueryClient.on('close', onClose);
+
+      liveQueryClient.open();
+
+      expect(socket.close).toHaveBeenCalledTimes(1);
+      expect(onClose).not.toHaveBeenCalled();
+      expect(liveQueryClient.state).toBe('connecting');
+      expect(liveQueryClient.reconnectHandle).toBeNull();
+    });
+  });
+
   it('can handle WebSocket error message', () => {
     const liveQueryClient = new LiveQueryClient({
       applicationId: 'applicationId',

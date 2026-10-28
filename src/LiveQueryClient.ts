@@ -277,26 +277,42 @@ class LiveQueryClient {
       this.state = CLIENT_STATE.CONNECTING;
     }
 
-    this.socket = new WebSocketImplementation(this.serverURL);
-    this.socket.closingPromise = resolvingPromise();
+    clearTimeout(this.reconnectHandle);
+    this.reconnectHandle = null;
+    const previousSocket = this.socket;
+    const socket: typeof this.socket = new WebSocketImplementation(this.serverURL);
+    this.socket = socket;
+    socket.closingPromise = resolvingPromise();
 
     // Bind WebSocket callbacks
-    this.socket.onopen = () => {
-      this._handleWebSocketOpen();
+    socket.onopen = () => {
+      if (this.socket === socket && this.state !== CLIENT_STATE.DISCONNECTED) {
+        this._handleWebSocketOpen();
+      }
     };
 
-    this.socket.onmessage = event => {
-      this._handleWebSocketMessage(event);
+    socket.onmessage = event => {
+      if (this.socket === socket && this.state !== CLIENT_STATE.DISCONNECTED) {
+        this._handleWebSocketMessage(event);
+      }
     };
 
-    this.socket.onclose = event => {
-      this.socket.closingPromise?.resolve(event);
-      this._handleWebSocketClose();
+    socket.onclose = event => {
+      // A replaced connection must still resolve its own pending close.
+      socket.closingPromise?.resolve(event);
+      if (this.socket === socket) {
+        this._handleWebSocketClose();
+      }
     };
 
-    this.socket.onerror = error => {
-      this._handleWebSocketError(error);
+    socket.onerror = error => {
+      if (this.socket === socket && this.state !== CLIENT_STATE.DISCONNECTED) {
+        this._handleWebSocketError(error);
+      }
     };
+
+    // Install the replacement before closing, as close may emit synchronously.
+    previousSocket?.close();
   }
 
   resubscribe() {
@@ -337,11 +353,14 @@ class LiveQueryClient {
    * @returns {Promise | undefined} CloseEvent {@link https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close_event}
    */
   async close(): Promise<void> {
+    clearTimeout(this.reconnectHandle);
+    this.reconnectHandle = null;
     if (this.state === CLIENT_STATE.INITIALIZED || this.state === CLIENT_STATE.DISCONNECTED) {
       return;
     }
+    const socket = this.socket;
     this.state = CLIENT_STATE.DISCONNECTED;
-    this.socket?.close();
+    socket?.close();
     // Notify each subscription about the close
     for (const subscription of this.subscriptions.values()) {
       subscription.subscribed = false;
@@ -349,7 +368,7 @@ class LiveQueryClient {
     }
     this._handleReset();
     this.emit(CLIENT_EMMITER_TYPES.CLOSE);
-    return this.socket?.closingPromise;
+    return socket?.closingPromise;
   }
 
   // ensure we start with valid state if connect is called again after close
@@ -524,6 +543,10 @@ class LiveQueryClient {
     }
     this.reconnectHandle = setTimeout(
       (() => {
+        this.reconnectHandle = null;
+        if (this.state === CLIENT_STATE.DISCONNECTED) {
+          return;
+        }
         this.attempts++;
         this.connectPromise = resolvingPromise();
         this.open();
