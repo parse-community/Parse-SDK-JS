@@ -8,8 +8,13 @@ import OfflineQuery from './OfflineQuery';
 import { DEFAULT_PIN } from './LocalDatastoreUtils';
 
 import type LiveQuerySubscription from './LiveQuerySubscription';
+import type ParseRelation from './ParseRelation';
 import type { RequestOptions, BaseRequestOptions } from './RESTController';
 import type { Pointer, BaseAttributes } from './ParseObject';
+
+// List constraints compare array fields with their elements.
+type QueryFieldElement<T> = T extends readonly (infer Element)[] ? Element : T;
+type QueryFieldInput<T> = T extends ParseObject ? T | string : T;
 
 export interface BatchOptions extends BaseRequestOptions {
   batchSize?: number;
@@ -1171,6 +1176,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be equal to the provided value.
+   * For relation fields, the value may be a related object or its pointer.
    *
    * @param {string} key The key to check.
    * @param value The value that the Parse.Object must contain.
@@ -1180,11 +1186,13 @@ class ParseQuery<T extends ParseObject = ParseObject> {
     key: K,
     value:
       | T['attributes'][K]
-      | (NonNullable<T['attributes'][K]> extends ParseObject
-          ? Pointer
-          : NonNullable<T['attributes'][K]> extends (infer E)[]
-            ? E
-            : never)
+      | (NonNullable<T['attributes'][K]> extends ParseRelation<ParseObject, infer Related>
+          ? Related | Pointer
+          : NonNullable<T['attributes'][K]> extends ParseObject
+            ? Pointer
+            : NonNullable<T['attributes'][K]> extends (infer E)[]
+              ? E
+              : never)
   ): this {
     if (key && typeof key === 'object') {
       Object.entries(key).forEach(([k, val]) => this.equalTo(k, val as any));
@@ -1285,6 +1293,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be contained in the provided list of values.
+   * For array fields, matches if any element is in the provided list.
    *
    * @param {string} key The key to check.
    * @param {Array<*>} values The values that will match.
@@ -1292,7 +1301,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   containedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(
     key: K,
-    values: (T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never))[]
+    values: QueryFieldInput<QueryFieldElement<T['attributes'][K]>>[]
   ): this {
     return this._addCondition(key, '$in', values);
   }
@@ -1300,6 +1309,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * not be contained in the provided list of values.
+   * For array fields, matches if no element is in the provided list.
    *
    * @param {string} key The key to check.
    * @param {Array<*>} values The values that will not match.
@@ -1307,7 +1317,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   notContainedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(
     key: K,
-    values: T['attributes'][K][]
+    values: QueryFieldElement<T['attributes'][K]>[]
   ): this {
     return this._addCondition(key, '$nin', values);
   }
@@ -1315,6 +1325,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be contained by the provided list of values. Get objects where all array elements match.
+   * For array fields, the list contains values of the element type.
    *
    * @param {string} key The key to check.
    * @param {Array} values The values that will match.
@@ -1322,7 +1333,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   containedBy<K extends keyof T['attributes'] | keyof BaseAttributes>(
     key: K,
-    values: (T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never))[]
+    values: QueryFieldInput<QueryFieldElement<T['attributes'][K]>>[]
   ): this {
     return this._addCondition(key, '$containedBy', values);
   }
