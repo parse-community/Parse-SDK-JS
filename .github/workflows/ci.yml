@@ -82,6 +82,7 @@ jobs:
         include:
           - name: Node 20
             NODE_VERSION: 20.19.0
+            SKIP_PUPPETEER: true
           - name: Node 22
             NODE_VERSION: 22.13.0
           - name: Node 24
@@ -91,6 +92,12 @@ jobs:
     - name: Fix usage of insecure GitHub protocol
       run: sudo git config --system url."https://github".insteadOf "git://github"
     - uses: actions/checkout@v4
+    # puppeteer 25 requires Node 22.12+, so skip its browser download and tests on older Node versions
+    - name: Skip puppeteer
+      if: matrix.SKIP_PUPPETEER
+      run: |
+        echo "PUPPETEER_SKIP_DOWNLOAD=true" >> "$GITHUB_ENV"
+        rm integration/test/ParseDistTest.js
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
