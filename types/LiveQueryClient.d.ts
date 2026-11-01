@@ -55,6 +55,8 @@ declare class LiveQueryClient {
     installationId?: string;
     additionalProperties: boolean;
     connectPromise: any;
+    private connectPromiseSettled;
+    private handshakeComplete;
     subscriptions: Map<number, LiveQuerySubscription>;
     private subscriptionPromises;
     socket: WebSocketController & {

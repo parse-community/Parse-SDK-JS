@@ -117,6 +117,8 @@ class LiveQueryClient {
   installationId?: string;
   additionalProperties: boolean;
   connectPromise: any;
+  private connectPromiseSettled: boolean;
+  private handshakeComplete: boolean;
   subscriptions: Map<number, LiveQuerySubscription>;
   private subscriptionPromises: WeakMap<LiveQuerySubscription, Promise<void>>;
   socket: WebSocketController & { closingPromise?: any };
@@ -170,6 +172,8 @@ class LiveQueryClient {
     this.installationId = installationId || undefined;
     this.additionalProperties = true;
     this.connectPromise = resolvingPromise();
+    this.connectPromiseSettled = false;
+    this.handshakeComplete = false;
     this.subscriptions = new Map();
     this.subscriptionPromises = new WeakMap();
     this.state = CLIENT_STATE.INITIALIZED;
@@ -290,9 +294,10 @@ class LiveQueryClient {
       return;
     }
 
-    if (this.state === CLIENT_STATE.CONNECTED) {
+    if (this.state === CLIENT_STATE.CONNECTED || this.connectPromiseSettled) {
       this.state = CLIENT_STATE.RECONNECTING;
       this.connectPromise = resolvingPromise();
+      this.connectPromiseSettled = false;
     } else if (this.state !== CLIENT_STATE.RECONNECTING) {
       this.state = CLIENT_STATE.CONNECTING;
     }
@@ -302,6 +307,8 @@ class LiveQueryClient {
     const previousSocket = this.socket;
     const socket: typeof this.socket = new WebSocketImplementation(this.serverURL);
     this.socket = socket;
+    this.handshakeComplete = false;
+    this.id = 0;
     socket.closingPromise = resolvingPromise();
 
     // Bind WebSocket callbacks
@@ -402,6 +409,8 @@ class LiveQueryClient {
     this.id = 0;
     this.requestId = 1;
     this.connectPromise = resolvingPromise();
+    this.connectPromiseSettled = false;
+    this.handshakeComplete = false;
     this.subscriptions = new Map();
     this.subscriptionPromises = new WeakMap();
   }
@@ -436,13 +445,16 @@ class LiveQueryClient {
     };
     switch (data.op) {
       case OP_EVENTS.CONNECTED:
+        this.handshakeComplete = true;
         if (this.state === CLIENT_STATE.RECONNECTING) {
           this.resubscribe();
         }
-        this.emit(CLIENT_EMMITER_TYPES.OPEN);
         this.id = data.clientId;
+        this.connectPromiseSettled = true;
         this.connectPromise.resolve();
         this.state = CLIENT_STATE.CONNECTED;
+        // Finish this socket's handshake before listeners can replace it.
+        this.emit(CLIENT_EMMITER_TYPES.OPEN);
         break;
       case OP_EVENTS.SUBSCRIBED:
         if (subscription) {
@@ -454,9 +466,21 @@ class LiveQueryClient {
         break;
       case OP_EVENTS.ERROR: {
         const parseError = new ParseError(data.code, data.error);
-        if (!this.id) {
-          this.connectPromise.reject(parseError);
+        if (!this.handshakeComplete && !data.reconnect) {
           this.state = CLIENT_STATE.DISCONNECTED;
+          clearTimeout(this.reconnectHandle);
+          this.reconnectHandle = null;
+          this.connectPromiseSettled = true;
+          // The client error event also reports an unobserved internal handshake.
+          this.connectPromise.catch(() => {});
+          this.connectPromise.reject(parseError);
+          // Failed queued subscriptions must not be revived by a later open().
+          for (const [requestId, pending] of this.subscriptions) {
+            if (this.subscriptionPromises.get(pending) === this.connectPromise) {
+              this.subscriptions.delete(requestId);
+            }
+          }
+          this.socket?.close();
         }
         if (data.requestId) {
           if (subscription) {
@@ -558,8 +582,9 @@ class LiveQueryClient {
       return;
     }
     // Gate requests as soon as reconnecting begins, including during its delay.
-    if (this.state !== CLIENT_STATE.RECONNECTING) {
+    if (this.connectPromiseSettled) {
       this.connectPromise = resolvingPromise();
+      this.connectPromiseSettled = false;
     }
     this.state = CLIENT_STATE.RECONNECTING;
     const time = generateInterval(this.attempts);
