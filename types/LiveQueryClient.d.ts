@@ -56,6 +56,7 @@ declare class LiveQueryClient {
     additionalProperties: boolean;
     connectPromise: any;
     subscriptions: Map<number, LiveQuerySubscription>;
+    private subscriptionPromises;
     socket: WebSocketController & {
         closingPromise?: any;
     };
@@ -99,6 +100,7 @@ declare class LiveQueryClient {
      * @returns {LiveQuerySubscription | undefined}
      */
     subscribe(query: ParseQuery, sessionToken?: string): LiveQuerySubscription | undefined;
+    private _queueSubscribe;
     /**
      * After calling unsubscribe you'll stop receiving events from the subscription object.
      *

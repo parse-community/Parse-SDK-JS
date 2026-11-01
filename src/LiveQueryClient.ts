@@ -118,6 +118,7 @@ class LiveQueryClient {
   additionalProperties: boolean;
   connectPromise: any;
   subscriptions: Map<number, LiveQuerySubscription>;
+  private subscriptionPromises: WeakMap<LiveQuerySubscription, Promise<void>>;
   socket: WebSocketController & { closingPromise?: any };
   state: string;
   reconnectHandle: any;
@@ -170,6 +171,7 @@ class LiveQueryClient {
     this.additionalProperties = true;
     this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
+    this.subscriptionPromises = new WeakMap();
     this.state = CLIENT_STATE.INITIALIZED;
     const EventEmitter = CoreManager.getEventEmitter();
     this.emitter = new EventEmitter();
@@ -227,15 +229,30 @@ class LiveQueryClient {
     const subscription = new LiveQuerySubscription(this.requestId, query, sessionToken, this);
     this.subscriptions.set(this.requestId, subscription);
     this.requestId += 1;
-    this.connectPromise
-      .then(() => {
-        this.socket.send(JSON.stringify(subscribeRequest));
-      })
-      .catch((error: Error) => {
-        subscription.subscribePromise.reject(error);
-      });
+    this._queueSubscribe(subscribeRequest.requestId, subscribeRequest).catch((error: Error) => {
+      subscription.subscribePromise.reject(error);
+    });
 
     return subscription;
+  }
+
+  private _queueSubscribe(requestId: number, request: object): Promise<void> {
+    const subscription = this.subscriptions.get(requestId);
+    const connectPromise = this.connectPromise;
+    if (subscription) {
+      this.subscriptionPromises.set(subscription, connectPromise);
+    }
+    return connectPromise.then(() => {
+      // A queued request belongs to its connection and active subscription.
+      if (
+        !subscription ||
+        this.subscriptions.get(requestId) !== subscription ||
+        this.connectPromise !== connectPromise
+      ) {
+        return;
+      }
+      this.socket.send(JSON.stringify(request));
+    });
   }
 
   /**
@@ -273,7 +290,10 @@ class LiveQueryClient {
       return;
     }
 
-    if (this.state !== CLIENT_STATE.RECONNECTING) {
+    if (this.state === CLIENT_STATE.CONNECTED) {
+      this.state = CLIENT_STATE.RECONNECTING;
+      this.connectPromise = resolvingPromise();
+    } else if (this.state !== CLIENT_STATE.RECONNECTING) {
       this.state = CLIENT_STATE.CONNECTING;
     }
 
@@ -317,6 +337,13 @@ class LiveQueryClient {
 
   resubscribe() {
     this.subscriptions.forEach((subscription, requestId) => {
+      // New subscriptions already queued for this handshake must not be sent twice.
+      if (
+        this.state === CLIENT_STATE.RECONNECTING &&
+        this.subscriptionPromises.get(subscription) === this.connectPromise
+      ) {
+        return;
+      }
       const query = subscription.query;
       const queryJSON = query.toJSON();
       const where = queryJSON.where;
@@ -340,9 +367,7 @@ class LiveQueryClient {
         subscribeRequest.sessionToken = sessionToken;
       }
 
-      this.connectPromise.then(() => {
-        this.socket.send(JSON.stringify(subscribeRequest));
-      });
+      this._queueSubscribe(requestId, subscribeRequest);
     });
   }
 
@@ -378,6 +403,7 @@ class LiveQueryClient {
     this.requestId = 1;
     this.connectPromise = resolvingPromise();
     this.subscriptions = new Map();
+    this.subscriptionPromises = new WeakMap();
   }
 
   _handleWebSocketOpen() {
@@ -531,6 +557,10 @@ class LiveQueryClient {
     if (this.state === CLIENT_STATE.DISCONNECTED) {
       return;
     }
+    // Gate requests as soon as reconnecting begins, including during its delay.
+    if (this.state !== CLIENT_STATE.RECONNECTING) {
+      this.connectPromise = resolvingPromise();
+    }
     this.state = CLIENT_STATE.RECONNECTING;
     const time = generateInterval(this.attempts);
 
@@ -548,7 +578,6 @@ class LiveQueryClient {
           return;
         }
         this.attempts++;
-        this.connectPromise = resolvingPromise();
         this.open();
       }).bind(this),
       time
