@@ -22,6 +22,8 @@ if (dns.setDefaultResultOrder) {
 const port = 1337;
 const mountPath = '/parse';
 const serverURL = 'http://localhost:1337/parse';
+const filePath = '/file.bin';
+const fileUri = `http://localhost:${port}${filePath}`;
 let didChangeConfiguration = false;
 const distFiles = {};
 
@@ -158,6 +160,10 @@ const reconfigureServer = async (changedConfiguration = {}) => {
         </body></html>`);
     });
   }
+  // Serve a file for the specs that save a file from a URI
+  app.get(filePath, (_req, res) => {
+    res.send(Buffer.from([61, 170, 236, 120]));
+  });
   parseServer.server.on('connection', connection => {
     openConnections.add(connection);
     connection.on('close', () => {
@@ -200,4 +206,4 @@ afterEach(async () => {
   }
 });
 
-module.exports = { twitterAuthData };
+module.exports = { twitterAuthData, fileUri };

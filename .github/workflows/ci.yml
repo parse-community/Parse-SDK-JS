@@ -86,6 +86,8 @@ jobs:
             NODE_VERSION: 22.13.0
           - name: Node 24
             NODE_VERSION: 24.1.0
+          - name: Node 26
+            NODE_VERSION: 26.13.0
       fail-fast: false
     steps:
     - name: Fix usage of insecure GitHub protocol
