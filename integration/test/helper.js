@@ -158,9 +158,7 @@ const reconfigureServer = async (changedConfiguration = {}) => {
         </body></html>`);
     });
   }
-  // Serve a file for the specs that save a file from a URI, so that they don't download it from an
-  // external server. On Node.js 26, fetch can crash the process after an HTTP/2 request is aborted,
-  // see https://github.com/nodejs/undici/issues/5936
+  // Serve a file for the specs that save a file from a URI
   app.get('/file.bin', (_req, res) => {
     res.send(Buffer.from([61, 170, 236, 120]));
   });
