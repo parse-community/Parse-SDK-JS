@@ -6,6 +6,7 @@ import type { BaseRequestOptions } from './RESTController';
 import type { Pointer, BaseAttributes } from './ParseObject';
 type QueryFieldElement<T> = T extends readonly (infer Element)[] ? Element extends readonly unknown[] ? T : Element : T;
 type QueryFieldInput<T> = T extends ParseObject ? T | string : T;
+type QueryFieldInInput<T> = T extends readonly unknown[] ? QueryFieldElement<T> | T : T;
 export interface BatchOptions extends BaseRequestOptions {
     batchSize?: number;
     json?: boolean;
@@ -493,22 +494,24 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
      * Adds a constraint to the query that requires a particular key's value to
      * be contained in the provided list of values.
      * For one-dimensional array fields, matches if any element is in the provided list.
+     * Legacy array-valued operands remain available for server queries.
      *
      * @param {string} key The key to check.
      * @param {Array<*>} values The values that will match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    containedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: QueryFieldElement<QueryFieldInput<T['attributes'][K]>>[]): this;
+    containedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: QueryFieldInInput<QueryFieldInput<T['attributes'][K]>>[]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * not be contained in the provided list of values.
      * For one-dimensional array fields, matches if no element is in the provided list.
+     * Legacy array-valued operands remain available for server queries.
      *
      * @param {string} key The key to check.
      * @param {Array<*>} values The values that will not match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    notContainedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: QueryFieldElement<T['attributes'][K]>[]): this;
+    notContainedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: QueryFieldInInput<T['attributes'][K]>[]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be contained by the provided list of values. Get objects where all array elements match.

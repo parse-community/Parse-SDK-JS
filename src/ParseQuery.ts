@@ -20,6 +20,8 @@ type QueryFieldElement<T> = T extends readonly (infer Element)[]
     : Element
   : T;
 type QueryFieldInput<T> = T extends ParseObject ? T | string : T;
+// Server $in/$nin flatten legacy field-valued operands; $containedBy does not.
+type QueryFieldInInput<T> = T extends readonly unknown[] ? QueryFieldElement<T> | T : T;
 
 export interface BatchOptions extends BaseRequestOptions {
   batchSize?: number;
@@ -1299,6 +1301,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * Adds a constraint to the query that requires a particular key's value to
    * be contained in the provided list of values.
    * For one-dimensional array fields, matches if any element is in the provided list.
+   * Legacy array-valued operands remain available for server queries.
    *
    * @param {string} key The key to check.
    * @param {Array<*>} values The values that will match.
@@ -1306,7 +1309,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   containedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(
     key: K,
-    values: QueryFieldElement<QueryFieldInput<T['attributes'][K]>>[]
+    values: QueryFieldInInput<QueryFieldInput<T['attributes'][K]>>[]
   ): this {
     return this._addCondition(key, '$in', values);
   }
@@ -1315,6 +1318,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    * Adds a constraint to the query that requires a particular key's value to
    * not be contained in the provided list of values.
    * For one-dimensional array fields, matches if no element is in the provided list.
+   * Legacy array-valued operands remain available for server queries.
    *
    * @param {string} key The key to check.
    * @param {Array<*>} values The values that will not match.
@@ -1322,7 +1326,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   notContainedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(
     key: K,
-    values: QueryFieldElement<T['attributes'][K]>[]
+    values: QueryFieldInInput<T['attributes'][K]>[]
   ): this {
     return this._addCondition(key, '$nin', values);
   }
