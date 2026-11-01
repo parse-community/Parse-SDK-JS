@@ -2191,6 +2191,7 @@ function testQuery() {
       optionalTags?: string[] | null;
       readonlyTags: readonly string[];
       owners: Owner[];
+      readonlyOwners: readonly Owner[];
       optionalOwners?: Owner[] | null;
       owner?: Owner | null;
       matrix: number[][];
@@ -2208,13 +2209,16 @@ function testQuery() {
     // $ExpectType (string | null | undefined)[]
     optionalInValues;
     const ownerInValues: Parameters<typeof query.containedIn<'owners'>>[1] = [];
-    // $ExpectType (string | Owner)[]
+    // $ExpectType Owner[]
     ownerInValues;
+    const readonlyOwnerInValues: Parameters<typeof query.containedIn<'readonlyOwners'>>[1] = [];
+    // $ExpectType Owner[]
+    readonlyOwnerInValues;
     const readonlyInValues: Parameters<typeof query.containedIn<'readonlyTags'>>[1] = [];
     // $ExpectType string[]
     readonlyInValues;
     const matrixInValues: Parameters<typeof query.containedIn<'matrix'>>[1] = [];
-    // $ExpectType number[][]
+    // $ExpectType number[][][]
     matrixInValues;
     const notInValues: Parameters<typeof query.notContainedIn<'tags'>>[1] = [];
     // $ExpectType string[]
@@ -2232,7 +2236,7 @@ function testQuery() {
     // $ExpectType (string | null | undefined)[]
     optionalByValues;
     const ownerByValues: Parameters<typeof query.containedBy<'owners'>>[1] = [];
-    // $ExpectType (string | Owner)[]
+    // $ExpectType Owner[]
     ownerByValues;
 
     // $ExpectType ParseQuery<Item>
@@ -2242,13 +2246,15 @@ function testQuery() {
     // $ExpectType ParseQuery<Item>
     query.containedIn('readonlyTags', ['A1']);
     // $ExpectType ParseQuery<Item>
-    query.containedIn('owners', [owner, 'ownerId']);
+    query.containedIn('owners', [owner]);
     // $ExpectType ParseQuery<Item>
-    query.containedIn('optionalOwners', [owner, 'ownerId']);
+    query.containedIn('optionalOwners', [null, owner]);
+    // $ExpectType ParseQuery<Item>
+    query.containedIn('readonlyOwners', [owner]);
     // $ExpectType ParseQuery<Item>
     query.containedIn('owner', [owner, 'ownerId']);
     // $ExpectType ParseQuery<Item>
-    query.containedIn('matrix', [[1, 2]]);
+    query.containedIn('matrix', [[[1, 2]]]);
     // $ExpectType ParseQuery<Item>
     query.containedIn('objectId', ['itemId']);
     // $ExpectError
@@ -2257,6 +2263,14 @@ function testQuery() {
     query.containedIn('optionalTags', [1]);
     // $ExpectError
     query.containedIn('owners', [new Item()]);
+    // $ExpectError
+    query.containedIn('owners', [owner, 'ownerId']);
+    // $ExpectError
+    query.containedIn('optionalOwners', ['ownerId']);
+    // $ExpectError
+    query.containedIn('readonlyOwners', ['ownerId']);
+    // $ExpectError
+    query.containedIn('matrix', [[1, 2]]);
     // $ExpectError
     query.containedIn('matrix', [1, 2]);
     // $ExpectError
@@ -2277,7 +2291,7 @@ function testQuery() {
     // $ExpectType ParseQuery<Item>
     query.notContainedIn('owner', [owner]);
     // $ExpectType ParseQuery<Item>
-    query.notContainedIn('matrix', [[1, 2]]);
+    query.notContainedIn('matrix', [[[1, 2]]]);
     // $ExpectType ParseQuery<Item>
     query.notContainedIn('objectId', ['itemId']);
     // $ExpectError
@@ -2286,6 +2300,8 @@ function testQuery() {
     query.notContainedIn('optionalTags', [1]);
     // $ExpectError
     query.notContainedIn('owners', [new Item()]);
+    // $ExpectError
+    query.notContainedIn('matrix', [[1, 2]]);
     // $ExpectError
     query.notContainedIn('matrix', [1, 2]);
 
@@ -2296,19 +2312,29 @@ function testQuery() {
     // $ExpectType ParseQuery<Item>
     query.containedBy('readonlyTags', ['A1']);
     // $ExpectType ParseQuery<Item>
-    query.containedBy('owners', [owner, 'ownerId']);
+    query.containedBy('owners', [owner]);
     // $ExpectType ParseQuery<Item>
-    query.containedBy('optionalOwners', [owner, 'ownerId']);
+    query.containedBy('optionalOwners', [null, owner]);
+    // $ExpectType ParseQuery<Item>
+    query.containedBy('readonlyOwners', [owner]);
     // $ExpectType ParseQuery<Item>
     query.containedBy('owner', [owner, 'ownerId']);
     // $ExpectType ParseQuery<Item>
-    query.containedBy('matrix', [[1, 2]]);
+    query.containedBy('matrix', [[[1, 2]]]);
     // $ExpectError
     query.containedBy('tags', [1]);
     // $ExpectError
     query.containedBy('optionalTags', [1]);
     // $ExpectError
     query.containedBy('owners', [new Item()]);
+    // $ExpectError
+    query.containedBy('owners', [owner, 'ownerId']);
+    // $ExpectError
+    query.containedBy('optionalOwners', ['ownerId']);
+    // $ExpectError
+    query.containedBy('readonlyOwners', ['ownerId']);
+    // $ExpectError
+    query.containedBy('matrix', [[1, 2]]);
     // $ExpectError
     query.containedBy('matrix', [1, 2]);
     // $ExpectError

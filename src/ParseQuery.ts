@@ -12,8 +12,13 @@ import type ParseRelation from './ParseRelation';
 import type { RequestOptions, BaseRequestOptions } from './RESTController';
 import type { Pointer, BaseAttributes } from './ParseObject';
 
-// List constraints compare array fields with their elements.
-type QueryFieldElement<T> = T extends readonly (infer Element)[] ? Element : T;
+// Unwrap one-dimensional arrays. Nested arrays retain their existing input shape
+// because server and local list operators do not yet share nested-array semantics.
+type QueryFieldElement<T> = T extends readonly (infer Element)[]
+  ? Element extends readonly unknown[]
+    ? T
+    : Element
+  : T;
 type QueryFieldInput<T> = T extends ParseObject ? T | string : T;
 
 export interface BatchOptions extends BaseRequestOptions {
@@ -1293,7 +1298,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be contained in the provided list of values.
-   * For array fields, matches if any element is in the provided list.
+   * For one-dimensional array fields, matches if any element is in the provided list.
    *
    * @param {string} key The key to check.
    * @param {Array<*>} values The values that will match.
@@ -1301,7 +1306,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   containedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(
     key: K,
-    values: QueryFieldInput<QueryFieldElement<T['attributes'][K]>>[]
+    values: QueryFieldElement<QueryFieldInput<T['attributes'][K]>>[]
   ): this {
     return this._addCondition(key, '$in', values);
   }
@@ -1309,7 +1314,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * not be contained in the provided list of values.
-   * For array fields, matches if no element is in the provided list.
+   * For one-dimensional array fields, matches if no element is in the provided list.
    *
    * @param {string} key The key to check.
    * @param {Array<*>} values The values that will not match.
@@ -1325,7 +1330,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
   /**
    * Adds a constraint to the query that requires a particular key's value to
    * be contained by the provided list of values. Get objects where all array elements match.
-   * For array fields, the list contains values of the element type.
+   * For one-dimensional array fields, the list contains values of the element type.
    *
    * @param {string} key The key to check.
    * @param {Array} values The values that will match.
@@ -1333,7 +1338,7 @@ class ParseQuery<T extends ParseObject = ParseObject> {
    */
   containedBy<K extends keyof T['attributes'] | keyof BaseAttributes>(
     key: K,
-    values: QueryFieldInput<QueryFieldElement<T['attributes'][K]>>[]
+    values: QueryFieldElement<QueryFieldInput<T['attributes'][K]>>[]
   ): this {
     return this._addCondition(key, '$containedBy', values);
   }
