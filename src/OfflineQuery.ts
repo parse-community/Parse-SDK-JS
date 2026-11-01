@@ -18,7 +18,7 @@ function contains(haystack, needle) {
       if (typeof ptr === 'string' && ptr === needle.objectId) {
         return true;
       }
-      if (ptr.className === needle.className && ptr.objectId === needle.objectId) {
+      if (ptr && ptr.className === needle.className && ptr.objectId === needle.objectId) {
         return true;
       }
     }
