@@ -17,7 +17,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
-          node-version: latest
+          node-version: 24
           cache: npm
       - run: npm ci
       - run: npx semantic-release
@@ -49,7 +49,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: latest
+          node-version: 24
           cache: npm
       - name: Generate Docs
         run: |
