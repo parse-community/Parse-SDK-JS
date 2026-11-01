@@ -4,12 +4,12 @@ const assert = require('assert');
 const { Readable } = require('stream');
 const Parse = require('../../node');
 
+// Served by the test server, see helper.js
+const fileUri = 'http://localhost:1337/file.bin';
+
 describe('Parse.File', () => {
   it('can save file with uri', async () => {
-    // Try https
-    const parseLogo =
-      'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
-    const file1 = new Parse.File('parse-server-logo', { uri: parseLogo });
+    const file1 = new Parse.File('parse-server-logo', { uri: fileUri });
     await file1.save();
 
     const object = new Parse.Object('TestObject');
@@ -22,7 +22,7 @@ describe('Parse.File', () => {
     assert.equal(file1.name(), result.get('file1').name());
     assert.equal(file1.url(), result.get('file1').url());
 
-    // Try http
+    // Try the URL of the saved file
     const file2 = new Parse.File('parse-server-logo', { uri: file1.url() });
     await file2.save();
 
@@ -34,14 +34,12 @@ describe('Parse.File', () => {
   });
 
   it('can cancel save file with uri', async () => {
-    const parseLogo =
-      'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
-    const file = new Parse.File('parse-server-logo', { uri: parseLogo });
-    file.save().then(() => {
-      assert.equal(file.name(), undefined);
-      assert.equal(file.url(), undefined);
-    });
+    const file = new Parse.File('parse-server-logo', { uri: fileUri });
+    const promise = file.save();
     file.cancel();
+    await promise;
+    assert.equal(file.name(), undefined);
+    assert.equal(file.url(), undefined);
   });
 
   it('can get file upload / download progress', async () => {
@@ -121,9 +119,7 @@ describe('Parse.File', () => {
   });
 
   it('can delete file', async () => {
-    const parseLogo =
-      'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
-    const file = new Parse.File('parse-server-logo', { uri: parseLogo });
+    const file = new Parse.File('parse-server-logo', { uri: fileUri });
     await file.save();
     const data = await file.getData();
 
@@ -134,9 +130,7 @@ describe('Parse.File', () => {
   });
 
   it('can handle delete file error', async () => {
-    const parseLogo =
-      'https://raw.githubusercontent.com/parse-community/parse-server/master/.github/parse-server-logo.png';
-    const file = new Parse.File('parse-server-logo', { uri: parseLogo });
+    const file = new Parse.File('parse-server-logo', { uri: fileUri });
     try {
       await file.destroy();
       assert.equal(false, true);
