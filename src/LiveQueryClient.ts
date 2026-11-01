@@ -117,7 +117,10 @@ class LiveQueryClient {
   installationId?: string;
   additionalProperties: boolean;
   connectPromise: any;
+  private connectPromiseSettled: boolean;
+  private handshakeComplete: boolean;
   subscriptions: Map<number, LiveQuerySubscription>;
+  private subscriptionPromises: WeakMap<LiveQuerySubscription, Promise<void>>;
   socket: WebSocketController & { closingPromise?: any };
   state: string;
   reconnectHandle: any;
@@ -169,7 +172,10 @@ class LiveQueryClient {
     this.installationId = installationId || undefined;
     this.additionalProperties = true;
     this.connectPromise = resolvingPromise();
+    this.connectPromiseSettled = false;
+    this.handshakeComplete = false;
     this.subscriptions = new Map();
+    this.subscriptionPromises = new WeakMap();
     this.state = CLIENT_STATE.INITIALIZED;
     const EventEmitter = CoreManager.getEventEmitter();
     this.emitter = new EventEmitter();
@@ -227,15 +233,30 @@ class LiveQueryClient {
     const subscription = new LiveQuerySubscription(this.requestId, query, sessionToken, this);
     this.subscriptions.set(this.requestId, subscription);
     this.requestId += 1;
-    this.connectPromise
-      .then(() => {
-        this.socket.send(JSON.stringify(subscribeRequest));
-      })
-      .catch((error: Error) => {
-        subscription.subscribePromise.reject(error);
-      });
+    this._queueSubscribe(subscribeRequest.requestId, subscribeRequest).catch((error: Error) => {
+      subscription.subscribePromise.reject(error);
+    });
 
     return subscription;
+  }
+
+  private _queueSubscribe(requestId: number, request: object): Promise<void> {
+    const subscription = this.subscriptions.get(requestId);
+    const connectPromise = this.connectPromise;
+    if (subscription) {
+      this.subscriptionPromises.set(subscription, connectPromise);
+    }
+    return connectPromise.then(() => {
+      // A queued request belongs to its connection and active subscription.
+      if (
+        !subscription ||
+        this.subscriptions.get(requestId) !== subscription ||
+        this.connectPromise !== connectPromise
+      ) {
+        return;
+      }
+      this.socket.send(JSON.stringify(request));
+    });
   }
 
   /**
@@ -273,34 +294,63 @@ class LiveQueryClient {
       return;
     }
 
-    if (this.state !== CLIENT_STATE.RECONNECTING) {
+    if (this.state === CLIENT_STATE.CONNECTED || this.connectPromiseSettled) {
+      this.state = CLIENT_STATE.RECONNECTING;
+      this.connectPromise = resolvingPromise();
+      this.connectPromiseSettled = false;
+    } else if (this.state !== CLIENT_STATE.RECONNECTING) {
       this.state = CLIENT_STATE.CONNECTING;
     }
 
-    this.socket = new WebSocketImplementation(this.serverURL);
-    this.socket.closingPromise = resolvingPromise();
+    clearTimeout(this.reconnectHandle);
+    this.reconnectHandle = null;
+    const previousSocket = this.socket;
+    const socket: typeof this.socket = new WebSocketImplementation(this.serverURL);
+    this.socket = socket;
+    this.handshakeComplete = false;
+    this.id = 0;
+    socket.closingPromise = resolvingPromise();
 
     // Bind WebSocket callbacks
-    this.socket.onopen = () => {
-      this._handleWebSocketOpen();
+    socket.onopen = () => {
+      if (this.socket === socket && this.state !== CLIENT_STATE.DISCONNECTED) {
+        this._handleWebSocketOpen();
+      }
     };
 
-    this.socket.onmessage = event => {
-      this._handleWebSocketMessage(event);
+    socket.onmessage = event => {
+      if (this.socket === socket && this.state !== CLIENT_STATE.DISCONNECTED) {
+        this._handleWebSocketMessage(event);
+      }
     };
 
-    this.socket.onclose = event => {
-      this.socket.closingPromise?.resolve(event);
-      this._handleWebSocketClose();
+    socket.onclose = event => {
+      // A replaced connection must still resolve its own pending close.
+      socket.closingPromise?.resolve(event);
+      if (this.socket === socket) {
+        this._handleWebSocketClose();
+      }
     };
 
-    this.socket.onerror = error => {
-      this._handleWebSocketError(error);
+    socket.onerror = error => {
+      if (this.socket === socket && this.state !== CLIENT_STATE.DISCONNECTED) {
+        this._handleWebSocketError(error);
+      }
     };
+
+    // Install the replacement before closing, as close may emit synchronously.
+    previousSocket?.close();
   }
 
   resubscribe() {
     this.subscriptions.forEach((subscription, requestId) => {
+      // New subscriptions already queued for this handshake must not be sent twice.
+      if (
+        this.state === CLIENT_STATE.RECONNECTING &&
+        this.subscriptionPromises.get(subscription) === this.connectPromise
+      ) {
+        return;
+      }
       const query = subscription.query;
       const queryJSON = query.toJSON();
       const where = queryJSON.where;
@@ -324,9 +374,7 @@ class LiveQueryClient {
         subscribeRequest.sessionToken = sessionToken;
       }
 
-      this.connectPromise.then(() => {
-        this.socket.send(JSON.stringify(subscribeRequest));
-      });
+      this._queueSubscribe(requestId, subscribeRequest);
     });
   }
 
@@ -337,11 +385,14 @@ class LiveQueryClient {
    * @returns {Promise | undefined} CloseEvent {@link https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close_event}
    */
   async close(): Promise<void> {
+    clearTimeout(this.reconnectHandle);
+    this.reconnectHandle = null;
     if (this.state === CLIENT_STATE.INITIALIZED || this.state === CLIENT_STATE.DISCONNECTED) {
       return;
     }
+    const socket = this.socket;
     this.state = CLIENT_STATE.DISCONNECTED;
-    this.socket?.close();
+    socket?.close();
     // Notify each subscription about the close
     for (const subscription of this.subscriptions.values()) {
       subscription.subscribed = false;
@@ -349,7 +400,7 @@ class LiveQueryClient {
     }
     this._handleReset();
     this.emit(CLIENT_EMMITER_TYPES.CLOSE);
-    return this.socket?.closingPromise;
+    return socket?.closingPromise;
   }
 
   // ensure we start with valid state if connect is called again after close
@@ -358,7 +409,10 @@ class LiveQueryClient {
     this.id = 0;
     this.requestId = 1;
     this.connectPromise = resolvingPromise();
+    this.connectPromiseSettled = false;
+    this.handshakeComplete = false;
     this.subscriptions = new Map();
+    this.subscriptionPromises = new WeakMap();
   }
 
   _handleWebSocketOpen() {
@@ -391,13 +445,16 @@ class LiveQueryClient {
     };
     switch (data.op) {
       case OP_EVENTS.CONNECTED:
+        this.handshakeComplete = true;
         if (this.state === CLIENT_STATE.RECONNECTING) {
           this.resubscribe();
         }
-        this.emit(CLIENT_EMMITER_TYPES.OPEN);
         this.id = data.clientId;
+        this.connectPromiseSettled = true;
         this.connectPromise.resolve();
         this.state = CLIENT_STATE.CONNECTED;
+        // Finish this socket's handshake before listeners can replace it.
+        this.emit(CLIENT_EMMITER_TYPES.OPEN);
         break;
       case OP_EVENTS.SUBSCRIBED:
         if (subscription) {
@@ -409,9 +466,21 @@ class LiveQueryClient {
         break;
       case OP_EVENTS.ERROR: {
         const parseError = new ParseError(data.code, data.error);
-        if (!this.id) {
-          this.connectPromise.reject(parseError);
+        if (!this.handshakeComplete && !data.reconnect) {
           this.state = CLIENT_STATE.DISCONNECTED;
+          clearTimeout(this.reconnectHandle);
+          this.reconnectHandle = null;
+          this.connectPromiseSettled = true;
+          // The client error event also reports an unobserved internal handshake.
+          this.connectPromise.catch(() => {});
+          this.connectPromise.reject(parseError);
+          // Failed queued subscriptions must not be revived by a later open().
+          for (const [requestId, pending] of this.subscriptions) {
+            if (this.subscriptionPromises.get(pending) === this.connectPromise) {
+              this.subscriptions.delete(requestId);
+            }
+          }
+          this.socket?.close();
         }
         if (data.requestId) {
           if (subscription) {
@@ -512,6 +581,11 @@ class LiveQueryClient {
     if (this.state === CLIENT_STATE.DISCONNECTED) {
       return;
     }
+    // Gate requests as soon as reconnecting begins, including during its delay.
+    if (this.connectPromiseSettled) {
+      this.connectPromise = resolvingPromise();
+      this.connectPromiseSettled = false;
+    }
     this.state = CLIENT_STATE.RECONNECTING;
     const time = generateInterval(this.attempts);
 
@@ -524,8 +598,11 @@ class LiveQueryClient {
     }
     this.reconnectHandle = setTimeout(
       (() => {
+        this.reconnectHandle = null;
+        if (this.state === CLIENT_STATE.DISCONNECTED) {
+          return;
+        }
         this.attempts++;
-        this.connectPromise = resolvingPromise();
         this.open();
       }).bind(this),
       time
