@@ -3,9 +3,7 @@
 const assert = require('assert');
 const { Readable } = require('stream');
 const Parse = require('../../node');
-
-// Served by the test server, see helper.js
-const fileUri = 'http://localhost:1337/file.bin';
+const { fileUri } = require('./helper');
 
 describe('Parse.File', () => {
   it('can save file with uri', async () => {
