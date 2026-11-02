@@ -5,18 +5,13 @@ on:
       tag:
         default: ''
         description: 'Version tag:'
-permissions:
-  contents: read
-  pages: write
-  id-token: write
 jobs:
-  docs-publish:
+  docs:
     if: github.event.inputs.tag != ''
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,12 +27,34 @@ jobs:
           npm run release_docs
         env:
           SOURCE_TAG: ${{ github.event.inputs.tag }}
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+      - name: Upload docs
+        uses: actions/upload-artifact@v4
         with:
-          path: ./docs
+          name: docs
+          path: docs
+          retention-days: 1
+
+  docs-deploy:
+    needs: docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+      - name: Download docs
+        uses: actions/download-artifact@v4
+        with:
+          name: docs
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "deploy: $SOURCE_TAG"
+          git push origin HEAD:gh-pages
+        env:
+          SOURCE_TAG: ${{ github.event.inputs.tag }}
