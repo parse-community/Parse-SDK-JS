@@ -1,6 +1,6 @@
 {
   "name": "parse",
-  "version": "8.6.2",
+  "version": "8.7.0-alpha.1",
   "description": "Parse JavaScript SDK",
   "homepage": "https://parseplatform.org",
   "keywords": [
@@ -81,20 +81,20 @@
     "@babel/preset-react": "7.28.5",
     "@babel/preset-typescript": "7.27.1",
     "@eslint/js": "10.0.1",
+    "@mongodb-js/mongodb-runner": "8.4.3",
     "@parse/minami": "git+https://github.com/parse-community/minami#main",
     "@rollup/plugin-terser": "1.0.0",
     "@saithodev/semantic-release-backmerge": "4.0.1",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/commit-analyzer": "13.0.1",
-    "@semantic-release/git": "10.0.1",
+    "@semantic-release/git": "11.0.1",
     "@semantic-release/github": "12.0.6",
     "@semantic-release/npm": "13.1.5",
     "@semantic-release/release-notes-generator": "14.1.1",
-    "@types/facebook-js-sdk": "3.3.11",
-    "babel-jest": "30.4.1",
+    "@types/facebook-js-sdk": "3.3.13",
+    "babel-jest": "30.5.2",
     "babel-plugin-minify-dead-code-elimination": "0.5.2",
     "babel-plugin-transform-inline-environment-variables": "0.4.4",
-    "codecov": "3.8.3",
     "core-js": "3.49.0",
     "cross-env": "10.1.0",
     "eslint": "10.2.1",
@@ -102,26 +102,24 @@
     "eslint-plugin-jsdoc": "62.9.0",
     "express": "5.2.1",
     "gulp": "5.0.1",
-    "gulp-babel": "8.0.0",
-    "gulp-watch": "5.0.1",
+    "gulp-babel": "8.1.0",
     "jasmine": "6.3.0",
     "jasmine-reporters": "2.5.2",
     "jasmine-spec-reporter": "7.0.0",
-    "jest": "30.3.0",
-    "jest-environment-jsdom": "30.3.0",
+    "jest": "30.5.2",
+    "jest-environment-jsdom": "30.5.2",
     "jsdoc": "4.0.5",
     "jsdoc-babel": "0.5.0",
     "madge": "8.0.0",
     "metro-react-native-babel-preset": "0.77.0",
-    "mongodb-runner": "6.8.3",
-    "parse-server": "9.10.0",
-    "puppeteer": "24.42.0",
+    "parse-server": "9.10.1",
+    "puppeteer": "25.15.0",
     "regenerator-runtime": "0.14.1",
-    "semantic-release": "25.0.3",
+    "semantic-release": "25.0.9",
     "typescript-eslint": "8.65.0",
-    "vite": "8.1.4",
+    "vite": "8.3.5",
     "vite-plugin-commonjs": "0.10.4",
-    "vite-plugin-node-polyfills": "0.26.0"
+    "vite-plugin-node-polyfills": "0.28.0"
   },
   "scripts": {
     "build": "node build_releases.js",
@@ -151,7 +149,7 @@
     "cross-env": "cross-env"
   },
   "engines": {
-    "node": ">=20.19.0 <21 || >=22.13.0 <23 || >=24.1.0 <25"
+    "node": ">=20.19.0 <21 || >=22.13.0 <23 || >=24.1.0 <25 || >=26.13.0 <27"
   },
   "jest": {
     "automock": true,
@@ -174,5 +172,10 @@
       "package.json"
     ],
     "testEnvironment": "jsdom"
+  },
+  "overrides": {
+    "@saithodev/semantic-release-backmerge": {
+      "semantic-release": "$semantic-release"
+    }
   }
 }

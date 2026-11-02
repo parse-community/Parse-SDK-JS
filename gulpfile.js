@@ -1,7 +1,6 @@
 const babel      = require('gulp-babel');
 const gulp       = require('gulp');
 const path       = require('path');
-const watch      = require('gulp-watch');
 
 const BUILD = process.env.PARSE_BUILD || 'browser';
 
@@ -50,6 +49,10 @@ gulp.task('compile', function() {
   return compileTask(gulp.src('src/*.*(js|ts)'));
 });
 
+function compileChanged() {
+  return compileTask(gulp.src('src/*.*(js|ts)', { since: gulp.lastRun(compileChanged) }));
+}
+
 gulp.task('watch', function() {
-  return compileTask(watch('src/*.*(js|ts)', { ignoreInitial: false, verbose: true }));
+  gulp.watch('src/*.*(js|ts)', { ignoreInitial: false }, compileChanged);
 });

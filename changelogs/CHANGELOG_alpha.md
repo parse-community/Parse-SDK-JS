@@ -1,3 +1,10 @@
+# [8.7.0-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.6.2...8.7.0-alpha.1) (2026-11-01)
+
+
+### Features
+
+* Add support for Node.js 26 ([#3173](https://github.com/parse-community/Parse-SDK-JS/issues/3173)) ([621c6f7](https://github.com/parse-community/Parse-SDK-JS/commit/621c6f7459cc5d265f2b6973e56e1f0d7acc6649))
+
 ## [8.6.2-alpha.1](https://github.com/parse-community/Parse-SDK-JS/compare/8.6.1...8.6.2-alpha.1) (2026-09-23)
 
 

@@ -25,7 +25,7 @@ We want to make contributing to this project as easy and transparent as possible
 - [Visual Studio Code](https://code.visualstudio.com), a popular IDE.
 - [Jest Extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest) the Jest extension for VSC to run the tests inline and debug quicky.
 - [Jasmine Test Explorer Extension](https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-test-explorer), a very practical test exploration plugin which let you run, debug and see the test results inline.
-- [mongodb-runner](https://github.com/mongodb-js/runner) Easily install and run MongoDB to test your code against it. Install with `npm install -g mongodb-runner`.
+- [mongodb-runner](https://github.com/mongodb-js/devtools-shared/tree/main/packages/mongodb-runner) Easily install and run MongoDB to test your code against it. Install with `npm install -g @mongodb-js/mongodb-runner`.
 
 ### Set-up Your Local Machine
 
