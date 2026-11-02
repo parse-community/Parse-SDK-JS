@@ -1,8 +1,12 @@
 import ParseGeoPoint from './ParseGeoPoint';
 import ParseObject from './ParseObject';
 import type LiveQuerySubscription from './LiveQuerySubscription';
+import type ParseRelation from './ParseRelation';
 import type { BaseRequestOptions } from './RESTController';
 import type { Pointer, BaseAttributes } from './ParseObject';
+type QueryFieldElement<T> = T extends readonly (infer Element)[] ? Element extends readonly unknown[] ? T : Element : T;
+type QueryFieldInput<T> = T extends ParseObject ? T | string : T;
+type QueryFieldInInput<T> = T extends readonly unknown[] ? QueryFieldElement<T> | T : T;
 export interface BatchOptions extends BaseRequestOptions {
     batchSize?: number;
     json?: boolean;
@@ -434,12 +438,13 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be equal to the provided value.
+     * For relation fields, the value may be a related object or its pointer.
      *
      * @param {string} key The key to check.
      * @param value The value that the Parse.Object must contain.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    equalTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (NonNullable<T['attributes'][K]> extends ParseObject ? Pointer : NonNullable<T['attributes'][K]> extends (infer E)[] ? E : never)): this;
+    equalTo<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, value: T['attributes'][K] | (NonNullable<T['attributes'][K]> extends ParseRelation<ParseObject, infer Related> ? Related | Pointer : NonNullable<T['attributes'][K]> extends ParseObject ? Pointer : NonNullable<T['attributes'][K]> extends (infer E)[] ? E : never)): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be not equal to the provided value.
@@ -488,30 +493,35 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be contained in the provided list of values.
+     * For one-dimensional array fields, matches if any element is in the provided list.
+     * Legacy array-valued operands remain available for server queries.
      *
      * @param {string} key The key to check.
      * @param {Array<*>} values The values that will match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    containedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: (T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never))[]): this;
+    containedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: QueryFieldInInput<QueryFieldInput<T['attributes'][K]>>[]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * not be contained in the provided list of values.
+     * For one-dimensional array fields, matches if no element is in the provided list.
+     * Legacy array-valued operands remain available for server queries.
      *
      * @param {string} key The key to check.
      * @param {Array<*>} values The values that will not match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    notContainedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: T['attributes'][K][]): this;
+    notContainedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: QueryFieldInInput<T['attributes'][K]>[]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * be contained by the provided list of values. Get objects where all array elements match.
+     * For one-dimensional array fields, the list contains values of the element type.
      *
      * @param {string} key The key to check.
      * @param {Array} values The values that will match.
      * @returns {Parse.Query} Returns the query, so you can chain this call.
      */
-    containedBy<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: (T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never))[]): this;
+    containedBy<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: QueryFieldElement<QueryFieldInput<T['attributes'][K]>>[]): this;
     /**
      * Adds a constraint to the query that requires a particular key's value to
      * contain each one of the provided list of values.

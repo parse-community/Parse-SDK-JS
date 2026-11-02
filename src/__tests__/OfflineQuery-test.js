@@ -630,6 +630,29 @@ describe('OfflineQuery', () => {
     expect(matchesQuery(q.className, message, [], q)).toBe(false);
   });
 
+  describe.each([null, undefined])('pointer lists with %s candidates', candidate => {
+    it.each([
+      ['containedIn', true, false],
+      ['notContainedIn', false, true],
+      ['containedBy', true, false],
+    ])('matches %s without dereferencing an empty candidate', (method, matches, doesNotMatch) => {
+      const profile = ParseObject.fromJSON({ className: 'Profile', objectId: 'matching' });
+      const other = ParseObject.fromJSON({ className: 'Profile', objectId: 'other' });
+      const message = new ParseObject('Message');
+      message.set('profiles', [profile]);
+
+      const matchingQuery = new ParseQuery('Message');
+      matchingQuery[method]('profiles', [candidate, other, profile]);
+      expect(matchesQuery(matchingQuery.className, message, [], matchingQuery)).toBe(matches);
+
+      const nonmatchingQuery = new ParseQuery('Message');
+      nonmatchingQuery[method]('profiles', [candidate, other]);
+      expect(matchesQuery(nonmatchingQuery.className, message, [], nonmatchingQuery)).toBe(
+        doesNotMatch
+      );
+    });
+  });
+
   it('should support notContainedIn with pointers', () => {
     const profile = new ParseObject('Profile');
     profile.id = 'abc';
