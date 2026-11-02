@@ -30,39 +30,61 @@ jobs:
         id: tag
         run: echo "::set-output name=current_tag::$(git describe --tags --abbrev=0 --exact-match || echo '')"
 
-  docs-publish:
+  docs:
     needs: release
     if: needs.release.outputs.current_tag != '' && github.ref == 'refs/heads/release'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
+      - name: Cache Node.js modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+              ${{ runner.os }}-node-
       - name: Generate Docs
         run: |
+          echo $SOURCE_TAG
           npm ci
-          npm run release_docs
+          ./release_docs.sh
         env:
           SOURCE_TAG: ${{ needs.release.outputs.current_tag }}
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+      - name: Upload docs
+        uses: actions/upload-artifact@v4
         with:
-          path: ./docs
+          name: docs
+          path: docs
+          retention-days: 1
+
+  docs-deploy:
+    needs: [release, docs]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+      - name: Download docs
+        uses: actions/download-artifact@v4
+        with:
+          name: docs
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "deploy: $SOURCE_TAG"
+          git push origin HEAD:gh-pages
+        env:
+          SOURCE_TAG: ${{ needs.release.outputs.current_tag }}
