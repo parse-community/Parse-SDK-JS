@@ -1,32 +1,44 @@
+# Trigger this workflow only to manually create a docs release; this should only be used
+# in extraordinary circumstances, as docs releases are normally created automatically as
+# part of the automated release workflow.
+
 name: release-manual-docs
 on:
   workflow_dispatch:
     inputs:
-      tag:
+      ref:
         default: ''
-        description: 'Version tag:'
+        description: 'Reference (tag / SHA):'
+        required: true
 jobs:
   docs:
-    if: github.event.inputs.tag != ''
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.tag }}
+          ref: ${{ github.event.inputs.ref }}
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
+      - name: Cache Node.js modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+              ${{ runner.os }}-node-
       - name: Generate Docs
         run: |
+          echo $SOURCE_TAG
           npm ci
-          npm run release_docs
+          ./release_docs.sh
         env:
-          SOURCE_TAG: ${{ github.event.inputs.tag }}
+          SOURCE_TAG: ${{ github.event.inputs.ref }}
       - name: Upload docs
         uses: actions/upload-artifact@v4
         with:
@@ -57,4 +69,4 @@ jobs:
           git diff --cached --quiet || git commit -m "deploy: $SOURCE_TAG"
           git push origin HEAD:gh-pages
         env:
-          SOURCE_TAG: ${{ github.event.inputs.tag }}
+          SOURCE_TAG: ${{ github.event.inputs.ref }}

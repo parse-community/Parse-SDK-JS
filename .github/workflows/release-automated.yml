@@ -39,17 +39,22 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
+      - name: Cache Node.js modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+              ${{ runner.os }}-node-
       - name: Generate Docs
         run: |
+          echo $SOURCE_TAG
           npm ci
-          npm run release_docs
+          ./release_docs.sh
         env:
           SOURCE_TAG: ${{ needs.release.outputs.current_tag }}
       - name: Upload docs
