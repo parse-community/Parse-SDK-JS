@@ -276,6 +276,16 @@ describe('RESTController', () => {
     );
   });
 
+  it('preserves the cause of a thrown network error', async () => {
+    const cause = { name: 'SocketError', code: 'UND_ERR_SOCKET', message: 'other side closed' };
+    const fetchError = new TypeError('fetch failed');
+    fetchError.cause = cause;
+    mockFetch([], {}, fetchError);
+    await expect(
+      RESTController.request('GET', 'classes/MyObject', {}, {})
+    ).rejects.toHaveProperty('cause', cause);
+  });
+
   it('handles fetch errors', async () => {
     const error = { name: 'Error', message: 'Generic error' };
     mockFetch([], {}, error);
